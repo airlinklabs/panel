@@ -1,9 +1,11 @@
-// ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
-//      AirLink - Open Source Project by AirlinkLab
-//      Repository: https://github.com/airlinklab/airlink
-//
-//      © 2024 AirlinkLab. Licensed under the MIT License
-// ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
+/** 
+ * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
+ *      AirLink - Open Source Project by AirlinkLab
+ *      Repository: https://github.com/airlinklab/airlink
+ * 
+ *     © 2024 AirlinkLab. Licensed under the MIT License
+ * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
+ */
 
 import express from 'express';
 
