@@ -23,11 +23,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'default_secret',
-  resave: false,
-  saveUninitialized: true,
-}));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'default_secret',
+    resave: false,
+    saveUninitialized: true,
+  }),
+);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -47,16 +49,18 @@ const loadModules = async () => {
           const { info, router } = module;
 
           if (info.version === airlinkVersion) {
-            console.log(`Loading module: ${info.name} (v${info.moduleVersion})`);
+            console.log(
+              `Loading module: ${info.name} (v${info.moduleVersion})`,
+            );
             app.use(router()); // Use the router from the module
           } else {
             console.warn(
-              `Skipping ${info.name}: incompatible with AirLink version ${airlinkVersion}`
+              `Skipping ${info.name}: incompatible with AirLink version ${airlinkVersion}`,
             );
           }
         } else {
           console.warn(
-            `Module ${file} is missing required exports (info and router).`
+            `Module ${file} is missing required exports (info and router).`,
           );
         }
       } catch (error) {

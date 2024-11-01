@@ -25,7 +25,7 @@ const authServiceModule: Module = {
     author: 'AirLinkLab',
     license: 'MIT',
   },
-    
+
   router: () => {
     const router = Router();
 
@@ -33,10 +33,7 @@ const authServiceModule: Module = {
       try {
         const user = await prisma.users.findFirst({
           where: {
-            OR: [
-              { email: identifier },
-              { username: identifier },
-            ],
+            OR: [{ email: identifier }, { username: identifier }],
           },
         });
 
@@ -48,7 +45,7 @@ const authServiceModule: Module = {
         if (isPasswordValid) {
           return { success: true, user };
         }
-    
+
         return { success: false, error: 'incorrect_password' };
       } catch (error) {
         console.error('Database error:', error);
@@ -58,13 +55,16 @@ const authServiceModule: Module = {
 
     router.post('/login', (req: Request, res: Response) => {
       console.log('Login request received:', req.body);
-      const { identifier, password }: { identifier?: string; password?: string } = req.body;
-    
+      const {
+        identifier,
+        password,
+      }: { identifier?: string; password?: string } = req.body;
+
       // Validate identifier and password
       if (!identifier || !password) {
         return res.redirect('/login?err=missing_credentials');
       }
-    
+
       // Call handleLogin function and handle Promises
       handleLogin(identifier, password)
         .then((result) => {
@@ -79,7 +79,7 @@ const authServiceModule: Module = {
           } else if (result.success && !result.user) {
             return res.redirect('/login?err=user_not_found');
           }
-    
+
           // Redirect with the appropriate error if login failed
           return res.redirect(`/login?err=${result.error}`);
         })
@@ -90,8 +90,7 @@ const authServiceModule: Module = {
     });
 
     return router;
-  }
-
+  },
 };
 
 export default authServiceModule;
