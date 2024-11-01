@@ -22,13 +22,17 @@ const authModule: Module = {
       res.render('auth/login', { errorMessage });
     });
 
-    // Handle logout
+    router.get('/register', (req: Request, res: Response) => {
+      const errorMessage =
+        req.query.err === 'missing_credentials'
+          ? 'Invalid register credentials. Please try again.'
+          : '';
+      res.render('auth/register', { errorMessage });
+    });
+
     router.get('/logout', (req: Request, res: Response) => {
       req.session.destroy((err) => {
-        if (err) {
-          console.error('Logout error:', err);
-          return res.redirect('/');
-        }
+        if (err) () => {};
         res.clearCookie('connect.sid');
         res.redirect('/');
       });

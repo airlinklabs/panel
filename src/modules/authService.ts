@@ -18,7 +18,7 @@ declare module 'express-session' {
 
 const authServiceModule: Module = {
   info: {
-    name: 'Auth Module',
+    name: 'Auth System Module',
     description: 'This file is for authentication and authorization of users.',
     version: '1.0.0',
     moduleVersion: '1.0.0',
@@ -54,7 +54,6 @@ const authServiceModule: Module = {
     };
 
     router.post('/login', (req: Request, res: Response) => {
-      console.log('Login request received:', req.body);
       const {
         identifier,
         password,
@@ -85,6 +84,29 @@ const authServiceModule: Module = {
         })
         .catch((error) => {
           console.error('Login error:', error);
+          return res.status(500).send('Server error. Please try again later.');
+        });
+    });
+
+    router.post('/register', async (req: Request, res: Response) => {
+      const { email, username, password } = req.body;
+      if (!email || !username || !password) {
+        return res.redirect('/register?err=missing_credentials');
+      }
+
+      prisma.users
+        .create({
+          data: {
+            email,
+            username,
+            password: await bcrypt.hash(password, 10),
+          },
+        })
+        .then(() => {
+          res.redirect('/login');
+        })
+        .catch((error: any) => {
+          console.error('Database error:', error);
           return res.status(500).send('Server error. Please try again later.');
         });
     });
