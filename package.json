@@ -11,7 +11,9 @@
     "start": "node dist/app.js",
     "clean": "ts-node -e \"import { removeSync, readdirSync } from 'fs-extra'; readdirSync('dist').forEach(dir => { if (dir !== 'storage') removeSync(`dist/${dir}`); });\"",
     "start:dev": "nodemon",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "migrate:dev": "npx prisma migrate dev --name db && npx prisma generate",
+    "migrate:deploy": "npx prisma migrate deploy --name db && npx prisma generate"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
@@ -21,11 +23,13 @@
     "fs-extra": "^11.2.0",
     "nodemon": "^3.1.7",
     "prettier": "^3.3.3",
+    "prisma": "^5.21.1",
     "tailwindcss": "^3.4.14",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   },
   "dependencies": {
+    "@prisma/client": "^5.21.1",
     "express": "^4.21.1"
   }
 }
