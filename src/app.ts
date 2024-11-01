@@ -12,7 +12,7 @@ import path from 'path';
 import session from 'express-session';
 import dotenv from 'dotenv';
 import { loadModules } from './handlers/modulesLoader';
-import logger from './handlers/core';
+import logger from './handlers/logger';
 import config from './storage/config.json';
 
 dotenv.config();
