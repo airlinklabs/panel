@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="/styles.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .landscape-bg {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1506744038136-46273834b3fb');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        .glass-effect {
+            background: rgba(17, 25, 40, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.125);
+        }
+
+        .input-glow:focus {
+            box-shadow: 0 0 15px rgba(180, 150, 90, 0.5);
+        }
+
+        .btn-glow:hover {
+            box-shadow: 0 0 20px rgba(180, 150, 90, 0.5);
+        }
+
+        /* Sage green color */
+        .bg-sage {
+            background-color: #8B9D83;
+        }
+        .hover\:bg-sage-dark:hover {
+            background-color: #718068;
+        }
+        .text-sage {
+            color: #8B9D83;
+        }
+    </style>
+</head>
+<body class="min-h-screen landscape-bg flex items-center justify-end p-8">
+    <div class="glass-effect w-full max-w-md p-8 rounded-2xl shadow-2xl mr-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white">
+                Welcome Back
+            </h1>
+            <p class="text-white mt-2">Enter your credentials to access your dashboard</p>
+        </div>
+
+        <!-- Login Form -->
+        <form action="/login" method="POST" class="space-y-6">
+            <!-- Username/Email Input -->
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-user text-black"></i>
+                </div>
+                <input 
+                    type="text"
+                    name="username"
+                    placeholder="Username or Email"
+                    class="w-full pl-10 pr-4 py-3 bg-gray-900/50 border border-stone-500 rounded-lg focus:outline-none focus:border-amber-600 text-white input-glow transition-all duration-300"
+                    required
+                >
+            </div>
+
+            <!-- Password Input -->
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-lock text-black"></i>
+                </div>
+                <input 
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    class="w-full pl-10 pr-4 py-3 bg-gray-900/50 border border-stone-500 rounded-lg focus:outline-none focus:border-amber-600 text-white input-glow transition-all duration-300"
+                    required
+                >
+            </div>
+
+            <!-- Remember Me & Forgot Password -->
+            <div class="flex items-center justify-between text-sm">
+                <label class="flex items-center text-white hover:text-slate-50 cursor-pointer transition-colors">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-amber-600 rounded border-stone-500 bg-gray-900/50">
+                    <span class="ml-2">Remember me</span>
+                </label>
+                <a href="/forgot-password" class="text-white hover:text-slate-50 transition-colors">
+                    Forgot Password?
+                </a>
+            </div>
+
+            <!-- Login Button -->
+            <button 
+                type="submit"
+                class="w-full py-3 bg-sage text-white rounded-lg font-semibold hover:bg-sage-dark transform hover:scale-[1.02] transition-all duration-300 btn-glow"
+            >
+                <i class="fas fa-sign-in-alt mr-2"></i>
+                Sign In
+            </button>
+        </form>
+    </div>
+</body>
+</html>

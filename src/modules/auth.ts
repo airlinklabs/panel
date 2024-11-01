@@ -1,11 +1,11 @@
 import { Express, Request, Response } from 'express';
 import { Module } from '../handlers/moduleInit';
 
-const exampleModule: Module = {
+const authModule: Module = {
   info: {
-    name: 'Example Module',
+    name: 'Auth Module',
     description:
-      'This is a sample module for the AirLink project. It demonstrates how to create and load modules dynamically with metadata.',
+      'This is the auth module, which is used to authenticate users.',
     version: '1.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
@@ -13,8 +13,8 @@ const exampleModule: Module = {
   },
 
   init: (app: Express) => {
-    app.get('/example', (req: Request, res: Response) => {
-      res.send('Hello from Example Module!');
+    app.get('/', (req: Request, res: Response) => {
+      res.render('index', { title: 'Login' });
     });
 
     app.get('/example/info', (req: Request, res: Response) => {
@@ -27,4 +27,4 @@ const exampleModule: Module = {
   },
 };
 
-export default exampleModule;
+export default authModule;

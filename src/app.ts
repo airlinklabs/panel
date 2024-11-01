@@ -15,6 +15,14 @@ import config from './storage/config.json';
 const app = express();
 const port = 3000;
 
+// Load static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Load views
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+
 const airlinkVersion = config.meta.version;
 
 const loadModules = async () => {
