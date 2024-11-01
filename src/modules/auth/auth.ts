@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { Module } from '../handlers/moduleInit';
+import { Module } from '../../handlers/moduleInit';
 
 const authModule: Module = {
   info: {

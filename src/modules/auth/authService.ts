@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import session from 'express-session';
 import { PrismaClient } from '@prisma/client';
 import { Router, Request, Response } from 'express';
-import { Module } from '../handlers/moduleInit';
+import { Module } from '../../handlers/moduleInit';
 
 const prisma = new PrismaClient();
 // Extend session interface to include user data
@@ -74,7 +74,7 @@ const authServiceModule: Module = {
               email: result.user.email,
               isAdmin: result.user.isAdmin,
             };
-            return res.redirect('/');
+            return res.redirect('/dashboard');
           } else if (result.success && !result.user) {
             return res.redirect('/login?err=user_not_found');
           }
