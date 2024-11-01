@@ -1,4 +1,4 @@
-import { Express, Request, Response } from 'express';
+import { Router } from 'express';
 
 interface ModuleInfo {
     name: string;
@@ -11,5 +11,5 @@ interface ModuleInfo {
   
 export interface Module {
     info: ModuleInfo;
-    init: (app: Express) => void;
+    router: () => Router;
 }

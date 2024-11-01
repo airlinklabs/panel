@@ -11,6 +11,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import config from './storage/config.json';
+import session from 'express-session';
 
 const app = express();
 const port = 3000;
@@ -21,6 +22,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Load views
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'default_secret',
+  resave: false,
+  saveUninitialized: true,
+}));
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 const airlinkVersion = config.meta.version;
 
