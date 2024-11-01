@@ -1,0 +1,10 @@
+{
+    "website": {
+        "url": "http://localhost:3000",
+        "name": "Airlink",
+        "port": 3000,
+        "secret": "secret",
+        "version": "1.0.0",
+        "mode": "production"
+    }
+}
