@@ -10,10 +10,10 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
-import config from '../storage/config.json';
 
 export const loadModules = async (app: express.Express, airlinkVersion: string) => {
   const modulesDir = path.join(__dirname, '../modules');
+  
   const getFilesRecursively = (dir: string): string[] => {
     const dirents = fs.readdirSync(dir, { withFileTypes: true });
     const files = dirents.flatMap((dirent) => {
