@@ -23,10 +23,27 @@ const authModule: Module = {
     });
 
     router.get('/register', (req: Request, res: Response) => {
-      const errorMessage =
-        req.query.err === 'missing_credentials'
-          ? 'Invalid register credentials. Please try again.'
-          : '';
+      let errorMessage = '';
+
+      switch (req.query.err) {
+        case 'missing_credentials':
+          errorMessage = 'Invalid register credentials. Please try again.';
+          break;
+        case 'user_already_exists':
+          errorMessage =
+            'User already exists. Please choose another username or email.';
+          break;
+        case 'invalid_email':
+          errorMessage = 'Invalid email format. Please enter a valid email.';
+          break;
+        case 'invalid_username':
+          errorMessage =
+            'Invalid username format. Please choose a different username.';
+          break;
+        default:
+          errorMessage = '';
+      }
+
       res.render('auth/register', { errorMessage });
     });
 

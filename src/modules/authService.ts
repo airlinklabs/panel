@@ -94,6 +94,25 @@ const authServiceModule: Module = {
         return res.redirect('/register?err=missing_credentials');
       }
 
+      // Check if user already exists
+      const existingUser = await prisma.users.findFirst({
+        where: {
+          OR: [{ email }, { username }],
+        },
+      });
+      if (existingUser) {
+        return res.redirect('/register?err=user_already_exists');
+      }
+
+      // Check the entry
+      if (!email.includes('@') || !email.includes('.')) {
+        return res.redirect('/register?err=invalid_email');
+      }
+      // Check username
+      if (!username.match(/^[a-zA-Z0-9]+$/)) {
+        return res.redirect('/register?err=invalid_username');
+      }
+
       prisma.users
         .create({
           data: {
