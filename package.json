@@ -10,7 +10,8 @@
     "build": "tsc && copyfiles -u 1 src/views/**/* dist/ && copyfiles -u 1 src/public/**/* dist/ && tailwindcss -i src/public/styles.css -o dist/public/styles.css",
     "start": "node dist/app.js",
     "clean": "ts-node -e \"import { removeSync, readdirSync } from 'fs-extra'; readdirSync('dist').forEach(dir => { if (dir !== 'storage') removeSync(`dist/${dir}`); });\"",
-    "start:dev": "nodemon"
+    "start:dev": "nodemon",
+    "format": "prettier --write src/"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
@@ -19,6 +20,7 @@
     "copyfiles": "^2.4.1",
     "fs-extra": "^11.2.0",
     "nodemon": "^3.1.7",
+    "prettier": "^3.3.3",
     "tailwindcss": "^3.4.14",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
