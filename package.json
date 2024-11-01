@@ -9,7 +9,7 @@
   "scripts": {
     "build:css": "tailwindcss build src/public/styles.css -c tailwind.config.js -o dist/public/styles.css",
     "build:css:watch": "tailwindcss build src/public/styles.css -c tailwind.config.js -o dist/public/styles.css --watch",
-    "build": "tsc && copyfiles -u 1 src/views/**/* dist/ && copyfiles -u 1 src/public/**/* dist/ && npm run build:css",
+    "build": "ts-node ./src/cmd/build.ts",
     "start": "node dist/app.js",
     "clean": "ts-node ./src/cmd/clean.ts",
     "start:dev": "nodemon",
