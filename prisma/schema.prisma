@@ -10,7 +10,8 @@ datasource db {
 model Users {
   id      Int      @id @default(autoincrement())
   email   String   @unique
-  name    String?
+  username    String?
+  password String
   isAdmin Boolean  @default(false)
   servers Server[]
 }

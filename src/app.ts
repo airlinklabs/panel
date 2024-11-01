@@ -22,7 +22,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-
 const airlinkVersion = config.meta.version;
 
 const loadModules = async () => {
@@ -34,22 +33,20 @@ const loadModules = async () => {
     if (file.endsWith('.js') || file.endsWith('.ts')) {
       try {
         const { default: module } = await import(modulePath);
-        if (module && module.info && typeof module.init === 'function') {
-          const { info, init } = module;
+        if (module && module.info && typeof module.router === 'function') {
+          const { info, router } = module;
 
           if (info.version === airlinkVersion) {
-            console.log(
-              `Loading module: ${info.name} (v${info.moduleVersion})`,
-            );
-            init(app);
+            console.log(`Loading module: ${info.name} (v${info.moduleVersion})`);
+            app.use(router()); // Use the router from the module
           } else {
             console.warn(
-              `Skipping ${info.name}: incompatible with AirLink version ${airlinkVersion}`,
+              `Skipping ${info.name}: incompatible with AirLink version ${airlinkVersion}`
             );
           }
         } else {
           console.warn(
-            `Module ${file} is missing required exports (info and init).`,
+            `Module ${file} is missing required exports (info and router).`
           );
         }
       } catch (error) {

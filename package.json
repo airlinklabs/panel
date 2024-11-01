@@ -7,7 +7,7 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "tw": "tailwindcss -i src/public/styles.css -o dist/public/styles.css --watch",
+    "build:css": "tailwindcss -i src/public/styles.css -o dist/public/styles.css --watch",
     "build": "tsc && copyfiles -u 1 src/views/**/* dist/ && copyfiles -u 1 src/public/**/* dist/ && tailwindcss -i src/public/styles.css -o dist/public/styles.css",
     "start": "node dist/app.js",
     "clean": "ts-node -e \"import { removeSync, readdirSync } from 'fs-extra'; readdirSync('dist').forEach(dir => { if (dir !== 'storage') removeSync(`dist/${dir}`); });\"",
@@ -17,7 +17,9 @@
     "migrate:deploy": "npx prisma migrate deploy --name db && npx prisma generate"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
+    "@types/express-session": "^1.18.0",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^22.8.6",
     "copyfiles": "^2.4.1",
@@ -31,6 +33,9 @@
   },
   "dependencies": {
     "@prisma/client": "^5.21.1",
-    "express": "^4.21.1"
+    "bcrypt": "^5.1.1",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1"
   }
 }
