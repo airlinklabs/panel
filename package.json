@@ -1,20 +1,20 @@
 {
-  "name": "panel",
+  "name": "airlink-panel",
   "version": "1.0.0",
-  "description": "Airlink is a simple to use Game server managment panel",
-  "main": "index.js",
-  "keywords": [],
-  "author": "",
+  "description": "Airlink is a simple-to-use game server management panel",
+  "main": "dist/app.js",
+  "keywords": ["game server", "management", "panel"],
+  "author": "AirlinkLab",
   "license": "MIT",
   "scripts": {
     "build:css": "tailwindcss -i src/public/styles.css -o dist/public/styles.css --watch",
     "build": "tsc && copyfiles -u 1 src/views/**/* dist/ && copyfiles -u 1 src/public/**/* dist/ && tailwindcss -i src/public/styles.css -o dist/public/styles.css",
     "start": "node dist/app.js",
     "clean": "ts-node -e \"import { existsSync, mkdirSync } from 'fs'; import { removeSync, readdirSync } from 'fs-extra'; if (!existsSync('dist')) mkdirSync('dist'); readdirSync('dist').forEach(dir => { if (dir !== 'storage') removeSync(`dist/${dir}`); });\"",
-    "start:dev": "nodemon",
+    "start:dev": "nodemon --exec ts-node src/app.ts",
     "format": "prettier --write src/",
-    "migrate:dev": "npx prisma migrate dev --name db && npx prisma generate",
-    "migrate:deploy": "npx prisma migrate deploy --name db && npx prisma generate"
+    "migrate:dev": "npx prisma migrate dev --name init && npx prisma generate",
+    "migrate:deploy": "npx prisma migrate deploy && npx prisma generate"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
