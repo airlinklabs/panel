@@ -11,6 +11,7 @@ model Users {
   id      Int      @id @default(autoincrement())
   email   String   @unique
   name    String?
+  isAdmin Boolean  @default(false)
   servers Server[]
 }
 

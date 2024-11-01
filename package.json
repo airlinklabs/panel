@@ -7,7 +7,8 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "build": "tsc && copyfiles -u 1 src/views/**/* dist/ && copyfiles -u 1 src/public/**/* dist/ && tailwindcss -i src/public/styles.css -o dist/public/styles.css",
+    "build:css": "tailwindcss -i src/public/styles.css -o dist/public/styles.css --watch",
+    "build": "tsc && copyfiles -u 1 src/views/**/* dist/ && copyfiles -u 1 src/public/**/* dist/",
     "start": "node dist/app.js",
     "clean": "ts-node -e \"import { removeSync, readdirSync } from 'fs-extra'; readdirSync('dist').forEach(dir => { if (dir !== 'storage') removeSync(`dist/${dir}`); });\"",
     "start:dev": "nodemon",
