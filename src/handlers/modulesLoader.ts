@@ -10,37 +10,39 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import config from '../storage/config.json';
 
 export const loadModules = async (app: express.Express, airlinkVersion: string) => {
   const modulesDir = path.join(__dirname, '../modules');
-  const files = fs.readdirSync(modulesDir);
+  const getFilesRecursively = (dir: string): string[] => {
+    const dirents = fs.readdirSync(dir, { withFileTypes: true });
+    const files = dirents.flatMap((dirent) => {
+      const fullPath = path.join(dir, dirent.name);
+      return dirent.isDirectory() ? getFilesRecursively(fullPath) : fullPath;
+    });
+    return files.filter((file) => file.endsWith('.js') || file.endsWith('.ts'));
+  };
+
+  const files = getFilesRecursively(modulesDir);
 
   for (const file of files) {
-    const modulePath = path.join(modulesDir, file);
-    if (file.endsWith('.js') || file.endsWith('.ts')) {
-      try {
-        const { default: module } = await import(modulePath);
-        if (module && module.info && typeof module.router === 'function') {
-          const { info, router } = module;
+    try {
+      const { default: module } = await import(file);
+      if (module && module.info && typeof module.router === 'function') {
+        const { info, router } = module;
 
-          if (info.version === airlinkVersion) {
-            console.log(
-              `Loading module: ${info.name} (v${info.moduleVersion})`
-            );
-            app.use(router()); // Use the router from the module
-          } else {
-            console.warn(
-              `Skipping ${info.name}: incompatible with AirLink version ${airlinkVersion}`
-            );
-          }
+        if (info.version === airlinkVersion) {
+          console.log(`Loading module: ${info.name} (v${info.moduleVersion})`);
+          app.use(router());
         } else {
-          console.warn(
-            `Module ${file} is missing required exports (info and router).`
-          );
+          console.warn(`Skipping ${info.name}: incompatible with AirLink version ${airlinkVersion}`);
         }
-      } catch (error) {
-        console.error(`Failed to load module ${file}:`, error);
+      } else {
+        console.warn(`Module ${file} is missing required exports (info and router).`);
       }
+    } catch (error) {
+      console.error(`Failed to load module ${file}:`, error);
     }
   }
 };
+
