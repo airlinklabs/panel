@@ -7,11 +7,12 @@
   "author": "AirlinkLab",
   "license": "MIT",
   "scripts": {
-    "build:css": "tailwindcss -i src/public/styles.css -o dist/public/styles.css --watch",
-    "build": "tsc && copyfiles -u 1 src/views/**/* dist/ && copyfiles -u 1 src/public/**/* dist/ && tailwindcss -i src/public/styles.css -o dist/public/styles.css",
+    "build:css": "tailwindcss build src/public/styles.css -c tailwind.config.js -o dist/public/styles.css",
+    "build:css:watch": "tailwindcss build src/public/styles.css -c tailwind.config.js -o dist/public/styles.css --watch",
+    "build": "tsc && copyfiles -u 1 src/views/**/* dist/ && copyfiles -u 1 src/public/**/* dist/ && npm run build:css",
     "start": "node dist/app.js",
     "clean": "ts-node -e \"import { existsSync, mkdirSync } from 'fs'; import { removeSync, readdirSync } from 'fs-extra'; if (!existsSync('dist')) mkdirSync('dist'); readdirSync('dist').forEach(dir => { if (dir !== 'storage') removeSync(`dist/${dir}`); });\"",
-    "start:dev": "nodemon --exec ts-node src/app.ts",
+    "start:dev": "nodemon",
     "format": "prettier --write src/",
     "migrate:dev": "npx prisma migrate dev --name init && npx prisma generate",
     "migrate:deploy": "npx prisma migrate deploy && npx prisma generate"
