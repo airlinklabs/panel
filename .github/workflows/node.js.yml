@@ -21,14 +21,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+    - uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'  # Caching npm packages, but will not depend on lock file
-    - name: Install Dependencies
-      run: npm install --cache .npm --prefer-offline --no-audit
-    - name: Build
-      run: npm run build --if-present
-    - name: Test
-      run: npm test
+        cache-dependency-path: subdir/package-lock.json
+        node-version: 20
+        cache: 'npm'
+    - run: npm ci
+    - run: npm test
+
