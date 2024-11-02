@@ -21,7 +21,7 @@
     "format": "prettier --write src/",
     "migrate:dev": "npx prisma migrate dev --name init && npx prisma generate",
     "migrate:deploy": "npx prisma migrate deploy && npx prisma generate",
-    "test": "jest",
+    "test": "jest --forceExit",
     "test:watch": "jest --watch"
   },
   "devDependencies": {
