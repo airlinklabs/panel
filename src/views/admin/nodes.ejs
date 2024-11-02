@@ -1,0 +1,91 @@
+<%- include('../components/header', { title: 'Dashboard' }) %>
+<main class="bg-neutral-900 h-screen m-auto">
+  <div class="flex h-screen">
+    <%- include('../components/sidebar') %>
+
+    <div class="flex-1 p-6">
+      <h1 class="text-2xl font-bold text-white">Node Dashboard</h1>
+      <div class="mt-4">
+        <button id="addNodeBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Neuen Node hinzufügen</button>
+      </div>
+
+      <div id="nodeList" class="mt-6">
+        <h2 class="text-xl font-semibold text-white">Aktive Nodes</h2>
+        <table class="min-w-full mt-4">
+          <thead>
+            <tr>
+              <th class="bg-gray-800 text-white px-4 py-2">Name</th>
+              <th class="bg-gray-800 text-white px-4 py-2">Adresse</th>
+              <th class="bg-gray-800 text-white px-4 py-2">API Schlüssel</th>
+              <th class="bg-gray-800 text-white px-4 py-2">Aktionen</th>
+            </tr>
+          </thead>
+          <tbody id="nodeTableBody" class="bg-gray-700">
+            <!-- Nodes werden hier dynamisch eingefügt -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../components/footer') %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/nodes') // Stelle sicher, dass dieser Endpoint existiert
+      .then(response => response.json())
+      .then(data => {
+        const nodeTableBody = document.getElementById('nodeTableBody');
+        nodeTableBody.innerHTML = ''; // Leere den Inhalt
+
+        data.nodes.forEach(node => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td class="text-white px-4 py-2">${node.name}</td>
+            <td class="text-white px-4 py-2">${node.address}</td>
+            <td class="text-white px-4 py-2">${node.apiKey}</td>
+            <td class="text-white px-4 py-2">
+              <button class="bg-red-500 px-2 py-1 rounded" onclick="deleteNode(${node.id})">Löschen</button>
+            </td>
+          `;
+          nodeTableBody.appendChild(row);
+        });
+      })
+      .catch(error => console.error('Error fetching nodes:', error));
+
+    document.getElementById('addNodeBtn').addEventListener('click', function() {
+      const nodeName = prompt('Gib den Namen des Nodes ein:');
+      const nodeAddress = prompt('Gib die Adresse des Nodes ein:');
+      
+      if (nodeName && nodeAddress) {
+        fetch('/admin/nodes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: nodeName, address: nodeAddress }),
+        })
+          .then(response => response.json())
+          .then(data => {
+            alert(data.message);
+            // Wenn erfolgreich, aktualisiere die Liste der Nodes
+            location.reload();
+          })
+          .catch(error => console.error('Error adding node:', error));
+      }
+    });
+  });
+
+  function deleteNode(nodeId) {
+    fetch(`/admin/nodes/${nodeId}`, {
+      method: 'DELETE',
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert(data.message);
+      location.reload(); // Aktualisiere die Liste nach dem Löschen
+    })
+    .catch(error => console.error('Error deleting node:', error));
+  }
+</script>

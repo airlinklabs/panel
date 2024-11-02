@@ -31,7 +31,7 @@ model Node {
   id          Int      @id @default(autoincrement())
   name        String
   createdAt   DateTime @default(now())
-  apiKey      String
   address     String
+  apiKey      String
   servers     Server[]
 }
