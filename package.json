@@ -8,7 +8,7 @@
     "management",
     "panel"
   ],
-  "author": "AirlinkLab",
+  "author": "AirlinkLabs",
   "license": "MIT",
   "scripts": {
     "build:css": "tailwindcss -i src/public/styles.css -o dist/public/styles.css",

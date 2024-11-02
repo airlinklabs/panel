@@ -1,9 +1,9 @@
 /**
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
- *      AirLink - Open Source Project by AirlinkLab
- *      Repository: https://github.com/airlinklab/airlink
+ *      AirLink - Open Source Project by AirlinkLabs
+ *      Repository: https://github.com/airlinklabs/airlink
  *
- *     © 2024 AirlinkLab. Licensed under the MIT License
+ *     © 2024 AirlinkLabs. Licensed under the MIT License
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
  */
 
