@@ -59,37 +59,44 @@ const adminModule: Module = {
 
     router.post('/admin/nodes', isAuthenticated, (req: Request, res: Response): void => {
       const { name, address } = req.body;
-
+    
       const userId = req.session?.user?.id;
       if (!userId) {
         return res.redirect('/login');
       }
-
+    
       prisma.users.findUnique({ where: { id: userId } })
         .then(user => {
           if (!user || !user.isAdmin) {
-            return res.redirect('/dashboard');
+            res.redirect('/dashboard');
+            return null; 
           }
-
+    
           if (!name || !address) {
             res.status(400).json({ message: 'Name und Adresse sind erforderlich.' });
-            return;
+            return null;
           }
+    
           const apiKey = generateApiKey(32);
           return prisma.node.create({
             data: {
               name,
               address,
-              apiKey,
+              apiKey, // idk how to fix 
+              createdAt: new Date(),
             },
           });
         })
-        .then(newNode => {
-          res.status(201).json({ message: 'Node erfolgreich hinzugefügt.', node: newNode });
+        .then(node => {
+          if (node) {
+            res.json(node);
+          } else {
+            res.status(500).json({ message: 'Error when creating the node.' });
+          }
         })
         .catch(error => {
-          console.error('Error creating node:', error);
-          res.status(500).json({ message: 'Fehler beim Erstellen des Nodes.' });
+          console.error('Error when creating the node:', error);
+          res.status(500).json({ message: 'Error when creating the node.' });
         });
     });
 
