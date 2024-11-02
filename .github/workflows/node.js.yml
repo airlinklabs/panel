@@ -26,6 +26,6 @@ jobs:
         cache-dependency-path: workflow/package-lock.json
         node-version: 20
         cache: 'npm'
-    - run: npm ci
+    - run: npm i
     - run: npm test
 
