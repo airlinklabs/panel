@@ -2,4 +2,4 @@ node_modules/
 dist/
 prisma/*
 !prisma/schema.prisma
-package-lock.json
+/package-lock.json
