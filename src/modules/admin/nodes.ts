@@ -2,6 +2,8 @@ import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
+import { cp } from 'fs';
+import axios from 'axios';
 
 const prisma = new PrismaClient();
 
@@ -87,8 +89,11 @@ const adminModule: Module = {
             },
           });
         })
-        .then(node => {
+        .then(async node => {
           if (node) {
+            const response = await axios.post(node.address + '/create/nodes', {
+            
+            })
             res.json(node);
           } else {
             res.status(500).json({ message: 'Error when creating the node.' });
