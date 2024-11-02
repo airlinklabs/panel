@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../app'; // Pfad zu deiner Express-App
+import app from '../../app';
 
 describe('GET /', () => {
   it('should respond with a 200 status code', async () => {
