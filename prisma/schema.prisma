@@ -13,6 +13,7 @@ model Users {
   username    String?
   password String
   isAdmin Boolean  @default(false)
+  description String? @default("No About Me") 
   servers Server[]
 }
 
