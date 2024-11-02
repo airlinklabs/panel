@@ -6,22 +6,22 @@
     <div class="flex-1 p-6">
       <h1 class="text-2xl font-bold text-white">Node Dashboard</h1>
       <div class="mt-4">
-        <button id="addNodeBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Neuen Node hinzufügen</button>
+        <button id="addNodeBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Add New Node</button>
       </div>
 
       <div id="nodeList" class="mt-6">
-        <h2 class="text-xl font-semibold text-white">Aktive Nodes</h2>
+        <h2 class="text-xl font-semibold text-white">Active Nodes</h2>
         <table class="min-w-full mt-4">
           <thead>
             <tr>
               <th class="bg-gray-800 text-white px-4 py-2">Name</th>
-              <th class="bg-gray-800 text-white px-4 py-2">Adresse</th>
-              <th class="bg-gray-800 text-white px-4 py-2">API Schlüssel</th>
-              <th class="bg-gray-800 text-white px-4 py-2">Aktionen</th>
+              <th class="bg-gray-800 text-white px-4 py-2">Address</th>
+              <th class="bg-gray-800 text-white px-4 py-2">API Key</th>
+              <th class="bg-gray-800 text-white px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody id="nodeTableBody" class="bg-gray-700">
-            <!-- Nodes werden hier dynamisch eingefügt -->
+            <!-- Nodes will be dynamically inserted here -->
           </tbody>
         </table>
       </div>
@@ -33,11 +33,11 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    fetch('/api/nodes') // Stelle sicher, dass dieser Endpoint existiert
+    fetch('/api/nodes') // Make sure this endpoint exists
       .then(response => response.json())
       .then(data => {
         const nodeTableBody = document.getElementById('nodeTableBody');
-        nodeTableBody.innerHTML = ''; // Leere den Inhalt
+        nodeTableBody.innerHTML = ''; // Clear content
 
         data.nodes.forEach(node => {
           const row = document.createElement('tr');
@@ -46,7 +46,7 @@
             <td class="text-white px-4 py-2">${node.address}</td>
             <td class="text-white px-4 py-2">${node.apiKey}</td>
             <td class="text-white px-4 py-2">
-              <button class="bg-red-500 px-2 py-1 rounded" onclick="deleteNode(${node.id})">Löschen</button>
+              <button class="bg-red-500 px-2 py-1 rounded" onclick="deleteNode(${node.id})">Delete</button>
             </td>
           `;
           nodeTableBody.appendChild(row);
@@ -55,8 +55,8 @@
       .catch(error => console.error('Error fetching nodes:', error));
 
     document.getElementById('addNodeBtn').addEventListener('click', function() {
-      const nodeName = prompt('Gib den Namen des Nodes ein:');
-      const nodeAddress = prompt('Gib die Adresse des Nodes ein:');
+      const nodeName = prompt('Enter the name of the node:');
+      const nodeAddress = prompt('Enter the address of the node:');
       
       if (nodeName && nodeAddress) {
         fetch('/admin/nodes', {
@@ -69,7 +69,7 @@
           .then(response => response.json())
           .then(data => {
             alert(data.message);
-            // Wenn erfolgreich, aktualisiere die Liste der Nodes
+            // If successful, refresh the node list
             location.reload();
           })
           .catch(error => console.error('Error adding node:', error));
@@ -84,7 +84,7 @@
     .then(response => response.json())
     .then(data => {
       alert(data.message);
-      location.reload(); // Aktualisiere die Liste nach dem Löschen
+      location.reload(); // Refresh the list after deletion
     })
     .catch(error => console.error('Error deleting node:', error));
   }
