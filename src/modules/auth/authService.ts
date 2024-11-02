@@ -5,7 +5,8 @@ import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 
 const prisma = new PrismaClient();
-// Extend session interface to include user data
+
+// Session-Deklaration für Benutzerdaten
 declare module 'express-session' {
   interface SessionData {
     user: {
@@ -29,12 +30,11 @@ const authServiceModule: Module = {
   router: () => {
     const router = Router();
 
+    // Funktion zur Bearbeitung des Logins
     const handleLogin = async (identifier: string, password: string) => {
       try {
         const user = await prisma.users.findFirst({
-          where: {
-            OR: [{ email: identifier }, { username: identifier }],
-          },
+          where: { OR: [{ email: identifier }, { username: identifier }] },
         });
 
         if (!user) {
@@ -42,96 +42,85 @@ const authServiceModule: Module = {
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (isPasswordValid) {
-          return { success: true, user };
-        }
-
-        return { success: false, error: 'incorrect_password' };
+        return isPasswordValid ? { success: true, user } : { success: false, error: 'incorrect_password' };
       } catch (error) {
         console.error('Database error:', error);
-        return { success: false, error: 'database_error' }; // Return a generic error message
+        return { success: false, error: 'database_error' };
       }
     };
 
-    router.post('/login', (req: Request, res: Response) => {
-      const {
-        identifier,
-        password,
-      }: { identifier?: string; password?: string } = req.body;
-
-      // Validate identifier and password
+    // Login-Route
+    router.post('/login', async (req: Request, res: Response) => {
+      const { identifier, password }: { identifier?: string; password?: string } = req.body;
       if (!identifier || !password) {
         return res.redirect('/login?err=missing_credentials');
       }
 
-      // Call handleLogin function and handle Promises
-      handleLogin(identifier, password)
-        .then((result) => {
-          // Check if the login was successful and user is defined
-          if (result.success && result.user) {
-            req.session.user = {
-              id: result.user.id,
-              email: result.user.email,
-              isAdmin: result.user.isAdmin,
-            };
-            return res.redirect('/dashboard');
-          } else if (result.success && !result.user) {
-            return res.redirect('/login?err=user_not_found');
-          }
-
-          // Redirect with the appropriate error if login failed
-          return res.redirect(`/login?err=${result.error}`);
-        })
-        .catch((error) => {
-          console.error('Login error:', error);
-          return res.status(500).send('Server error. Please try again later.');
-        });
+      try {
+        const result = await handleLogin(identifier, password);
+        if (result.success && result.user) {
+          req.session.user = {
+            id: result.user.id,
+            email: result.user.email,
+            isAdmin: result.user.isAdmin,
+          };
+          return res.redirect('/dashboard');
+        }
+        return res.redirect(`/login?err=${result.error}`);
+      } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).send('Server error. Please try again later.');
+      }
     });
 
+    // Registrierungs-Route
     router.post('/register', async (req: Request, res: Response) => {
       const { email, username, password } = req.body;
+
+      // Validierung der Eingaben
       if (!email || !username || !password) {
         return res.redirect('/register?err=missing_credentials');
       }
 
-      // Check if user already exists
-      const existingUser = await prisma.users.findFirst({
-        where: {
-          OR: [{ email }, { username }],
-        },
-      });
-      if (existingUser) {
-        return res.redirect('/register?err=user_already_exists');
-      }
+      try {
+        const existingUser = await prisma.users.findFirst({
+          where: { OR: [{ email }, { username }] },
+        });
 
-      // Check the entry
-      if (!email.includes('@') || !email.includes('.')) {
-        return res.redirect('/register?err=invalid_email');
-      }
-      // Check username
-      if (!username.match(/^[a-zA-Z0-9]+$/)) {
-        return res.redirect('/register?err=invalid_username');
-      }
+        if (existingUser) {
+          return res.redirect('/register?err=user_already_exists');
+        }
 
-      prisma.users
-        .create({
+        if (!email.includes('@') || !email.includes('.')) {
+          return res.redirect('/register?err=invalid_email');
+        }
+
+        if (!username.match(/^[a-zA-Z0-9]+$/)) {
+          return res.redirect('/register?err=invalid_username');
+        }
+
+        await prisma.users.create({
           data: {
             email,
             username,
             password: await bcrypt.hash(password, 10),
           },
-        })
-        .then(() => {
-          res.redirect('/login');
-        })
-        .catch((error: any) => {
-          console.error('Database error:', error);
-          return res.status(500).send('Server error. Please try again later.');
         });
+        res.redirect('/login');
+      } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).send('Server error. Please try again later.');
+      }
     });
 
     return router;
   },
 };
+
+// Prisma-Verbindung bei Beendigung schließen
+process.on('SIGINT', async () => {
+  await prisma.$disconnect();
+  process.exit();
+});
 
 export default authServiceModule;

@@ -1,11 +1,12 @@
 import { Router, Request, Response } from 'express';
-import { Module } from '../handlers/moduleInit';
+import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
+import { isAuthenticated } from '../../utils/auth/authUtil';
 
 const prisma = new PrismaClient();
 
 interface ErrorMessage {
-  message?: string; // Make message optional to avoid TypeScript errors
+  message?: string;
 }
 
 interface User {
@@ -34,41 +35,22 @@ const dashboardModule: Module = {
     license: 'MIT',
   },
 
-
-
   router: () => {
     const router = Router();
 
-    router.get('/dashboard', async (req: Request, res: Response) => {
-      const errorMessage: ErrorMessage = {}; // Define the errorMessage with the type
-
-      // Assuming you have a way to identify the user, for example via session
-
-      const userIdString = req.session.id; // Assuming this is how you get the user ID from the session
-
-      // Check if userId exists
-      if (!userIdString) {
-        errorMessage.message = 'User not authenticated.';
-        return res.render('user/dashboard', { errorMessage, user: userObject, req });
-      }
-
-      const userId = parseInt(userIdString, 10); // Adjust according to how you store the user ID in session
-
+    router.get('/dashboard', isAuthenticated, async (req: Request, res: Response) => {
+      const errorMessage: ErrorMessage = {};
+      const userId = req.session?.user?.id;
       if (!userId) {
-        errorMessage.message = 'User not authenticated.';
-        return res.render('user/dashboard', { errorMessage, user: userObject, req });
+        return res.redirect('/login');
       }
 
       try {
-        const user = await prisma.users.findUnique({
-          where: { id: userId }, // Now userId is a number
-        });
-
+        const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
           errorMessage.message = 'User not found.';
           return res.render('user/dashboard', { errorMessage, user: userObject, req });
         }
-        console.log('test:' + user);
 
         res.render('user/dashboard', { errorMessage, user, req });
       } catch (error) {
@@ -81,5 +63,10 @@ const dashboardModule: Module = {
     return router;
   },
 };
+
+process.on('SIGINT', async () => {
+  await prisma.$disconnect();
+  process.exit();
+});
 
 export default dashboardModule;
