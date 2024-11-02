@@ -25,10 +25,10 @@ const userObject: User = {
   email: 'IyZxg@example.com',
 };
 
-const dashboardModule: Module = {
+const adminModule: Module = {
   info: {
-    name: 'Dashboard Module',
-    description: 'This file is for dashboard functionality.',
+    name: 'Admin Module',
+    description: 'This file is for admin functionality.',
     version: '1.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
@@ -71,4 +71,4 @@ process.on('SIGINT', async () => {
   process.exit();
 });
 
-export default dashboardModule;
+export default adminModule;
