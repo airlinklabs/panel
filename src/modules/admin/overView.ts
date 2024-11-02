@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
-import { isAuthenticated } from '../../utils/auth/authUtil';
+import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 
 const prisma = new PrismaClient();
 

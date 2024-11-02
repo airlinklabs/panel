@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
-import { isAuthenticated } from '../../utils/auth/authUtil';
+import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 
 const prisma = new PrismaClient();
 
@@ -10,20 +10,22 @@ interface ErrorMessage {
 }
 
 interface User {
-  username: string;
-  id: number;
-  description: string;
-  isAdmin: boolean;
-  email: string;
+  username?: string;
+  id?: number;
+  description?: string;
+  isAdmin?: boolean;
+  email?: string;
 }
 
-const userObject: User = {
-  username: 'John Doe',
-  description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-  id: 1,
-  isAdmin: false,
-  email: 'IyZxg@example.com',
-};
+async function getUser(req: Request) {
+  const userObject: User = {
+    username: req.session?.user?.username,
+    id: req.session?.user?.id,
+    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+    isAdmin: req?.session?.user?.isAdmin,
+    email: req.session?.user?.email,
+  };
+}
 
 const dashboardModule: Module = {
   info: {
@@ -49,14 +51,14 @@ const dashboardModule: Module = {
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
           errorMessage.message = 'User not found.';
-          return res.render('user/dashboard', { errorMessage, user: userObject, req });
+          return res.render('user/dashboard', { errorMessage, user: getUser(req), req });
         }
 
         res.render('user/dashboard', { errorMessage, user, req });
       } catch (error) {
         console.error('Error fetching user:', error);
         errorMessage.message = 'Error fetching user data.';
-        res.render('user/dashboard', { errorMessage, user: userObject, req });
+        res.render('user/dashboard', { errorMessage, user: getUser(req), req });
       }
     });
 

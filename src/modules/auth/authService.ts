@@ -6,13 +6,13 @@ import { Module } from '../../handlers/moduleInit';
 
 const prisma = new PrismaClient();
 
-// Session-Deklaration für Benutzerdaten
 declare module 'express-session' {
   interface SessionData {
     user: {
       id: number;
       email: string;
       isAdmin: boolean;
+      username: string;
     };
   }
 }
@@ -30,7 +30,6 @@ const authServiceModule: Module = {
   router: () => {
     const router = Router();
 
-    // Funktion zur Bearbeitung des Logins
     const handleLogin = async (identifier: string, password: string) => {
       try {
         const user = await prisma.users.findFirst({
@@ -49,7 +48,6 @@ const authServiceModule: Module = {
       }
     };
 
-    // Login-Route
     router.post('/login', async (req: Request, res: Response) => {
       const { identifier, password }: { identifier?: string; password?: string } = req.body;
       if (!identifier || !password) {
@@ -63,6 +61,7 @@ const authServiceModule: Module = {
             id: result.user.id,
             email: result.user.email,
             isAdmin: result.user.isAdmin,
+            username: result.user.username!,
           };
           return res.redirect('/dashboard');
         }
@@ -73,11 +72,9 @@ const authServiceModule: Module = {
       }
     });
 
-    // Registrierungs-Route
     router.post('/register', async (req: Request, res: Response) => {
       const { email, username, password } = req.body;
 
-      // Validierung der Eingaben
       if (!email || !username || !password) {
         return res.redirect('/register?err=missing_credentials');
       }
@@ -117,7 +114,6 @@ const authServiceModule: Module = {
   },
 };
 
-// Prisma-Verbindung bei Beendigung schließen
 process.on('SIGINT', async () => {
   await prisma.$disconnect();
   process.exit();
