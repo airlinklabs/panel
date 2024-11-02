@@ -23,27 +23,43 @@ const dashboardModule: Module = {
   router: () => {
     const router = Router();
 
-    router.get('/dashboard', isAuthenticated, async (req: Request, res: Response) => {
-      const errorMessage: ErrorMessage = {};
-      const userId = req.session?.user?.id;
-      if (!userId) {
-        return res.redirect('/login');
-      }
-
-      try {
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {
-          errorMessage.message = 'User not found.';
-          return res.render('user/dashboard', { errorMessage, user, req });
+    router.get(
+      '/dashboard',
+      isAuthenticated,
+      async (req: Request, res: Response) => {
+        const errorMessage: ErrorMessage = {};
+        const userId = req.session?.user?.id;
+        if (!userId) {
+          return res.redirect('/login');
         }
 
-        res.render('user/dashboard', { errorMessage, user, req });
-      } catch (error) {
-        console.error('Error fetching user:', error);
-        errorMessage.message = 'Error fetching user data.';
-        res.render('user/dashboard', { errorMessage, user: getUser(req), req });
-      }
-    });
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            errorMessage.message = 'User not found.';
+            return res.render('user/dashboard', { errorMessage, user, req });
+          }
+
+          res.render('user/dashboard', {
+            errorMessage,
+            user,
+            req,
+            name: 'AirLink',
+            logo: '',
+          });
+        } catch (error) {
+          console.error('Error fetching user:', error);
+          errorMessage.message = 'Error fetching user data.';
+          res.render('user/dashboard', {
+            errorMessage,
+            user: getUser(req),
+            req,
+            name: 'AirLink',
+            logo: '',
+          });
+        }
+      },
+    );
 
     return router;
   },

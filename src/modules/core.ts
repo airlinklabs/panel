@@ -15,11 +15,7 @@ const coreModule: Module = {
     const router = Router();
 
     router.get('/', (req: Request, res: Response) => {
-      const errorMessage =
-        req.query.err === 'internal_server_error'
-          ? 'Internal server error. Please try again.'
-          : '';
-      res.render('index', { errorMessage });
+      res.render('index', { req, name: 'AirLink', logo: '' });
     });
 
     return router;

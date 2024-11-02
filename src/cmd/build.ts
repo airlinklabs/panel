@@ -25,6 +25,9 @@ copySync(publicSrc, publicDest, { overwrite: true });
 
 // Step 4: Build Tailwind CSS
 console.log('Building Tailwind CSS...');
-execSync('tailwindcss build src/public/styles.css -c tailwind.config.js -o dist/public/styles.css', { stdio: 'inherit' });
+execSync(
+  'tailwindcss build src/public/styles.css -c tailwind.config.js -o dist/public/styles.css',
+  { stdio: 'inherit' },
+);
 
 console.log('Build complete.');

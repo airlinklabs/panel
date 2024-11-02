@@ -1,31 +1,57 @@
-<%- include('../components/header', { title: 'Register' }) %>
-<main class="bg-neutral-900 h-screen w-screen flex items-center justify-center">
-    <div class="bg-black/20 h-auto flex flex-col items-center justify-center p-8 w-1/4 m-5 border border-neutral-200/20 rounded-2xl shadow-lg">
-        <h1 class="text-white text-2xl font-semibold mb-6">Create an account!</h1>
+<%- include('../components/header', { title: 'Register'}) %>
+<div class="min-h-full flex">
+  <div class="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+    <div class="mx-auto w-full max-w-sm lg:w-96">
+      <div>
+        <img class="h-12 w-auto rounded-xl" src="<%= logo %>" alt="">
+        <h2 class="mt-6 text-3xl font-medium text-white">Register an account</h2>
+        <p class="mt-2 text-sm text-neutral-500">
+          Please enter your details below.
+        </p>
+      </div>
 
-        <!-- Error message display -->
-        <% if (errorMessage) { %>
-            <div class="bg-red-600 text-white p-3 rounded-lg mb-4 w-full text-center">
-                <%= errorMessage %>
+      <div class="mt-8">
+        <div class="mt-6">
+          <form method="POST" action="/register" class="space-y-6">
+            <div>
+              <label for="username" class="block text-sm font-medium text-neutral-400"> Username </label>
+              <div class="mt-1">
+                <input placeholder="example" id="username" name="username" autocomplete="username" required class="appearance-none block w-full px-3 py-2 bg-white/10 border border-transparent rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm">
+              </div>
             </div>
-        <% } %>
 
-        <form class="w-full" action="/register" method="POST">
-            <div class="mb-4">
-                <label for="username" class="block text-white mb-1">Username</label>
-                <input type="text" id="username" name="username" class="w-full p-2 border border-neutral-600 rounded-lg bg-neutral-800 text-white focus:outline-none focus:border-blue-500" required>
+            <div>
+              <label for="email" class="block text-sm font-medium text-neutral-400"> Email </label>
+              <div class="mt-1">
+                <input placeholder="example@domain.com" id="email" name="email" autocomplete="email" required class="appearance-none block w-full px-3 py-2 bg-white/10 border border-transparent rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm">
+              </div>
             </div>
-            <div class="mb-4">
-                <label for="email" class="block text-white mb-1">Email</label>
-                <input type="email" id="email" name="email" class="w-full p-2 border border-neutral-600 rounded-lg bg-neutral-800 text-white focus:outline-none focus:border-blue-500" required>
+
+            <div class="space-y-1">
+              <label for="password" class="block text-sm font-medium text-neutral-400"> Password </label>
+              <div class="mt-1">
+                <input placeholder="********" id="password" name="password" type="password" autocomplete="new-password" required class="appearance-none block w-full px-3 py-2 bg-white/10 border border-transparent rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm">
+              </div>
             </div>
-            <div class="mb-4">
-                <label for="password" class="block text-white mb-1">Password</label>
-                <input type="password" id="password" name="password" class="w-full p-2 border border-neutral-600 rounded-lg bg-neutral-800 text-white focus:outline-none focus:border-blue-500" required>
+
+            <div>
+              <button type="submit" class="w-full flex transition justify-center py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-neutral-800 bg-white hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500">Register</button>
             </div>
-            <button type="submit" class="w-full p-2 bg-neutral-100 hover:bg-neutral-300 rounded-lg text-neutral-800 font-semibold transition duration-200">Register</button>
-        </form>
-        <p class="mt-4 text-white text-sm">Already have an account? <a href="/login" class="text-blue-400 hover:underline">Login</a></p>
+            
+            <% if (req.query.err && req.query.err == "InvalidCredentials") { %>
+              <div class="mt-2"></div>
+              <span class="text-amber-600 pt-4 font-normal text-sm">Invalid credentials. Please try again.</span>
+            <% } %>
+          </form>
+        </div>
+      </div>
+      <div class="mt-6 text-sm text-neutral-500">
+        Already have an account? <a href="/login" class="font-normal text-neutral-500 hover:text-white transition ">Sign in</a>
+      </div>
     </div>
-</main>
+  </div>
+  <div class="hidden lg:block relative w-0 flex-1">
+    <img class="absolute inset-0 h-full w-full object-cover" src="https://i.imgur.com/8G5eRWX.jpeg" alt="">
+  </div>
+</div>
 <%- include('../components/footer') %>

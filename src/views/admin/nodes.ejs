@@ -1,27 +1,29 @@
 <%- include('../components/header', { title: 'Dashboard' }) %>
 <main class="bg-neutral-900 h-screen m-auto">
   <div class="flex h-screen">
-    <%- include('../components/sidebar') %>
+    <div class="w-60 fixed h-full">
+      <%- include('../components/sidebar') %>
+    </div>
 
-    <div class="flex-1 p-6">
+    <div class="flex-1 p-6 ml-64 overflow-y-auto">
       <h1 class="text-2xl font-bold text-white">Node Dashboard</h1>
       <div class="mt-4">
         <button id="addNodeBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Neuen Node hinzufügen</button>
       </div>
 
       <div id="nodeList" class="mt-6">
-        <h2 class="text-xl font-semibold text-white">Aktive Nodes</h2>
+        <h2 class="text-xl font-semibold text-white">Active Nodes</h2>
         <table class="min-w-full mt-4">
           <thead>
             <tr>
               <th class="bg-gray-800 text-white px-4 py-2">Name</th>
               <th class="bg-gray-800 text-white px-4 py-2">Adresse</th>
-              <th class="bg-gray-800 text-white px-4 py-2">API Schlüssel</th>
-              <th class="bg-gray-800 text-white px-4 py-2">Aktionen</th>
+              <th class="bg-gray-800 text-white px-4 py-2">API Key</th>
+              <th class="bg-gray-800 text-white px-4 py-2">Node ID</th>
             </tr>
           </thead>
           <tbody id="nodeTableBody" class="bg-gray-700">
-            <!-- Nodes werden hier dynamisch eingefügt -->
+            
           </tbody>
         </table>
       </div>
@@ -30,6 +32,7 @@
 </main>
 
 <%- include('../components/footer') %>
+
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {

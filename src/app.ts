@@ -33,7 +33,7 @@ app.use(
     secret: process.env.SESSION_SECRET || 'default_secret',
     resave: false,
     saveUninitialized: true,
-  })
+  }),
 );
 
 app.use(express.urlencoded({ extended: true }));

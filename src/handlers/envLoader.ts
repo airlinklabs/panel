@@ -14,7 +14,7 @@ export function loadEnv() {
         process.env[key.trim()] = value.trim().replace(/^["']|["']$/g, '');
       }
     });
-    } catch (error) {
-        console.error(`Error loading .env file: ${(error as Error).message}`);
-    }
+  } catch (error) {
+    console.error(`Error loading .env file: ${(error as Error).message}`);
+  }
 }

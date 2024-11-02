@@ -41,7 +41,9 @@ const authServiceModule: Module = {
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
-        return isPasswordValid ? { success: true, user } : { success: false, error: 'incorrect_password' };
+        return isPasswordValid
+          ? { success: true, user }
+          : { success: false, error: 'incorrect_password' };
       } catch (error) {
         console.error('Database error:', error);
         return { success: false, error: 'database_error' };
@@ -49,7 +51,10 @@ const authServiceModule: Module = {
     };
 
     router.post('/login', async (req: Request, res: Response) => {
-      const { identifier, password }: { identifier?: string; password?: string } = req.body;
+      const {
+        identifier,
+        password,
+      }: { identifier?: string; password?: string } = req.body;
       if (!identifier || !password) {
         return res.redirect('/login?err=missing_credentials');
       }

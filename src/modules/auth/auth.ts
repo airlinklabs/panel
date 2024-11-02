@@ -15,36 +15,11 @@ const authModule: Module = {
     const router = Router();
 
     router.get('/login', (req: Request, res: Response) => {
-      const errorMessage =
-        req.query.err === 'incorrect_password'
-          ? 'Invalid login credentials. Please try again.'
-          : '';
-      res.render('auth/login', { errorMessage });
+      res.render('auth/login', { req, name: 'AirLink', logo: '' });
     });
 
     router.get('/register', (req: Request, res: Response) => {
-      let errorMessage = '';
-
-      switch (req.query.err) {
-        case 'missing_credentials':
-          errorMessage = 'Invalid register credentials. Please try again.';
-          break;
-        case 'user_already_exists':
-          errorMessage =
-            'User already exists. Please choose another username or email.';
-          break;
-        case 'invalid_email':
-          errorMessage = 'Invalid email format. Please enter a valid email.';
-          break;
-        case 'invalid_username':
-          errorMessage =
-            'Invalid username format. Please choose a different username.';
-          break;
-        default:
-          errorMessage = '';
-      }
-
-      res.render('auth/register', { errorMessage });
+      res.render('auth/register', { req, name: 'AirLink', logo: '' });
     });
 
     router.get('/logout', (req: Request, res: Response) => {

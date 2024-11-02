@@ -23,29 +23,33 @@ const adminModule: Module = {
   router: () => {
     const router = Router();
 
-    router.get('/admin/overview', isAuthenticated, async (req: Request, res: Response) => {
-      const errorMessage: ErrorMessage = {};
-      const userId = req.session?.user?.id;
-      if (!userId) {
-        return res.redirect('/login');
-      }
+    router.get(
+      '/admin/overview',
+      isAuthenticated,
+      async (req: Request, res: Response) => {
+        const errorMessage: ErrorMessage = {};
+        const userId = req.session?.user?.id;
+        if (!userId) {
+          return res.redirect('/login');
+        }
 
-      try {
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
             return res.redirect('/login');
-        }
-        
-        if (!user.isAdmin) {
-            return res.redirect('/dashboard');
-        }
+          }
 
-        res.render('admin/overview', { errorMessage, user, req });
-      } catch (error) {
-        console.error('Error fetching user:', error);
-        return res.redirect('/login');
-      }
-    });
+          if (!user.isAdmin) {
+            return res.redirect('/dashboard');
+          }
+
+          res.render('admin/overview', { errorMessage, user, req });
+        } catch (error) {
+          console.error('Error fetching user:', error);
+          return res.redirect('/login');
+        }
+      },
+    );
 
     return router;
   },

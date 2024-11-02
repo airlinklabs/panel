@@ -11,9 +11,12 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 
-export const loadModules = async (app: express.Express, airlinkVersion: string) => {
+export const loadModules = async (
+  app: express.Express,
+  airlinkVersion: string,
+) => {
   const modulesDir = path.join(__dirname, '../modules');
-  
+
   const getFilesRecursively = (dir: string): string[] => {
     const dirents = fs.readdirSync(dir, { withFileTypes: true });
     const files = dirents.flatMap((dirent) => {
@@ -35,14 +38,17 @@ export const loadModules = async (app: express.Express, airlinkVersion: string) 
           console.log(`Loading module: ${info.name} (v${info.moduleVersion})`);
           app.use(router());
         } else {
-          console.warn(`Skipping ${info.name}: incompatible with AirLink version ${airlinkVersion}`);
+          console.warn(
+            `Skipping ${info.name}: incompatible with AirLink version ${airlinkVersion}`,
+          );
         }
       } else {
-        console.warn(`Module ${file} is missing required exports (info and router).`);
+        console.warn(
+          `Module ${file} is missing required exports (info and router).`,
+        );
       }
     } catch (error) {
       console.error(`Failed to load module ${file}:`, error);
     }
   }
 };
-
