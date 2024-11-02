@@ -10,12 +10,12 @@
 import express from 'express';
 import path from 'path';
 import session from 'express-session';
-import dotenv from 'dotenv';
+import { loadEnv } from './handlers/envLoader';
 import { loadModules } from './handlers/modulesLoader';
 import logger from './handlers/logger';
 import config from './storage/config.json';
 
-dotenv.config();
+loadEnv();
 
 const app = express();
 const port = process.env.PORT || 3000;
