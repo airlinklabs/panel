@@ -2,28 +2,13 @@ import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
+import { getUser } from '../../handlers/utils/user/user';
 
 const prisma = new PrismaClient();
 
 interface ErrorMessage {
   message?: string;
 }
-
-interface User {
-  username: string;
-  id: number;
-  description: string;
-  isAdmin: boolean;
-  email: string;
-}
-
-const userObject: User = {
-  username: 'John Doe',
-  description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-  id: 1,
-  isAdmin: false,
-  email: 'IyZxg@example.com',
-};
 
 const adminModule: Module = {
   info: {
