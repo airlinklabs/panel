@@ -42,3 +42,10 @@ describe('GET /admin/nodes', () => {
     expect(response.status).toBe(200);
   });
 });
+
+describe('GET /admin/nodes/list', () => {
+  it('should respond with a 200 status code', async () => {
+    const response = await request(app).get('/');
+    expect(response.status).toBe(200);
+  });
+});
