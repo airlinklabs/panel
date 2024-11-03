@@ -9,8 +9,7 @@ export const isAuthenticated = (
   res: Response,
   next: NextFunction,
 ) => {
-  if (!req.session?.id) {
-    // If there's no session ID, redirect to /login
+  if (!req.session?.user?.id) {
     return res.redirect('/login');
   }
   next();

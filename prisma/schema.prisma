@@ -31,7 +31,9 @@ model Node {
   id          Int      @id @default(autoincrement())
   name        String
   createdAt   DateTime @default(now())
-  address     String
-  apiKey      String
+  remote      String
+  port        Int
+  key         String
+  status      String
   servers     Server[]
 }

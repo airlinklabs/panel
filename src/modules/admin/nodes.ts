@@ -7,6 +7,58 @@ import axios from 'axios';
 
 const prisma = new PrismaClient();
 
+async function checkNodeStatus(node: any) {
+  try {
+    const requestData = {
+      method: 'get',
+      url: 'http://' + node.remote + ':' + node.port,
+      auth: {
+        username: 'Airlink',
+        password: node.key
+      },
+      headers: { 
+        'Content-Type': 'application/json'
+      }
+    };
+    const response = await axios(requestData);
+    const { versionFamily, versionRelease, status, remote } = response.data;
+
+    node.status = status;
+    node.versionFamily = versionFamily;
+    node.versionRelease = versionRelease;
+    node.remote = remote;
+
+    prisma.node.update({
+      where: { id: node.id },
+      data: {
+        status: status,
+        remote
+      },
+    })
+    return node;
+  } catch (error) {
+    node.status = 'Offline';
+    prisma.node.update({
+      where: { id: node.id },
+       data: {
+         status: 'Offline'
+       },
+    })
+    return node;
+  }
+}
+
+function generateApiKey(length: number): string {
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    result += characters[randomIndex];
+  }
+  return result;
+}
+
 const adminModule: Module = {
   info: {
     name: 'Admin Nodes Module',
@@ -49,22 +101,28 @@ const adminModule: Module = {
       },
     );
 
-    function generateApiKey(length: number): string {
-      const characters =
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let result = '';
-      for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        result += characters[randomIndex];
+    router.get('/admin/nodes/list', isAuthenticated, async (req: Request, res: Response) => {
+      try {
+        const nodes = await prisma.node.findMany();
+        const nodesWithStatus = [];
+    
+        for (const node of nodes) {
+          nodesWithStatus.push(await checkNodeStatus(node));
+        }
+    
+        res.json(nodesWithStatus);
+      } catch (error) {
+        console.error('Error fetching nodes:', error);
+        res.status(500).json({ message: 'Error fetching nodes.' });
       }
-      return result;
-    }
+    });
+    
 
     router.post(
-      '/admin/nodes',
+      '/admin/nodes/create',
       isAuthenticated,
       (req: Request, res: Response): void => {
-        const { name, address } = req.body;
+        const { name, remote, port } = req.body;
 
         const userId = req.session?.user?.id;
         if (!userId) {
@@ -79,19 +137,21 @@ const adminModule: Module = {
               return null;
             }
 
-            if (!name || !address) {
+            if (!name || !remote || !port) {
               res
                 .status(400)
                 .json({ message: 'Name und Adresse sind erforderlich.' });
               return null;
             }
 
-            const apiKey = generateApiKey(32);
+            const key = generateApiKey(32);
             return prisma.node.create({
               data: {
                 name,
-                address,
-                apiKey, // idk how to fix
+                remote,
+                port,
+                status: 'Offline',
+                key,
                 createdAt: new Date(),
               },
             });
@@ -99,7 +159,7 @@ const adminModule: Module = {
           .then(async (node) => {
             if (node) {
               const response = await axios.post(
-                node.address + '/create/nodes',
+                node.remote + '/create/nodes',
                 {},
               );
               res.json(node);
