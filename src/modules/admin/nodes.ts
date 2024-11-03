@@ -28,22 +28,9 @@ async function checkNodeStatus(node: any) {
     node.versionRelease = versionRelease;
     node.remote = remote;
 
-    prisma.node.update({
-      where: { id: node.id },
-      data: {
-        status: status,
-        remote
-      },
-    })
     return node;
   } catch (error) {
     node.status = 'Offline';
-    prisma.node.update({
-      where: { id: node.id },
-       data: {
-         status: 'Offline'
-       },
-    })
     return node;
   }
 }
@@ -116,7 +103,6 @@ const adminModule: Module = {
         res.status(500).json({ message: 'Error fetching nodes.' });
       }
     });
-    
 
     router.post(
       '/admin/nodes/create',
@@ -150,7 +136,6 @@ const adminModule: Module = {
                 name,
                 remote,
                 port,
-                status: 'Offline',
                 key,
                 createdAt: new Date(),
               },

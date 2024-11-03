@@ -34,6 +34,5 @@ model Node {
   remote      String
   port        Int
   key         String
-  status      String
   servers     Server[]
 }
