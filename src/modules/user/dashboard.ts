@@ -25,7 +25,7 @@ const dashboardModule: Module = {
 
     router.get(
       '/dashboard',
-      isAuthenticated,
+      isAuthenticated(),
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;

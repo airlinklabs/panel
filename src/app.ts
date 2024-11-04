@@ -14,7 +14,8 @@ import { loadEnv } from './handlers/envLoader';
 import { loadModules } from './handlers/modulesLoader';
 import logger from './handlers/logger';
 import config from './storage/config.json';
-
+import cookieParser from 'cookie-parser';
+import { translationMiddleware } from './handlers/translation';
 loadEnv();
 
 const app = express();
@@ -36,8 +37,15 @@ app.use(
   }),
 );
 
+// Load body parser
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+// Load cookies
+app.use(cookieParser());
+
+// Load translation
+app.use(translationMiddleware);
 
 // Load modules
 loadModules(app, airlinkVersion)

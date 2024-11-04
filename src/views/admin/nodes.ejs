@@ -1,94 +1,319 @@
 <%- include('../components/header', { title: 'Dashboard' }) %>
+
 <main class="bg-neutral-900 h-screen m-auto">
   <div class="flex h-screen">
-    <div class="w-60 fixed h-full">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
       <%- include('../components/sidebar') %>
     </div>
-
-    <div class="flex-1 p-6 ml-64 overflow-y-auto">
-      <h1 class="text-2xl font-bold text-white">Node Dashboard</h1>
-      <div class="mt-4">
-        <button id="addNodeBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Neuen Node hinzufügen</button>
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-white"><%= req.translations.nodes %></h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.nodesText %></p>
+        </div>
+        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <div class="flex gap-2">
+            <button id="createButton" type="button" class="block rounded-xl bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2">
+              <%= req.translations.createNewNode %>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
+       
+        <div class="bg-white/5 rounded-xl p-6 shadow-lg">
+          <h2 class="text-lg font-semibold text-white mb-2"><%= req.translations.totalNodes %></h2>
+          <p class="text-4xl font-bold text-white"><%= nodes.length %></p>
+          <p class="text-sm text-neutral-400 mt-2"><%= req.translations.onlineNodes %>: <%= nodes.filter(node => node.status === 'Online').length %></p>
+        </div>
+        <div class="bg-white/5 rounded-xl p-6 shadow-lg">
+          <h2 class="text-lg font-semibold text-white mb-2">Server Count</h2>
+          <p class="text-4xl font-bold text-white"><%= Object.values(nodes.length).reduce((a, b) => a + b, 0) %></p>
+          <% if (nodes.length > 0) { %>
+            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.averageNodeDensity %>: <%= (Object.values(nodes.length).reduce((a, b) => a + b, 0) / nodes.length).toFixed(2) %></p>
+          <% } else { %>
+            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noNodesAvailable %></p>
+          <% } %>
+        </div>
       </div>
 
-      <div id="nodeList" class="mt-6">
-        <h2 class="text-xl font-semibold text-white">Active Nodes</h2>
-        <table class="min-w-full mt-4">
-          <thead>
+      <!-- notifications -->
+      <% if (req.query.err == "none") { %>
+        <div class="mt-6 w-full ml-8 mr-8">
+          <div class="rounded-xl bg-emerald-800/10 px-4 py-6 shadow-lg">
+            <div class="flex">
+              <div class="flex-shrink-0 ml-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mt-2 text-emerald-400">
+                  <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                </svg>                
+              </div>
+              <div class="ml-5">
+                <h3 class="text-sm font-medium text-emerald-400"><%= req.translations.success %>!</h3>
+                <p class="text-sm text-emerald-400/50"><%= req.translations.actionCompleted %></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Table of nodes -->
+      <div class="overflow-hidden shadow ring-1 ring-white/5 rounded-lg m-8" id="nodeTable">
+        <table class="min-w-full divide-y divide-white/10">
+          <thead class="bg-white/5">
             <tr>
-              <th class="bg-gray-800 text-white px-4 py-2">Name</th>
-              <th class="bg-gray-800 text-white px-4 py-2">Adresse</th>
-              <th class="bg-gray-800 text-white px-4 py-2">API Key</th>
-              <th class="bg-gray-800 text-white px-4 py-2">Node ID</th>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-white sm:pl-6"><%= req.translations.name %></th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white"><%= req.translations.connection %></th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white"><%= req.translations.instances %></th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white"><%= req.translations.actions %></th>
             </tr>
           </thead>
-          <tbody id="nodeTableBody" class="bg-gray-700">
-            
+          <tbody class="divide-y divide-white/5 bg-white/5">
+            <% nodes.forEach(function(node) { %>
+              <tr class="hover:bg-white/[0.05] transition-colors clickable-row cursor-pointer" onclick="handleRowClick(event, '/admin/node/<%= node.id %>/stats')">
+                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                  <div class="flex items-center">
+                    <div class="mr-5">
+                      <% if (node.status == "Online") { %>
+                        <span class="flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-emerald-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                      <% } else if (node.status == "Offline") { %>
+                        <span class="flex h-2 w-2">
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-neutral-500"></span>
+                        </span>
+                      <% } else { %>
+                        <span class="flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-amber-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                        </span>
+                      <% } %>
+                    </div>
+                    <div class="font-medium text-white"><%= node.name %></div>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= node.address %>:<%= node.port %></td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= nodes.length[node.id] || 0 %></td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                  <div class="flex gap-3">
+                    <button onclick="configure('<%= node.id %>')" type="button" class="rounded-xl bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">Configure</button>
+                    <a href="./node/<%= node.id %>">
+                      <button type="button" class="rounded-xl bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">Edit</button>
+                    </a>
+                    <button onclick="deletenode('<%= node.id %>')" type="button" class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Remove</button>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
           </tbody>
         </table>
       </div>
+      <div id="nodeForm" class="mt-6 px-8 w-full hidden">
+        <div class="p-3 bg-neutral-800/30 shadow-xl border border-white/10 rounded-xl overflow-hidden sm:p-6 lg:p-8 card" style="max-width: 800px; margin: auto;">
+          <form>
+            <h2 class="text-lg font-medium text-white mb-4"><%= req.translations.addNewNode %></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="nodeName" class="block text-neutral-400 text-sm tracking-tight mb-1"><%= req.translations.name %>:</label>
+                <input id="nodeName" class="rounded-lg focus:ring-0 focus:border-neutral-500 text-white text-sm mt-1 w-full hover:bg-white/10 px-4 py-2 bg-neutral-700 placeholder:text-neutral-400 border border-neutral-600" placeholder="My node">
+              </div>
+              
+              <div>
+                <label for="nodeRam" class="block text-neutral-400 text-sm tracking-tight mb-1"><%= req.translations.ram %> (GB):</label>
+                <input id="nodeRam" class="rounded-lg focus:ring-0 focus:border-neutral-500 text-white text-sm mt-1 w-full hover:bg-white/10 px-4 py-2 bg-neutral-700 placeholder:text-neutral-400 border border-neutral-600" placeholder="For information purposes.">
+              </div>
+              
+              <div>
+                <label for="nodeDisk" class="block text-neutral-400 text-sm tracking-tight mb-1"><%= req.translations.disk %> (GB):</label>
+                <input id="nodeDisk" class="rounded-lg focus:ring-0 focus:border-neutral-500 text-white text-sm mt-1 w-full hover:bg-white/10 px-4 py-2 bg-neutral-700 placeholder:text-neutral-400 border border-neutral-600" placeholder="For information purposes.">
+              </div>
+              
+              <div>
+                <label for="nodeProcessor" class="block text-neutral-400 text-sm tracking-tight mb-1"><%= req.translations.cpu %>:</label>
+                <input id="nodeProcessor" class="rounded-lg focus:ring-0 focus:border-neutral-500 text-white text-sm mt-1 w-full hover:bg-white/10 px-4 py-2 bg-neutral-700 placeholder:text-neutral-400 border border-neutral-600" placeholder="For information purposes.">
+              </div>
+              
+              <div>
+                <label for="nodeAddress" class="block text-neutral-400 text-sm tracking-tight mb-1"><%= req.translations.addressIP %>:</label>
+                <input id="nodeAddress" class="rounded-lg focus:ring-0 focus:border-neutral-500 text-white text-sm mt-1 w-full hover:bg-white/10 px-4 py-2 bg-neutral-700 placeholder:text-neutral-400 border border-neutral-600" placeholder="192.168.1.1 or hostname.com">
+              </div>
+              
+              <div>
+                <label for="nodePort" class="block text-neutral-400 text-sm tracking-tight mb-1"><%= req.translations.deamonPort %>:</label>
+                <input id="nodePort" class="rounded-lg focus:ring-0 focus:border-neutral-500 text-white text-sm mt-1 w-full hover:bg-white/10 px-4 py-2 bg-neutral-700 placeholder:text-neutral-400 border border-neutral-600" placeholder="3002">
+              </div>
+              
+              <div class="col-span-2 text-center mt-4">
+                <button id="createNodeBtn" type="button" class="w-full md:w-auto rounded-lg bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+                  <%= req.translations.create %>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      
     </div>
   </div>
 </main>
 
-<%- include('../components/footer') %>
-
-
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    fetch('/api/nodes') // Stelle sicher, dass dieser Endpoint existiert
-      .then(response => response.json())
-      .then(data => {
-        const nodeTableBody = document.getElementById('nodeTableBody');
-        nodeTableBody.innerHTML = ''; // Leere den Inhalt
+  function handleRowClick(event, url) {
+    if (!['BUTTON', 'A'].includes(event.target.tagName)) {
+      window.location = url;
+    }
+  }
 
-        data.nodes.forEach(node => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td class="text-white px-4 py-2">${node.name}</td>
-            <td class="text-white px-4 py-2">${node.address}</td>
-            <td class="text-white px-4 py-2">${node.apiKey}</td>
-            <td class="text-white px-4 py-2">
-              <button class="bg-red-500 px-2 py-1 rounded" onclick="deleteNode(${node.id})">Löschen</button>
-            </td>
-          `;
-          nodeTableBody.appendChild(row);
-        });
-      })
-      .catch(error => console.error('Error fetching nodes:', error));
+  async function deletenode(nodeId) {
+    try {
+      let response = await fetch('/nodes/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nodeId })
+      });
 
-    document.getElementById('addNodeBtn').addEventListener('click', function() {
-      const nodeName = prompt('Gib den Namen des Nodes ein:');
-      const nodeAddress = prompt('Gib die Adresse des Nodes ein:');
-      
-      if (nodeName && nodeAddress) {
-        fetch('/admin/nodes', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ name: nodeName, address: nodeAddress }),
-        })
-          .then(response => response.json())
-          .then(data => {
-            alert(data.message);
-            // Wenn erfolgreich, aktualisiere die Liste der Nodes
-            location.reload();
-          })
-          .catch(error => console.error('Error adding node:', error));
+      let result = await response.json();
+
+      if (response.ok) {
+        alert('Node successfully deleted');
+        window.location.reload();
+      } else if (result.error === "There are instances on the node") {
+        if (confirm('There are still instances on this node. Do you want to delete all instances and remove the node?')) {
+          await retryDeleteNode(nodeId, true);
+        }
       }
+    } catch (error) {
+      console.error('Request failed:', error);
+    }
+  }
+
+  async function retryDeleteNode(nodeId, deleteInstances) {
+    const response = await fetch(`/nodes/delete?deleteinstances=${deleteInstances}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nodeId })
     });
+    if (response.ok) {
+      alert('Node and instances successfully deleted');
+      window.location.reload();
+    }
+  }
+
+  document.getElementById('createButton').addEventListener('click', () => {
+    const table = document.getElementById('nodeTable');
+    const form = document.getElementById('nodeForm');
+    const stats = document.getElementById('stats');
+
+    table.classList.toggle('hidden');
+    form.classList.toggle('hidden');
+    stats.classList.toggle('hidden');
   });
 
-  function deleteNode(nodeId) {
-    fetch(`/admin/nodes/${nodeId}`, {
-      method: 'DELETE',
-    })
-    .then(response => response.json())
-    .then(data => {
-      alert(data.message);
-      location.reload(); // Aktualisiere die Liste nach dem Löschen
-    })
-    .catch(error => console.error('Error deleting node:', error));
+  async function configure(nodeId) {
+    try {
+      const response = await fetch(`/admin/node/${nodeId}/configure-command`);
+      if (!response.ok) throw new Error('Failed to fetch configure command');
+      const data = await response.json();
+      showPopup(data.configureCommand);
+    } catch (error) {
+      console.error(error);
+    }
   }
+
+  function showPopup(command) {
+    const overlay = createOverlay();
+    const popup = createPopup(command);
+
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+
+    setTimeout(() => {
+      overlay.classList.remove('opacity-0');
+      popup.classList.remove('scale-95', 'opacity-0');
+    }, 10);
+
+    const copyBtn = document.getElementById('copyBtn');
+    copyBtn.addEventListener('click', () => copyCommand(copyBtn, command));
+    document.getElementById('doneBtn').addEventListener('click', closePopup);
+  }
+
+  function createOverlay() {
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center transition-opacity duration-300 opacity-0';
+    overlay.id = 'modal-overlay';
+    return overlay;
+  }
+
+  function createPopup(command) {
+    const popup = document.createElement('div');
+    popup.className = 'bg-neutral-800 text-white border border-white/5 rounded-xl shadow-xl p-6 max-w-2xl w-full mx-4 transform transition-all duration-300 scale-95 opacity-0';
+    popup.innerHTML = `
+      <div class="flex justify-center items-center mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 48 48" class="text-emerald-500">
+          <path fill="currentColor" d="M16.599,41.42L1.58,26.401c-0.774-0.774-0.774-2.028,0-2.802l4.019-4.019 c0.774-0.774,2.028-0.774,2.802,0L23.42,34.599c0.774,0.774,0.774,2.028,0,2.802l-4.019,4.019 C18.627,42.193,17.373,42.193,16.599,41.42z"/>
+          <path fill="currentColor" d="M12.58,34.599L39.599,7.58c0.774-0.774,2.028-0.774,2.802,0l4.019,4.019 c0.774,0.774,0.774,2.028,0,2.802L19.401,41.42c-0.774,0.774-2.028,0.774-2.802,0l-4.019-4.019 C11.807,36.627,11.807,35.373,12.58,34.599z"/>
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold mb-2 text-center">Token Created</h2>
+      <p class="mb-4 text-neutral-300 text-center">To auto-configure your node, run the following command:</p>
+      <pre class="bg-neutral-900 p-3 rounded-xl mb-4 overflow-x-auto"><code id="commandCode" class="text-emerald-500">${command}</code></pre>
+      <div class="flex justify-end">
+        <button id="copyBtn" class="bg-emerald-600 text-white px-4 py-2 rounded-xl mr-2 hover:bg-emerald-700 transition-colors">Copy</button>
+        <button id="doneBtn" class="bg-neutral-700 text-white px-4 py-2 rounded-xl hover:bg-neutral-600 transition-colors">Close</button>
+      </div>
+    `;
+    return popup;
+  }
+
+  function copyCommand(copyBtn, command) {
+    navigator.clipboard.writeText(command)
+      .then(() => {
+        copyBtn.textContent = 'Copied!';
+        copyBtn.classList.replace('bg-emerald-600', 'bg-neutral-600');
+        setTimeout(() => {
+          copyBtn.textContent = 'Copy';
+          copyBtn.classList.replace('bg-neutral-600', 'bg-emerald-600');
+        }, 2000);
+      })
+      .catch(error => console.error('Failed to copy:', error));
+  }
+
+  function closePopup() {
+    const overlay = document.getElementById('modal-overlay');
+    overlay.classList.add('opacity-0');
+    setTimeout(() => document.body.removeChild(overlay), 300);
+  }
+
+  document.getElementById('createNodeBtn').addEventListener('click', async () => {
+    const nodeData = {
+      name: document.getElementById('nodeName').value,
+      ram: document.getElementById('nodeRam').value,
+      cpu: document.getElementById('nodeProcessor').value,
+      disk: document.getElementById('nodeDisk').value,
+      address: document.getElementById('nodeAddress').value,
+      port: document.getElementById('nodePort').value
+    };
+
+    try {
+      const response = await fetch('/admin/nodes/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nodeData)
+      });
+
+      if (response.ok) {
+        console.log('Node created:', await response.json());
+        window.location.href = '../admin/nodes?err=none';
+      } else {
+        throw new Error('Failed to create node');
+      }
+    } catch (error) {
+      alert('Error creating node:', error);
+    }
+  });
 </script>
+
+<%- include('../components/footer') %>

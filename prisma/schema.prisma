@@ -30,9 +30,13 @@ model Server {
 model Node {
   id          Int      @id @default(autoincrement())
   name        String
-  createdAt   DateTime @default(now())
-  remote      String
-  port        Int
+  ram         Int      @default(0)
+  cpu         Int      @default(0)
+  disk        Int      @default(0)
+  address     String   @default("127.0.0.1")
+  port        Int      @default(3001)
   key         String
+  apiKey      String   @default("")
+  createdAt   DateTime @default(now())
   servers     Server[]
 }

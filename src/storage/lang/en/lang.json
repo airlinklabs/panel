@@ -1,0 +1,23 @@
+{
+    "nodes": "Nodes",
+    "nodesText": "A list of all the nodes set up on the Skyport panel.",
+    "createNewNode": "Create new node",
+    "configure": "Configure",
+    "ram": "RAM",
+    "disk": "Disk",
+    "cpu": "CPU",
+    "addressIP": "IP Address",
+    "deamonPort": "Daemon Port",
+    "noNodesAvailable": "No nodes available",
+    "averageNodeDensity": "Average Node Density",
+    "onlineNodes": "Online Nodes",
+    "totalNodes": "Total Nodes",
+    "success": "Success",
+    "actionCompleted": "The action was successfully completed.",
+    "name": "Name",
+    "connection": "Connection",
+    "instances": "Instances",
+    "actions": "Actions",
+    "addNewNode": "Add new node",
+    "create": "Create"
+}

@@ -25,7 +25,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/overview',
-      isAuthenticated,
+      isAuthenticated(),
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
