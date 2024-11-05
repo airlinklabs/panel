@@ -1,6 +1,6 @@
 {
     "nodes": "Nodes",
-    "nodesText": "A list of all the nodes set up on the Skyport panel.",
+    "nodesText": "A list of all the nodes set up on the Airlink panel.",
     "createNewNode": "Create new node",
     "configure": "Configure",
     "ram": "RAM",

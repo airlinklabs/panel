@@ -6,23 +6,14 @@
   let selected = '';
   
   function filterLinks(searchTerm) {
-    // Split the search term into mainTerm and subTerm
     const [mainTerm, subTerm] = searchTerm.split(':/');
-    
-    // Ensure mainTerm and subTerm are lowercase for comparison
     const mainTermFiltered = mainTerm ? mainTerm.toLowerCase() : '';
     const subTermFiltered = subTerm ? subTerm.toLowerCase() : '';
-  
-    // Filter links based on mainTerm and optionally subTerm
     const filteredLinks = Array.from(navLinks).filter((link) => {
       const textContent = link.textContent.toLowerCase();
       const searchData = link.getAttribute('searchdata')?.toLowerCase();
       const linkSubTerm = link.getAttribute('subterm')?.toLowerCase();
-  
-      // Check if main term matches
       const mainTermMatch = textContent.includes(mainTermFiltered) || (searchData && searchData.includes(mainTermFiltered));
-  
-      // If subTerm exists, check if it matches too
       const subTermMatch = subTermFiltered
         ? textContent.includes(subTermFiltered) || (searchData && searchData.includes(subTermFiltered)) || (linkSubTerm && linkSubTerm.includes(subTermFiltered))
         : true;
@@ -46,22 +37,25 @@
           'nav-link',
           'transition',
           'text-gray-600',
-          'hover:bg-gray-200',
+          'hover:bg-gray-100',
           'backdrop-blur',
           'hover:text-gray-800',
           'group',
           'flex',
           'items-center',
           'px-4',
+          'mt-1',
           'py-2',
           'text-sm',
           'font-medium',
           'rounded-xl',
+          'hover:border',
+          'hover:border-neutral-800/20'
         );
   
         if (index === 0) {
           selected = resultLink.href;
-          resultLink.classList.add('bg-gray-200', 'text-gray-900', 'font-semibold', 'searchLinkActive', 'mt-4');
+          resultLink.classList.add('bg-gray-200', 'text-gray-900', 'font-semibold', 'searchLinkActive', 'mt-4', 'border', 'border-neutral-800/20');
         }
   
         searchResults.appendChild(resultLink);
@@ -72,7 +66,7 @@
   filterLinks('');
   document.addEventListener('keydown', function(event) {
     if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
-      event.preventDefault(); // Prevent default browser action (like search)
+      event.preventDefault();
       showSearchResults()
     }
   });
