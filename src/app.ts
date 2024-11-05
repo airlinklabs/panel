@@ -15,7 +15,7 @@ import { loadModules } from './handlers/modulesLoader';
 import logger from './handlers/logger';
 import config from './storage/config.json';
 import cookieParser from 'cookie-parser';
-import { translationMiddleware } from './handlers/translation';
+import { translationMiddleware } from './handlers/utils/core/translation';
 loadEnv();
 
 const app = express();
