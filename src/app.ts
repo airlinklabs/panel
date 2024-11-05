@@ -20,6 +20,7 @@ loadEnv();
 
 const app = express();
 const port = process.env.PORT || 3000;
+const name = process.env.NAME || 'AirLink';
 const airlinkVersion = config.meta.version;
 
 // Load static files
@@ -46,6 +47,13 @@ app.use(cookieParser());
 
 // Load translation
 app.use(translationMiddleware);
+
+// Load locals
+app.use((req, res, next) => {
+  res.locals.name = name;
+  res.locals.airlinkVersion = airlinkVersion;
+  next();
+});
 
 // Load modules
 loadModules(app, airlinkVersion)

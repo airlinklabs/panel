@@ -15,7 +15,7 @@ const coreModule: Module = {
     const router = Router();
 
     router.get('/', (req: Request, res: Response) => {
-      res.render('index', { req, name: 'AirLink', logo: '' });
+      res.render('index', { req, logo: '' });
     });
 
     return router;

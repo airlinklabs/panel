@@ -63,7 +63,7 @@ const adminModule: Module = {
     
           const nodes = await listNodes(res);
     
-          res.render('admin/nodes/nodes', { user, req, name: 'AirLink', logo: '', nodes });
+          res.render('admin/nodes/nodes', { user, req, logo: '', nodes });
         } catch (error) {
           console.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -88,7 +88,7 @@ const adminModule: Module = {
     
           const nodes = await listNodes(res);
     
-          res.render('admin/nodes/create', { user, req, name: 'AirLink', logo: '', nodes });
+          res.render('admin/nodes/create', { user, req, logo: '', nodes });
         } catch (error) {
           console.error('Error fetching user:', error);
           return res.redirect('/login');

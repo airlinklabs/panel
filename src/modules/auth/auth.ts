@@ -15,11 +15,11 @@ const authModule: Module = {
     const router = Router();
 
     router.get('/login', (req: Request, res: Response) => {
-      res.render('auth/login', { req, name: 'AirLink', logo: '' });
+      res.render('auth/login', { req, logo: '' });
     });
 
     router.get('/register', (req: Request, res: Response) => {
-      res.render('auth/register', { req, name: 'AirLink', logo: '' });
+      res.render('auth/register', { req, logo: '' });
     });
 
     router.get('/logout', (req: Request, res: Response) => {

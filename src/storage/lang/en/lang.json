@@ -19,5 +19,16 @@
     "instances": "Instances",
     "actions": "Actions",
     "addNewNode": "Add new node",
-    "create": "Create"
+    "create": "Create",
+    "overview": "Overview",
+    "overviewText": "A simple overview of your Panel.",
+    "user": "User",
+    "users": "Users",
+    "images": "Images",
+    "runningLatestVersion": "You are running the latest version!",
+    "here": "here",
+    "newReleaseAirlink1": "A new release, Airlink",
+    "newReleaseAirlink2": "is available. Please click",
+    "newReleaseAirlink3": "to download it!",
+    "sysInfoText": "You are running Airlink Panel version"
 }
