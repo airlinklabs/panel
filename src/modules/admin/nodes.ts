@@ -54,15 +54,15 @@ const adminModule: Module = {
         if (!userId) {
           return res.redirect('/login');
         }
-    
+
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
-    
+
           const nodes = await listNodes(res);
-    
+
           res.render('admin/nodes/nodes', { user, req, logo: '', nodes });
         } catch (error) {
           console.error('Error fetching user:', error);
@@ -79,15 +79,15 @@ const adminModule: Module = {
         if (!userId) {
           return res.redirect('/login');
         }
-    
+
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
-    
+
           const nodes = await listNodes(res);
-    
+
           res.render('admin/nodes/create', { user, req, logo: '', nodes });
         } catch (error) {
           console.error('Error fetching user:', error);
@@ -110,60 +110,80 @@ const adminModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response): Promise<void> => {
         const { name, ram, cpu, disk, address, port } = req.body;
-    
+
         const userId = req.session?.user?.id;
         if (!userId) {
           return res.redirect('/login');
         }
-    
+
         if (!name || typeof name !== 'string') {
           res.status(400).json({ message: 'Name must be a string.' });
           return Promise.resolve();
         } else if (name.length < 3 || name.length > 50) {
-          res.status(400).json({ message: 'Name must be between 3 and 50 characters long.' });
+          res
+            .status(400)
+            .json({
+              message: 'Name must be between 3 and 50 characters long.',
+            });
           return Promise.resolve();
         }
-    
+
         if (!ram || isNaN(parseInt(ram)) || parseInt(ram) <= 0) {
           res.status(400).json({ message: 'RAM must be a positive number.' });
           return Promise.resolve();
         }
-    
+
         if (!cpu || isNaN(parseInt(cpu)) || parseInt(cpu) <= 0) {
           res.status(400).json({ message: 'CPU must be a positive number.' });
           return Promise.resolve();
         }
-    
+
         if (!disk || isNaN(parseInt(disk)) || parseInt(disk) <= 0) {
           res.status(400).json({ message: 'Disk must be a positive number.' });
           return Promise.resolve();
         }
-    
-        const addressRegex = /^(localhost|(?:\d{1,3}\.){3}\d{1,3}|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})$/;
-        if (!address || typeof address !== 'string' || !addressRegex.test(address)) {
-          res.status(400).json({ message: 'Address must be a valid IPv4, domain, or localhost.' });
+
+        const addressRegex =
+          /^(localhost|(?:\d{1,3}\.){3}\d{1,3}|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})$/;
+        if (
+          !address ||
+          typeof address !== 'string' ||
+          !addressRegex.test(address)
+        ) {
+          res
+            .status(400)
+            .json({
+              message: 'Address must be a valid IPv4, domain, or localhost.',
+            });
           return Promise.resolve();
         }
-    
-        if (!port || isNaN(parseInt(port)) || parseInt(port) <= 1024 || parseInt(port) > 65535) {
-          res.status(400).json({ message: 'Port must be a number between 1025 and 65535.' });
+
+        if (
+          !port ||
+          isNaN(parseInt(port)) ||
+          parseInt(port) <= 1024 ||
+          parseInt(port) > 65535
+        ) {
+          res
+            .status(400)
+            .json({ message: 'Port must be a number between 1025 and 65535.' });
           return Promise.resolve();
         }
-    
+
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(403).json({ message: 'Unauthorized access.' });
             return Promise.resolve();
           }
-    
+
           const key = generateApiKey(32);
-    
+
           const ramValue = parseFloat(ram);
           const cpuValue = parseFloat(cpu);
           const diskValue = parseFloat(disk);
           const portValue = parseInt(port);
-    
+
           const node = await prisma.node.create({
             data: {
               name,
@@ -176,7 +196,7 @@ const adminModule: Module = {
               createdAt: new Date(),
             },
           });
-    
+
           res.status(201).json({ message: 'Node created successfully.', node });
           return Promise.resolve();
         } catch (error) {
@@ -184,7 +204,7 @@ const adminModule: Module = {
           res.status(500).json({ message: 'Error when creating the node.' });
           return Promise.resolve();
         }
-      }
+      },
     );
 
     return router;

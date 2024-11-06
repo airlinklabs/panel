@@ -6,16 +6,16 @@ import { Request, Response, NextFunction } from 'express';
  * If not authenticated, redirects to the /login page.
  * If authenticated but not an admin (when required), redirects to the /not-authorized page.
  */
-export const isAuthenticated = (
-  isAdminRequired = false
-) => (req: Request, res: Response, next: NextFunction) => {
-  if (!req.session.user?.id) {
-    return res.redirect('/login');
-  }
+export const isAuthenticated =
+  (isAdminRequired = false) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    if (!req.session.user?.id) {
+      return res.redirect('/login');
+    }
 
-  if (isAdminRequired && !req.session.user?.isAdmin) {
-    return res.redirect('/dashboard');
-  }
+    if (isAdminRequired && !req.session.user?.isAdmin) {
+      return res.redirect('/dashboard');
+    }
 
-  next();
-};
+    next();
+  };

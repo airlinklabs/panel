@@ -46,7 +46,13 @@ const adminModule: Module = {
           const userCount = await prisma.users.count();
           const nodeCount = await prisma.node.count();
 
-          res.render('admin/overview/overview', { errorMessage, user, userCount, nodeCount, req });
+          res.render('admin/overview/overview', {
+            errorMessage,
+            user,
+            userCount,
+            nodeCount,
+            req,
+          });
         } catch (error) {
           console.error('Error fetching user:', error);
           return res.redirect('/login');

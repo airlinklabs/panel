@@ -110,102 +110,91 @@
      </div>
 
      <script>
-        document.addEventListener('DOMContentLoaded', function() {
-          const navLinks = document.querySelectorAll('.nav-link');
-          const activeBackground = document.getElementById('active-background');
-          let isAnimating = false;
-          let currentActiveLink = null;
+      document.addEventListener('DOMContentLoaded', () => {
+        const navLinks = document.querySelectorAll('.nav-link');
+        const activeBackground = document.getElementById('active-background');
+        let isAnimating = false;
+        let currentActiveLink = null;
+    
+        const getCookie = (name) => {
+          const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+          return match ? match[2] : null;
+        };
         
-          function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-          }
-        
-          function setCookie(name, value, days) {
-            let expires = '';
-            if (days) {
-              const date = new Date();
-              date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-              expires = `; expires=${date.toUTCString()}`;
-            }
-            document.cookie = `${name}=${value || ''}${expires}; path=/`;
-          }
-        
-          function updateActiveBackground(link) {
-            const linkRect = link.getBoundingClientRect();
-            const navRect = link.closest('ul').getBoundingClientRect();
-            const topOffset = linkRect.top - navRect.top + link.closest('ul').scrollTop;
-        
-            activeBackground.style.height = `${linkRect.height}px`;
-            activeBackground.style.transform = `translateY(${topOffset}px)`;
-        
-            setCookie('lastActiveLink', link.id, 7);
-            currentActiveLink = link;
-          }
-        
-          function moveActiveBackgroundInstantly(link) {
-            activeBackground.style.transition = 'none';
-            updateActiveBackground(link);
-            setTimeout(() => {
-              activeBackground.style.transition = 'transform 0.3s ease, height 0.3s ease';
-            }, 50);
-          }
-        
-          function updateActiveLink(currentPath) {
-            let foundActive = false;
-            navLinks.forEach((link) => {
-              let currentpathx2 = currentPath.replace('instance/', 'instances');
-              if (currentpathx2.startsWith(link.getAttribute('href'))) {
-                link.classList.add('active');
-                if (currentActiveLink) {
-                  updateActiveBackground(link);
-                } else {
-                  moveActiveBackgroundInstantly(link);
-                }
-                foundActive = true;
-              } else {
-                link.classList.remove('active');
-              }
-            });
-        
-            if (!foundActive) {
-              activeBackground.style.transform = 'translateY(0)';
-              activeBackground.style.height = '0px';
-            }
-          }
-        
-          const lastActiveLinkId = getCookie('lastActiveLink');
-          if (lastActiveLinkId) {
-            const lastActiveLink = document.getElementById(lastActiveLinkId);
-            if (lastActiveLink) {
-              lastActiveLink.classList.add('active');
-              moveActiveBackgroundInstantly(lastActiveLink);
-            }
-          }
-        
-          function animatePageTransition(href) {
-            if (isAnimating) return;
-            isAnimating = true;
-              window.location.href = href;
-          }
-        
-          navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-              e.preventDefault();
-              const href = link.getAttribute('href');
-              updateActiveLink(href);
-              animatePageTransition(href);
-            });
+        const setCookie = (name, value, days) => {
+          const date = new Date();
+          date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+          document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
+        };
+    
+        const updateActiveBackground = (link) => {
+          const linkRect = link.getBoundingClientRect();
+          const navRect = link.closest('ul').getBoundingClientRect();
+          const topOffset = linkRect.top - navRect.top + link.closest('ul').scrollTop;
+    
+          activeBackground.style.height = `${linkRect.height}px`;
+          activeBackground.style.transform = `translateY(${topOffset}px)`;
+    
+          setCookie('lastActiveLink', link.id, 7);
+          currentActiveLink = link;
+        };
+    
+        const moveActiveBackgroundInstantly = (link) => {
+          activeBackground.style.transition = 'none';
+          updateActiveBackground(link);
+          requestAnimationFrame(() => {
+            activeBackground.style.transition = 'transform 0.3s ease, height 0.3s ease';
           });
-        
-          updateActiveLink(window.location.pathname);
-        
-          window.addEventListener('popstate', () => {
-            updateActiveLink(window.location.pathname);
+        };
+    
+        const updateActiveLink = (currentPath) => {
+          let foundActive = false;
+          navLinks.forEach((link) => {
+            const adjustedPath = currentPath.replace('instance/', 'instances');
+            const isActive = adjustedPath.startsWith(link.getAttribute('href'));
+    
+            link.classList.toggle('active', isActive);
+    
+            if (isActive) {
+              currentActiveLink ? updateActiveBackground(link) : moveActiveBackgroundInstantly(link);
+              foundActive = true;
+            }
+          });
+    
+          if (!foundActive) {
+            activeBackground.style.transform = 'translateY(0)';
+            activeBackground.style.height = '0px';
+          }
+        };
+    
+        const lastActiveLinkId = getCookie('lastActiveLink');
+        if (lastActiveLinkId) {
+          const lastActiveLink = document.getElementById(lastActiveLinkId);
+          if (lastActiveLink) {
+            lastActiveLink.classList.add('active');
+            moveActiveBackgroundInstantly(lastActiveLink);
+          }
+        }
+    
+        const animatePageTransition = (href) => {
+          if (isAnimating) return;
+          isAnimating = true;
+          window.location.href = href;
+        };
+    
+        navLinks.forEach(link => {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const href = link.getAttribute('href');
+            updateActiveLink(href);
+            animatePageTransition(href);
           });
         });
-        </script>    
+    
+        updateActiveLink(window.location.pathname);
+        window.addEventListener('popstate', () => updateActiveLink(window.location.pathname));
+      });
+    </script>      
 
       
       <div id="colcont" class="lg:pl-56">
@@ -272,43 +261,3 @@
       <script src="/javascript/search.js"></script>
         </div>
      </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-
-
-
-
-
- 
-               
-      
