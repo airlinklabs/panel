@@ -55,7 +55,6 @@
     "cookie-parser": "^1.4.7",
     "ejs": "^3.1.10",
     "express": "^4.21.1",
-    "express-session": "^1.18.1",
-    "winston": "^3.16.0"
+    "express-session": "^1.18.1"
   }
 }
