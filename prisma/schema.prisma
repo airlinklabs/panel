@@ -17,6 +17,17 @@ model Users {
   servers Server[]
 }
 
+model Session {
+  id           String   @id @default(cuid())
+  session_id   String   @unique
+  data         String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+
+
 model Server {
   id        Int      @id @default(autoincrement())
   name      String

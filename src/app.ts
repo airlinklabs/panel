@@ -17,6 +17,7 @@ import config from './storage/config.json';
 import cookieParser from 'cookie-parser';
 import expressWs from 'express-ws';
 import { translationMiddleware } from './handlers/utils/core/translation';
+import PrismaSessionStore from './handlers/sessionStore';
 
 loadEnv();
 
@@ -35,11 +36,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+// Load session with Prisma store
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'default_secret',
     resave: false,
     saveUninitialized: true,
+    store: new PrismaSessionStore(),
   }),
 );
 
