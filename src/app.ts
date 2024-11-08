@@ -63,7 +63,7 @@ loadModules(app, airlinkVersion)
     });
   })
   .catch((err) => {
-    logger.error('Failed to load modules:', err);
+    logger.error('Failed to load modules: ' + err);
   });
 
 export default app;
