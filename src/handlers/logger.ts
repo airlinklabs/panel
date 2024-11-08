@@ -32,11 +32,36 @@ const colors = {
 };
 
 const logLevels = {
-  error: { color: colors.red, bgColor: colors.bgRed, icon: '✖', label: 'ERROR' },
-  warn: { color: colors.yellow, bgColor: colors.bgYellow, icon: '⚠', label: 'WARN' },
-  info: { color: colors.blue, bgColor: colors.bgBlue, icon: 'ℹ', label: 'INFO' },
-  success: { color: colors.green, bgColor: colors.bgGreen, icon: '✔', label: 'SUCCESS' },
-  debug: { color: colors.magenta, bgColor: colors.bgMagenta, icon: '⚙', label: 'DEBUG' },
+  error: {
+    color: colors.red,
+    bgColor: colors.bgRed,
+    icon: '✖',
+    label: 'ERROR',
+  },
+  warn: {
+    color: colors.yellow,
+    bgColor: colors.bgYellow,
+    icon: '⚠',
+    label: 'WARN',
+  },
+  info: {
+    color: colors.blue,
+    bgColor: colors.bgBlue,
+    icon: 'ℹ',
+    label: 'INFO',
+  },
+  success: {
+    color: colors.green,
+    bgColor: colors.bgGreen,
+    icon: '✔',
+    label: 'SUCCESS',
+  },
+  debug: {
+    color: colors.magenta,
+    bgColor: colors.bgMagenta,
+    icon: '⚙',
+    label: 'DEBUG',
+  },
 };
 
 const logsDir = path.join(process.cwd(), 'logs');
@@ -56,18 +81,24 @@ class Logger {
     return now.toISOString().replace('T', ' ').split('.')[0];
   }
 
-  private formatMessage(level: keyof typeof logLevels, message: string): string {
+  private formatMessage(
+    level: keyof typeof logLevels,
+    message: string,
+  ): string {
     const { color, bgColor, icon, label } = logLevels[level];
     const timestamp = this.getTimestamp();
     const consoleOutput = `${colors.gray}${timestamp}${colors.reset} ${color}${icon} ${bgColor}${colors.bright}${label}${colors.reset} ${color}${message}${colors.reset}`;
     const fileOutput = `[${timestamp}] ${label}: ${message}\n`;
-    const logFile = path.join(logsDir, level === 'error' ? 'error.log' : 'combined.log');
+    const logFile = path.join(
+      logsDir,
+      level === 'error' ? 'error.log' : 'combined.log',
+    );
     try {
       fs.appendFileSync(logFile, fileOutput);
     } catch (err) {
       this.originalConsoleLog(`Failed to write to log file: ${err}`);
     }
-    
+
     return consoleOutput;
   }
 
@@ -99,9 +130,11 @@ class Logger {
   }
 
   log(...args: any[]): void {
-    const message = args.map(arg => 
-      typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-    ).join(' ');
+    const message = args
+      .map((arg) =>
+        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg),
+      )
+      .join(' ');
     this.info(message);
   }
 }

@@ -143,50 +143,61 @@ const accountModule: Module = {
       },
     );
 
-    router.post('/change-password', isAuthenticated(), async (req: Request, res: Response, next: NextFunction) => {
-      const { currentPassword, newPassword } = req.body;
-  
-      if (!currentPassword || !newPassword) {
-          res.status(400).send('Current and new password parameters are required.');
+    router.post(
+      '/change-password',
+      isAuthenticated(),
+      async (req: Request, res: Response, next: NextFunction) => {
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+          res
+            .status(400)
+            .send('Current and new password parameters are required.');
           return;
-      }
-  
-      try {
+        }
+
+        try {
           const userId = req.session?.user?.id;
           if (!userId) {
-              res.redirect('/login');
-              return;
+            res.redirect('/login');
+            return;
           }
-  
-          const currentUser = await prisma.users.findUnique({ where: { id: userId } });
+
+          const currentUser = await prisma.users.findUnique({
+            where: { id: userId },
+          });
           if (!currentUser) {
-              res.status(404).send('User not found.');
-              return;
+            res.status(404).send('User not found.');
+            return;
           }
-  
-          const passwordMatch = await bcrypt.compare(currentPassword, currentUser.password);
+
+          const passwordMatch = await bcrypt.compare(
+            currentPassword,
+            currentUser.password,
+          );
           if (!passwordMatch) {
-              res.status(401).send('Current password is incorrect.');
-              return;
+            res.status(401).send('Current password is incorrect.');
+            return;
           }
-  
+
           const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-  
+
           await prisma.users.update({
-              where: { id: userId },
-              data: { password: hashedNewPassword },
+            where: { id: userId },
+            data: { password: hashedNewPassword },
           });
-          
+
           req.session.destroy(async (err) => {
-              if (err) next(err);
+            if (err) next(err);
           });
-  
+
           res.status(200).redirect('/login?err=UpdatedCredentials');
-      } catch (error) {
+        } catch (error) {
           console.error('Error changing password:', error);
           res.status(500).send('Internal Server Error');
-      }
-  });
+        }
+      },
+    );
 
     router.get(
       '/validate-password',
