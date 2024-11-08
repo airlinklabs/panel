@@ -15,13 +15,18 @@ import { loadModules } from './handlers/modulesLoader';
 import logger from './handlers/logger';
 import config from './storage/config.json';
 import cookieParser from 'cookie-parser';
+import expressWs from 'express-ws';
 import { translationMiddleware } from './handlers/utils/core/translation';
+
 loadEnv();
 
 const app = express();
 const port = process.env.PORT || 3000;
 const name = process.env.NAME || 'AirLink';
 const airlinkVersion = config.meta.version;
+
+// Load websocket
+expressWs(app);
 
 // Load static files
 app.use(express.static(path.join(__dirname, 'public')));
