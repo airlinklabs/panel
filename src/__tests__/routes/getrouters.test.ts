@@ -22,6 +22,13 @@ describe('GET /register', () => {
   });
 });
 
+describe('GET /account', () => {
+  it('should respond with a 200 status code', async () => {
+    const response = await request(app).get('/');
+    expect(response.status).toBe(200);
+  });
+});
+
 describe('GET /logout', () => {
   it('should respond with a 200 status code', async () => {
     const response = await request(app).get('/');
