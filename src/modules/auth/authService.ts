@@ -68,9 +68,11 @@ const authServiceModule: Module = {
             isAdmin: result.user.isAdmin,
             username: result.user.username!,
           };
-          return res.redirect('/dashboard');
+          res.redirect('/dashboard');
+          return;
         }
-        return res.redirect(`/login?err=${result.error}`);
+        res.redirect(`/login?err=${result.error}`);
+        return;
       } catch (error) {
         console.error('Login error:', error);
         res.status(500).send('Server error. Please try again later.');
@@ -81,7 +83,8 @@ const authServiceModule: Module = {
       const { email, username, password } = req.body;
 
       if (!email || !username || !password) {
-        return res.redirect('/register?err=missing_credentials');
+        res.redirect('/register?err=missing_credentials');
+        return;
       }
 
       try {
@@ -90,15 +93,18 @@ const authServiceModule: Module = {
         });
 
         if (existingUser) {
-          return res.redirect('/register?err=user_already_exists');
+          res.redirect('/register?err=user_already_exists');
+          return;
         }
 
         if (!email.includes('@') || !email.includes('.')) {
-          return res.redirect('/register?err=invalid_email');
+          res.redirect('/register?err=invalid_email');
+          return;
         }
 
         if (!username.match(/^[a-zA-Z0-9]+$/)) {
-          return res.redirect('/register?err=invalid_username');
+          res.redirect('/register?err=invalid_username');
+          return;
         }
 
         await prisma.users.create({

@@ -108,7 +108,7 @@ const adminModule: Module = {
     router.post(
       '/admin/nodes/create',
       isAuthenticated(true),
-      async (req: Request, res: Response): Promise<void> => {
+      async (req: Request, res: Response) => {
         const { name, ram, cpu, disk, address, port } = req.body;
 
         const userId = req.session?.user?.id;
@@ -118,29 +118,27 @@ const adminModule: Module = {
 
         if (!name || typeof name !== 'string') {
           res.status(400).json({ message: 'Name must be a string.' });
-          return Promise.resolve();
+          return;
         } else if (name.length < 3 || name.length > 50) {
-          res
-            .status(400)
-            .json({
-              message: 'Name must be between 3 and 50 characters long.',
-            });
-          return Promise.resolve();
+          res.status(400).json({
+            message: 'Name must be between 3 and 50 characters long.',
+          });
+          return;
         }
 
         if (!ram || isNaN(parseInt(ram)) || parseInt(ram) <= 0) {
           res.status(400).json({ message: 'RAM must be a positive number.' });
-          return Promise.resolve();
+          return;
         }
 
         if (!cpu || isNaN(parseInt(cpu)) || parseInt(cpu) <= 0) {
           res.status(400).json({ message: 'CPU must be a positive number.' });
-          return Promise.resolve();
+          return;
         }
 
         if (!disk || isNaN(parseInt(disk)) || parseInt(disk) <= 0) {
           res.status(400).json({ message: 'Disk must be a positive number.' });
-          return Promise.resolve();
+          return;
         }
 
         const addressRegex =
@@ -150,12 +148,10 @@ const adminModule: Module = {
           typeof address !== 'string' ||
           !addressRegex.test(address)
         ) {
-          res
-            .status(400)
-            .json({
-              message: 'Address must be a valid IPv4, domain, or localhost.',
-            });
-          return Promise.resolve();
+          res.status(400).json({
+            message: 'Address must be a valid IPv4, domain, or localhost.',
+          });
+          return;
         }
 
         if (
@@ -167,14 +163,14 @@ const adminModule: Module = {
           res
             .status(400)
             .json({ message: 'Port must be a number between 1025 and 65535.' });
-          return Promise.resolve();
+          return;
         }
 
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(403).json({ message: 'Unauthorized access.' });
-            return Promise.resolve();
+            return;
           }
 
           const key = generateApiKey(32);
@@ -198,11 +194,11 @@ const adminModule: Module = {
           });
 
           res.status(201).json({ message: 'Node created successfully.', node });
-          return Promise.resolve();
+          return;
         } catch (error) {
           console.error('Error when creating the node:', error);
           res.status(500).json({ message: 'Error when creating the node.' });
-          return Promise.resolve();
+          return;
         }
       },
     );

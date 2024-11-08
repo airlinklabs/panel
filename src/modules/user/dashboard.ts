@@ -30,14 +30,16 @@ const dashboardModule: Module = {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
         if (!userId) {
-          return res.redirect('/login');
+          res.redirect('/login');
+          return;
         }
 
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             errorMessage.message = 'User not found.';
-            return res.render('user/dashboard', { errorMessage, user, req });
+            res.render('user/dashboard', { errorMessage, user, req });
+            return;
           }
 
           res.render('user/dashboard', {
