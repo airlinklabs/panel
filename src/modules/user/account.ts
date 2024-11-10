@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { getUser } from '../../handlers/utils/user/user';
 import bcrypt from 'bcrypt';
+import logger from '../../handlers/logger';
 
 const prisma = new PrismaClient();
 
@@ -51,7 +52,7 @@ const accountModule: Module = {
             logo: '',
           });
         } catch (error) {
-          console.error('Error fetching user:', error);
+          logger.error('Error fetching user:', error);
           errorMessage.message = 'Error fetching user data.';
           res.render('user/account', {
             errorMessage,
@@ -107,7 +108,7 @@ const accountModule: Module = {
             res.status(200).json({ success: true, username: newUsername });
           });
         } catch (error) {
-          console.error('Error updating username:', error);
+          logger.error('Error updating username:', error);
           res.status(500).send('Internal Server Error');
         }
       },
@@ -136,7 +137,7 @@ const accountModule: Module = {
           res.status(200).json({ exists: false });
           return;
         } catch (error) {
-          console.error('Error checking username:', error);
+          logger.error('Error checking username:', error);
           res.status(500).json({ message: 'Error checking username.' });
           return;
         }
@@ -193,7 +194,7 @@ const accountModule: Module = {
 
           res.status(200).redirect('/login?err=UpdatedCredentials');
         } catch (error) {
-          console.error('Error changing password:', error);
+          logger.error('Error changing password:', error);
           res.status(500).send('Internal Server Error');
         }
       },
@@ -237,7 +238,7 @@ const accountModule: Module = {
               .json({ message: 'User not found or password not available.' });
           }
         } catch (error) {
-          console.error('Error validating password:', error);
+          logger.error('Error validating password:', error);
           res.status(500).json({ message: 'Internal Server Error' });
         }
       },

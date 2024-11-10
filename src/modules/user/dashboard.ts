@@ -3,6 +3,7 @@ import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { getUser } from '../../handlers/utils/user/user';
+import logger from '../../handlers/logger';
 
 const prisma = new PrismaClient();
 
@@ -50,7 +51,7 @@ const dashboardModule: Module = {
             logo: '',
           });
         } catch (error) {
-          console.error('Error fetching user:', error);
+          logger.error('Error fetching user:', error);
           errorMessage.message = 'Error fetching user data.';
           res.render('user/dashboard', {
             errorMessage,

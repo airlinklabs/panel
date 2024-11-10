@@ -102,7 +102,7 @@ class Logger {
     return consoleOutput;
   }
 
-  error(message: any): void {
+  error(message: any, error: unknown): void {
     const formattedMessage = this.formatMessage('error', String(message));
     this.originalConsoleLog(formattedMessage);
   }

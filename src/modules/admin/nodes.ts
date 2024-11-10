@@ -3,6 +3,7 @@ import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
+import logger from '../../handlers/logger';
 
 const prisma = new PrismaClient();
 
@@ -28,7 +29,7 @@ async function listNodes(res: Response) {
 
     return nodesWithStatus;
   } catch (error) {
-    console.error('Error fetching nodes:', error);
+    logger.error('Error fetching nodes:', error);
     res.status(500).json({ message: 'Error fetching nodes.' });
   }
 }
@@ -65,7 +66,7 @@ const adminModule: Module = {
 
           res.render('admin/nodes/nodes', { user, req, logo: '', nodes });
         } catch (error) {
-          console.error('Error fetching user:', error);
+          logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
       },
@@ -90,7 +91,7 @@ const adminModule: Module = {
 
           res.render('admin/nodes/create', { user, req, logo: '', nodes });
         } catch (error) {
-          console.error('Error fetching user:', error);
+          logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
       },
@@ -196,7 +197,7 @@ const adminModule: Module = {
           res.status(201).json({ message: 'Node created successfully.', node });
           return;
         } catch (error) {
-          console.error('Error when creating the node:', error);
+          logger.error('Error when creating the node:', error);
           res.status(500).json({ message: 'Error when creating the node.' });
           return;
         }

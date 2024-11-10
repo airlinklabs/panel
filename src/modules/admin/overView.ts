@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import { getUser } from '../../handlers/utils/user/user';
+import logger from '../../handlers/logger';
 
 const prisma = new PrismaClient();
 
@@ -54,7 +54,7 @@ const adminModule: Module = {
             req,
           });
         } catch (error) {
-          console.error('Error fetching user:', error);
+          logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
       },

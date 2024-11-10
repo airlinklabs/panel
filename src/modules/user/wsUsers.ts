@@ -2,6 +2,7 @@ import { Router, Request } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
 import { WebSocket } from 'ws';
+import logger from '../../handlers/logger';
 
 export let onlineUsers: Set<string> = new Set();
 export let userTimeouts: Map<string, NodeJS.Timeout> = new Map();
@@ -59,7 +60,7 @@ const wsUsersModule: Module = {
         });
 
       } catch (error) {
-        console.error('Error fetching user:', error);
+        logger.error('Error fetching user:', error);
         ws.close();
       }
     });

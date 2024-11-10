@@ -3,6 +3,7 @@ import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { onlineUsers } from '../user/wsUsers';
+import logger from '../../handlers/logger';
 
 const prisma = new PrismaClient();
 
@@ -12,7 +13,7 @@ async function listUsers(res: Response) {
 
     return users;
   } catch (error) {
-    console.error('Error fetching users:', error);
+    logger.error('Error fetching users:', error);
     res.status(500).json({ message: 'Error fetching users.' });
   }
 }
@@ -49,7 +50,7 @@ const adminModule: Module = {
           
           res.render('admin/users/users', { user, req, logo: '', users, onlineUsers });
         } catch (error) {
-          console.error('Error fetching user:', error);
+          logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
       },

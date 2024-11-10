@@ -10,6 +10,7 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import logger from './logger';
 
 export const loadModules = async (
   app: express.Express,
@@ -35,20 +36,20 @@ export const loadModules = async (
         const { info, router } = module;
 
         if (info.version === airlinkVersion) {
-          console.log(`Loading module: ${info.name} (v${info.moduleVersion})`);
+          logger.log(`Loading module: ${info.name} (v${info.moduleVersion})`);
           app.use(router());
         } else {
-          console.warn(
+          logger.warn(
             `Skipping ${info.name}: incompatible with AirLink version ${airlinkVersion}`,
           );
         }
       } else {
-        console.warn(
+        logger.warn(
           `Module ${file} is missing required exports (info and router).`,
         );
       }
     } catch (error) {
-      console.error(`Failed to load module ${file}:`, error);
+      logger.error(`Failed to load module ${file}:`, error);
     }
   }
 };

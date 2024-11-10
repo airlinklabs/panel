@@ -29,3 +29,16 @@ Airlink is a simple to use Game server managment panel
    ```bash
    npm run start
    ```
+
+## Running with pm2
+
+1. Start the application using pm2:
+   ```bash
+   pm2 start npm --name "panel" -- run start
+   ```
+
+2. (Optional) Set up pm2 to auto-start on server reboot:
+   ```bash
+   pm2 save
+   pm2 startup
+   ```

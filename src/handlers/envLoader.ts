@@ -10,6 +10,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import logger from './logger';
 
 export function loadEnv() {
   const envPath = path.resolve(process.cwd(), '.env');
@@ -25,6 +26,6 @@ export function loadEnv() {
       }
     });
   } catch (error) {
-    console.error(`Error loading .env file: ${(error as Error).message}`);
+    logger.error(`Error loading .env file:`, error);
   }
 }

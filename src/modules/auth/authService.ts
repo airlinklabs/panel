@@ -3,6 +3,7 @@ import session from 'express-session';
 import { PrismaClient } from '@prisma/client';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
+import logger from '../../handlers/logger';
 
 const prisma = new PrismaClient();
 
@@ -45,7 +46,7 @@ const authServiceModule: Module = {
           ? { success: true, user }
           : { success: false, error: 'incorrect_password' };
       } catch (error) {
-        console.error('Database error:', error);
+        logger.error('Database error:', error);
         return { success: false, error: 'database_error' };
       }
     };
@@ -74,7 +75,7 @@ const authServiceModule: Module = {
         res.redirect(`/login?err=${result.error}`);
         return;
       } catch (error) {
-        console.error('Login error:', error);
+        logger.error('Login error:', error);
         res.status(500).send('Server error. Please try again later.');
       }
     });
@@ -116,7 +117,7 @@ const authServiceModule: Module = {
         });
         res.redirect('/login');
       } catch (error) {
-        console.error('Database error:', error);
+        logger.error('Database error:', error);
         res.status(500).send('Server error. Please try again later.');
       }
     });
