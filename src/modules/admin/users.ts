@@ -37,7 +37,8 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         if (!userId) {
-          return res.redirect('/login');
+          res.redirect('/login');
+          return;
         }
 
         try {
@@ -47,10 +48,68 @@ const adminModule: Module = {
           }
 
           const users = await listUsers(res);
-          
-          res.render('admin/users/users', { user, req, logo: '', users, onlineUsers });
+
+          res.render('admin/users/users', {
+            user,
+            req,
+            logo: '',
+            users,
+            onlineUsers,
+          });
         } catch (error) {
           logger.error('Error fetching user:', error);
+          return res.redirect('/login');
+        }
+      },
+    );
+
+    router.get(
+      '/admin/users/create',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        if (!userId) {
+          res.redirect('/login');
+          return;
+        }
+
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            return res.redirect('/login');
+          }
+
+          res.render('admin/users/create', { user, req, logo: '' });
+        } catch (error) {
+          logger.error('Error fetching user:', error);
+          return res.redirect('/login');
+        }
+      },
+    );
+
+    router.post(
+      '/admin/create-user',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        const { email, username, password, isAdmin } = req.body;
+        if (!email || !username || !password) {
+          res.redirect('/login');
+          return;
+        }
+
+        try {
+          await prisma.users.create({
+            data: {
+              email,
+              username,
+              password,
+              isAdmin,
+            },
+          });
+
+          return res.redirect('/admin/users');
+        } catch (error) {
+          logger.error('Error creating user:', error);
           return res.redirect('/login');
         }
       },

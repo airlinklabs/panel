@@ -50,7 +50,6 @@ async function build() {
     console.log('Compiling TypeScript...');
     execSync('tsc', { stdio: 'inherit' });
 
-
     console.log('Building Tailwind CSS...');
     execSync(
       'tailwindcss build src/public/styles.css -c tailwind.config.js -o dist/public/styles.css',

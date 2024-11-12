@@ -1,5 +1,5 @@
 # panel
-Airlink is a simple to use Game server managment panel
+Airlink is a simple to use Game server management panel
 
 ## Installation
 

@@ -55,10 +55,9 @@ const wsUsersModule: Module = {
             onlineUsers.delete(username);
             userTimeouts.delete(username);
           }, 1000);
-          
+
           userTimeouts.set(username, timeout);
         });
-
       } catch (error) {
         logger.error('Error fetching user:', error);
         ws.close();

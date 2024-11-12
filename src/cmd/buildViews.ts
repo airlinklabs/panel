@@ -7,7 +7,11 @@ const viewsDest = join(__dirname, '../..', 'dist', 'views');
 
 const buildViews = () => {
   console.log('Copying views...');
-  copySync(viewsSrc, viewsDest, { overwrite: true, errorOnExist: false, preserveTimestamps: true });
+  copySync(viewsSrc, viewsDest, {
+    overwrite: true,
+    errorOnExist: false,
+    preserveTimestamps: true,
+  });
   console.log('Views copied successfully.');
 };
 

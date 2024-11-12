@@ -26,8 +26,6 @@ model Session {
   updatedAt    DateTime @updatedAt
 }
 
-
-
 model Server {
   id        Int      @id @default(autoincrement())
   name      String

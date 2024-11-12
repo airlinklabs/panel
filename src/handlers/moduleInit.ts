@@ -7,7 +7,6 @@
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
  */
 
-
 import { Router } from 'express';
 
 interface ModuleInfo {
