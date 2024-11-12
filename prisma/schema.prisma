@@ -8,11 +8,11 @@ datasource db {
 }
 
 model Users {
-  id      Int      @id @default(autoincrement())
-  email   String   @unique
-  username    String?
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  username String?
   password String
-  isAdmin Boolean  @default(false)
+  isAdmin  Boolean  @default(false)
   description String? @default("No About Me") 
   servers Server[]
 }

@@ -35,6 +35,8 @@
   "username": "Username",
   "checking": "Checking...",
   "updateUsername": "Update Username",
+  "password": "Password",
+  "admin": "Admin",
   "currentPassword": "Current Password",
   "newPassword": "New Password",
   "update_password": "Update Password",

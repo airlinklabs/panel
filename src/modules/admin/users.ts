@@ -88,33 +88,51 @@ const adminModule: Module = {
     );
 
     router.post(
-      '/admin/create-user',
+      '/admin/users/create-user',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const { email, username, password, isAdmin } = req.body;
+        let { email, username, password, isAdmin } = req.body;
+    
         if (!email || !username || !password) {
-          res.redirect('/login');
+          res.status(400).json({ message: 'Missing required fields: email, username, or password.' });
           return;
         }
-
+    
+        isAdmin = isAdmin === 'true';
+    
         try {
-          await prisma.users.create({
-            data: {
-              email,
-              username,
-              password,
-              isAdmin,
+          const existingUser = await prisma.users.findFirst({
+            where: {
+              OR: [{ email }, { username }],
             },
           });
+    
+          if (existingUser) {
+            res.status(400).json({ message: 'Email or username already exists.' });
+            return;
+          }
 
-          return res.redirect('/admin/users');
+          if (!existingUser) {
+            await prisma.users.create({
+              data: {
+                email,
+                username,
+                password,
+                isAdmin,
+              },
+            });
+          }
+    
+          res.redirect('/admin/users');
+          return;
         } catch (error) {
           logger.error('Error creating user:', error);
-          return res.redirect('/login');
+          res.status(500).json({ message: 'Error creating user. Please try again later.' });
+          return;
         }
-      },
+      }
     );
-
+    
     return router;
   },
 };
