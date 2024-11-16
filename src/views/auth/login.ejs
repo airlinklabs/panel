@@ -1,139 +1,80 @@
 <%- include('../components/header', { title: 'Login'}) %>
-<!-- CARD -->
-<div
-  class="bg-black/20 border-2 border-neutral-200/20 rounded-2xl shadow-lg transition-transform duration-300 hover:scale-[1.02] h-[36rem] w-[72rem] grid grid-cols-2"
->
-  <!--INSERT FORM CARD HERE!-->
-  <div
-    id="auth-option-form-div"
-    class="grid justify-items-center items-center grid-rows-[3rem_max-content_max-content_1fr_max-content] gap-y-2 m-8"
-  >
-    <!-- User Icon -->
-    <svg
-      class="w-12 h-12 text-neutral-400"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="1.5"
-        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-      ></path>
-    </svg>
-    <!-- Text -->
-    <div class="text-center mb-3 mt-3">
-      <h2 class="text-white text-2xl font-semibold">Sign In</h2>
-      <p class="text-neutral-400 mt-2">Access your account</p>
-    </div>
-
-    <!-- Form -->
-    <form id="login-form" class="space-y-6 w-80" action="/login" method="POST">
+<div class="min-h-full flex">
+  <div class="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24 border-r border-neutral-950/20">
+    <div class="mx-auto w-full max-w-sm lg:w-96">
       <div>
-        <label for="email" class="block text-sm font-medium text-neutral-400">
-          Username or Email
-        </label>
-        <div class="mt-2">
-          <input
-            name="identifier"
-            placeholder="your@address.com"
-            id="username"
-            autocomplete="username"
-            required
-            class="appearance-none block w-full px-3 py-2 bg-white/10 border border-neutral-800/10 rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm"
-          />
-        </div>
-      </div>
-      <div class="space-y-1">
-        <label
-          for="password"
-          class="block text-sm font-medium text-neutral-400"
-        >
-          Password
-        </label>
-        <div class="mt-2">
-          <input
-            id="password"
-            name="password"
-            placeholder="********"
-            type="password"
-            autocomplete="current-password"
-            required
-            class="appearance-none block w-full px-3 py-2 bg-white/10 border border-neutral-800/10 rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm"
-          />
-        </div>
-      </div>
-      <div class="flex items-center justify-between">
-        <div class="flex items-center">
-          <input
-            id="remember-me"
-            name="remember-me"
-            type="checkbox"
-            class="h-4 w-4 text-neutral-600 focus:ring-neutral-500 border-neutral-800/10 bg-neutral-800/20 dark:border-white/10 dark:bg-white/5 rounded"
-          />
-          <label for="remember-me" class="ml-2 block text-sm text-neutral-400">
-            Remember me
-          </label>
-        </div>
-        <div class="text-sm">
-          <a
-            href="/auth/reset-password"
-            class="font-normal text-neutral-500 hover:text-white transition"
-            >Forgot your password?</a
-          >
-        </div>
+        <% if (logo == true) { %><img class="h-12 w-auto rounded-xl" src="../assets/logo.png"> <% } %>
+        <h2 class="<% if (logo == true) { %>mt-6<% } %> text-3xl font-medium text-neutral-800 dark:text-white">Sign in to <%= name %></h2>
+        <p class="mt-2 text-sm font-normal text-neutral-500">
+          Please enter your account credentials below.
+        </p>
       </div>
 
-      <% if (req.query.err && req.query.err == "missing_credentials") { %>
-        <div class="mt-2"></div>
-        <span class="text-amber-600 pt-4 font-normal text-sm">
-          Missing credentials. Please try again.
-        </span>
-      <% } %>
-      
-      <% if (req.query.err && req.query.err == "user_not_found") { %>
-        <div class="mt-2"></div>
-        <span class="text-amber-600 pt-4 font-normal text-sm">
-          User not found. Please try again.
-        </span>
-      <% } %>
-      
-      <% if (req.query.err && req.query.err == "incorrect_password") { %>
-        <div class="mt-2"></div>
-        <span class="text-amber-600 pt-4 font-normal text-sm">
-          Incorrect password. Please try again.
-        </span>
-      <% } %>
-      
-      <% if (req.query.err && req.query.err == "database_error") { %>
-        <div class="mt-2"></div>
-        <span class="text-amber-600 pt-4 font-normal text-sm">
-          Database error. Please try again.
-        </span>
-      <% } %>
-      
-    </form>
-    <!-- Login Button -->
-    <button type="submit" class="h-6 w-[30.375rem]">
-      <a
-        href="/login"
-        class="block p-3 bg-neutral-100 hover:bg-neutral-300 rounded-lg text-neutral-800 font-semibold text-center transition duration-200"
-      >
-        Sign in
-      </a>
-    </button>
-    <p class="text-neutral-400 text-sm">
-      You don't have an account?
-      <a href="#" class="text-blue-400 hover:underline">Create one</a>
-    </p>
+      <div class="mt-8">
+        <div class="mt-6">
+          <form id="login-form" class="space-y-6" action="/login" method="POST">
+            <div>
+              <label for="email" class="block text-sm font-medium text-neutral-400"> Username or Email </label>
+              <div class="mt-2">
+                <input name="identifier" placeholder="example" id="username" autocomplete="username" required class="appearance-none block w-full px-3 py-2 bg-white/10 border border-neutral-800/10 rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm">
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <label for="password" class="block text-sm font-medium text-neutral-400"> Password </label>
+              <div class="mt-2">
+                <input id="password" name="password" placeholder="********" type="password" autocomplete="current-password" required class="appearance-none block w-full px-3 py-2 bg-white/10 border border-neutral-800/10 rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm">
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-neutral-600 focus:ring-neutral-500 border-neutral-800/10 bg-neutral-800/20 dark:border-white/10 dark:bg-white/5 rounded">
+                <label for="remember-me" class="ml-2 block text-sm text-neutral-400"> Remember me </label>
+              </div>
+
+              <div class="text-sm">
+                <a href="/auth/reset-password" class="font-normal text-neutral-500 hover:text-white transition ">Forgot your password?</a>
+              </div>
+            </div>
+
+            <div>
+              <button type="submit" class="w-full cursor-pointer flex transition duration-350 justify-center py-2 px-4 border border-neutral-800/20 rounded-xl shadow-sm text-sm font-medium text-neutral-200 dark:text-neutral-800 bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500">Sign in</button>
+            </div>
+
+            <% if (settings.register) { %>
+            <div class="mt-6 text-sm text-neutral-500 py-[-50px]">
+              Need an account? <a href="/register" class="font-normal text-neutral-500 hover:text-white transition ">Register</a>
+            </div>
+            <% } %>
+
+            <% if (req.query.err && req.query.err == "missing_credentials") { %>
+              <div class="mt-2"></div>
+              <span class="text-amber-600 pt-4 font-normal text-sm">Missing credentials. Please try again.</span>
+            <% } %>
+
+            <% if (req.query.err && req.query.err == "user_not_found") { %>
+                <div class="mt-2"></div>
+                <span class="text-amber-600 pt-4 font-normal text-sm">User not found. Please try again.</span>
+            <% } %>
+
+            <% if (req.query.err && req.query.err == "incorrect_password") { %>
+                <div class="mt-2"></div>
+                <span class="text-amber-600 pt-4 font-normal text-sm">Incorrect password. Please try again.</span>
+            <% } %>
+
+            <% if (req.query.err && req.query.err == "database_error") { %>
+                <div class="mt-2"></div>
+                <span class="text-amber-600 pt-4 font-normal text-sm">Database error. Please try again.</span>
+            <% } %>
+
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div
-    class="w-full h-full overflow-hidden relative rounded-tr-2xl rounded-br-2xl border-neutral-200/20 border-l-2"
-  >
-    <img src='https://i.imgur.com/j9BodUY.jpeg' />
+  <div class="hidden lg:block relative w-0 flex-1">
+    <img class="absolute inset-0 h-full w-full object-cover" src="https://i.imgur.com/j9BodUY.jpeg" alt="">
   </div>
 </div>
-
 <%- include('../components/footer') %>
