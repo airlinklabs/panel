@@ -1,57 +1,112 @@
 <%- include('../components/header', { title: 'Register'}) %>
-<div class="min-h-full flex">
-  <div class="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
-    <div class="mx-auto w-full max-w-sm lg:w-96">
+<!-- CARD -->
+<div
+  class="bg-black/20 border-2 border-neutral-200/20 rounded-2xl shadow-lg transition-transform duration-300 hover:scale-[1.02] h-[36rem] w-[72rem] grid grid-cols-2"
+>
+  <!-- Form Section -->
+  <div
+    id="auth-option-form-div"
+    class="grid justify-items-center items-center grid-rows-[3rem_max-content_max-content_1fr_max-content] gap-y-2 m-8"
+  >
+    <!-- User Icon -->
+    <svg
+      class="w-12 h-12 text-neutral-400"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+      ></path>
+    </svg>
+    
+    <!-- Text -->
+    <div class="text-center mb-3 mt-3">
+      <h2 class="text-white text-2xl font-semibold">Register an account</h2>
+      <p class="text-neutral-400 mt-2">Please enter your details below.</p>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" action="/register" class="space-y-6 w-80">
+      <!-- Username -->
       <div>
-        <img class="h-12 w-auto rounded-xl" src="<%= logo %>" alt="">
-        <h2 class="mt-6 text-3xl font-medium text-white">Register an account</h2>
-        <p class="mt-2 text-sm text-neutral-500">
-          Please enter your details below.
-        </p>
-      </div>
-
-      <div class="mt-8">
-        <div class="mt-6">
-          <form method="POST" action="/register" class="space-y-6">
-            <div>
-              <label for="username" class="block text-sm font-medium text-neutral-400"> Username </label>
-              <div class="mt-1">
-                <input placeholder="example" id="username" name="username" autocomplete="username" required class="appearance-none block w-full px-3 py-2 bg-white/10 border border-transparent rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm">
-              </div>
-            </div>
-
-            <div>
-              <label for="email" class="block text-sm font-medium text-neutral-400"> Email </label>
-              <div class="mt-1">
-                <input placeholder="example@domain.com" id="email" name="email" autocomplete="email" required class="appearance-none block w-full px-3 py-2 bg-white/10 border border-transparent rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm">
-              </div>
-            </div>
-
-            <div class="space-y-1">
-              <label for="password" class="block text-sm font-medium text-neutral-400"> Password </label>
-              <div class="mt-1">
-                <input placeholder="********" id="password" name="password" type="password" autocomplete="new-password" required class="appearance-none block w-full px-3 py-2 bg-white/10 border border-transparent rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm">
-              </div>
-            </div>
-
-            <div>
-              <button type="submit" class="w-full flex transition justify-center py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-neutral-800 bg-white hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500">Register</button>
-            </div>
-            
-            <% if (req.query.err && req.query.err == "InvalidCredentials") { %>
-              <div class="mt-2"></div>
-              <span class="text-amber-600 pt-4 font-normal text-sm">Invalid credentials. Please try again.</span>
-            <% } %>
-          </form>
+        <label for="username" class="block text-sm font-medium text-neutral-400"> Username </label>
+        <div class="mt-2">
+          <input
+            placeholder="example"
+            id="username"
+            name="username"
+            autocomplete="username"
+            required
+            class="appearance-none block w-full px-3 py-2 bg-white/10 border border-neutral-800/10 rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm"
+          />
         </div>
       </div>
-      <div class="mt-6 text-sm text-neutral-500">
-        Already have an account? <a href="/login" class="font-normal text-neutral-500 hover:text-white transition ">Sign in</a>
+
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-sm font-medium text-neutral-400"> Email </label>
+        <div class="mt-2">
+          <input
+            placeholder="example@domain.com"
+            id="email"
+            name="email"
+            autocomplete="email"
+            required
+            class="appearance-none block w-full px-3 py-2 bg-white/10 border border-neutral-800/10 rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm"
+          />
+        </div>
       </div>
+
+      <!-- Password -->
+      <div>
+        <label for="password" class="block text-sm font-medium text-neutral-400"> Password </label>
+        <div class="mt-2">
+          <input
+            placeholder="********"
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="new-password"
+            required
+            class="appearance-none block w-full px-3 py-2 bg-white/10 border border-neutral-800/10 rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm"
+          />
+        </div>
+      </div>
+
+      <!-- Error Messages -->
+      <% if (req.query.err && req.query.err == "InvalidCredentials") { %>
+        <div class="mt-2"></div>
+        <span class="text-amber-600 pt-4 font-normal text-sm">Invalid credentials. Please try again.</span>
+      <% } %>
+
+      <!-- Register Button -->
+      <div>
+        <button
+          type="submit"
+          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-neutral-800 bg-white hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500"
+        >
+          Register
+        </button>
+      </div>
+    </form>
+
+    <!-- Sign In Link -->
+    <div class="mt-6 text-sm text-neutral-500">
+      Already have an account? 
+      <a href="/login" class="font-normal text-neutral-500 hover:text-white transition">
+        Sign in
+      </a>
     </div>
   </div>
-  <div class="hidden lg:block relative w-0 flex-1">
-    <img class="absolute inset-0 h-full w-full object-cover" src="https://i.imgur.com/8G5eRWX.jpeg" alt="">
+
+  <!-- Background Image -->
+  <div class="w-full h-full overflow-hidden relative rounded-tr-2xl rounded-br-2xl border-neutral-200/20 border-l-2">
+    <img src="https://i.imgur.com/8G5eRWX.jpeg" alt="" />
   </div>
 </div>
+
 <%- include('../components/footer') %>
