@@ -1,91 +1,143 @@
-<%- include('../components/header', { title: 'Register'}) %>
+<!DOCTYPE html>
+<html class="h-full" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= name %> - <%= title %></title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.fontshare.com">
+    <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,300,600,400,700&display=swap" rel="stylesheet">
+</head>
+<body style="font-family: 'General Sans'" class="bg-neutral-100 dark:bg-[#141414] h-full">
+    <div class="min-h-screen flex justify-center items-center">
+        <div class="bg-black/20 border-2 border-neutral-200/20 rounded-2xl shadow-lg transition-transform duration-300 hover:scale-[1.02] h-[36rem] w-[72rem] grid grid-cols-2 relative">
+            
+            <!-- Left Column (Form) -->
+            <div class="grid justify-items-center items-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+                <div class="mx-auto w-full max-w-sm lg:w-96">
+                    <div>
+                        <% if (logo == true) { %>
+                            <img class="h-12 w-auto rounded-xl" src="../assets/logo.png">
+                        <% } %>
+                        <h2 class="<% if (logo == true) { %>mt-6<% } %> text-3xl font-medium text-neutral-800 dark:text-white">Sign in to <%= name %></h2>
+                        <p class="mt-2 text-sm font-normal text-neutral-500">
+                            Please enter your account credentials below.
+                        </p>
+                    </div>
 
-<div class="bg-black/20 border-2 border-neutral-200/20 rounded-2xl shadow-lg transition-transform duration-300 hover:scale-[1.02] h-[36rem] w-[72rem] grid grid-cols-2">
-  <!-- Left Section: Registration Form -->
-  <div id="auth-option-form-div" class="grid justify-items-center items-center grid-rows-[3rem_max-content_max-content_1fr_max-content] gap-y-2 m-8">
-    
-    <!-- Logo -->
-    <img class="h-12 w-auto rounded-xl" src="<%= logo %>" alt="Logo">
-    
-    <!-- Title & Description -->
-    <div class="text-center mb-3 mt-3">
-      <h2 class="text-white text-2xl font-semibold">Register an account</h2>
-      <p class="text-neutral-400 mt-2">Please enter your details below.</p>
+                    <div class="mt-8">
+                        <form id="login-form" class="space-y-6" action="/login" method="POST">
+                            <!-- Username/Email Input -->
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-neutral-400">Username or Email</label>
+                                <div class="mt-2">
+                                    <input name="identifier" placeholder="your@address.com" id="username" autocomplete="username" required class="appearance-none block w-full px-3 py-2 bg-white/10 border border-neutral-800/10 rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm">
+                                </div>
+                            </div>
+
+                            <!-- Password Input -->
+                            <div class="space-y-1">
+                                <label for="password" class="block text-sm font-medium text-neutral-400">Password</label>
+                                <div class="mt-2">
+                                    <input id="password" name="password" placeholder="********" type="password" autocomplete="current-password" required class="appearance-none block w-full px-3 py-2 bg-white/10 border border-neutral-800/10 rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm">
+                                </div>
+                            </div>
+
+                            <!-- Remember Me and Forgot Password -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-neutral-600 focus:ring-neutral-500 border-neutral-800/10 bg-neutral-800/20 dark:border-white/10 dark:bg-white/5 rounded">
+                                    <label for="remember-me" class="ml-2 block text-sm text-neutral-400">Remember me</label>
+                                </div>
+
+                                <div class="text-sm">
+                                    <a href="/auth/reset-password" class="font-normal text-neutral-500 hover:text-white transition">Forgot your password?</a>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div>
+                                <button type="submit" class="w-full cursor-pointer flex transition duration-350 justify-center py-2 px-4 border border-neutral-800/20 rounded-xl shadow-sm text-sm font-medium text-neutral-200 dark:text-neutral-800 bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500">Sign in</button>
+                            </div>
+
+                            <!-- Register Link -->
+                            <% if (settings.register) { %>
+                                <div class="mt-6 text-sm text-neutral-500 py-[-50px]">
+                                    Need an account? <a href="/register" class="font-normal text-neutral-500 hover:text-white transition">Register</a>
+                                </div>
+                            <% } %>
+
+                            <!-- Error Messages -->
+                            <% if (req.query.err && req.query.err == "missing_credentials") { %>
+                                <div class="mt-2"></div>
+                                <span class="text-amber-600 pt-4 font-normal text-sm">Missing credentials. Please try again.</span>
+                            <% } %>
+
+                            <% if (req.query.err && req.query.err == "user_not_found") { %>
+                                <div class="mt-2"></div>
+                                <span class="text-amber-600 pt-4 font-normal text-sm">User not found. Please try again.</span>
+                            <% } %>
+
+                            <% if (req.query.err && req.query.err == "incorrect_password") { %>
+                                <div class="mt-2"></div>
+                                <span class="text-amber-600 pt-4 font-normal text-sm">Incorrect password. Please try again.</span>
+                            <% } %>
+
+                            <% if (req.query.err && req.query.err == "database_error") { %>
+                                <div class="mt-2"></div>
+                                <span class="text-amber-600 pt-4 font-normal text-sm">Database error. Please try again.</span>
+                            <% } %>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Theme Toggle Button inside the Card (Positioned at the Top-Right Corner with Space) -->
+            <button id="theme-toggle" class="absolute top-6 right-6 w-14 h-8 flex items-center bg-gray-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500 z-50">
+                <span class="dot bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
+            </button>
+
+            <!-- Right Column (Background Image) -->
+            <div class="relative w-full h-full overflow-hidden rounded-tr-2xl rounded-br-2xl border-neutral-200/20 border-l-2">
+                <img class="absolute inset-0 h-full w-full object-cover" src="https://i.imgur.com/j9BodUY.jpeg" alt="">
+            </div>
+
+        </div>
     </div>
 
-    <!-- Form -->
-    <form method="POST" action="/register" class="space-y-6 w-80">
-      <!-- Username -->
-      <div>
-        <label for="username" class="block text-sm font-medium text-neutral-400">Username</label>
-        <div class="mt-2">
-          <input
-            id="username"
-            name="username"
-            placeholder="example"
-            autocomplete="username"
-            required
-            class="appearance-none block w-full px-3 py-2 bg-white/10 border border-neutral-800/10 rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm"
-          />
-        </div>
-      </div>
+    <script>
+        function initializeTheme() {
+            const userPreference = localStorage.getItem('theme');
+            const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-      <!-- Email -->
-      <div>
-        <label for="email" class="block text-sm font-medium text-neutral-400">Email</label>
-        <div class="mt-2">
-          <input
-            id="email"
-            name="email"
-            placeholder="example@domain.com"
-            autocomplete="email"
-            required
-            class="appearance-none block w-full px-3 py-2 bg-white/10 border border-neutral-800/10 rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm"
-          />
-        </div>
-      </div>
+            if (userPreference === 'dark' || (!userPreference && systemPreference)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            updateSwitchPosition();
+        }
 
-      <!-- Password -->
-      <div class="space-y-1">
-        <label for="password" class="block text-sm font-medium text-neutral-400">Password</label>
-        <div class="mt-2">
-          <input
-            id="password"
-            name="password"
-            type="password"
-            placeholder="********"
-            autocomplete="new-password"
-            required
-            class="appearance-none block w-full px-3 py-2 bg-white/10 border border-neutral-800/10 rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm"
-          />
-        </div>
-      </div>
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateSwitchPosition();
+        }
 
-      <!-- Submit Button -->
-      <div>
-        <button type="submit" class="w-full cursor-pointer flex transition duration-350 justify-center py-2 px-4 border border-neutral-800/20 rounded-xl shadow-sm text-sm font-medium text-neutral-200 dark:text-neutral-800 bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500">
-          Register
-        </button>
-      </div>
+        function updateSwitchPosition() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const dot = document.querySelector('#theme-toggle .dot');
+            if (isDark) {
+                dot.classList.add('translate-x-6');
+            } else {
+                dot.classList.remove('translate-x-6');
+            }
+        }
 
-      <!-- Error Message (if any) -->
-      <% if (req.query.err && req.query.err == "InvalidCredentials") { %>
-        <div class="mt-2"></div>
-        <span class="text-amber-600 pt-4 font-normal text-sm">Invalid credentials. Please try again.</span>
-      <% } %>
-    </form>
-
-    <!-- Footer Links -->
-    <p class="text-neutral-400 text-sm">
-      Already have an account? 
-      <a href="/login" class="text-blue-400 hover:underline">Sign in</a>
-    </p>
-  </div>
-
-  <!-- Right Section: Background Image -->
-  <div class="w-full h-full overflow-hidden relative rounded-tr-2xl rounded-br-2xl border-neutral-200/20 border-l-2">
-    <img src="https://i.imgur.com/8G5eRWX.jpeg" alt="Background image" class="object-cover w-full h-full" />
-  </div>
-</div>
-
+        document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+        initializeTheme();
+    </script>
 <%- include('../components/footer') %>
