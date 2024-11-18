@@ -27,5 +27,6 @@ jobs:
         node-version: 20
         cache: 'npm'
     - run: npm i
+    - run: npm run migrate-deploy
     - run: npm test
 
