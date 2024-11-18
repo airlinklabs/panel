@@ -11,16 +11,24 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      matrix: # a led
+      matrix:
         node-version: [20.x, 22.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
     - uses: actions/checkout@v3
+    
     - uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }}   # Use matrix node-version
-        cache: 'npm'                               # Cache npm dependencies
-    - run: npm install                           # Use npm install to install dependencies
-    - run: npm run migrate-deploy                # Run migration/deploy script
-    - run: npm test                              # Run tests
+        node-version: ${{ matrix.node-version }}  # Use matrix node-version
+        cache: 'npm'                              # Cache npm dependencies
+
+    - run: |
+        if [ ! -f package-lock.json ]; then
+          npm install --package-lock-only       # Create a package-lock.json if it's missing
+        fi
+
+    - run: npm install                          # Install dependencies
+
+    - run: npm run migrate-deploy               # Run migration/deploy script
+    - run: npm test                             # Run tests
