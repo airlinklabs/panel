@@ -3,3 +3,4 @@ dist/
 prisma/*
 !prisma/schema.prisma
 /package-lock.json
+/logs
