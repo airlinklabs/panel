@@ -1,3 +1,6 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
 name: Node.js CI
 
 on:
@@ -8,6 +11,7 @@ on:
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     strategy:
@@ -17,18 +21,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    
     - uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }}  # Use matrix node-version
-        cache: 'npm'                              # Cache npm dependencies
-
-    - run: |
-        if [ ! -f package-lock.json ]; then
-          npm install --package-lock-only       # Create a package-lock.json if it's missing
-        fi
-
-    - run: npm install                          # Install dependencies
-
-    - run: npm run migrate-deploy               # Run migration/deploy script
-    - run: npm test                             # Run tests
+        cache-dependency-path: workflow/package-lock.json
+        node-version: 20
+        cache: 'npm'
+    - run: npm i
+    - run: npm run migrate-deploy
+    - run: npm test
