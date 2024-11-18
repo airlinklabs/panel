@@ -2,19 +2,19 @@
   "name": "airlink-panel",
   "version": "1.0.0",
   "description": "Airlink is a simple-to-use game server management panel",
-  "main": "dist/app.js",
-  "keywords": [
-    "game server",
-    "management",
-    "panel"
-  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AirlinkLabs/panel"
+  },
   "author": "AirlinkLabs",
   "license": "MIT",
   "scripts": {
+    "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix",
+    "serve": "node dist/app.js",
+    "start": "npm run serve", 
     "build:css": "tailwindcss -i ./public/tw.conf -o ./public/styles.css",
     "watch:css": "tailwindcss -i ./public/tw.conf -o ./public/styles.css --watch",
     "build": "tsc",
-    "start": "node .",
     "start:dev": "nodemon",
     "format": "prettier --write src/",
     "migrate:dev": "npx prisma migrate dev --name init && npx prisma generate",
