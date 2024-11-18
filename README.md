@@ -1,6 +1,9 @@
 # panel
 Airlink is a simple to use Game server management panel
 
+> [!CAUTION]
+> AirLink was in development for a while and was used by a few people, please wait an release version
+
 ## Installation
 
 1. Clone the repository:
@@ -10,34 +13,46 @@ Airlink is a simple to use Game server management panel
    cd panel
    ```
 
-2. Install dependencies:
+2. Set 755 permissions on the panel directory:
    ```bash
+   sudo chown -R www-data:www-data /var/www/panel
+   sudo chmod -R 755 /var/www/panel
+   ```
+
+3. Install dependencies:
+   ```bash
+    npm install -g typescript
     npm install --production
    ```
 
-3. Configure the Prisma database and run migrations:
+4. Configure the Prisma database and run migrations:
    ```bash
    npm run migrate:deploy
    ```
 
-4. Build the application:
+5. Build the application:
    ```bash
    npm run build
    ```
 
-5. Run the application:
+6. Run the application:
    ```bash
    npm run start
    ```
 
-## Running with pm2
+## Running with pm2 (Optional)
 
-1. Start the application using pm2:
+1. Install pm2:
    ```bash
-   pm2 start npm --name "panel" -- run start
+   npm install pm2 -g
    ```
 
-2. (Optional) Set up pm2 to auto-start on server reboot:
+2. Start the application using pm2:
+   ```bash
+   pm2 start dist/app.js --name "panel"
+   ```
+
+3. Set up pm2 to auto-start on server reboot:
    ```bash
    pm2 save
    pm2 startup
