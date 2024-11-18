@@ -13,7 +13,7 @@ import session from 'express-session';
 import { loadEnv } from './handlers/envLoader';
 import { loadModules } from './handlers/modulesLoader';
 import logger from './handlers/logger';
-import config from './storage/config.json';
+import config from '../storage/config.json';
 import cookieParser from 'cookie-parser';
 import expressWs from 'express-ws';
 import { translationMiddleware } from './handlers/utils/core/translation';
@@ -30,10 +30,10 @@ const airlinkVersion = config.meta.version;
 expressWs(app);
 
 // Load static files
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Load views
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 
 // Load session with Prisma store
@@ -46,7 +46,7 @@ app.use(
   }),
 );
 
-// Load body parser
+// Load body parser^
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 

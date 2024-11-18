@@ -2,6 +2,7 @@
 module.exports = {
   content: [
     './src/**/*.{html,ejs,js,ts}',
+    './views/**/*',
   ],
   darkMode: 'class',
   theme: {
