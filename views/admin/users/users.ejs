@@ -28,19 +28,20 @@
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.totalUsers %></h2>
           <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= users.length %></p>
           <% if (users.length > 0) { %>
-          <p class="text-sm text-neutral-400 mt-2"><%= req.translations.onlineUsers %>: <%= onlineUsers.size %></p>
-          <% } else { %>
-          <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noUsersAvailable %></p>
-          <% } %>
-        </div>
-        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
-          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Server Count</h2>
-          <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= Object.values(users.length).reduce((a, b) => a + b, 0) %></p>
-          <% if (users.length > 0) { %>
             <p class="text-sm text-neutral-400 mt-2"><%= req.translations.averageUserDensity %>: <%= (Object.values(users.length).reduce((a, b) => a + b, 0) / users.length).toFixed(2) %></p>
           <% } else { %>
             <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noUsersAvailable %></p>
           <% } %>
+        </div>
+        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.activeUsers %></h2>
+          <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%=  %></p>
+          <% if (users.length > 0) { %>
+            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.onlineUsers %>: <%= onlineUsers.size %></p>
+            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.offlineUsers %>: <%= offlineUsers.size %></p>
+            <% } else { %>
+            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noUsersAvailable %></p>
+            <% } %>
         </div>
       </div>
 
@@ -106,7 +107,7 @@
                     <a href="./users/edit/<%= user.id %>">
                       <button type="button" class="rounded-xl bg-white border border-neutral-800/20 hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">Edit</button>
                     </a>
-                    <button onclick="deleteuser('<%= user.id %>')" type="button" class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Remove</button>
+                    <button onclick="deleteUser('<%= user.id %>')" type="button" class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Remove</button>
                   </div>
                 </td>
               </tr>
@@ -125,7 +126,7 @@
     }
   }
 
-  async function deleteuser(userId) {
+  async function deleteUser(userId) {
     try {
       let response = await fetch('/users/delete', {
         method: 'POST',

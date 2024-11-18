@@ -73,5 +73,9 @@
   "emailTaken": "Email is taken",
   "passwordNotMatch": "Passwords do not match",
   "passwordUpdated": "Password updated successfully!",
-  "role": "Role"
+  "role": "Role",
+  "averageUserDensity": "Average User Density",
+  "noUsersAvailable": "No users available",
+  "offlineUsers": "Offline Users",
+  "activeUsers": "Active Users"
 }
