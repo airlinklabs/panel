@@ -2,7 +2,7 @@
 Airlink is a simple to use Game server management panel
 
 > [!CAUTION]
-> AirLink was in development for a while and was used by a few people, please wait an release version
+> AirLink is still in development. Wait for Stable Release 
 
 ## Installation
 
