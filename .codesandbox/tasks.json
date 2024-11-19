@@ -1,0 +1,93 @@
+{
+  // These tasks will run in order when initializing your CodeSandbox project.
+  "setupTasks": [
+    {
+      "command": "npm run setup",
+      "name": "Install Dependencies"
+    }
+  ],
+
+  // These tasks can be run from CodeSandbox. Running one will open a log in the app.
+  "tasks": {
+    "build-ts": {
+      "name": "build-ts",
+      "command": "yarn build-ts",
+      "runAtStart": false
+    },
+    "build": {
+      "name": "build",
+      "command": "yarn build",
+      "runAtStart": false
+    },
+    "lint": {
+      "name": "lint",
+      "command": "yarn lint",
+      "runAtStart": false
+    },
+    "serve": {
+      "name": "serve",
+      "command": "yarn serve",
+      "runAtStart": false
+    },
+    "start": {
+      "name": "start",
+      "command": "npm run start:dev",
+      "runAtStart": true
+    },
+    "build-css": {
+      "name": "build-css",
+      "command": "yarn build-css",
+      "runAtStart": false
+    },
+    "start:dev": {
+      "name": "start:dev",
+      "command": "yarn start:dev",
+      "runAtStart": false
+    },
+    "format": {
+      "name": "format",
+      "command": "yarn format",
+      "runAtStart": false
+    },
+    "migrate-dev": {
+      "name": "migrate-dev",
+      "command": "yarn migrate-dev",
+      "runAtStart": false
+    },
+    "migrate-deploy": {
+      "name": "migrate-deploy",
+      "command": "yarn migrate-deploy",
+      "runAtStart": false
+    },
+    "test": {
+      "name": "test",
+      "command": "yarn test",
+      "runAtStart": false
+    },
+    "watch-test": {
+      "name": "watch-test",
+      "command": "yarn watch-test",
+      "runAtStart": false
+    },
+    "watch-ts": {
+      "name": "watch-ts",
+      "command": "yarn watch-ts",
+      "runAtStart": false
+    },
+    "watch-css": {
+      "name": "watch-css",
+      "command": "yarn watch-css",
+      "runAtStart": false
+    },
+    "watch": {
+      "name": "watch",
+      "command": "yarn watch",
+      "runAtStart": false
+    },
+    "setup": {
+      "name": "setup",
+      "command": "yarn setup",
+      "runAtStart": false
+    }
+  }
+}

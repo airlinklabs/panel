@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.evokerking.dev/json_schemas/skyport/meta_data.config.json",
   "meta": {
     "version": "1.0.0",
     "codename": "Glazzer Fridge",
