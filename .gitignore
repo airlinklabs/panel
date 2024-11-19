@@ -4,6 +4,9 @@ node_modules/
 # Build outputs
 dist/
 
+# Code sandbox
+.codesandbox/
+
 # Prisma files
 prisma/*
 !prisma/schema.prisma
