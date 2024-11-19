@@ -12,7 +12,7 @@
     "build-ts": "tsc",
     "build": "npm run build-ts && npm run lint",
     "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix",
-    "serve": "node dist/app.js",
+    "serve": "echo Running setup to script to ensure everything is setup properly && npm run setup && echo Serving now && node dist/app.js",
     "start": "npm run serve",
     "build-css": "tailwindcss -i ./public/tw.conf -o ./public/styles.css",
     "start:dev": "nodemon",

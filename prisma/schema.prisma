@@ -12,7 +12,7 @@ model Users {
   email       String   @unique
   username    String?
   password    String
-  isAdmin     Boolean  @default(true)
+  isAdmin     Boolean  @default(false)
   description String?  @default("No About Me")
   servers     Server[]
 }

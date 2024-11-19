@@ -11,82 +11,146 @@
   "tasks": {
     "build-ts": {
       "name": "build-ts",
+<<<<<<< HEAD
       "command": "yarn build-ts",
+=======
+      "command": "npm run build-ts",
+>>>>>>> ab2652c7958e0ff7c6548f048d18413891ca345c
       "runAtStart": false
     },
     "build": {
       "name": "build",
+<<<<<<< HEAD
       "command": "yarn build",
+=======
+      "command": "npm run build",
+>>>>>>> ab2652c7958e0ff7c6548f048d18413891ca345c
       "runAtStart": false
     },
     "lint": {
       "name": "lint",
+<<<<<<< HEAD
       "command": "yarn lint",
+=======
+      "command": "npm run lint",
+>>>>>>> ab2652c7958e0ff7c6548f048d18413891ca345c
       "runAtStart": false
     },
     "serve": {
       "name": "serve",
+<<<<<<< HEAD
       "command": "yarn serve",
+=======
+      "command": "npm run serve",
+>>>>>>> ab2652c7958e0ff7c6548f048d18413891ca345c
       "runAtStart": false
     },
     "start": {
       "name": "start",
       "command": "npm run start:dev",
+<<<<<<< HEAD
       "runAtStart": true
     },
     "build-css": {
       "name": "build-css",
       "command": "yarn build-css",
+=======
+      "runAtStart": false
+    },
+    "build-css": {
+      "name": "build-css",
+      "command": "npm run build-css",
+>>>>>>> ab2652c7958e0ff7c6548f048d18413891ca345c
       "runAtStart": false
     },
     "start:dev": {
       "name": "start:dev",
+<<<<<<< HEAD
       "command": "yarn start:dev",
+=======
+      "command": "npm run start:dev",
+>>>>>>> ab2652c7958e0ff7c6548f048d18413891ca345c
       "runAtStart": false
     },
     "format": {
       "name": "format",
+<<<<<<< HEAD
       "command": "yarn format",
+=======
+      "command": "npm run format",
+>>>>>>> ab2652c7958e0ff7c6548f048d18413891ca345c
       "runAtStart": false
     },
     "migrate-dev": {
       "name": "migrate-dev",
+<<<<<<< HEAD
       "command": "yarn migrate-dev",
+=======
+      "command": "npm run migrate-dev",
+>>>>>>> ab2652c7958e0ff7c6548f048d18413891ca345c
       "runAtStart": false
     },
     "migrate-deploy": {
       "name": "migrate-deploy",
+<<<<<<< HEAD
       "command": "yarn migrate-deploy",
+=======
+      "command": "npm run migrate-deploy",
+>>>>>>> ab2652c7958e0ff7c6548f048d18413891ca345c
       "runAtStart": false
     },
     "test": {
       "name": "test",
+<<<<<<< HEAD
       "command": "yarn test",
+=======
+      "command": "npm run test",
+>>>>>>> ab2652c7958e0ff7c6548f048d18413891ca345c
       "runAtStart": false
     },
     "watch-test": {
       "name": "watch-test",
+<<<<<<< HEAD
       "command": "yarn watch-test",
+=======
+      "command": "npm run watch-test",
+>>>>>>> ab2652c7958e0ff7c6548f048d18413891ca345c
       "runAtStart": false
     },
     "watch-ts": {
       "name": "watch-ts",
+<<<<<<< HEAD
       "command": "yarn watch-ts",
+=======
+      "command": "npm run watch-ts",
+>>>>>>> ab2652c7958e0ff7c6548f048d18413891ca345c
       "runAtStart": false
     },
     "watch-css": {
       "name": "watch-css",
+<<<<<<< HEAD
       "command": "yarn watch-css",
+=======
+      "command": "npm run watch-css",
+>>>>>>> ab2652c7958e0ff7c6548f048d18413891ca345c
       "runAtStart": false
     },
     "watch": {
       "name": "watch",
+<<<<<<< HEAD
       "command": "yarn watch",
+=======
+      "command": "npm run watch",
+>>>>>>> ab2652c7958e0ff7c6548f048d18413891ca345c
       "runAtStart": false
     },
     "setup": {
       "name": "setup",
+<<<<<<< HEAD
       "command": "yarn setup",
+=======
+      "command": "npm run setup",
+>>>>>>> ab2652c7958e0ff7c6548f048d18413891ca345c
       "runAtStart": false
     }
   }
