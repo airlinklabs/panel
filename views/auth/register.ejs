@@ -13,31 +13,59 @@
       <div class="mt-8">
         <div class="mt-6">
           <form method="POST" action="/register" class="space-y-6">
+            <!-- Username Field -->
             <div>
               <label for="username" class="block text-sm font-medium text-neutral-400"> Username </label>
               <div class="mt-1">
-                <input placeholder="example" id="username" name="username" autocomplete="username" required class="appearance-none block w-full px-3 py-2 bg-white/10 border border-transparent rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm">
+                <input 
+                  placeholder="example" 
+                  id="username" 
+                  name="username" 
+                  autocomplete="username" 
+                  required 
+                  class="appearance-none block w-full px-3 py-2 bg-white/10 dark:bg-neutral-800/20 border border-neutral-800/50 dark:border-neutral-600 rounded-xl placeholder-neutral-500 dark:placeholder-neutral-400 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white dark:text-neutral-800 transition sm:text-sm">
               </div>
             </div>
 
+            <!-- Email Field -->
             <div>
               <label for="email" class="block text-sm font-medium text-neutral-400"> Email </label>
               <div class="mt-1">
-                <input placeholder="example@domain.com" id="email" name="email" autocomplete="email" required class="appearance-none block w-full px-3 py-2 bg-white/10 border border-transparent rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm">
+                <input 
+                  placeholder="example@domain.com" 
+                  id="email" 
+                  name="email" 
+                  autocomplete="email" 
+                  required 
+                  class="appearance-none block w-full px-3 py-2 bg-white/10 dark:bg-neutral-800/20 border border-neutral-800/50 dark:border-neutral-600 rounded-xl placeholder-neutral-500 dark:placeholder-neutral-400 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white dark:text-neutral-800 transition sm:text-sm">
               </div>
             </div>
 
+            <!-- Password Field -->
             <div class="space-y-1">
               <label for="password" class="block text-sm font-medium text-neutral-400"> Password </label>
               <div class="mt-1">
-                <input placeholder="********" id="password" name="password" type="password" autocomplete="new-password" required class="appearance-none block w-full px-3 py-2 bg-white/10 border border-transparent rounded-xl placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white transition sm:text-sm">
+                <input 
+                  placeholder="********" 
+                  id="password" 
+                  name="password" 
+                  type="password" 
+                  autocomplete="new-password" 
+                  required 
+                  class="appearance-none block w-full px-3 py-2 bg-white/10 dark:bg-neutral-800/20 border border-neutral-800/50 dark:border-neutral-600 rounded-xl placeholder-neutral-500 dark:placeholder-neutral-400 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-white dark:text-neutral-800 transition sm:text-sm">
               </div>
             </div>
 
+            <!-- Submit Button -->
             <div>
-              <button type="submit" class="w-full cursor-pointer flex transition duration-350 justify-center py-2 px-4 border border-neutral-800/20 rounded-xl shadow-sm text-sm font-medium text-neutral-200 dark:text-neutral-800 bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500">Register</button>
+              <button 
+                type="submit" 
+                class="w-full cursor-pointer flex transition duration-350 justify-center py-2 px-4 border border-neutral-800/20 rounded-xl shadow-sm text-sm font-medium text-neutral-200 dark:text-neutral-800 bg-neutral-950 dark:bg-white hover:bg-neutral-900 dark:hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500">
+                Register
+              </button>
             </div>
-            
+
+            <!-- Error Message -->
             <% if (req.query.err && req.query.err == "InvalidCredentials") { %>
               <div class="mt-2"></div>
               <span class="text-amber-600 pt-4 font-normal text-sm">Invalid credentials. Please try again.</span>
@@ -45,13 +73,21 @@
           </form>
         </div>
       </div>
+
+      <!-- Sign In Link -->
       <div class="mt-6 text-sm text-neutral-500">
-        Already have an account? <a href="/login" class="font-normal text-neutral-500 hover:text-white transition ">Sign in</a>
+        Already have an account? 
+        <a href="/login" class="font-normal text-neutral-500 hover:text-white transition">
+          Sign in
+        </a>
       </div>
     </div>
   </div>
+
+  <!-- Right Image for Desktop -->
   <div class="hidden lg:block relative w-0 flex-1">
     <img class="absolute inset-0 h-full w-full object-cover" src="https://i.imgur.com/8G5eRWX.jpeg" alt="">
   </div>
 </div>
+
 <%- include('../components/footer') %>
