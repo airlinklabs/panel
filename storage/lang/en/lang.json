@@ -74,18 +74,15 @@
   "passwordNotMatch": "Passwords do not match",
   "passwordUpdated": "Password updated successfully!",
   "role": "Role",
-<<<<<<< HEAD
   "createNewServer": "Create new server",
   "servers": "Servers",
   "serversText": "A list of all the servers set up on the Airlink panel.",
   "UUID": "UUID",
   "Owner": "Owner",
   "Node": "Node",
-  "Status": "Status"
-=======
+  "Status": "Status",
   "averageUserDensity": "Average User Density",
   "noUsersAvailable": "No users available",
   "offlineUsers": "Offline Users",
   "activeUsers": "Active Users"
->>>>>>> 00541ae44eb5e56e55f5f8847d85dbc769cbe261
 }
