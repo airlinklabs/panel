@@ -194,7 +194,7 @@ const adminModule: Module = {
             },
           });
 
-          res.status(201).json({ message: 'Node created successfully.', node });
+          res.status(200).json({ message: 'Node created successfully.', node });
           return;
         } catch (error) {
           logger.error('Error when creating the node:', error);

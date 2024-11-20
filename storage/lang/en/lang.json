@@ -73,5 +73,12 @@
   "emailTaken": "Email is taken",
   "passwordNotMatch": "Passwords do not match",
   "passwordUpdated": "Password updated successfully!",
-  "role": "Role"
+  "role": "Role",
+  "createNewServer": "Create new server",
+  "servers": "Servers",
+  "serversText": "A list of all the servers set up on the Airlink panel.",
+  "UUID": "UUID",
+  "Owner": "Owner",
+  "Node": "Node",
+  "Status": "Status"
 }

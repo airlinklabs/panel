@@ -28,10 +28,13 @@ model Session {
 
 model Server {
   id        Int      @id @default(autoincrement())
+  UUID      String   @unique @default(uuid())
   name      String
   createdAt DateTime @default(now())
+  Ports     String
+  Suspended Boolean  @default(false)
   ownerId   Int
-  owner     Users     @relation(fields: [ownerId], references: [id])
+  owner     Users    @relation(fields: [ownerId], references: [id])
   nodeId    Int
   node      Node     @relation(fields: [nodeId], references: [id])
 }
