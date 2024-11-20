@@ -16,6 +16,7 @@ import logger from './handlers/logger';
 import config from '../storage/config.json';
 import cookieParser from 'cookie-parser';
 import expressWs from 'express-ws';
+import compression from "compression";
 import { translationMiddleware } from './handlers/utils/core/translation';
 import PrismaSessionStore from './handlers/sessionStore';
 
@@ -36,6 +37,9 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 
+// Load compression
+app.use(compression());
+
 // Load session with Prisma store
 app.use(
   session({
@@ -46,7 +50,7 @@ app.use(
   }),
 );
 
-// Load body parser^
+// Load body parser
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 

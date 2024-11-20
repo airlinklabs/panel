@@ -27,12 +27,12 @@ Airlink is a simple to use Game server management panel
 
 4. Configure the Prisma database and run migrations:
    ```bash
-   npm run migrate:deploy
+   npm run migrate-deploy
    ```
 
 5. Build the application:
    ```bash
-   npm run build
+   npm run build-ts
    ```
 
 6. Run the application:

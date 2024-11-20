@@ -1,5 +1,5 @@
 {
     "watch": ["src"],
     "ext": "ts",
-    "exec": "npx tsc && npm run start" 
+    "exec": "npm run build-ts && npm run start" 
 }
