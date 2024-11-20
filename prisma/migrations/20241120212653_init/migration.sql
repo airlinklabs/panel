@@ -1,6 +1,7 @@
 /*
   Warnings:
 
+  - Added the required column `Ports` to the `Server` table without a default value. This is not possible if the table is not empty.
   - The required column `UUID` was added to the `Server` table with a prisma-level default value. This is not possible if the table is not empty. Please add this column as optional, then populate it before making it required.
 
 */
@@ -12,10 +13,12 @@ CREATE TABLE "new_Server" (
     "UUID" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "Ports" TEXT NOT NULL,
+    "Suspended" BOOLEAN NOT NULL DEFAULT false,
     "ownerId" INTEGER NOT NULL,
     "nodeId" INTEGER NOT NULL,
-    CONSTRAINT "Server_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "Users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "Server_nodeId_fkey" FOREIGN KEY ("nodeId") REFERENCES "Node" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "Server_nodeId_fkey" FOREIGN KEY ("nodeId") REFERENCES "Node" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Server_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "Users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 INSERT INTO "new_Server" ("createdAt", "id", "name", "nodeId", "ownerId") SELECT "createdAt", "id", "name", "nodeId", "ownerId" FROM "Server";
 DROP TABLE "Server";
