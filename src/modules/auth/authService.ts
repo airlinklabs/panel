@@ -57,8 +57,20 @@ const authServiceModule: Module = {
         identifier,
         password,
       }: { identifier: string; password: string } = req.body;
+
+      const identifierRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$|^[a-zA-Z0-9]{3,20}$/;
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
       if (!identifier || !password) {
         return res.redirect('/login?err=missing_credentials');
+      }
+
+      if (!identifierRegex.test(identifier)) {
+        return res.redirect('/login?err=invalid_identifier');
+      }
+
+      if (!passwordRegex.test(password)) {
+        return res.redirect('/login?err=weak_password');
       }
 
       try {
@@ -87,8 +99,27 @@ const authServiceModule: Module = {
     router.post('/register', async (req: Request, res: Response) => {
       const { email, username, password } = req.body;
 
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const usernameRegex = /^[a-zA-Z0-9]{3,20}$/;
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
       if (!email || !username || !password) {
         res.redirect('/register?err=missing_credentials');
+        return;
+      }
+
+      if (!emailRegex.test(email)) {
+        res.redirect('/register?err=invalid_email');
+        return;
+      }
+
+      if (!usernameRegex.test(username)) {
+        res.redirect('/register?err=invalid_username');
+        return;
+      }
+
+      if (!passwordRegex.test(password)) {
+        res.redirect('/register?err=weak_password');
         return;
       }
 
