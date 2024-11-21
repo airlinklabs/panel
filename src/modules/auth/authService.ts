@@ -14,6 +14,7 @@ declare module 'express-session' {
       email: string;
       isAdmin: boolean;
       username: string;
+      description: string;
     };
   }
 }
@@ -55,7 +56,7 @@ const authServiceModule: Module = {
       const {
         identifier,
         password,
-      }: { identifier?: string; password?: string } = req.body;
+      }: { identifier: string; password: string } = req.body;
       if (!identifier || !password) {
         return res.redirect('/login?err=missing_credentials');
       }
@@ -63,12 +64,15 @@ const authServiceModule: Module = {
       try {
         const result = await handleLogin(identifier, password);
         if (result.success && result.user) {
-          req.session.user = {
-            id: result.user.id,
-            email: result.user.email,
-            isAdmin: result.user.isAdmin,
-            username: result.user.username!,
-          };
+          if (result.user.username && result.user.description) {
+            req.session.user = {
+              id: result.user.id,
+              email: result.user.email,
+              isAdmin: result.user.isAdmin,
+              description: result.user.description,
+              username: result.user.username,
+            };
+          }
           res.redirect('/dashboard');
           return;
         }
@@ -98,21 +102,16 @@ const authServiceModule: Module = {
           return;
         }
 
-        if (!email.includes('@') || !email.includes('.')) {
-          res.redirect('/register?err=invalid_email');
-          return;
-        }
-
-        if (!username.match(/^[a-zA-Z0-9]+$/)) {
-          res.redirect('/register?err=invalid_username');
-          return;
-        }
+        const userCount = await prisma.users.count();
+        const isFirstUser = userCount === 0;
 
         await prisma.users.create({
           data: {
             email,
             username,
             password: await bcrypt.hash(password, 10),
+            description: 'No About Me',
+            isAdmin: isFirstUser
           },
         });
         res.redirect('/login');

@@ -11,6 +11,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import session from 'express-session';
 import { loadEnv } from './handlers/envLoader';
+import { databaseLoader } from './handlers/databaseLoader';
 import { loadModules } from './handlers/modulesLoader';
 import logger from './handlers/logger';
 import config from '../storage/config.json';
@@ -81,14 +82,16 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 // Load modules
-loadModules(app, airlinkVersion)
+databaseLoader()
+  .then(() => loadModules(app, airlinkVersion))
   .then(() => {
     app.listen(port, () => {
       logger.info(`Server is running on http://localhost:${port}`);
     });
   })
   .catch((err) => {
-    logger.error('Failed to load modules:', err);
+    logger.error('Failed to start server:', err);
+    process.exit(1);
   });
 
 export default app;

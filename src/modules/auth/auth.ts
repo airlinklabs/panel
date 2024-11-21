@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
+import logger from '../../handlers/logger';
 
 const authModule: Module = {
   info: {
@@ -22,12 +23,19 @@ const authModule: Module = {
       res.render('auth/register', { req, logo: '' });
     });
 
-    router.get('/logout', (req: Request, res: Response) => {
-      req.session.destroy((err) => {
-        if (err) () => {};
-        res.clearCookie('connect.sid');
+    router.post('/logout', (req: Request, res: Response) => {
+      if (req.session) {
+        req.session.destroy((err) => {
+          if (err) {
+            logger.error('Session destruction error', err);
+            return res.status(500).json({ error: 'logout_error' });
+          }
+          res.clearCookie('connect.sid');
+          res.redirect('/');
+        });
+      } else {
         res.redirect('/');
-      });
+      }
     });
 
     return router;
