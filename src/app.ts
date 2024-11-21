@@ -7,7 +7,7 @@
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
  */
 
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import session from 'express-session';
 import { loadEnv } from './handlers/envLoader';
@@ -45,8 +45,13 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET || 'default_secret',
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     store: new PrismaSessionStore(),
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: process.env.url ? process.env.url.startsWith('https://') : false,
+      maxAge: 24 * 60 * 60 * 1000
+    }
   }),
 );
 
@@ -65,6 +70,14 @@ app.use((req, res, next) => {
   res.locals.name = name;
   res.locals.airlinkVersion = airlinkVersion;
   next();
+});
+
+// Load error handling
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  logger.error('Unhandled error:', err);
+  res.status(500).json({ 
+    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message 
+  });
 });
 
 // Load modules
