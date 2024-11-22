@@ -1,0 +1,27 @@
+Index: prisma/schema.prisma
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>generator client {\n  provider = \"prisma-client-js\"\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Users {\n  id          Int      @id @default(autoincrement())\n  email       String   @unique\n  username    String?\n  password    String\n  isAdmin     Boolean  @default(false)\n  description String?  @default(\"No About Me\")\n  servers     Server[]\n}\n\nmodel Session {\n  id         String   @id @default(cuid())\n  session_id String   @unique\n  data       String\n  expires    DateTime\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n}\n\nmodel Server {\n  id        Int      @id @default(autoincrement())\n  name      String\n  createdAt DateTime @default(now())\n  ownerId   Int\n  owner     Users    @relation(fields: [ownerId], references: [id])\n  nodeId    Int\n  node      Node     @relation(fields: [nodeId], references: [id])\n}\n\nmodel Node {\n  id        Int      @id @default(autoincrement())\n  name      String\n  ram       Int      @default(0)\n  cpu       Int      @default(0)\n  disk      Int      @default(0)\n  address   String   @default(\"127.0.0.1\")\n  port      Int      @default(3001)\n  key       String\n  apiKey    String   @default(\"\")\n  createdAt DateTime @default(now())\n  servers   Server[]\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+--- a/prisma/schema.prisma	(revision 63d41b16a5dc3c0908955cf49b43c3d8d7eb0fc1)
++++ b/prisma/schema.prisma	(date 1732235461882)
+@@ -28,12 +28,15 @@
+ 
+ model Server {
+   id        Int      @id @default(autoincrement())
++  UUID      String   @unique @default(uuid())
+   name      String
+   createdAt DateTime @default(now())
++  Ports     String
++  Suspended Boolean  @default(false)
+   ownerId   Int
+-  owner     Users    @relation(fields: [ownerId], references: [id])
+   nodeId    Int
+   node      Node     @relation(fields: [nodeId], references: [id])
++  owner     Users    @relation(fields: [ownerId], references: [id])
+ }
+ 
+ model Node {

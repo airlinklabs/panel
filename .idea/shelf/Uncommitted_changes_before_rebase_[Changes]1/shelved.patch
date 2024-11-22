@@ -1,0 +1,77 @@
+Index: .gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Node.js modules\nnode_modules/\n\n# Build outputs\ndist/\n\n# Code sandbox\n.codesandbox/\n\n# Prisma files\nprisma/*\n!prisma/schema.prisma\n!prisma/migrations/\n\n# Lock file\n/package-lock.json\n\n# Logs\n/logs\n*.log\n\n# Coverage reports\ncoverage/\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.gitignore b/.gitignore
+--- a/.gitignore	(revision 63d41b16a5dc3c0908955cf49b43c3d8d7eb0fc1)
++++ b/.gitignore	(date 1732235195305)
+@@ -9,7 +9,7 @@
+ 
+ # Prisma files
+ prisma/*
+-!prisma/schema.prisma
++#!prisma/schema.prisma
+ !prisma/migrations/
+ 
+ # Lock file
+Index: prisma/schema.prisma
+===================================================================
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+deleted file mode 100644
+--- a/prisma/schema.prisma	(revision 63d41b16a5dc3c0908955cf49b43c3d8d7eb0fc1)
++++ /dev/null	(revision 63d41b16a5dc3c0908955cf49b43c3d8d7eb0fc1)
+@@ -1,51 +0,0 @@
+-generator client {
+-  provider = "prisma-client-js"
+-}
+-
+-datasource db {
+-  provider = "sqlite"
+-  url      = env("DATABASE_URL")
+-}
+-
+-model Users {
+-  id          Int      @id @default(autoincrement())
+-  email       String   @unique
+-  username    String?
+-  password    String
+-  isAdmin     Boolean  @default(false)
+-  description String?  @default("No About Me")
+-  servers     Server[]
+-}
+-
+-model Session {
+-  id         String   @id @default(cuid())
+-  session_id String   @unique
+-  data       String
+-  expires    DateTime
+-  createdAt  DateTime @default(now())
+-  updatedAt  DateTime @updatedAt
+-}
+-
+-model Server {
+-  id        Int      @id @default(autoincrement())
+-  name      String
+-  createdAt DateTime @default(now())
+-  ownerId   Int
+-  owner     Users    @relation(fields: [ownerId], references: [id])
+-  nodeId    Int
+-  node      Node     @relation(fields: [nodeId], references: [id])
+-}
+-
+-model Node {
+-  id        Int      @id @default(autoincrement())
+-  name      String
+-  ram       Int      @default(0)
+-  cpu       Int      @default(0)
+-  disk      Int      @default(0)
+-  address   String   @default("127.0.0.1")
+-  port      Int      @default(3001)
+-  key       String
+-  apiKey    String   @default("")
+-  createdAt DateTime @default(now())
+-  servers   Server[]
+-}
