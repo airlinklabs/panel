@@ -102,8 +102,11 @@ class Logger {
     return consoleOutput;
   }
 
-  error(message: any, error: unknown): void {
-    const formattedMessage = this.formatMessage('error', String(message));
+  error(message: string, error: unknown): void {
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : String(error);
+    const formattedMessage = this.formatMessage('error', `${message}: ${errorMessage}`);
     this.originalConsoleLog(formattedMessage);
   }
 
