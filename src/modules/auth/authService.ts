@@ -38,17 +38,17 @@ const authServiceModule: Module = {
           where: { OR: [{ email: identifier }, { username: identifier }] },
         });
 
-        if (!user) {
-          return { success: false, error: 'user_not_found' };
+        const hash = user?.password ?? '$2b$10$' + 'x'.repeat(53);
+        const isPasswordValid = await bcrypt.compare(password, hash);
+
+        if (!user || !isPasswordValid) {
+          return { success: false, error: 'invalid_credentials' };
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        return isPasswordValid
-          ? { success: true, user }
-          : { success: false, error: 'incorrect_password' };
+        return { success: true, user };
       } catch (error) {
         logger.error('Database error:', error);
-        return { success: false, error: 'database_error' };
+        return { success: false, error: 'internal_error' };
       }
     };
 
@@ -88,7 +88,7 @@ const authServiceModule: Module = {
           res.redirect('/dashboard');
           return;
         }
-        res.redirect(`/login?err=${result.error}`);
+        res.redirect('/login?err=invalid_credentials');
         return;
       } catch (error) {
         logger.error('Login error:', error);
@@ -108,18 +108,12 @@ const authServiceModule: Module = {
         return;
       }
 
-      if (!emailRegex.test(email)) {
-        res.redirect('/register?err=invalid_email');
-        return;
+      if (!emailRegex.test(email) || !passwordRegex.test(password)) {
+        return res.redirect('/register?err=invalid_input');
       }
 
       if (!usernameRegex.test(username)) {
         res.redirect('/register?err=invalid_username');
-        return;
-      }
-
-      if (!passwordRegex.test(password)) {
-        res.redirect('/register?err=weak_password');
         return;
       }
 

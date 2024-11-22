@@ -51,7 +51,8 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === 'production',
       httpOnly: process.env.url ? process.env.url.startsWith('https://') : false,
-      maxAge: 24 * 60 * 60 * 1000
+      sameSite: 'strict',
+      maxAge: 3600000 // 1 hours
     }
   }),
 );

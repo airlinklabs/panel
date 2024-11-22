@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { onlineUsers } from '../user/wsUsers';
 import logger from '../../handlers/logger';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -123,7 +124,7 @@ const adminModule: Module = {
               data: {
                 email,
                 username,
-                password,
+                password: await bcrypt.hash(password, 10),
                 isAdmin,
               },
             });
