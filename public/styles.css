@@ -1625,6 +1625,11 @@ select {
   background-color: rgb(202 138 4 / 0.1);
 }
 
+.bg-green-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(22 163 74 / var(--tw-bg-opacity, 1));
+}
+
 .bg-opacity-50 {
   --tw-bg-opacity: 0.5;
 }
@@ -1930,6 +1935,11 @@ select {
   color: rgb(250 204 21 / var(--tw-text-opacity, 1));
 }
 
+.text-green-400 {
+  --tw-text-opacity: 1;
+  color: rgb(74 222 128 / var(--tw-text-opacity, 1));
+}
+
 .placeholder-neutral-400::-moz-placeholder {
   --tw-placeholder-opacity: 1;
   color: rgb(163 163 163 / var(--tw-placeholder-opacity, 1));
@@ -2176,6 +2186,11 @@ select {
 
 .hover\:bg-white\/\[0\.05\]:hover {
   background-color: rgb(255 255 255 / 0.05);
+}
+
+.hover\:bg-green-700:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(21 128 61 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:text-amber-600:hover {
