@@ -19,11 +19,9 @@
     "format": "prettier --write src/",
     "migrate-dev": "npx prisma migrate dev --name init && npx prisma generate",
     "migrate-deploy": "npx prisma migrate deploy && npx prisma generate",
-    "test": "jest --forceExit --coverage --verbose",
-    "watch-test": "npm run test -- --watchAll",
     "watch-ts": "tsc -w",
     "watch-css": "tailwindcss -i ./public/tw.conf -o ./public/styles.css --watch",
-    "watch": "concurrently \"npm run watch-ts\" \"npm run watch-css\" \"npm run watch-test\""
+    "watch": "concurrently \"npm run watch-ts\" \"npm run watch-css\""
   },
   "dependencies": {
     "axios": "^1.7.7",
@@ -45,7 +43,6 @@
     "@types/express-session": "^1.18.0",
     "@types/express-ws": "^3.0.5",
     "@types/fs-extra": "^11.0.4",
-    "@types/jest": "^29.5.14",
     "@types/node": "^22.8.6",
     "@types/supertest": "^6.0.2",
     "@types/ws": "^8.5.13",
@@ -55,9 +52,7 @@
     "jest": "^29.7.0",
     "nodemon": "^3.1.7",
     "prettier": "^3.3.3",
-    "supertest": "^7.0.0",
     "tailwindcss": "^3.4.15",
-    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "ws": "^8.18.0"
