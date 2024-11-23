@@ -185,7 +185,7 @@ const accountModule: Module = {
             data: { password: hashedNewPassword },
           });
 
-          req.session.destroy(async (err) => {
+          req.session.destroy((err) => {
             if (err) next(err);
           });
 
