@@ -79,32 +79,29 @@ const accountModule: Module = {
         }
 
         try {
-          req.session.destroy(async (err) => {
-            if (err) {
-              next(err);
-            }
+          const userExist = await prisma.users.findFirst({
+            where: { username: currentUsername },
+          });
+          if (!userExist) {
+            res.status(404).send('Current username does not exist.');
+            return;
+          }
 
-            const userExist = await prisma.users.findFirst({
-              where: { username: currentUsername },
-            });
-            if (!userExist) {
-              res.status(404).send('Current username does not exist.');
-              return;
-            }
+          const newUsernameExist = await prisma.users.findFirst({
+            where: { username: newUsername },
+          });
+          if (newUsernameExist) {
+            res.status(409).send('New username is already taken.');
+            return;
+          }
 
-            const newUsernameExist = await prisma.users.findFirst({
-              where: { username: newUsername },
-            });
-            if (newUsernameExist) {
-              res.status(409).send('New username is already taken.');
-              return;
-            }
+          await prisma.users.updateMany({
+            data: { username: newUsername },
+            where: { username: currentUsername },
+          });
 
-            await prisma.users.updateMany({
-              data: { username: newUsername },
-              where: { username: currentUsername },
-            });
-
+          req.session.destroy((err) => {
+            if (err) next(err);
             res.status(200).json({ success: true, username: newUsername });
           });
         } catch (error) {

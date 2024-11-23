@@ -8,12 +8,12 @@ export interface User {
   email?: string;
 }
 
-export async function getUser(req: Request): Promise<User> {
-  const user: User = {
+export function getUser(req: Request) {
+  const user = {
     username: req.session?.user?.username,
     id: req.session?.user?.id,
     description: req.session?.user?.description,
-    isAdmin: req?.session?.user?.isAdmin,
+    isAdmin: req.session?.user?.isAdmin,
     email: req.session?.user?.email,
   };
   return user;
