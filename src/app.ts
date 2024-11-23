@@ -7,7 +7,7 @@
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
  */
 
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import session from 'express-session';
 import { loadEnv } from './handlers/envLoader';
@@ -75,11 +75,18 @@ app.use((req, res, next) => {
 });
 
 // Load error handling
-app.use((err: Error, req: Request, res: Response ) => {
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   logger.error('Unhandled error:', err);
-  res.status(500).json({ 
-    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message 
-  });
+  
+  if (!res.headersSent) {
+    res.status(500).json({ 
+      error: process.env.NODE_ENV === 'production' 
+        ? 'Internal server error' 
+        : err.message 
+    });
+  }
+  
+  next(err);
 });
 
 // Load modules
