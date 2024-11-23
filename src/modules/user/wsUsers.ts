@@ -4,8 +4,8 @@ import { PrismaClient } from '@prisma/client';
 import { WebSocket } from 'ws';
 import logger from '../../handlers/logger';
 
-export let onlineUsers: Set<string> = new Set();
-export let userTimeouts: Map<string, NodeJS.Timeout> = new Map();
+export const onlineUsers: Set<string> = new Set();
+export const userTimeouts: Map<string, NodeJS.Timeout> = new Map();
 
 const prisma = new PrismaClient();
 

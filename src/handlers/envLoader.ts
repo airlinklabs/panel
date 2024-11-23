@@ -25,6 +25,6 @@ export function loadEnv() {
       }
     });
   } catch (error) {
-    logger.error(`Error loading .env file:`, error);
+    logger.error('Error loading .env file:', error);
   }
 }

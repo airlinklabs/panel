@@ -3,13 +3,8 @@ import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
-import { log } from 'console';
 
 const prisma = new PrismaClient();
-
-interface ErrorMessage {
-  message?: string;
-}
 
 const adminModule: Module = {
   info: {

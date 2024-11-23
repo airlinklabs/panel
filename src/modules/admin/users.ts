@@ -92,7 +92,8 @@ const adminModule: Module = {
       '/admin/users/create-user',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        let { email, username, password, isAdmin } = req.body;
+        let isAdmin = req.body.isAdmin;
+        const { email, username, password } = req.body;
 
         if (!email || !username || !password) {
           res

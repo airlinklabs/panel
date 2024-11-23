@@ -7,7 +7,7 @@
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
  */
 
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response } from 'express';
 import path from 'path';
 import session from 'express-session';
 import { loadEnv } from './handlers/envLoader';
@@ -17,7 +17,7 @@ import logger from './handlers/logger';
 import config from '../storage/config.json';
 import cookieParser from 'cookie-parser';
 import expressWs from 'express-ws';
-import compression from "compression";
+import compression from 'compression';
 import { translationMiddleware } from './handlers/utils/core/translation';
 import PrismaSessionStore from './handlers/sessionStore';
 
@@ -75,7 +75,7 @@ app.use((req, res, next) => {
 });
 
 // Load error handling
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response ) => {
   logger.error('Unhandled error:', err);
   res.status(500).json({ 
     error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message 

@@ -1,9 +1,9 @@
+/* eslint-disable no-undef */
 const searchModal = document.getElementById('searchModal');
 const modalContent = document.querySelector('.modal-content');
 const searchInput = document.getElementById('searchInput');
 const searchResults = document.getElementById('searchResults');
 const navLinks = document.querySelectorAll('.nav-link');
-let selected = '';
 
 function filterLinks(searchTerm) {
   const [mainTerm, subTerm] = searchTerm.split(':/');

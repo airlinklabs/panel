@@ -73,6 +73,7 @@ class Logger {
   private originalConsoleLog: (...args: any[]) => void;
 
   constructor() {
+    // eslint-disable-next-line no-console
     this.originalConsoleLog = console.log;
   }
 
@@ -125,12 +126,16 @@ class Logger {
     this.originalConsoleLog(formattedMessage);
   }
 
-  debug(message: any): void {
+  debug(...args: unknown[]): void {
     if (process.env.NODE_ENV === 'development') {
-      const formattedMessage = this.formatMessage('debug', String(message));
+      const message = args
+        .map((arg) => (typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)))
+        .join(' ');
+      const formattedMessage = this.formatMessage('debug', message);
       this.originalConsoleLog(formattedMessage);
     }
   }
+  
 
   log(...args: any[]): void {
     const message = args

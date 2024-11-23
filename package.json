@@ -11,10 +11,10 @@
   "scripts": {
     "build-ts": "tsc",
     "build": "npm run build-ts && npm run lint",
-    "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix",
+    "lint": "eslint . --fix",
     "serve": "node dist/app.js",
     "start": "npm run serve",
-    "build-css": "tailwindcss -i ./public/tw.conf -o ./public/styles.css",
+    "build:css": "tailwindcss -i ./public/tw.conf -o ./public/styles.css --watch",
     "start:dev": "nodemon",
     "format": "prettier --write src/",
     "migrate-dev": "npx prisma migrate dev --name init && npx prisma generate",
@@ -34,6 +34,7 @@
     "prisma": "^5.22.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.15.0",
     "@prisma/client": "^5.22.0",
     "@tailwindcss/forms": "^0.5.9",
     "@types/bcrypt": "^5.0.2",
@@ -53,7 +54,8 @@
     "prettier": "^3.3.3",
     "tailwindcss": "^3.4.15",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.15.0",
     "ws": "^8.18.0"
   }
 }

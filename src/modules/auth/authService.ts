@@ -1,5 +1,4 @@
 import bcrypt from 'bcrypt';
-import session from 'express-session';
 import { PrismaClient } from '@prisma/client';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
