@@ -21,8 +21,14 @@ CREATE TABLE "Session" (
 -- CreateTable
 CREATE TABLE "Server" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "UUID" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "Ports" TEXT NOT NULL,
+    "Memory" INTEGER NOT NULL,
+    "Cpu" INTEGER NOT NULL,
+    "Storage" INTEGER NOT NULL,
+    "Suspended" BOOLEAN NOT NULL DEFAULT false,
     "ownerId" INTEGER NOT NULL,
     "nodeId" INTEGER NOT NULL,
     CONSTRAINT "Server_nodeId_fkey" FOREIGN KEY ("nodeId") REFERENCES "Node" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -48,3 +54,6 @@ CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Session_session_id_key" ON "Session"("session_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Server_UUID_key" ON "Server"("UUID");
