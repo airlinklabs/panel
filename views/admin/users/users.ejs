@@ -27,20 +27,19 @@
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.totalUsers %></h2>
           <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= users.length %></p>
-          <% if (users.length > 0) { %>
-            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.averageUserDensity %>: <%= (Object.values(users.length).reduce((a, b) => a + b, 0) / users.length).toFixed(2) %></p>
+          <% if (onlineUsers.size > 0) { %>
+            <p class="text-sm text-neutral-400 mt-2">Online Users: <%= onlineUsers.size %></p>
           <% } else { %>
-            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noUsersAvailable %></p>
+            <p class="text-sm text-neutral-400 mt-2">No Users Online</p>
           <% } %>
         </div>
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
-          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.activeUsers %></h2>
-          <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%=  %></p>
-          <% if (users.length > 0) { %>
-            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.onlineUsers %>: <%= onlineUsers.size %></p>
-            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.offlineUsers %>: <%= offlineUsers.size %></p>
+          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Admins</h2>
+            <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= users.filter(user => user.isAdmin).length %></p>
+            <% if (onlineUsers.size > 0) { %>
+              <p class="text-sm text-neutral-400 mt-2">Online Admins: <%= Array.from(onlineUsers).filter(username => users.some(user => user.username === username && user.isAdmin)).length %></p>
             <% } else { %>
-            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noUsersAvailable %></p>
+              <p class="text-sm text-neutral-400 mt-2">No Users Online</p>
             <% } %>
         </div>
       </div>
