@@ -26,7 +26,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/overview',
-      isAuthenticated(),
+      isAuthenticated(true),
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
@@ -61,7 +61,7 @@ const adminModule: Module = {
       },
     );
 
-    router.get('/admin/check-update', isAuthenticated(), async (req: Request, res: Response) => {
+    router.get('/admin/check-update', isAuthenticated(true), async (req: Request, res: Response) => {
       try {
         const updateInfo = await checkForUpdates();
         res.json(updateInfo);
@@ -71,7 +71,7 @@ const adminModule: Module = {
       }
     });
     
-    router.post('/admin/perform-update', isAuthenticated(), async (req: Request, res: Response) => {
+    router.post('/admin/perform-update', isAuthenticated(true), async (req: Request, res: Response) => {
       try {
         const success = await performUpdate();
         if (success) {
