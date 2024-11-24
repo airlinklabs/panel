@@ -41,7 +41,7 @@ const adminModule: Module = {
           }
 
           if (!user.isAdmin) {
-            return res.redirect('/dashboard');
+            return res.redirect('/');
           }
 
           const userCount = await prisma.users.count();

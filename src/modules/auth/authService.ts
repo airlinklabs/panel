@@ -57,19 +57,8 @@ const authServiceModule: Module = {
         password,
       }: { identifier: string; password: string } = req.body;
 
-      const identifierRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$|^[a-zA-Z0-9]{3,20}$/;
-      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-
       if (!identifier || !password) {
         return res.redirect('/login?err=missing_credentials');
-      }
-
-      if (!identifierRegex.test(identifier)) {
-        return res.redirect('/login?err=invalid_identifier');
-      }
-
-      if (!passwordRegex.test(password)) {
-        return res.redirect('/login?err=weak_password');
       }
 
       try {
@@ -84,7 +73,7 @@ const authServiceModule: Module = {
               username: result.user.username,
             };
           }
-          res.redirect('/dashboard');
+          res.redirect('/');
           return;
         }
         res.redirect('/login?err=invalid_credentials');
@@ -144,6 +133,21 @@ const authServiceModule: Module = {
         res.status(500).send('Server error. Please try again later.');
       }
     });
+
+    router.get('/logout', (req: Request, res: Response) => {
+      if (req.session) {
+        req.session.destroy((err) => {
+          if (err) {
+            logger.error('Session destruction error', err);
+            return res.status(500).json({ error: 'logout_error' });
+          }
+          res.clearCookie('connect.sid');
+          res.redirect('/');
+        });
+      } else {
+        res.redirect('/');
+      }
+    })
 
     return router;
   },

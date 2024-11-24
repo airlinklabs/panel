@@ -14,10 +14,6 @@ const coreModule: Module = {
   router: () => {
     const router = Router();
 
-    router.get('/', (req: Request, res: Response) => {
-      res.render('index', { req, logo: '' });
-    });
-
     return router;
   },
 };

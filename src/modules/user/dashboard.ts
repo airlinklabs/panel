@@ -25,7 +25,7 @@ const dashboardModule: Module = {
     const router = Router();
 
     router.get(
-      '/dashboard',
+      '/',
       isAuthenticated(),
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
@@ -43,12 +43,15 @@ const dashboardModule: Module = {
             return;
           }
 
+          const servers = await prisma.server.findMany({ where: { ownerId: user.id }, include: { node: true, owner: true } });
+
           res.render('user/dashboard', {
             errorMessage,
             user,
             req,
             name: 'AirLink',
             logo: '',
+            servers
           });
         } catch (error) {
           logger.error('Error fetching user:', error);
