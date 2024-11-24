@@ -44,7 +44,7 @@ app.use(compression());
 // Load session with Prisma store
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'default_secret',
+    secret: process.env.SESSION_SECRET || Math.random().toString(36).substring(2, 15),
     resave: false,
     saveUninitialized: false,
     store: new PrismaSessionStore(),
