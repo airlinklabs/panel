@@ -232,20 +232,27 @@
 
         <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
           <div class="relative flex flex-1 flex-col">
-             <div class="ml-14 lg:-ml-2 flex items-center w-fit mt-3.5 px-4 py-2 h-10  rounded-xl border border-neutral-700/20 dark:border-white/5  active:scale-100 duration-200 bg-transparent text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-neutral-400">
+
+            <div class="ml-14 lg:-ml-2 flex items-center w-fit mt-3.5 px-4 py-2 h-10 rounded-xl border border-neutral-700/20 dark:border-white/5 active:scale-100 duration-200 dark:hover:border-neutral-300/10 bg-transparent text-white">
+               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-neutral-400">
                    <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
-                </svg>
-                <input id="searchInput" 
-                   class="bg-transparent border-transparent ml-2 focus-visible:ring-transparent border-none ring-transparent sm:text-sm placeholder:text-zinc-500 text-neutral-700 dark:text-neutral-300 focus-visible:outline-none" 
-                   placeholder="Search" 
-                   type="search" 
-                   name="search"
-                   autocomplete="off"
-                   onclick="input.blur()"
-                   onfocus="showSearchResults()">
-             </div>
-             <div id="searchResults" class="absolute bg-white w-[12.5rem] rounded-xl shadow-lg hidden mt-20 px-2 pb-2 border border-neutral-800/20">
+               </svg>
+               <input id="searchInput" 
+                  class="bg-transparent border-transparent ml-2 focus-visible:ring-transparent border-none ring-transparent sm:text-sm placeholder:text-zinc-500 text-neutral-700 dark:text-neutral-300 focus-visible:outline-none" 
+                  placeholder="Search" 
+                  type="search" 
+                  name="search"
+                  autocomplete="off"
+                  onclick="input.blur()"
+                  onfocus="showSearchResults()">
+                  <div class="ml-2 px-1 py-0.5 text-[10px] w-[55px] font-medium text-neutral-700 dark:text-neutral-400 bg-neutral-500/20 dark:bg-neutral-800 rounded-md border border-neutral-800/20 dark:border-neutral-700
+                  bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.2)_50%,transparent_75%,transparent_100%)] 
+                  bg-[length:250%_250%,100%_100%] bg-[position:-100%_0,0_0] bg-no-repeat transition-ease-out
+                  hover:bg-[position:200%_0,0_0] hover:duration-[2s]">
+                  CTRL + K
+              </div>
+           </div>
+             <div id="searchResults" class="absolute bg-white w-[19.5rem] rounded-xl shadow-lg hidden mt-20 px-2 pb-2 border border-neutral-800/20">
              </div>
           </div>
           <script>
