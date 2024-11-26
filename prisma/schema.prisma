@@ -30,6 +30,7 @@ model Server {
   id        Int      @id @default(autoincrement())
   UUID      String   @unique @default(uuid())
   name      String
+  description String?
   createdAt DateTime @default(now())
   Ports     String
   Memory    Int
@@ -38,8 +39,21 @@ model Server {
   Suspended Boolean  @default(false)
   ownerId   Int
   nodeId    Int
+  imageId   Int
   node      Node     @relation(fields: [nodeId], references: [id])
   owner     Users    @relation(fields: [ownerId], references: [id])
+  image     Images   @relation(fields: [imageId], references: [id])
+}
+
+model Images {
+  id        Int      @id @default(autoincrement())
+  UUID      String   @unique @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  image     String
+  scripts   String?
+  variables String?
+  servers   Server[]
 }
 
 

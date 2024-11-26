@@ -52,7 +52,7 @@ app.use(
       secure: process.env.NODE_ENV === 'production',
       httpOnly: process.env.url ? process.env.url.startsWith('https://') : false,
       sameSite: 'strict',
-      maxAge: 3600000 // 1 hours
+      maxAge: 3600000 * 72 // 3 days
     }
   }),
 );

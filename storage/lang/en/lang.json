@@ -84,5 +84,8 @@
   "averageUserDensity": "Average User Density",
   "noUsersAvailable": "No users available",
   "offlineUsers": "Offline Users",
-  "activeUsers": "Active Users"
+  "activeUsers": "Active Users",
+  "description": "Description",
+  "Ports": "Ports",
+  "Image": "Image"
 }
