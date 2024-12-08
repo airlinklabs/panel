@@ -19,90 +19,118 @@ const adminModule: Module = {
   router: () => {
     const router = Router();
 
-    router.get('/admin/servers', isAuthenticated(true), async (req: Request, res: Response) => {
-      const userId = req.session?.user?.id;
-      if (!userId) {
-        return res.redirect('/login');
-      }
-
-      try {
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {
+    router.get(
+      '/admin/servers',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        if (!userId) {
           return res.redirect('/login');
         }
 
-        const servers = await prisma.server.findMany({
-          include: {
-            node: true,
-            owner: true,
-          },
-        });
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            return res.redirect('/login');
+          }
 
-        res.render('admin/servers/servers', { user, req, logo: '', servers });
-      } catch (error) {
-        logger.error('Error fetching servers:', error);
-        return res.redirect('/login');
-      }
-    });
+          const servers = await prisma.server.findMany({
+            include: {
+              node: true,
+              owner: true,
+            },
+          });
 
-    router.get('/admin/servers/create', isAuthenticated(true), async (req: Request, res: Response) => {
-      const userId = req.session?.user?.id;
-      if (!userId) {
-        return res.redirect('/login');
-      }
+          res.render('admin/servers/servers', { user, req, logo: '', servers });
+        } catch (error) {
+          logger.error('Error fetching servers:', error);
+          return res.redirect('/login');
+        }
+      },
+    );
 
-      try {
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {
+    router.get(
+      '/admin/servers/create',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        if (!userId) {
           return res.redirect('/login');
         }
 
-        const users = await prisma.users.findMany();
-        const nodes = await prisma.node.findMany();
-        const images = await prisma.images.findMany();
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            return res.redirect('/login');
+          }
 
-        res.render('admin/servers/create', { user, req, logo: '', nodes, images, users });
-      } catch (error) {
-        logger.error('Error fetching data for server creation:', error);
-        return res.redirect('/login');
-      }
-    });
+          const users = await prisma.users.findMany();
+          const nodes = await prisma.node.findMany();
+          const images = await prisma.images.findMany();
 
-    router.post('/admin/servers/create', isAuthenticated(true), async (req: Request, res: Response) => {
-      const userId = req.session?.user?.id;
-      if (!userId) {
-        return res.redirect('/login');
-      }
+          res.render('admin/servers/create', {
+            user,
+            req,
+            logo: '',
+            nodes,
+            images,
+            users,
+          });
+        } catch (error) {
+          logger.error('Error fetching data for server creation:', error);
+          return res.redirect('/login');
+        }
+      },
+    );
 
-      const { name, description, nodeId, imageId, Ports, Memory, Cpu, Storage } = req.body;
+    router.post(
+      '/admin/servers/create',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        if (!userId) {
+          return res.redirect('/login');
+        }
 
-      if (!name || !description || !nodeId || !imageId) {
-        res.status(400).send('Missing required fields');
-        return;
-      }
+        const {
+          name,
+          description,
+          nodeId,
+          imageId,
+          Ports,
+          Memory,
+          Cpu,
+          Storage,
+        } = req.body;
 
-      const Port = `[{"Port": "${Ports}", "primary": true}]`;
+        if (!name || !description || !nodeId || !imageId) {
+          res.status(400).send('Missing required fields');
+          return;
+        }
 
-      try {
-        await prisma.server.create({
-          data: {
-            name,
-            description,
-            ownerId: userId,
-            nodeId: parseInt(nodeId),
-            imageId: parseInt(imageId),
-            Ports: Port || '[{"Port": "25565:25565", "primary": true}]',
-            Memory: parseInt(Memory) || 4,
-            Cpu: parseInt(Cpu) || 2,
-            Storage: parseInt(Storage) || 20,
-          },
-        });
-        res.redirect('/admin/servers');
-      } catch (error) {
-        logger.error('Error creating server:', error);
-        res.status(500).send('Error creating server');
-      }
-    });
+        const Port = `[{"Port": "${Ports}", "primary": true}]`;
+
+        try {
+          await prisma.server.create({
+            data: {
+              name,
+              description,
+              ownerId: userId,
+              nodeId: parseInt(nodeId),
+              imageId: parseInt(imageId),
+              Ports: Port || '[{"Port": "25565:25565", "primary": true}]',
+              Memory: parseInt(Memory) || 4,
+              Cpu: parseInt(Cpu) || 2,
+              Storage: parseInt(Storage) || 20,
+            },
+          });
+          res.redirect('/admin/servers');
+        } catch (error) {
+          logger.error('Error creating server:', error);
+          res.status(500).send('Error creating server');
+        }
+      },
+    );
 
     return router;
   },

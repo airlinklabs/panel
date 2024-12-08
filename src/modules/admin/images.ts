@@ -21,63 +21,75 @@ const adminModule: Module = {
   router: () => {
     const router = Router();
 
-    router.get('/admin/images', isAuthenticated(true), async (req: Request, res: Response) => {
-      const userId = req.session?.user?.id;
-      if (!userId) {
-        return res.redirect('/login');
-      }
-
-      try {
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {
+    router.get(
+      '/admin/images',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        if (!userId) {
           return res.redirect('/login');
         }
 
-        const images = await prisma.images.findMany();
-        res.render('admin/images/images', { user, req, logo: '', images });
-      } catch (error) {
-        logger.error('Error fetching images:', error);
-        return res.redirect('/login');
-      }
-    });
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            return res.redirect('/login');
+          }
 
-    router.post('/admin/images/upload', isAuthenticated(true), async (req: Request, res: Response) => {
-      const file = req.file;
+          const images = await prisma.images.findMany();
+          res.render('admin/images/images', { user, req, logo: '', images });
+        } catch (error) {
+          logger.error('Error fetching images:', error);
+          return res.redirect('/login');
+        }
+      },
+    );
 
-      if (!file) {
-        res.status(400).send('No file uploaded.');
-        return;
-      }
+    router.post(
+      '/admin/images/upload',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        const file = req.file;
 
-      try {
-        // upload soon
+        if (!file) {
+          res.status(400).send('No file uploaded.');
+          return;
+        }
 
-        res.redirect('/admin/images?err=soon');
-      } catch (error) {
-        logger.error('Error uploading image:', error);
-        res.status(500).send('Failed to upload image.');
-      }
-    });
+        try {
+          // upload soon
 
-    router.post('/admin/images/create', isAuthenticated(true), async (req: Request, res: Response) => {
-      const { name, scripts, variables, image } = req.body;
+          res.redirect('/admin/images?err=soon');
+        } catch (error) {
+          logger.error('Error uploading image:', error);
+          res.status(500).send('Failed to upload image.');
+        }
+      },
+    );
 
-      try {
-        const newImage = await prisma.images.create({
-          data: {
-            name,
-            image,
-            scripts: scripts || null,
-            variables: variables || null,
-          },
-        }); 
+    router.post(
+      '/admin/images/create',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        const { name, scripts, variables, image } = req.body;
 
-        res.redirect('/admin/images?err=none');
-      } catch (error) {
-        logger.error('Error creating image:', error);
-        res.status(500).send('Failed to create image.');
-      }
-    });
+        try {
+          const newImage = await prisma.images.create({
+            data: {
+              name,
+              image,
+              scripts: scripts || null,
+              variables: variables || null,
+            },
+          });
+
+          res.redirect('/admin/images?err=none');
+        } catch (error) {
+          logger.error('Error creating image:', error);
+          res.status(500).send('Failed to create image.');
+        }
+      },
+    );
 
     return router;
   },

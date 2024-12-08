@@ -36,6 +36,7 @@ model Server {
   Memory    Int
   Cpu       Int
   Storage   Int
+  Variables String?
   Suspended Boolean  @default(false)
   ownerId   Int
   nodeId    Int
@@ -66,7 +67,6 @@ model Node {
   address   String   @default("127.0.0.1")
   port      Int      @default(3001)
   key       String
-  apiKey    String   @default("")
   createdAt DateTime @default(now())
   servers   Server[]
 }

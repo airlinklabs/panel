@@ -96,11 +96,9 @@ const adminModule: Module = {
         const { email, username, password } = req.body;
 
         if (!email || !username || !password) {
-          res
-            .status(400)
-            .json({
-              message: 'Missing required fields: email, username, or password.',
-            });
+          res.status(400).json({
+            message: 'Missing required fields: email, username, or password.',
+          });
           return;
         }
 

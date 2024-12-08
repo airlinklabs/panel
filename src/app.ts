@@ -23,6 +23,9 @@ import PrismaSessionStore from './handlers/sessionStore';
 
 loadEnv();
 
+// Set max listeners
+process.setMaxListeners(20);
+
 const app = express();
 const port = process.env.PORT || 3000;
 const name = process.env.NAME || 'AirLink';
@@ -44,16 +47,19 @@ app.use(compression());
 // Load session with Prisma store
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || Math.random().toString(36).substring(2, 15),
+    secret:
+      process.env.SESSION_SECRET || Math.random().toString(36).substring(2, 15),
     resave: false,
     saveUninitialized: false,
     store: new PrismaSessionStore(),
     cookie: {
       secure: process.env.NODE_ENV === 'production',
-      httpOnly: process.env.url ? process.env.url.startsWith('https://') : false,
+      httpOnly: process.env.url
+        ? process.env.url.startsWith('https://')
+        : false,
       sameSite: 'strict',
-      maxAge: 3600000 * 72 // 3 days
-    }
+      maxAge: 3600000 * 72, // 3 days
+    },
   }),
 );
 
@@ -77,29 +83,31 @@ app.use((req, res, next) => {
 // Load error handling
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   logger.error('Unhandled error:', err);
-  
+
   if (!res.headersSent) {
-    res.status(500).json({ 
-      error: process.env.NODE_ENV === 'production' 
-        ? 'Internal server error' 
-        : err.message 
+    res.status(500).json({
+      error:
+        process.env.NODE_ENV === 'production'
+          ? 'Internal server error'
+          : err.message,
     });
   }
-  
+
   next(err);
 });
 
 // Load modules
 databaseLoader()
-  .then(() => loadModules(app, airlinkVersion))
+  .then(() => {
+    return loadModules(app, airlinkVersion);
+  })
   .then(() => {
     app.listen(port, () => {
       logger.info(`Server is running on http://localhost:${port}`);
     });
   })
   .catch((err) => {
-    logger.error('Failed to start server:', err);
-    process.exit(1);
+    logger.error('Failed to load modules or database:', err);
   });
 
 export default app;

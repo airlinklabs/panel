@@ -104,10 +104,11 @@ class Logger {
   }
 
   error(message: string, error: unknown): void {
-    const errorMessage = error instanceof Error 
-      ? error.message 
-      : String(error);
-    const formattedMessage = this.formatMessage('error', `${message}: ${errorMessage}`);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const formattedMessage = this.formatMessage(
+      'error',
+      `${message}: ${errorMessage}`,
+    );
     this.originalConsoleLog(formattedMessage);
   }
 
@@ -129,13 +130,14 @@ class Logger {
   debug(...args: unknown[]): void {
     if (process.env.NODE_ENV === 'development') {
       const message = args
-        .map((arg) => (typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)))
+        .map((arg) =>
+          typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg),
+        )
         .join(' ');
       const formattedMessage = this.formatMessage('debug', message);
       this.originalConsoleLog(formattedMessage);
     }
   }
-  
 
   log(...args: any[]): void {
     const message = args

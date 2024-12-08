@@ -15,7 +15,7 @@ const prisma = new PrismaClient();
 
 export const databaseLoader = async () => {
   const dbPath = path.join(__dirname, '../../prisma/dev.db');
-  
+
   if (!fs.existsSync(dbPath)) {
     logger.error('databaseLoader', `Database not found at location: ${dbPath}`);
     throw new Error('Database file not found');
@@ -24,15 +24,21 @@ export const databaseLoader = async () => {
   try {
     await prisma.$connect();
     logger.info('Database connection established successfully');
-    
+
     await prisma.$queryRaw`SELECT 1`;
-    
+
     return prisma;
   } catch (error: unknown) {
     if (error instanceof Error) {
-      logger.error('databaseLoader', `Database connection error: ${error.message}`);
+      logger.error(
+        'databaseLoader',
+        `Database connection error: ${error.message}`,
+      );
     } else {
-      logger.error('databaseLoader', 'Database connection error: Unknown error occurred');
+      logger.error(
+        'databaseLoader',
+        'Database connection error: Unknown error occurred',
+      );
     }
     throw error;
   } finally {

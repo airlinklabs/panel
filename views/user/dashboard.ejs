@@ -72,7 +72,7 @@
               </thead>
               <tbody class="divide-y divide-gray-200 dark:divide-white/10 bg-gray-50 dark:bg-white/5">
                 <% servers.forEach(server => { %>
-                  <tr onclick="window.location.href = '../server/<%= server.Id %>';" class="hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer">
+                  <tr onclick="window.location.href = '../server/<%= server.UUID %>';" class="hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer">
                     <td class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-6"><%= server.name %></td>
                     <td class="px-3 py-4 text-sm">
                       <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full 

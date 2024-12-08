@@ -61,29 +61,37 @@ const adminModule: Module = {
       },
     );
 
-    router.get('/admin/check-update', isAuthenticated(true), async (req: Request, res: Response) => {
-      try {
-        const updateInfo = await checkForUpdates();
-        res.json(updateInfo);
-      } catch (error) {
-        logger.error('Error checking for updates:', error);
-        res.status(500).json({ error: 'Error checking for updates' });
-      }
-    });
-    
-    router.post('/admin/perform-update', isAuthenticated(true), async (req: Request, res: Response) => {
-      try {
-        const success = await performUpdate();
-        if (success) {
-          res.json({ message: 'Update completed successfully' });
-        } else {
+    router.get(
+      '/admin/check-update',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const updateInfo = await checkForUpdates();
+          res.json(updateInfo);
+        } catch (error) {
+          logger.error('Error checking for updates:', error);
+          res.status(500).json({ error: 'Error checking for updates' });
+        }
+      },
+    );
+
+    router.post(
+      '/admin/perform-update',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const success = await performUpdate();
+          if (success) {
+            res.json({ message: 'Update completed successfully' });
+          } else {
+            res.status(500).json({ error: 'Error performing update' });
+          }
+        } catch (error) {
+          logger.error('Error performing update:', error);
           res.status(500).json({ error: 'Error performing update' });
         }
-      } catch (error) {
-        logger.error('Error performing update:', error);
-        res.status(500).json({ error: 'Error performing update' });
-      }
-    });
+      },
+    );
 
     return router;
   },

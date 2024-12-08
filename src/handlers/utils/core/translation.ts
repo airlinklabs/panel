@@ -4,8 +4,14 @@ import path from 'path';
 import logger from '../../logger';
 
 function loadTranslations(lang: string): Record<string, unknown> {
-  const langPath = path.join(__dirname, `../../../../storage/lang/${lang}/lang.json`);
-  const fallbackPath = path.join(__dirname, '../../../../storage/lang/en/lang.json');
+  const langPath = path.join(
+    __dirname,
+    `../../../../storage/lang/${lang}/lang.json`,
+  );
+  const fallbackPath = path.join(
+    __dirname,
+    '../../../../storage/lang/en/lang.json',
+  );
 
   try {
     if (fs.existsSync(langPath)) {
@@ -17,7 +23,10 @@ function loadTranslations(lang: string): Record<string, unknown> {
     try {
       return JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
     } catch (fallbackError) {
-      logger.error('Error loading default English translations:', fallbackError);
+      logger.error(
+        'Error loading default English translations:',
+        fallbackError,
+      );
       return {};
     }
   }

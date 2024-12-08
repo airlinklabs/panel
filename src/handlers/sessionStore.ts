@@ -33,7 +33,7 @@ class PrismaSessionStore extends session.Store {
       const sessionData = {
         session_id: sid,
         data: JSON.stringify(session),
-        expires: new Date(Date.now() + (session.cookie.maxAge || 3600000)),
+        expires: new Date(Date.now() + (session.cookie.maxAge || 3600000 * 72)),
       };
 
       await prisma.session.upsert({

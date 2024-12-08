@@ -52,10 +52,8 @@ const authServiceModule: Module = {
     };
 
     router.post('/login', async (req: Request, res: Response) => {
-      const {
-        identifier,
-        password,
-      }: { identifier: string; password: string } = req.body;
+      const { identifier, password }: { identifier: string; password: string } =
+        req.body;
 
       if (!identifier || !password) {
         return res.redirect('/login?err=missing_credentials');
@@ -124,7 +122,7 @@ const authServiceModule: Module = {
             username,
             password: await bcrypt.hash(password, 10),
             description: 'No About Me',
-            isAdmin: isFirstUser
+            isAdmin: isFirstUser,
           },
         });
         res.redirect('/login');
@@ -147,7 +145,7 @@ const authServiceModule: Module = {
       } else {
         res.redirect('/');
       }
-    })
+    });
 
     return router;
   },

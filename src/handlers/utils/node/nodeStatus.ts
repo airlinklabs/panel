@@ -24,7 +24,7 @@ export async function checkNodeStatus(node: Node): Promise<Node> {
         'Content-Type': 'application/json',
       },
     };
-    
+
     const response = await axios(requestData);
     const { versionFamily, versionRelease, status, remote } = response.data;
 
@@ -42,7 +42,7 @@ export async function checkNodeStatus(node: Node): Promise<Node> {
       node.status = 'Offline';
       node.error = 'An unexpected error occurred';
     }
-    
+
     return node;
   }
 }

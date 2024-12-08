@@ -87,5 +87,14 @@
   "activeUsers": "Active Users",
   "description": "Description",
   "Ports": "Ports",
-  "Image": "Image"
+  "Image": "Image",
+  "identifier": "Identifier",
+  "SendACommand": "Send a command",
+  "ramUsage": "RAM Usage",
+  "cpuUsage": "CPU Usage",
+  "diskUsage": "Disk Usage",
+  "start": "Start",
+  "stop": "Stop",
+  "restart": "Restart",
+  "kill": "Kill"
 }

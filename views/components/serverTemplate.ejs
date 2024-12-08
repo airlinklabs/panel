@@ -1,0 +1,73 @@
+<div class="mt-6 ml-8 mb-8">
+    <div>
+       <div class="hidden relative sm:block">
+          <nav class="flex relative">
+            <div id="sliding-background" class="absolute w-fit h-9 px-3 transition-transform duration-200 ease-in-out z-0 bg-neutral-500/20 border border-neutral-700/10 dark:bg-white/5 rounded-xl"></div>
+             <ul role="list" class="flex min-w-full mt-1.5 flex-none gap-x-2 text-sm font-normal leading-6 text-neutral-400">
+                <li class=" transition">
+                   <a href="/server/<%= server.UUID %>" class="nav-link2 py-2 px-3 transition border hover:bg-white/5 border-transparent hover:text-white hover:shadow rounded-xl">
+                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="size-4 mb-0.5 inline-flex mr-1"><rect width="256" height="256" fill="none"/><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm-91,94.25-40,32a8,8,0,1,1-10-12.5L107.19,128,75,102.25a8,8,0,1,1,10-12.5l40,32a8,8,0,0,1,0,12.5ZM176,168H136a8,8,0,0,1,0-16h40a8,8,0,0,1,0,16Z"/></svg>                                      
+                     Console
+                  </a>
+                </li>
+                <li class=" transition">
+                   <a href="/server/<%= server.UUID %>/files" class="nav-link2 py-2 px-3 transition border hover:bg-white/5 border-transparent hover:text-white hover:shadow rounded-xl">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="size-4 mb-0.5 inline-flex mr-1"><rect width="256" height="256" fill="none"/><path d="M224,64H154.67L126.93,43.2a16.12,16.12,0,0,0-9.6-3.2H72A16,16,0,0,0,56,56V72H40A16,16,0,0,0,24,88V200a16,16,0,0,0,16,16H192.89A15.13,15.13,0,0,0,208,200.89V184h16.89A15.13,15.13,0,0,0,240,168.89V80A16,16,0,0,0,224,64Zm0,104H208V112a16,16,0,0,0-16-16H122.67L94.93,75.2a16.12,16.12,0,0,0-9.6-3.2H72V56h45.33L147.2,78.4A8,8,0,0,0,152,80h72Z"/></svg>
+                      Files
+                   </a>
+                </li>
+
+             </ul>
+          </nav>
+       </div>
+    </div>
+ </div>
+ <script>
+   document.addEventListener("DOMContentLoaded", function() {
+     var currentPagePath = window.location.pathname;
+     var navLinks2 = document.querySelectorAll('.nav-link2');
+     var slidingBackground = document.getElementById('sliding-background');
+     
+     function updateActiveLink(clickedLink = null) {
+      var activeLink = null;
+      navLinks2.forEach(function(link) {
+         if (currentPagePath.startsWith(link.getAttribute('href'))) {
+            activeLink = link;
+         }
+      });
+       if (activeLink) {
+         navLinks2.forEach(link => {
+           link.classList.remove('text-white', 'font-medium', 'bg-white/10', 'shadow-sm');
+         });
+         
+         activeLink.classList.add('text-white', 'font-medium');
+         
+         var linkRect = activeLink.getBoundingClientRect();
+         var navRect = activeLink.closest('nav').getBoundingClientRect();
+         slidingBackground.style.width = linkRect.width + 'px';
+         slidingBackground.style.transform = `translateX(${linkRect.left - navRect.left}px)`;
+       }
+     }
+     
+     // Initial setup
+     updateActiveLink();
+     
+     navLinks2.forEach(function(link) {
+       link.addEventListener('click', function(e) {
+         e.preventDefault();
+         var href = this.getAttribute('href');
+         
+         updateActiveLink(this);
+         
+         setTimeout(() => {
+           window.location.href = href;
+         }, 300);
+       });
+     });
+     
+     window.addEventListener('popstate', function() {
+       currentPagePath = window.location.pathname;
+       updateActiveLink();
+     });
+   });
+ </script>

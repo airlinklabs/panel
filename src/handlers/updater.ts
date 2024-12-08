@@ -34,7 +34,7 @@ export async function checkForUpdates(): Promise<{
     if (isDev) {
       // Check latest commit on main branch
       const response = await axios.get(
-        'https://api.github.com/repos/airlinklabs/panel/commits/main'
+        'https://api.github.com/repos/airlinklabs/panel/commits/main',
       );
       const latestCommit: GithubCommit = response.data;
       const currentCommit = execSync('git rev-parse HEAD').toString().trim();
@@ -43,12 +43,12 @@ export async function checkForUpdates(): Promise<{
         hasUpdate: currentCommit !== latestCommit.sha,
         latestVersion: latestCommit.sha.substring(0, 7),
         currentVersion: currentCommit.substring(0, 7),
-        updateInfo: latestCommit.commit.message
+        updateInfo: latestCommit.commit.message,
       };
     } else {
       // Check latest release
       const response = await axios.get(
-        'https://api.github.com/repos/airlinklabs/panel/releases/latest'
+        'https://api.github.com/repos/airlinklabs/panel/releases/latest',
       );
       const latestRelease: GithubRelease = response.data;
       const latestVersion = latestRelease.tag_name.replace('v', '');
@@ -57,7 +57,7 @@ export async function checkForUpdates(): Promise<{
         hasUpdate: latestVersion !== currentVersion,
         latestVersion,
         currentVersion,
-        updateInfo: `Release ${latestVersion}`
+        updateInfo: `Release ${latestVersion}`,
       };
     }
   } catch (error) {
@@ -74,7 +74,7 @@ export async function performUpdate(): Promise<boolean> {
     }
 
     const isDev = process.env.NODE_ENV === 'development';
-    
+
     if (isDev) {
       // Pull latest commits
       execSync('git fetch origin main', { stdio: 'inherit' });
@@ -82,10 +82,12 @@ export async function performUpdate(): Promise<boolean> {
     } else {
       // Checkout latest release
       const response = await axios.get(
-        'https://api.github.com/repos/airlinklabs/panel/releases/latest'
+        'https://api.github.com/repos/airlinklabs/panel/releases/latest',
       );
       const latestRelease: GithubRelease = response.data;
-      execSync(`git fetch && git checkout ${latestRelease.tag_name}`, { stdio: 'inherit' });
+      execSync(`git fetch && git checkout ${latestRelease.tag_name}`, {
+        stdio: 'inherit',
+      });
     }
 
     // Update dependencies and rebuild

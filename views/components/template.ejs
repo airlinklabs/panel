@@ -23,7 +23,7 @@
               <ul role="list" class="flex flex-1 flex-col gap-y-7 mt-2">
                  <li>
                     <ul role="list" class="-mx-2 space-y-1">
-                       <div id="active-background" class="absolute left-2 w-[calc(100%-1.5rem)] h-9 transition-transform duration-200 ease-in-out z-0 bg-neutral-500/20 border border-neutral-700/10 dark:bg-white/5 rounded-xl"></div>
+                       <div id="active-background" class="absolute left-2 w-[calc(100%-1.5rem)] h-9 transition-transform duration-200 ease-in-out z-[-1] bg-neutral-500/20 border border-neutral-700/10 dark:bg-white/5 rounded-xl"></div>
                        <li>
                           <a href="/" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" searchdata="container instances servers" subterm="jegli:/server/servername">
                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 mt-0.5 h-5">
@@ -38,32 +38,6 @@
                                                                                        
                              <span>Account</span>
                           </a>
-                         
-                         <script>
-                             document.addEventListener("DOMContentLoaded", function() {
-                                 document.querySelectorAll('.svg-icon').forEach(function(span) {
-                                     const url = span.getAttribute('data-icon-url');
-                         
-                                     fetch(url)
-                                         .then(response => {
-                                             if (!response.ok) {
-                                                 throw new Error('Network response was not ok');
-                                             } else if (response.status !== 200) {
-                                                 throw new Error(`Request failed with status ${response.status}`);
-                                             } else if (!response.text().includes('<svg')) {
-                                                throw new Error('Response does not contain an SVG');
-                                             }
-                                             return response.text();
-                                         })
-                                         .then(svgContent => {
-                                             span.innerHTML = svgContent;
-                                         })
-                                         .catch(error => {
-                                             console.error('Error on Loading the SVG:', error);
-                                         });
-                                 });
-                             });
-                         </script>
                          
                        </li>
                        <% if (user.isAdmin == true) { %>
@@ -174,7 +148,7 @@
         const updateActiveLink = (currentPath) => {
           let foundActive = false;
           navLinks.forEach((link) => {
-            const adjustedPath = currentPath.replace('instance/', 'instances');
+            const adjustedPath = currentPath.replace('server/', 'servers');
             const isActive = adjustedPath.startsWith(link.getAttribute('href'));
     
             link.classList.toggle('active', isActive);
