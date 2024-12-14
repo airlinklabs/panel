@@ -29,6 +29,7 @@ const accountModule: Module = {
       '/account',
       isAuthenticated(),
       async (req: Request, res: Response) => {
+        // todo : remove this fucking shit use like flash or somethings like that but not that bro, idk why we do that
         const errorMessage: ErrorMessage = {};
         try {
           const userId = req.session?.user?.id;
