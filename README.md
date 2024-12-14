@@ -1,10 +1,28 @@
-# panel
-Airlink is a simple to use Game server management panel
-
 > [!CAUTION]
 > AirLink was in development for a while and was used by a few people, please wait an release version
 
-## Installation
+# Airlink Panel 🚀
+
+**Streamlined Game Server Management**
+
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
+  
+[![License](https://img.shields.io/github/license/AirlinkLabs/panel)](https://github.com/AirlinkLabs/panel/blob/main/LICENSE)
+[![Discord](https://img.shields.io/discord/hwEtBUmMpy)]([https://discord.gg/your-discord](https://discord.gg/hwEtBUmMpy))
+
+## 📖 Overview
+
+Airlink Panel is an advanced, open-source game server management platform designed to simplify server deployment, monitoring, and administration.
+
+## 🛠 Prerequisites
+
+- Node.js (v16+)
+- npm (v8+)
+- Git
+- Supported Database (PostgreSQL/MySQL)
+
+## 💾 Installation
 
 1. Clone the repository:
    ```bash
@@ -57,3 +75,26 @@ Airlink is a simple to use Game server management panel
    pm2 save
    pm2 startup
    ```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+### Contribution Guidelines
+
+- Follow TypeScript best practices
+- Write unit tests for new features
+- Maintain clean, readable code
+- Update documentation
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+<div align="center">
+  Made with ❤️ by AirLink Labs
+</div>
