@@ -29,7 +29,10 @@
 
     "adminUsersTitle": "Users",
     "adminUsersText": "A list of all the users on the Airlink panel.",
-  
+
+    "adminUserTitle": "User",
+    "adminUserText": "Manage an individual user.",
+    
   "_commentary_user": "Category section user",
 
     "userDashboardTitle": "Dashboard",

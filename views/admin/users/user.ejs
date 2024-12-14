@@ -1,0 +1,22 @@
+<%- include('../../components/header', { title: 'Overview' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+           <h1 class="text-base font-medium leading-6 text-white"><%= req.translations.adminUserTitle %></h1>
+           <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminUserText %></p>
+         </div>
+       </div>
+       <div class="px-8 mt-5">
+       </div>
+    </div>
+  </div>
+</main>
+<%- include('../../components/footer') %>

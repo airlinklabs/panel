@@ -141,6 +141,30 @@ const adminModule: Module = {
       },
     );
 
+    router.get('/admin/user/:id/', isAuthenticated(true), async (req: Request, res: Response) => {
+      const userId = req.session?.user?.id;
+      if (!userId) {
+        res.redirect('/login');
+        return;
+      }
+      try {
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+          return res.redirect('/login');
+        }
+
+        const dataUser = await prisma.users.findUnique({ where: { id: parseInt(req.params.id, 10) } });
+        if (!dataUser) {
+          return res.redirect('/admin/users');
+        }
+
+        res.render('admin/users/user', { user, req, logo: '', dataUser });
+      } catch (error) {
+        logger.error('Error fetching user:', error);
+        return res.redirect('/login');
+      }
+    });
+
     return router;
   },
 };
