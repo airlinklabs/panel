@@ -133,5 +133,8 @@
   "start": "Start",
   "stop": "Stop",
   "restart": "Restart",
-  "kill": "Kill"
+  "kill": "Kill",
+  "updateDescription": "Update Description",
+  "usernameDescriptionSuccess": "Description updated successfully!",
+  "usernameDescriptionError": "Error updating description. Please try again later."
 }

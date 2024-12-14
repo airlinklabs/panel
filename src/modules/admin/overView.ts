@@ -29,12 +29,9 @@ const adminModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
-        const userId = req.session?.user?.id;
-        if (!userId) {
-          return res.redirect('/login');
-        }
 
         try {
+          const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');

@@ -23,12 +23,8 @@ const adminModule: Module = {
       '/admin/servers',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const userId = req.session?.user?.id;
-        if (!userId) {
-          return res.redirect('/login');
-        }
-
         try {
+          const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
@@ -53,12 +49,8 @@ const adminModule: Module = {
       '/admin/servers/create',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const userId = req.session?.user?.id;
-        if (!userId) {
-          return res.redirect('/login');
-        }
-
         try {
+          const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
@@ -87,11 +79,6 @@ const adminModule: Module = {
       '/admin/servers/create',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const userId = req.session?.user?.id;
-        if (!userId) {
-          return res.redirect('/login');
-        }
-
         const {
           name,
           description,
@@ -102,8 +89,9 @@ const adminModule: Module = {
           Cpu,
           Storage,
         } = req.body;
-
-        if (!name || !description || !nodeId || !imageId) {
+        
+        const userId = req.session?.user?.id;
+        if (!name || !description || !nodeId || !imageId || !Ports || !Memory || !Cpu || !Storage || !userId) {
           res.status(400).send('Missing required fields');
           return;
         }

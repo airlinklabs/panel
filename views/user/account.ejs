@@ -41,7 +41,14 @@
                              <input id="email" type="email" name="email" value="" class="text-white rounded-xl focus:ring-0 focus:border-0 text-sm mt-1 mb-0 w-full transition-all hover:bg-white/5 px-4 py-2 border-white/5 bg-neutral-600/20 placeholder:text-white/20 border" placeholder="<%= user.email %>" disabled />
                           </div>
                        </div>
-                       <button type="submit" id="change-username-btn" class="mt-4 block rounded-xl bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2" disabled><%= req.translations.updateUsername %></button>
+                    </form>
+
+                    <form id="change-description-form" action="/update-description" method="POST" class="mt-5">
+                      <div class="mt-5">
+                          <label class="text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.description %>:</label>
+                          <textarea id="description" name="description" class="rounded-xl focus:ring-0 focus:border-0 text-sm mt-1 mb-0 w-full transition-all hover:bg-white/5 px-4 py-2 border-white/5 bg-neutral-600/20 placeholder-neutral-400 text-white border" placeholder="<%= user.description %>"><%= user.description %></textarea>
+                      </div>
+                      <button type="submit" id="change-description-btn" class="mt-4 block rounded-xl bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2"><%= req.translations.updateDescription %></button>
                     </form>
                   
                     <form id="change-password-form" action="/change-password" method="POST" class="mt-5">

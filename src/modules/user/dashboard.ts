@@ -26,13 +26,8 @@ const dashboardModule: Module = {
 
     router.get('/', isAuthenticated(), async (req: Request, res: Response) => {
       const errorMessage: ErrorMessage = {};
-      const userId = req.session?.user?.id;
-      if (!userId) {
-        res.redirect('/login');
-        return;
-      }
-
       try {
+        const userId = req.session?.user?.id;
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
           errorMessage.message = 'User not found.';

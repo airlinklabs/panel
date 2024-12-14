@@ -51,12 +51,8 @@ const adminModule: Module = {
       '/admin/nodes',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const userId = req.session?.user?.id;
-        if (!userId) {
-          return res.redirect('/login');
-        }
-
         try {
+          const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
@@ -76,12 +72,8 @@ const adminModule: Module = {
       '/admin/nodes/create',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const userId = req.session?.user?.id;
-        if (!userId) {
-          return res.redirect('/login');
-        }
-
         try {
+          const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
@@ -111,11 +103,6 @@ const adminModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         const { name, ram, cpu, disk, address, port } = req.body;
-
-        const userId = req.session?.user?.id;
-        if (!userId) {
-          return res.redirect('/login');
-        }
 
         if (!name || typeof name !== 'string') {
           res.status(400).json({ message: 'Name must be a string.' });
@@ -168,6 +155,7 @@ const adminModule: Module = {
         }
 
         try {
+          const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(403).json({ message: 'Unauthorized access.' });

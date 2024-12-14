@@ -30,13 +30,8 @@ const accountModule: Module = {
       isAuthenticated(),
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
-        const userId = req.session?.user?.id;
-        if (!userId) {
-          res.redirect('/login');
-          return;
-        }
-
         try {
+          const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             errorMessage.message = 'User not found.';
@@ -63,6 +58,46 @@ const accountModule: Module = {
           });
         }
       },
+    );
+
+    router.post(
+      '/update-description',
+      isAuthenticated(),
+      async (req: Request, res: Response, next: NextFunction) => {
+        const { description } = req.body;
+        if (!description) {
+          res.status(400).send('Description parameter is required.');
+          return;
+        }
+
+        if (description.length > 255) {
+          res.status(400).send('Description must be less than 255 characters.');
+          return;
+        }
+
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findFirst({
+            where: { id: userId },
+          });
+
+          if (!user) {
+            res.redirect('/login');
+            return;
+          }
+
+          await prisma.users.update({
+            where: { id: userId },
+            data: { description },
+          });
+
+          res.status(200).redirect('/account');
+          return;
+        } catch (error) {
+          logger.error('Error updating description:', error);
+          res.status(500).send('Internal Server Error');
+        }
+      }
     );
 
     router.post(
@@ -156,10 +191,6 @@ const accountModule: Module = {
 
         try {
           const userId = req.session?.user?.id;
-          if (!userId) {
-            res.redirect('/login');
-            return;
-          }
 
           const currentUser = await prisma.users.findUnique({
             where: { id: userId },
@@ -210,9 +241,6 @@ const accountModule: Module = {
           }
 
           const userId = req.session?.user?.id;
-          if (!userId) {
-            return res.redirect('/login');
-          }
 
           const currentUser = await prisma.users.findUnique({
             where: { id: userId },

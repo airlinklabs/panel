@@ -47,10 +47,6 @@ const dashboardModule: Module = {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
 
-        if (!userId) {
-          return res.redirect('/login');
-        }
-
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
@@ -101,10 +97,6 @@ const dashboardModule: Module = {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
         const powerAction = req.params?.poweraction;
-    
-        if (!userId) {
-          return res.redirect('/login');
-        }
     
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });

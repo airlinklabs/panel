@@ -36,13 +36,8 @@ const adminModule: Module = {
       '/admin/users',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const userId = req.session?.user?.id;
-        if (!userId) {
-          res.redirect('/login');
-          return;
-        }
-
         try {
+          const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
@@ -68,13 +63,8 @@ const adminModule: Module = {
       '/admin/users/create',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const userId = req.session?.user?.id;
-        if (!userId) {
-          res.redirect('/login');
-          return;
-        }
-
         try {
+          const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
@@ -142,12 +132,8 @@ const adminModule: Module = {
     );
 
     router.get('/admin/user/:id/', isAuthenticated(true), async (req: Request, res: Response) => {
-      const userId = req.session?.user?.id;
-      if (!userId) {
-        res.redirect('/login');
-        return;
-      }
       try {
+        const userId = req.session?.user?.id;
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
           return res.redirect('/login');
@@ -157,6 +143,13 @@ const adminModule: Module = {
         if (!dataUser) {
           return res.redirect('/admin/users');
         }
+
+        // todo: 
+        //     - render data user
+        //     - update user
+        //     - see how many time he connected
+        //     - see whitch page was he see
+        //     - him request ...
 
         res.render('admin/users/user', { user, req, logo: '', dataUser });
       } catch (error) {
