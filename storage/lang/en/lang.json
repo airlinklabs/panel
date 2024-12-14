@@ -1,13 +1,52 @@
 {
-  "nodes": "Nodes",
-  "nodesText": "A list of all the nodes set up on the Airlink panel.",
+
+  "_commentary": "Category section title and description",
+    "_commentary_admin": "Category section admin",
+
+    "adminOverviewTitle": "Overview",
+    "adminOverviewText": "A simple overview of your Panel.",
+
+    "adminImagesTitle": "Manage Images",
+    "adminImagesText": "Easily upload or manually create images for your instances.",
+  
+    "adminSettingsTitle": "Settings",
+    "adminSettingsText": "A list of all the settings on the Airlink panel.",
+
+    "adminNodesTitle": "Nodes",
+    "adminNodesText": "A list of all the nodes set up on the Airlink panel.",
+
+    "adminCreateNodeTitle": "Create Node",
+    "adminCreateNodeText": "Create a new node on Airlink.",
+
+    "adminCreateServerTitle": "Create Server",
+    "adminCreateServerText": "Create a new Server on Airlink.",
+
+    "adminServersTitle": "Servers",
+    "adminServersText": "A list of all the servers set up on the Airlink panel.",
+
+    "adminCreateUserTitle": "Create User",
+    "adminCreateUserText": "Create a new user on Airlink.",
+
+    "adminUsersTitle": "Users",
+    "adminUsersText": "A list of all the users on the Airlink panel.",
+  
+  "_commentary_user": "Category section user",
+
+    "userDashboardTitle": "Dashboard",
+    "userDashboardText": "View and manage your servers.",
+
+    "userAccountTitle": "Account",
+    "userAccountText": "Manage your account settings.",
+
+  "_commentary_other": "Category section other",
+
   "createNewNode": "Create new node",
   "configure": "Configure",
   "ram": "RAM",
   "disk": "Disk",
   "cpu": "CPU",
   "addressIP": "IP Address",
-  "deamonPort": "Daemon Port",
+  "daemonPort": "Daemon Port",
   "noNodesAvailable": "No nodes available",
   "averageNodeDensity": "Average Node Density",
   "onlineNodes": "Online Nodes",
@@ -20,8 +59,6 @@
   "actions": "Actions",
   "addNewNode": "Add new node",
   "create": "Create",
-  "overview": "Overview",
-  "overviewText": "A simple overview of your Panel.",
   "user": "User",
   "users": "Users",
   "images": "Images",
@@ -52,7 +89,6 @@
   "usernameUpdatedSuccess": "Username updated successfully!",
   "currentPasswordHide": "********",
   "newPasswordHide": "********",
-  "usersText": "A list of all the users on the Airlink panel.",
   "createNewUser": "Create new user",
   "totalUsers": "Total Users",
   "onlineUsers": "Online Users",
@@ -75,8 +111,6 @@
   "passwordUpdated": "Password updated successfully!",
   "role": "Role",
   "createNewServer": "Create new server",
-  "servers": "Servers",
-  "serversText": "A list of all the servers set up on the Airlink panel.",
   "UUID": "UUID",
   "Owner": "Owner",
   "Node": "Node",

@@ -10,12 +10,11 @@
     <div class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
-            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">Create Node</h1>
-            <p class="mt-1 tracking-tight text-sm text-neutral-500">Create a new node on Airlink.</p>
+            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminCreateNodeTitle %></h1>
+            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminCreateNodeText %></p>
         </div>
       </div>
       
-
       <div id="nodeForm" class="mt-6 px-8 w-full">
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
           <form>
@@ -46,7 +45,7 @@
               </div>
       
               <div>
-                <label for="nodePort" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.deamonPort %>:</label>
+                <label for="nodePort" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.daemonPort %>:</label>
                 <input id="nodePort" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="3002">
               </div>
       

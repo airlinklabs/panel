@@ -13,6 +13,8 @@ const coreModule: Module = {
 
   router: () => {
     const router = Router();
+    
+    // ok what will go here?
 
     return router;
   },

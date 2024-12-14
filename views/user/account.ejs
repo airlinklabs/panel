@@ -8,6 +8,14 @@
      </div>
      <!-- Content -->
      <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <!-- Page Header -->
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.userAccountTitle %></h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.userAccountText %></p>
+        </div>
+      </div>
+
       <div class="px-4 sm:px-6 lg:px-8">
         <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-2">
            <div class="p-3 bg-transparent shadow-xl border border-white/5 rounded-xl overflow-hidden sm:p-6 lg:p-10 card w-full">
