@@ -1,5 +1,5 @@
 > [!CAUTION]
-> AirLink was in development for a while and was used by a few people, please wait an release version
+> AirLink is in development for a while and is getting used by a few people, please wait an release version
 
 # Airlink Panel 🚀
 
