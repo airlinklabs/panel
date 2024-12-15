@@ -2101,6 +2101,10 @@ select {
   background-color: rgb(153 27 27 / var(--tw-bg-opacity, 1));
 }
 
+.bg-red-800\/10 {
+  background-color: rgb(153 27 27 / 0.1);
+}
+
 .bg-slate-900 {
   --tw-bg-opacity: 1;
   background-color: rgb(15 23 42 / var(--tw-bg-opacity, 1));
@@ -2139,10 +2143,6 @@ select {
 .bg-zinc-950 {
   --tw-bg-opacity: 1;
   background-color: rgb(9 9 11 / var(--tw-bg-opacity, 1));
-}
-
-.bg-red-800\/10 {
-  background-color: rgb(153 27 27 / 0.1);
 }
 
 .bg-opacity-50 {
@@ -2605,6 +2605,10 @@ select {
   color: rgb(248 113 113 / var(--tw-text-opacity, 1));
 }
 
+.text-red-400\/50 {
+  color: rgb(248 113 113 / 0.5);
+}
+
 .text-red-500 {
   --tw-text-opacity: 1;
   color: rgb(239 68 68 / var(--tw-text-opacity, 1));
@@ -2633,10 +2637,6 @@ select {
 .text-zinc-200 {
   --tw-text-opacity: 1;
   color: rgb(228 228 231 / var(--tw-text-opacity, 1));
-}
-
-.text-red-400\/50 {
-  color: rgb(248 113 113 / 0.5);
 }
 
 .underline {
