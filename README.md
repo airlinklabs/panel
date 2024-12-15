@@ -9,7 +9,7 @@
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
   
 [![License](https://img.shields.io/github/license/AirlinkLabs/panel)](https://github.com/AirlinkLabs/panel/blob/main/LICENSE)
-[![Discord](https://img.shields.io/discord/D8YbT9rDqz)]([https://discord.gg/D8YbT9rDqz](https://discord.gg/D8YbT9rDqz))
+[![Discord](https://img.shields.io/discord/1302020587316707420)]([https://discord.gg/D8YbT9rDqz](https://discord.gg/D8YbT9rDqz))
 
 ## 📖 Overview
 
