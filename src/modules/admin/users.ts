@@ -131,7 +131,7 @@ const adminModule: Module = {
       },
     );
 
-    router.get('/admin/user/:id/', isAuthenticated(true), async (req: Request, res: Response) => {
+    router.get('/admin/users/view/:id/', isAuthenticated(true), async (req: Request, res: Response) => {
       try {
         const userId = req.session?.user?.id;
         const user = await prisma.users.findUnique({ where: { id: userId } });
