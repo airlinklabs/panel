@@ -90,7 +90,7 @@ const dashboardModule: Module = {
     );
 
     router.post(
-      '/server/:id/:poweraction',
+      '/server/:id/power/:poweraction',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};

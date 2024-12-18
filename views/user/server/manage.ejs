@@ -393,7 +393,7 @@ function sendCommand() {
 
     document.getElementById('startButton').addEventListener('click', () => {
         const serverUUID = '<%= server.UUID %>';
-        fetch(`/server/${serverUUID}/start`, {
+        fetch(`/server/${serverUUID}/power/start`, {
             method: 'POST',
         })
         .then(response => response.json())
@@ -407,7 +407,7 @@ function sendCommand() {
 
     document.getElementById('stopButton').addEventListener('click', () => {
         const serverUUID = '<%= server.UUID %>';
-        fetch(`/server/${serverUUID}/stop`, {
+        fetch(`/server/${serverUUID}/power/stop`, {
             method: 'POST',
         })
         .then(response => response.json())
