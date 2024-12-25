@@ -3283,6 +3283,14 @@ select {
   border-color: rgb(255 255 255 / 0.05);
 }
 
+.dark\:border-neutral-300\/20:is(.dark *) {
+  border-color: rgb(212 212 212 / 0.2);
+}
+
+.dark\:border-neutral-300\/5:is(.dark *) {
+  border-color: rgb(212 212 212 / 0.05);
+}
+
 .dark\:bg-\[\#141414\]:is(.dark *) {
   --tw-bg-opacity: 1;
   background-color: rgb(20 20 20 / var(--tw-bg-opacity, 1));
