@@ -44,7 +44,7 @@ const accountModule: Module = {
             errorMessage,
             user,
             req,
-            name: 'AirLink',
+            
             logo: '',
           });
         } catch (error) {

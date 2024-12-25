@@ -1,5 +1,5 @@
     <style>
-      .active {
+      #links556 .active {
          color: white !important;
       }
     </style>
@@ -26,7 +26,7 @@
               </div>
               
           </div>
-              <ul role="list" class="flex flex-1 flex-col gap-y-7 mt-2">
+              <ul role="list" id="links556" class="flex flex-1 flex-col gap-y-7 mt-2">
                  <li>
                     <ul role="list" class="-mx-2 space-y-1">
                        <div id="active-background" class="absolute left-2 w-[calc(100%-1.5rem)] h-9 transition-transform duration-200 ease-in-out z-[-1] bg-neutral-500/20 border border-neutral-700/10 dark:border-neutral-300/5 dark:bg-white/5 rounded-xl"></div>
@@ -124,17 +124,36 @@
           const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
           return match ? match[2] : null;
         };
-        
+    
         const setCookie = (name, value, days) => {
           const date = new Date();
           date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
           document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
         };
     
+        const normalizePath = (path) => {
+          try {
+            const url = new URL(path, window.location.origin);
+            return url.pathname.replace(/\/+$/, '');
+          } catch (error) {
+            console.error('Invalid path:', path);
+            return '';
+          }
+        };
+    
         const updateActiveBackground = (link) => {
+          if (!link || !link.closest) return;
+    
           const linkRect = link.getBoundingClientRect();
-          const navRect = link.closest('ul').getBoundingClientRect();
-          const topOffset = linkRect.top - navRect.top + link.closest('ul').scrollTop;
+          const navContainer = link.closest('ul');
+    
+          if (!navContainer) {
+            console.error('Nav container not found for link:', link);
+            return;
+          }
+    
+          const navRect = navContainer.getBoundingClientRect();
+          const topOffset = linkRect.top - navRect.top + navContainer.scrollTop;
     
           activeBackground.style.height = `${linkRect.height}px`;
           activeBackground.style.transform = `translateY(${topOffset}px)`;
@@ -152,10 +171,15 @@
         };
     
         const updateActiveLink = (currentPath) => {
+          const adjustedPath = currentPath.replace('server/', 'servers');
+          const adjustedPathNormalized = normalizePath(adjustedPath);
           let foundActive = false;
+    
           navLinks.forEach((link) => {
-            const adjustedPath = currentPath.replace('server/', 'servers');
-            const isActive = adjustedPath.startsWith(link.getAttribute('href'));
+            if (!link || !link.getAttribute) return;
+    
+            const hrefNormalized = normalizePath(link.getAttribute('href'));
+            const isActive = adjustedPathNormalized === hrefNormalized;
     
             link.classList.toggle('active', isActive);
     
@@ -183,7 +207,10 @@
         const animatePageTransition = (href) => {
           if (isAnimating) return;
           isAnimating = true;
-          window.location.href = href;
+
+          setTimeout(() => {
+            window.location.href = href;
+          }, 300);
         };
     
         navLinks.forEach(link => {
@@ -197,14 +224,22 @@
     
         updateActiveLink(window.location.pathname);
         window.addEventListener('popstate', () => updateActiveLink(window.location.pathname));
+    
+        const ws = new WebSocket(`ws://${window.location.host}/online-check`);
+        ws.onopen = () => {
+          console.log('WebSocket connection opened');
+        };
+    
+        const changeUsernameBtn = document.getElementById('change-username-btn');
+        if (changeUsernameBtn) {
+          changeUsernameBtn.addEventListener('click', () => {
+            console.log('Change username clicked');
+          });
+        } else {
+          console.warn('changeUsernameBtn not found');
+        }
       });
-
-      const ws = new WebSocket(`ws://${window.location.host}/online-check`);
-
-      ws.open = () => {
-         console.log('WebSocket connection opened');
-      }
-    </script>      
+    </script>
 
       
       <div id="colcont" class="lg:pl-56">
