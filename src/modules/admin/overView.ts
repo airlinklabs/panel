@@ -43,12 +43,16 @@ const adminModule: Module = {
 
           const userCount = await prisma.users.count();
           const nodeCount = await prisma.node.count();
+          const instanceCount = await prisma.server.count();
+          const imageCount = await prisma.images.count();
 
           res.render('admin/overview/overview', {
             errorMessage,
             user,
             userCount,
+            instanceCount,
             nodeCount,
+            imageCount,
             req,
           });
         } catch (error) {

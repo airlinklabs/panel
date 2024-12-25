@@ -218,6 +218,73 @@ const dashboardModule: Module = {
         }
       }
     );
+
+    router.get(
+      '/server/:id/files',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const errorMessage: ErrorMessage = {};
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            errorMessage.message = 'User not found.';
+            return res.render('user/account', { errorMessage, user, req });
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { UUID: String(serverId) },
+            include: { node: true, image: true, owner: true },
+          });
+
+          if (!server) {
+            errorMessage.message = 'Server not found.';
+            return res.render('user/server/files', {
+              errorMessage,
+              user,
+              req,
+              logo: '',
+            });
+          }
+
+          const filesRequest = {
+            method: 'GET',
+            url: `http://${server.node.address}:${server.node.port}/fs/list?id=${server.UUID}`,
+            auth: {
+              username: 'Airlink',
+              password: server.node.key,
+            },
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          };
+
+          let files = await axios(filesRequest);
+          files = files.data;
+
+          return res.render('user/server/files', {
+            errorMessage,
+            user,
+            files,
+            req,
+            server,
+            logo: '',
+          });
+        } catch (error) {
+          logger.error('Error fetching user:', error);
+          errorMessage.message = 'Error fetching user data.';
+          return res.render('user/server/files', {
+            errorMessage,
+            user: req.session?.user,
+            req,
+            logo: '',
+          });
+        }
+      }
+    );
+
     
 
     return router;

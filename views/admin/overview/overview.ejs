@@ -25,7 +25,7 @@
             <div class="overflow-hidden rounded-xl bg-neutral-700/10 px-4 py-5 shadow sm:p-6">
                <dt class="truncate text-sm font-medium text-neutral-400"><%= req.translations.instances %></dt>
                <dd class="mt-1 text-3xl font-medium tracking-tight text-white">
-                
+                <%= instanceCount %>
                </dd>
             </div>
             <div class="overflow-hidden rounded-xl bg-neutral-700/10 px-4 py-5 shadow sm:p-6">
@@ -37,24 +37,31 @@
             <div class="overflow-hidden rounded-xl bg-neutral-700/10 px-4 py-5 shadow sm:p-6">
                <dt class="truncate text-sm font-medium text-neutral-400"><%= req.translations.images %></dt>
                <dd class="mt-1 text-3xl font-medium tracking-tight text-white">
-                
+                <%= imageCount %>
                </dd>
             </div>
          </dl>
-         <div class="bg-neutral-700/10 rounded-xl pb-4 mt-5 shadow sm:p-6">
-          <img src="// coming soon" class="h-24">
-          <p class="text-sm mt-1 font-normal text-neutral-300 mb-2">
-            <%= req.translations.sysInfoText %> <span id="currentVersion"></span>
-            <span class="text-xs text-neutral-400">(<%= process.env.NODE_ENV %>)</span>
-          </p>
-          <div id="updateStatus" class="mb-4"></div>
-          <div class="flex space-x-4">
-            <button id="checkUpdateBtn" class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">
-              Check for Updates
-            </button>
-            <button id="performUpdateBtn" class="hidden bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition">
-              Install Update
-            </button>
+         <div class="bg-neutral-700/10 rounded-xl pb-4 mt-5 shadow sm:p-6 flex flex-wrap sm:flex-nowrap items-start">
+          <!-- Linke Seite -->
+          <div class="flex-shrink-0">
+            <img src="https://i.imgur.com/Q0Pl4ys.png" class="h-44">
+            <p class="text-sm mt-1 font-normal text-neutral-300 mb-2">
+              <%= req.translations.sysInfoText %> <span id="currentVersion"></span>
+              <span class="text-xs text-neutral-400">(<%= process.env.NODE_ENV %>)</span>
+            </p>
+          </div>
+          
+          <!-- Rechte Seite -->
+          <div class="flex-grow ml-0 sm:ml-8 mt-4 sm:mt-0">
+            <div class="flex space-x-4">
+              <button id="checkUpdateBtn" class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">
+                Check for Updates
+              </button>
+              <button id="performUpdateBtn" class="hidden bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition">
+                Install Update
+              </button>
+            </div>
+            <div id="updateStatus" class="mb-4"></div>
           </div>
         </div>
         
