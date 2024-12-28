@@ -18,3 +18,7 @@ prisma/*
 
 # Coverage reports
 coverage/
+
+# .env
+.env
+*.env.*
