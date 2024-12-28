@@ -12,6 +12,9 @@
     "adminSettingsTitle": "Settings",
     "adminSettingsText": "A list of all the settings on the Airlink panel.",
 
+    "adminEditNodeTitle": "Edit Node",
+    "adminEditNodeText": "Edit an individual node.",
+
     "adminNodesTitle": "Nodes",
     "adminNodesText": "A list of all the nodes set up on the Airlink panel.",
 
@@ -137,5 +140,6 @@
   "updateDescription": "Update Description",
   "usernameDescriptionSuccess": "Description updated successfully!",
   "usernameDescriptionError": "Error updating description. Please try again later.",
-  "nodes": "Nodes"
+  "nodes": "Nodes",
+  "daemonKey": "Daemon Key"
 }

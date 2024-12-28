@@ -255,7 +255,7 @@ const adminModule: Module = {
       },
     );
 
-    router.get('/admin/node/:id/edit', isAuthenticated(true), async (req: Request, res: Response) => {
+    router.get('/admin/node/:id', isAuthenticated(true), async (req: Request, res: Response) => {
       try {
 
         const userId = req.session?.user?.id;
@@ -271,11 +271,54 @@ const adminModule: Module = {
           res.status(404).json({ message: 'Node not found.' });
           return;
         }
-        return;
-        //res.render('admin/nodes/edit', { node, user, req, logo: '' });
+
+        res.render('admin/nodes/edit', { node, user, req, logo: '' });
       } catch (error) {
         logger.error('Error fetching user:', error);
         return res.redirect('/login');
+      }
+    });
+
+    router.put('/admin/node/:id/edit', isAuthenticated(true), async (req: Request, res: Response) => {
+      try {
+        const userId = req.session?.user?.id;
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+          return res.redirect('/login');
+        }
+    
+        const nodeId = parseInt(req.params.id);
+    
+        const name = req.body.name;
+        const ram = parseInt(req.body.ram);
+        const cpu = parseInt(req.body.cpu);
+        const disk = parseInt(req.body.disk);
+        const address = req.body.address;
+        const port = parseInt(req.body.port);
+    
+        if (!name || isNaN(ram) || isNaN(cpu) || isNaN(disk) || !address || !port) {
+          res.status(400).json({ message: 'All fields are required and numeric values must be valid numbers.' });
+          return;
+        }
+    
+        const node = await prisma.node.update({
+          where: { id: nodeId },
+          data: {
+            name,
+            ram,
+            cpu,
+            disk,
+            address,
+            port,
+          },
+        });
+    
+        res.status(200).json({ message: 'Node updated successfully.', node });
+        return;
+      } catch (error) {
+        logger.error('Error when updating the node:', error);
+        res.status(500).json({ message: 'Error when updating the node.' });
+        return;
       }
     });
 
