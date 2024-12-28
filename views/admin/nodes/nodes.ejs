@@ -112,7 +112,7 @@
                     <a href="./node/<%= node.id %>">
                       <button type="button" class="rounded-xl bg-white border border-neutral-800/20 hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">Edit</button>
                     </a>
-                    <button onclick="deletenode('<%= node.id %>')" type="button" class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Remove</button>
+                    <button onclick="deleteNode('<%= node.id %>')" type="button" class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Remove</button>
                   </div>
                 </td>
               </tr>
@@ -131,12 +131,11 @@
     }
   }
 
-  async function deletenode(nodeId) {
+  async function deleteNode(nodeId) {
     try {
-      let response = await fetch('/nodes/delete', {
-        method: 'POST',
+      let response = await fetch(`/admin/node/${nodeId}`, {
+        method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nodeId })
       });
 
       let result = await response.json();
@@ -155,10 +154,9 @@
   }
 
   async function retryDeleteNode(nodeId, deleteInstances) {
-    const response = await fetch(`/nodes/delete?deleteinstances=${deleteInstances}`, {
+    const response = await fetch(`/admin/node/${nodeId}?deleteInstances=${deleteInstances}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nodeId })
+      headers: { 'Content-Type': 'application/json' }
     });
     if (response.ok) {
       alert('Node and instances successfully deleted');
@@ -172,10 +170,10 @@
 
   async function configure(nodeId) {
     try {
-      const response = await fetch(`/admin/node/${nodeId}/configure-command`);
+      const response = await fetch(`/admin/node/${nodeId}/configure`);
       if (!response.ok) throw new Error('Failed to fetch configure command');
       const data = await response.json();
-      showPopup(data.configureCommand);
+      showPopup(data);
     } catch (error) {
       console.error(error);
     }

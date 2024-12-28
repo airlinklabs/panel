@@ -192,6 +192,93 @@ const adminModule: Module = {
       },
     );
 
+    router.delete('/admin/node/:id', isAuthenticated(true), async (req: Request, res: Response) => {
+      try {
+        const userId = req.session?.user?.id;
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+          return res.redirect('/login');
+        }
+    
+        const nodeId = parseInt(req.params.id);
+        const deleteInstances = req.query.deleteInstance === 'true';
+    
+        try {
+          if (deleteInstances) {
+            await prisma.server.deleteMany({
+              where: { nodeId: nodeId }
+            });
+          }
+    
+          await prisma.node.delete({ where: { id: nodeId } });
+          
+          res.status(200).json({ 
+            message: deleteInstances 
+              ? 'Node and associated instances deleted successfully.'
+              : 'Node deleted successfully.'
+          });
+        } catch (error) {
+          logger.error('Error when deleting the node:', error);
+          res.status(500).json({ message: 'Error when deleting the node.' });
+        }
+      } catch (error) {
+        logger.error('Error fetching user:', error);
+        return res.redirect('/login');
+      }
+    });
+
+    router.get(
+      '/admin/node/:id/configure',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            return res.redirect('/login');
+          }
+    
+          const nodeId = parseInt(req.params.id);
+    
+          const node = await prisma.node.findUnique({ where: { id: nodeId } });
+          if (!node) {
+            res.status(404).json({ message: 'Node not found.' });
+            return;
+          }
+    
+          res.status(200).json('npm run configure -- -- --panel "' + process.env.URL + '" --key "' + node.key +'"');
+          return;
+        } catch (error) {
+          logger.error('Error fetching user:', error);
+          return res.redirect('/login');
+        }
+      },
+    );
+
+    router.get('/admin/node/:id/edit', isAuthenticated(true), async (req: Request, res: Response) => {
+      try {
+
+        const userId = req.session?.user?.id;
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+          return res.redirect('/login');
+        }
+    
+        const nodeId = parseInt(req.params.id);
+    
+        const node = await prisma.node.findUnique({ where: { id: nodeId } });
+        if (!node) {
+          res.status(404).json({ message: 'Node not found.' });
+          return;
+        }
+        return;
+        //res.render('admin/nodes/edit', { node, user, req, logo: '' });
+      } catch (error) {
+        logger.error('Error fetching user:', error);
+        return res.redirect('/login');
+      }
+    });
+
     return router;
   },
 };

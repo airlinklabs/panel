@@ -54,8 +54,8 @@ app.use(
     store: new PrismaSessionStore(),
     cookie: {
       secure: process.env.NODE_ENV === 'production',
-      httpOnly: process.env.url
-        ? process.env.url.startsWith('https://')
+      httpOnly: process.env.URL
+        ? process.env.URL.startsWith('https://')
         : false,
       sameSite: 'strict',
       maxAge: 3600000 * 72, // 3 days
