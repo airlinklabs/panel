@@ -6,8 +6,6 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 
 const prisma = new PrismaClient();
-const upload = multer({ dest: 'uploads/' });
-
 const adminModule: Module = {
   info: {
     name: 'Admin Module for Images',
@@ -41,27 +39,67 @@ const adminModule: Module = {
       },
     );
 
-    router.post(
-      '/admin/images/upload',
-      isAuthenticated(true),
-      async (req: Request, res: Response) => {
-        const file = req.file;
-
-        if (!file) {
-          res.status(400).send('No file uploaded.');
+    router.post('/admin/images/upload', async (req, res) => {
+      const jsonData = req.body;
+    
+      try {
+        // Validate the JSON structure
+        const { Name, DockerImage, Scripts, Variables } = jsonData;
+    
+        if (!Name || !DockerImage) {
+          res.redirect('/admin/images?err=missing_fields');
           return;
         }
-
-        try {
-          // upload soon
-
-          res.redirect('/admin/images?err=soon');
-        } catch (error) {
-          logger.error('Error uploading image:', error);
-          res.status(500).send('Failed to upload image.');
+    
+        // Validate Scripts and Variables (optional fields)
+        const validatedScripts = Scripts ? Scripts : null;
+        const validatedVariables = Variables ? Variables : null;
+    
+        // Ensure Scripts and Variables are valid JSON-like objects (if not null)
+        if (validatedScripts && typeof validatedScripts !== 'object') {
+          res.redirect('/admin/images?err=invalid_scripts_format');
+          return;
         }
-      },
-    );
+    
+        if (validatedVariables && typeof validatedVariables !== 'object') {
+          res.redirect('/admin/images?err=invalid_variables_format');
+          return;
+        }
+    
+        // Save to the database
+        router.post('/admin/images/upload', async (req, res) => {
+          const jsonData = req.body;
+        
+          try {
+            // Validate the JSON structure
+            const { Name, DockerImage, Scripts, Variables } = jsonData;
+        
+            if (!Name || !DockerImage) {
+              res.redirect('/admin/images?err=missing_fields');
+              return;
+            }
+        
+            // Save to the database
+            const image = await prisma.images.create({
+              data: {
+                name: Name,
+                image: DockerImage
+              },
+            });
+        
+            res.redirect('/admin/images?success=true');
+          } catch (error) {
+            logger.error('Error processing image upload:', error);
+            res.status(500).send('Failed to process the uploaded file.');
+          }
+        });        
+    
+        res.redirect('/admin/images?success=true');
+      } catch (error) {
+        logger.error('Error processing image upload:', error);
+        res.status(500).send('Failed to process the uploaded file.');
+      }
+    });    
 
     router.post(
       '/admin/images/create',

@@ -16,11 +16,11 @@
         <!-- Action Buttons -->
         <div class="mt-4 sm:mt-0 sm:ml-4 sm:flex-none">
           <button
-            onclick="openModal('uploadModal')"
-            class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
-          >
-            Upload Image
-          </button>
+          id="uploadimage"
+          class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
+        >
+          Upload Image
+        </button>
           <button
             onclick="openModal('createModal')"
             class="border border-neutral-800/20 rounded-xl ml-2 bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
@@ -70,11 +70,24 @@
   </div>
 </main>
 
-<!-- Modals -->
-<div id="uploadModal" class="modal hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center transition-opacity">
-<h1 class="text-white text-2xl">Soon</h1>
+      <div class="flex justify-end gap-2">
+        <button
+          type="button"
+          onclick="closeModal('uploadModal')"
+          class="px-4 py-2 text-sm font-medium text-neutral-800 bg-white border border-neutral-800 rounded-md hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="px-4 py-2 text-sm font-medium text-white bg-neutral-800 rounded-md hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
+        >
+          Upload
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
-
 <div id="createModal" class="modal hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center transition-opacity">
   <div class="modal-content bg-white rounded-lg p-6 w-96">
     <span class="close absolute top-0 right-0 mt-4 mr-4 cursor-pointer" onclick="closeModal('createModal')">&times;</span>
@@ -138,5 +151,45 @@
     }
   }
 </script>
-
+<script>
+    document.addEventListener("DOMContentLoaded", async function(event) {
+    var uploadBtn = document.getElementById('uploadimage');
+   uploadBtn.addEventListener('click', async function() {
+          var input = document.createElement('input');
+          input.type = 'file';
+          input.accept = '.json';
+          input.click();
+          input.addEventListener('change', function(event) {
+              var file = event.target.files[0];
+              if (file && file.type === 'application/json') {
+                  var reader = new FileReader();
+                  reader.onload = function(event) {
+                      var jsonData = event.target.result;
+                      var xhr = new XMLHttpRequest();
+                      xhr.open('POST', '/admin/images/upload', true);
+                      xhr.setRequestHeader('Content-Type', 'application/json');
+                      xhr.onload = function() {
+                          if (xhr.status === 200) {
+                              console.log('Image uploaded successfully.');
+                              
+                              setTimeout(function() {
+                                  window.location.reload();
+                              }, 500);
+                          } else {
+                              console.error('Error uploading image.');
+                          }
+                      };
+                      xhr.onerror = function() {
+                          console.error('Network error.');
+                      };
+                      xhr.send(jsonData);
+                  };
+                  reader.readAsText(file);
+              } else {
+                  alert('<%= req.translations.jsonSelectFile %>');
+              }
+          });
+      });
+    });
+  </script>
 <%- include('../../components/footer') %>
