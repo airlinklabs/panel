@@ -39,33 +39,6 @@ const adminModule: Module = {
       },
     );
 
-    router.post('/admin/images/upload', async (req, res) => {
-      const jsonData = req.body;
-    
-      try {
-        // Validate the JSON structure
-        const { Name, DockerImage, Scripts, Variables } = jsonData;
-    
-        if (!Name || !DockerImage) {
-          res.redirect('/admin/images?err=missing_fields');
-          return;
-        }
-    
-        // Validate Scripts and Variables (optional fields)
-        const validatedScripts = Scripts ? Scripts : null;
-        const validatedVariables = Variables ? Variables : null;
-    
-        // Ensure Scripts and Variables are valid JSON-like objects (if not null)
-        if (validatedScripts && typeof validatedScripts !== 'object') {
-          res.redirect('/admin/images?err=invalid_scripts_format');
-          return;
-        }
-    
-        if (validatedVariables && typeof validatedVariables !== 'object') {
-          res.redirect('/admin/images?err=invalid_variables_format');
-          return;
-        }
-    
         // Save to the database
         router.post('/admin/images/upload', async (req, res) => {
           const jsonData = req.body;
