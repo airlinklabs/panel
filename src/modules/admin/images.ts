@@ -1,5 +1,4 @@
 import { Router, Request, Response } from 'express';
-import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
 import { Module } from '../../handlers/moduleInit';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
@@ -39,12 +38,10 @@ const adminModule: Module = {
       },
     );
 
-    // Save to the database
     router.post('/admin/images/upload', async (req, res) => {
       const jsonData = req.body;
         
       try {
-        // Validate the JSON structure
         const { Name, DockerImage, Scripts, Variables } = jsonData;
         
         if (!Name || !DockerImage) {
@@ -52,7 +49,6 @@ const adminModule: Module = {
           return;
         }
     
-        // Save to the database
         await prisma.images.create({
           data: {
             name: Name,
