@@ -39,40 +39,33 @@ const adminModule: Module = {
       },
     );
 
+    // Save to the database
+    router.post('/admin/images/upload', async (req, res) => {
+      const jsonData = req.body;
+        
+      try {
+        // Validate the JSON structure
+        const { Name, DockerImage, Scripts, Variables } = jsonData;
+        
+        if (!Name || !DockerImage) {
+          res.redirect('/admin/images?err=missing_fields');
+          return;
+        }
+    
         // Save to the database
-        router.post('/admin/images/upload', async (req, res) => {
-          const jsonData = req.body;
-        
-          try {
-            // Validate the JSON structure
-            const { Name, DockerImage, Scripts, Variables } = jsonData;
-        
-            if (!Name || !DockerImage) {
-              res.redirect('/admin/images?err=missing_fields');
-              return;
-            }
-        
-            // Save to the database
-            const image = await prisma.images.create({
-              data: {
-                name: Name,
-                image: DockerImage
-              },
-            });
-        
-            res.redirect('/admin/images?success=true');
-          } catch (error) {
-            logger.error('Error processing image upload:', error);
-            res.status(500).send('Failed to process the uploaded file.');
-          }
-        });        
+        await prisma.images.create({
+          data: {
+            name: Name,
+            image: DockerImage
+          },
+        });
     
         res.redirect('/admin/images?success=true');
       } catch (error) {
         logger.error('Error processing image upload:', error);
         res.status(500).send('Failed to process the uploaded file.');
-      }
-    });    
+      }        
+    });   
 
     router.post(
       '/admin/images/create',
@@ -81,7 +74,7 @@ const adminModule: Module = {
         const { name, scripts, variables, image } = req.body;
 
         try {
-          const newImage = await prisma.images.create({
+          await prisma.images.create({
             data: {
               name,
               image,
