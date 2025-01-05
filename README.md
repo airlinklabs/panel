@@ -45,7 +45,7 @@ Airlink Panel is an advanced, open-source game server management platform design
 
 4. Configure the Prisma database and run migrations:
    ```bash
-   npm run migrate-deploy
+   npm run migrate:dev
    ```
 
 5. Build the application:
