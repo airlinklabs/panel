@@ -135,16 +135,11 @@ const dashboardModule: Module = {
             try {
               const response = await axios(requestData);
               logger.info('Container stopped successfully:' + response.data);
-              return res.redirect(`/server/${serverId}`);
+              res.status(200).json({ message: 'Container stopped successfully.' });
+              return;
             } catch (stopError) {
               logger.error('Error stopping container:', stopError);
-              errorMessage.message = 'Error stopping the server.';
-              return res.render('user/server/manage', {
-                errorMessage,
-                user: req.session?.user,
-                req,
-                logo: '',
-              });
+              res.status(500).json({ error: 'Failed to stop container.' });
             }
           }
     
@@ -177,7 +172,7 @@ const dashboardModule: Module = {
                 }
               });
             } catch (error) {
-              logger.error('Fehler beim Parsen von server.Variables:', error);
+              logger.error('Error processing server.Variables:', error);
               throw new Error('Invalid format in server.Variables');
             }
           }
@@ -205,20 +200,18 @@ const dashboardModule: Module = {
           const startResponse = await axios(startRequestData);
           logger.info('Container started successfully:' + startResponse.data);
     
-          return res.redirect(`/server/${serverId}`);
+          res.status(200).json({ message: 'Container started successfully.' });
+          return;
         } catch (error) {
           logger.error('Error processing power action:', error);
-          errorMessage.message = 'Error processing server action.';
-          return res.render('user/server/manage', {
-            errorMessage,
-            user: req.session?.user,
-            req,
-            logo: '',
-          });
+          res.status(500).json({ error: 'Failed to process power action.' });
         }
       }
     );
 
+    /*
+     * File system : Files
+     */
     router.get(
       '/server/:id/files',
       isAuthenticatedForServer('id'),
@@ -285,7 +278,122 @@ const dashboardModule: Module = {
       }
     );
 
+    /*
+     * File system : Get file content
+     */
+    router.get(
+      '/server/:id/files/:path(*)',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+        const filePath = req.params?.path;
     
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+    
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true }
+          });
+          
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+    
+          const response = await axios({
+            method: 'GET',
+            url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
+            params: { id: server.UUID, path: filePath },
+            auth: {
+              username: 'Airlink',
+              password: server.node.key
+            }
+          });
+    
+          const extension = filePath.split('.').pop()?.toLowerCase() || '';
+          
+          return res.render('user/server/file', {
+            errorMessage: {},
+            user,
+            file: {
+              name: filePath.split('/').pop(),
+              path: filePath,
+              content: response.data.content,
+              extension
+            },
+            server,
+            req,
+            logo: ''
+          });
+        } catch (error) {
+          logger.error('Error fetching file:', error);
+          res.status(500).json({ error: 'Failed to fetch file' });
+          return;
+        }
+      }
+    );
+    
+    /*
+     * File system : Save
+     */
+    router.post(
+      '/server/:id/files/:path(*)',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+        let filePath = req.params?.path;
+        if (filePath.endsWith('/save')) {
+          filePath = filePath.slice(0, -5);
+        }
+        const { content } = req.body;
+    
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+    
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true }
+          });
+          
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+    
+          await axios({
+            method: 'POST',
+            url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
+            data: { 
+              id: server.UUID,
+              path: filePath,
+              content: content 
+            },
+            auth: {
+              username: 'Airlink',
+              password: server.node.key
+            }
+          });
+    
+          res.json({ success: true });
+          return;
+        } catch (error) {
+          logger.error('Error saving file:', error);
+          res.status(500).json({ error: 'Failed to save file' });
+          return;
+        }
+      }
+    );
 
     return router;
   },

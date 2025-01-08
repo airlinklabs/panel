@@ -29,7 +29,6 @@ const wsServerConsoleModule: Module = {
       }
 
       try {
-        // Fetch user from the database
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user || !user.username) {
           ws.send(JSON.stringify({ error: 'User not found or username missing' }));

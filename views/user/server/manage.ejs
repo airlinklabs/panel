@@ -114,7 +114,7 @@
                 <dt class="truncate text-sm font-medium text-neutral-400"><%= req.translations.addressIP %>:</dt>
                 <dd class="mt-1 text-lg font-medium tracking-tight text-white">
                     <span>
-                      <%= server.node.address %><span class="text-neutral-400">:<%= JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.Port.split(':')[1]).pop() %></span>
+                      <%= server.node.address %><span class="text-neutral-400">:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.Port.split(':')[1]).pop() : '' %></span>
                     </span>
                 </dd>
             </div>
@@ -356,8 +356,8 @@
         if (socket) {
             socket.close();
         }
-        connectWebSocket();
-    }
+        setTimeout(connectWebSocket, 500);
+     }
 
     function sendCommand() {
         const inputElement = document.getElementById('input');
@@ -412,10 +412,6 @@
             method: 'POST',
         })
         .then(response => response.json())
-        .then(data => {
-            console.log(data);
-            restartWebSocket();
-        })
         .catch(error => {
             console.error('Error:', error);
         });
@@ -428,7 +424,6 @@
         })
         .then(response => response.json())
         .then(data => {
-            console.log(data);
             restartWebSocket();
         })
         .catch(error => {

@@ -18,15 +18,34 @@ function generateApiKey(length: number): string {
   return result;
 }
 
+interface NodeWithInstance {
+  id: number;
+  name: string;
+  ram: number;
+  cpu: number;
+  disk: number;
+  address: string;
+  port: number;
+  key: string;
+  createdAt: Date;
+  instances: any;
+}
+
 async function listNodes(res: Response) {
   try {
     const nodes = await prisma.node.findMany();
     const nodesWithStatus = [];
-
-    for (const node of nodes) {
+  
+    for (let node of nodes) {
+      const instances = await prisma.server.findMany({
+        where: {
+          id: node.id,
+        },
+      });
+      (node as NodeWithInstance).instances = instances || [];
       nodesWithStatus.push(await checkNodeStatus(node));
     }
-
+  
     return nodesWithStatus;
   } catch (error) {
     logger.error('Error fetching nodes:', error);
@@ -60,7 +79,9 @@ const adminModule: Module = {
 
           const nodes = await listNodes(res);
 
-          res.render('admin/nodes/nodes', { user, req, logo: '', nodes });
+          const instance = await prisma.server.findMany();
+
+          res.render('admin/nodes/nodes', { user, req, logo: '', nodes, instance });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');

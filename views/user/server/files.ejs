@@ -22,6 +22,7 @@
       </div>
       
       <!-- ERROR Messages -->
+      <!-- Todo : Component -->
       <div class="rounded-xl bg-red-800/10 px-4 py-6 mt-8 ml-8 mb-8 mr-8 hidden" id="daemonIsDown">
         <div class="flex">
             <div class="flex-shrink-0 ml-1.5">
@@ -44,7 +45,7 @@
     </div>
 
 
-        <!-- server Tamplate -->
+      <!-- Server Template -->
       <%- include('../../components/serverTemplate') %>
 
       <div class="flex flex-col lg:flex-row px-8 mt-8">
@@ -52,37 +53,27 @@
           <table class="min-w-full bg-white dark:bg-neutral-800">
             <thead class="bg-neutral-100 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-300">
               <tr>
-                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">
-                  Name
-                </th>
-                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">
-                  Type
-                </th>
-                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">
-                  Extension
-                </th>
-                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">
-                  Category
-                </th>
-                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">
-                  Size
-                </th>
+                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">Name</th>
+                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">Type</th>
+                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">Extension</th>
+                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">Category</th>
+                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">Size</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
               <% files.forEach(file => { %>
-                <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700 transition">
+                <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700 transition cursor-pointer" onclick="window.location.href='/server/<%= server.UUID %>/files/<%= encodeURIComponent(file.name) %>'">
                   <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
                     <%= file.name %>
                   </td>
                   <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
-                    <%= file.type || 'Unkown' %>
+                    <%= file.type || 'Unknown' %>
                   </td>
                   <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
                     <%= file.extension %>
                   </td>
                   <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
-                    <%= file.category || 'Not Categoryzed' %>
+                    <%= file.category || 'Not Categorized' %>
                   </td>
                   <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
                     <% 

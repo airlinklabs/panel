@@ -35,11 +35,16 @@
         </div>
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Server Count</h2>
-          <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= Object.values(nodes.length).reduce((a, b) => a + b, 0) %></p>
-          <% if (nodes.length > 0) { %>
-            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.averageNodeDensity %>: <%= (Object.values(nodes.length).reduce((a, b) => a + b, 0) / nodes.length).toFixed(2) %></p>
+          <p class="text-4xl font-normal text-neutral-800 dark:text-white">
+            <%= Object.values(instance.length).reduce((a, b) => a + b, 0) %>
+          </p>
+          <% if (instance.length > 0) { %>
+            <p class="text-sm text-neutral-400 mt-2">
+              <%= req.translations.averageInstanceDensity %>: 
+              <%= (Object.values(instance.length).reduce((a, b) => a + b, 0) / nodes.length).toFixed(2) %>
+            </p>
           <% } else { %>
-            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noNodesAvailable %></p>
+            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noInstancesAvailable %></p>
           <% } %>
         </div>
       </div>
@@ -105,7 +110,7 @@
                   px-2 py-1 text-xs font-medium ring-1 ring-inset">
                     <%= node.versionRelease || 'unknown' %>
                   </div></td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= nodes.length[node.id] || 0 %></td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= node.instances ? node.instances.length : 0 %></td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                   <div class="flex gap-3">
                     <button onclick="configure('<%= node.id %>')" type="button" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">Configure</button>
