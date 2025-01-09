@@ -174,6 +174,19 @@ body {
   /* 1 */
   line-height: inherit;
   /* 2 */
+  transition: background-color 0.5s ease, color 0.5s ease; /* Added transition for smooth mode change */
+}
+
+.dark\:bg-\[\#141414\]:is(.dark *) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(20 20 20 / var(--tw-bg-opacity, 1));
+  transition: background-color 0.5s ease; /* Added transition for dark mode */
+}
+
+.dark\:text-neutral-300:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(212 212 212 / var(--tw-text-opacity, 1));
+  transition: color 0.5s ease; /* Added transition for dark mode text */
 }
 
 /*
