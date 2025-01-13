@@ -41,15 +41,15 @@
           <div class="bg-white dark:bg-neutral-800 p-6">
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-lg font-medium text-neutral-900 dark:text-white">
-                <%= file.name %>
+                <span class="text-neutral-400 font-md">/app/data/</span><%= file.name %>
               </h2>
               <div class="flex space-x-2">
-                <button id="saveBtn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <button id="saveBtn" class="px-4 py-2 bg-white text-black rounded-xl hover:bg-blue-700">
                   Save
                 </button>
               </div>
             </div>
-            <div class="border rounded-lg h-[500px]" id="editor-container"></div>
+            <div class="border border-neutral-200/80 rounded-lg h-[500px] p-2" id="editor-container"></div>
           </div>
         </div>
       </div>

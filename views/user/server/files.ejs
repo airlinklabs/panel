@@ -1,5 +1,31 @@
 <%- include('../../components/header', { title: 'Files' }) %>
 
+<%
+function getFileIcon(category) {
+  const icons = {
+    'Configuration Files': `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+      <path fill-rule="evenodd" d="M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6Zm14.25 6a.75.75 0 0 1-.22.53l-2.25 2.25a.75.75 0 1 1-1.06-1.06L15.44 12l-1.72-1.72a.75.75 0 1 1 1.06-1.06l2.25 2.25c.141.14.22.331.22.53Zm-10.28-.53a.75.75 0 0 0 0 1.06l2.25 2.25a.75.75 0 1 0 1.06-1.06L8.56 12l1.72-1.72a.75.75 0 1 0-1.06-1.06l-2.25 2.25Z" clip-rule="evenodd" />
+    </svg>    
+    `,
+    'Documents': `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+      <path fill-rule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clip-rule="evenodd" />
+      <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+    </svg>    
+    `,
+    'No Category': `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+      <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
+      <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+    </svg>    
+    `,
+  };
+
+  return icons[category];
+}
+%>
+
 <main class="h-screen m-auto">
   <div class="flex h-screen">
     <!-- Sidebar -->
@@ -20,60 +46,87 @@
           </p>
         </div>
       </div>
-      
-      <!-- ERROR Messages -->
-      <!-- Todo : Component -->
-      <div class="rounded-xl bg-red-800/10 px-4 py-6 mt-8 ml-8 mb-8 mr-8 hidden" id="daemonIsDown">
-        <div class="flex">
-            <div class="flex-shrink-0 ml-1.5">
-                <svg class="animate-spin mt-2 h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg"
-                    fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                    </circle>
-                    <path class="opacity-75" fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                    </path>
-                </svg>
-            </div>
-            <div class="ml-5">
-                <h3 class="text-sm font-medium text-red-400"><%= req.translations.connectionFailure %></h3>
-                <div class="text-sm text-red-400/50">
-                    <p><%= req.translations.connectionFailureText %></p>
-                </div>
-            </div>
-        </div>
-    </div>
 
+      <!-- ERROR Message -->
+      <div class="rounded-xl bg-red-800/10 px-4 py-6 mt-8 hidden" id="daemonIsDown">
+        <div class="flex">
+          <svg class="animate-spin mt-2 h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <div class="ml-5">
+            <h3 class="text-sm font-medium text-red-400"><%= req.translations.connectionFailure %></h3>
+            <p class="text-sm text-red-400/50"><%= req.translations.connectionFailureText %></p>
+          </div>
+        </div>
+      </div>
 
       <!-- Server Template -->
       <%- include('../../components/serverTemplate') %>
 
-      <div class="flex flex-col lg:flex-row px-8 mt-8">
-        <div class="overflow-hidden rounded-lg shadow-md w-full">
+      <div class="flex-grow px-8 mt-8 -mb-4">
+        <h1 class="text-white text-sm">
+          <a class="text-neutral-300 hover:text-neutral-200 transition" href="./files">/app/data/</a>
+          <% 
+              if (req.query.path) { 
+                  const parts = req.query.path.split('/');
+                  let currentPath = '';
+      
+                  parts.forEach((part, index) => {
+                      currentPath += part;
+      
+                      if (index < parts.length - 1) {
+                          %>
+                          <a href="./files?path=<%= currentPath %>" class="text-neutral-300 hover:text-neutral-200 transition"><%= part %></a>/
+                          <% 
+                          currentPath += '/';
+                      } else {
+                          %>
+                          <span class="text-neutral-100"><%= part %></span>
+                          <%
+                      }
+                  });
+              }
+          %>
+        </h1>
+       </div>
+
+      <!-- File Table -->
+      <div class="px-8 mt-8">
+        <div class="overflow-hidden rounded-lg shadow-md">
           <table class="min-w-full bg-white dark:bg-neutral-800">
             <thead class="bg-neutral-100 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-300">
               <tr>
-                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">Name</th>
-                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">Type</th>
-                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">Extension</th>
-                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">Category</th>
-                <th scope="col" class="px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider">Size</th>
+                <th class="px-6 py-3 text-left">
+                  <input type="checkbox" id="selectAll" class="form-checkbox h-5 w-5 text-neutral-500 bg-white/10 border border-white/15 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox">
+                </th>
+                <th class="px-6 py-3 text-left text-sm font-semibold uppercase">File Name</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold uppercase">Size</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold uppercase">&nbsp;</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700">
               <% files.forEach(file => { %>
-                <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700 transition cursor-pointer" onclick="window.location.href='/server/<%= server.UUID %>/files/<%= encodeURIComponent(file.name) %>'">
-                  <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
+                <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700/30 cursor-pointer">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white border-none">
+                    <input type="checkbox" class="form-checkbox h-5 w-5 text-neutral-500 bg-white/5 border border-white/10 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox" data-filename="<%= file.name %>">
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white border-none">
+                    <a href="/server/<%= server.UUID %>/files<%= 
+                      file.type === 'directory' 
+                      ? '?path=' + encodeURIComponent(
+                          currentPath && currentPath !== '/' 
+                          ? currentPath.replace(/^\/+/, '') + '/' + file.name 
+                          : file.name
+                        ) 
+                      : '/edit/' + encodeURIComponent(file.name) 
+                    %>" 
+                       class="flex items-center">
+                    <span class="mr-4">
+                      <%- getFileIcon(file.category || 'No Category') %>
+                    </span>
                     <%= file.name %>
-                  </td>
-                  <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
-                    <%= file.type || 'Unknown' %>
-                  </td>
-                  <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
-                    <%= file.extension %>
-                  </td>
-                  <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
-                    <%= file.category || 'Not Categorized' %>
+                    </a>
                   </td>
                   <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
                     <% 
@@ -87,16 +140,57 @@
                     %>
                     <%= size.toFixed(2) %> <%= sizes[unitIndex] %>
                   </td>
+                  <td class="px-6 py-4 text-sm">
+                    <button onclick="toggleDropdown(event, '<%= file.name %>')" class="text-neutral-400 hover:text-white transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                      </svg>    
+                    </button>
+                    <div id="dropdown-<%= file.name %>" class="absolute right-0 mt-2 w-fit mr-20 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10 transform opacity-0 scale-95 transition-all duration-200 ease-out pointer-events-none">
+                      <div class="p-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                     
+                      </div>
+                    </div>
+                  </td>
                 </tr>
               <% }) %>
             </tbody>
           </table>
         </div>
       </div>
-
-
     </div>
   </div>
 </main>
+
+<script>
+      function toggleDropdown(event, fileName) {
+        event.stopPropagation();
+        const dropdown = document.getElementById(`dropdown-${fileName}`);
+        
+        // Close other open dropdowns with animation
+        document.querySelectorAll('[id^="dropdown-"]').forEach((el) => {
+          if (el.id !== `dropdown-${fileName}` && !el.classList.contains('pointer-events-none')) {
+            closeDropdown(el);
+          }
+        });
+      
+        // Toggle the clicked dropdown
+        if (dropdown.classList.contains('pointer-events-none')) {
+          openDropdown(dropdown);
+        } else {
+          closeDropdown(dropdown);
+        }
+      }
+
+function openDropdown(dropdown) {
+  dropdown.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+  dropdown.classList.add('opacity-100', 'scale-100');
+}
+
+function closeDropdown(dropdown) {
+  dropdown.classList.remove('opacity-100', 'scale-100');
+  dropdown.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+}
+</script>
 
 <%- include('../../components/footer') %>

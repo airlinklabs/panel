@@ -219,6 +219,9 @@ const dashboardModule: Module = {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
+        let path = req.query?.path || '/';
+        path = typeof path === 'string' ? path : String(path);
+        path = path.replace(/\/+/g, '/');
 
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
@@ -244,7 +247,7 @@ const dashboardModule: Module = {
 
           const filesRequest = {
             method: 'GET',
-            url: `http://${server.node.address}:${server.node.port}/fs/list?id=${server.UUID}`,
+            url: `http://${server.node.address}:${server.node.port}/fs/list?id=${server.UUID}&path=${path}`,
             auth: {
               username: 'Airlink',
               password: server.node.key,
@@ -261,6 +264,7 @@ const dashboardModule: Module = {
             errorMessage,
             user,
             files,
+            currentPath: path,
             req,
             server,
             logo: '',
@@ -282,7 +286,7 @@ const dashboardModule: Module = {
      * File system : Get file content
      */
     router.get(
-      '/server/:id/files/:path(*)',
+      '/server/:id/files/edit/:path(*)',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
@@ -390,6 +394,54 @@ const dashboardModule: Module = {
         } catch (error) {
           logger.error('Error saving file:', error);
           res.status(500).json({ error: 'Failed to save file' });
+          return;
+        }
+      }
+    );
+
+    router.delete(
+      '/server/:id/files/rm/:path(*)',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+        const filePath = req.params?.path;
+    
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+    
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true }
+          });
+          
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+    
+          await axios({
+            method: 'DELETE',
+            url: `http://${server.node.address}:${server.node.port}/fs/rm`,
+            data: {
+              id: server.UUID,
+              path: filePath
+            },
+            auth: {
+              username: 'Airlink',
+              password: server.node.key
+            }
+          });
+    
+          res.json({ success: true });
+          return;
+        } catch (error) {
+          logger.error('Error deleting file:', error);
+          res.status(500).json({ error: 'Failed to delete file' });
           return;
         }
       }
