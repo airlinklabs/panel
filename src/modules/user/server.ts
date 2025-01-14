@@ -257,8 +257,18 @@ const dashboardModule: Module = {
             }
           };
 
-          let files = await axios(filesRequest);
-          files = files.data;
+          let files = (await axios(filesRequest)).data as any[];
+          files = typeof files === 'string' ? JSON.parse(files) : files;
+          
+          files = files.sort((a: any, b: any) => {
+            if (a.type === 'directory' && b.type === 'file') {
+              return -1;
+            } else if (a.type === 'file' && b.type === 'directory') {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
 
           return res.render('user/server/files', {
             errorMessage,

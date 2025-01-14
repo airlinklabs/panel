@@ -14,6 +14,11 @@ function getFileIcon(category) {
       <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
     </svg>    
     `,
+    'Folder': `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+      <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z" />
+    </svg>    
+    `,
     'No Category': `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
       <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
@@ -98,7 +103,7 @@ function getFileIcon(category) {
             <thead class="bg-neutral-100 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-300">
               <tr>
                 <th class="px-6 py-3 text-left">
-                  <input type="checkbox" id="selectAll" class="form-checkbox h-5 w-5 text-neutral-500 bg-white/10 border border-white/15 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox">
+                  <input type="checkbox" id="selectAll" class="form-checkbox h-5 w-5 text-neutral-500 bg-white/10 border border-white/15 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox" disabled>
                 </th>
                 <th class="px-6 py-3 text-left text-sm font-semibold uppercase">File Name</th>
                 <th class="px-6 py-3 text-left text-sm font-semibold uppercase">Size</th>
@@ -109,7 +114,7 @@ function getFileIcon(category) {
               <% files.forEach(file => { %>
                 <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700/30 cursor-pointer">
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white border-none">
-                    <input type="checkbox" class="form-checkbox h-5 w-5 text-neutral-500 bg-white/5 border border-white/10 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox" data-filename="<%= file.name %>">
+                    <input type="checkbox" class="form-checkbox h-5 w-5 text-neutral-500 bg-white/5 border border-white/10 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>">
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white border-none">
                     <a href="/server/<%= server.UUID %>/files<%= 
@@ -123,7 +128,9 @@ function getFileIcon(category) {
                     %>" 
                        class="flex items-center">
                     <span class="mr-4">
-                      <%- getFileIcon(file.category || 'No Category') %>
+                      <%- getFileIcon(
+                          file.type === 'directory' ? 'Folder' : file.category || 'No Category'
+                        ) %>
                     </span>
                     <%= file.name %>
                     </a>
@@ -147,9 +154,19 @@ function getFileIcon(category) {
                       </svg>    
                     </button>
                     <div id="dropdown-<%= file.name %>" class="absolute right-0 mt-2 w-fit mr-20 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10 transform opacity-0 scale-95 transition-all duration-200 ease-out pointer-events-none">
-                      <div class="p-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                     
-                      </div>
+                      <div 
+                      class="p-2 bg-gray-900 dark:bg-white rounded-lg shadow-md" 
+                      role="menu" 
+                      aria-orientation="vertical" 
+                      aria-labelledby="options-menu"
+                    >
+                      <button 
+                        class="transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-red-500 dark:text-red-600 hover:bg-red-50 dark:hover:bg-red-50 text-left" 
+                        role="menuitem" onclick="deletefile('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')"
+                      >
+                        Delete
+                      </button>
+                    </div>
                     </div>
                   </td>
                 </tr>
@@ -163,34 +180,50 @@ function getFileIcon(category) {
 </main>
 
 <script>
-      function toggleDropdown(event, fileName) {
-        event.stopPropagation();
-        const dropdown = document.getElementById(`dropdown-${fileName}`);
-        
-        // Close other open dropdowns with animation
-        document.querySelectorAll('[id^="dropdown-"]').forEach((el) => {
-          if (el.id !== `dropdown-${fileName}` && !el.classList.contains('pointer-events-none')) {
-            closeDropdown(el);
-          }
-        });
+  document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+      const target = event.target.closest('tr');
       
-        // Toggle the clicked dropdown
-        if (dropdown.classList.contains('pointer-events-none')) {
-          openDropdown(dropdown);
-        } else {
-          closeDropdown(dropdown);
-        }
+      if (target) {
+        const fileName = target.querySelector('button').getAttribute('onclick').match(/'(.+?)'/)[1];
+        showDropdown(event, fileName);
       }
+    });
 
-function openDropdown(dropdown) {
-  dropdown.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
-  dropdown.classList.add('opacity-100', 'scale-100');
-}
+    document.addEventListener('click', () => {
+      document.querySelectorAll('[id^="dropdown-"]').forEach((el) => closeDropdown(el));
+    });
+  });
 
-function closeDropdown(dropdown) {
-  dropdown.classList.remove('opacity-100', 'scale-100');
-  dropdown.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
-}
+  function showDropdown(event, fileName) {
+    const dropdown = document.getElementById(`dropdown-${fileName}`);
+    
+    const { clientX: mouseX, clientY: mouseY } = event;
+    const dropdownRect = dropdown.getBoundingClientRect();
+    const bodyWidth = document.body.clientWidth;
+
+    dropdown.style.left = `${Math.min(mouseX, bodyWidth - dropdownRect.width)}px`;
+    dropdown.style.top = `${mouseY}px`;
+
+    openDropdown(dropdown);
+  }
+
+  function openDropdown(dropdown) {
+    dropdown.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+    dropdown.classList.add('opacity-100', 'scale-100');
+  }
+
+  function closeDropdown(dropdown) {
+    dropdown.classList.remove('opacity-100', 'scale-100');
+    dropdown.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+  }
+
+  function deletefile(fileName, filePath) {
+    fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(filePath), { method: 'DELETE' }).then(() => {
+      location.reload();
+    });
+  }
 </script>
 
 <%- include('../../components/footer') %>
