@@ -1246,6 +1246,10 @@ select {
   margin-top: auto;
 }
 
+.mb-5 {
+  margin-bottom: 1.25rem;
+}
+
 .block {
   display: block;
 }
@@ -2359,6 +2363,10 @@ select {
 .bg-zinc-950 {
   --tw-bg-opacity: 1;
   background-color: rgb(9 9 11 / var(--tw-bg-opacity, 1));
+}
+
+.bg-white\/90 {
+  background-color: rgb(255 255 255 / 0.9);
 }
 
 .bg-opacity-50 {
@@ -3584,6 +3592,24 @@ select {
   background-color: rgb(255 255 255 / 0.05);
 }
 
+.dark\:bg-neutral-700\/20:is(.dark *) {
+  background-color: rgb(64 64 64 / 0.2);
+}
+
+.dark\:bg-neutral-200:is(.dark *) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(229 229 229 / var(--tw-bg-opacity, 1));
+}
+
+.dark\:bg-neutral-400:is(.dark *) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(163 163 163 / var(--tw-bg-opacity, 1));
+}
+
+.dark\:bg-neutral-400\/20:is(.dark *) {
+  background-color: rgb(163 163 163 / 0.2);
+}
+
 .dark\:text-amber-400:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(251 191 36 / var(--tw-text-opacity, 1));
@@ -3625,6 +3651,11 @@ select {
 .dark\:text-white:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+
+.dark\:text-neutral-100:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(245 245 245 / var(--tw-text-opacity, 1));
 }
 
 .dark\:ring-white\/5:is(.dark *) {
