@@ -1242,6 +1242,10 @@ select {
   margin-top: auto;
 }
 
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+
 .block {
   display: block;
 }
@@ -3304,6 +3308,11 @@ select {
 
 .hover\:bg-white\/\[0\.05\]:hover {
   background-color: rgb(255 255 255 / 0.05);
+}
+
+.hover\:bg-neutral-700:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(64 64 64 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:bg-\[position\:200\%_0\2c 0_0\]:hover {

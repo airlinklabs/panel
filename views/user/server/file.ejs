@@ -119,7 +119,7 @@
   document.getElementById('saveBtn').addEventListener('click', async () => {
     const content = editor.getValue();
     try {
-      const response = await fetch(`/api/server/<%= server.UUID %>/files/<%= file.path %>`, {
+      const response = await fetch(`/server/<%= server.UUID %>/files/<%= file.path %>`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
