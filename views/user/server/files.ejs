@@ -117,14 +117,18 @@ function getFileIcon(category) {
                     <input type="checkbox" class="form-checkbox h-5 w-5 text-neutral-500 bg-white/5 border border-white/10 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>">
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white border-none">
-                    <a href="/server/<%= server.UUID %>/files<%= 
-                      file.type === 'directory' 
-                      ? '?path=' + encodeURIComponent(
-                          currentPath && currentPath !== '/' 
-                          ? currentPath.replace(/^\/+/, '') + '/' + file.name 
-                          : file.name
-                        ) 
-                      : '/edit/' + encodeURIComponent(file.name) 
+                    <a href="/server/<%= server.UUID %>/files<%=
+                      file.type === 'directory'
+                        ? '?path=' + encodeURIComponent(
+                            currentPath && currentPath !== '/'
+                              ? currentPath.replace(/^\/+/, '') + '/' + file.name
+                              : file.name
+                          )
+                        : '/edit/' + encodeURIComponent(
+                            currentPath && currentPath !== '/'
+                              ? currentPath.replace(/^\/+/, '') + '/' + file.name
+                              : file.name
+                          )
                     %>" 
                        class="flex items-center">
                     <span class="mr-4">
