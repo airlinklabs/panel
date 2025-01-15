@@ -41,7 +41,28 @@
           <div class="bg-white dark:bg-neutral-800 p-6">
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-lg font-medium text-neutral-900 dark:text-white">
-                <span class="text-neutral-400 font-md">/app/data/</span><%= file.name %>
+                <a class="text-neutral-300 hover:text-neutral-200 transition" href="/server/<%= server.UUID %>/files">/app/data/</a>
+              <% 
+                  if (file.path) { 
+                      const parts = file.path.split('/');
+                      let currentPath = '';
+          
+                      parts.forEach((part, index) => {
+                          currentPath += part;
+          
+                          if (index < parts.length - 1) {
+                              %>
+                              <a href="/server/<%= server.UUID %>/files?path=<%= currentPath %>" class="text-neutral-300 hover:text-neutral-200 transition"><%= part %></a>/
+                              <% 
+                              currentPath += '/';
+                          } else {
+                              %>
+                              <span class="text-neutral-100"><%= part %></span>
+                              <%
+                          }
+                      });
+                  }
+              %>
               </h2>
               <div class="flex space-x-2">
                 <button id="saveBtn" class="px-4 py-2 bg-white text-black rounded-xl hover:bg-blue-700">
