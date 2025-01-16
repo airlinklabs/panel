@@ -2369,6 +2369,10 @@ select {
   background-color: rgb(255 255 255 / 0.9);
 }
 
+.bg-amber-800\/10 {
+  background-color: rgb(146 64 14 / 0.1);
+}
+
 .bg-opacity-50 {
   --tw-bg-opacity: 0.5;
 }
@@ -2906,6 +2910,10 @@ select {
 .text-zinc-200 {
   --tw-text-opacity: 1;
   color: rgb(228 228 231 / var(--tw-text-opacity, 1));
+}
+
+.text-amber-400\/80 {
+  color: rgb(251 191 36 / 0.8);
 }
 
 .underline {
