@@ -3,6 +3,7 @@ import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
+import axios from 'axios';
 
 const prisma = new PrismaClient();
 
@@ -116,6 +117,74 @@ const adminModule: Module = {
         } catch (error) {
           logger.error('Error creating server:', error);
           res.status(500).send('Error creating server');
+        }
+      },
+    );
+
+    router.get(
+      '/admin/server/delete/:id',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        const { id } = req.params;
+        
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.redirect('/login');
+            return;
+          }
+    
+          const serverId = parseInt(id);
+          if (isNaN(serverId)) {
+            res.status(400).send('Invalid server ID');
+            return;
+          }
+    
+          const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            include: { node: true, image: true, owner: true },
+          });
+    
+          if (!server) {
+            res.status(404).send('Server not found');
+            return;
+          }
+    
+          try {
+            const response = await axios.delete(
+              `http://${server.node.address}:${server.node.port}/container/delete`,
+              {
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                data: {
+                  id: serverId,
+                  deleteCmd: 'delete',
+                }
+              }
+            );
+    
+            if (response.status !== 200) {
+              throw new Error('Failed to delete server container');
+            }
+    
+            await prisma.server.delete({ where: { id: serverId } });
+            res.redirect('/admin/servers');
+            return;
+          } catch (error) {
+            logger.error('Error deleting server container:', error);
+            res.status(500).send(`Failed to delete server container: ${error}`);
+            return;
+          }
+        } catch (error) {
+          logger.error('Error in delete server route:', error);
+          res.status(500).send('Error deleting server');
+          return;
         }
       },
     );

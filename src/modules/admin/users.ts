@@ -148,12 +148,34 @@ const adminModule: Module = {
         //     - render data user
         //     - update user
         //     - see how many time he connected
-        //     - see whitch page was he see
+        //     - see which page was he see
         //     - him request ...
 
         res.render('admin/users/user', { user, req, logo: '', dataUser });
       } catch (error) {
         logger.error('Error fetching user:', error);
+        return res.redirect('/login');
+      }
+    });
+
+    router.delete('/admin/users/delete/:id/', isAuthenticated(true), async (req: Request, res: Response) => {
+      try {
+        const userId = req.session?.user?.id;
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+          return res.redirect('/login');
+        }
+
+        const dataUser = await prisma.users.findUnique({ where: { id: parseInt(req.params.id, 10) } });
+        if (!dataUser) {
+          return res.redirect('/admin/users');
+        }
+
+        await prisma.users.delete({ where: { id: parseInt(req.params.id, 10) } });
+
+        res.status(200).json({ message: 'User deleted successfully.' });
+      } catch (error) {
+        logger.error('Error deleting user:', error);
         return res.redirect('/login');
       }
     });

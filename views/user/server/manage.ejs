@@ -28,7 +28,7 @@
     }
 </style>
 
-<main class="h-screen m-auto">
+<main class="h-screen m-auto text-white">
   <div class="flex h-screen">
     <!-- Sidebar -->
     <div class="w-60 h-full">
@@ -37,6 +37,22 @@
 
     <!-- Content -->
     <div class="flex-1 p-6 overflow-y-auto pt-16">
+    <!-- Alpha Warning Alert -->
+    <div class="rounded-xl bg-amber-800/10 px-4 py-4 mx-8 mt-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-amber-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-amber-400">Alpha Version Notice</h3>
+                <div class="mt-1 text-sm text-amber-400/80">
+                    <p>Server Manage is in alpha. This version may have bugs in the console or other features.</p>
+                </div>
+            </div>
+        </div>
+    </div>
       <!-- Page Header -->
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
@@ -285,6 +301,7 @@
         };
 
         socket.onclose = () => {
+            console.log('WebSocket connection closed.');
             writeConsole('system', 'system', 'WebSocket connection closed. Reconnecting...');
             setTimeout(connectWebSocket, 5000); // Attempt to reconnect every 5 seconds
         };
@@ -406,12 +423,20 @@
         return [r, g, b];
     }
 
+    let id = 0;
+
     document.getElementById('startButton').addEventListener('click', () => {
         const serverUUID = '<%= server.UUID %>';
         fetch(`/server/${serverUUID}/power/start`, {
             method: 'POST',
         })
         .then(response => response.json())
+        .then(data => {
+            if (id < 1) {
+                restartWebSocket();
+                id++;
+            }
+        })
         .catch(error => {
             console.error('Error:', error);
         });

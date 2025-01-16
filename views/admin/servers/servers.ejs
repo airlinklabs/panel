@@ -103,7 +103,9 @@
                     <a href="./server/<%= server.id %>">
                       <button type="button" class="rounded-xl bg-white border border-neutral-800/20 hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">Edit</button>
                     </a>
-                    <button onclick="deleteserver('<%= server.id %>')" type="button" class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Remove</button>
+                    <a href="/admin/server/delete/<%= server.id %>">
+                      <button  type="button" class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Remove</button>
+                    </a>
                   </div>
                 </td>
               </tr>
@@ -114,5 +116,13 @@
     </div>
   </div>
 </main>
+
+<script>
+  function handleRowClick(event, url) {
+    //event.preventDefault();
+    //alert("Sorry this feature is not available yet");
+    //window.location.href = url;
+  }
+</script>
 
 <%- include('../../components/footer') %>
