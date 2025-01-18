@@ -942,6 +942,22 @@ select {
   bottom: 0px;
 }
 
+.bottom-10 {
+  bottom: 2.5rem;
+}
+
+.bottom-14 {
+  bottom: 3.5rem;
+}
+
+.bottom-16 {
+  bottom: 4rem;
+}
+
+.bottom-5 {
+  bottom: 1.25rem;
+}
+
 .left-0 {
   left: 0px;
 }
@@ -960,6 +976,10 @@ select {
 
 .right-4 {
   right: 1rem;
+}
+
+.right-5 {
+  right: 1.25rem;
 }
 
 .top-0 {
@@ -1092,6 +1112,10 @@ select {
 
 .mb-4 {
   margin-bottom: 1rem;
+}
+
+.mb-5 {
+  margin-bottom: 1.25rem;
 }
 
 .mb-6 {
@@ -1244,10 +1268,6 @@ select {
 
 .mt-auto {
   margin-top: auto;
-}
-
-.mb-5 {
-  margin-bottom: 1.25rem;
 }
 
 .block {
@@ -1577,6 +1597,11 @@ select {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
+.translate-y-0 {
+  --tw-translate-y: 0px;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
 .translate-y-full {
   --tw-translate-y: 100%;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
@@ -1896,6 +1921,10 @@ select {
   border-top-right-radius: 0.75rem;
 }
 
+.rounded-tl-xl {
+  border-top-left-radius: 0.75rem;
+}
+
 .border {
   border-width: 1px;
 }
@@ -2095,6 +2124,10 @@ select {
 .bg-amber-800 {
   --tw-bg-opacity: 1;
   background-color: rgb(146 64 14 / var(--tw-bg-opacity, 1));
+}
+
+.bg-amber-800\/10 {
+  background-color: rgb(146 64 14 / 0.1);
 }
 
 .bg-black {
@@ -2363,14 +2396,6 @@ select {
 .bg-zinc-950 {
   --tw-bg-opacity: 1;
   background-color: rgb(9 9 11 / var(--tw-bg-opacity, 1));
-}
-
-.bg-white\/90 {
-  background-color: rgb(255 255 255 / 0.9);
-}
-
-.bg-amber-800\/10 {
-  background-color: rgb(146 64 14 / 0.1);
 }
 
 .bg-opacity-50 {
@@ -2719,6 +2744,10 @@ select {
   color: rgb(251 191 36 / var(--tw-text-opacity, 1));
 }
 
+.text-amber-400\/80 {
+  color: rgb(251 191 36 / 0.8);
+}
+
 .text-amber-500 {
   --tw-text-opacity: 1;
   color: rgb(245 158 11 / var(--tw-text-opacity, 1));
@@ -2910,10 +2939,6 @@ select {
 .text-zinc-200 {
   --tw-text-opacity: 1;
   color: rgb(228 228 231 / var(--tw-text-opacity, 1));
-}
-
-.text-amber-400\/80 {
-  color: rgb(251 191 36 / 0.8);
 }
 
 .underline {
@@ -3510,11 +3535,6 @@ select {
   background-color: rgb(59 130 246 / var(--tw-bg-opacity, 1));
 }
 
-.dark\:divide-neutral-700:is(.dark *) > :not([hidden]) ~ :not([hidden]) {
-  --tw-divide-opacity: 1;
-  border-color: rgb(64 64 64 / var(--tw-divide-opacity, 1));
-}
-
 .dark\:divide-white\/10:is(.dark *) > :not([hidden]) ~ :not([hidden]) {
   border-color: rgb(255 255 255 / 0.1);
 }
@@ -3561,17 +3581,16 @@ select {
   background-color: rgb(34 197 94 / 0.5);
 }
 
+.dark\:bg-neutral-400\/20:is(.dark *) {
+  background-color: rgb(163 163 163 / 0.2);
+}
+
 .dark\:bg-neutral-500\/10:is(.dark *) {
   background-color: rgb(115 115 115 / 0.1);
 }
 
 .dark\:bg-neutral-600\/20:is(.dark *) {
   background-color: rgb(82 82 82 / 0.2);
-}
-
-.dark\:bg-neutral-700:is(.dark *) {
-  --tw-bg-opacity: 1;
-  background-color: rgb(64 64 64 / var(--tw-bg-opacity, 1));
 }
 
 .dark\:bg-neutral-700\/70:is(.dark *) {
@@ -3600,24 +3619,6 @@ select {
   background-color: rgb(255 255 255 / 0.05);
 }
 
-.dark\:bg-neutral-700\/20:is(.dark *) {
-  background-color: rgb(64 64 64 / 0.2);
-}
-
-.dark\:bg-neutral-200:is(.dark *) {
-  --tw-bg-opacity: 1;
-  background-color: rgb(229 229 229 / var(--tw-bg-opacity, 1));
-}
-
-.dark\:bg-neutral-400:is(.dark *) {
-  --tw-bg-opacity: 1;
-  background-color: rgb(163 163 163 / var(--tw-bg-opacity, 1));
-}
-
-.dark\:bg-neutral-400\/20:is(.dark *) {
-  background-color: rgb(163 163 163 / 0.2);
-}
-
 .dark\:text-amber-400:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(251 191 36 / var(--tw-text-opacity, 1));
@@ -3630,6 +3631,11 @@ select {
 .dark\:text-blue-400:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(96 165 250 / var(--tw-text-opacity, 1));
+}
+
+.dark\:text-neutral-100:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(245 245 245 / var(--tw-text-opacity, 1));
 }
 
 .dark\:text-neutral-300:is(.dark *) {
@@ -3659,11 +3665,6 @@ select {
 .dark\:text-white:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
-}
-
-.dark\:text-neutral-100:is(.dark *) {
-  --tw-text-opacity: 1;
-  color: rgb(245 245 245 / var(--tw-text-opacity, 1));
 }
 
 .dark\:ring-white\/5:is(.dark *) {
