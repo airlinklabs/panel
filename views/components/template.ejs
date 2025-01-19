@@ -171,7 +171,8 @@
         };
     
         const updateActiveLink = (currentPath) => {
-          const adjustedPath = currentPath.replace('server/', 'servers');
+          const adjustedPath = currentPath.replace('server/' + currentPath.split('server/').pop(), '');
+          console.log(adjustedPath)
           const adjustedPathNormalized = normalizePath(adjustedPath);
           let foundActive = false;
     
