@@ -189,7 +189,7 @@ const dashboardModule: Module = {
             },
             data: {
               id: String(serverId),
-              image: String(server.image?.image),
+              image: String(server.image?.dockerImages?.[0] ?? ''),
               ports: ports,
               Memory: server.Memory * 1024,
               Cpu: server.Cpu,
