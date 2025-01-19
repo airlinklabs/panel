@@ -1,72 +1,79 @@
-generator client {
-  provider = "prisma-client-js"
-}
+  generator client {
+    provider = "prisma-client-js"
+  }
 
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
+  datasource db {
+    provider = "sqlite"
+    url      = env("DATABASE_URL")
+  }
 
-model Users {
+  model Users {
+    id          Int      @id @default(autoincrement())
+    email       String   @unique
+    username    String?
+    password    String
+    isAdmin     Boolean  @default(false)
+    description String?  @default("No About Me")
+    servers     Server[]
+  }
+
+  model Session {
+    id         String   @id @default(cuid())
+    session_id String   @unique
+    data       String
+    expires    DateTime
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+  }
+
+  model Server {
+    id        Int      @id @default(autoincrement())
+    UUID      String   @unique @default(uuid())
+    name      String
+    description String?
+    createdAt DateTime @default(now())
+    Ports     String
+    Memory    Int
+    Cpu       Int
+    Storage   Int
+    Variables String?
+    Suspended Boolean  @default(false)
+    ownerId   Int
+    nodeId    Int
+    imageId   Int
+    node      Node     @relation(fields: [nodeId], references: [id])
+    owner     Users    @relation(fields: [ownerId], references: [id])
+    image     Images   @relation(fields: [imageId], references: [id])
+  }
+
+model Images {
   id          Int      @id @default(autoincrement())
-  email       String   @unique
-  username    String?
-  password    String
-  isAdmin     Boolean  @default(false)
-  description String?  @default("No About Me")
+  UUID        String   @unique @default(uuid())
+  name        String?
+  description String?
+  author      String?
+  authorName  String?
+  createdAt   DateTime @default(now())
+
+  meta        String?
+  dockerImages String?
+  startup     String?
+  info        String?
+  scripts     String?
+  variables   String?
+
   servers     Server[]
 }
 
-model Session {
-  id         String   @id @default(cuid())
-  session_id String   @unique
-  data       String
-  expires    DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
-model Server {
-  id        Int      @id @default(autoincrement())
-  UUID      String   @unique @default(uuid())
-  name      String
-  description String?
-  createdAt DateTime @default(now())
-  Ports     String
-  Memory    Int
-  Cpu       Int
-  Storage   Int
-  Variables String?
-  Suspended Boolean  @default(false)
-  ownerId   Int
-  nodeId    Int
-  imageId   Int
-  node      Node     @relation(fields: [nodeId], references: [id])
-  owner     Users    @relation(fields: [ownerId], references: [id])
-  image     Images   @relation(fields: [imageId], references: [id])
-}
-
-model Images {
-  id        Int      @id @default(autoincrement())
-  UUID      String   @unique @default(uuid())
-  name      String
-  createdAt DateTime @default(now())
-  image     String
-  scripts   String?
-  variables String?
-  servers   Server[]
-}
-
-
-model Node {
-  id        Int      @id @default(autoincrement())
-  name      String
-  ram       Int      @default(0)
-  cpu       Int      @default(0)
-  disk      Int      @default(0)
-  address   String   @default("127.0.0.1")
-  port      Int      @default(3001)
-  key       String
-  createdAt DateTime @default(now())
-  servers   Server[]
-}
+  model Node {
+    id        Int      @id @default(autoincrement())
+    name      String
+    ram       Int      @default(0)
+    cpu       Int      @default(0)
+    disk      Int      @default(0)
+    address   String   @default("127.0.0.1")
+    port      Int      @default(3001)
+    key       String
+    createdAt DateTime @default(now())
+    servers   Server[]
+  }

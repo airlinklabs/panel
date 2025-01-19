@@ -5,6 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 
 const prisma = new PrismaClient();
+
 const adminModule: Module = {
   info: {
     name: 'Admin Module for Images',
@@ -39,22 +40,8 @@ const adminModule: Module = {
     );
 
     router.post('/admin/images/upload', async (req, res) => {
-      const jsonData = req.body;
-        
       try {
-        const { Name, DockerImage, Scripts, Variables } = jsonData;
-        
-        if (!Name || !DockerImage) {
-          res.redirect('/admin/images?err=missing_fields');
-          return;
-        }
-    
-        await prisma.images.create({
-          data: {
-            name: Name,
-            image: DockerImage
-          },
-        });
+
     
         res.redirect('/admin/images?success=true');
       } catch (error) {
@@ -70,14 +57,6 @@ const adminModule: Module = {
         const { name, scripts, variables, image } = req.body;
 
         try {
-          await prisma.images.create({
-            data: {
-              name,
-              image,
-              scripts: scripts || null,
-              variables: variables || null,
-            },
-          });
 
           res.redirect('/admin/images?err=none');
         } catch (error) {

@@ -21,7 +21,8 @@
     "migrate:deploy": "npx prisma migrate deploy && npx prisma generate",
     "watch-ts": "tsc -w",
     "watch-css": "tailwindcss -i ./public/tw.conf -o ./public/styles.css --watch",
-    "watch": "concurrently \"npm run watch-ts\" \"npm run watch-css\""
+    "watch": "concurrently \"npm run watch-ts\" \"npm run watch-css\"",
+    "seed": "ts-node src/handlers/cmd/seed.ts"
   },
   "dependencies": {
     "axios": "^1.7.7",
