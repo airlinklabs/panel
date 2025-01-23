@@ -89,6 +89,8 @@ const adminModule: Module = {
           Memory,
           Cpu,
           Storage,
+          dockerImage,
+          variables
         } = req.body;
         
         const userId = req.session?.user?.id;
@@ -100,7 +102,36 @@ const adminModule: Module = {
         const Port = `[{"Port": "${Ports}", "primary": true}]`;
 
         try {
-          await prisma.server.create({
+          const dockerImages = await prisma.images.findUnique({
+            where: {
+              id: parseInt(imageId),
+            },
+          }).then((image) => {
+            if (!image) {
+              return null;
+            }
+            return image.dockerImages;
+          });
+
+          if (!dockerImages) {
+            res.status(400).send('Docker image not found');
+            return;
+          }
+
+          const imagesDocker = JSON.parse(dockerImages);
+
+          type ImageDocker = { [key: string]: string };
+
+          const imageDocker: ImageDocker | undefined = imagesDocker.find((image: ImageDocker) =>
+            Object.keys(image).includes(dockerImage)
+          );
+
+          if (!imageDocker) {
+            res.status(400).send('Docker image not found');
+            return;
+          }
+
+         await prisma.server.create({
             data: {
               name,
               description,
@@ -111,6 +142,8 @@ const adminModule: Module = {
               Memory: parseInt(Memory) || 4,
               Cpu: parseInt(Cpu) || 2,
               Storage: parseInt(Storage) || 20,
+              Variables: JSON.stringify(variables) || '[]',
+              dockerImage: JSON.stringify(imageDocker),
             },
           });
           res.status(200).send('Server created successfully');

@@ -136,16 +136,22 @@
 
     function updateDockerImages() {
       const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
-      const dockerImages = JSON.parse(selectedOption.getAttribute('data-docker-images')) || {};
+      const dockerImagesData = selectedOption.getAttribute('data-docker-images');
 
       dockerImageSelect.innerHTML = '<option value="" disabled selected>Select a Docker image</option>';
 
-      Object.keys(dockerImages).forEach(imageName => {
-        const option = document.createElement('option');
-        option.value = dockerImages[imageName];
-        option.textContent = imageName;
-        dockerImageSelect.appendChild(option);
-      });
+
+      if (dockerImagesData) {
+        const dockerImages = JSON.parse(dockerImagesData);
+        dockerImages.forEach(imageObj => {
+          Object.entries(imageObj).forEach(([key, value]) => {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = key;
+            dockerImageSelect.appendChild(option);
+          });
+        });
+      }
     }
 
     function updateVariables() {
@@ -273,7 +279,7 @@
         .then(response => response)
         .then(data => {
           console.log('Success');
-          window.location.href = '/admin/servers?err=none';
+         window.location.href = '/admin/servers?err=none';
         })
         .catch(error => {
           console.error('Error:', error);

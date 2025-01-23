@@ -37,6 +37,7 @@
     Cpu       Int
     Storage   Int
     Variables String?
+    dockerImage String?
     Suspended Boolean  @default(false)
     ownerId   Int
     nodeId    Int
