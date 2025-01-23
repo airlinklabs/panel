@@ -142,5 +142,6 @@
   "usernameDescriptionSuccess": "Description updated successfully!",
   "usernameDescriptionError": "Error updating description. Please try again later.",
   "nodes": "Nodes",
-  "daemonKey": "Daemon Key"
+  "daemonKey": "Daemon Key",
+  "DockerImage": "Docker Image"
 }

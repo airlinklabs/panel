@@ -38,8 +38,15 @@ class Seeder {
     }), {});
   }
 
-  private stringifyJsonFields(image: ImageData): Record<string, any> {
+  private stringifyJsonFields(image: Record<string, any>): Record<string, any> {
     const jsonFields = ['meta', 'dockerImages', 'info', 'scripts', 'variables'];
+
+    if (!image.dockerImages && image.docker_images) {
+      image.dockerImages = image.docker_images;
+    } else if (!image.dockerImages) {
+      image.dockerImages = {};
+    }
+
     return {
       ...image,
       ...Object.fromEntries(
@@ -94,7 +101,7 @@ class Seeder {
 
       if (existingImages > 0) {
         const shouldContinue = await this.promptUser(
-          "'images' is already set in the database. Do you want to continue seeding? (y/n) "
+          '\'images\' is already set in the database. Do you want to continue seeding? (y/n) '
         );
 
         if (!shouldContinue) {
