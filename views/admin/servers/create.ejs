@@ -132,6 +132,7 @@
     const serverImageSelect = document.getElementById('serverImage');
     const dockerImageSelect = document.getElementById('dockerImage');
     const variablesContainer = document.getElementById('variablesContainer');
+    const form = document.getElementById('createServerForm');
 
     function updateDockerImages() {
       const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
@@ -239,6 +240,45 @@
         variablesContainer.appendChild(variableDiv);
       });
     }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const variablesArray = [];
+
+      const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+      const variables = JSON.parse(selectedOption.getAttribute('data-variables')) || [];
+
+      variables.forEach(variable => {
+        const variableValue = formData.get(variable.env);
+        if (variableValue !== null) {
+          variablesArray.push({
+            name: variable.env,
+            value: variableValue
+          });
+        }
+      });
+
+      const data = Object.fromEntries(formData);
+      data.variables = variablesArray;
+
+      fetch('/admin/servers/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+        .then(response => response)
+        .then(data => {
+          console.log('Success');
+          window.location.href = '/admin/servers?err=none';
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    });
 
     updateDockerImages();
     updateVariables();

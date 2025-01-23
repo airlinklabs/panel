@@ -113,7 +113,7 @@ const adminModule: Module = {
               Storage: parseInt(Storage) || 20,
             },
           });
-          res.redirect('/admin/servers');
+          res.status(200).send('Server created successfully');
         } catch (error) {
           logger.error('Error creating server:', error);
           res.status(500).send('Error creating server');
