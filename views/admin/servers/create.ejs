@@ -257,11 +257,18 @@
       const variables = JSON.parse(selectedOption.getAttribute('data-variables')) || [];
 
       variables.forEach(variable => {
-        const variableValue = formData.get(variable.env);
+        let variableValue = formData.get(variable.env);
+        if (variable.type === 'boolean') {
+          variableValue = (variableValue === 'on') ? 1 : 0;
+        } else if (variable.type === 'number') {
+          variableValue = parseInt(variableValue);
+        }
         if (variableValue !== null) {
           variablesArray.push({
-            name: variable.env,
-            value: variableValue
+            env: variable.env,
+            name: variable.name,
+            value: variableValue,
+            type: variable.type
           });
         }
       });
