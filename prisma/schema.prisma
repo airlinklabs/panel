@@ -37,6 +37,7 @@
     Cpu       Int
     Storage   Int
     Variables String?
+    StartCommand String?
     dockerImage String?
     Suspended Boolean  @default(false)
     ownerId   Int
@@ -55,7 +56,6 @@ model Images {
   author      String?
   authorName  String?
   createdAt   DateTime @default(now())
-
   meta        String?
   dockerImages String?
   startup     String?

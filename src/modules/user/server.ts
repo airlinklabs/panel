@@ -176,6 +176,13 @@ const dashboardModule: Module = {
               throw new Error('Invalid format in server.Variables');
             }
           }
+
+          if (!server.dockerImage) {
+            res.status(400).json({ error: 'Docker image not found.' });
+            return
+          }
+
+          const ServerImage = Object.values(JSON.parse(server.dockerImage))[0];
     
           const startRequestData = {
             method: 'POST',
@@ -189,11 +196,12 @@ const dashboardModule: Module = {
             },
             data: {
               id: String(serverId),
-              image: String(server.image?.dockerImages?.[0] ?? ''),
+              image: String(ServerImage),
               ports: ports,
               Memory: server.Memory * 1024,
               Cpu: server.Cpu,
               env: envVariables,
+              StartCommand: server.StartCommand,
             },
           };
     

@@ -131,6 +131,24 @@ const adminModule: Module = {
             return;
           }
 
+          const image = await prisma.images.findUnique({
+            where: {
+              id: parseInt(imageId),
+            },
+          });
+
+          if (!image) {
+            res.status(400).send('Image not found');
+            return;
+          }
+
+          const StartCommand = image.startup;
+
+          if (!StartCommand) {
+            res.status(400).send('Image startup command not found');
+            return;
+          }
+
          await prisma.server.create({
             data: {
               name,
@@ -143,6 +161,7 @@ const adminModule: Module = {
               Cpu: parseInt(Cpu) || 2,
               Storage: parseInt(Storage) || 20,
               Variables: JSON.stringify(variables) || '[]',
+              StartCommand,
               dockerImage: JSON.stringify(imageDocker),
             },
           });
