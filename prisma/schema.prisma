@@ -81,8 +81,14 @@ model Images {
 
 model settings {
   id          Int      @id @default(autoincrement())
-  name        String
-  value       String
+  title       String @default("Airlink")
+  description String @default("AirLink is a free and open source project by AirlinkLabs")
+  favicon   String @default("https://overnode.fr/airlink/favicon.ico")
+  footer    String @default("AirLink is a free and open source project by AirlinkLabs")
+  copyright String @default("© 2025 Airlink")
+  logo      String @default("https://overnode.fr/airlink/logo.png")
+  theme     String @default("default")
+  language  String @default("en")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

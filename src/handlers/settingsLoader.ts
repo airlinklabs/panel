@@ -1,0 +1,68 @@
+/**
+ * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
+ *      AirLink - Open Source Project by AirlinkLabs
+ *      Repository: https://github.com/airlinklabs/airlink
+ *
+ *     © 2024 AirlinkLabs. Licensed under the MIT License
+ * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
+ */
+
+import logger from './logger';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+
+export const settingsLoader = async () => {
+  try {
+    await prisma.$connect();
+    
+    /*
+     * All settings
+     *
+     * Title
+     * Description
+     * Favicon
+     * Footer
+     * Copyright
+     * Logo
+     * Theme
+     * Language
+     * 
+     */
+
+    const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+
+    if (!settings) {
+      await prisma.settings.create({
+        data: {
+          title: 'AirLink',
+          description: 'AirLink is a free and open source project by AirlinkLabs',
+          favicon: 'https://overnode.fr/airlink/favicon.ico',
+          footer: 'AirLink is a free and open source project by AirlinkLabs',
+          copyright: '© 2025 Airlink',
+          logo: 'https://overnode.fr/airlink/logo.png',
+          theme: 'default',
+          language: 'en',
+        },
+      });
+      logger.info('Settings created');
+
+      return prisma;
+    }
+    return prisma;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      logger.error(
+        'settingsLoader',
+        `Database connection error: ${error.message}`,
+      );
+    } else {
+      logger.error(
+        'settingsLoader',
+        'Database connection error: Unknown error occurred',
+      );
+    }
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+};
