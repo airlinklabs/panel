@@ -30,7 +30,9 @@ const adminModule: Module = {
             return res.redirect('/login');
           }
 
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
           res.render('admin/settings/settings', { user, req, settings });
         } catch (error) {
           logger.error('Error fetching user:', error);
@@ -42,24 +44,28 @@ const adminModule: Module = {
     router.post('/admin/settings', isAuthenticated(true), async (req, res) => {
       const settingsData = req.body;
       await prisma.settings.update({
-        where: { id: 1 }, 
-        data: settingsData
-      });
-      res.json({ success: true });
-    });
-    
-    router.post('/admin/settings/reset', isAuthenticated(true), async (req, res) => {
-      await prisma.settings.update({
         where: { id: 1 },
-        data: {
-          title: 'Airlink',
-          logo: '../assets/logo.png',
-          theme: 'default',
-          language: 'en'
-        }
+        data: settingsData,
       });
       res.json({ success: true });
     });
+
+    router.post(
+      '/admin/settings/reset',
+      isAuthenticated(true),
+      async (req, res) => {
+        await prisma.settings.update({
+          where: { id: 1 },
+          data: {
+            title: 'Airlink',
+            logo: '../assets/logo.png',
+            theme: 'default',
+            language: 'en',
+          },
+        });
+        res.json({ success: true });
+      },
+    );
 
     return router;
   },

@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
 export const settingsLoader = async () => {
   try {
     await prisma.$connect();
-    
+
     /*
      * All settings
      *
@@ -24,7 +24,7 @@ export const settingsLoader = async () => {
      * Logo
      * Theme
      * Language
-     * 
+     *
      */
 
     const settings = await prisma.settings.findUnique({ where: { id: 1 } });
@@ -33,7 +33,8 @@ export const settingsLoader = async () => {
       await prisma.settings.create({
         data: {
           title: 'AirLink',
-          description: 'AirLink is a free and open source project by AirlinkLabs',
+          description:
+            'AirLink is a free and open source project by AirlinkLabs',
           logo: '../assets/logo.png',
           theme: 'default',
           language: 'en',

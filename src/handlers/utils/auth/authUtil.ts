@@ -8,14 +8,14 @@ import { Request, Response, NextFunction } from 'express';
  */
 export const isAuthenticated =
   (isAdminRequired = false) =>
-    (req: Request, res: Response, next: NextFunction) => {
-      if (!req.session.user?.id) {
-        return res.redirect('/login');
-      }
+  (req: Request, res: Response, next: NextFunction) => {
+    if (!req.session.user?.id) {
+      return res.redirect('/login');
+    }
 
-      if (isAdminRequired && !req.session.user?.isAdmin) {
-        return res.redirect('/');
-      }
+    if (isAdminRequired && !req.session.user?.isAdmin) {
+      return res.redirect('/');
+    }
 
-      next();
-    };
+    next();
+  };

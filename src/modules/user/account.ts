@@ -39,23 +39,27 @@ const accountModule: Module = {
             res.render('user/account', { errorMessage, user, req });
             return;
           }
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
 
           res.render('user/account', {
             errorMessage,
             user,
             req,
-            settings
+            settings,
           });
         } catch (error) {
           logger.error('Error fetching user:', error);
           errorMessage.message = 'Error fetching user data.';
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
           res.render('user/account', {
             errorMessage,
             user: getUser(req),
             req,
-            settings
+            settings,
           });
         }
       },
@@ -98,7 +102,7 @@ const accountModule: Module = {
           logger.error('Error updating description:', error);
           res.status(500).send('Internal Server Error');
         }
-      }
+      },
     );
 
     router.post(

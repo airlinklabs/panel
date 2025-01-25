@@ -45,7 +45,9 @@ const adminModule: Module = {
           const nodeCount = await prisma.node.count();
           const instanceCount = await prisma.server.count();
           const imageCount = await prisma.images.count();
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
 
           res.render('admin/overview/overview', {
             errorMessage,

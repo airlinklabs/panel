@@ -31,7 +31,9 @@ const adminModule: Module = {
           }
 
           const images = await prisma.images.findMany();
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
           res.render('admin/images/images', { user, req, settings, images });
         } catch (error) {
           logger.error('Error fetching images:', error);
@@ -42,14 +44,12 @@ const adminModule: Module = {
 
     router.post('/admin/images/upload', async (req, res) => {
       try {
-
-    
         res.redirect('/admin/images?success=true');
       } catch (error) {
         logger.error('Error processing image upload:', error);
         res.status(500).send('Failed to process the uploaded file.');
-      }        
-    });   
+      }
+    });
 
     router.post(
       '/admin/images/create',
@@ -58,7 +58,6 @@ const adminModule: Module = {
         const { name, scripts, variables, image } = req.body;
 
         try {
-
           res.redirect('/admin/images?err=none');
         } catch (error) {
           logger.error('Error creating image:', error);

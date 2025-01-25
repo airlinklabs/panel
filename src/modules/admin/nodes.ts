@@ -35,7 +35,7 @@ async function listNodes(res: Response) {
   try {
     const nodes = await prisma.node.findMany();
     const nodesWithStatus = [];
-  
+
     for (const node of nodes) {
       const instances = await prisma.server.findMany({
         where: {
@@ -45,7 +45,7 @@ async function listNodes(res: Response) {
       (node as NodeWithInstance).instances = instances || [];
       nodesWithStatus.push(await checkNodeStatus(node));
     }
-  
+
     return nodesWithStatus;
   } catch (error) {
     logger.error('Error fetching nodes:', error);
@@ -80,9 +80,17 @@ const adminModule: Module = {
           const nodes = await listNodes(res);
 
           const instance = await prisma.server.findMany();
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
 
-          res.render('admin/nodes/nodes', { user, req, settings, nodes, instance });
+          res.render('admin/nodes/nodes', {
+            user,
+            req,
+            settings,
+            nodes,
+            instance,
+          });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -103,7 +111,9 @@ const adminModule: Module = {
 
           const nodes = await listNodes(res);
 
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
           res.render('admin/nodes/create', { user, req, settings, nodes });
         } catch (error) {
           logger.error('Error fetching user:', error);
@@ -215,40 +225,44 @@ const adminModule: Module = {
       },
     );
 
-    router.delete('/admin/node/:id', isAuthenticated(true), async (req: Request, res: Response) => {
-      try {
-        const userId = req.session?.user?.id;
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {
+    router.delete(
+      '/admin/node/:id',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            return res.redirect('/login');
+          }
+
+          const nodeId = parseInt(req.params.id);
+          const deleteInstances = req.query.deleteInstance === 'true';
+
+          try {
+            if (deleteInstances) {
+              await prisma.server.deleteMany({
+                where: { nodeId: nodeId },
+              });
+            }
+
+            await prisma.node.delete({ where: { id: nodeId } });
+
+            res.status(200).json({
+              message: deleteInstances
+                ? 'Node and associated instances deleted successfully.'
+                : 'Node deleted successfully.',
+            });
+          } catch (error) {
+            logger.error('Error when deleting the node:', error);
+            res.status(500).json({ message: 'Error when deleting the node.' });
+          }
+        } catch (error) {
+          logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
-    
-        const nodeId = parseInt(req.params.id);
-        const deleteInstances = req.query.deleteInstance === 'true';
-    
-        try {
-          if (deleteInstances) {
-            await prisma.server.deleteMany({
-              where: { nodeId: nodeId }
-            });
-          }
-    
-          await prisma.node.delete({ where: { id: nodeId } });
-          
-          res.status(200).json({ 
-            message: deleteInstances 
-              ? 'Node and associated instances deleted successfully.'
-              : 'Node deleted successfully.'
-          });
-        } catch (error) {
-          logger.error('Error when deleting the node:', error);
-          res.status(500).json({ message: 'Error when deleting the node.' });
-        }
-      } catch (error) {
-        logger.error('Error fetching user:', error);
-        return res.redirect('/login');
-      }
-    });
+      },
+    );
 
     router.get(
       '/admin/node/:id/configure',
@@ -260,16 +274,24 @@ const adminModule: Module = {
           if (!user) {
             return res.redirect('/login');
           }
-    
+
           const nodeId = parseInt(req.params.id);
-    
+
           const node = await prisma.node.findUnique({ where: { id: nodeId } });
           if (!node) {
             res.status(404).json({ message: 'Node not found.' });
             return;
           }
-    
-          res.status(200).json('npm run configure -- -- --panel "' + process.env.URL + '" --key "' + node.key +'"');
+
+          res
+            .status(200)
+            .json(
+              'npm run configure -- -- --panel "' +
+                process.env.URL +
+                '" --key "' +
+                node.key +
+                '"',
+            );
           return;
         } catch (error) {
           logger.error('Error fetching user:', error);
@@ -278,73 +300,94 @@ const adminModule: Module = {
       },
     );
 
-    router.get('/admin/node/:id', isAuthenticated(true), async (req: Request, res: Response) => {
-      try {
+    router.get(
+      '/admin/node/:id',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            return res.redirect('/login');
+          }
 
-        const userId = req.session?.user?.id;
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {
+          const nodeId = parseInt(req.params.id);
+
+          const node = await prisma.node.findUnique({ where: { id: nodeId } });
+          if (!node) {
+            res.status(404).json({ message: 'Node not found.' });
+            return;
+          }
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
+
+          res.render('admin/nodes/edit', { node, user, req, settings });
+        } catch (error) {
+          logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
-    
-        const nodeId = parseInt(req.params.id);
-    
-        const node = await prisma.node.findUnique({ where: { id: nodeId } });
-        if (!node) {
-          res.status(404).json({ message: 'Node not found.' });
+      },
+    );
+
+    router.put(
+      '/admin/node/:id/edit',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            return res.redirect('/login');
+          }
+
+          const nodeId = parseInt(req.params.id);
+
+          const name = req.body.name;
+          const ram = parseInt(req.body.ram);
+          const cpu = parseInt(req.body.cpu);
+          const disk = parseInt(req.body.disk);
+          const address = req.body.address;
+          const port = parseInt(req.body.port);
+
+          if (
+            !name ||
+            isNaN(ram) ||
+            isNaN(cpu) ||
+            isNaN(disk) ||
+            !address ||
+            !port
+          ) {
+            res
+              .status(400)
+              .json({
+                message:
+                  'All fields are required and numeric values must be valid numbers.',
+              });
+            return;
+          }
+
+          const node = await prisma.node.update({
+            where: { id: nodeId },
+            data: {
+              name,
+              ram,
+              cpu,
+              disk,
+              address,
+              port,
+            },
+          });
+
+          res.status(200).json({ message: 'Node updated successfully.', node });
+          return;
+        } catch (error) {
+          logger.error('Error when updating the node:', error);
+          res.status(500).json({ message: 'Error when updating the node.' });
           return;
         }
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-
-        res.render('admin/nodes/edit', { node, user, req, settings });
-      } catch (error) {
-        logger.error('Error fetching user:', error);
-        return res.redirect('/login');
-      }
-    });
-
-    router.put('/admin/node/:id/edit', isAuthenticated(true), async (req: Request, res: Response) => {
-      try {
-        const userId = req.session?.user?.id;
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {
-          return res.redirect('/login');
-        }
-    
-        const nodeId = parseInt(req.params.id);
-    
-        const name = req.body.name;
-        const ram = parseInt(req.body.ram);
-        const cpu = parseInt(req.body.cpu);
-        const disk = parseInt(req.body.disk);
-        const address = req.body.address;
-        const port = parseInt(req.body.port);
-    
-        if (!name || isNaN(ram) || isNaN(cpu) || isNaN(disk) || !address || !port) {
-          res.status(400).json({ message: 'All fields are required and numeric values must be valid numbers.' });
-          return;
-        }
-    
-        const node = await prisma.node.update({
-          where: { id: nodeId },
-          data: {
-            name,
-            ram,
-            cpu,
-            disk,
-            address,
-            port,
-          },
-        });
-    
-        res.status(200).json({ message: 'Node updated successfully.', node });
-        return;
-      } catch (error) {
-        logger.error('Error when updating the node:', error);
-        res.status(500).json({ message: 'Error when updating the node.' });
-        return;
-      }
-    });
+      },
+    );
 
     return router;
   },

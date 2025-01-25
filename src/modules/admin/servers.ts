@@ -37,7 +37,9 @@ const adminModule: Module = {
               owner: true,
             },
           });
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
 
           res.render('admin/servers/servers', { user, req, settings, servers });
         } catch (error) {
@@ -61,7 +63,9 @@ const adminModule: Module = {
           const users = await prisma.users.findMany();
           const nodes = await prisma.node.findMany();
           const images = await prisma.images.findMany();
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
 
           res.render('admin/servers/create', {
             user,
@@ -92,11 +96,21 @@ const adminModule: Module = {
           Cpu,
           Storage,
           dockerImage,
-          variables
+          variables,
         } = req.body;
-        
+
         const userId = req.session?.user?.id;
-        if (!name || !description || !nodeId || !imageId || !Ports || !Memory || !Cpu || !Storage || !userId) {
+        if (
+          !name ||
+          !description ||
+          !nodeId ||
+          !imageId ||
+          !Ports ||
+          !Memory ||
+          !Cpu ||
+          !Storage ||
+          !userId
+        ) {
           res.status(400).send('Missing required fields');
           return;
         }
@@ -104,16 +118,18 @@ const adminModule: Module = {
         const Port = `[{"Port": "${Ports}", "primary": true}]`;
 
         try {
-          const dockerImages = await prisma.images.findUnique({
-            where: {
-              id: parseInt(imageId),
-            },
-          }).then((image) => {
-            if (!image) {
-              return null;
-            }
-            return image.dockerImages;
-          });
+          const dockerImages = await prisma.images
+            .findUnique({
+              where: {
+                id: parseInt(imageId),
+              },
+            })
+            .then((image) => {
+              if (!image) {
+                return null;
+              }
+              return image.dockerImages;
+            });
 
           if (!dockerImages) {
             res.status(400).send('Docker image not found');
@@ -124,8 +140,8 @@ const adminModule: Module = {
 
           type ImageDocker = { [key: string]: string };
 
-          const imageDocker: ImageDocker | undefined = imagesDocker.find((image: ImageDocker) =>
-            Object.keys(image).includes(dockerImage)
+          const imageDocker: ImageDocker | undefined = imagesDocker.find(
+            (image: ImageDocker) => Object.keys(image).includes(dockerImage),
           );
 
           if (!imageDocker) {
@@ -151,7 +167,7 @@ const adminModule: Module = {
             return;
           }
 
-         await prisma.server.create({
+          await prisma.server.create({
             data: {
               name,
               description,
@@ -180,7 +196,7 @@ const adminModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         const { id } = req.params;
-        
+
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
@@ -188,23 +204,23 @@ const adminModule: Module = {
             res.redirect('/login');
             return;
           }
-    
+
           const serverId = parseInt(id);
           if (isNaN(serverId)) {
             res.status(400).send('Invalid server ID');
             return;
           }
-    
+
           const server = await prisma.server.findUnique({
             where: { id: serverId },
             include: { node: true, image: true, owner: true },
           });
-    
+
           if (!server) {
             res.status(404).send('Server not found');
             return;
           }
-    
+
           try {
             const response = await axios.delete(
               `http://${server.node.address}:${server.node.port}/container/delete`,
@@ -219,14 +235,14 @@ const adminModule: Module = {
                 data: {
                   id: serverId,
                   deleteCmd: 'delete',
-                }
-              }
+                },
+              },
             );
-    
+
             if (response.status !== 200) {
               throw new Error('Failed to delete server container');
             }
-    
+
             await prisma.server.delete({ where: { id: serverId } });
             res.redirect('/admin/servers');
             return;

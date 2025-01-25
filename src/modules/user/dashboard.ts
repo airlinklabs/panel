@@ -56,7 +56,7 @@ const dashboardModule: Module = {
           errorMessage,
           user: getUser(req),
           req,
-          settings
+          settings,
         });
       }
     });

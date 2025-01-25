@@ -44,7 +44,9 @@ const adminModule: Module = {
           }
 
           const users = await listUsers(res);
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
 
           res.render('admin/users/users', {
             user,
@@ -70,7 +72,9 @@ const adminModule: Module = {
           if (!user) {
             return res.redirect('/login');
           }
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
 
           res.render('admin/users/create', { user, req, settings });
         } catch (error) {
@@ -133,55 +137,71 @@ const adminModule: Module = {
       },
     );
 
-    router.get('/admin/users/view/:id/', isAuthenticated(true), async (req: Request, res: Response) => {
-      try {
-        const userId = req.session?.user?.id;
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {
+    router.get(
+      '/admin/users/view/:id/',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            return res.redirect('/login');
+          }
+
+          const dataUser = await prisma.users.findUnique({
+            where: { id: parseInt(req.params.id, 10) },
+          });
+          if (!dataUser) {
+            return res.redirect('/admin/users');
+          }
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
+
+          // todo:
+          //     - render data user
+          //     - update user
+          //     - see how many time he connected
+          //     - see which page was he see
+          //     - him request ...
+
+          res.render('admin/users/user', { user, req, settings, dataUser });
+        } catch (error) {
+          logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
+      },
+    );
 
-        const dataUser = await prisma.users.findUnique({ where: { id: parseInt(req.params.id, 10) } });
-        if (!dataUser) {
-          return res.redirect('/admin/users');
-        }
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+    router.delete(
+      '/admin/users/delete/:id/',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            return res.redirect('/login');
+          }
 
-        // todo: 
-        //     - render data user
-        //     - update user
-        //     - see how many time he connected
-        //     - see which page was he see
-        //     - him request ...
+          const dataUser = await prisma.users.findUnique({
+            where: { id: parseInt(req.params.id, 10) },
+          });
+          if (!dataUser) {
+            return res.redirect('/admin/users');
+          }
 
-        res.render('admin/users/user', { user, req, settings, dataUser });
-      } catch (error) {
-        logger.error('Error fetching user:', error);
-        return res.redirect('/login');
-      }
-    });
+          await prisma.users.delete({
+            where: { id: parseInt(req.params.id, 10) },
+          });
 
-    router.delete('/admin/users/delete/:id/', isAuthenticated(true), async (req: Request, res: Response) => {
-      try {
-        const userId = req.session?.user?.id;
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {
+          res.status(200).json({ message: 'User deleted successfully.' });
+        } catch (error) {
+          logger.error('Error deleting user:', error);
           return res.redirect('/login');
         }
-
-        const dataUser = await prisma.users.findUnique({ where: { id: parseInt(req.params.id, 10) } });
-        if (!dataUser) {
-          return res.redirect('/admin/users');
-        }
-
-        await prisma.users.delete({ where: { id: parseInt(req.params.id, 10) } });
-
-        res.status(200).json({ message: 'User deleted successfully.' });
-      } catch (error) {
-        logger.error('Error deleting user:', error);
-        return res.redirect('/login');
-      }
-    });
+      },
+    );
 
     return router;
   },

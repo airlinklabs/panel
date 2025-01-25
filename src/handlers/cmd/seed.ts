@@ -2,15 +2,16 @@ import { createInterface } from 'readline';
 import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
 
-const IMAGES_URL = 'https://raw.githubusercontent.com/airlinklabs/images/refs/heads/main/index.json';
+const IMAGES_URL =
+  'https://raw.githubusercontent.com/airlinklabs/images/refs/heads/main/index.json';
 const FIELD_MAPPING: Record<string, string> = {
-  docker_images: 'dockerImages'
+  docker_images: 'dockerImages',
 };
 
 const prisma = new PrismaClient();
 const rl = createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
 interface ImageData {
@@ -32,10 +33,13 @@ class Seeder {
   }
 
   private mapFields(data: Record<string, any>): Record<string, any> {
-    return Object.entries(data).reduce((acc, [key, value]) => ({
-      ...acc,
-      [FIELD_MAPPING[key] || key]: value
-    }), {});
+    return Object.entries(data).reduce(
+      (acc, [key, value]) => ({
+        ...acc,
+        [FIELD_MAPPING[key] || key]: value,
+      }),
+      {},
+    );
   }
 
   private stringifyJsonFields(image: Record<string, any>): Record<string, any> {
@@ -50,8 +54,8 @@ class Seeder {
     return {
       ...image,
       ...Object.fromEntries(
-        jsonFields.map(field => [field, JSON.stringify(image[field])])
-      )
+        jsonFields.map((field) => [field, JSON.stringify(image[field])]),
+      ),
     };
   }
 
@@ -67,16 +71,17 @@ class Seeder {
 
   private async fetchAndProcessImages(): Promise<Record<string, any>[]> {
     const { data: imageUrls } = await axios.get<string[]>(IMAGES_URL);
-    
+
     const results = await Promise.allSettled(
-      imageUrls.map(url => this.fetchImageData(url))
+      imageUrls.map((url) => this.fetchImageData(url)),
     );
 
     return results
-      .filter((result): result is PromiseFulfilledResult<ImageData> => 
-        result.status === 'fulfilled' && result.value !== null
+      .filter(
+        (result): result is PromiseFulfilledResult<ImageData> =>
+          result.status === 'fulfilled' && result.value !== null,
       )
-      .map(result => this.mapFields(this.stringifyJsonFields(result.value)));
+      .map((result) => this.mapFields(this.stringifyJsonFields(result.value)));
   }
 
   private async performSeeding(): Promise<void> {
@@ -101,7 +106,7 @@ class Seeder {
 
       if (existingImages > 0) {
         const shouldContinue = await this.promptUser(
-          '\'images\' is already set in the database. Do you want to continue seeding? (y/n) '
+          "'images' is already set in the database. Do you want to continue seeding? (y/n) ",
         );
 
         if (!shouldContinue) {
@@ -129,8 +134,9 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Main execution
 const seeder = new Seeder();
-seeder.seed()
-  .catch(error => {
+seeder
+  .seed()
+  .catch((error) => {
     console.error('Fatal error during seeding:', error);
     process.exit(1);
   })
