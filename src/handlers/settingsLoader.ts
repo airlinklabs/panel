@@ -21,8 +21,6 @@ export const settingsLoader = async () => {
      * Title
      * Description
      * Favicon
-     * Footer
-     * Copyright
      * Logo
      * Theme
      * Language
@@ -36,9 +34,6 @@ export const settingsLoader = async () => {
         data: {
           title: 'AirLink',
           description: 'AirLink is a free and open source project by AirlinkLabs',
-          favicon: '../assets/logo.ico',
-          footer: 'AirLink is a free and open source project by AirlinkLabs',
-          copyright: '© 2025 Airlink',
           logo: '../assets/logo.png',
           theme: 'default',
           language: 'en',

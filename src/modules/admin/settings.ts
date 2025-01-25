@@ -53,8 +53,7 @@ const adminModule: Module = {
         where: { id: 1 },
         data: {
           title: 'Airlink',
-          favicon: 'https://overnode.fr/airlink/favicon.ico',
-          logo: 'https://overnode.fr/airlink/logo.png',
+          logo: '../assets/logo.png',
           theme: 'default',
           language: 'en'
         }
