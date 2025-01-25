@@ -27,7 +27,16 @@
 <% if (features.includes('auto-complete')) { %>
     <script>
         setTimeout(() => {
-        const suggestions = ["help", "test", "hello", "history", "command", "clear"];
+            const suggestions = [
+            "help", "pardon", "ban", "kick", "teleport", "time", "weather", "give", 
+            "gamemode", "difficulty", "summon", "say", "me", "list", "scoreboard", 
+            "tp", "setworldspawn", "clear", "op", "deop", "banlist", "spawnpoint", 
+            "stop", "save-all", "setblock", "execute", "fill", "replaceitem", "event", 
+            "advancement", "item", "effect", "clear", "playsound", "team", "title", 
+            "item", "gamerule", "clone", "debug", "setblock", "stop", "publish", 
+            "ban-ip", "whitelist", "enchant", "give", "help", "me", "msg", "tellraw", 
+            "difficulty", "seed", "defaultgamemode", "seed"
+        ];
         const inputField = document.getElementById("input");
         const suggestionsBox = document.getElementById("suggestions");
         const settingsIcon = document.getElementById("settings-icon");
