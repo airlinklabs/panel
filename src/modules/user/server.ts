@@ -578,63 +578,73 @@ const dashboardModule: Module = {
         return;
       }
     });
-    router.get('/server/:id/players', isAuthenticatedForServer('id'), async (req: Request, res: Response) => {
-      const userId = req.session?.user?.id;
-      const serverId = req.params?.id;
-    
-      try {
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {
-          res.status(404).json({ error: 'User not found' });
-          return;
-        }
 
-        const server = await prisma.server.findUnique({
-          where: { UUID: serverId },
-          include: { node: true },
-        });
-    
-        if (!server) {
-          res.status(404).json({ error: 'Server not found' });
-          return;
-        }
 
-        const primaryPort = server.Ports
-        ? JSON.parse(server.Ports)
-            .filter((Port: any) => Port.primary)
-            .map((Port: any) => Port.Port.split(':')[1])
-            .pop()
-        : '';
-      
-      if (!primaryPort) {
-        throw new Error('No primary port found');
-      }
-      
-        const pingResponse = await MinecraftServerListPing.ping(4, server.node.address, parseInt(primaryPort, 10), 3000);
-        const players = pingResponse.players?.sample?.map((player: any) => ({
-          name: player.name,
-          uuid: player.id,
-        })) || [];
+ router.get('/server/:id/players', isAuthenticatedForServer('id'), async (req: Request, res: Response) => {
+  const userId = req.session?.user?.id;
+  const serverId = req.params?.id;
 
-        const settings = await prisma.settings.findUnique({
-          where: { id: 1 },
-        });
-    
-        return res.render('user/server/players', {
-          errorMessage: {},
-          user,
-          players,
-          server,
-          req,
-          settings,
-        });
-        return;
-      } catch (error) {
-        logger.error('Error getting players:', error);
-        res.status(500).json({ error: 'Failed to get players' });
-        return;
-      }
+  try {
+    const user = await prisma.users.findUnique({ where: { id: userId } });
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    const server = await prisma.server.findUnique({
+      where: { UUID: serverId },
+      include: { node: true },
     });
+
+    if (!server) {
+      res.status(404).json({ error: 'Server not found' });
+      return;
+    }
+
+    const primaryPort = server.Ports
+      ? JSON.parse(server.Ports)
+          .filter((Port: any) => Port.primary)
+          .map((Port: any) => Port.Port.split(':')[1])
+          .pop()
+      : '';
+
+    if (!primaryPort) {
+      return res.render('user/server/players', {
+        errorMessage: { message: 'No primary port found' },
+        user,
+        players: [],
+        server,
+        req,
+        settings: await prisma.settings.findUnique({ where: { id: 1 } }),
+      });
+    }
+
+    let players: Array<{ name: string; uuid: string }> = [];
+    try {
+      const pingResponse = await MinecraftServerListPing.ping(4, 'basti.privt.xyz1', parseInt(primaryPort, 10), 3000);
+      players = pingResponse.players?.sample?.map((player: any) => ({
+        name: player.name,
+        uuid: player.id,
+      })) || [];
+    } catch (pingError) {
+      // nothing
+    }
+
+    const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+
+    return res.render('user/server/players', {
+      errorMessage: {},
+      user,
+      players,
+      server,
+      req,
+      settings,
+    });
+  } catch (error) {
+    logger.error('Error getting players:', error);
+    res.status(500).json({ error: 'Failed to get players' });
+  }
+});
 
     return router;
   },
