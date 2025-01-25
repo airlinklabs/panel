@@ -533,7 +533,6 @@ const dashboardModule: Module = {
     );
 
     router.post('/server/:id/feature/eula', isAuthenticatedForServer('id'), async (req: Request, res: Response) => {
-      console.log('test')
       const userId = req.session?.user?.id;
       const serverId = req.params?.id;
 
