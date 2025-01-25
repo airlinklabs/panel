@@ -2155,6 +2155,10 @@ select {
   border-color: rgb(255 255 255 / 0.05);
 }
 
+.border-neutral-300\/20 {
+  border-color: rgb(212 212 212 / 0.2);
+}
+
 .bg-amber-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(254 243 199 / var(--tw-bg-opacity, 1));
@@ -2459,6 +2463,22 @@ select {
 .bg-zinc-950 {
   --tw-bg-opacity: 1;
   background-color: rgb(9 9 11 / var(--tw-bg-opacity, 1));
+}
+
+.bg-white\/50 {
+  background-color: rgb(255 255 255 / 0.5);
+}
+
+.bg-neutral-800\/50 {
+  background-color: rgb(38 38 38 / 0.5);
+}
+
+.bg-neutral-800\/80 {
+  background-color: rgb(38 38 38 / 0.8);
+}
+
+.bg-neutral-900\/80 {
+  background-color: rgb(23 23 23 / 0.8);
 }
 
 .bg-opacity-50 {
