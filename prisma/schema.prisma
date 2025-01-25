@@ -78,3 +78,11 @@ model Images {
     createdAt DateTime @default(now())
     servers   Server[]
   }
+
+model settings {
+  id          Int      @id @default(autoincrement())
+  name        String
+  value       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
