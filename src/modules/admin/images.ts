@@ -31,7 +31,8 @@ const adminModule: Module = {
           }
 
           const images = await prisma.images.findMany();
-          res.render('admin/images/images', { user, req, logo: '', images });
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          res.render('admin/images/images', { user, req, settings, images });
         } catch (error) {
           logger.error('Error fetching images:', error);
           return res.redirect('/login');

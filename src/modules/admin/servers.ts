@@ -37,8 +37,9 @@ const adminModule: Module = {
               owner: true,
             },
           });
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
-          res.render('admin/servers/servers', { user, req, logo: '', servers });
+          res.render('admin/servers/servers', { user, req, settings, servers });
         } catch (error) {
           logger.error('Error fetching servers:', error);
           return res.redirect('/login');
@@ -60,11 +61,12 @@ const adminModule: Module = {
           const users = await prisma.users.findMany();
           const nodes = await prisma.node.findMany();
           const images = await prisma.images.findMany();
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
           res.render('admin/servers/create', {
             user,
             req,
-            logo: '',
+            settings,
             nodes,
             images,
             users,

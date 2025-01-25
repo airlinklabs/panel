@@ -80,8 +80,9 @@ const adminModule: Module = {
           const nodes = await listNodes(res);
 
           const instance = await prisma.server.findMany();
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
-          res.render('admin/nodes/nodes', { user, req, logo: '', nodes, instance });
+          res.render('admin/nodes/nodes', { user, req, settings, nodes, instance });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -102,7 +103,8 @@ const adminModule: Module = {
 
           const nodes = await listNodes(res);
 
-          res.render('admin/nodes/create', { user, req, logo: '', nodes });
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          res.render('admin/nodes/create', { user, req, settings, nodes });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -292,8 +294,9 @@ const adminModule: Module = {
           res.status(404).json({ message: 'Node not found.' });
           return;
         }
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
-        res.render('admin/nodes/edit', { node, user, req, logo: '' });
+        res.render('admin/nodes/edit', { node, user, req, settings });
       } catch (error) {
         logger.error('Error fetching user:', error);
         return res.redirect('/login');

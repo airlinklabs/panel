@@ -36,10 +36,10 @@ export const settingsLoader = async () => {
         data: {
           title: 'AirLink',
           description: 'AirLink is a free and open source project by AirlinkLabs',
-          favicon: 'https://overnode.fr/airlink/favicon.ico',
+          favicon: '../assets/logo.ico',
           footer: 'AirLink is a free and open source project by AirlinkLabs',
           copyright: '© 2025 Airlink',
-          logo: 'https://overnode.fr/airlink/logo.png',
+          logo: '../assets/logo.png',
           theme: 'default',
           language: 'en',
         },

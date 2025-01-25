@@ -1,6 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import logger from '../../handlers/logger';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 const authModule: Module = {
   info: {
@@ -15,12 +18,14 @@ const authModule: Module = {
   router: () => {
     const router = Router();
 
-    router.get('/login', (req: Request, res: Response) => {
-      res.render('auth/login', { req, logo: '' });
+    router.get('/login', async (req: Request, res: Response) => {
+      const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+      res.render('auth/login', { req, settings });
     });
 
-    router.get('/register', (req: Request, res: Response) => {
-      res.render('auth/register', { req, logo: '' });
+    router.get('/register', async (req: Request, res: Response) => {
+      const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+      res.render('auth/register', { req, settings });
     });
 
     router.post('/logout', (req: Request, res: Response) => {

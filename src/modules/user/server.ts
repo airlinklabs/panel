@@ -58,14 +58,14 @@ const dashboardModule: Module = {
             where: { UUID: String(serverId) },
             include: { node: true, image: true, owner: true },
           });
-
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           if (!server) {
             errorMessage.message = 'Server not found.';
             return res.render('user/server/manage', {
               errorMessage,
               user,
               req,
-              logo: '',
+              settings
             });
           }
 
@@ -74,16 +74,17 @@ const dashboardModule: Module = {
             user,
             req,
             server,
-            logo: '',
+            settings,
           });
         } catch (error) {
           logger.error('Error fetching user:', error);
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           errorMessage.message = 'Error fetching user data.';
           return res.render('user/server/manage', {
             errorMessage,
             user: req.session?.user,
             req,
-            logo: '',
+            settings
           });
         }
       }
@@ -242,14 +243,14 @@ const dashboardModule: Module = {
             where: { UUID: String(serverId) },
             include: { node: true, image: true, owner: true },
           });
-
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           if (!server) {
             errorMessage.message = 'Server not found.';
             return res.render('user/server/files', {
               errorMessage,
               user,
               req,
-              logo: '',
+              settings,
             });
           }
 
@@ -285,16 +286,17 @@ const dashboardModule: Module = {
             currentPath: path,
             req,
             server,
-            logo: '',
+            settings
           });
         } catch (error) {
           logger.error('Error fetching user:', error);
           errorMessage.message = 'Error fetching user data.';
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           return res.render('user/server/files', {
             errorMessage,
             user: req.session?.user,
             req,
-            logo: '',
+            settings
           });
         }
       }
@@ -339,7 +341,8 @@ const dashboardModule: Module = {
           });
     
           const extension = filePath.split('.').pop()?.toLowerCase() || '';
-          
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+
           return res.render('user/server/file', {
             errorMessage: {},
             user,
@@ -351,7 +354,7 @@ const dashboardModule: Module = {
             },
             server,
             req,
-            logo: ''
+            settings
           });
         } catch (error) {
           logger.error('Error fetching file:', error);

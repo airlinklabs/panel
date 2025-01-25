@@ -44,11 +44,12 @@ const adminModule: Module = {
           }
 
           const users = await listUsers(res);
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
           res.render('admin/users/users', {
             user,
             req,
-            logo: '',
+            settings,
             users,
             onlineUsers,
           });
@@ -69,8 +70,9 @@ const adminModule: Module = {
           if (!user) {
             return res.redirect('/login');
           }
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
-          res.render('admin/users/create', { user, req, logo: '' });
+          res.render('admin/users/create', { user, req, settings });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -143,6 +145,7 @@ const adminModule: Module = {
         if (!dataUser) {
           return res.redirect('/admin/users');
         }
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
         // todo: 
         //     - render data user
@@ -151,7 +154,7 @@ const adminModule: Module = {
         //     - see which page was he see
         //     - him request ...
 
-        res.render('admin/users/user', { user, req, logo: '', dataUser });
+        res.render('admin/users/user', { user, req, settings, dataUser });
       } catch (error) {
         logger.error('Error fetching user:', error);
         return res.redirect('/login');

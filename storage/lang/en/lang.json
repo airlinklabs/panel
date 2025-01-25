@@ -143,5 +143,6 @@
   "usernameDescriptionError": "Error updating description. Please try again later.",
   "nodes": "Nodes",
   "daemonKey": "Daemon Key",
-  "DockerImage": "Docker Image"
+  "DockerImage": "Docker Image",
+  "adminSettingsSave": "Save"
 }

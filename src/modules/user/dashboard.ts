@@ -39,24 +39,24 @@ const dashboardModule: Module = {
           where: { ownerId: user.id },
           include: { node: true, owner: true },
         });
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
         res.render('user/dashboard', {
           errorMessage,
           user,
           req,
-          name: 'AirLink',
-          logo: '',
+          settings,
           servers,
         });
       } catch (error) {
         logger.error('Error fetching user:', error);
         errorMessage.message = 'Error fetching user data.';
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         res.render('user/dashboard', {
           errorMessage,
           user: getUser(req),
           req,
-          name: 'AirLink',
-          logo: '',
+          settings
         });
       }
     });

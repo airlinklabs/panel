@@ -30,13 +30,37 @@ const adminModule: Module = {
             return res.redirect('/login');
           }
 
-          res.render('admin/settings/settings', { user, req, logo: '' });
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          res.render('admin/settings/settings', { user, req, settings });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
         }
       },
     );
+
+    router.post('/admin/settings', isAuthenticated(true), async (req, res) => {
+      const settingsData = req.body;
+      await prisma.settings.update({
+        where: { id: 1 }, 
+        data: settingsData
+      });
+      res.json({ success: true });
+    });
+    
+    router.post('/admin/settings/reset', isAuthenticated(true), async (req, res) => {
+      await prisma.settings.update({
+        where: { id: 1 },
+        data: {
+          title: 'Airlink',
+          favicon: 'https://overnode.fr/airlink/favicon.ico',
+          logo: 'https://overnode.fr/airlink/logo.png',
+          theme: 'default',
+          language: 'en'
+        }
+      });
+      res.json({ success: true });
+    });
 
     return router;
   },
