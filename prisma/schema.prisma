@@ -39,6 +39,7 @@
     Variables String?
     StartCommand String?
     dockerImage String?
+    Installing Boolean @default(true)
     Suspended Boolean  @default(false)
     ownerId   Int
     nodeId    Int
