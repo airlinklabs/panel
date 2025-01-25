@@ -20,6 +20,7 @@ import expressWs from 'express-ws';
 import compression from 'compression';
 import { translationMiddleware } from './handlers/utils/core/translation';
 import PrismaSessionStore from './handlers/sessionStore';
+import { settingsLoader } from './handlers/settingsLoader';
 
 loadEnv();
 
@@ -98,8 +99,8 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 // Load modules
 databaseLoader()
-  .then(() => {
-    
+  .then(async () => {
+    await settingsLoader();
     return loadModules(app, airlinkVersion);
   })
   .then(() => {
