@@ -144,5 +144,6 @@
   "nodes": "Nodes",
   "daemonKey": "Daemon Key",
   "DockerImage": "Docker Image",
-  "adminSettingsSave": "Save"
+  "adminSettingsSave": "Save",
+  "general": "General"
 }

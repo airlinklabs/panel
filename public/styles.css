@@ -107,7 +107,7 @@
 }
 
 /*
-! tailwindcss v3.4.15 | MIT License | https://tailwindcss.com
+! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com
 */
 
 /*
@@ -1279,6 +1279,14 @@ select {
   margin-top: auto;
 }
 
+.mr-6 {
+  margin-right: 1.5rem;
+}
+
+.mr-12 {
+  margin-right: 3rem;
+}
+
 .block {
   display: block;
 }
@@ -1323,6 +1331,11 @@ select {
 .size-6 {
   width: 1.5rem;
   height: 1.5rem;
+}
+
+.size-5 {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .h-0 {
@@ -2006,10 +2019,6 @@ select {
 .border-black {
   --tw-border-opacity: 1;
   border-color: rgb(0 0 0 / var(--tw-border-opacity, 1));
-}
-
-.border-black\/10 {
-  border-color: rgb(0 0 0 / 0.1);
 }
 
 .border-gray-300 {
@@ -2728,10 +2737,6 @@ select {
   font-size: 10px;
 }
 
-.text-\[18px\] {
-  font-size: 18px;
-}
-
 .text-base {
   font-size: 1rem;
   line-height: 1.5rem;
@@ -2755,6 +2760,10 @@ select {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
+}
+
+.text-\[18px\] {
+  font-size: 18px;
 }
 
 .font-bold {
@@ -3035,10 +3044,6 @@ select {
   opacity: 0.75;
 }
 
-.opacity-\[0\.7\] {
-  opacity: 0.7;
-}
-
 .shadow {
   --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
@@ -3249,46 +3254,6 @@ select {
   transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
 }
 
-.file\:mr-4::file-selector-button {
-  margin-right: 1rem;
-}
-
-.file\:rounded-xl::file-selector-button {
-  border-radius: 0.75rem;
-}
-
-.file\:border-0::file-selector-button {
-  border-width: 0px;
-}
-
-.file\:bg-white\/5::file-selector-button {
-  background-color: rgb(255 255 255 / 0.05);
-}
-
-.file\:px-4::file-selector-button {
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-.file\:py-2::file-selector-button {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
-.file\:text-sm::file-selector-button {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-}
-
-.file\:font-medium::file-selector-button {
-  font-weight: 500;
-}
-
-.file\:text-neutral-300::file-selector-button {
-  --tw-text-opacity: 1;
-  color: rgb(212 212 212 / var(--tw-text-opacity, 1));
-}
-
 .placeholder\:font-medium::-moz-placeholder {
   font-weight: 500;
 }
@@ -3381,11 +3346,6 @@ select {
 .hover\:bg-gray-100:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1));
-}
-
-.hover\:bg-green-500:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(34 197 94 / var(--tw-bg-opacity, 1));
 }
 
 .hover\:bg-green-700:hover {
@@ -3498,10 +3458,6 @@ select {
   transition-duration: 2s;
 }
 
-.hover\:file\:bg-white\/10::file-selector-button:hover {
-  background-color: rgb(255 255 255 / 0.1);
-}
-
 .focus\:border-0:focus {
   border-width: 0px;
 }
@@ -3579,10 +3535,6 @@ select {
 
 .focus\:ring-neutral-800\/10:focus {
   --tw-ring-color: rgb(38 38 38 / 0.1);
-}
-
-.focus\:ring-transparent:focus {
-  --tw-ring-color: transparent;
 }
 
 .focus\:ring-offset-2:focus {
@@ -3896,25 +3848,6 @@ select {
          column-gap: 1.5rem;
   }
 
-  .sm\:rounded-none {
-    border-radius: 0px;
-  }
-
-  .sm\:rounded-l-lg {
-    border-top-left-radius: 0.5rem;
-    border-bottom-left-radius: 0.5rem;
-  }
-
-  .sm\:rounded-r-lg {
-    border-top-right-radius: 0.5rem;
-    border-bottom-right-radius: 0.5rem;
-  }
-
-  .sm\:rounded-r-none {
-    border-top-right-radius: 0px;
-    border-bottom-right-radius: 0px;
-  }
-
   .sm\:p-6 {
     padding: 1.5rem;
   }
@@ -3950,6 +3883,10 @@ select {
 
   .md\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .md\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
