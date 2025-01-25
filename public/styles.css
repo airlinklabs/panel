@@ -1415,6 +1415,10 @@ select {
   height: 100vh;
 }
 
+.h-48 {
+  height: 12rem;
+}
+
 .max-h-60 {
   max-height: 15rem;
 }
@@ -1539,6 +1543,10 @@ select {
 
 .w-screen {
   width: 100vw;
+}
+
+.w-1\/2 {
+  width: 50%;
 }
 
 .min-w-0 {
@@ -2630,6 +2638,11 @@ select {
   padding-bottom: -50px;
 }
 
+.py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
 .pb-1 {
   padding-bottom: 0.25rem;
 }
@@ -3002,6 +3015,11 @@ select {
 .text-zinc-200 {
   --tw-text-opacity: 1;
   color: rgb(228 228 231 / var(--tw-text-opacity, 1));
+}
+
+.text-gray-800 {
+  --tw-text-opacity: 1;
+  color: rgb(31 41 55 / var(--tw-text-opacity, 1));
 }
 
 .underline {

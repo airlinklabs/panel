@@ -1,0 +1,22 @@
+
+<!-- EULA Feature -->
+
+<% if (features.includes('eula')) { %>
+        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur z-10">
+            <div class="bg-white/5 backdrop-blur py-8 px-8 rounded-2xl shadow-lg w-1/2 h-48">
+                <p class="text-white text-lg font-medium">Do you accept Minecraft's EULA?</p>
+                <p class="text-sm text-neutral-400">By pressing this button you agree to the <a class="text-white" href="https://account.mojang.com/documents/minecraft_eula">Mojang EULA</a>.</p>
+                <button 
+                onclick="fetch('/server/<%= req.params.id %>/feature/eula', { method: 'POST' })
+                    .then( () => {
+                            location.reload();
+                    })
+                    .catch(error => {
+                        console.error('There was an error!', error);
+                    });" 
+                class="mt-8 bg-white text-sm font-sm text-gray-800 px-4 font-medium transition py-2 rounded-xl hover:bg-gray-100">
+                I agree
+                </button>
+            </div>
+        </div>
+<% } %>

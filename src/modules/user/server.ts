@@ -4,11 +4,25 @@ import { PrismaClient } from '@prisma/client';
 import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
+import { checkEulaStatus } from '../../handlers/features';
 
 const prisma = new PrismaClient();
 
 interface ErrorMessage {
   message?: string;
+}
+
+interface ServerImageInfo {
+  features: string[];
+  stop: string;
+}
+
+interface ServerImage {
+  info?: ServerImageInfo | string;
+}
+
+interface Server {
+  image: ServerImage;
 }
 
 interface Port {
@@ -70,8 +84,34 @@ const dashboardModule: Module = {
             });
           }
 
+          let features: string[] = [];
+
+          if (server.image && typeof server.image.info === 'string') {
+            try {
+              const parsedInfo = JSON.parse(server.image.info) as ServerImageInfo;
+              if (Array.isArray(parsedInfo.features)) {
+                features = parsedInfo.features;
+              }
+            } catch (error) {
+              console.error("Failed to parse server.image.info:", error);
+            }
+          } else if (server.image && typeof server.image.info === 'object' && server.image.info !== null) {
+            const info = server.image.info as ServerImageInfo;
+            if (Array.isArray(info.features)) {
+              features = info.features;
+            }
+          }
+
+          if (features.includes('eula')) {
+            const eulaStatus = await checkEulaStatus(server.UUID);
+            if (eulaStatus.accepted) {
+              features = features.filter(feature => feature !== 'eula');
+            }
+          }
+
           return res.render('user/server/manage', {
             errorMessage,
+            features,
             user,
             req,
             server,
@@ -491,6 +531,53 @@ const dashboardModule: Module = {
         }
       },
     );
+
+    router.post('/server/:id/feature/eula', isAuthenticatedForServer('id'), async (req: Request, res: Response) => {
+      console.log('test')
+      const userId = req.session?.user?.id;
+      const serverId = req.params?.id;
+
+      const user = await prisma.users.findUnique({ where: { id: userId } });
+      if (!user) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
+
+      const server = await prisma.server.findUnique({
+        where: { UUID: serverId },
+        include: { node: true },
+      });
+
+      if (!server) {
+        res.status(404).json({ error: 'Server not found' });
+        return;
+      }
+
+      try {
+        
+        await axios({
+          method: 'POST',
+          url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
+          data: {
+            id: server.UUID,
+            path: 'eula.txt',
+            content: 'eula=true',
+          },
+          auth: {
+            username: 'Airlink',
+            password: server.node.key,
+          },
+        });
+
+        res.status(200).json({ success: true });
+        return;
+
+      } catch (error) {
+        logger.error('Error accepting EULA:', error);
+        res.status(500).json({ error: 'Failed to accept EULA' });
+        return;
+      }
+    });
 
     return router;
   },
