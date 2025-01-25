@@ -25,7 +25,7 @@ export async function checkEulaStatus(serverId: string): Promise<CheckEulaResult
     }) as Server | null;
 
     if (!server) {
-      return { accepted: false, error: 'Server not found' };
+      return { accepted: false };
     }
 
     const eulaResponse = await axios({
@@ -40,8 +40,10 @@ export async function checkEulaStatus(serverId: string): Promise<CheckEulaResult
 
     const eulaAccepted = (eulaResponse.data.content as string).includes('eula=true');
     return { accepted: eulaAccepted };
-  } catch (error) {
-    console.error('Error checking EULA status:', error);
+  } catch (error: any) {
+    if (error.response && error.response.status === 404) {
+      return { accepted: false };
+    }
     return { accepted: false, error: 'An error occurred while checking the EULA status.' };
   }
 }

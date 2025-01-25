@@ -994,6 +994,14 @@ select {
   top: 1rem;
 }
 
+.-top-44 {
+  top: -11rem;
+}
+
+.top-3 {
+  top: 0.75rem;
+}
+
 .z-0 {
   z-index: 0;
 }
@@ -1287,6 +1295,30 @@ select {
   margin-right: 3rem;
 }
 
+.mb-32 {
+  margin-bottom: 8rem;
+}
+
+.-mt-32 {
+  margin-top: -8rem;
+}
+
+.-mt-12 {
+  margin-top: -3rem;
+}
+
+.-mt-10 {
+  margin-top: -2.5rem;
+}
+
+.-mt-2 {
+  margin-top: -0.5rem;
+}
+
+.mt-10 {
+  margin-top: 2.5rem;
+}
+
 .block {
   display: block;
 }
@@ -1421,6 +1453,10 @@ select {
 
 .max-h-60 {
   max-height: 15rem;
+}
+
+.max-h-40 {
+  max-height: 10rem;
 }
 
 .min-h-\[100px\] {
@@ -1972,6 +2008,16 @@ select {
 .rounded-t-xl {
   border-top-left-radius: 0.75rem;
   border-top-right-radius: 0.75rem;
+}
+
+.rounded-b-lg {
+  border-bottom-right-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+
+.rounded-t-lg {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
 }
 
 .rounded-tl-xl {
@@ -3198,6 +3244,11 @@ select {
   --tw-ring-color: rgb(202 138 4 / 0.2);
 }
 
+.ring-neutral-100 {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(245 245 245 / var(--tw-ring-opacity, 1));
+}
+
 .ring-opacity-5 {
   --tw-ring-opacity: 0.05;
 }
@@ -3552,6 +3603,12 @@ select {
   box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
 }
 
+.focus\:ring-1:focus {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+
 .focus\:focus\:ring-transparent:focus:focus {
   --tw-ring-color: transparent;
 }
@@ -3573,6 +3630,19 @@ select {
 
 .focus\:ring-neutral-800\/10:focus {
   --tw-ring-color: rgb(38 38 38 / 0.1);
+}
+
+.focus\:ring-blue-500:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(59 130 246 / var(--tw-ring-opacity, 1));
+}
+
+.focus\:ring-neutral-100\/10:focus {
+  --tw-ring-color: rgb(245 245 245 / 0.1);
+}
+
+.focus\:ring-neutral-100\/50:focus {
+  --tw-ring-color: rgb(245 245 245 / 0.5);
 }
 
 .focus\:ring-offset-2:focus {

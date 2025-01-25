@@ -20,3 +20,94 @@
             </div>
         </div>
 <% } %>
+
+
+<!-- AUTO-COMPLETE FEATURE -->
+
+<% if (features.includes('auto-complete')) { %>
+    <script>
+        setTimeout(() => {
+        const suggestions = ["help", "test", "hello", "history", "command", "clear"];
+        const inputField = document.getElementById("input");
+        const suggestionsBox = document.getElementById("suggestions");
+        const settingsIcon = document.getElementById("settings-icon");
+        const settingsMenu = document.getElementById("settings-menu");
+        let autoCompleteToggle = null;
+
+            autoCompleteToggle = document.getElementById("auto-complete-toggle");
+            const isAutoCompleteEnabled = getCookie("auto-complete-enabled") === "true";
+            autoCompleteToggle.checked = isAutoCompleteEnabled;
+
+            settingsIcon.addEventListener("click", () => {
+            settingsMenu.classList.toggle("hidden");
+        });
+    
+        autoCompleteToggle.addEventListener("change", () => {
+            const isEnabled = autoCompleteToggle.checked;
+            setCookie("auto-complete-enabled", isEnabled, 365);
+    
+            if (isEnabled) {
+                suggestionsBox.classList.remove("hidden");
+            } else {
+                suggestionsBox.classList.add("hidden");
+            }
+        });
+    
+        inputField.addEventListener("input", () => {
+            if (!autoCompleteToggle.checked) return;
+    
+            const query = inputField.value.toLowerCase();
+            suggestionsBox.innerHTML = "";
+    
+            if (query) {
+                const filteredSuggestions = suggestions.filter(suggestion => 
+                    suggestion.toLowerCase().startsWith(query)
+                );
+    
+                if (filteredSuggestions.length > 0) {
+                    suggestionsBox.classList.remove("hidden");
+                    filteredSuggestions.forEach(suggestion => {
+                        const suggestionDiv = document.createElement("div");
+                        suggestionDiv.textContent = suggestion;
+                        suggestionDiv.className = "px-4 py-2 hover:bg-neutral-600 cursor-pointer";
+    
+                        suggestionDiv.addEventListener("click", () => {
+                            inputField.value = suggestion;
+                            suggestionsBox.classList.add("hidden");
+                        });
+    
+                        suggestionsBox.appendChild(suggestionDiv);
+                    });
+                } else {
+                    suggestionsBox.classList.add("hidden");
+                }
+            } else {
+                suggestionsBox.classList.add("hidden");
+            }
+        });
+    
+        document.addEventListener("click", (event) => {
+            if (!event.target.closest("#input") && !event.target.closest("#suggestions") && !event.target.closest("#settings-icon")) {
+                suggestionsBox.classList.add("hidden");
+                settingsMenu.classList.add("hidden");
+            }
+        });
+    
+        function setCookie(name, value, days) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/`;
+        }
+    
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+        }, 100);
+    </script>
+    <% } %>
