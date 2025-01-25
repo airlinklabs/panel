@@ -1,0 +1,68 @@
+<%- include('../../components/header', { title: 'Players' }) %>
+
+<main class="h-screen m-auto text-white">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <!-- Page Header -->
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">
+            <%= server.name.charAt(0).toUpperCase() + server.name.slice(1) %>
+          </h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500">
+            <%= server.description %>
+          </p>
+        </div>
+      </div>
+      
+      <div class="rounded-xl bg-red-800/10 px-4 py-6 mt-8 ml-8 mb-8 mr-8 hidden" id="daemonIsDown">
+        <div class="flex">
+            <div class="flex-shrink-0 ml-1.5">
+                <svg class="animate-spin mt-2 h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                    </circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+            </div>
+            <div class="ml-5">
+                <h3 class="text-sm font-medium text-red-400"><%= req.translations.connectionFailure %></h3>
+                <div class="text-sm text-red-400/50">
+                    <p><%= req.translations.connectionFailureText %></p>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <%- include('../../components/serverTemplate') %>
+
+      <!-- Here Players get shown -->
+      <div class="flex-1 p-6 overflow-y-auto">
+        <div id="PlayersGrid" class="grid grid-cols-6 gap-4">
+            <% players.forEach(player => { %>
+                <div class="p-4 bg-black rounded-lg shadow-lg text-center">
+                  <img 
+                    src="https://crafatar.com/avatars/<%= player.uuid %>?size=64&overlay" 
+                    alt="<%= player.name %>'s Avatar" 
+                    class="mx-auto rounded-full mb-3 border border-gray-700"
+                    width="64" 
+                    height="64"
+                  />
+                  <p class="text-lg font-bold text-white"><%= player.name %></p>
+                </div>
+              <% }) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/footer') %>
