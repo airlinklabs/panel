@@ -682,7 +682,7 @@ const dashboardModule: Module = {
 
     let players: Array<{ name: string; uuid: string }> = [];
     try {
-      const pingResponse = await MinecraftServerListPing.ping(4, 'basti.privt.xyz', parseInt(primaryPort, 10), 3000);
+      const pingResponse = await MinecraftServerListPing.ping(4, server.node.address, parseInt(primaryPort, 10), 3000);
       players = pingResponse.players?.sample?.map((player: any) => ({
         name: player.name,
         uuid: player.id,
