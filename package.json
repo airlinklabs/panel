@@ -32,6 +32,7 @@
     "ejs": "^3.1.10",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
+    "minecraft-status": "^1.1.0",
     "multer": "^1.4.5-lts.1",
     "path": "^0.12.7"
   },

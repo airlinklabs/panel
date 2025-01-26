@@ -1,9 +1,3 @@
-/*
-  Warnings:
-
-  - Added the required column `imageId` to the `Server` table without a default value. This is not possible if the table is not empty.
-
-*/
 -- RedefineTables
 PRAGMA defer_foreign_keys=ON;
 PRAGMA foreign_keys=OFF;
@@ -17,6 +11,10 @@ CREATE TABLE "new_Server" (
     "Memory" INTEGER NOT NULL,
     "Cpu" INTEGER NOT NULL,
     "Storage" INTEGER NOT NULL,
+    "Variables" TEXT,
+    "StartCommand" TEXT,
+    "dockerImage" TEXT,
+    "Installing" BOOLEAN NOT NULL DEFAULT true,
     "Suspended" BOOLEAN NOT NULL DEFAULT false,
     "ownerId" INTEGER NOT NULL,
     "nodeId" INTEGER NOT NULL,
@@ -25,7 +23,7 @@ CREATE TABLE "new_Server" (
     CONSTRAINT "Server_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "Users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "Server_imageId_fkey" FOREIGN KEY ("imageId") REFERENCES "Images" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
-INSERT INTO "new_Server" ("Cpu", "Memory", "Ports", "Storage", "Suspended", "UUID", "createdAt", "description", "id", "name", "nodeId", "ownerId") SELECT "Cpu", "Memory", "Ports", "Storage", "Suspended", "UUID", "createdAt", "description", "id", "name", "nodeId", "ownerId" FROM "Server";
+INSERT INTO "new_Server" ("Cpu", "Memory", "Ports", "StartCommand", "Storage", "Suspended", "UUID", "Variables", "createdAt", "description", "dockerImage", "id", "imageId", "name", "nodeId", "ownerId") SELECT "Cpu", "Memory", "Ports", "StartCommand", "Storage", "Suspended", "UUID", "Variables", "createdAt", "description", "dockerImage", "id", "imageId", "name", "nodeId", "ownerId" FROM "Server";
 DROP TABLE "Server";
 ALTER TABLE "new_Server" RENAME TO "Server";
 CREATE UNIQUE INDEX "Server_UUID_key" ON "Server"("UUID");

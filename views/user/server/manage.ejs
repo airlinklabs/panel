@@ -1,4 +1,5 @@
 <%- include('../../components/header', { title: 'Console' }) %>
+<%- include('../../components/serverFeatures') %>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.js"
     integrity="sha512-2PRgAav8Os8vLcOAh1gSaDoNLe1fAyq8/G3QSdyjFFD+OqNjLeHE/8q4+S4MEZgPsuo+itHopj+hJvqS8XUQ8A=="
@@ -37,22 +38,6 @@
 
     <!-- Content -->
     <div class="flex-1 p-6 overflow-y-auto pt-16">
-    <!-- Alpha Warning Alert -->
-    <div class="rounded-xl bg-amber-800/10 px-4 py-4 mx-8 mt-4">
-        <div class="flex">
-            <div class="flex-shrink-0 flex items-center">
-                <svg class="h-6 w-6 text-amber-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
-                </svg>
-            </div>
-            <div class="ml-3">
-                <h3 class="text-sm font-medium text-amber-400">Alpha Version Notice</h3>
-                <div class="mt-1 text-sm text-amber-400/80">
-                    <p>Server Manage is in alpha. This version may have bugs in the console or other features.</p>
-                </div>
-            </div>
-        </div>
-    </div>
       <!-- Page Header -->
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
@@ -179,32 +164,71 @@
 
       <div class="flex flex-col lg:flex-row px-8">
 
-        <!-- Left side: Console -->
-        <div class="w-full lg:w-2/3 lg:pr-5 flex flex-col">
-            <div class="bg-neutral-900/50 border border-neutral-700/10 rounded-t-xl p-4 flex-1">
-                <div id="terminal" class="overflow-x-auto whitespace-pre-wrap min-h-full w-full"></div>
-            </div>
-            <input id="input" type="text" autocomplete="off" placeholder="<%= req.translations.SendACommand %>"
-                class="w-full px-4 py-3 bg-neutral-600/20 text-white rounded-b-xl text-sm border-t border-transparent focus:ring-2 focus:focus:ring-transparent focus:border-transparent placeholder:font-medium placeholder:text-neutral-500">
+<!-- Left side: Console -->
+<div class="w-full lg:w-2/3 lg:pr-5 flex flex-col">
+    <div class="bg-neutral-900/50 border border-neutral-700/10 rounded-t-xl p-4 flex-1">
+        <div id="terminal" class="overflow-x-auto whitespace-pre-wrap min-h-full w-full"></div>
+    </div>
+    <div class="relative">
+        <input id="input" type="text" autocomplete="off" placeholder="Type a command..."
+            class="w-full px-4 py-3 bg-neutral-600/20 text-white rounded-b-xl text-sm border-t border-neutral-700 select-none focus:ring-1 focus:ring-neutral-100/50 focus:border-transparent placeholder:font-medium placeholder:text-neutral-500">
+        
+            <% if (features.includes('auto-complete')) { %>
+        <div id="settings-icon" class="absolute right-4 top-3 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
+            </svg>
         </div>
-    
+        
+        <div id="suggestions" class="absolute bg-neutral-800 text-white border border-neutral-600 rounded-b-lg w-full max-h-40 overflow-y-auto hidden -mt-2">
+            <!-- Auto Complete thingys come here -->
+        </div>
+        <div id="settings-menu" class="absolute bg-neutral-700 text-white p-4 rounded-lg hidden mt-10 right-0 w-48">
+            <label class="flex items-center space-x-2">
+                <input type="checkbox" id="auto-complete-toggle" class="form-checkbox h-4 w-4 text-neutral-400" />
+                <span>Enable Auto-Completion</span>
+            </label>
+        </div>
+        <% } %>
+    </div>
+</div>
+        
         <!-- Right side: Stats Cards -->
         <div class="w-full lg:w-1/3 mt-4 lg:mt-0 space-y-4 flex flex-col">
             <!-- Status Card -->
             <div class="bg-neutral-500/20 border border-neutral-700/10 dark:bg-white/5 rounded-xl px-4 py-5 shadow sm:p-6 h-full relative overflow-hidden flex-1">
                 <canvas id="statusChart" class="absolute inset-0 w-full h-full"></canvas>
-                <div class="relative z-10">
+                <div class="relative z-10 flex items-center justify-between">
+                  <div>
                     <h2 class="text-sm font-medium text-neutral-400"><%= req.translations.Status %>:</h2>
                     <p id="status" class="mt-1 text-lg font-medium tracking-tight text-white">-</p>
+                  </div>
+              
+                <% if (features.includes('players')) { %>
+                  <div id="players-deco" class="flex items-center transition-all duration-[1.5s,15s] translate-y-32">
+                    <div class="relative inline-flex items-center">
+                      <div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white/10 transform hover:-translate-y-2 transition-all duration-500 relative z-30">
+                        <img src="https://mc-heads.net/avatar/privt" alt="Avatar 1" class="w-full h-full" />
+                      </div>
+                      <div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white/10 transform -translate-y-1 hover:-translate-y-3 transition-all duration-700 -ml-4 relative z-20">
+                        <img src="https://mc-heads.net/avatar/achul123" alt="Avatar 2" class="w-full h-full" />
+                      </div>
+                      <div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white/10 transform hover:-translate-y-4 transition-all duration-500 -ml-4 relative z-10">
+                        <img src="https://mc-heads.net/avatar/dc7431" alt="Avatar 3" class="w-full h-full" />
+                      </div>
+                    </div>
+                  </div>
+                <% } %>
                 </div>
-            </div>
+              </div>
+              
     
             <!-- RAM Usage Card -->
             <div class="bg-neutral-500/20 border border-neutral-700/10 dark:bg-white/5 rounded-xl px-4 py-5 shadow sm:p-6 h-full relative overflow-hidden flex-1">
                 <canvas id="ramChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
                     <h2 class="text-sm font-medium text-neutral-400"><%= req.translations.ramUsage %>:</h2>
-                    <p id="ramUsage" class="mt-1 text-lg font-medium tracking-tight text-white">-</p>
+                    <p id="ramUsage" class="mt-1 text-lg font-medium tracking-tight text-white">0% (0 Bytes / 0 Bytes)</p>
                 </div>
             </div>
     
@@ -213,7 +237,7 @@
                 <canvas id="cpuChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
                     <h2 class="text-sm font-medium text-neutral-400"><%= req.translations.cpuUsage %>:</h2>
-                    <p id="cpuUsage" class="mt-1 text-lg font-medium tracking-tight text-white">-</p>
+                    <p id="cpuUsage" class="mt-1 text-lg font-medium tracking-tight text-white">0%</p>
                 </div>
             </div>
     
@@ -249,7 +273,6 @@
         magenta: '#BB80B3',
         cyan: '#2DDAFD',
         white: '#d0d0d0',
-        brightBlack: 'rgba(255, 255, 255, 0.2)',
         brightRed: '#FF5370',
         brightGreen: '#C3E88D',
         brightYellow: '#FFCB6B',
@@ -258,8 +281,7 @@
         brightCyan: '#89DDFF',
         brightWhite: '#ffffff',
         cursor: '#c5c9d1',
-        cursorAccent: '#c5c9d1',
-        selection: '#5DA5D533',
+        cursorAccent: '#c5c9d1'
     };
 
     const term = new Terminal({
@@ -285,29 +307,54 @@
     const path = '/console/<%= server.UUID %>';
 
     const socketUrl = `${protocol}//${host}${path}`;
+
     let socket;
 
-    function connectWebSocket() {
-        socket = new WebSocket(socketUrl);
+let isReconnecting = false;
 
-        socket.onopen = () => {
-            writeConsole('system', 'system', 'WebSocket connection established');
-        };
-
-        socket.onmessage = handleWebSocketMessage;
-
-        socket.onerror = (error) => {
-            writeConsole('system', 'error', `WebSocket Error: ${error.message}`);
-        };
-
-        socket.onclose = () => {
-            console.log('WebSocket connection closed.');
-            writeConsole('system', 'system', 'WebSocket connection closed. Reconnecting...');
-            setTimeout(connectWebSocket, 5000); // Attempt to reconnect every 5 seconds
-        };
+function connectWebSocket() {
+    if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN)) {
+        console.log("WebSocket is already connecting or open. Skipping new connection.");
+        return;
     }
 
-    connectWebSocket();
+    isReconnecting = true;
+
+    if (socket) {
+        console.log("Closing existing WebSocket connection...");
+        socket.close();
+    }
+
+    socket = new WebSocket(socketUrl);
+
+    socket.onopen = () => {
+        console.log('WebSocket connection established');
+        writeConsole('system', 'system', 'WebSocket connection established');
+        isReconnecting = false;
+    };
+
+    socket.onmessage = handleWebSocketMessage;
+
+    socket.onerror = (error) => {
+        console.error('WebSocket Error:', error.message);
+        writeConsole('system', 'error', `WebSocket Error: ${error.message}`);
+    };
+
+    socket.onclose = () => {
+        console.log('WebSocket connection closed. Reconnecting...');
+        writeConsole('system', 'system', 'WebSocket connection closed. Reconnecting...');
+
+        if (!isReconnecting) {
+            isReconnecting = true;
+            setTimeout(() => {
+                connectWebSocket();
+            }, 5000);
+        }
+    };
+}
+
+connectWebSocket();
+
 
     function handleWebSocketMessage(msg) {
         const lines = msg.data.split('\n');
@@ -318,7 +365,7 @@
             const trimmedLine = line.trim();
 
             if (trimmedLine.includes("Failed to attach to container")) {
-                return; // Ignore this specific message
+                return;
             }
 
             if (trimmedLine === '' && previousLineWasEmpty) return;
@@ -371,10 +418,11 @@
 
     function restartWebSocket() {
         if (socket) {
+            console.log("Restarting WebSocket connection...");
             socket.close();
         }
         setTimeout(connectWebSocket, 500);
-     }
+    }
 
     function sendCommand() {
         const inputElement = document.getElementById('input');
@@ -430,16 +478,13 @@
         fetch(`/server/${serverUUID}/power/start`, {
             method: 'POST',
         })
-        .then(response => response.json())
-        .then(data => {
-            if (id < 1) {
+            .then(response => response.json())
+            .then(data => {
                 restartWebSocket();
-                id++;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     });
 
     document.getElementById('stopButton').addEventListener('click', () => {
@@ -447,13 +492,13 @@
         fetch(`/server/${serverUUID}/power/stop`, {
             method: 'POST',
         })
-        .then(response => response.json())
-        .then(data => {
-            restartWebSocket();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+            .then(response => response.json())
+            .then(data => {
+                restartWebSocket();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     });
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -466,5 +511,168 @@
 
         inputElement.addEventListener('keydown', handleKeyUp);
     });
-</script>
 
+    function initStatsWebSocket() {
+        const statsWs = new WebSocket(`${protocol}//${host}/status/<%= server.UUID %>`);
+        
+        statsWs.onmessage = event => {
+            if (isValidJson(event.data)) {
+                const stats = JSON.parse(event.data);
+                if (stats.error) {
+                    console.error('Error fetching stats:', stats.error);
+                    return;
+                }
+    
+                updateRamUsage(stats);
+                updateCpuUsage(stats);
+                updateDiskUsage(stats);
+                updateStatus(stats);
+            } else {
+                console.log('Received non-JSON data:', event.data);
+            }
+        };
+
+        statsWs.onclose = () => {
+            console.log('WebSocket Stats connection closed, attempting to reconnect...');
+        };
+    }
+
+    function formatBytes(bytes, decimals = 2) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    function createBackgroundChart(canvasId, type = 'line') {
+            return new Chart(document.getElementById(canvasId).getContext('2d'), {
+                type: type,
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderWidth: 1,
+                        pointRadius: 0,
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    },
+                    animation: true
+                }
+            });
+        }
+        
+    const statusChart = createBackgroundChart('statusChart');
+    const ramChart = createBackgroundChart('ramChart');
+    const cpuChart = createBackgroundChart('cpuChart');
+    const diskChart = createBackgroundChart('diskChart', 'doughnut');
+
+    function updateRamUsage(stats) {
+    const ramStatsUsage = stats?.data?.memory?.usage || 0;
+    const ramStatsLimit = stats?.data?.memory?.limit || <%- server.Memory %> * 1024 * 1024 * 1024;
+    let ramUsagePercent = Number(stats?.data?.memory?.percentage) || 0;
+    const ramUsageInMB = ramStatsUsage / 1024 / 1024;
+    const ramLimitInMB = ramStatsLimit / 1024 / 1024;
+
+    if (isNaN(ramUsagePercent)) {
+        ramUsagePercent = 0;
+    }
+
+    const ramUsageText = `${ramUsagePercent.toFixed(1)}% (${formatBytes(ramStatsUsage)} / ${formatBytes(ramStatsLimit)})`;
+    document.getElementById('ramUsage').textContent = ramUsageText;
+
+    if (ramStatsUsage > 0) {
+        updateChart(ramChart, ramUsagePercent);
+    }
+}
+
+    function updateCpuUsage(stats) {
+        let cpuUsagePercent = stats.data.cpu.percentage || 0;
+
+        if (isNaN(cpuUsagePercent)) {
+            cpuUsagePercent = 0;
+        }
+
+        document.getElementById('cpuUsage').textContent = `${cpuUsagePercent}% / ${<%- server.Cpu %>}%`;
+
+        if (cpuUsagePercent > 0) {
+            updateChart(cpuChart, cpuUsagePercent);
+        }
+    }
+
+    function updateDiskUsage(stats) {
+        const diskUsageRaw = parseFloat(stats.data.storage.usage) || 0;
+        const diskLimitRaw = 10 * 1024;
+        const diskUsagePercent = (diskUsageRaw / diskLimitRaw * 100).toFixed(2);
+        document.getElementById('diskUsage').textContent = `${diskUsagePercent}% (${formatBytes(diskUsageRaw * 1024 * 1024)} / ${formatBytes(diskLimitRaw * 1024 * 1024)})`;
+    }
+
+    function updateStatus(stats) {
+        <% if (features.includes('players')) { %>
+        const playersDeco = document.getElementById('players-deco');
+        <% } %>
+        const statusElement = document.getElementById('status');
+        const ramUsageRaw = stats.data.memory.percentage;
+
+        if (ramUsageRaw !== "NaN") {
+            statusElement.textContent = 'Online';
+            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+            <% if (features.includes('players')) { %>
+            playersDeco.classList.remove('translate-y-32');
+            <% } %>
+            updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
+        } else {
+            statusElement.textContent = 'Offline';
+            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
+            <% if (features.includes('players')) { %>
+            playersDeco.classList.add('translate-y-32');
+            <% } %>
+            updateStatusChart('rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.2)');
+        }
+    }
+
+    function updateChart(chart, value) {
+        chart.data.labels.push('');
+        chart.data.datasets[0].data.push(value);
+
+        if (chart.data.labels.length > 20) {
+            chart.data.labels.shift();
+            chart.data.datasets[0].data.shift();
+        }
+
+        chart.update();
+    }
+
+    function updateStatusChart(backgroundColor, borderColor) {
+        statusChart.data.datasets[0].backgroundColor = backgroundColor;
+        statusChart.data.datasets[0].borderColor = borderColor;
+        statusChart.data.labels = [''];
+        statusChart.data.datasets[0].data = [100];
+        statusChart.update();
+    }
+
+    function isValidJson(str) {
+            try {
+              JSON.parse(str);
+            } catch (e) {
+              return false;
+            }
+            return true;
+        }
+
+    initStatsWebSocket();
+</script>

@@ -1,0 +1,97 @@
+<%- include('../../components/header', { title: 'Players' }) %>
+
+<main class="h-screen m-auto text-white">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </aside>
+
+    <!-- Main Content -->
+    <section class="flex-1 p-6 overflow-y-auto pt-16">
+      <!-- Page Header -->
+      <header class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-xl font-semibold text-neutral-800 dark:text-white">
+            <%= server.name.charAt(0).toUpperCase() + server.name.slice(1) %>
+          </h1>
+          <p class="mt-1 text-sm text-neutral-500">
+            <%= server.description %>
+          </p>
+        </div>
+      </header>
+
+      <!-- Connection Failure Message -->
+      <div id="daemonIsDown" class="hidden rounded-xl bg-red-800/10 px-6 py-4 mt-8 mx-8">
+        <div class="flex items-center">
+          <svg class="animate-spin h-5 w-5 text-red-400 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <div>
+            <h3 class="text-sm font-medium text-red-400"><%= req.translations.connectionFailure %></h3>
+            <p class="text-sm text-red-400/50">
+              <%= req.translations.connectionFailureText %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Server Template -->
+      <%- include('../../components/serverTemplate') %>
+
+      <!-- Players Grid -->
+      <div class="p-6">
+        <% if (players.length !== 0) { %>
+        <div id="PlayersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <% players.forEach(player => { %>
+            <div class="relative p-4 bg-neutral-800 rounded-xl shadow-lg text-center group">
+              <img 
+                src="https://crafatar.com/avatars/<%= player.uuid %>?size=64&overlay" 
+                alt="<%= player.name %>'s Avatar" 
+                class="mx-auto rounded-full mb-3 border border-gray-700"
+                width="64" 
+                height="64"
+              />
+              <p class="text-lg font-bold text-white"><%= player.name %></p>
+            </div>
+            </div>
+          <% }) %>
+          <% } else { %>
+
+            <div id="no-players-message" class="text-center py-12">
+              <div class="flex justify-center mb-6">
+                <div class="relative inline-flex items-center">
+                    <div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white/10 transform hover:-translate-y-2 transition-all duration-200 relative z-30">
+                        <img src="https://mc-heads.net/avatar/privt" alt="" class="w-full h-full" />
+                    </div>
+                    <div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white/10 transform -translate-y-1 hover:-translate-y-3 transition-all duration-200 -ml-4 relative z-20">
+                        <img src="https://mc-heads.net/avatar/achul123" alt="" class="w-full h-full" />
+                    </div>
+                    <div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white/10 transform hover:-translate-y-4 transition-all duration-200 -ml-4 relative z-10">
+                        <img src="https://mc-heads.net/avatar/dc7431" alt="" class="w-full h-full" />
+                    </div>
+                </div>
+            </div>
+              <h2 class="text-xl font-semibold text-neutral-300">No players online!</h2>
+              <p class="mt-2 text-sm text-neutral-500">
+                It seems quiet here. Once players join, they’ll show up in this list.
+              </p>
+              <div class="mt-6">
+                <a 
+                  href="/invite/<%= req.params.id %>"
+                  class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-200"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Invite friends to join
+                </a>
+              </div>
+            </div>
+          <% } %>
+      </div>
+    </section>
+  </div>
+</main>
+
+<%- include('../../components/footer') %>

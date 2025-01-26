@@ -4,6 +4,9 @@ import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
+import QueueHandler from '../../handlers/utils/core/queueer';
+
+const queueer = new QueueHandler();
 
 const prisma = new PrismaClient();
 
@@ -183,6 +186,104 @@ const adminModule: Module = {
               dockerImage: JSON.stringify(imageDocker),
             },
           });
+
+          queueer.addTask(async () => {
+            const servers = await prisma.server.findMany({
+              where: {
+                Installing: true,
+              },
+              include: {
+                image: true,
+                node: true,
+              },
+            });
+          
+            for (const server of servers) {
+              if (!server.Variables) {
+                await prisma.server.update({
+                  where: { id: server.id },
+                  data: { Installing: false },
+                });
+                continue;
+              }
+          
+              let ServerEnv;
+              try {
+                ServerEnv = JSON.parse(server.Variables);
+              } catch (error) {
+                console.error(`Error parsing Variables for server ID ${server.id}:`, error);
+                await prisma.server.update({
+                  where: { id: server.id },
+                  data: { Installing: false },
+                });
+                continue;
+              }
+          
+              if (!Array.isArray(ServerEnv)) {
+                console.error(`ServerEnv is not an array for server ID ${server.id}. Skipping...`);
+                await prisma.server.update({
+                  where: { id: server.id },
+                  data: { Installing: false },
+                });
+                continue;
+              }
+          
+              const env = ServerEnv.reduce((acc: { [key: string]: any }, curr: { env: string, value: any }) => {
+                acc[curr.env] = curr.value;
+                return acc;
+              }, {});
+          
+              console.log(env);
+          
+              if (server.image?.scripts) {
+                let scripts;
+                try {
+                  scripts = JSON.parse(server.image.scripts);
+                } catch (error) {
+                  console.error(`Error parsing scripts for server ID ${server.id}:`, error);
+                  await prisma.server.update({
+                    where: { id: server.id },
+                    data: { Installing: false },
+                  });
+                  continue;
+                }
+
+                const requestBody = {
+                  id: server.UUID,
+                  env: env,
+                  scripts: scripts.install.map((script: { url: string; fileName: string }) => ({
+                    url: script.url,
+                    fileName: script.fileName,
+                  })),
+                };
+          
+                console.log(requestBody);
+          
+                try {
+                  await axios.post(
+                    `http://${server.node.address}:${server.node.port}/container/install`,
+                    requestBody,
+                    {
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`,
+                      },
+                    }
+                  );
+          
+                  await prisma.server.update({
+                    where: { id: server.id },
+                    data: { Installing: false },
+                  });
+                } catch (error) {
+                  console.error(`Error sending install request for server ID ${server.id}:`, error);
+                }
+              } else {
+                console.warn(`No scripts found for server ID ${server.id}. Skipping...`);
+              }
+            }
+          }, 0);
+
           res.status(200).send('Server created successfully');
         } catch (error) {
           logger.error('Error creating server:', error);
