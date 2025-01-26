@@ -1,4 +1,4 @@
-> [!Precaución]
+> [!CAUTION]
 > Airlink sigue en desarrollo por un tiempo y está siendo utilizada por algunas personas, espere a una versión de lanzamiento.
 
 # Airlink Panel 🚀
