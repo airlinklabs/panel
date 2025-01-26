@@ -107,7 +107,7 @@
 }
 
 /*
-! tailwindcss v3.4.15 | MIT License | https://tailwindcss.com
+! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com
 */
 
 /*
@@ -1754,12 +1754,12 @@ select {
   cursor: default;
 }
 
-.cursor-not-allowed {
-  cursor: not-allowed;
-}
-
 .cursor-pointer {
   cursor: pointer;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed;
 }
 
 .select-none {
@@ -3388,6 +3388,14 @@ select {
   transition-duration: 700ms;
 }
 
+.duration-\[1s\2c 15s\] {
+  transition-duration: 1s,15s;
+}
+
+.duration-\[2s\2c 15s\] {
+  transition-duration: 2s,15s;
+}
+
 .duration-\[1\.5s\2c 15s\] {
   transition-duration: 1.5s,15s;
 }
@@ -3899,6 +3907,11 @@ select {
 .dark\:text-white:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+
+.dark\:text-neutral-900:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(23 23 23 / var(--tw-text-opacity, 1));
 }
 
 .dark\:ring-white\/5:is(.dark *) {
