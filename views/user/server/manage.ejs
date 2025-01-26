@@ -198,18 +198,37 @@
             <!-- Status Card -->
             <div class="bg-neutral-500/20 border border-neutral-700/10 dark:bg-white/5 rounded-xl px-4 py-5 shadow sm:p-6 h-full relative overflow-hidden flex-1">
                 <canvas id="statusChart" class="absolute inset-0 w-full h-full"></canvas>
-                <div class="relative z-10">
+                <div class="relative z-10 flex items-center justify-between">
+                  <div>
                     <h2 class="text-sm font-medium text-neutral-400"><%= req.translations.Status %>:</h2>
                     <p id="status" class="mt-1 text-lg font-medium tracking-tight text-white">-</p>
+                  </div>
+              
+                <% if (features.includes('players')) { %>
+                  <div id="players-deco" class="flex items-center transition-all duration-[1.5s,15s] translate-y-32">
+                    <div class="relative inline-flex items-center">
+                      <div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white/10 transform hover:-translate-y-2 transition-all duration-500 relative z-30">
+                        <img src="https://mc-heads.net/avatar/privt" alt="Avatar 1" class="w-full h-full" />
+                      </div>
+                      <div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white/10 transform -translate-y-1 hover:-translate-y-3 transition-all duration-700 -ml-4 relative z-20">
+                        <img src="https://mc-heads.net/avatar/achul123" alt="Avatar 2" class="w-full h-full" />
+                      </div>
+                      <div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white/10 transform hover:-translate-y-4 transition-all duration-500 -ml-4 relative z-10">
+                        <img src="https://mc-heads.net/avatar/dc7431" alt="Avatar 3" class="w-full h-full" />
+                      </div>
+                    </div>
+                  </div>
+                <% } %>
                 </div>
-            </div>
+              </div>
+              
     
             <!-- RAM Usage Card -->
             <div class="bg-neutral-500/20 border border-neutral-700/10 dark:bg-white/5 rounded-xl px-4 py-5 shadow sm:p-6 h-full relative overflow-hidden flex-1">
                 <canvas id="ramChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
                     <h2 class="text-sm font-medium text-neutral-400"><%= req.translations.ramUsage %>:</h2>
-                    <p id="ramUsage" class="mt-1 text-lg font-medium tracking-tight text-white">-</p>
+                    <p id="ramUsage" class="mt-1 text-lg font-medium tracking-tight text-white">0% (0 Bytes / 0 Bytes)</p>
                 </div>
             </div>
     
@@ -218,7 +237,7 @@
                 <canvas id="cpuChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
                     <h2 class="text-sm font-medium text-neutral-400"><%= req.translations.cpuUsage %>:</h2>
-                    <p id="cpuUsage" class="mt-1 text-lg font-medium tracking-tight text-white">-</p>
+                    <p id="cpuUsage" class="mt-1 text-lg font-medium tracking-tight text-white">0%</p>
                 </div>
             </div>
     
@@ -541,14 +560,20 @@
     const diskChart = createBackgroundChart('diskChart', 'doughnut');
 
     function updateRamUsage(stats) {
-    const ramStatsUsage = stats.data.memory.usage || 0;
-    const ramStatsLimit = stats.data.memory.limit || 0;
-    const ramUsagePercent = stats.data.memory.percentage || 9425;
-    const ramUsageInMB = ramStatsUsage / 1024 / 1024 || 0;
-    const ramLimitInMB = ramStatsLimit / 1024 / 1024 || 0;
-    document.getElementById('ramUsage').textContent = `${ramUsagePercent}% (${formatBytes(ramStatsUsage)} / ${formatBytes(ramStatsLimit)})`;
+    const ramStatsUsage = stats?.data?.memory?.usage || 0;
+    const ramStatsLimit = stats?.data?.memory?.limit || <%- server.Memory %> * 1024 * 1024 * 1024;
+    let ramUsagePercent = Number(stats?.data?.memory?.percentage) || 0; // Sicherstellen, dass es eine Zahl ist
+    const ramUsageInMB = ramStatsUsage / 1024 / 1024;
+    const ramLimitInMB = ramStatsLimit / 1024 / 1024;
+
+    if (isNaN(ramUsagePercent)) {
+        ramUsagePercent = 0;
+    }
+
+    const ramUsageText = `${ramUsagePercent.toFixed(1)}% (${formatBytes(ramStatsUsage)} / ${formatBytes(ramStatsLimit)})`;
+    document.getElementById('ramUsage').textContent = ramUsageText;
+
     if (ramStatsUsage > 0) {
-        if (ramUsagePercent !== 9425)
         updateChart(ramChart, ramUsagePercent);
     }
 }
@@ -560,7 +585,7 @@
             cpuUsagePercent = 0;
         }
 
-        document.getElementById('cpuUsage').textContent = `${cpuUsagePercent}%`;
+        document.getElementById('cpuUsage').textContent = `${cpuUsagePercent}% / ${<%- server.Cpu %>}%`;
 
         if (cpuUsagePercent > 0) {
             updateChart(cpuChart, cpuUsagePercent);
@@ -575,16 +600,25 @@
     }
 
     function updateStatus(stats) {
+        <% if (features.includes('players')) { %>
+        const playersDeco = document.getElementById('players-deco');
+        <% } %>
         const statusElement = document.getElementById('status');
-        const ramUsageRaw = stats.data.memory.usage / 1024 / 1024 || 0;
+        const ramUsageRaw = stats.data.memory.percentage;
 
-        if (ramUsageRaw > 1) {
+        if (ramUsageRaw !== "NaN") {
             statusElement.textContent = 'Online';
             statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+            <% if (features.includes('players')) { %>
+            playersDeco.classList.remove('translate-y-32');
+            <% } %>
             updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
         } else {
             statusElement.textContent = 'Offline';
             statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
+            <% if (features.includes('players')) { %>
+            playersDeco.classList.add('translate-y-32');
+            <% } %>
             updateStatusChart('rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.2)');
         }
     }
