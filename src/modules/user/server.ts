@@ -688,7 +688,7 @@ const dashboardModule: Module = {
         uuid: player.id,
       })) || [];
     } catch (pingError) {
-      // nothing
+      console.log('chicken with curry')
     }
 
     const settings = await prisma.settings.findUnique({ where: { id: 1 } });
