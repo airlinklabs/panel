@@ -162,7 +162,6 @@ const wsServerConsoleModule: Module = {
       },
     );
 
-
     return router;
   },
 };

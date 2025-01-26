@@ -17,12 +17,14 @@ interface CheckEulaResult {
   error?: string;
 }
 
-export async function checkEulaStatus(serverId: string): Promise<CheckEulaResult> {
+export async function checkEulaStatus(
+  serverId: string,
+): Promise<CheckEulaResult> {
   try {
-    const server = await prisma.server.findUnique({
+    const server = (await prisma.server.findUnique({
       where: { UUID: serverId },
       include: { node: true },
-    }) as Server | null;
+    })) as Server | null;
 
     if (!server) {
       return { accepted: false };
@@ -38,12 +40,17 @@ export async function checkEulaStatus(serverId: string): Promise<CheckEulaResult
       },
     });
 
-    const eulaAccepted = (eulaResponse.data.content as string).includes('eula=true');
+    const eulaAccepted = (eulaResponse.data.content as string).includes(
+      'eula=true',
+    );
     return { accepted: eulaAccepted };
   } catch (error: any) {
     if (error.response && error.response.status === 404) {
       return { accepted: false };
     }
-    return { accepted: false, error: 'An error occurred while checking the EULA status.' };
+    return {
+      accepted: false,
+      error: 'An error occurred while checking the EULA status.',
+    };
   }
 }

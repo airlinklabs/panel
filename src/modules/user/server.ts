@@ -5,7 +5,7 @@ import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUt
 import logger from '../../handlers/logger';
 import axios from 'axios';
 import { checkEulaStatus } from '../../handlers/features';
-const { MinecraftServerListPing } = require("minecraft-status");
+const { MinecraftServerListPing } = require('minecraft-status');
 
 const prisma = new PrismaClient();
 
@@ -89,14 +89,20 @@ const dashboardModule: Module = {
 
           if (server.image && typeof server.image.info === 'string') {
             try {
-              const parsedInfo = JSON.parse(server.image.info) as ServerImageInfo;
+              const parsedInfo = JSON.parse(
+                server.image.info,
+              ) as ServerImageInfo;
               if (Array.isArray(parsedInfo.features)) {
                 features = parsedInfo.features;
               }
             } catch (error) {
-              console.error("Failed to parse server.image.info:", error);
+              console.error('Failed to parse server.image.info:', error);
             }
-          } else if (server.image && typeof server.image.info === 'object' && server.image.info !== null) {
+          } else if (
+            server.image &&
+            typeof server.image.info === 'object' &&
+            server.image.info !== null
+          ) {
             const info = server.image.info as ServerImageInfo;
             if (Array.isArray(info.features)) {
               features = info.features;
@@ -106,7 +112,7 @@ const dashboardModule: Module = {
           if (features.includes('eula')) {
             const eulaStatus = await checkEulaStatus(server.UUID);
             if (eulaStatus.accepted) {
-              features = features.filter(feature => feature !== 'eula');
+              features = features.filter((feature) => feature !== 'eula');
             }
           }
 
@@ -305,7 +311,7 @@ const dashboardModule: Module = {
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
-          
+
           if (!server) {
             errorMessage.message = 'Server not found.';
             return res.render('user/server/files', {
@@ -345,14 +351,20 @@ const dashboardModule: Module = {
 
           if (server.image && typeof server.image.info === 'string') {
             try {
-              const parsedInfo = JSON.parse(server.image.info) as ServerImageInfo;
+              const parsedInfo = JSON.parse(
+                server.image.info,
+              ) as ServerImageInfo;
               if (Array.isArray(parsedInfo.features)) {
                 features = parsedInfo.features;
               }
             } catch (error) {
-              console.error("Failed to parse server.image.info:", error);
+              console.error('Failed to parse server.image.info:', error);
             }
-          } else if (server.image && typeof server.image.info === 'object' && server.image.info !== null) {
+          } else if (
+            server.image &&
+            typeof server.image.info === 'object' &&
+            server.image.info !== null
+          ) {
             const info = server.image.info as ServerImageInfo;
             if (Array.isArray(info.features)) {
               features = info.features;
@@ -375,7 +387,7 @@ const dashboardModule: Module = {
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
-          
+
           return res.render('user/server/files', {
             errorMessage,
             features: [],
@@ -407,7 +419,7 @@ const dashboardModule: Module = {
 
           const server = await prisma.server.findUnique({
             where: { UUID: serverId },
-            include: { node: true, image: true, },
+            include: { node: true, image: true },
           });
 
           if (!server) {
@@ -434,14 +446,20 @@ const dashboardModule: Module = {
 
           if (server.image && typeof server.image.info === 'string') {
             try {
-              const parsedInfo = JSON.parse(server.image.info) as ServerImageInfo;
+              const parsedInfo = JSON.parse(
+                server.image.info,
+              ) as ServerImageInfo;
               if (Array.isArray(parsedInfo.features)) {
                 features = parsedInfo.features;
               }
             } catch (error) {
-              console.error("Failed to parse server.image.info:", error);
+              console.error('Failed to parse server.image.info:', error);
             }
-          } else if (server.image && typeof server.image.info === 'object' && server.image.info !== null) {
+          } else if (
+            server.image &&
+            typeof server.image.info === 'object' &&
+            server.image.info !== null
+          ) {
             const info = server.image.info as ServerImageInfo;
             if (Array.isArray(info.features)) {
               features = info.features;
@@ -574,139 +592,207 @@ const dashboardModule: Module = {
       },
     );
 
-    router.post('/server/:id/feature/eula', isAuthenticatedForServer('id'), async (req: Request, res: Response) => {
-      const userId = req.session?.user?.id;
-      const serverId = req.params?.id;
+    router.get(
+      '/server/:id/files/download/:path(*)',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+        const filePath = req.params?.path;
 
-      const user = await prisma.users.findUnique({ where: { id: userId } });
-      if (!user) {
-        res.status(404).json({ error: 'User not found' });
-        return;
-      }
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
 
-      const server = await prisma.server.findUnique({
-        where: { UUID: serverId },
-        include: { node: true },
-      });
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true },
+          });
 
-      if (!server) {
-        res.status(404).json({ error: 'Server not found' });
-        return;
-      }
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
 
-      try {
-        
-        await axios({
-          method: 'POST',
-          url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
-          data: {
-            id: server.UUID,
-            path: 'eula.txt',
-            content: 'eula=true',
-          },
-          auth: {
-            username: 'Airlink',
-            password: server.node.key,
-          },
+          const response = await axios({
+            method: 'GET',
+            url: `http://${server.node.address}:${server.node.port}/fs/download`,
+            params: { id: server.UUID, path: filePath },
+            auth: {
+              username: 'Airlink',
+              password: server.node.key,
+            },
+            responseType: 'stream',
+          });
+
+          res.setHeader(
+            'Content-Disposition',
+            `attachment; filename="${filePath}"`,
+          );
+          res.setHeader('Content-Type', 'application/octet-stream');
+
+          response.data.pipe(res); // Redirige le flux du fichier vers la réponse
+        } catch (error) {
+          logger.error('Error downloading file:', error);
+          res.status(500).json({ error: 'Failed to download file' });
+        }
+      },
+    );
+
+    router.post(
+      '/server/:id/feature/eula',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+          res.status(404).json({ error: 'User not found' });
+          return;
+        }
+
+        const server = await prisma.server.findUnique({
+          where: { UUID: serverId },
+          include: { node: true },
         });
 
-        res.status(200).json({ success: true });
-        return;
+        if (!server) {
+          res.status(404).json({ error: 'Server not found' });
+          return;
+        }
 
-      } catch (error) {
-        logger.error('Error accepting EULA:', error);
-        res.status(500).json({ error: 'Failed to accept EULA' });
-        return;
-      }
-    });
-
-
- router.get('/server/:id/players', isAuthenticatedForServer('id'), async (req: Request, res: Response) => {
-  const userId = req.session?.user?.id;
-  const serverId = req.params?.id;
-
-  try {
-    const user = await prisma.users.findUnique({ where: { id: userId } });
-    if (!user) {
-      res.status(404).json({ error: 'User not found' });
-      return;
-    }
-
-    const server = await prisma.server.findUnique({
-      where: { UUID: serverId },
-      include: { node: true, image: true, },
-    });
-
-    if (!server) {
-      res.status(404).json({ error: 'Server not found' });
-      return;
-    }
-
-    const primaryPort = server.Ports
-      ? JSON.parse(server.Ports)
-          .filter((Port: any) => Port.primary)
-          .map((Port: any) => Port.Port.split(':')[1])
-          .pop()
-      : '';
-
-
-      let features: string[] = [];
-
-      if (server.image && typeof server.image.info === 'string') {
         try {
-          const parsedInfo = JSON.parse(server.image.info) as ServerImageInfo;
-          if (Array.isArray(parsedInfo.features)) {
-            features = parsedInfo.features;
-          }
+          await axios({
+            method: 'POST',
+            url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
+            data: {
+              id: server.UUID,
+              path: 'eula.txt',
+              content: 'eula=true',
+            },
+            auth: {
+              username: 'Airlink',
+              password: server.node.key,
+            },
+          });
+
+          res.status(200).json({ success: true });
+          return;
         } catch (error) {
-          console.error("Failed to parse server.image.info:", error);
+          logger.error('Error accepting EULA:', error);
+          res.status(500).json({ error: 'Failed to accept EULA' });
+          return;
         }
-      } else if (server.image && typeof server.image.info === 'object' && server.image.info !== null) {
-        const info = server.image.info as ServerImageInfo;
-        if (Array.isArray(info.features)) {
-          features = info.features;
+      },
+    );
+
+    router.get(
+      '/server/:id/players',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true, image: true },
+          });
+
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+
+          const primaryPort = server.Ports
+            ? JSON.parse(server.Ports)
+                .filter((Port: any) => Port.primary)
+                .map((Port: any) => Port.Port.split(':')[1])
+                .pop()
+            : '';
+
+          let features: string[] = [];
+
+          if (server.image && typeof server.image.info === 'string') {
+            try {
+              const parsedInfo = JSON.parse(
+                server.image.info,
+              ) as ServerImageInfo;
+              if (Array.isArray(parsedInfo.features)) {
+                features = parsedInfo.features;
+              }
+            } catch (error) {
+              console.error('Failed to parse server.image.info:', error);
+            }
+          } else if (
+            server.image &&
+            typeof server.image.info === 'object' &&
+            server.image.info !== null
+          ) {
+            const info = server.image.info as ServerImageInfo;
+            if (Array.isArray(info.features)) {
+              features = info.features;
+            }
+          }
+
+          if (!primaryPort) {
+            return res.render('user/server/players', {
+              errorMessage: { message: 'No primary port found' },
+              user,
+              features,
+              players: [],
+              server,
+              req,
+              settings: await prisma.settings.findUnique({ where: { id: 1 } }),
+            });
+          }
+
+          let players: Array<{ name: string; uuid: string }> = [];
+          try {
+            const pingResponse = await MinecraftServerListPing.ping(
+              4,
+              server.node.address,
+              parseInt(primaryPort, 10),
+              3000,
+            );
+            players =
+              pingResponse.players?.sample?.map((player: any) => ({
+                name: player.name,
+                uuid: player.id,
+              })) || [];
+          } catch (pingError) {
+            console.log('chicken with curry');
+          }
+
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
+
+          return res.render('user/server/players', {
+            errorMessage: {},
+            user,
+            players,
+            features,
+            server,
+            req,
+            settings,
+          });
+        } catch (error) {
+          logger.error('Error getting players:', error);
+          res.status(500).json({ error: 'Failed to get players' });
         }
-      }
-
-    if (!primaryPort) {
-      return res.render('user/server/players', {
-        errorMessage: { message: 'No primary port found' },
-        user,
-        features,
-        players: [],
-        server,
-        req,
-        settings: await prisma.settings.findUnique({ where: { id: 1 } }),
-      });
-    }
-
-    let players: Array<{ name: string; uuid: string }> = [];
-    try {
-      const pingResponse = await MinecraftServerListPing.ping(4, server.node.address, parseInt(primaryPort, 10), 3000);
-      players = pingResponse.players?.sample?.map((player: any) => ({
-        name: player.name,
-        uuid: player.id,
-      })) || [];
-    } catch (pingError) {
-      console.log('chicken with curry')
-    }
-
-    const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-
-    return res.render('user/server/players', {
-      errorMessage: {},
-      user,
-      players,
-      features,
-      server,
-      req,
-      settings,
-    });
-  } catch (error) {
-    logger.error('Error getting players:', error);
-    res.status(500).json({ error: 'Failed to get players' });
-  }
-});
+      },
+    );
 
     return router;
   },

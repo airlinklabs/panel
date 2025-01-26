@@ -197,7 +197,7 @@ const adminModule: Module = {
                 node: true,
               },
             });
-          
+
             for (const server of servers) {
               if (!server.Variables) {
                 await prisma.server.update({
@@ -206,41 +206,55 @@ const adminModule: Module = {
                 });
                 continue;
               }
-          
+
               let ServerEnv;
               try {
                 ServerEnv = JSON.parse(server.Variables);
               } catch (error) {
-                console.error(`Error parsing Variables for server ID ${server.id}:`, error);
+                console.error(
+                  `Error parsing Variables for server ID ${server.id}:`,
+                  error,
+                );
                 await prisma.server.update({
                   where: { id: server.id },
                   data: { Installing: false },
                 });
                 continue;
               }
-          
+
               if (!Array.isArray(ServerEnv)) {
-                console.error(`ServerEnv is not an array for server ID ${server.id}. Skipping...`);
+                console.error(
+                  `ServerEnv is not an array for server ID ${server.id}. Skipping...`,
+                );
                 await prisma.server.update({
                   where: { id: server.id },
                   data: { Installing: false },
                 });
                 continue;
               }
-          
-              const env = ServerEnv.reduce((acc: { [key: string]: any }, curr: { env: string, value: any }) => {
-                acc[curr.env] = curr.value;
-                return acc;
-              }, {});
-          
+
+              const env = ServerEnv.reduce(
+                (
+                  acc: { [key: string]: any },
+                  curr: { env: string; value: any },
+                ) => {
+                  acc[curr.env] = curr.value;
+                  return acc;
+                },
+                {},
+              );
+
               console.log(env);
-          
+
               if (server.image?.scripts) {
                 let scripts;
                 try {
                   scripts = JSON.parse(server.image.scripts);
                 } catch (error) {
-                  console.error(`Error parsing scripts for server ID ${server.id}:`, error);
+                  console.error(
+                    `Error parsing scripts for server ID ${server.id}:`,
+                    error,
+                  );
                   await prisma.server.update({
                     where: { id: server.id },
                     data: { Installing: false },
@@ -251,14 +265,16 @@ const adminModule: Module = {
                 const requestBody = {
                   id: server.UUID,
                   env: env,
-                  scripts: scripts.install.map((script: { url: string; fileName: string }) => ({
-                    url: script.url,
-                    fileName: script.fileName,
-                  })),
+                  scripts: scripts.install.map(
+                    (script: { url: string; fileName: string }) => ({
+                      url: script.url,
+                      fileName: script.fileName,
+                    }),
+                  ),
                 };
-          
+
                 console.log(requestBody);
-          
+
                 try {
                   await axios.post(
                     `http://${server.node.address}:${server.node.port}/container/install`,
@@ -268,18 +284,23 @@ const adminModule: Module = {
                         'Content-Type': 'application/json',
                         Authorization: `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`,
                       },
-                    }
+                    },
                   );
-          
+
                   await prisma.server.update({
                     where: { id: server.id },
                     data: { Installing: false },
                   });
                 } catch (error) {
-                  console.error(`Error sending install request for server ID ${server.id}:`, error);
+                  console.error(
+                    `Error sending install request for server ID ${server.id}:`,
+                    error,
+                  );
                 }
               } else {
-                console.warn(`No scripts found for server ID ${server.id}. Skipping...`);
+                console.warn(
+                  `No scripts found for server ID ${server.id}. Skipping...`,
+                );
               }
             }
           }, 0);

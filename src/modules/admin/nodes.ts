@@ -358,12 +358,10 @@ const adminModule: Module = {
             !address ||
             !port
           ) {
-            res
-              .status(400)
-              .json({
-                message:
-                  'All fields are required and numeric values must be valid numbers.',
-              });
+            res.status(400).json({
+              message:
+                'All fields are required and numeric values must be valid numbers.',
+            });
             return;
           }
 
