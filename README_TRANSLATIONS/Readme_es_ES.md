@@ -57,7 +57,7 @@ Airlink panel es una plataforma avanzada de administración de servidores de jue
    npm run start
    ```
 
-## Ejecutar con pm2 (Optional)
+## Ejecutar con pm2 (Opcional)
 
 1. Instalar pm2:
    ```bash
