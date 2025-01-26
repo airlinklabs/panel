@@ -254,7 +254,6 @@
         magenta: '#BB80B3',
         cyan: '#2DDAFD',
         white: '#d0d0d0',
-        brightBlack: 'rgba(255, 255, 255, 0.2)',
         brightRed: '#FF5370',
         brightGreen: '#C3E88D',
         brightYellow: '#FFCB6B',
@@ -263,8 +262,7 @@
         brightCyan: '#89DDFF',
         brightWhite: '#ffffff',
         cursor: '#c5c9d1',
-        cursorAccent: '#c5c9d1',
-        selection: '#5DA5D533',
+        cursorAccent: '#c5c9d1'
     };
 
     const term = new Terminal({
@@ -471,5 +469,154 @@
 
         inputElement.addEventListener('keydown', handleKeyUp);
     });
-</script>
 
+    function initStatsWebSocket() {
+        const statsWs = new WebSocket(`${protocol}//${host}/status/<%= server.UUID %>`);
+        
+        statsWs.onmessage = event => {
+            if (isValidJson(event.data)) {
+                const stats = JSON.parse(event.data);
+                if (stats.error) {
+                    console.error('Error fetching stats:', stats.error);
+                    return;
+                }
+    
+                updateRamUsage(stats);
+                updateCpuUsage(stats);
+                updateDiskUsage(stats);
+                updateStatus(stats);
+            } else {
+                console.log('Received non-JSON data:', event.data);
+            }
+        };
+
+        statsWs.onclose = () => {
+            console.log('WebSocket Stats connection closed, attempting to reconnect...');
+            setTimeout(initStatsWebSocket, 3000);
+        };
+    }
+
+    function formatBytes(bytes, decimals = 2) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    function createBackgroundChart(canvasId, type = 'line') {
+            return new Chart(document.getElementById(canvasId).getContext('2d'), {
+                type: type,
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderWidth: 1,
+                        pointRadius: 0,
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    },
+                    animation: true
+                }
+            });
+        }
+        
+    const statusChart = createBackgroundChart('statusChart');
+    const ramChart = createBackgroundChart('ramChart');
+    const cpuChart = createBackgroundChart('cpuChart');
+    const diskChart = createBackgroundChart('diskChart', 'doughnut');
+
+    function updateRamUsage(stats) {
+    const ramStatsUsage = stats.data.memory.usage || 0;
+    const ramStatsLimit = stats.data.memory.limit || 0;
+    const ramUsagePercent = stats.data.memory.percentage || 9425;
+    const ramUsageInMB = ramStatsUsage / 1024 / 1024 || 0;
+    const ramLimitInMB = ramStatsLimit / 1024 / 1024 || 0;
+    document.getElementById('ramUsage').textContent = `${ramUsagePercent}% (${formatBytes(ramStatsUsage)} / ${formatBytes(ramStatsLimit)})`;
+    if (ramStatsUsage > 0) {
+        if (ramUsagePercent !== 9425)
+        updateChart(ramChart, ramUsagePercent);
+    }
+}
+
+    function updateCpuUsage(stats) {
+        let cpuUsagePercent = stats.data.cpu.percentage || 0;
+
+        if (isNaN(cpuUsagePercent)) {
+            cpuUsagePercent = 0;
+        }
+
+        document.getElementById('cpuUsage').textContent = `${cpuUsagePercent}%`;
+
+        if (cpuUsagePercent > 0) {
+            updateChart(cpuChart, cpuUsagePercent);
+        }
+    }
+
+    function updateDiskUsage(stats) {
+        const diskUsageRaw = parseFloat(stats.data.storage.usage) || 0;
+        const diskLimitRaw = 10 * 1024; // Assuming 10GB limit
+        const diskUsagePercent = (diskUsageRaw / diskLimitRaw * 100).toFixed(2);
+        document.getElementById('diskUsage').textContent = `${diskUsagePercent}% (${formatBytes(diskUsageRaw * 1024 * 1024)} / ${formatBytes(diskLimitRaw * 1024 * 1024)})`;
+    }
+
+    function updateStatus(stats) {
+        const statusElement = document.getElementById('status');
+        const ramUsageRaw = stats.data.memory.usage / 1024 / 1024 || 0;
+
+        if (ramUsageRaw > 1) {
+            statusElement.textContent = 'Online';
+            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+            updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
+        } else {
+            statusElement.textContent = 'Offline';
+            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
+            updateStatusChart('rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.2)');
+        }
+    }
+
+    function updateChart(chart, value) {
+        chart.data.labels.push('');
+        chart.data.datasets[0].data.push(value);
+
+        if (chart.data.labels.length > 20) {
+            chart.data.labels.shift();
+            chart.data.datasets[0].data.shift();
+        }
+
+        chart.update();
+    }
+
+    function updateStatusChart(backgroundColor, borderColor) {
+        statusChart.data.datasets[0].backgroundColor = backgroundColor;
+        statusChart.data.datasets[0].borderColor = borderColor;
+        statusChart.data.labels = [''];
+        statusChart.data.datasets[0].data = [100];
+        statusChart.update();
+    }
+
+    function isValidJson(str) {
+            try {
+              JSON.parse(str);
+            } catch (e) {
+              return false;
+            }
+            return true;
+        }
+
+    initStatsWebSocket();
+</script>
