@@ -211,10 +211,15 @@ function getFileIcon(category) {
    <!-- Floating Action Bar -->
    <div id="floatingActionBar" class="fixed bottom-0 w-full bg-neutral-800 z-50 backdrop-blur text-white py-4 px-6 transform transition-transform duration-300 ease-in-out flex justify-between items-center">
     <span id="selectedFilesCount">0 files selected</span>
-    <button id="massDeleteBtn" class="bg-red-500 hover:bg-red-600 text-white font-normal py-2 px-4 rounded-xl transition">
-    Delete Selected
-    </button>
- </div>
+    <div class="flex gap-4">
+        <button id="massDeleteBtn" class="bg-red-500 hover:bg-red-600 text-white font-normal py-2 px-4 rounded-xl transition">
+            Delete Selected
+        </button>
+        <button id="massArchiveBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-normal py-2 px-4 rounded-xl transition">
+            Archive Selected
+        </button>
+    </div>
+</div>
  <!-- Mass Delete Confirmation Modal -->
  <div id="massDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
     <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
@@ -337,21 +342,27 @@ function getFileIcon(category) {
   let selectedFiles = [];
 
   function updateSelectedFiles() {
-  selectedFiles = Array.from(fileCheckboxes)
-    .filter(checkbox => checkbox.checked)
-    .map(checkbox => checkbox.dataset.filename);
-
-  selectedFilesCount.textContent = `${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''} selected`;
-
-  if (selectedFiles.length > 0) {
+    const selectedCount = selectedFiles.length;
+    if (selectedFiles.length > 0) {
     floatingActionBar.classList.remove('translate-y-full');
   } else {
     floatingActionBar.classList.add('translate-y-full');
   }
+    document.getElementById('selectedFilesCount').innerText = `${selectedCount} file${selectedCount !== 1 ? 's' : ''} selected`;
 
-  selectAllCheckbox.checked = fileCheckboxes.length > 0 && selectedFiles.length === fileCheckboxes.length;
-  sessionStorage.setItem('selectedFiles', JSON.stringify(selectedFiles));
+    document.getElementById('massDeleteBtn').disabled = selectedCount === 0;
+    document.getElementById('massArchiveBtn').disabled = selectedCount === 0;
 }
+
+document.getElementById('massArchiveBtn').addEventListener('click', () => {
+    if (selectedFiles.length > 0) {
+        const confirmArchive = confirm(`Are you sure you want to archive ${selectedFiles.length} selected file${selectedFiles.length !== 1 ? 's' : ''}?`);
+        
+        if (confirmArchive) {
+            archiveFiles(selectedFiles);
+        }
+    }
+});
 
 function initializeSelectedFiles() {
   const storedSelectedFiles = JSON.parse(sessionStorage.getItem('selectedFiles') || '[]');
@@ -361,14 +372,42 @@ function initializeSelectedFiles() {
   updateSelectedFiles();
 }
 
-selectAllCheckbox.addEventListener('change', function() {
-  fileCheckboxes.forEach(checkbox => checkbox.checked = this.checked);
-  updateSelectedFiles();
+document.querySelectorAll('.file-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', event => {
+        const fileName = event.target.dataset.filename;
+
+        if (event.target.checked) {
+            selectedFiles.push(fileName);
+        } else {
+            selectedFiles = selectedFiles.filter(name => name !== fileName);
+        }
+
+        updateSelectedFiles();
+    });
 });
 
-fileCheckboxes.forEach(checkbox => {
-  checkbox.addEventListener('change', updateSelectedFiles);
-});
+function archiveFiles(files) {
+    fetch('/server/<%= server.UUID %>/zip', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          relativePath: files,
+          zipname: 'archive'
+         })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Files archived successfully!');
+            selectedFiles = [];
+            updateSelectedFiles();
+        } else {
+            alert('Error archiving files.');
+        }
+    });
+}
 
 massDeleteBtn.addEventListener('click', function() {
   massDeleteMessage.textContent = `Are you sure you want to delete ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}? This is a permanent action and cannot be reversed.`;
