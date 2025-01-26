@@ -41,6 +41,9 @@ app.use(express.static(path.join(__dirname, '../public')));
 // Load views
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
+//app.set('view options', {
+//  compileDebug: process.env.NODE_ENV === 'development',
+//});
 
 // Load compression
 app.use(compression());
