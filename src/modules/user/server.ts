@@ -305,6 +305,7 @@ const dashboardModule: Module = {
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
+          
           if (!server) {
             errorMessage.message = 'Server not found.';
             return res.render('user/server/files', {
@@ -340,9 +341,28 @@ const dashboardModule: Module = {
             }
           });
 
+          let features: string[] = [];
+
+          if (server.image && typeof server.image.info === 'string') {
+            try {
+              const parsedInfo = JSON.parse(server.image.info) as ServerImageInfo;
+              if (Array.isArray(parsedInfo.features)) {
+                features = parsedInfo.features;
+              }
+            } catch (error) {
+              console.error("Failed to parse server.image.info:", error);
+            }
+          } else if (server.image && typeof server.image.info === 'object' && server.image.info !== null) {
+            const info = server.image.info as ServerImageInfo;
+            if (Array.isArray(info.features)) {
+              features = info.features;
+            }
+          }
+
           return res.render('user/server/files', {
             errorMessage,
             user,
+            features,
             files,
             currentPath: path,
             req,
@@ -355,8 +375,10 @@ const dashboardModule: Module = {
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
+          
           return res.render('user/server/files', {
             errorMessage,
+            features: [],
             user: req.session?.user,
             req,
             settings,
@@ -385,7 +407,7 @@ const dashboardModule: Module = {
 
           const server = await prisma.server.findUnique({
             where: { UUID: serverId },
-            include: { node: true },
+            include: { node: true, image: true, },
           });
 
           if (!server) {
@@ -408,9 +430,28 @@ const dashboardModule: Module = {
             where: { id: 1 },
           });
 
+          let features: string[] = [];
+
+          if (server.image && typeof server.image.info === 'string') {
+            try {
+              const parsedInfo = JSON.parse(server.image.info) as ServerImageInfo;
+              if (Array.isArray(parsedInfo.features)) {
+                features = parsedInfo.features;
+              }
+            } catch (error) {
+              console.error("Failed to parse server.image.info:", error);
+            }
+          } else if (server.image && typeof server.image.info === 'object' && server.image.info !== null) {
+            const info = server.image.info as ServerImageInfo;
+            if (Array.isArray(info.features)) {
+              features = info.features;
+            }
+          }
+
           return res.render('user/server/file', {
             errorMessage: {},
             user,
+            features,
             file: {
               name: filePath.split('/').pop(),
               path: filePath,
@@ -593,7 +634,7 @@ const dashboardModule: Module = {
 
     const server = await prisma.server.findUnique({
       where: { UUID: serverId },
-      include: { node: true },
+      include: { node: true, image: true, },
     });
 
     if (!server) {
@@ -608,10 +649,30 @@ const dashboardModule: Module = {
           .pop()
       : '';
 
+
+      let features: string[] = [];
+
+      if (server.image && typeof server.image.info === 'string') {
+        try {
+          const parsedInfo = JSON.parse(server.image.info) as ServerImageInfo;
+          if (Array.isArray(parsedInfo.features)) {
+            features = parsedInfo.features;
+          }
+        } catch (error) {
+          console.error("Failed to parse server.image.info:", error);
+        }
+      } else if (server.image && typeof server.image.info === 'object' && server.image.info !== null) {
+        const info = server.image.info as ServerImageInfo;
+        if (Array.isArray(info.features)) {
+          features = info.features;
+        }
+      }
+
     if (!primaryPort) {
       return res.render('user/server/players', {
         errorMessage: { message: 'No primary port found' },
         user,
+        features,
         players: [],
         server,
         req,
@@ -621,7 +682,7 @@ const dashboardModule: Module = {
 
     let players: Array<{ name: string; uuid: string }> = [];
     try {
-      const pingResponse = await MinecraftServerListPing.ping(4, server.node.address, parseInt(primaryPort, 10), 3000);
+      const pingResponse = await MinecraftServerListPing.ping(4, 'basti.privt.xyz', parseInt(primaryPort, 10), 3000);
       players = pingResponse.players?.sample?.map((player: any) => ({
         name: player.name,
         uuid: player.id,
@@ -636,6 +697,7 @@ const dashboardModule: Module = {
       errorMessage: {},
       user,
       players,
+      features,
       server,
       req,
       settings,
