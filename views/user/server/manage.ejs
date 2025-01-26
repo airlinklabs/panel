@@ -307,29 +307,54 @@
     const path = '/console/<%= server.UUID %>';
 
     const socketUrl = `${protocol}//${host}${path}`;
+
     let socket;
 
-    function connectWebSocket() {
-        socket = new WebSocket(socketUrl);
+let isReconnecting = false;
 
-        socket.onopen = () => {
-            writeConsole('system', 'system', 'WebSocket connection established');
-        };
-
-        socket.onmessage = handleWebSocketMessage;
-
-        socket.onerror = (error) => {
-            writeConsole('system', 'error', `WebSocket Error: ${error.message}`);
-        };
-
-        socket.onclose = () => {
-            console.log('WebSocket connection closed.');
-            writeConsole('system', 'system', 'WebSocket connection closed. Reconnecting...');
-            setTimeout(connectWebSocket, 5000); // Attempt to reconnect every 5 seconds
-        };
+function connectWebSocket() {
+    if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN)) {
+        console.log("WebSocket is already connecting or open. Skipping new connection.");
+        return;
     }
 
-    connectWebSocket();
+    isReconnecting = true;
+
+    if (socket) {
+        console.log("Closing existing WebSocket connection...");
+        socket.close();
+    }
+
+    socket = new WebSocket(socketUrl);
+
+    socket.onopen = () => {
+        console.log('WebSocket connection established');
+        writeConsole('system', 'system', 'WebSocket connection established');
+        isReconnecting = false;
+    };
+
+    socket.onmessage = handleWebSocketMessage;
+
+    socket.onerror = (error) => {
+        console.error('WebSocket Error:', error.message);
+        writeConsole('system', 'error', `WebSocket Error: ${error.message}`);
+    };
+
+    socket.onclose = () => {
+        console.log('WebSocket connection closed. Reconnecting...');
+        writeConsole('system', 'system', 'WebSocket connection closed. Reconnecting...');
+
+        if (!isReconnecting) {
+            isReconnecting = true;
+            setTimeout(() => {
+                connectWebSocket();
+            }, 5000);
+        }
+    };
+}
+
+connectWebSocket();
+
 
     function handleWebSocketMessage(msg) {
         const lines = msg.data.split('\n');
@@ -340,7 +365,7 @@
             const trimmedLine = line.trim();
 
             if (trimmedLine.includes("Failed to attach to container")) {
-                return; // Ignore this specific message
+                return;
             }
 
             if (trimmedLine === '' && previousLineWasEmpty) return;
@@ -393,10 +418,11 @@
 
     function restartWebSocket() {
         if (socket) {
+            console.log("Restarting WebSocket connection...");
             socket.close();
         }
         setTimeout(connectWebSocket, 500);
-     }
+    }
 
     function sendCommand() {
         const inputElement = document.getElementById('input');
@@ -452,16 +478,13 @@
         fetch(`/server/${serverUUID}/power/start`, {
             method: 'POST',
         })
-        .then(response => response.json())
-        .then(data => {
-            if (id < 1) {
+            .then(response => response.json())
+            .then(data => {
                 restartWebSocket();
-                id++;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     });
 
     document.getElementById('stopButton').addEventListener('click', () => {
@@ -469,13 +492,13 @@
         fetch(`/server/${serverUUID}/power/stop`, {
             method: 'POST',
         })
-        .then(response => response.json())
-        .then(data => {
-            restartWebSocket();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+            .then(response => response.json())
+            .then(data => {
+                restartWebSocket();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     });
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -511,7 +534,6 @@
 
         statsWs.onclose = () => {
             console.log('WebSocket Stats connection closed, attempting to reconnect...');
-            setTimeout(initStatsWebSocket, 3000);
         };
     }
 
@@ -562,7 +584,7 @@
     function updateRamUsage(stats) {
     const ramStatsUsage = stats?.data?.memory?.usage || 0;
     const ramStatsLimit = stats?.data?.memory?.limit || <%- server.Memory %> * 1024 * 1024 * 1024;
-    let ramUsagePercent = Number(stats?.data?.memory?.percentage) || 0; // Sicherstellen, dass es eine Zahl ist
+    let ramUsagePercent = Number(stats?.data?.memory?.percentage) || 0;
     const ramUsageInMB = ramStatsUsage / 1024 / 1024;
     const ramLimitInMB = ramStatsLimit / 1024 / 1024;
 
@@ -594,7 +616,7 @@
 
     function updateDiskUsage(stats) {
         const diskUsageRaw = parseFloat(stats.data.storage.usage) || 0;
-        const diskLimitRaw = 10 * 1024; // Assuming 10GB limit
+        const diskLimitRaw = 10 * 1024;
         const diskUsagePercent = (diskUsageRaw / diskLimitRaw * 100).toFixed(2);
         document.getElementById('diskUsage').textContent = `${diskUsagePercent}% (${formatBytes(diskUsageRaw * 1024 * 1024)} / ${formatBytes(diskLimitRaw * 1024 * 1024)})`;
     }
