@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
-import { checkEulaStatus } from '../../handlers/features';
+import { checkEulaStatus, isWorld } from '../../handlers/features';
 const { MinecraftServerListPing } = require('minecraft-status');
 
 const prisma = new PrismaClient();
@@ -858,6 +858,104 @@ const dashboardModule: Module = {
         }
       },
     );
+
+    router.get(
+      '/server/:id/worlds',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+    
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+    
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true, image: true },
+          });
+    
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+    
+          try {
+            const worldsRequest = {
+              method: 'GET',
+              url: `http://${server.node.address}:${server.node.port}/fs/list?id=${server.UUID}`,
+              auth: {
+                username: 'Airlink',
+                password: server.node.key,
+              },
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            };
+
+            const serverInfos = {nodeAddress: server.node.address, nodePort: server.node.port, serverUUID: server.UUID, nodeKey: server.node.key};
+            const axios = require('axios');
+            const response = await axios(worldsRequest);
+            const Folders = response.data;
+    
+            const worlds = [];
+            for (const folder of Folders) {
+              if (folder.type === 'directory' && (await isWorld(folder.name, serverInfos))) {
+                worlds.push({ name: folder.name });
+              }
+            }
+    
+            const settings = await prisma.settings.findUnique({
+              where: { id: 1 },
+            });
+
+            let features: string[] = [];
+
+            if (server.image && typeof server.image.info === 'string') {
+              try {
+                const parsedInfo = JSON.parse(
+                  server.image.info,
+                ) as ServerImageInfo;
+                if (Array.isArray(parsedInfo.features)) {
+                  features = parsedInfo.features;
+                }
+              } catch (error) {
+                console.error('Failed to parse server.image.info:', error);
+              }
+            } else if (
+              server.image &&
+              typeof server.image.info === 'object' &&
+              server.image.info !== null
+            ) {
+              const info = server.image.info as ServerImageInfo;
+              if (Array.isArray(info.features)) {
+                features = info.features;
+              }
+            }
+    
+            return res.render('user/server/worlds', {
+              errorMessage: {},
+              user,
+              worlds,
+              features,
+              server,
+              req,
+              settings,
+            });
+          } catch (fileRequestError) {
+            console.error('Error fetching files:', fileRequestError);
+            res.status(500).json({ error: 'Failed to fetch files' });
+          }
+        } catch (error) {
+          logger.error('Error getting worlds:', error);
+          res.status(500).json({ error: 'Failed to get worlds' });
+        }
+      }
+    );
+    
 
     return router;
   },
