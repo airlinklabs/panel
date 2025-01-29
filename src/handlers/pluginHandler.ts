@@ -12,7 +12,9 @@ interface Plugin {
 
 export function loadPlugins(app: Express) {
   const pluginsDir = path.join(__dirname, '../../storage/plugins');
-  const pluginFiles = fs.readdirSync(pluginsDir).filter(file => file.endsWith('.addon'));
+  const pluginFiles = fs
+    .readdirSync(pluginsDir)
+    .filter((file) => file.endsWith('.addon'));
 
   if (pluginFiles.length > 0) {
     logger.info(`---- Loadin ${pluginFiles.length} Plugins ----`);
@@ -39,7 +41,9 @@ export function loadPlugins(app: Express) {
         const pluginMain = packageJson.main;
 
         if (!pluginFilesMap[pluginMain]) {
-          throw new Error(`Missing main file (${pluginMain}) in plugin ${packageJson.name}`);
+          throw new Error(
+            `Missing main file (${pluginMain}) in plugin ${packageJson.name}`,
+          );
         }
 
         const pluginFunction = eval(pluginFilesMap[pluginMain]);
@@ -55,8 +59,9 @@ export function loadPlugins(app: Express) {
         const routePath = packageJson.router;
         app.use(routePath, router);
 
-        logger.info(`Loaded plugin: ${packageJson.name} (v${packageJson.version})`);
-
+        logger.info(
+          `Loaded plugin: ${packageJson.name} (v${packageJson.version})`,
+        );
       } catch (error: any) {
         logger.error(`Failed to load plugin from file ${file}:`, error.message);
       }

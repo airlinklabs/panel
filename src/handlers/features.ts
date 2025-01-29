@@ -10,7 +10,6 @@ interface ServerInfo {
   nodeKey: string;
 }
 
-
 interface Server {
   UUID: string;
   node: {
@@ -63,9 +62,18 @@ export async function checkEulaStatus(
   }
 }
 
-
-export const isWorld = async (folderName: string, serverInfo: ServerInfo): Promise<boolean> => {
-  const excludedFolders = ['plugins', 'config', 'cache', 'versions', 'logs', 'libraries'];
+export const isWorld = async (
+  folderName: string,
+  serverInfo: ServerInfo,
+): Promise<boolean> => {
+  const excludedFolders = [
+    'plugins',
+    'config',
+    'cache',
+    'versions',
+    'logs',
+    'libraries',
+  ];
   if (
     typeof folderName !== 'string' ||
     folderName.length === 0 ||
@@ -91,14 +99,15 @@ export const isWorld = async (folderName: string, serverInfo: ServerInfo): Promi
     const content = response.data;
     const requiredFiles = ['level.dat'];
     const isValidWorld = requiredFiles.every((file) =>
-      content.some((item: any) => item.name === file)
+      content.some((item: any) => item.name === file),
     );
 
     return isValidWorld;
   } catch (error) {
-    console.error(`Error checking world folder content for ${folderName}:`, error);
+    console.error(
+      `Error checking world folder content for ${folderName}:`,
+      error,
+    );
     return false;
   }
 };
-
-

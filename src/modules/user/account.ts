@@ -293,11 +293,12 @@ const accountModule: Module = {
           const user = await prisma.users.findFirst({
             where: { email: email },
           });
+
           if (user) {
             res.status(409).send('Email is already in use.');
             return;
           }
-          
+
           await prisma.users.update({
             where: { id: userId },
             data: { email },

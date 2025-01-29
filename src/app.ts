@@ -105,8 +105,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 databaseLoader()
   .then(async () => {
     await settingsLoader();
-    return loadModules(app, airlinkVersion)
-    .then(async () => {
+    return loadModules(app, airlinkVersion).then(async () => {
       loadPlugins(app);
     });
   })
