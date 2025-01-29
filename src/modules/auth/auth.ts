@@ -20,6 +20,15 @@ const authModule: Module = {
 
     router.get('/login', async (req: Request, res: Response) => {
       const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+
+      const userCount = await prisma.users.count();
+      const isFirstUser = userCount === 0;
+
+      if (isFirstUser) {
+        res.redirect('/register');
+        return;
+      }
+
       res.render('auth/login', { req, settings });
     });
 
