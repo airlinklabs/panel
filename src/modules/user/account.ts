@@ -181,6 +181,7 @@ const accountModule: Module = {
       },
     );
 
+    // todo : add the request in the frontend
     router.post(
       '/change-password',
       isAuthenticated(),
@@ -274,6 +275,41 @@ const accountModule: Module = {
       },
     );
 
+    // todo : add email frontend
+    router.post(
+      '/update-email',
+      isAuthenticated(),
+      async (req: Request, res: Response) => {
+        const { email } = req.body;
+
+        if (!email) {
+          res.status(400).json({ message: 'Email is required.' });
+          return;
+        }
+
+        const userId = req.session?.user?.id;
+
+        try {
+          const user = await prisma.users.findFirst({
+            where: { email: email },
+          });
+          if (user) {
+            res.status(409).send('Email is already in use.');
+            return;
+          }
+          
+          await prisma.users.update({
+            where: { id: userId },
+            data: { email },
+          });
+
+          res.status(200).json({ message: 'Email updated successfully.' });
+        } catch (error) {
+          logger.error('Error updating email:', error);
+          res.status(500).json({ message: 'Internal Server Error' });
+        }
+      },
+    );
     return router;
   },
 };
