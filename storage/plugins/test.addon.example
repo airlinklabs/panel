@@ -1,0 +1,14 @@
+#package.json
+{
+    "name": "examplePlugin",
+    "version": "1.0.0",
+    "main": "index.js",
+    "router": "/"
+}
+
+#index.js
+module.exports = (router) => {
+  router.get('/example', (req, res) => {
+    res.send('test');
+  });
+};

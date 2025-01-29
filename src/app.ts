@@ -21,6 +21,7 @@ import compression from 'compression';
 import { translationMiddleware } from './handlers/utils/core/translation';
 import PrismaSessionStore from './handlers/sessionStore';
 import { settingsLoader } from './handlers/settingsLoader';
+import { loadPlugins } from './handlers/pluginHandler';
 
 loadEnv();
 
@@ -104,7 +105,10 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 databaseLoader()
   .then(async () => {
     await settingsLoader();
-    return loadModules(app, airlinkVersion);
+    return loadModules(app, airlinkVersion)
+    .then(async () => {
+      loadPlugins(app);
+    });
   })
   .then(() => {
     app.listen(port, () => {
