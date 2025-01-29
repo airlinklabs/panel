@@ -3,6 +3,14 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+interface ServerInfo {
+  serverUUID: string;
+  nodeAddress: string;
+  nodePort: number;
+  nodeKey: string;
+}
+
+
 interface Server {
   UUID: string;
   node: {
@@ -54,3 +62,43 @@ export async function checkEulaStatus(
     };
   }
 }
+
+
+export const isWorld = async (folderName: string, serverInfo: ServerInfo): Promise<boolean> => {
+  const excludedFolders = ['plugins', 'config', 'cache', 'versions', 'logs', 'libraries'];
+  if (
+    typeof folderName !== 'string' ||
+    folderName.length === 0 ||
+    excludedFolders.includes(folderName.toLowerCase())
+  ) {
+    return false;
+  }
+
+  try {
+    const requestConfig = {
+      method: 'GET',
+      url: `http://${serverInfo.nodeAddress}:${serverInfo.nodePort}/fs/list?id=${serverInfo.serverUUID}&path=${folderName}`,
+      auth: {
+        username: 'Airlink',
+        password: serverInfo.nodeKey,
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await axios(requestConfig);
+    const content = response.data;
+    const requiredFiles = ['level.dat'];
+    const isValidWorld = requiredFiles.every((file) =>
+      content.some((item: any) => item.name === file)
+    );
+
+    return isValidWorld;
+  } catch (error) {
+    console.error(`Error checking world folder content for ${folderName}:`, error);
+    return false;
+  }
+};
+
+
