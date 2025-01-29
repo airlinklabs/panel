@@ -1,7 +1,5 @@
     <style>
-      #links556 .active {
-         color: white !important;
-      }
+
     </style>
     
     <!-- Sidebar -->
@@ -183,6 +181,9 @@
             const isActive = adjustedPathNormalized === hrefNormalized;
     
             link.classList.toggle('active', isActive);
+            link.classList.toggle('text-neutral-950', isActive);
+            link.classList.toggle('font-[405]', isActive);
+            link.classList.toggle('dark:text-white', isActive);
     
             if (isActive) {
               currentActiveLink ? updateActiveBackground(link) : moveActiveBackgroundInstantly(link);
@@ -200,7 +201,7 @@
         if (lastActiveLinkId) {
           const lastActiveLink = document.getElementById(lastActiveLinkId);
           if (lastActiveLink) {
-            lastActiveLink.classList.add('active');
+            lastActiveLink.classList.add('active text-black dark:text-white');
             moveActiveBackgroundInstantly(lastActiveLink);
           }
         }
