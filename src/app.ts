@@ -101,7 +101,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   next(err);
 });
 
-// Load modules
+// Load modules, plugins, database and start the webserver
 databaseLoader()
   .then(async () => {
     await settingsLoader();
