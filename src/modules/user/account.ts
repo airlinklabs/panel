@@ -109,19 +109,21 @@ const accountModule: Module = {
       '/update-username',
       isAuthenticated(),
       async (req: Request, res: Response, next: NextFunction) => {
-        const { currentUsername, newUsername } = req.body;
+        const { newUsername } = req.body;
+        const userId = req.session?.user?.id;
 
-        if (!currentUsername || !newUsername) {
+        if (!newUsername) {
           res
             .status(400)
-            .send('Current and new username parameters are required.');
+            .send('New username parameters are required.');
           return;
         }
 
         try {
           const userExist = await prisma.users.findFirst({
-            where: { username: currentUsername },
+            where: { id: userId },
           });
+
           if (!userExist) {
             res.status(404).send('Current username does not exist.');
             return;
@@ -130,6 +132,7 @@ const accountModule: Module = {
           const newUsernameExist = await prisma.users.findFirst({
             where: { username: newUsername },
           });
+
           if (newUsernameExist) {
             res.status(409).send('New username is already taken.');
             return;
@@ -137,13 +140,10 @@ const accountModule: Module = {
 
           await prisma.users.updateMany({
             data: { username: newUsername },
-            where: { username: currentUsername },
+            where: { username: userExist.username },
           });
 
-          req.session.destroy((err) => {
-            if (err) next(err);
-            res.status(200).json({ success: true, username: newUsername });
-          });
+          res.status(200).json({ message: 'Username updated successfully.' });
         } catch (error) {
           logger.error('Error updating username:', error);
           res.status(500).send('Internal Server Error');
@@ -222,11 +222,7 @@ const accountModule: Module = {
             data: { password: hashedNewPassword },
           });
 
-          req.session.destroy((err) => {
-            if (err) next(err);
-          });
-
-          res.status(200).redirect('/login?err=UpdatedCredentials');
+          res.status(200).json({ message: 'Password changed successfully.' });
         } catch (error) {
           logger.error('Error changing password:', error);
           res.status(500).send('Internal Server Error');
@@ -234,12 +230,12 @@ const accountModule: Module = {
       },
     );
 
-    router.get(
+    router.post(
       '/validate-password',
       isAuthenticated(),
       async (req: Request, res: Response) => {
         try {
-          const { currentPassword } = req.query;
+          const { currentPassword } = req.body;
 
           if (!currentPassword) {
             res.status(400).json({ message: 'Current password is required.' });
@@ -277,7 +273,7 @@ const accountModule: Module = {
 
     // todo : add email frontend
     router.post(
-      '/update-email',
+      '/change-email',
       isAuthenticated(),
       async (req: Request, res: Response) => {
         const { email } = req.body;
