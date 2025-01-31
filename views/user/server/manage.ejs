@@ -547,8 +547,25 @@ connectWebSocket();
             }
         };
 
+
+        statsWs.onopen = () => {
+            console.log('WebSocket Stats connection established');
+        };
+
         statsWs.onclose = () => {
             console.log('WebSocket Stats connection closed, attempting to reconnect...');
+
+            <% if (features.includes('players')) { %>
+            const playersDeco = document.getElementById('players-deco');
+            <% } %>
+
+            const statusElement = document.getElementById('status');
+
+            statusElement.textContent = 'Connection Lost!';
+            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
+            <% if (features.includes('players')) { %>
+            playersDeco.classList.add('translate-y-32');
+            <% } %>
         };
     }
 
