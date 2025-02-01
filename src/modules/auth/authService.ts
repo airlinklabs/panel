@@ -87,7 +87,7 @@ const authServiceModule: Module = {
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       const usernameRegex = /^[a-zA-Z0-9]{3,20}$/;
-      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
 
       if (!email || !username || !password) {
         res.redirect('/register?err=missing_credentials');

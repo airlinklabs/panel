@@ -149,7 +149,9 @@ const wsServerConsoleModule: Module = {
             ws.send('\x1b[31;1mThis instance is unavailable!\x1b[0m');
           };
 
-          socket.onclose = () => {};
+          socket.onclose = () => {
+            ws.close();
+          };
 
           ws.on('close', () => {
             socket.close();

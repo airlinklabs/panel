@@ -31,6 +31,9 @@ function initializeTheme() {
     const isDark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
     updateSwitchPosition();
+    if (typeof setTerminalTheme === 'function') {
+    setTerminalTheme();
+  }
   }
 
   function updateSwitchPosition() {
