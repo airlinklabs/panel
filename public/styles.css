@@ -1605,6 +1605,22 @@ select {
   width: 100vw;
 }
 
+.w-\[calc\(90\%-1\.5rem\)\] {
+  width: calc(90% - 1.5rem);
+}
+
+.w-\[calc\(98\%-1\.5rem\)\] {
+  width: calc(98% - 1.5rem);
+}
+
+.w-\[calc\(95\%-1\.5rem\)\] {
+  width: calc(95% - 1.5rem);
+}
+
+.w-\[calc\(97\%-1\.5rem\)\] {
+  width: calc(97% - 1.5rem);
+}
+
 .min-w-0 {
   min-width: 0px;
 }
