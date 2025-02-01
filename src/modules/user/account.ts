@@ -113,9 +113,7 @@ const accountModule: Module = {
         const userId = req.session?.user?.id;
 
         if (!newUsername) {
-          res
-            .status(400)
-            .send('New username parameters are required.');
+          res.status(400).send('New username parameters are required.');
           return;
         }
 
