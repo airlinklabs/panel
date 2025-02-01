@@ -13,13 +13,15 @@
             <div class="flex items-center space-x-4 py-4 px-4 border-y border-neutral-800/10 dark:border-white/5">
               <img class="h-8 w-8 rounded-xl border border-neutral-700/10" src="https://api.dicebear.com/9.x/thumbs/svg?seed=<%= user.username %>" alt="User avatar">
               <div>
-                  <p class="text-1sm font-medium text-neutral-700 dark:text-white">
-                    <%= user.username %>
-                    <span class="text-1xs text-neutral-500"><sup class="mt-1">#<%= String(user.id).padStart(4, '0') %></sup></span>
-                  </p>
-                  <p class="text-xs text-neutral-600 dark:text-neutral-400"><%= user.description %></p>
+                <p class="text-1sm font-medium text-neutral-700 dark:text-white">
+                  <span id="sidebar-username"><%= user.username %></span>
+                  <span class="text-1xs text-neutral-500">
+                    <sup class="mt-1">#<%= String(user.id).padStart(4, '0') %></sup>
+                  </span>
+                </p>
+                <p id="sidebar-description" class="text-xs text-neutral-600 dark:text-neutral-400"><%= user.description %></p>
               </div>
-            </div>
+            </div>            
 
               <ul role="list" id="links556" class="flex flex-1 flex-col gap-y-7 mt-2">
                  <li>
@@ -278,8 +280,8 @@
              <div id="searchResults" class="absolute bg-white w-[19.5rem] rounded-xl shadow-lg hidden mt-20 px-2 pb-2 border border-neutral-800/20">
              </div>
           </div>
+
           <script>
-             
              document.addEventListener('keydown', function(event) {
                if (event.key === 'control' && event.key === 'k') {
                  event.preventDefault();
@@ -293,6 +295,7 @@
              
              document.getElementById('searchInput').addEventListener('focus', showSearchResults);
           </script>
+
           <script>
              function showSearchResults() {
                  var searchResults = document.getElementById('searchResults');
@@ -306,8 +309,6 @@
                      searchResults.classList.add('hidden');
                  }
              });
-      
-             
           </script>
         </div>
         <script src="/javascript/search.js"></script>

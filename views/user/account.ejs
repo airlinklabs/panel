@@ -137,14 +137,22 @@
     // Username Form
     document.getElementById('change-username-form')?.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const username = event.target.querySelector('#username').value.trim();
+
+      const usernameInput = event.target.querySelector('#username');
+      const newUsername = usernameInput.value.trim();
+
       await submitForm(
         '/update-username',
-        { newUsername: username },
+        { newUsername: newUsername },
         'Username updated successfully!',
       );
-      usernameInput.placeholder = username;
+
+      const sidebarUsername = document.getElementById('sidebar-username');
+      sidebarUsername.textContent = newUsername;
+
+      usernameInput.placeholder = newUsername;
     });
+
   
     // Email Form
     document.getElementById('change-email-form')?.addEventListener('submit', async (event) => {
@@ -168,6 +176,10 @@
          { description },
          'Description updated successfully!'
        );
+
+       const sidebarDescription = document.getElementById('sidebar-description');
+       sidebarDescription.textContent = description;
+
        descriptionEl.placeholder = description;
     });
   
