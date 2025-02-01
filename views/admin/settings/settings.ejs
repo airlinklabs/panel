@@ -93,6 +93,8 @@
   </div>
 </main>
 
+<%- include('../../components/toast')%>
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('settingsForm');
@@ -126,13 +128,13 @@
               });
 
               if (response.ok) {
-                  alert('Settings saved successfully!');
+                  showToast('Settings saved successfully!', 'success');
               } else {
                   throw new Error('Failed to save settings');
               }
           } catch (error) {
               console.error('Error:', error);
-              alert('Failed to save settings');
+              showToast('Failed to save settings', 'error');
           }
       });
 
@@ -142,13 +144,13 @@
                   const response = await fetch('/admin/settings/reset', { method: 'POST' });
                   if (response.ok) {
                       await fetchSettings();
-                      alert('Settings reset to default!');
+                      showToast('Settings reset to default!', 'success');
                   } else {
                       throw new Error('Failed to reset settings');
                   }
               } catch (error) {
                   console.error('Error:', error);
-                  alert('Failed to reset settings');
+                  showToast('Failed to reset settings', 'error');
               }
           }
       });

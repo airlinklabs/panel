@@ -78,6 +78,8 @@
   </div>
 </main>
 
+<%- include('../../components/toast')%>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js"></script>
 <%
     const fileExtension = file.extensions;
@@ -115,7 +117,6 @@
     });
   });
 
-  // Todo : Change alert for Toast component
   document.getElementById('saveBtn').addEventListener('click', async () => {
     const content = editor.getValue();
     try {
@@ -129,10 +130,10 @@
 
       if (!response.ok) throw new Error('Failed to save file');
 
-      alert('File saved successfully');
+      showToast('File saved successfully!', 'success');
     } catch (error) {
       console.error('Error saving file:', error);
-      alert('Failed to save file');
+      showToast('Failed to save file', 'error');
     }
   });
 
@@ -152,10 +153,10 @@
 
       if (!response.ok) throw new Error('Failed to save file');
 
-      alert('File saved successfully');
+      showToast('File saved successfully!', 'success');
     } catch (error) {
       console.error('Error saving file:', error);
-      alert('Failed to save file');
+      showToast('Failed to save file', 'error');
     }
   }
 });

@@ -118,6 +118,8 @@
   </div>
 </main>
 
+<%- include('../../components/toast')%>
+
 <script>
   function handleRowClick(event, url) {
     if (!['BUTTON', 'A'].includes(event.target.tagName)) {
@@ -137,7 +139,7 @@
         if (response.ok) {
           location.reload();
         } else {
-          alert('Failed to delete user.');
+          showToast('Failed to delete user.', 'error');
         }
       }).catch(error => {
         console.error('Error deleting user:', error);

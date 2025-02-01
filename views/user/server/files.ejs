@@ -251,6 +251,8 @@ function getFileIcon(category) {
   </div>
 </main>
 
+<%- include('../../components/toast')%>
+
 <script>
   function handleFileNameKeyPress(event) {
     if (event.key === 'Enter') {
@@ -324,7 +326,7 @@ function getFileIcon(category) {
         })
         .catch(error => {
             console.error('Download failed:', error);
-            alert('Failed to download file.');
+            showToast('Failed to download file', 'error');
         });
 }
 
@@ -400,11 +402,11 @@ function archiveFiles(files) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Files archived successfully!');
+            showToast('Files archived successfully!', 'success');
             selectedFiles = [];
             updateSelectedFiles();
         } else {
-            alert('Error archiving files.');
+            showToast('Failed to archive files', 'error');
         }
     });
 }
@@ -432,9 +434,9 @@ confirmMassDeleteBtn.addEventListener('click', async function() {
   try {
     await Promise.all(deletePromises);
     window.location.reload();
-  } catch {
+  } catch (error) {
     console.error('Error deleting files:', error);
-    alert('An error occurred while deleting files. Please try again.');
+    showToast('Failed to delete files', 'error');
   }
 });
 

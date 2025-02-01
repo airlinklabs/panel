@@ -61,6 +61,8 @@
   </div>
 </main>
 
+<%- include('../../components/toast')%>
+
 <script>
   document.getElementById('createuserBtn').addEventListener('click', async () => {
     const userData = {
@@ -83,7 +85,7 @@
         throw new Error('Failed to create user');
       }
     } catch (error) {
-      alert('Error creating user:', error);
+      showToast('Failed to create user', 'error');
     }
   });
 </script>
