@@ -181,7 +181,6 @@ const accountModule: Module = {
       },
     );
 
-    // todo : add the request in the frontend
     router.post(
       '/change-password',
       isAuthenticated(),
@@ -271,7 +270,6 @@ const accountModule: Module = {
       },
     );
 
-    // todo : add email frontend
     router.post(
       '/change-email',
       isAuthenticated(),
