@@ -68,7 +68,7 @@ const accountModule: Module = {
     router.post(
       '/update-description',
       isAuthenticated(),
-      async (req: Request, res: Response, next: NextFunction) => {
+      async (req: Request, res: Response) => {
         const { description } = req.body;
         if (!description) {
           res.status(400).send('Description parameter is required.');
@@ -108,7 +108,7 @@ const accountModule: Module = {
     router.post(
       '/update-username',
       isAuthenticated(),
-      async (req: Request, res: Response, next: NextFunction) => {
+      async (req: Request, res: Response) => {
         const { newUsername } = req.body;
         const userId = req.session?.user?.id;
 
@@ -185,7 +185,7 @@ const accountModule: Module = {
     router.post(
       '/change-password',
       isAuthenticated(),
-      async (req: Request, res: Response, next: NextFunction) => {
+      async (req: Request, res: Response) => {
         const { currentPassword, newPassword } = req.body;
 
         if (!currentPassword || !newPassword) {
