@@ -137,13 +137,13 @@
     // Username Form
     document.getElementById('change-username-form')?.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const username = event.target.querySelector('#username').value.trim();
+      let username = event.target.querySelector('#username').value.trim();
       await submitForm(
         '/update-username',
         { newUsername: username },
         'Username updated successfully!',
-        '/account'
       );
+      usernameInput.placeholder = username;
     });
   
     // Email Form
@@ -154,20 +154,21 @@
         '/change-email',
         { email },
         'Email updated successfully!',
-        '/account'
       );
     });
   
     // Description Form
     document.getElementById('change-description-form')?.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const description = event.target.querySelector('#description').value.trim();
-      await submitForm(
-        '/update-description',
-        { description },
-        'Description updated successfully!',
-        '/account'
-      );
+       const descriptionEl = event.target.querySelector('#description');
+       const description = descriptionEl.value.trim();
+          
+       await submitForm(
+         '/update-description',
+         { description },
+         'Description updated successfully!'
+       );
+       descriptionEl.placeholder = description;
     });
   
     // Password Form
