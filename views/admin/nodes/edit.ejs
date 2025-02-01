@@ -68,6 +68,8 @@
   </div>
 </main>
 
+<%- include('../../components/toast') %>
+
 <script>
   document.getElementById('updateNodeBtn').addEventListener('click', async () => {
     const nodeData = {
@@ -93,7 +95,7 @@
         throw new Error('Failed to update node');
       }
     } catch (error) {
-      alert('Error updating node:', error);
+      showToast('Error updating node:' + error, 'error');
     }
   });
 </script>

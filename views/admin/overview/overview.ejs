@@ -64,6 +64,8 @@
             <div id="updateStatus" class="mb-4"></div>
           </div>
         </div>
+
+        <%- include('../../components/toast') %>
         
         <script>
           const currentVersion = '<%= airlinkVersion %>';
@@ -101,11 +103,11 @@
               try {
                 const response = await fetch('/admin/perform-update', { method: 'POST' });
                 const data = await response.json();
-                alert(data.message || 'Update completed. Server will restart.');
+                showToast(data.message || 'Update completed. Server will restart.', 'success');
                 setTimeout(() => window.location.reload(), 5000);
               } catch (error) {
                 console.error('Error:', error);
-                alert('Error performing update');
+                showToast('Error performing update', 'error');
               }
             }
           });

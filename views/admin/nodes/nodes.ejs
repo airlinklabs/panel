@@ -129,6 +129,8 @@
   </div>
 </main>
 
+<%- include('../../components/toast') %>
+
 <script>
   function handleRowClick(event, url) {
     if (!['BUTTON', 'A'].includes(event.target.tagName)) {
@@ -146,7 +148,7 @@
       let result = await response.json();
 
       if (response.ok) {
-        alert('Node successfully deleted');
+        showToast('Node successfully deleted', 'success');
         window.location.reload();
       } else if (result.error === "There are instances on the node") {
         if (confirm('There are still instances on this node. Do you want to delete all instances and remove the node?')) {
@@ -164,7 +166,7 @@
       headers: { 'Content-Type': 'application/json' }
     });
     if (response.ok) {
-      alert('Node and instances successfully deleted');
+      showToast('Node and instances successfully deleted', 'success');
       window.location.reload();
     }
   }

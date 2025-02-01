@@ -117,11 +117,12 @@
   </div>
 </main>
 
+<%- include('../../components/toast') %>
+
 <script>
   function handleRowClick(event, url) {
-    //event.preventDefault();
-    //alert("Sorry this feature is not available yet");
-    //window.location.href = url;
+    event.preventDefault();
+    showToast("Sorry this feature is not available yet.", "error");
   }
 </script>
 

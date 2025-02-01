@@ -63,6 +63,8 @@
   </div>
 </main>
 
+<%- include('../../components/toast') %>
+
 <script>
   document.getElementById('createNodeBtn').addEventListener('click', async () => {
     const nodeData = {
@@ -88,7 +90,7 @@
         throw new Error('Failed to create node');
       }
     } catch (error) {
-      alert('Error creating node:', error);
+      showToast('Error creating node:' + error, 'error');
     }
   });
 </script>
