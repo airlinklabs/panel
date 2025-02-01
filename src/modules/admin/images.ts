@@ -66,6 +66,28 @@ const adminModule: Module = {
       },
     );
 
+    router.delete(
+      '/admin/images/delete/:id',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        const { id } = req.params;
+
+        try {
+          const serverImage = await prisma.images.findUnique({ where: { id: Number(id) } });
+          if (serverImage) {
+            res.status(400).send('This image is being used by a server. Please delete it from the server first.');
+            return;
+          }
+
+          await prisma.images.delete({ where: { id: Number(id) } });
+          res.status(200).send('Image deleted successfully.');
+        } catch (error) {
+          logger.error('Error deleting image:', error);
+          res.status(500).send('Failed to delete image.');
+        }
+      }
+    );
+
     return router;
   },
 };
