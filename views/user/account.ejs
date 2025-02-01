@@ -137,7 +137,7 @@
     // Username Form
     document.getElementById('change-username-form')?.addEventListener('submit', async (event) => {
       event.preventDefault();
-      let username = event.target.querySelector('#username').value.trim();
+      const username = event.target.querySelector('#username').value.trim();
       await submitForm(
         '/update-username',
         { newUsername: username },
