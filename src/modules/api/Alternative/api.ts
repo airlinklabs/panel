@@ -159,6 +159,7 @@ const coreModule: Module = {
                 servers: {
                   object: 'null_resource',
                   attributes: {},
+                  data: {},
                 },
               },
             },
@@ -166,16 +167,61 @@ const coreModule: Module = {
 
           if (include === 'servers') {
             const servers = await prisma.server.findMany({
-              where: { ownerId: user.id },
-              include: { node: true, owner: true },
-            });
+                where: { ownerId: user.id },
+                include: { node: true, owner: true },
+              });
+              
+              const formattedServers = servers.map((server) => ({
+                attributes: {
+                  id: server.id,
+                  UUID: server.UUID,
+                  name: server.name,
+                  description: server.description,
+                  createdAt: server.createdAt,
+                  ports: JSON.parse(server.Ports || '[]'),
+                  limits: {
+                    memory: server.Memory,
+                    disk: server.Storage,
+                    cpu: server.Cpu,
+                  },
+                  variables: JSON.parse(server.Variables || '[]'),
+                  startCommand: server.StartCommand,
+                  dockerImage: JSON.parse(server.dockerImage || '{}'),
+                  installing: server.Installing,
+                  suspended: server.Suspended,
+                },
+                relationships: {
+                  node: {
+                    attributes: {
+                      id: server.node.id,
+                      name: server.node.name,
+                      ram: server.node.ram,
+                      cpu: server.node.cpu,
+                      disk: server.node.disk,
+                      address: server.node.address,
+                      port: server.node.port,
+                      key: server.node.key,
+                      createdAt: server.node.createdAt,
+                    },
+                  },
+                  owner: {
+                    attributes: {
+                      id: server.owner.id,
+                      email: server.owner.email,
+                      username: server.owner.username,
+                      isAdmin: server.owner.isAdmin,
+                      description: server.owner.description,
+                    },
+                  },
+                },
+              }));
 
             userResponse.attributes.relationships.servers = {
               object: 'server_list',
-              attributes: servers,
+              attributes: formattedServers,
+              data: formattedServers,
             };
           }
-          console.log(userResponse);
 
           res.status(200).json(userResponse);
         } catch (error) {
