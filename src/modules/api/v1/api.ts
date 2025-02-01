@@ -26,8 +26,8 @@ const coreModule: Module = {
       }
     }
 
-    function validator(req: Request, res: Response, next: NextFunction) {
-      loadApiKeys();
+    async function validator(req: Request, res: Response, next: NextFunction) {
+      await loadApiKeys();
       const apiKey = req.headers['api-key'] as string;
       if (validKeys.includes(apiKey)) {
         next();

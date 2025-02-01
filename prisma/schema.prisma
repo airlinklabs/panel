@@ -10,7 +10,7 @@
   model Users {
     id          Int      @id @default(autoincrement())
     email       String   @unique
-    username    String?
+    username    String?  @unique
     password    String
     isAdmin     Boolean  @default(false)
     description String?  @default("No About Me")
