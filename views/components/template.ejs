@@ -1,50 +1,55 @@
-    <!-- Sidebar -->
-    <div id="pc-sidebar" class="sidebar transition hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-56 lg:flex-col left-0">
-        <div id="pc-sidebar2" class="flex grow flex-col overflow-hidden bg-transparent border border-neutral-800/10 dark:border-white/5">
-           <nav class="flex flex-1 flex-col">
-              <div class="pl-6 pt-4 pb-4 flex">
-                 <a href="/" class="flex">
-                    <img src="<%= settings.logo %>" class="bg-neutral-950/90 p-1 dark:bg-transparent h-10 w-10 -mt-1 rounded-xl mr-3 inline-flex light:shadow-sm">
-                    <h1 class="text-neutral-700 dark:text-white font-medium tracking-tight text-lg"><%= settings.title %></h1>
-                 </a>
-              </div>
+<!-- Sidebar -->
+<div id="pc-sidebar" class="sidebar transition hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-56 lg:flex-col left-0">
+  <div id="pc-sidebar2" class="flex grow flex-col overflow-hidden bg-transparent border border-neutral-800/10 dark:border-white/5">
+      <nav class="flex flex-1 flex-col">
+          <!-- Logo section -->
+          <div class="pl-6 pt-4 pb-4 flex">
+              <a href="/" class="flex items-center">
+                  <img src="<%= settings.logo %>" alt="Logo" class="bg-neutral-950/90 p-1 dark:bg-transparent h-10 w-10 rounded-xl mr-3 inline-flex">
+                  <h1 class="text-neutral-700 dark:text-white font-medium tracking-tight text-lg"><%= settings.title %></h1>
+              </a>
+          </div>
 
-            <!-- User info -->
-            <div class="flex items-center space-x-4 py-4 px-4 border-y border-neutral-800/10 dark:border-white/5">
-              <img class="h-8 w-8 rounded-xl border border-neutral-700/10" src="https://api.dicebear.com/9.x/thumbs/svg?seed=<%= user.username %>" alt="User avatar">
+          <!-- User info -->
+          <div class="flex items-center space-x-4 py-4 px-4 border-y border-neutral-800/10 dark:border-white/5">
+              <img class="h-8 w-8 rounded-xl border border-neutral-700/10" src="https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(user.username) %>" alt="User avatar">
               <div>
-                <p class="text-1sm font-medium text-neutral-700 dark:text-white">
-                  <span id="sidebar-username"><%= user.username %></span>
-                  <span class="text-1xs text-neutral-500">
-                    <sup class="mt-1">#<%= String(user.id).padStart(4, '0') %></sup>
-                  </span>
-                </p>
-                <p id="sidebar-description" class="text-xs text-neutral-600 dark:text-neutral-400"><%= user.description %></p>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-white">
+                      <span id="sidebar-username"><%= user.username %></span>
+                      <span class="text-xs text-neutral-500">
+                          <sup class="mt-1">#<%= String(user.id).padStart(4, '0') %></sup>
+                      </span>
+                  </p>
+                  <p id="sidebar-description" class="text-xs text-neutral-600 dark:text-neutral-400"><%= user.description %></p>
               </div>
-            </div>            
+          </div>            
 
-              <ul role="list" id="links556" class="flex flex-1 flex-col gap-y-7 mt-2">
-                 <li>
-                    <ul role="list" class="-mx-2 space-y-1">
-                       <div id="active-background" class="absolute left-2 w-[calc(100%-1.5rem)] h-9 transition-transform duration-200 ease-in-out z-[-1] bg-neutral-500/20 border border-neutral-700/10 dark:border-neutral-300/5 dark:bg-white/5 rounded-xl"></div>
-                       <li>
-                          <a href="/" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" searchdata="container instances servers" subterm="jegli:/server/servername">
-                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 mt-0.5 h-5">
-                              <path d="M12.378 1.602a.75.75 0 0 0-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03ZM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 0 0 .372-.648V7.93ZM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 0 0 .372.648l8.628 5.033Z" />
-                            </svg>                                                      
-                             <span>Servers</span>
-                          </a>
-                          <a href="/account" searchdata="account profile <%= user.username %>" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 mt-0.5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          <!-- Navigation links -->
+          <ul role="list" class="flex flex-1 flex-col gap-y-7 mt-2">
+              <li>
+                  <ul role="list" class="-mx-2 space-y-1 relative">
+                      <div id="active-background" class="absolute left-2 w-[calc(100%-1.5rem)] h-9 transition-transform duration-200 ease-in-out z-[-1] bg-neutral-500/20 border border-neutral-700/10 dark:border-neutral-300/5 dark:bg-white/5 rounded-xl"></div>
+                      <li class="nav-item">
+                          <a href="/" class="nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" data-search="container instances servers" data-subterm="jegli:/server/servername">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 mt-0.5">
+                                  <path d="M12.378 1.602a.75.75 0 0 0-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03ZM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 0 0 .372-.648V7.93ZM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 0 0 .372.648l8.628 5.033Z" />
                               </svg>
-                                                                                       
-                             <span>Account</span>
+                              <span>Servers</span>
                           </a>
-                         
-                       </li>
-                      <% if (user.isAdmin == true) { %>
-                       <p class="pl-8 text-neutral-600 dark:text-neutral-400 text-xs font-medium pt-6 pb-2"><span>Admin Panel</span></p>
+                      </li>
+                      <!-- Account link -->
+                      <li class="nav-item">
+                          <a href="/account" class="nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" data-search="account profile <%= user.username %>">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mt-0.5">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                              </svg>
+                              <span>Account</span>
+                          </a>
+                      </li>
+
+                      <!-- Admin section -->
+                      <% if (user.isAdmin === true) { %>
+                        <p class="pl-8 text-neutral-600 dark:text-neutral-400 text-xs font-medium pt-6 pb-2"><span>Admin Panel</span></p>
                        <li>
                           <a href="/admin/overview" searchdata="admin overview control" class=" transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 mt-0.5 h-5">
@@ -94,223 +99,190 @@
                            <span>Images</span>
                         </a>
                      </li>
-                    <% } %>
-                    </ul>
-                 </li>
-                 <li class="mt-auto border-t border-neutral-800/10 dark:border-white/5">
-                    <a href="/logout" class="group -mx-2 flex gap-x-3 rounded-xl pl-6 py-4 text-sm font-medium leading-6 text-neutral-500 transition hover:text-neutral-700 dark:hover:text-neutral-500/80">
-                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 mt-0.5 h-5">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
-                       </svg>
-                       <span>Logout</span>
-                    </a>
-                 </li>
-              </ul>
-           </nav>
-        </div>
-     </div>
+                      <% } %>
+                  </ul>
+              </li>
 
-     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const navLinks = document.querySelectorAll('.nav-link');
-        const activeBackground = document.getElementById('active-background');
-        let isAnimating = false;
-        let currentActiveLink = null;
-    
-        const getCookie = (name) => {
-          const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-          return match ? match[2] : null;
-        };
-    
-        const setCookie = (name, value, days) => {
-          const date = new Date();
-          date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-          document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
-        };
-    
-        const normalizePath = (path) => {
-          try {
-            const url = new URL(path, window.location.origin);
-            return url.pathname.replace(/\/+$/, '');
-          } catch (error) {
-            console.error('Invalid path:', path);
-            return '';
-          }
-        };
-    
-        const updateActiveBackground = (link) => {
-          if (!link || !link.closest) return;
-    
-          const linkRect = link.getBoundingClientRect();
-          const navContainer = link.closest('ul');
-    
-          if (!navContainer) {
-            console.error('Nav container not found for link:', link);
-            return;
-          }
-    
-          const navRect = navContainer.getBoundingClientRect();
-          const topOffset = linkRect.top - navRect.top + navContainer.scrollTop;
-    
+              <!-- Logout section -->
+              <li class="mt-auto border-t border-neutral-800/10 dark:border-white/5">
+                  <a href="/logout" class="group -mx-2 flex gap-x-3 rounded-xl pl-6 py-4 text-sm font-medium leading-6 text-neutral-500 transition hover:text-neutral-700 dark:hover:text-neutral-500/80">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mt-0.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+                      </svg>
+                      <span>Logout</span>
+                  </a>
+              </li>
+          </ul>
+      </nav>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const navLinks = document.querySelectorAll('.nav-link');
+  const activeBackground = document.getElementById('active-background');
+  let isAnimating = false;
+  let currentActiveLink = null;
+
+  // Utility functions
+  const getCookie = name => {
+      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? decodeURIComponent(match[2]) : null;
+  };
+
+  const setCookie = (name, value, days) => {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      document.cookie = `${name}=${encodeURIComponent(value)}; expires=${date.toUTCString()}; path=/; SameSite=Strict`;
+  };
+
+  const normalizePath = path => {
+      try {
+          const url = new URL(path, window.location.origin);
+          return url.pathname.replace(/\/+$/, '');
+      } catch (error) {
+          console.warn('Invalid path:', path);
+          return '';
+      }
+  };
+
+  // Background animation functions
+  const updateActiveBackground = (link) => {
+      if (!link?.closest) return;
+
+      const linkRect = link.getBoundingClientRect();
+      const navContainer = link.closest('ul');
+      if (!navContainer) return;
+
+      const navRect = navContainer.getBoundingClientRect();
+      const topOffset = linkRect.top - navRect.top + navContainer.scrollTop;
+
+      requestAnimationFrame(() => {
           activeBackground.style.height = `${linkRect.height}px`;
           activeBackground.style.transform = `translateY(${topOffset}px)`;
-    
-          setCookie('lastActiveLink', link.id, 7);
-          currentActiveLink = link;
-        };
-    
-        const moveActiveBackgroundInstantly = (link) => {
-          activeBackground.style.transition = 'none';
-          updateActiveBackground(link);
-          requestAnimationFrame(() => {
-            activeBackground.style.transition = 'transform 0.3s ease, height 0.3s ease';
-          });
-        };
-    
-        const updateActiveLink = (currentPath) => {
-          const adjustedPath = currentPath.replace('server/' + currentPath.split('server/').pop(), '');
-          console.log(adjustedPath)
-          const adjustedPathNormalized = normalizePath(adjustedPath);
-          let foundActive = false;
-    
-          navLinks.forEach((link) => {
-            if (!link || !link.getAttribute) return;
-    
-            const hrefNormalized = normalizePath(link.getAttribute('href'));
-            const isActive = adjustedPathNormalized === hrefNormalized;
-    
-            link.classList.toggle('active', isActive);
-            link.classList.toggle('text-neutral-950', isActive);
-            link.classList.toggle('font-[405]', isActive);
-            link.classList.toggle('dark:text-white', isActive);
-    
-            if (isActive) {
-              currentActiveLink ? updateActiveBackground(link) : moveActiveBackgroundInstantly(link);
-              foundActive = true;
-            }
-          });
-    
-          if (!foundActive) {
-            activeBackground.style.transform = 'translateY(0)';
-            activeBackground.style.height = '0px';
-          }
-        };
-    
-        const lastActiveLinkId = getCookie('lastActiveLink');
-        if (lastActiveLinkId) {
-          const lastActiveLink = document.getElementById(lastActiveLinkId);
-          if (lastActiveLink) {
-            lastActiveLink.classList.add('active text-black dark:text-white');
-            moveActiveBackgroundInstantly(lastActiveLink);
-          }
-        }
-    
-        const animatePageTransition = (href) => {
-          if (isAnimating) return;
-          isAnimating = true;
-
-          setTimeout(() => {
-            window.location.href = href;
-          }, 300);
-        };
-    
-        navLinks.forEach(link => {
-          link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const href = link.getAttribute('href');
-            updateActiveLink(href);
-            animatePageTransition(href);
-          });
-        });
-    
-        updateActiveLink(window.location.pathname);
-        window.addEventListener('popstate', () => updateActiveLink(window.location.pathname));
-    
-        const ws = new WebSocket(`ws://${window.location.host}/online-check`);
-        ws.onopen = () => {
-          console.log('WebSocket connection opened');
-        };
-    
-        const changeUsernameBtn = document.getElementById('change-username-btn');
-        if (changeUsernameBtn) {
-          changeUsernameBtn.addEventListener('click', () => {
-            console.log('Change username clicked');
-          });
-        } else {
-          console.warn('changeUsernameBtn not found');
-        }
       });
-    </script>
 
-      
-    <div id="colcont" class="lg:pl-56">
-      <div class="backdrop-blur bg-opacity-50 absolute inset-0 z-30 h-16"></div>
-        <div class="sticky backdrop-blur top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-transparent px-4 sm:gap-x-6 sm:px-4 lg:px-4">
-           <div class="hidden lg:block">
-           <button type="button" id="sidebar-toggle" class="hidden lg:block w-fit p-2 mt-1 rounded-xl dark:text-white border border-neutral-700/20 dark:border-white/5 hover:scale-110 active:scale-100 duration-200 text-neutral-500">
-              <span class="sr-only">Open sidebar</span>
-              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-              </svg>
-           </button>
-        </div>
+      setCookie('lastActiveLink', link.id, 7);
+      currentActiveLink = link;
+  };
 
-        <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-          <div class="relative flex flex-1 flex-col">
+  // Navigation handling
+  const handleNavigation = (href) => {
+      if (isAnimating) return;
+      isAnimating = true;
 
-            <div class="ml-14 lg:-ml-2 flex items-center w-fit mt-3.5 px-4 py-2 h-10 rounded-xl border border-neutral-700/20 dark:border-white/5 active:scale-100 duration-200 dark:hover:border-neutral-300/10 bg-transparent text-white">
-               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-neutral-400">
-                   <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
-               </svg>
-               <input id="searchInput" 
-                  class="bg-transparent border-transparent ml-2 focus-visible:ring-transparent border-none ring-transparent sm:text-sm placeholder:text-zinc-500 text-neutral-700 dark:text-neutral-300 focus-visible:outline-none" 
-                  placeholder="Search" 
-                  type="search" 
-                  name="search"
-                  autocomplete="off"
-                  onclick="input.blur()"
-                  onfocus="showSearchResults()">
-                  <div class="ml-2 px-1 py-0.5 text-[10px] w-[55px] font-medium text-neutral-700 dark:text-neutral-400 bg-neutral-500/20 dark:bg-neutral-800 rounded-md border border-neutral-800/20 dark:border-neutral-700
-                  bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.2)_50%,transparent_75%,transparent_100%)] 
-                  bg-[length:250%_250%,100%_100%] bg-[position:-100%_0,0_0] bg-no-repeat transition-ease-out
-                  hover:bg-[position:200%_0,0_0] hover:duration-[2s]">
-                  CTRL + K
-              </div>
-           </div>
-             <div id="searchResults" class="absolute bg-white w-[19.5rem] rounded-xl shadow-lg hidden mt-20 px-2 pb-2 border border-neutral-800/20">
-             </div>
-          </div>
+      requestAnimationFrame(() => {
+          setTimeout(() => {
+              window.location.href = href;
+          }, 300);
+      });
+  };
 
-          <script>
-             document.addEventListener('keydown', function(event) {
-               if (event.key === 'control' && event.key === 'k') {
-                 event.preventDefault();
-                 document.getElementById('searchInput').focus();
-               }
-             });
-             
-             function showSearchResults() {
-               document.getElementById('searchResults').classList.remove('hidden');
-             }
-             
-             document.getElementById('searchInput').addEventListener('focus', showSearchResults);
-          </script>
+  // Event listeners
+  navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const href = link.getAttribute('href');
+          if (href) {
+              updateActiveBackground(link);
+              handleNavigation(href);
+          }
+      });
+  });
 
-          <script>
-             function showSearchResults() {
-                 var searchResults = document.getElementById('searchResults');
-                 searchResults.classList.remove('hidden');
-             }
-             
-             document.addEventListener('click', function(event) {
-                 var searchInput = document.getElementById('searchInput');
-                 var searchResults = document.getElementById('searchResults');
-                 if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
-                     searchResults.classList.add('hidden');
-                 }
-             });
-          </script>
-        </div>
-        <script src="/javascript/search.js"></script>
-      </div>
+  // Initialize active state
+  const initializeActiveState = () => {
+      const currentPath = normalizePath(window.location.pathname);
+      const activeLink = Array.from(navLinks).find(link => {
+          const href = link.getAttribute('href');
+          return href && normalizePath(href) === currentPath;
+      });
+
+      if (activeLink) {
+          activeLink.classList.add('active', 'text-neutral-950', 'font-[405]', 'dark:text-white');
+          setTimeout(() => updateActiveBackground(activeLink), 0);
+      }
+  };
+
+  initializeActiveState();
+  window.addEventListener('popstate', initializeActiveState);
+
+  // WebSocket connection
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const ws = new WebSocket(`${wsProtocol}//${window.location.host}/online-check`);
+  ws.addEventListener('open', () => console.log('WebSocket connected'));
+  ws.addEventListener('error', console.error);
+});
+
+</script>
+<div id="colcont" class="lg:pl-56">
+  <div class="backdrop-blur bg-opacity-50 absolute inset-0 z-30 h-16"></div>
+    <div class="sticky backdrop-blur top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-transparent px-4 sm:gap-x-6 sm:px-4 lg:px-4">
+       <div class="hidden lg:block">
+       <button type="button" id="sidebar-toggle" class="hidden lg:block w-fit p-2 mt-1 rounded-xl dark:text-white border border-neutral-700/20 dark:border-white/5 hover:scale-110 active:scale-100 duration-200 text-neutral-500">
+          <span class="sr-only">Open sidebar</span>
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+       </button>
     </div>
+
+    <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+      <div class="relative flex flex-1 flex-col">
+
+        <div class="ml-14 lg:-ml-2 flex items-center w-fit mt-3.5 px-4 py-2 h-10 rounded-xl border border-neutral-700/20 dark:border-white/5 active:scale-100 duration-200 dark:hover:border-neutral-300/10 bg-transparent text-white">
+           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-neutral-400">
+               <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
+           </svg>
+           <input id="searchInput" 
+              class="bg-transparent border-transparent ml-2 focus-visible:ring-transparent border-none ring-transparent sm:text-sm placeholder:text-zinc-500 text-neutral-700 dark:text-neutral-300 focus-visible:outline-none" 
+              placeholder="Search" 
+              type="search" 
+              name="search"
+              autocomplete="off"
+              onclick="input.blur()"
+              onfocus="showSearchResults()">
+              <div class="ml-2 px-1 py-0.5 text-[10px] w-[55px] font-medium text-neutral-700 dark:text-neutral-400 bg-neutral-500/20 dark:bg-neutral-800 rounded-md border border-neutral-800/20 dark:border-neutral-700
+              bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.2)_50%,transparent_75%,transparent_100%)] 
+              bg-[length:250%_250%,100%_100%] bg-[position:-100%_0,0_0] bg-no-repeat transition-ease-out
+              hover:bg-[position:200%_0,0_0] hover:duration-[2s]">
+              CTRL + K
+          </div>
+       </div>
+         <div id="searchResults" class="absolute bg-white w-[19.5rem] rounded-xl shadow-lg hidden mt-20 px-2 pb-2 border border-neutral-800/20">
+         </div>
+      </div>
+
+      <script>
+         document.addEventListener('keydown', function(event) {
+           if (event.key === 'control' && event.key === 'k') {
+             event.preventDefault();
+             document.getElementById('searchInput').focus();
+           }
+         });
+         
+         function showSearchResults() {
+           document.getElementById('searchResults').classList.remove('hidden');
+         }
+         
+         document.getElementById('searchInput').addEventListener('focus', showSearchResults);
+      </script>
+
+      <script>
+         function showSearchResults() {
+             var searchResults = document.getElementById('searchResults');
+             searchResults.classList.remove('hidden');
+         }
+         
+         document.addEventListener('click', function(event) {
+             var searchInput = document.getElementById('searchInput');
+             var searchResults = document.getElementById('searchResults');
+             if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+                 searchResults.classList.add('hidden');
+             }
+         });
+         </script>
+      <script src="/javascript/search.js"></script>
+    </div>
+  </div>
+</div>
