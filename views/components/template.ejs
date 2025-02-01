@@ -1,7 +1,3 @@
-    <style>
-
-    </style>
-    
     <!-- Sidebar -->
     <div id="pc-sidebar" class="sidebar transition hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-56 lg:flex-col left-0">
         <div id="pc-sidebar2" class="flex grow flex-col overflow-hidden bg-transparent border border-neutral-800/10 dark:border-white/5">
@@ -12,18 +8,19 @@
                     <h1 class="text-neutral-700 dark:text-white font-medium tracking-tight text-lg"><%= settings.title %></h1>
                  </a>
               </div>
-                   <!-- User info -->
+
+            <!-- User info -->
             <div class="flex items-center space-x-4 py-4 px-4 border-y border-neutral-800/10 dark:border-white/5">
-            <img class="h-8 w-8 rounded-xl border border-neutral-700/10" src="https://api.dicebear.com/9.x/thumbs/svg?seed=<%= user.username %>" alt="User avatar">
-            <div>
-                <p class="text-1sm font-medium text-neutral-700 dark:text-white">
-                  <%= user.username %>
-                  <span class="text-1xs text-neutral-500"><sup class="mt-1">#<%= String(user.id).padStart(4, '0') %></sup></span>
-                </p>
-                <p class="text-xs text-neutral-600 dark:text-neutral-400"><%= user.description %></p>
+              <img class="h-8 w-8 rounded-xl border border-neutral-700/10" src="https://api.dicebear.com/9.x/thumbs/svg?seed=<%= user.username %>" alt="User avatar">
+              <div>
+                  <p class="text-1sm font-medium text-neutral-700 dark:text-white">
+                    <%= user.username %>
+                    <span class="text-1xs text-neutral-500"><sup class="mt-1">#<%= String(user.id).padStart(4, '0') %></sup></span>
+                  </p>
+                  <p class="text-xs text-neutral-600 dark:text-neutral-400"><%= user.description %></p>
               </div>
-              
-          </div>
+            </div>
+
               <ul role="list" id="links556" class="flex flex-1 flex-col gap-y-7 mt-2">
                  <li>
                     <ul role="list" class="-mx-2 space-y-1">
@@ -44,7 +41,7 @@
                           </a>
                          
                        </li>
-                       <% if (user.isAdmin == true) { %>
+                      <% if (user.isAdmin == true) { %>
                        <p class="pl-8 text-neutral-600 dark:text-neutral-400 text-xs font-medium pt-6 pb-2"><span>Admin Panel</span></p>
                        <li>
                           <a href="/admin/overview" searchdata="admin overview control" class=" transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
@@ -95,7 +92,7 @@
                            <span>Images</span>
                         </a>
                      </li>
-                       <% } %>
+                    <% } %>
                     </ul>
                  </li>
                  <li class="mt-auto border-t border-neutral-800/10 dark:border-white/5">
@@ -244,8 +241,8 @@
     </script>
 
       
-      <div id="colcont" class="lg:pl-56">
-        <div class="backdrop-blur bg-opacity-50 absolute inset-0 z-30 h-16"></div>
+    <div id="colcont" class="lg:pl-56">
+      <div class="backdrop-blur bg-opacity-50 absolute inset-0 z-30 h-16"></div>
         <div class="sticky backdrop-blur top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-transparent px-4 sm:gap-x-6 sm:px-4 lg:px-4">
            <div class="hidden lg:block">
            <button type="button" id="sidebar-toggle" class="hidden lg:block w-fit p-2 mt-1 rounded-xl dark:text-white border border-neutral-700/20 dark:border-white/5 hover:scale-110 active:scale-100 duration-200 text-neutral-500">
@@ -312,7 +309,7 @@
       
              
           </script>
-       </div>
-      <script src="/javascript/search.js"></script>
         </div>
-     </div>
+        <script src="/javascript/search.js"></script>
+      </div>
+    </div>
