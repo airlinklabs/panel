@@ -100,9 +100,10 @@ const adminModule: Module = {
           Storage,
           dockerImage,
           variables,
+          ownerId,
         } = req.body;
 
-        const userId = req.session?.user?.id;
+        const userId = +ownerId;
         if (
           !name ||
           !description ||
