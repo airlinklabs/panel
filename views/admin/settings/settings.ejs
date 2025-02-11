@@ -1,0 +1,162 @@
+<%- include('../../components/header', { title: 'Overview' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+           <h1 class="text-base font-medium leading-6 text-white"><%= req.translations.adminSettingsTitle %></h1>
+           <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminSettingsText %></p>
+         </div>
+       </div>
+       <div class="px-8 mt-5">
+
+        <%- include('../../components/settingsTemplate') %>
+
+        <div class="flex flex-col bg-white/5 pt-0 py-5 rounded-xl">
+            <h1 class="text-white text-[18px] px-5 py-4 mb-1 w-full bg-white/5 rounded-t-xl font-medium"><%= req.translations.general %></h1>
+
+        <form id="settingsForm" class="space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-5 mt-5">
+              <div>
+                  <label class="block text-white text-sm font-medium mb-2">Site Title</label>
+                  <input 
+                      type="text" 
+                      name="title" 
+                      placeholder="<%= settings.title %>"
+                      class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5 transition-all"
+                  >
+              </div>
+
+              <!-- Upload Logo -->
+              <div>
+                  <label class="block text-white text-sm font-medium mb-2">Upload Logo</label>
+                  <input 
+                      type="file" 
+                      name="logo" 
+                      class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 transition-all"
+                  >
+              </div>
+
+              <div>
+                  <label class="block text-white text-sm font-medium mb-2">Theme</label>
+                  <select 
+                      name="theme" 
+                      class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5 transition-all"
+                  >
+                      <option class="text-white" value="default">Default</option>
+                      <option class="text-white" value="dark" disabled>Dark</option>
+                      <option class="text-white" value="light" disabled>Light</option>
+                  </select>
+              </div>
+
+              <div>
+                  <label class="block text-white text-sm font-medium mb-2">Default Language</label>
+                  <select 
+                      name="language" 
+                      class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5 transition-all"
+                  >
+                      <option class="text-white" value="en">English</option>
+                      <option class="text-white" value="fr" disabled>Français</option>
+                  </select>
+              </div>
+          </div>
+
+          <div class="flex justify-end items-center mt-8 space-x-4">
+            <button
+                type="button"
+                id="resetButton"
+                class="md:w-auto rounded-lg bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2"
+            >
+                Reset to Default
+            </button>
+            <button
+                type="submit"
+                class="md:w-auto rounded-lg bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-6 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2"
+            >
+                Save Settings
+            </button>
+        </div>
+    </form>
+
+    </div>
+    </div>
+    </div>
+
+    </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast')%>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('settingsForm');
+      const resetButton = document.getElementById('resetButton');
+
+      async function fetchSettings() {
+          try {
+              const response = await fetch('/admin/settings');
+              const settings = await response.json();
+              Object.entries(settings).forEach(([key, value]) => {
+                  const input = form.querySelector(`[name="${key}"]`);
+                  if (input) input.value = value;
+              });
+          } catch (error) {
+              console.error('Error fetching settings:', error);
+          }
+      }
+
+      form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const formData = new FormData(form);
+          const settings = Object.fromEntries(formData.entries());
+
+          try {
+              const response = await fetch('/admin/settings', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(settings)
+              });
+
+              if (response.ok) {
+                  showToast('Settings saved successfully!', 'success');
+              } else {
+                  throw new Error('Failed to save settings');
+              }
+          } catch (error) {
+              console.error('Error:', error);
+              showToast('Failed to save settings', 'error');
+          }
+      });
+
+      resetButton.addEventListener('click', async () => {
+          if (confirm('Reset all settings to default?')) {
+              try {
+                  const response = await fetch('/admin/settings/reset', { method: 'POST' });
+                  if (response.ok) {
+                      await fetchSettings();
+                      showToast('Settings reset to default!', 'success');
+                  } else {
+                      throw new Error('Failed to reset settings');
+                  }
+              } catch (error) {
+                  console.error('Error:', error);
+                  showToast('Failed to reset settings', 'error');
+              }
+          }
+      });
+
+      fetchSettings();
+  });
+</script>
+
+<%- include('../../components/footer') %>

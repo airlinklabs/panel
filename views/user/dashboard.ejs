@@ -1,0 +1,237 @@
+<%- include('../components/header', { title: 'Servers' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../components/template') %>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <!-- Page Header -->
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.userDashboardTitle %></h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.userDashboardText %></p>
+        </div>
+      </div>
+
+      <!-- Error Notification -->
+      <% if (req.query.err === "NOTACTIVEYET") { %>
+        <div class="rounded-xl bg-amber-100 dark:bg-amber-800/10 px-4 py-6 m-7">
+          <div class="flex">
+            <div class="flex-shrink-0 ml-1.5">
+              <svg class="animate-spin h-5 w-5 text-amber-500 dark:text-amber-400 mt-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+            <div class="ml-5">
+              <h3 class="text-sm font-medium text-amber-700 dark:text-amber-400">Awaiting Installation</h3>
+              <p class="text-sm text-amber-500 dark:text-amber-400/50">The server either isn't installed yet, or is in a failed state.</p>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Servers Section -->
+      <div class="px-4 sm:px-6 lg:px-8 mt-8">
+        <% if (servers.length === 0) { %>
+          <!-- No Servers Message -->
+          <div id="noServersContainer" class="text-center mt-64">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+            class="mx-auto h-28 w-28 text-neutral-500">
+            <path fill-rule="evenodd"
+              d="M11.622 1.602a.75.75 0 0 1 .756 0l2.25 1.313a.75.75 0 0 1-.756 1.295L12 3.118 10.128 4.21a.75.75 0 1 1-.756-1.295l2.25-1.313ZM5.898 5.81a.75.75 0 0 1-.27 1.025l-1.14.665 1.14.665a.75.75 0 1 1-.756 1.295L3.75 8.806v.944a.75.75 0 0 1-1.5 0V7.5a.75.75 0 0 1 .372-.648l2.25-1.312a.75.75 0 0 1 1.026.27Zm12.204 0a.75.75 0 0 1 1.026-.27l2.25 1.312a.75.75 0 0 1 .372.648v2.25a.75.75 0 0 1-1.5 0v-.944l-1.122.654a.75.75 0 1 1-.756-1.295l1.14-.665-1.14-.665a.75.75 0 0 1-.27-1.025Zm-9 5.25a.75.75 0 0 1 1.026-.27L12 11.882l1.872-1.092a.75.75 0 1 1 .756 1.295l-1.878 1.096V15a.75.75 0 0 1-1.5 0v-1.82l-1.878-1.095a.75.75 0 0 1-.27-1.025ZM3 13.5a.75.75 0 0 1 .75.75v1.82l1.878 1.095a.75.75 0 1 1-.756 1.295l-2.25-1.312a.75.75 0 0 1-.372-.648v-2.25A.75.75 0 0 1 3 13.5Zm18 0a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-.372.648l-2.25 1.312a.75.75 0 1 1-.756-1.295l1.878-1.096V14.25a.75.75 0 0 1 .75-.75Zm-9 5.25a.75.75 0 0 1 .75.75v.944l1.122-.654a.75.75 0 1 1 .756 1.295l-2.25 1.313a.75.75 0 0 1-.756 0l-2.25-1.313a.75.75 0 1 1 .756-1.295l1.122.654V19.5a.75.75 0 0 1 .75-.75Z"
+              clip-rule="evenodd" />
+          </svg>
+            <h2 class="mt-8 text-lg font-medium text-gray-900 dark:text-white">
+              Oops! We couldn't find any servers associated with your account.
+            </h3>
+            <p class="mt-1 text-sm text-gray-400 dark:text-neutral-400">
+              You don’t have any servers yet.
+              <% if (user.isAdmin) { %>
+                Why not create one now? <a href="/admin/servers/create" class="text-blue-500 hover:underline">Create a server</a>
+              <% } else { %>
+                Just wait for an admin to assign one to you!
+              <% } %>              
+            </p>
+          </div>
+        <% } else { %>
+          <!-- Servers Table -->
+          <div class="overflow-hidden shadow ring-1 ring-gray-200 dark:ring-white/5 rounded-lg">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-white/10">
+              <thead class="bg-gray-50 dark:bg-white/5">
+                <tr>
+                  <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-white sm:pl-6">Server</th>
+                  <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Status</th>
+                  <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">RAM Usage</th>
+                  <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">CPU Usage</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 dark:divide-white/10 bg-gray-50 dark:bg-white/5">
+                <% servers.forEach(server => { %>
+                  <tr onclick="window.location.href = '../server/<%= server.UUID %>';" class="hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer">
+                    <td class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-6"><%= server.name %></td>
+                    <td class="px-3 py-4 text-sm">
+                      <span class="status-badge inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full transition-colors duration-300
+                      <%= server.status === 'running' ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-700/20 text-red-700 dark:text-red-400' %>">
+                      <span class="relative flex h-2 w-2 mr-1.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75
+                        <%= server.status === 'running' ? 'bg-green-400' : 'bg-red-400' %>"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2
+                        <%= server.status === 'running' ? 'bg-green-500' : 'bg-red-500' %>"></span>
+                      </span>
+                      <%= server.status === 'running' ? 'Running' : 'Stopped' %>
+                      </span>
+                    </td>
+                    <td class="px-3 py-4 text-sm text-gray-700 dark:text-neutral-300">
+                      <div class="space-y-2">
+                      <div class="flex justify-between text-xs mb-1">
+                        <span class="ram-usage-text">Loading...</span>
+                      </div>
+                      <div class="h-1.5 bg-gray-200 dark:bg-neutral-800 rounded-full overflow-hidden">
+                        <div class="ram-usage-bar h-full bg-blue-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+                      </div>
+                      </div>
+                    </td>
+                    <td class="px-3 py-4 text-sm text-gray-700 dark:text-neutral-300">
+                      <div class="space-y-2">
+                      <div class="flex justify-between text-xs mb-1">
+                        <span class="cpu-usage-text">Loading...</span>
+                      </div>
+                      <div class="h-1.5 bg-gray-200 dark:bg-neutral-800 rounded-full overflow-hidden">
+                        <div class="cpu-usage-bar h-full bg-purple-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+                      </div>
+                      </div>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Enhanced Scripts -->
+<script>
+function updateServerStats() {
+  const servers = document.querySelectorAll('tr');
+  
+  servers.forEach(server => {
+    const statusBadge = server.querySelector('.status-badge');
+    if (statusBadge && statusBadge.textContent.trim() === 'Running') {
+      const ramBar = server.querySelector('.ram-usage-bar');
+      const cpuBar = server.querySelector('.cpu-usage-bar');
+      
+      if (ramBar && cpuBar) {
+        const ramUsage = Math.floor(Math.random() * 100);
+        const cpuUsage = Math.floor(Math.random() * 100);
+        
+        // Animate the bars
+        ramBar.style.width = `${ramUsage}%`;
+        cpuBar.style.width = `${cpuUsage}%`;
+        
+        // Update colors based on usage
+        ramBar.style.backgroundColor = getUsageColor(ramUsage);
+        cpuBar.style.backgroundColor = getUsageColor(cpuUsage);
+        
+        // Update text with fade effect
+        const ramText = server.querySelector('.ram-usage-text');
+        const cpuText = server.querySelector('.cpu-usage-text');
+        
+        updateTextWithFade(ramText, `${ramUsage}%`);
+        updateTextWithFade(cpuText, `${cpuUsage}%`);
+      }
+    }
+  });
+}
+
+function getUsageColor(usage) {
+  if (usage < 50) return '#3B82F6';
+  if (usage < 80) return '#F59E0B';
+  return '#EF4444';
+}
+
+function updateTextWithFade(element, newValue) {
+  if (!element) return;
+  element.style.opacity = '0';
+  setTimeout(() => {
+    element.textContent = newValue;
+    element.style.opacity = '1';
+  }, 150);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 'k') {
+    e.preventDefault();
+    const searchInput = document.querySelector('input[type="search"]');
+    if (searchInput) searchInput.focus();
+  }
+});
+
+// Update stats every 5 seconds
+setInterval(updateServerStats, 5000);
+
+// Initial stats update
+updateServerStats();
+</script>
+
+<%- include('../components/footer') %>
+  servers.forEach(server => {
+    const statusBadge = server.querySelector('.status-badge');
+    const serverName = server.querySelector('td').textContent;
+    
+    if (statusBadge) {
+      const wasRunning = statusBadge.dataset.running === 'true';
+      const isRunning = statusBadge.textContent.trim() === 'Running';
+      
+      if (wasRunning !== isRunning) {
+        Toast.show(
+          `${serverName} is now ${isRunning ? 'running' : 'stopped'}`,
+          isRunning ? 'success' : 'error'
+        );
+        statusBadge.dataset.running = isRunning;
+      }
+      
+      if (isRunning) {
+        const ramBar = server.querySelector('.ram-usage-bar');
+        const cpuBar = server.querySelector('.cpu-usage-bar');
+        
+        if (ramBar && cpuBar) {
+          const ramUsage = Math.floor(Math.random() * 100);
+          const cpuUsage = Math.floor(Math.random() * 100);
+          
+          // Show warning toast for high usage
+          if (ramUsage > 90) {
+            Toast.show(`${serverName}: High memory usage (${ramUsage}%)`, 'warning');
+          }
+          if (cpuUsage > 90) {
+            Toast.show(`${serverName}: High CPU usage (${cpuUsage}%)`, 'warning');
+          }
+          
+          ramBar.style.width = `${ramUsage}%`;
+          cpuBar.style.width = `${cpuUsage}%`;
+          ramBar.style.backgroundColor = getUsageColor(ramUsage);
+          cpuBar.style.backgroundColor = getUsageColor(cpuUsage);
+          updateTextWithFade(server.querySelector('.ram-usage-text'), `${ramUsage}%`);
+          updateTextWithFade(server.querySelector('.cpu-usage-text'), `${cpuUsage}%`);
+        }
+      }
+    }
+  });
+}
+
+// Update stats every 5 seconds
+setInterval(updateServerStats, 5000);
+
+// Initial stats update
+updateServerStats();
+</script>
+
+<%- include('../components/footer') %>

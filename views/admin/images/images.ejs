@@ -1,0 +1,206 @@
+<%- include('../../components/header', { title: 'Manage Images' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminImagesTitle %></h1>
+          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-300"><%= req.translations.adminImagesText %></p>
+        </div>
+        <!-- Action Buttons -->
+        <div class="mt-4 sm:mt-0 sm:ml-4 sm:flex-none">
+          <button
+          id="uploadimage"
+          class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
+        >
+          Upload Image
+        </button>
+          <button
+            onclick="openModal('createModal')"
+            class="border border-neutral-800/20 rounded-xl ml-2 bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
+          >
+            Create Image
+          </button>
+        </div>
+      </div>
+
+      <!-- Images Table -->
+      <div class="overflow-hidden shadow-lg rounded-lg m-8 border border-neutral-800/20" id="imagesTable">
+        <table class="min-w-full divide-y divide-white/10">
+          <thead class="bg-white/5">
+            <tr>
+              <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Name</th>
+              <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Image</th>
+              <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Created At</th>
+              <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5 bg-white/5">
+            <% images.forEach(function(image) { %>
+              <tr class="hover:bg-white/[0.05] transition-colors">
+                <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-white"><%= image.name %></td>
+                <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-neutral-400"><%= image.image %></td>
+                <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-500"><%= new Date(image.createdAt).toLocaleDateString() %></td>
+                <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-white">
+                  <div class="flex gap-3">
+                    <a href="/admin/images/edit/<%= image.id %>" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">
+                      Edit
+                    </a>
+                    <button
+                      onclick="deleteImage('<%= image.id %>')"
+                      type="button"
+                      class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+      <div class="flex justify-end gap-2">
+        <button
+          type="button"
+          onclick="closeModal('uploadModal')"
+          class="px-4 py-2 text-sm font-medium text-neutral-800 bg-white border border-neutral-800 rounded-md hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="px-4 py-2 text-sm font-medium text-white bg-neutral-800 rounded-md hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
+        >
+          Upload
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+<div id="createModal" class="modal hidden fixed inset-0 z-50 bg-neutral-900/50 flex justify-center items-center transition-opacity">
+  <div class="modal-content bg-white dark:bg-neutral-800 rounded-xl p-6 w-96 border border-neutral-800/20 shadow-lg">
+    <span class="close absolute top-0 right-0 mt-4 mr-4 text-neutral-800 dark:text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 cursor-pointer" onclick="closeModal('createModal')">&times;</span>
+    
+    <h2 class="text-xl font-medium text-neutral-800 dark:text-white">Create Image</h2>
+    
+    <form action="/admin/images/create" method="POST" class="mt-6 space-y-4">
+      <div class="flex flex-col gap-4">
+        <input
+          type="text"
+          name="name"
+          placeholder="Image Name"
+          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-600/20 rounded-xl focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
+          required
+        />
+        <input
+          type="text"
+          name="image"
+          placeholder="Image URL or Base64"
+          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-600/20 rounded-xl focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
+          required
+        />
+        <textarea
+          name="scripts"
+          placeholder="Optional: Scripts"
+          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-600/20 rounded-xl focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2 resize-none min-h-[100px]"
+        ></textarea>
+        <textarea
+          name="variables"
+          placeholder="Optional: Variables"
+          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-600/20 rounded-xl focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2 resize-none min-h-[100px]"
+        ></textarea>
+        <button 
+          type="submit" 
+          class="w-full py-2 px-3 border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
+        >
+          Create Image
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../../components/toast')%>
+
+<script>
+  function openModal(id) {
+    document.getElementById(id).classList.remove('hidden');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+  }
+
+  async function deleteImage(imageId) {
+    if (confirm('Are you sure you want to delete this image?')) {
+      fetch(`/admin/images/delete/${imageId}`, {
+        method: 'DELETE',
+      })
+        .then(async (response) => {
+          if (response.ok) {
+            showToast('Image deleted successfully.', 'success');
+            setTimeout(() => location.reload(), 1000);
+          } else {
+            const errorMessage = await response.text();
+            showToast(errorMessage || 'Failed to delete the image.', 'error');
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          showToast('An error occurred while deleting the image.', 'error');
+        });
+    }
+  }
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", async function(event) {
+    var uploadBtn = document.getElementById('uploadimage');
+   uploadBtn.addEventListener('click', async function() {
+          var input = document.createElement('input');
+          input.type = 'file';
+          input.accept = '.json';
+          input.click();
+          input.addEventListener('change', function(event) {
+              var file = event.target.files[0];
+              if (file && file.type === 'application/json') {
+                  var reader = new FileReader();
+                  reader.onload = function(event) {
+                      var jsonData = event.target.result;
+                      var xhr = new XMLHttpRequest();
+                      xhr.open('POST', '/admin/images/upload', true);
+                      xhr.setRequestHeader('Content-Type', 'application/json');
+                      xhr.onload = function() {
+                          if (xhr.status === 200) {
+                              showToast('Image uploaded successfully.', 'success');
+                              setTimeout(function() {
+                                  window.location.reload();
+                              }, 500);
+                          } else {
+                              showToast('Error uploading image.', 'error');
+                          }
+                      };
+                      xhr.onerror = function() {
+                          showToast('Network error.', 'error');
+                      };
+                      xhr.send(jsonData);
+                  };
+                  reader.readAsText(file);
+              } else {
+                  showToast('<%= req.translations.jsonSelectFile %>', 'error');
+              }
+          });
+      });
+    });
+  </script>
+<%- include('../../components/footer') %>

@@ -1,0 +1,304 @@
+<%- include('../../components/header', { title: 'Dashboard' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminCreateServerTitle %></h1>
+            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminCreateServerText %></p>
+        </div>
+      </div>
+
+      <div id="nodeForm" class="mt-6 px-8 w-full">
+        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+          <form id="createServerForm" method="POST" action="/admin/servers/create">
+            <!-- General Category -->
+            <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">General</h2>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <label for="serverName" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.name %>:</label>
+                <input id="serverName" name="name" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server">
+              </div>
+
+              <div>
+                <label for="serverDescription" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.description %>:</label>
+                <input id="serverDescription" name="description" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server description">
+              </div>
+
+              <div>
+                <label for="serverUser" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.user %>:</label>
+                <select id="serverUser" name="ownerId" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                  <% users.forEach(user => { %>
+                    <option value="<%= user.id %>"><%= user.username %></option>
+                  <% }); %>
+                </select>
+              </div>
+
+              <div>
+                <label for="serverNode" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                  <%= req.translations.Node %>:
+                </label>
+                <div class="relative mt-2 mb-4">
+                  <select id="serverNode" name="nodeId" 
+                          class="block w-full rounded-xl bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 text-neutral-800 dark:text-white text-sm px-4 py-2 focus:outline-none focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 hover:bg-white/5 dark:hover:bg-neutral-700/30">
+                    <% if (nodes.length > 0) { %>
+                      <% nodes.forEach(node => { %>
+                        <option value="<%= node.id %>"><%= node.name %></option>
+                      <% }); %>
+                    <% } else { %>
+                      <option value="" disabled selected>No nodes available</option>
+                    <% } %>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resources Category -->
+            <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Resources</h2>
+            <div class="grid grid-cols-3 gap-4">
+              <div>
+                <label for="serverCPU" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">CPU (Cores):</label>
+                <input id="serverCPU" name="Cpu" type="number" min="1" max="128" value="2" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+              </div>
+
+              <div>
+                <label for="serverMemory" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Memory (GB):</label>
+                <input id="serverMemory" name="Memory" type="number" min="1" max="128" value="4" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+              </div>
+
+              <div>
+                <label for="serverStorage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Storage (GB):</label>
+                <input id="serverStorage" name="Storage" type="number" min="1" max="1000" value="20" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+              </div>
+            </div>
+
+            <!-- Startup Category -->
+            <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Startup</h2>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <label for="serverImage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.Image %>:</label>
+                <select id="serverImage" name="imageId" 
+                        class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                  <% images.forEach(image => { %>
+                    <option value="<%= image.id %>" data-docker-images='<%= image.dockerImages %>' data-variables='<%= image.variables %>'>
+                      <%= image.name %>
+                    </option>
+                  <% }); %>
+                </select>
+              </div>
+
+              <div>
+                <label for="dockerImage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.DockerImage %>:</label>
+                <select id="dockerImage" name="dockerImage" 
+                        class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                  <option value="" disabled selected>Select a Docker image</option>
+                </select>
+              </div>
+
+            <div>
+                <label for="serverPorts" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.Ports %>:</label>
+                <input id="serverPorts" name="Ports" type="text" placeholder="25565:25565" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+            </div>
+
+            </div>
+
+            <h2 class="text-neutral-700 dark:text-neutral-300 text-md font-semibold mb-4">Variables</h2>
+
+            <div class="grid grid-cols-4 gap-4 mb-6" id="variablesContainer">
+              <!-- here come the variables -->
+            </div>
+
+            <!-- Submit Button -->
+            <div class="col-span-2">
+                <button type="submit" class="w-full md:w-auto rounded-lg bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+                    <%= req.translations.create %>
+                  </button>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const serverImageSelect = document.getElementById('serverImage');
+    const dockerImageSelect = document.getElementById('dockerImage');
+    const variablesContainer = document.getElementById('variablesContainer');
+    const form = document.getElementById('createServerForm');
+
+    function updateDockerImages() {
+      const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+      const dockerImagesData = selectedOption.getAttribute('data-docker-images');
+
+      dockerImageSelect.innerHTML = '<option value="" disabled selected>Select a Docker image</option>';
+
+
+      if (dockerImagesData) {
+        const dockerImages = JSON.parse(dockerImagesData);
+        dockerImages.forEach(imageObj => {
+          Object.entries(imageObj).forEach(([key, value]) => {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = key;
+            dockerImageSelect.appendChild(option);
+          });
+        });
+      }
+    }
+
+    function updateVariables() {
+      const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+      const variables = JSON.parse(selectedOption.getAttribute('data-variables')) || [];
+
+      variablesContainer.innerHTML = '';
+
+      variables.forEach(variable => {
+        const variableDiv = document.createElement('div');
+        variableDiv.classList.add('mb-4', 'flex', 'items-center');
+        
+        const label = document.createElement('label');
+        label.setAttribute('for', variable.env);
+        label.classList.add('text-neutral-700', 'dark:text-neutral-400', 'text-sm', 'tracking-tight', 'mr-2');
+        label.textContent = variable.name + (variable.required ? ' *' : '');
+
+        let input;
+
+        switch (variable.type) {
+          case 'text':
+            input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = `Enter ${variable.name}`;
+            break;
+          case 'number':
+            input = document.createElement('input');
+            input.type = 'number';
+            input.placeholder = `Enter ${variable.name}`;
+            input.min = variable.min || 1;
+            input.max = variable.max || 1000;
+            break;
+          case 'boolean':
+            input = document.createElement('div');
+            input.classList.add('flex', 'items-center', 'space-x-2', 'mt-1');
+            const checkboxContainer = document.createElement('label');
+            checkboxContainer.setAttribute('for', variable.env);
+            checkboxContainer.classList.add('relative', 'inline-block', 'w-12', 'h-6');
+
+            const checkboxInput = document.createElement('input');
+            checkboxInput.type = 'checkbox';
+            checkboxInput.id = variable.env;
+            checkboxInput.name = variable.env;
+            checkboxInput.classList.add('sr-only', 'peer');
+            checkboxInput.checked = variable.value || false;
+
+            const checkboxSpan = document.createElement('span');
+            checkboxSpan.classList.add('block', 'w-12', 'h-6', 'bg-neutral-400', 'peer-checked:bg-blue-500', 'rounded-full');
+
+            const circleSpan = document.createElement('span');
+            circleSpan.classList.add('absolute', 'left-0.5', 'top-0.5', 'w-5', 'h-5', 'bg-white', 'rounded-full', 'peer-checked:translate-x-6', 'transition');
+
+            checkboxContainer.appendChild(checkboxInput);
+            checkboxContainer.appendChild(checkboxSpan);
+            checkboxContainer.appendChild(circleSpan);
+            input.appendChild(checkboxContainer);
+            break;
+          default:
+            input = document.createElement('input');
+            input.type = 'text';
+            break;
+        }
+        
+        if (variable.type !== 'boolean') {
+          input.classList.add(
+            'rounded-xl', 
+            'focus:ring', 
+            'focus:ring-neutral-800/10', 
+            'focus:border-neutral-800/20', 
+            'text-neutral-800', 
+            'dark:text-white', 
+            'text-sm', 
+            'w-full', 
+            'hover:bg-white/5', 
+            'px-4', 
+            'py-2', 
+            'bg-neutral-400/10', 
+            'dark:bg-neutral-600/20', 
+            'border', 
+            'border-neutral-800/10', 
+            'dark:border-white/5'
+          );
+        }
+
+        input.id = variable.env;
+        input.name = variable.env;
+        input.value = variable.value || '';
+        input.required = variable.required;
+
+        variableDiv.appendChild(label);
+        variableDiv.appendChild(input);
+        variablesContainer.appendChild(variableDiv);
+      });
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const variablesArray = [];
+
+      const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+      const variables = JSON.parse(selectedOption.getAttribute('data-variables')) || [];
+
+      variables.forEach(variable => {
+        let variableValue = formData.get(variable.env);
+        if (variable.type === 'boolean') {
+          variableValue = (variableValue === 'on') ? 1 : 0;
+        } else if (variable.type === 'number') {
+          variableValue = parseInt(variableValue);
+        }
+        if (variableValue !== null) {
+          variablesArray.push({
+            env: variable.env,
+            name: variable.name,
+            value: variableValue,
+            type: variable.type
+          });
+        }
+      });
+
+      const data = Object.fromEntries(formData);
+      data.variables = variablesArray;
+
+      fetch('/admin/servers/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+        .then(response => response)
+        .then(data => {
+          console.log('Success');
+         window.location.href = '/admin/servers?err=none';
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    });
+
+    updateDockerImages();
+    updateVariables();
+
+    serverImageSelect.addEventListener('change', () => {
+      updateDockerImages();
+      updateVariables();
+    });
+  });
+</script>

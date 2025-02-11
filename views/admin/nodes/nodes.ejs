@@ -1,0 +1,254 @@
+<%- include('../../components/header', { title: 'Dashboard' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminNodesTitle %></h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminNodesText %></p>
+        </div>
+        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <div class="flex gap-2">
+            <button id="createButton" type="button" class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+              <%= req.translations.createNewNode %>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
+       
+        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.totalNodes %></h2>
+          <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= nodes.length %></p>
+          <% if (nodes.length > 0) { %>
+          <p class="text-sm text-neutral-400 mt-2"><%= req.translations.onlineNodes %>: <%= nodes.filter(node => node.status === 'Online').length %></p>
+          <% } else { %>
+          <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noNodesAvailable %></p>
+          <% } %>
+        </div>
+        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Server Count</h2>
+          <p class="text-4xl font-normal text-neutral-800 dark:text-white">
+            <%= Object.values(instance.length).reduce((a, b) => a + b, 0) %>
+          </p>
+          <% if (instance.length > 0) { %>
+            <p class="text-sm text-neutral-400 mt-2">
+              <%= req.translations.averageInstanceDensity %>: 
+              <%= (Object.values(instance.length).reduce((a, b) => a + b, 0) / nodes.length).toFixed(2) %>
+            </p>
+          <% } else { %>
+            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noInstancesAvailable %></p>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- notifications -->
+      <% if (req.query.err == "none") { %>
+        <div class="mt-6 ml-8 mr-8">
+          <div class="rounded-xl bg-emerald-600/20 dark:bg-emerald-800/10 px-4 py-6 shadow-lg border border-neutral-800/20">
+            <div class="flex">
+              <div class="flex-shrink-0 ml-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mt-2 text-emerald-400">
+                  <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                </svg>                
+              </div>
+              <div class="ml-5">
+                <h3 class="text-sm font-medium text-emerald-400"><%= req.translations.success %>!</h3>
+                <p class="text-sm text-emerald-400/50"><%= req.translations.actionCompleted %></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Table of nodes -->
+      <div class="overflow-hidden shadow rounded-lg m-8 border border-neutral-800/20" id="nodeTable">
+        <table class="min-w-full divide-y divide-white/10">
+          <thead class="bg-white/5">
+            <tr>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.name %></th>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.connection %></th>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.instances %></th>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.actions %></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5 bg-white/5">
+            <% nodes.forEach(function(node) { %>
+              <tr class="hover:bg-white/[0.05] transition-colors clickable-row cursor-pointer" onclick="handleRowClick(event, '/admin/node/<%= node.id %>/stats')">
+                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                  <div class="flex items-center">
+                    <div class="mr-5">
+                      <% if (node.status == "Online") { %>
+                        <span class="flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-emerald-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                      <% } else if (node.status == "Offline") { %>
+                        <span class="flex h-2 w-2">
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-neutral-500"></span>
+                        </span>
+                      <% } else { %>
+                        <span class="flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-amber-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                        </span>
+                      <% } %>
+                    </div>
+                    <div class="font-medium text-neutral-800 dark:text-white"><%= node.name %></div>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= node.address %>:<%= node.port %>
+                  <div class="mt-1 ml-2 inline-flex items-center rounded-md 
+                  <%= node.versionRelease ? 'bg-emerald-600/10 text-emerald-400 ring-emerald-600/20' : 'bg-red-600/10 text-red-400 ring-red-600/20' %> 
+                  px-2 py-1 text-xs font-medium ring-1 ring-inset">
+                    <%= node.versionRelease || 'unknown' %>
+                  </div></td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= node.instances ? node.instances.length : 0 %></td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                  <div class="flex gap-3">
+                    <button onclick="configure('<%= node.id %>')" type="button" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">Configure</button>
+                    <a href="./node/<%= node.id %>">
+                      <button type="button" class="rounded-xl bg-white border border-neutral-800/20 hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">Edit</button>
+                    </a>
+                    <button onclick="deleteNode('<%= node.id %>')" type="button" class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Remove</button>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast') %>
+
+<script>
+  function handleRowClick(event, url) {
+    if (!['BUTTON', 'A'].includes(event.target.tagName)) {
+      window.location = url;
+    }
+  }
+
+  async function deleteNode(nodeId) {
+    try {
+      let response = await fetch(`/admin/node/${nodeId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      let result = await response.json();
+
+      if (response.ok) {
+        showToast('Node successfully deleted', 'success');
+        window.location.reload();
+      } else if (result.error === "There are instances on the node") {
+        if (confirm('There are still instances on this node. Do you want to delete all instances and remove the node?')) {
+          await retryDeleteNode(nodeId, true);
+        }
+      }
+    } catch (error) {
+      console.error('Request failed:', error);
+    }
+  }
+
+  async function retryDeleteNode(nodeId, deleteInstances) {
+    const response = await fetch(`/admin/node/${nodeId}?deleteInstances=${deleteInstances}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (response.ok) {
+      showToast('Node and instances successfully deleted', 'success');
+      window.location.reload();
+    }
+  }
+
+  document.getElementById('createButton').addEventListener('click', () => {
+    location.href = '/admin/nodes/create';
+  });
+
+  async function configure(nodeId) {
+    try {
+      const response = await fetch(`/admin/node/${nodeId}/configure`);
+      if (!response.ok) throw new Error('Failed to fetch configure command');
+      const data = await response.json();
+      showPopup(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  function showPopup(command) {
+    const overlay = createOverlay();
+    const popup = createPopup(command);
+
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+
+    setTimeout(() => {
+      overlay.classList.remove('opacity-0');
+      popup.classList.remove('scale-95', 'opacity-0');
+    }, 10);
+
+    const copyBtn = document.getElementById('copyBtn');
+    copyBtn.addEventListener('click', () => copyCommand(copyBtn, command));
+    document.getElementById('doneBtn').addEventListener('click', closePopup);
+  }
+
+  function createOverlay() {
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center transition-opacity duration-300 opacity-0';
+    overlay.id = 'modal-overlay';
+    return overlay;
+  }
+
+  function createPopup(command) {
+    const popup = document.createElement('div');
+    popup.className = 'bg-neutral-800 text-white border border-white/5 rounded-xl shadow-xl p-6 max-w-2xl w-full mx-4 transform transition-all duration-300 scale-95 opacity-0';
+    popup.innerHTML = `
+      <div class="flex justify-center items-center mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 48 48" class="text-emerald-500">
+          <path fill="currentColor" d="M16.599,41.42L1.58,26.401c-0.774-0.774-0.774-2.028,0-2.802l4.019-4.019 c0.774-0.774,2.028-0.774,2.802,0L23.42,34.599c0.774,0.774,0.774,2.028,0,2.802l-4.019,4.019 C18.627,42.193,17.373,42.193,16.599,41.42z"/>
+          <path fill="currentColor" d="M12.58,34.599L39.599,7.58c0.774-0.774,2.028-0.774,2.802,0l4.019,4.019 c0.774,0.774,0.774,2.028,0,2.802L19.401,41.42c-0.774,0.774-2.028,0.774-2.802,0l-4.019-4.019 C11.807,36.627,11.807,35.373,12.58,34.599z"/>
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold mb-2 text-center">Token Created</h2>
+      <p class="mb-4 text-neutral-300 text-center">To auto-configure your node, run the following command:</p>
+      <pre class="bg-neutral-900 p-3 rounded-xl mb-4 overflow-x-auto"><code id="commandCode" class="text-emerald-500">${command}</code></pre>
+      <div class="flex justify-end">
+        <button id="copyBtn" class="bg-emerald-600 text-white px-4 py-2 rounded-xl mr-2 hover:bg-emerald-700 transition-colors">Copy</button>
+        <button id="doneBtn" class="bg-neutral-700 text-white px-4 py-2 rounded-xl hover:bg-neutral-600 transition-colors">Close</button>
+      </div>
+    `;
+    return popup;
+  }
+
+  function copyCommand(copyBtn, command) {
+    navigator.clipboard.writeText(command)
+      .then(() => {
+        copyBtn.textContent = 'Copied!';
+        copyBtn.classList.replace('bg-emerald-600', 'bg-neutral-600');
+        setTimeout(() => {
+          copyBtn.textContent = 'Copy';
+          copyBtn.classList.replace('bg-neutral-600', 'bg-emerald-600');
+        }, 2000);
+      })
+      .catch(error => console.error('Failed to copy:', error));
+  }
+
+  function closePopup() {
+    const overlay = document.getElementById('modal-overlay');
+    overlay.classList.add('opacity-0');
+    setTimeout(() => document.body.removeChild(overlay), 300);
+  }
+</script>
+
+<%- include('../../components/footer') %>

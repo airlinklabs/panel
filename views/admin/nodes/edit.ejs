@@ -1,0 +1,103 @@
+<%- include('../../components/header', { title: 'Dashboard' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminEditNodeTitle %></h1>
+            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminEditNodeText %></p>
+        </div>
+      </div>
+      
+      <div id="nodeForm" class="mt-6 px-8 w-full">
+        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+          <form>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label for="nodeName" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.name %>:</label>
+                <input id="nodeName" value="<%= node.name %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="My node">
+              </div>
+      
+              <div>
+                <label for="nodeRam" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.ram %> (GB):</label>
+                <input id="nodeRam" value="<%= node.ram %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="This is only for information purposes.">
+              </div>
+      
+              <div>
+                <label for="nodeDisk" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.disk %> (GB):</label>
+                <input id="nodeDisk" value="<%= node.disk %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="This is only for information purposes.">
+              </div>
+      
+              <div>
+                <label for="nodeProcessor" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.cpu %>:</label>
+                <input id="nodeProcessor" value="<%= node.cpu %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="This is only for information purposes.">
+              </div>
+      
+              <div>
+                <label for="nodeAddress" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.addressIP %>:</label>
+                <input id="nodeAddress" value="<%= node.address %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="localhost">
+              </div>
+      
+              <div>
+                <label for="nodePort" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.daemonPort %>:</label>
+                <input id="nodePort" value="<%= node.port %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="3002">
+              </div>
+
+              <div>
+                <label for="nodeKey" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.daemonKey %>:</label>
+                <input id="nodeKey" value="<%= node.key %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= node.key %>" disabled>
+              </div>
+      
+              <div class="col-span-2">
+                <button id="updateNodeBtn" type="button" class="w-full md:w-auto rounded-lg bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+                    <%= req.translations.update %>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast') %>
+
+<script>
+  document.getElementById('updateNodeBtn').addEventListener('click', async () => {
+    const nodeData = {
+      name: document.getElementById('nodeName').value,
+      ram: document.getElementById('nodeRam').value,
+      cpu: document.getElementById('nodeProcessor').value,
+      disk: document.getElementById('nodeDisk').value,
+      address: document.getElementById('nodeAddress').value,
+      port: document.getElementById('nodePort').value
+    };
+
+    try {
+      const response = await fetch('/admin/node/<%= node.id %>/edit', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nodeData)
+      });
+
+      if (response.ok) {
+        console.log('Node updated:', await response.json());
+        window.location.href = '/admin/nodes?err=none';
+      } else {
+        throw new Error('Failed to update node');
+      }
+    } catch (error) {
+      showToast('Error updating node:' + error, 'error');
+    }
+  });
+</script>
+
+<%- include('../../components/footer') %>

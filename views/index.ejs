@@ -1,0 +1,45 @@
+<%- include('./components/header', { title: 'Authentication' }) %>
+
+<main class="bg-neutral-900 h-screen w-screen flex items-center justify-center">
+    <div class="container mx-auto px-4 flex flex-col items-center">
+        <!-- Header Text -->
+        <div class="text-center mb-12">
+            <h1 class="text-white text-4xl font-semibold mb-2">Welcome Back</h1>
+            <p class="text-neutral-400">Choose your entry point</p>
+        </div>
+        <!-- Cards Container -->
+        <div class="grid md:grid-cols-2 gap-8 w-full max-w-4xl">
+            <!-- Login Card -->
+            <div class="bg-black/20 p-8 border border-neutral-200/20 rounded-2xl shadow-lg backdrop-blur-sm transition-transform duration-300 hover:scale-[1.02]">
+                <div class="text-center mb-6">
+                    <svg class="w-12 h-12 text-neutral-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <h2 class="text-white text-2xl font-semibold">Sign In</h2>
+                    <p class="text-neutral-400 mt-2">Access your account</p>
+                </div>
+                <a href="/login" class="block w-full p-3 bg-neutral-100 hover:bg-neutral-300 rounded-lg text-neutral-800 font-semibold text-center transition duration-200">
+                    Login
+                </a>
+            </div>
+            <!-- Register Card -->
+            <div class="bg-black/20 p-8 border border-neutral-200/20 rounded-2xl shadow-lg backdrop-blur-sm transition-transform duration-300 hover:scale-[1.02]">
+                <div class="text-center mb-6">
+                    <svg class="w-12 h-12 text-neutral-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                    </svg>
+                    <h2 class="text-white text-2xl font-semibold">Create Account</h2>
+                    <p class="text-neutral-400 mt-2">Start your journey</p>
+                </div>
+                <a href="/register" class="block w-full p-3 bg-neutral-100 hover:bg-neutral-300 rounded-lg text-neutral-800 font-semibold text-center transition duration-200">
+                    Register
+                </a>
+            </div>
+        </div>
+        <!-- Footer Text -->
+        <p class="text-neutral-400 mt-12 text-sm">
+            Need help? <a href="#" class="text-blue-400 hover:underline">Contact Support</a>
+        </p>
+    </div>
+</main>
+<%- include('./components/footer') %>

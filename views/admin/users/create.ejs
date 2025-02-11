@@ -1,0 +1,93 @@
+<%- include('../../components/header', { title: 'Dashboard' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminCreateUserTitle %></h1>
+            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminCreateUserText %></p>
+        </div>
+      </div>
+      
+      <div id="userForm" class="mt-6 px-8 w-full">
+        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+          <form>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label for="userEmail" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.email %>:</label>
+                <input id="userEmail" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="example@domain.com">
+              </div>
+      
+              <div>
+                <label for="userUsername" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.username %>:</label>
+                <input id="userUsername" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="username">
+              </div>
+      
+              <div>
+                <label for="userPassword" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.password %>:</label>
+                <input id="userPassword" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="********">
+              </div>
+      
+              <div>
+                <label for="userIsAdmin" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.admin %>:</label>
+                <div class="flex items-center space-x-2 mt-3.5">
+                  <label for="userIsAdminSwitch" class="relative inline-block w-12 h-6">
+                    <input type="checkbox" id="userIsAdminSwitch" class="sr-only peer">
+                    <span class="block w-12 h-6 bg-neutral-400 peer-checked:bg-blue-500 rounded-full"></span>
+                    <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full peer-checked:translate-x-6 transition"></span>
+                  </label>
+                </div>
+              </div>
+              
+    
+      
+              <div class="col-span-2">
+                <button id="createuserBtn" type="button" class="w-full md:w-auto rounded-lg bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+                    <%= req.translations.create %>
+                  </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast')%>
+
+<script>
+  document.getElementById('createuserBtn').addEventListener('click', async () => {
+    const userData = {
+      email: document.getElementById('userEmail').value,
+      username: document.getElementById('userUsername').value,
+      password: document.getElementById('userPassword').value,
+    };
+
+    try {
+      const response = await fetch('/admin/users/create-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      });
+
+      if (response.ok) {
+        console.log('user created:', await response.json());
+        window.location.href = '/admin/users?err=none';
+      } else {
+        throw new Error('Failed to create user');
+      }
+    } catch (error) {
+      showToast('Failed to create user', 'error');
+    }
+  });
+</script>
+
+<%- include('../../components/footer') %>
