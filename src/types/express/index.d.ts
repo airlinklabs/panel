@@ -1,15 +1,11 @@
 import 'express';
-<<<<<<< HEAD
 import { Server, Users } from '@prisma/client';
-=======
->>>>>>> 589f8dca2f23529e9a3471e72955f7db4a489313
 
 declare global {
   namespace Express {
     interface Request {
       file?: Express.Multer.File;
       files?: Express.Multer.File[];
-<<<<<<< HEAD
       translations?: { [key: string]: string };
       session: {
         user?: {
@@ -43,8 +39,3 @@ interface ServerCreateData extends ServerUpdateData {
 }
 
 export { ServerUpdateData, ServerCreateData };
-=======
-    }
-  }
-}
->>>>>>> 589f8dca2f23529e9a3471e72955f7db4a489313
