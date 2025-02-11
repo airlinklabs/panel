@@ -75,6 +75,7 @@
                   <tr onclick="window.location.href = '../server/<%= server.UUID %>';" class="hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer">
                     <td class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-6"><%= server.name %></td>
                     <td class="px-3 py-4 text-sm">
+<<<<<<< HEAD
                       <span class="status-badge inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full transition-colors duration-300
                       <%= server.status === 'running' ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-700/20 text-red-700 dark:text-red-400' %>">
                       <span class="relative flex h-2 w-2 mr-1.5">
@@ -106,6 +107,15 @@
                       </div>
                       </div>
                     </td>
+=======
+                      <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full 
+                          <%= server.status === 'running' ? 'bg-green-100 dark:bg-green-500/50 text-green-700 dark:text-white' : 'bg-red-100 dark:bg-red-700/30 text-red-700 dark:text-neutral-300 border dark:border-red-600/20' %>">
+                        <%= server.status === 'running' ? 'Running' : 'Stopped' %>
+                      </span>
+                    </td>
+                    <td class="px-3 py-4 text-sm text-gray-700 dark:text-neutral-300"><span class="border border-gray-300 dark:border-neutral-600/20 bg-gray-100 dark:bg-neutral-500/10 px-2 py-0.5 rounded-lg">0 / 1GB</span></td>
+                    <td class="px-3 py-4 text-sm text-gray-700 dark:text-neutral-300"><span class="border border-gray-300 dark:border-neutral-600/20 bg-gray-100 dark:bg-neutral-500/10 px-2 py-0.5 rounded-lg">0%</span></td>
+>>>>>>> 589f8dca2f23529e9a3471e72955f7db4a489313
                   </tr>
                 <% }); %>
               </tbody>
@@ -117,6 +127,7 @@
   </div>
 </main>
 
+<<<<<<< HEAD
 <!-- Enhanced Scripts -->
 <script>
 function updateServerStats() {
@@ -234,4 +245,6 @@ setInterval(updateServerStats, 5000);
 updateServerStats();
 </script>
 
+=======
+>>>>>>> 589f8dca2f23529e9a3471e72955f7db4a489313
 <%- include('../components/footer') %>

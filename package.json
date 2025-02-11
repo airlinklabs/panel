@@ -44,7 +44,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
+<<<<<<< HEAD
     "@prisma/client": "^6.3.1",
+=======
+    "@prisma/client": "^6.2.1",
+>>>>>>> 589f8dca2f23529e9a3471e72955f7db4a489313
     "@tailwindcss/forms": "^0.5.10",
     "@types/bcrypt": "^5.0.2",
     "@types/compression": "^1.7.5",
@@ -62,7 +66,11 @@
     "fs-extra": "^11.2.0",
     "nodemon": "^3.1.9",
     "prettier": "^3.3.3",
+<<<<<<< HEAD
     "prisma": "^6.3.1",
+=======
+    "prisma": "^6.2.1",
+>>>>>>> 589f8dca2f23529e9a3471e72955f7db4a489313
     "tailwindcss": "^3.4.15",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
