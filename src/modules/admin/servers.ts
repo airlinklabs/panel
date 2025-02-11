@@ -309,10 +309,10 @@ const adminModule: Module = {
             }
           }, 0);
 
-          res.status(200).send('Server created successfully');
+            res.status(200).json({ success: true, message: 'Server created successfully' });
         } catch (error) {
           logger.error('Error creating server:', error);
-          res.status(500).send('Error creating server');
+            res.status(500).json({ error: 'Error creating server' });
         }
       },
     );
@@ -363,7 +363,8 @@ const adminModule: Module = {
         });
       } catch (error) {
         logger.error('Error fetching server for edit:', error);
-        return res.redirect('/admin/servers');
+        res.redirect('/admin/servers');
+        return;
       }
       }
     );
@@ -390,7 +391,8 @@ const adminModule: Module = {
         } = req.body;
 
         if (!name || !description || !nodeId || !Memory || !Cpu || !Storage || !ownerId) {
-        return res.status(400).json({ error: 'Missing required fields' });
+        res.status(400).json({ error: 'Missing required fields' });
+        return;
         }
 
         await ServerManager.updateServer(serverId, {
@@ -446,7 +448,7 @@ const adminModule: Module = {
         res.status(200).json({ success: true, message: 'Server deleted successfully' });
       } catch (error) {
         logger.error('Error in delete server route:', error);
-        res.status(500).send('Error deleting server');
+        res.status(500).json({ error: 'Error deleting server' });
       }
       },
 
