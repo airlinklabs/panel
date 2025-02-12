@@ -28,12 +28,22 @@ interface NodeWithInstance {
   port: number;
   key: string;
   createdAt: Date;
+  locationId?: number;
+  location?: {
+    id: number;
+    name: string;
+    shortCode: string;
+  };
   instances: any;
 }
 
 async function listNodes(res: Response) {
   try {
-    const nodes = await prisma.node.findMany();
+    const nodes = await prisma.node.findMany({
+      include: {
+        location: true
+      }
+    });
     const nodesWithStatus = [];
 
     for (const node of nodes) {
@@ -42,8 +52,11 @@ async function listNodes(res: Response) {
           id: node.id,
         },
       });
-      (node as NodeWithInstance).instances = instances || [];
-      nodesWithStatus.push(await checkNodeStatus(node));
+      const nodeWithInstance = {
+        ...node,
+        instances: instances || []
+      } as NodeWithInstance;
+      nodesWithStatus.push(await checkNodeStatus(nodeWithInstance));
     }
 
     return nodesWithStatus;
@@ -102,23 +115,34 @@ const adminModule: Module = {
       '/admin/nodes/create',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        try {
-          const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
-            return res.redirect('/login');
-          }
-
-          const nodes = await listNodes(res);
-
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
-          res.render('admin/nodes/create', { user, req, settings, nodes });
-        } catch (error) {
-          logger.error('Error fetching user:', error);
-          return res.redirect('/login');
+      try {
+        const userId = req.session?.user?.id;
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+        return res.redirect('/login');
         }
+
+        const nodes = await listNodes(res);
+        const locations = await prisma.location.findMany();
+        const settings = await prisma.settings.findUnique({
+        where: { id: 1 },
+        });
+        
+        logger.info(`Locations found: ${JSON.stringify(locations)}`);
+        logger.info(`User: ${JSON.stringify(user)}`);
+        logger.info(`Settings: ${JSON.stringify(settings)}`);
+        
+        res.render('admin/nodes/create', { 
+        user, 
+        req, 
+        settings, 
+        nodes, 
+        locations: locations || [] 
+        });
+      } catch (error) {
+        logger.error('Error in /admin/nodes/create:', error);
+        return res.redirect('/login');
+      }
       },
     );
 
@@ -135,7 +159,7 @@ const adminModule: Module = {
       '/admin/nodes/create',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const { name, ram, cpu, disk, address, port } = req.body;
+        const { name, ram, cpu, disk, address, port, locationId } = req.body;
 
         if (!name || typeof name !== 'string') {
           res.status(400).json({ message: 'Name must be a string.' });
@@ -202,7 +226,7 @@ const adminModule: Module = {
           const diskValue = parseFloat(disk);
           const portValue = parseInt(port);
 
-          const node = await prisma.node.create({
+            const node = await prisma.node.create({
             data: {
               name,
               ram: ramValue,
@@ -211,9 +235,10 @@ const adminModule: Module = {
               address,
               port: portValue,
               key,
+              locationId: locationId ? parseInt(locationId) : null,
               createdAt: new Date(),
             },
-          });
+            });
 
           res.status(200).json({ message: 'Node created successfully.', node });
           return;
@@ -277,7 +302,10 @@ const adminModule: Module = {
 
           const nodeId = parseInt(req.params.id);
 
-          const node = await prisma.node.findUnique({ where: { id: nodeId } });
+            const node = await prisma.node.findUnique({ 
+            where: { id: nodeId },
+            include: { location: true }
+            });
           if (!node) {
             res.status(404).json({ message: 'Node not found.' });
             return;
@@ -318,11 +346,12 @@ const adminModule: Module = {
             res.status(404).json({ message: 'Node not found.' });
             return;
           }
-          const settings = await prisma.settings.findUnique({
+            const locations = await prisma.location.findMany();
+            const settings = await prisma.settings.findUnique({
             where: { id: 1 },
-          });
+            });
 
-          res.render('admin/nodes/edit', { node, user, req, settings });
+            res.render('admin/nodes/edit', { node, user, req, settings, locations });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -343,12 +372,8 @@ const adminModule: Module = {
 
           const nodeId = parseInt(req.params.id);
 
-          const name = req.body.name;
-          const ram = parseInt(req.body.ram);
-          const cpu = parseInt(req.body.cpu);
-          const disk = parseInt(req.body.disk);
-          const address = req.body.address;
-          const port = parseInt(req.body.port);
+            const { name, ram, cpu, disk, address, port, locationId } = req.body;
+
 
           if (
             !name ||
@@ -368,12 +393,13 @@ const adminModule: Module = {
           const node = await prisma.node.update({
             where: { id: nodeId },
             data: {
-              name,
-              ram,
-              cpu,
-              disk,
-              address,
-              port,
+                name,
+                ram: parseInt(ram),
+                cpu: parseInt(cpu),
+                disk: parseInt(disk),
+                address,
+                port: parseInt(port),
+                locationId: locationId ? parseInt(locationId) : null,
             },
           });
 

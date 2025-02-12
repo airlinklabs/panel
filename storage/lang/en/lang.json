@@ -145,5 +145,6 @@
   "daemonKey": "Daemon Key",
   "DockerImage": "Docker Image",
   "adminSettingsSave": "Save",
-  "general": "General"
+  "general": "General",
+  "location": "Location"
 }

@@ -13,22 +13,27 @@ function loadTranslations(lang: string): Record<string, unknown> {
     '../../../../storage/lang/en/lang.json',
   );
 
+  const defaultTranslations = {
+    adminCreateNodeTitle: 'Create Node',
+    adminCreateNodeText: 'Create a new node on Airlink',
+    location: 'Location',
+    create: 'Create',
+    addressIP: 'IP Address', 
+    daemonPort: 'Daemon Port',
+    name: 'Name',
+    ram: 'RAM',
+    cpu: 'CPU',
+    disk: 'Disk'
+  };
+
   try {
     if (fs.existsSync(langPath)) {
-      return JSON.parse(fs.readFileSync(langPath, 'utf8'));
+      return { ...defaultTranslations, ...JSON.parse(fs.readFileSync(langPath, 'utf8')) };
     }
-    return JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
+    return { ...defaultTranslations, ...JSON.parse(fs.readFileSync(fallbackPath, 'utf8')) };
   } catch (error) {
     logger.error(`Error loading translations for ${lang}:`, error);
-    try {
-      return JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
-    } catch (fallbackError) {
-      logger.error(
-        'Error loading default English translations:',
-        fallbackError,
-      );
-      return {};
-    }
+    return defaultTranslations;
   }
 }
 

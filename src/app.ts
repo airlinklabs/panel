@@ -95,13 +95,14 @@ app.use(express.json());
 // Load cookies
 app.use(cookieParser());
 
-// Load translation
+// Load translation middleware first
 app.use(translationMiddleware);
 
-// Load locals
+// Load locals after translation middleware
 app.use((req, res, next) => {
   res.locals.name = name;
   res.locals.airlinkVersion = airlinkVersion;
+  res.locals.translations = (req as any).translations; // Add translations to locals
   next();
 });
 
