@@ -2,7 +2,9 @@ import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import { LocationManager } from '../../handlers/utils/core/locationManager';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import { prisma } from '../../lib/prisma';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 const adminModule: Module = {
 	info: {

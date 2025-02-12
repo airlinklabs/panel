@@ -8,6 +8,9 @@
     "sourceMap": true,
     "outDir": "dist",
     "baseUrl": ".",
+    "paths": {
+      "src/*": ["src/*"]
+    },
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,

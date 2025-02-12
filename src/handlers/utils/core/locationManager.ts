@@ -62,8 +62,8 @@ export class LocationManager {
 
 		const totalNodes = location.nodes.length;
 		const totalServers = location.nodes.reduce((acc, node) => acc + node.servers.length, 0);
-		const totalRam = location.nodes.reduce((acc, node) => acc + node.ram, 0);
-		const totalCpu = location.nodes.reduce((acc, node) => acc + node.cpu, 0);
+		const totalRam = location.nodes.reduce((acc, node) => acc + BigInt(node.ram.toString()), BigInt(0)).toString();  // Use BigInt() instead of literal
+		const totalCpu = location.nodes.reduce((acc, node) => acc + BigInt(node.cpu.toString()), BigInt(0)).toString();  // Use BigInt() instead of literal
 		const totalDisk = location.nodes.reduce((acc, node) => acc + node.disk, 0);
 
 		return {

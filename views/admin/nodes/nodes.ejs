@@ -123,7 +123,7 @@
                 px-2 py-1 text-xs font-medium ring-1 ring-inset">
                 <%= node.versionRelease || 'unknown' %>
                 </div></td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= node.instances ? node.instances.length : 0 %></td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= node.servers ? node.servers.length : 0 %></td>
               <td class="whitespace-nowrap px-3 py-4 text-sm">
                 <div class="flex gap-3">
                 <button onclick="configure('<%= node.id %>')" type="button" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">Configure</button>

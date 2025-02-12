@@ -24,20 +24,20 @@
                 <input id="nodeName" value="<%= node.name %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="My node">
               </div>
       
-              <div>
+                <div>
                 <label for="nodeRam" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.ram %> (GB):</label>
-                <input id="nodeRam" value="<%= node.ram %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="This is only for information purposes.">
-              </div>
+                <input id="nodeRam" value="<%= Math.floor(Number(node.ram.toString()) / (1024 * 1024 * 1024)) %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="This is only for information purposes.">
+                </div>
       
               <div>
                 <label for="nodeDisk" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.disk %> (GB):</label>
                 <input id="nodeDisk" value="<%= node.disk %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="This is only for information purposes.">
               </div>
       
-              <div>
+                <div>
                 <label for="nodeProcessor" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.cpu %>:</label>
-                <input id="nodeProcessor" value="<%= node.cpu %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="This is only for information purposes.">
-              </div>
+                <input id="nodeProcessor" value="<%= Math.floor(Number(node.cpu.toString()) / 100) %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="This is only for information purposes.">
+                </div>
       
               <div>
                 <label for="nodeAddress" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.addressIP %>:</label>
@@ -83,30 +83,31 @@
 <script>
   document.getElementById('updateNodeBtn').addEventListener('click', async () => {
     const nodeData = {
-      name: document.getElementById('nodeName').value,
-      ram: document.getElementById('nodeRam').value,
-      cpu: document.getElementById('nodeProcessor').value,
-      disk: document.getElementById('nodeDisk').value,
-      address: document.getElementById('nodeAddress').value,
-      port: document.getElementById('nodePort').value,
-      locationId: document.getElementById('nodeLocation').value
+        name: document.getElementById('nodeName').value,
+        ram: BigInt(document.getElementById('nodeRam').value * 1024 * 1024 * 1024).toString(), // Convert GB to bytes and then to BigInt string
+        cpu: BigInt(document.getElementById('nodeProcessor').value * 100).toString(), // Convert to percentage basis and then to BigInt string
+        disk: document.getElementById('nodeDisk').value,
+        address: document.getElementById('nodeAddress').value,
+        port: document.getElementById('nodePort').value,
+        locationId: document.getElementById('nodeLocation').value
     };
 
     try {
-      const response = await fetch('/admin/node/<%= node.id %>/edit', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(nodeData)
-      });
+        const response = await fetch('/admin/node/<%= node.id %>/edit', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(nodeData)
+        });
 
-      if (response.ok) {
-        console.log('Node updated:', await response.json());
-        window.location.href = '/admin/nodes?err=none';
-      } else {
-        throw new Error('Failed to update node');
-      }
+        if (response.ok) {
+            const result = await response.json();
+            window.location.href = '/admin/nodes?err=none';
+        } else {
+            const error = await response.json();
+            showToast(error.message || 'Failed to update node', 'error');
+        }
     } catch (error) {
-      showToast('Error updating node:' + error, 'error');
+        showToast('Error updating node: ' + error.message, 'error');
     }
   });
 </script>

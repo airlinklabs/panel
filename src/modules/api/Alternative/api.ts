@@ -199,12 +199,12 @@ const coreModule: Module = {
                 relationships: {
                   node: {
                     attributes: {
-                      id: server.node.id,
-                      name: server.node.name,
-                      ram: server.node.ram,
-                      cpu: server.node.cpu,
-                      disk: server.node.disk,
-                      address: server.node.address,
+                        id: server.node.id,
+                        name: server.node.name,
+                        ram: server.node.ram.toString(),
+                        cpu: server.node.cpu.toString(),
+                        disk: server.node.disk,
+                        address: server.node.address,
                       port: server.node.port,
                       key: server.node.key,
                       createdAt: server.node.createdAt,

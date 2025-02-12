@@ -21,8 +21,8 @@ function generateApiKey(length: number): string {
 interface NodeWithInstance {
   id: number;
   name: string;
-  ram: number;
-  cpu: number;
+  ram: string;  // Changed to string for JSON serialization
+  cpu: string;  // Changed to string for JSON serialization
   disk: number;
   address: string;
   port: number;
@@ -34,27 +34,26 @@ interface NodeWithInstance {
     name: string;
     shortCode: string;
   };
-  instances: any;
+  servers: any[];
+  instances: any[];
 }
 
 async function listNodes(res: Response) {
   try {
     const nodes = await prisma.node.findMany({
       include: {
-        location: true
+        location: true,
+        servers: true // Include servers directly in the node query
       }
     });
     const nodesWithStatus = [];
 
     for (const node of nodes) {
-      const instances = await prisma.server.findMany({
-        where: {
-          id: node.id,
-        },
-      });
       const nodeWithInstance = {
-        ...node,
-        instances: instances || []
+      ...node,
+      ram: node.ram.toString(),
+      cpu: node.cpu.toString(),
+      instances: node.servers || []
       } as NodeWithInstance;
       nodesWithStatus.push(await checkNodeStatus(nodeWithInstance));
     }
@@ -62,9 +61,10 @@ async function listNodes(res: Response) {
     return nodesWithStatus;
   } catch (error) {
     logger.error('Error fetching nodes:', error);
-    res.status(500).json({ message: 'Error fetching nodes.' });
+    return []; // Return empty array instead of undefined
   }
 }
+
 
 const adminModule: Module = {
   info: {
@@ -83,27 +83,27 @@ const adminModule: Module = {
       '/admin/nodes',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        try {
-          const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
-            return res.redirect('/login');
-          }
+      try {
+        const userId = req.session?.user?.id;
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+        return res.redirect('/login');
+        }
 
-          const nodes = await listNodes(res);
+        const nodes = await listNodes(res) || []; // Ensure nodes is at least an empty array
 
-          const instance = await prisma.server.findMany();
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
+        const instance = await prisma.server.findMany();
+        const settings = await prisma.settings.findUnique({
+        where: { id: 1 },
+        });
 
-          res.render('admin/nodes/nodes', {
-            user,
-            req,
-            settings,
-            nodes,
-            instance,
-          });
+        res.render('admin/nodes/nodes', {
+        user,
+        req,
+        settings,
+        nodes,
+        instance,
+        });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -221,16 +221,16 @@ const adminModule: Module = {
 
           const key = generateApiKey(32);
 
-          const ramValue = parseFloat(ram);
-          const cpuValue = parseFloat(cpu);
-          const diskValue = parseFloat(disk);
-          const portValue = parseInt(port);
+            const ramValue = parseInt(ram);
+            const cpuValue = parseFloat(cpu);
+            const diskValue = parseFloat(disk);
+            const portValue = parseInt(port);
 
             const node = await prisma.node.create({
             data: {
               name,
-              ram: ramValue,
-              cpu: cpuValue,
+              ram: BigInt(ramValue),
+              cpu: BigInt(cpuValue),
               disk: diskValue,
               address,
               port: portValue,
@@ -390,18 +390,18 @@ const adminModule: Module = {
             return;
           }
 
-          const node = await prisma.node.update({
+            const node = await prisma.node.update({
             where: { id: nodeId },
             data: {
-                name,
-                ram: parseInt(ram),
-                cpu: parseInt(cpu),
-                disk: parseInt(disk),
-                address,
-                port: parseInt(port),
-                locationId: locationId ? parseInt(locationId) : null,
+              name,
+              ram: BigInt(ram),
+              cpu: BigInt(cpu),
+              disk: parseInt(disk),
+              address,
+              port: parseInt(port),
+              locationId: locationId ? parseInt(locationId) : null,
             },
-          });
+            });
 
           res.status(200).json({ message: 'Node updated successfully.', node });
           return;

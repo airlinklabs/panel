@@ -89,8 +89,8 @@
   document.getElementById('createNodeBtn').addEventListener('click', async () => {
     const nodeData = {
       name: document.getElementById('nodeName').value,
-      ram: document.getElementById('nodeRam').value,
-      cpu: document.getElementById('nodeProcessor').value,
+      ram: BigInt(document.getElementById('nodeRam').value * 1024 * 1024 * 1024).toString(), // Convert GB to bytes and then to BigInt string
+      cpu: BigInt(document.getElementById('nodeProcessor').value * 100).toString(), // Convert to percentage basis and then to BigInt string
       disk: document.getElementById('nodeDisk').value,
       address: document.getElementById('nodeAddress').value,
       port: document.getElementById('nodePort').value,
@@ -105,13 +105,14 @@
       });
 
       if (response.ok) {
-        console.log('Node created:', await response.json());
+        const result = await response.json();
         window.location.href = '/admin/nodes?err=none';
       } else {
-        throw new Error('Failed to create node');
+        const error = await response.json();
+        showToast(error.message || 'Failed to create node', 'error');
       }
     } catch (error) {
-      showToast('Error creating node:' + error, 'error');
+      showToast('Error creating node: ' + error.message, 'error');
     }
   });
 </script>
