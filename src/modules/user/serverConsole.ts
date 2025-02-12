@@ -94,6 +94,80 @@ const wsServerConsoleModule: Module = {
     );
 
     router.ws(
+      '/api/console/:id/:password',
+      isAuthenticatedForServerWS('id', 'password'),
+      async (ws: WebSocket, req: Request) => {
+        if (!req.query.userId) {
+          ws.send(JSON.stringify({ error: 'User not authenticated' }));
+          ws.close();
+          return;
+        }
+
+        const userId = +req.query.userId;
+
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user || !user.username) {
+            ws.send(
+              JSON.stringify({ error: 'User not found or username missing' }),
+            );
+            ws.close();
+            return;
+          }
+
+          const serverId = req.params.id;
+          if (!serverId) {
+            ws.send(JSON.stringify({ error: 'Server ID is required' }));
+            ws.close();
+            return;
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true },
+          });
+          if (!server) {
+            ws.send(JSON.stringify({ error: 'Server not found' }));
+            ws.close();
+            return;
+          }
+
+          const node = server.node;
+
+          const socket = new WebSocket(
+            `ws://${node.address}:${node.port}/container/${serverId}`,
+          );
+
+          socket.onopen = () => {
+            socket.send(JSON.stringify({ event: 'auth', args: [node.key] }));
+          };
+
+          socket.onmessage = (msg) => {
+            ws.send(msg.data);
+          };
+
+          socket.onerror = () => {
+            ws.send('\x1b[31;1mThis instance is unavailable!\x1b[0m');
+          };
+
+          socket.onclose = () => {};
+
+          ws.onmessage = (msg) => {
+            socket.send(msg.data);
+          };
+
+          ws.on('close', () => {
+            socket.close();
+          });
+        } catch (error) {
+          logger.error('Error fetching user:', error);
+          ws.send(JSON.stringify({ error: 'Internal server error' }));
+          ws.close();
+        }
+      },
+    );
+
+    router.ws(
       '/status/:id',
       isAuthenticatedForServerWS('id'),
       async (ws: WebSocket, req: Request) => {

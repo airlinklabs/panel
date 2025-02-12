@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import logger from '../../../handlers/logger';
 import axios from 'axios';
 import QueueHandler from '../../../handlers/utils/core/queueer';
+import bcrypt from 'bcrypt';
 
 const queueer = new QueueHandler();
 
@@ -241,7 +242,7 @@ const coreModule: Module = {
       validator,
       async (req: Request, res: Response) => {
         try {
-          const { username, email, first_name, last_name, password } = req.body;
+          let { username, email, first_name, last_name, password } = req.body;
 
           if (!username || !email || !first_name || !last_name || !password) {
             res.status(400).json({ error: 'Missing required fields' });
@@ -256,6 +257,8 @@ const coreModule: Module = {
             res.status(400).json({ error: 'User already exists' });
             return;
           }
+
+          password = await bcrypt.hash(password, 10)
 
           const newUser = await prisma.users.create({
             data: {
@@ -279,6 +282,58 @@ const coreModule: Module = {
           res.status(500).json({ error: 'Internal server error' });
         }
       },
+    );
+
+    router.patch(
+      '/api/application/users/:id',
+      validator,
+      async (req: Request, res: Response) => {
+        try {
+          const userId = parseInt(req.params.id);
+          const { username, email, first_name, last_name, password } = req.body;
+    
+          if (!username && !email && !first_name && !last_name && !password) {
+            res.status(400).json({ error: 'No fields to update' });
+            return;
+          }
+    
+          const user = await prisma.users.findUnique({
+            where: { id: userId },
+          });
+    
+          if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+    
+          let updatedData: any = {};
+    
+          if (username) updatedData.username = username;
+          if (email) updatedData.email = email;
+          if (first_name) updatedData.first_name = first_name;
+          if (last_name) updatedData.last_name = last_name;
+          if (password) updatedData.password = password;
+
+          updatedData.password = await bcrypt.hash(password, 10)
+
+          const updatedUser = await prisma.users.update({
+            where: { id: userId },
+            data: updatedData,
+          });
+    
+          res.status(200).json({
+            object: 'user',
+            attributes: {
+              id: updatedUser.id,
+              username: updatedUser.username,
+              email: updatedUser.email
+            },
+          });
+        } catch (error) {
+          console.error('Error updating user:', error);
+          res.status(500).json({ error: 'Internal server error' });
+        }
+      }
     );
 
     router.post('/api/application/servers', validator, async (req: Request, res: Response) => {
