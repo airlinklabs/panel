@@ -9,6 +9,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.fontshare.com">
     <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,300,600,400,700&display=swap" rel="stylesheet">
+    <script>
+        // Page load time calculation
+        window.startTime = performance.now();
+        window.addEventListener('load', () => {
+            const endTime = performance.now();
+            const loadTime = endTime - window.startTime;
+            const pageLoadTimeElement = document.getElementById('page-load-time');
+            if (pageLoadTimeElement) {
+                const formattedTime = loadTime < 1000 
+                    ? `${Math.round(loadTime)}ms` 
+                    : `${(loadTime / 1000).toFixed(2)}s`;
+                pageLoadTimeElement.textContent = `Page loaded in ${formattedTime}`;
+            }
+        });
+    </script>
 </head>
 <body style="font-family: 'General Sans'" class="bg-neutral-100 dark:bg-[#141414] h-full">
 <button id="theme-toggle" class="absolute right-4 top-4 w-14 h-8 flex items-center bg-gray-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500 z-50">
