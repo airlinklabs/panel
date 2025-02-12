@@ -1,0 +1,260 @@
+<!-- System Monitor Popup -->
+<template id="systemMonitorPopup">
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-xl max-w-4xl w-full transform transition-all">
+			<div class="flex items-center justify-between p-6 border-b dark:border-neutral-800">
+				<div class="flex items-center space-x-4">
+					<h3 class="text-lg font-semibold text-neutral-900 dark:text-white">System Monitor</h3>
+					<span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" id="systemStatus">System Healthy</span>
+				</div>
+				<button class="close-btn text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+				</button>
+			</div>
+
+			<div class="p-6">
+				<!-- Resource Usage -->
+				<div class="grid grid-cols-3 gap-6 mb-6">
+					<!-- CPU Usage -->
+					<div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+						<div class="flex items-center justify-between mb-4">
+							<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">CPU Usage</h4>
+							<span class="text-2xl font-bold text-blue-500" id="cpuUsage">0%</span>
+						</div>
+						<div class="space-y-2">
+							<div class="h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full">
+								<div class="h-full bg-blue-500 rounded-full transition-all duration-300" id="cpuBar" style="width: 0%"></div>
+							</div>
+							<div class="flex justify-between text-xs text-neutral-500">
+								<span id="cpuTemp">Temperature: 0°C</span>
+								<span id="cpuFreq">Frequency: 0 GHz</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Memory Usage -->
+					<div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+						<div class="flex items-center justify-between mb-4">
+							<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Memory Usage</h4>
+							<span class="text-2xl font-bold text-green-500" id="memoryUsage">0%</span>
+						</div>
+						<div class="space-y-2">
+							<div class="h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full">
+								<div class="h-full bg-green-500 rounded-full transition-all duration-300" id="memoryBar" style="width: 0%"></div>
+							</div>
+							<div class="flex justify-between text-xs text-neutral-500">
+								<span id="memoryUsed">Used: 0 GB</span>
+								<span id="memoryTotal">Total: 0 GB</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Disk Usage -->
+					<div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+						<div class="flex items-center justify-between mb-4">
+							<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Disk Usage</h4>
+							<span class="text-2xl font-bold text-yellow-500" id="diskUsage">0%</span>
+						</div>
+						<div class="space-y-2">
+							<div class="h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full">
+								<div class="h-full bg-yellow-500 rounded-full transition-all duration-300" id="diskBar" style="width: 0%"></div>
+							</div>
+							<div class="flex justify-between text-xs text-neutral-500">
+								<span id="diskUsed">Used: 0 GB</span>
+								<span id="diskTotal">Total: 0 GB</span>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Process List -->
+				<div class="bg-neutral-50 dark:bg-neutral-800 rounded-lg">
+					<div class="p-4 border-b dark:border-neutral-700">
+						<div class="flex items-center justify-between">
+							<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Running Processes</h4>
+							<div class="flex items-center space-x-2">
+								<input type="text" placeholder="Search processes..." class="px-3 py-1.5 text-sm rounded-lg bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+								<button class="px-3 py-1.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg" id="refreshProcesses">
+									Refresh
+								</button>
+							</div>
+						</div>
+					</div>
+					<div class="overflow-x-auto">
+						<table class="min-w-full">
+							<thead>
+								<tr class="text-left text-xs font-medium text-neutral-500 border-b dark:border-neutral-700">
+									<th class="px-4 py-3">Process Name</th>
+									<th class="px-4 py-3">PID</th>
+									<th class="px-4 py-3">CPU %</th>
+									<th class="px-4 py-3">Memory</th>
+									<th class="px-4 py-3">Status</th>
+									<th class="px-4 py-3">Actions</th>
+								</tr>
+							</thead>
+							<tbody id="processList" class="text-sm">
+								<!-- Process rows will be dynamically inserted here -->
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+	class SystemMonitorPopupManager extends PopupManager {
+		constructor() {
+			super();
+			this.updateInterval = null;
+		}
+
+		showSystemMonitor(config = {}) {
+			const template = document.getElementById('systemMonitorPopup');
+			const popup = template.content.cloneNode(true);
+			const wrapper = document.createElement('div');
+			wrapper.appendChild(popup);
+
+			// Initialize metrics
+			this.updateMetrics(wrapper, config.metrics || {});
+
+			// Initialize process list
+			this.updateProcessList(wrapper, config.processes || []);
+
+			// Handle close button
+			wrapper.querySelector('.close-btn').addEventListener('click', () => {
+				clearInterval(this.updateInterval);
+				this.closePopup(wrapper);
+			});
+
+			// Handle refresh button
+			wrapper.querySelector('#refreshProcesses').addEventListener('click', () => {
+				this.updateProcessList(wrapper, config.processes || []);
+			});
+
+			// Handle process search
+			wrapper.querySelector('input[type="text"]').addEventListener('input', (e) => {
+				this.filterProcesses(wrapper, e.target.value);
+			});
+
+			// Start real-time updates
+			this.startUpdates(wrapper);
+
+			this.showPopup(wrapper);
+			return wrapper;
+		}
+
+		updateMetrics(wrapper, metrics) {
+			// Update CPU metrics
+			wrapper.querySelector('#cpuUsage').textContent = `${metrics.cpu || 0}%`;
+			wrapper.querySelector('#cpuBar').style.width = `${metrics.cpu || 0}%`;
+			wrapper.querySelector('#cpuTemp').textContent = `Temperature: ${metrics.cpuTemp || 0}°C`;
+			wrapper.querySelector('#cpuFreq').textContent = `Frequency: ${metrics.cpuFreq || 0} GHz`;
+
+			// Update memory metrics
+			wrapper.querySelector('#memoryUsage').textContent = `${metrics.memory || 0}%`;
+			wrapper.querySelector('#memoryBar').style.width = `${metrics.memory || 0}%`;
+			wrapper.querySelector('#memoryUsed').textContent = `Used: ${metrics.memoryUsed || 0} GB`;
+			wrapper.querySelector('#memoryTotal').textContent = `Total: ${metrics.memoryTotal || 0} GB`;
+
+			// Update disk metrics
+			wrapper.querySelector('#diskUsage').textContent = `${metrics.disk || 0}%`;
+			wrapper.querySelector('#diskBar').style.width = `${metrics.disk || 0}%`;
+			wrapper.querySelector('#diskUsed').textContent = `Used: ${metrics.diskUsed || 0} GB`;
+			wrapper.querySelector('#diskTotal').textContent = `Total: ${metrics.diskTotal || 0} GB`;
+
+			// Update system status
+			const status = wrapper.querySelector('#systemStatus');
+			if (metrics.cpu > 90 || metrics.memory > 90 || metrics.disk > 90) {
+				status.textContent = 'System Critical';
+				status.className = 'px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300';
+			} else if (metrics.cpu > 70 || metrics.memory > 70 || metrics.disk > 70) {
+				status.textContent = 'System Warning';
+				status.className = 'px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300';
+			}
+		}
+
+		updateProcessList(wrapper, processes) {
+			const tbody = wrapper.querySelector('#processList');
+			tbody.innerHTML = processes.map(proc => `
+				<tr class="border-b dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-700/50">
+					<td class="px-4 py-3 text-neutral-700 dark:text-neutral-300">${proc.name}</td>
+					<td class="px-4 py-3 text-neutral-700 dark:text-neutral-300">${proc.pid}</td>
+					<td class="px-4 py-3 text-neutral-700 dark:text-neutral-300">${proc.cpu}%</td>
+					<td class="px-4 py-3 text-neutral-700 dark:text-neutral-300">${proc.memory} MB</td>
+					<td class="px-4 py-3">
+						<span class="px-2 py-1 text-xs font-medium rounded-full ${
+							proc.status === 'running' ? 'bg-green-100 text-green-700' : 'bg-neutral-100 text-neutral-700'
+						}">${proc.status}</span>
+					</td>
+					<td class="px-4 py-3">
+						<button class="text-red-500 hover:text-red-600" onclick="terminateProcess(${proc.pid})">
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+							</svg>
+						</button>
+					</td>
+				</tr>
+			`).join('');
+		}
+
+		filterProcesses(wrapper, term) {
+			const rows = wrapper.querySelectorAll('#processList tr');
+			const searchTerm = term.toLowerCase();
+			
+			rows.forEach(row => {
+				const text = row.textContent.toLowerCase();
+				row.style.display = text.includes(searchTerm) ? '' : 'none';
+			});
+		}
+
+		startUpdates(wrapper) {
+			this.updateInterval = setInterval(() => {
+				// Simulate real-time data updates
+				this.updateMetrics(wrapper, {
+					cpu: Math.floor(Math.random() * 100),
+					cpuTemp: (40 + Math.random() * 20).toFixed(1),
+					cpuFreq: (2 + Math.random()).toFixed(1),
+					memory: Math.floor(Math.random() * 100),
+					memoryUsed: (4 + Math.random() * 4).toFixed(1),
+					memoryTotal: '16',
+					disk: Math.floor(Math.random() * 100),
+					diskUsed: (200 + Math.random() * 100).toFixed(1),
+					diskTotal: '500'
+				});
+			}, 1000);
+		}
+	}
+
+	// Initialize system monitor popup manager
+	const systemMonitorPopupManager = new SystemMonitorPopupManager();
+
+	// Example usage:
+	/*
+	systemMonitorPopupManager.showSystemMonitor({
+		metrics: {
+			cpu: 45,
+			cpuTemp: 55.5,
+			cpuFreq: 3.2,
+			memory: 60,
+			memoryUsed: 8.2,
+			memoryTotal: 16,
+			disk: 75,
+			diskUsed: 375,
+			diskTotal: 500
+		},
+		processes: [
+			{
+				name: 'node',
+				pid: 1234,
+				cpu: 2.5,
+				memory: 256,
+				status: 'running'
+			}
+		]
+	});
+	*/
+</script>

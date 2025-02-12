@@ -1,0 +1,349 @@
+<!-- Performance Monitor Popup -->
+<template id="performanceMonitorPopup">
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-xl max-w-6xl w-full transform transition-all">
+			<div class="flex items-center justify-between p-6 border-b dark:border-neutral-800">
+				<div class="flex items-center space-x-4">
+					<h3 class="text-lg font-semibold text-neutral-900 dark:text-white">Performance Monitor</h3>
+					<div class="flex items-center space-x-2">
+						<span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+						<span class="text-sm text-neutral-500 dark:text-neutral-400">Monitoring Active</span>
+					</div>
+				</div>
+				<div class="flex items-center space-x-4">
+					<select class="px-3 py-1.5 text-sm rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500">
+						<option value="realtime">Real-time</option>
+						<option value="1m">Last 1 minute</option>
+						<option value="5m">Last 5 minutes</option>
+						<option value="15m">Last 15 minutes</option>
+						<option value="1h">Last 1 hour</option>
+					</select>
+					<button class="close-btn text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+
+			<div class="p-6 space-y-6">
+				<!-- Resource Usage -->
+				<div class="grid grid-cols-4 gap-4">
+					<!-- CPU Usage -->
+					<div class="bg-neutral-50 dark:bg-neutral-800 rounded-lg p-4">
+						<div class="flex items-center justify-between mb-2">
+							<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">CPU Usage</h4>
+							<span class="text-2xl font-bold text-blue-500" id="cpuUsage">0%</span>
+						</div>
+						<div class="space-y-2">
+							<div class="h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full">
+								<div class="h-full bg-blue-500 rounded-full transition-all duration-300" id="cpuBar" style="width: 0%"></div>
+							</div>
+							<div class="flex justify-between text-xs text-neutral-500">
+								<span>0%</span>
+								<span>100%</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Memory Usage -->
+					<div class="bg-neutral-50 dark:bg-neutral-800 rounded-lg p-4">
+						<div class="flex items-center justify-between mb-2">
+							<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Memory Usage</h4>
+							<span class="text-2xl font-bold text-green-500" id="memoryUsage">0%</span>
+						</div>
+						<div class="space-y-2">
+							<div class="h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full">
+								<div class="h-full bg-green-500 rounded-full transition-all duration-300" id="memoryBar" style="width: 0%"></div>
+							</div>
+							<div class="flex justify-between text-xs text-neutral-500">
+								<span id="memoryUsed">0 GB</span>
+								<span id="memoryTotal">16 GB</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Network Usage -->
+					<div class="bg-neutral-50 dark:bg-neutral-800 rounded-lg p-4">
+						<div class="flex items-center justify-between mb-2">
+							<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Network I/O</h4>
+							<span class="text-2xl font-bold text-purple-500" id="networkUsage">0 MB/s</span>
+						</div>
+						<div class="space-y-2">
+							<div class="grid grid-cols-2 gap-2">
+								<div class="text-xs text-neutral-500">
+									<div>Upload</div>
+									<div id="uploadSpeed" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">0 MB/s</div>
+								</div>
+								<div class="text-xs text-neutral-500">
+									<div>Download</div>
+									<div id="downloadSpeed" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">0 MB/s</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Disk I/O -->
+					<div class="bg-neutral-50 dark:bg-neutral-800 rounded-lg p-4">
+						<div class="flex items-center justify-between mb-2">
+							<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Disk I/O</h4>
+							<span class="text-2xl font-bold text-yellow-500" id="diskUsage">0 MB/s</span>
+						</div>
+						<div class="space-y-2">
+							<div class="grid grid-cols-2 gap-2">
+								<div class="text-xs text-neutral-500">
+									<div>Read</div>
+									<div id="diskRead" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">0 MB/s</div>
+								</div>
+								<div class="text-xs text-neutral-500">
+									<div>Write</div>
+									<div id="diskWrite" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">0 MB/s</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Performance Graphs -->
+				<div class="grid grid-cols-2 gap-6">
+					<!-- CPU & Memory Graph -->
+					<div class="bg-neutral-50 dark:bg-neutral-800 rounded-lg p-4">
+						<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-4">CPU & Memory Usage</h4>
+						<div class="h-64" id="resourceGraph"></div>
+					</div>
+
+					<!-- Network Graph -->
+					<div class="bg-neutral-50 dark:bg-neutral-800 rounded-lg p-4">
+						<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-4">Network Traffic</h4>
+						<div class="h-64" id="networkGraph"></div>
+					</div>
+				</div>
+
+				<!-- Process List -->
+				<div class="bg-neutral-50 dark:bg-neutral-800 rounded-lg">
+					<div class="p-4 border-b dark:border-neutral-700">
+						<div class="flex items-center justify-between">
+							<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Top Processes</h4>
+							<button class="px-3 py-1.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg" id="refreshProcesses">
+								Refresh
+							</button>
+						</div>
+					</div>
+					<div class="overflow-x-auto">
+						<table class="min-w-full">
+							<thead>
+								<tr class="text-left text-xs font-medium text-neutral-500 border-b dark:border-neutral-700">
+									<th class="px-4 py-3">Process</th>
+									<th class="px-4 py-3">PID</th>
+									<th class="px-4 py-3">CPU %</th>
+									<th class="px-4 py-3">Memory</th>
+									<th class="px-4 py-3">Threads</th>
+									<th class="px-4 py-3">Status</th>
+								</tr>
+							</thead>
+							<tbody id="processList" class="text-sm">
+								<!-- Process rows will be dynamically inserted here -->
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+	class PerformanceMonitorPopupManager extends PopupManager {
+		constructor() {
+			super();
+			this.resourceChart = null;
+			this.networkChart = null;
+			this.updateInterval = null;
+		}
+
+		showPerformanceMonitor() {
+			const template = document.getElementById('performanceMonitorPopup');
+			const popup = template.content.cloneNode(true);
+			const wrapper = document.createElement('div');
+			wrapper.appendChild(popup);
+
+			// Initialize charts
+			this.initializeCharts(wrapper);
+
+			// Handle time range changes
+			wrapper.querySelector('select').addEventListener('change', (e) => {
+				this.updateTimeRange(e.target.value);
+			});
+
+			// Handle refresh button
+			wrapper.querySelector('#refreshProcesses').addEventListener('click', () => {
+				this.updateProcessList(wrapper);
+			});
+
+			// Handle close button
+			wrapper.querySelector('.close-btn').addEventListener('click', () => {
+				clearInterval(this.updateInterval);
+				if (this.resourceChart) this.resourceChart.destroy();
+				if (this.networkChart) this.networkChart.destroy();
+				this.closePopup(wrapper);
+			});
+
+			// Start real-time updates
+			this.startUpdates(wrapper);
+
+			this.showPopup(wrapper);
+			return wrapper;
+		}
+
+		initializeCharts(wrapper) {
+			// Initialize Resource Usage Chart
+			const resourceCtx = wrapper.querySelector('#resourceGraph').getContext('2d');
+			this.resourceChart = new Chart(resourceCtx, {
+				type: 'line',
+				data: {
+					labels: Array(20).fill(''),
+					datasets: [
+						{
+							label: 'CPU',
+							data: Array(20).fill(0),
+							borderColor: 'rgb(59, 130, 246)',
+							tension: 0.4,
+							fill: false
+						},
+						{
+							label: 'Memory',
+							data: Array(20).fill(0),
+							borderColor: 'rgb(16, 185, 129)',
+							tension: 0.4,
+							fill: false
+						}
+					]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					scales: {
+						y: {
+							beginAtZero: true,
+							max: 100
+						}
+					}
+				}
+			});
+
+			// Initialize Network Traffic Chart
+			const networkCtx = wrapper.querySelector('#networkGraph').getContext('2d');
+			this.networkChart = new Chart(networkCtx, {
+				type: 'line',
+				data: {
+					labels: Array(20).fill(''),
+					datasets: [
+						{
+							label: 'Upload',
+							data: Array(20).fill(0),
+							borderColor: 'rgb(139, 92, 246)',
+							tension: 0.4,
+							fill: false
+						},
+						{
+							label: 'Download',
+							data: Array(20).fill(0),
+							borderColor: 'rgb(244, 63, 94)',
+							tension: 0.4,
+							fill: false
+						}
+					]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					scales: {
+						y: {
+							beginAtZero: true
+						}
+					}
+				}
+			});
+		}
+
+		updateProcessList(wrapper, processes = []) {
+			const tbody = wrapper.querySelector('#processList');
+			tbody.innerHTML = processes.map(proc => `
+				<tr class="border-b dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-700/50">
+					<td class="px-4 py-3 text-neutral-700 dark:text-neutral-300">${proc.name}</td>
+					<td class="px-4 py-3 text-neutral-700 dark:text-neutral-300">${proc.pid}</td>
+					<td class="px-4 py-3 text-neutral-700 dark:text-neutral-300">${proc.cpu}%</td>
+					<td class="px-4 py-3 text-neutral-700 dark:text-neutral-300">${proc.memory} MB</td>
+					<td class="px-4 py-3 text-neutral-700 dark:text-neutral-300">${proc.threads}</td>
+					<td class="px-4 py-3">
+						<span class="px-2 py-1 text-xs font-medium rounded-full ${
+							proc.status === 'running' 
+								? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+								: 'bg-neutral-100 text-neutral-700'
+						}">${proc.status}</span>
+					</td>
+				</tr>
+			`).join('');
+		}
+
+		startUpdates(wrapper) {
+			this.updateInterval = setInterval(() => {
+				// Simulate real-time data updates
+				const cpu = Math.random() * 100;
+				const memory = Math.random() * 100;
+				const network = Math.random() * 10;
+				const disk = Math.random() * 5;
+
+				// Update metrics
+				wrapper.querySelector('#cpuUsage').textContent = `${cpu.toFixed(1)}%`;
+				wrapper.querySelector('#cpuBar').style.width = `${cpu}%`;
+
+				wrapper.querySelector('#memoryUsage').textContent = `${memory.toFixed(1)}%`;
+				wrapper.querySelector('#memoryBar').style.width = `${memory}%`;
+				wrapper.querySelector('#memoryUsed').textContent = `${(memory * 0.16).toFixed(1)} GB`;
+
+				wrapper.querySelector('#networkUsage').textContent = `${network.toFixed(1)} MB/s`;
+				wrapper.querySelector('#uploadSpeed').textContent = `${(network * 0.4).toFixed(1)} MB/s`;
+				wrapper.querySelector('#downloadSpeed').textContent = `${(network * 0.6).toFixed(1)} MB/s`;
+
+				wrapper.querySelector('#diskUsage').textContent = `${disk.toFixed(1)} MB/s`;
+				wrapper.querySelector('#diskRead').textContent = `${(disk * 0.3).toFixed(1)} MB/s`;
+				wrapper.querySelector('#diskWrite').textContent = `${(disk * 0.7).toFixed(1)} MB/s`;
+
+				// Update charts
+				this.resourceChart.data.datasets[0].data.push(cpu);
+				this.resourceChart.data.datasets[0].data.shift();
+				this.resourceChart.data.datasets[1].data.push(memory);
+				this.resourceChart.data.datasets[1].data.shift();
+				this.resourceChart.update();
+
+				this.networkChart.data.datasets[0].data.push(network * 0.4);
+				this.networkChart.data.datasets[0].data.shift();
+				this.networkChart.data.datasets[1].data.push(network * 0.6);
+				this.networkChart.data.datasets[1].data.shift();
+				this.networkChart.update();
+
+				// Update process list periodically
+				this.updateProcessList(wrapper, [
+					{ name: 'node', pid: 1234, cpu: 2.5, memory: 256, threads: 8, status: 'running' },
+					{ name: 'nginx', pid: 1235, cpu: 1.2, memory: 128, threads: 4, status: 'running' },
+					{ name: 'mysql', pid: 1236, cpu: 3.8, memory: 512, threads: 12, status: 'running' }
+				]);
+			}, 1000);
+		}
+
+		updateTimeRange(range) {
+			// Implementation for updating time range
+			console.log('Updating time range:', range);
+		}
+	}
+
+	// Initialize performance monitor popup manager
+	const performanceMonitorPopupManager = new PerformanceMonitorPopupManager();
+
+	// Example usage:
+	/*
+	performanceMonitorPopupManager.showPerformanceMonitor();
+	*/
+</script>

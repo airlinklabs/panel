@@ -1,0 +1,258 @@
+<!-- Network Monitor Popup -->
+<template id="networkMonitorPopup">
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-xl max-w-4xl w-full transform transition-all">
+			<div class="flex items-center justify-between p-6 border-b dark:border-neutral-800">
+				<h3 class="text-lg font-semibold text-neutral-900 dark:text-white">Network Monitor</h3>
+				<button class="close-btn text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+				</button>
+			</div>
+
+			<div class="p-6">
+				<!-- Network Overview -->
+				<div class="grid grid-cols-3 gap-4 mb-6">
+					<div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+						<div class="flex justify-between items-center mb-2">
+							<span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Bandwidth Usage</span>
+							<span class="text-lg font-bold text-blue-500" id="bandwidthUsage">0 MB/s</span>
+						</div>
+						<div class="h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full">
+							<div class="h-full bg-blue-500 rounded-full" style="width: 0%" id="bandwidthBar"></div>
+						</div>
+					</div>
+
+					<div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+						<div class="flex justify-between items-center mb-2">
+							<span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Active Connections</span>
+							<span class="text-lg font-bold text-green-500" id="activeConnections">0</span>
+						</div>
+						<div class="h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full">
+							<div class="h-full bg-green-500 rounded-full" style="width: 0%" id="connectionsBar"></div>
+						</div>
+					</div>
+
+					<div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+						<div class="flex justify-between items-center mb-2">
+							<span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Latency</span>
+							<span class="text-lg font-bold text-yellow-500" id="latency">0 ms</span>
+						</div>
+						<div class="h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full">
+							<div class="h-full bg-yellow-500 rounded-full" style="width: 0%" id="latencyBar"></div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Traffic Graph -->
+				<div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg mb-6">
+					<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-4">Network Traffic</h4>
+					<div class="h-64" id="trafficGraph"></div>
+				</div>
+
+				<!-- Active Connections Table -->
+				<div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+					<div class="flex justify-between items-center mb-4">
+						<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Active Connections</h4>
+						<button class="px-3 py-1.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg" id="refreshConnections">
+							Refresh
+						</button>
+					</div>
+					<div class="overflow-x-auto">
+						<table class="min-w-full">
+							<thead>
+								<tr class="text-left text-xs font-medium text-neutral-500">
+									<th class="px-4 py-2">IP Address</th>
+									<th class="px-4 py-2">Port</th>
+									<th class="px-4 py-2">Protocol</th>
+									<th class="px-4 py-2">Status</th>
+									<th class="px-4 py-2">Data Transfer</th>
+								</tr>
+							</thead>
+							<tbody class="text-sm" id="connectionsTable">
+								<!-- Connection rows will be dynamically inserted here -->
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+	class NetworkMonitorPopupManager extends PopupManager {
+		constructor() {
+			super();
+			this.chart = null;
+			this.updateInterval = null;
+		}
+
+		showNetworkMonitor(config = {}) {
+			const template = document.getElementById('networkMonitorPopup');
+			const popup = template.content.cloneNode(true);
+			const wrapper = document.createElement('div');
+			wrapper.appendChild(popup);
+
+			// Initialize traffic graph
+			this.initializeTrafficGraph(wrapper);
+
+			// Initialize metrics
+			this.updateMetrics(wrapper, config.metrics || {});
+
+			// Initialize connections table
+			this.updateConnectionsTable(wrapper, config.connections || []);
+
+			// Handle close button
+			wrapper.querySelector('.close-btn').addEventListener('click', () => {
+				clearInterval(this.updateInterval);
+				if (this.chart) {
+					this.chart.destroy();
+				}
+				this.closePopup(wrapper);
+			});
+
+			// Handle refresh button
+			wrapper.querySelector('#refreshConnections').addEventListener('click', () => {
+				this.updateConnectionsTable(wrapper, config.connections || []);
+			});
+
+			// Start real-time updates
+			this.startUpdates(wrapper);
+
+			this.showPopup(wrapper);
+			return wrapper;
+		}
+
+		initializeTrafficGraph(wrapper) {
+			const ctx = wrapper.querySelector('#trafficGraph').getContext('2d');
+			
+			this.chart = new Chart(ctx, {
+				type: 'line',
+				data: {
+					labels: Array(20).fill(''),
+					datasets: [
+						{
+							label: 'Upload',
+							data: Array(20).fill(0),
+							borderColor: 'rgb(59, 130, 246)',
+							tension: 0.4,
+							fill: false
+						},
+						{
+							label: 'Download',
+							data: Array(20).fill(0),
+							borderColor: 'rgb(16, 185, 129)',
+							tension: 0.4,
+							fill: false
+						}
+					]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					animation: false,
+					scales: {
+						y: {
+							beginAtZero: true,
+							grid: {
+								color: 'rgba(0, 0, 0, 0.1)'
+							}
+						},
+						x: {
+							grid: {
+								display: false
+							}
+						}
+					},
+					plugins: {
+						legend: {
+							position: 'top'
+						}
+					}
+				}
+			});
+		}
+
+		updateMetrics(wrapper, metrics) {
+			wrapper.querySelector('#bandwidthUsage').textContent = `${metrics.bandwidth || 0} MB/s`;
+			wrapper.querySelector('#bandwidthBar').style.width = `${metrics.bandwidthPercent || 0}%`;
+			
+			wrapper.querySelector('#activeConnections').textContent = metrics.connections || 0;
+			wrapper.querySelector('#connectionsBar').style.width = `${metrics.connectionsPercent || 0}%`;
+			
+			wrapper.querySelector('#latency').textContent = `${metrics.latency || 0} ms`;
+			wrapper.querySelector('#latencyBar').style.width = `${metrics.latencyPercent || 0}%`;
+		}
+
+		updateConnectionsTable(wrapper, connections) {
+			const tbody = wrapper.querySelector('#connectionsTable');
+			tbody.innerHTML = connections.map(conn => `
+				<tr class="hover:bg-neutral-100 dark:hover:bg-neutral-700/50">
+					<td class="px-4 py-2 text-neutral-700 dark:text-neutral-300">${conn.ip}</td>
+					<td class="px-4 py-2 text-neutral-700 dark:text-neutral-300">${conn.port}</td>
+					<td class="px-4 py-2 text-neutral-700 dark:text-neutral-300">${conn.protocol}</td>
+					<td class="px-4 py-2">
+						<span class="px-2 py-1 text-xs font-medium rounded-full ${
+							conn.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-neutral-100 text-neutral-700'
+						}">${conn.status}</span>
+					</td>
+					<td class="px-4 py-2 text-neutral-700 dark:text-neutral-300">${conn.transfer}</td>
+				</tr>
+			`).join('');
+		}
+
+		startUpdates(wrapper) {
+			this.updateInterval = setInterval(() => {
+				// Simulate real-time data updates
+				const upload = Math.random() * 10;
+				const download = Math.random() * 10;
+				
+				// Update graph
+				this.chart.data.datasets[0].data.push(upload);
+				this.chart.data.datasets[0].data.shift();
+				this.chart.data.datasets[1].data.push(download);
+				this.chart.data.datasets[1].data.shift();
+				this.chart.update();
+
+				// Update metrics
+				this.updateMetrics(wrapper, {
+					bandwidth: (upload + download).toFixed(2),
+					bandwidthPercent: Math.min(((upload + download) / 20) * 100, 100),
+					connections: Math.floor(Math.random() * 100),
+					connectionsPercent: Math.random() * 100,
+					latency: Math.floor(Math.random() * 200),
+					latencyPercent: Math.random() * 100
+				});
+			}, 1000);
+		}
+	}
+
+	// Initialize network monitor popup manager
+	const networkMonitorPopupManager = new NetworkMonitorPopupManager();
+
+	// Example usage:
+	/*
+	networkMonitorPopupManager.showNetworkMonitor({
+		metrics: {
+			bandwidth: '5.2',
+			bandwidthPercent: 26,
+			connections: 42,
+			connectionsPercent: 42,
+			latency: 85,
+			latencyPercent: 28
+		},
+		connections: [
+			{
+				ip: '192.168.1.100',
+				port: 8080,
+				protocol: 'TCP',
+				status: 'active',
+				transfer: '2.1 MB/s'
+			}
+		]
+	});
+	*/
+</script>

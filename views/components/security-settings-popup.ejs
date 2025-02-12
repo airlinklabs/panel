@@ -1,0 +1,296 @@
+<!-- Security Settings Popup -->
+<template id="securitySettingsPopup">
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-xl max-w-4xl w-full transform transition-all">
+			<div class="flex items-center justify-between p-6 border-b dark:border-neutral-800">
+				<div class="flex items-center space-x-4">
+					<h3 class="text-lg font-semibold text-neutral-900 dark:text-white">Security Settings</h3>
+					<span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300" id="securityStatus">Security Review Required</span>
+				</div>
+				<button class="close-btn text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+				</button>
+			</div>
+
+			<div class="p-6">
+				<div class="grid grid-cols-2 gap-6">
+					<!-- Firewall Settings -->
+					<div class="space-y-4">
+						<div class="flex items-center justify-between">
+							<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Firewall Settings</h4>
+							<button class="px-3 py-1.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">
+								Add Rule
+							</button>
+						</div>
+						<div class="bg-neutral-50 dark:bg-neutral-800 rounded-lg p-4">
+							<div class="space-y-2">
+								<div class="flex items-center justify-between">
+									<label class="flex items-center">
+										<input type="checkbox" class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-neutral-300 rounded">
+										<span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Enable Firewall</span>
+									</label>
+									<span class="text-xs text-green-500">Active</span>
+								</div>
+								<div class="border-t dark:border-neutral-700 pt-2">
+									<table class="min-w-full">
+										<thead>
+											<tr class="text-left text-xs font-medium text-neutral-500">
+												<th class="py-2">Port</th>
+												<th class="py-2">Protocol</th>
+												<th class="py-2">Action</th>
+												<th class="py-2"></th>
+											</tr>
+										</thead>
+										<tbody class="text-sm" id="firewallRules">
+											<!-- Firewall rules will be dynamically inserted here -->
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- SSL Certificate -->
+					<div class="space-y-4">
+						<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">SSL Certificate</h4>
+						<div class="bg-neutral-50 dark:bg-neutral-800 rounded-lg p-4">
+							<div class="space-y-4">
+								<div class="flex items-center justify-between">
+									<div>
+										<div class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Current Certificate</div>
+										<div class="text-xs text-neutral-500" id="certExpiry">Expires in 30 days</div>
+									</div>
+									<button class="px-3 py-1.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">
+										Renew
+									</button>
+								</div>
+								<div class="space-y-2">
+									<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Certificate Path</label>
+									<div class="flex space-x-2">
+										<input type="text" class="flex-1 px-3 py-2 bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500" placeholder="/path/to/cert.pem">
+										<button class="px-4 py-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700">
+											Browse
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Access Control -->
+					<div class="space-y-4">
+						<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Access Control</h4>
+						<div class="bg-neutral-50 dark:bg-neutral-800 rounded-lg p-4">
+							<div class="space-y-4">
+								<div class="flex items-center justify-between">
+									<label class="flex items-center">
+										<input type="checkbox" class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-neutral-300 rounded">
+										<span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Enable IP Whitelisting</span>
+									</label>
+									<button class="px-3 py-1.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">
+										Add IP
+									</button>
+								</div>
+								<div class="space-y-2" id="whitelistedIPs">
+									<!-- Whitelisted IPs will be dynamically inserted here -->
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Authentication -->
+					<div class="space-y-4">
+						<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Authentication</h4>
+						<div class="bg-neutral-50 dark:bg-neutral-800 rounded-lg p-4">
+							<div class="space-y-4">
+								<div class="flex items-center justify-between">
+									<label class="flex items-center">
+										<input type="checkbox" class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-neutral-300 rounded">
+										<span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Enable 2FA</span>
+									</label>
+									<button class="px-3 py-1.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">
+										Configure
+									</button>
+								</div>
+								<div class="space-y-2">
+									<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Password Policy</label>
+									<select class="w-full px-3 py-2 bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+										<option value="standard">Standard Security</option>
+										<option value="high">High Security</option>
+										<option value="custom">Custom Policy</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="px-6 py-4 bg-neutral-50 dark:bg-neutral-800 border-t dark:border-neutral-700 flex justify-between">
+				<button class="px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
+					Reset to Defaults
+				</button>
+				<div class="space-x-3">
+					<button class="cancel-btn px-4 py-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg">
+						Cancel
+					</button>
+					<button class="save-btn px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg">
+						Save Changes
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+	class SecuritySettingsPopupManager extends PopupManager {
+		showSecuritySettings(config = {}, onSave) {
+			const template = document.getElementById('securitySettingsPopup');
+			const popup = template.content.cloneNode(true);
+			const wrapper = document.createElement('div');
+			wrapper.appendChild(popup);
+
+			// Initialize with existing config
+			this.initializeConfig(wrapper, config);
+
+			// Handle firewall rules
+			this.initializeFirewallRules(wrapper, config.firewallRules || []);
+
+			// Handle whitelisted IPs
+			this.initializeWhitelistedIPs(wrapper, config.whitelistedIPs || []);
+
+			// Handle form submission
+			wrapper.querySelector('.save-btn').addEventListener('click', () => {
+				const formData = this.getFormData(wrapper);
+				if (onSave) {
+					onSave(formData);
+				}
+				this.closePopup(wrapper);
+			});
+
+			// Handle cancel
+			wrapper.querySelector('.cancel-btn').addEventListener('click', () => {
+				this.closePopup(wrapper);
+			});
+
+			// Handle close button
+			wrapper.querySelector('.close-btn').addEventListener('click', () => {
+				this.closePopup(wrapper);
+			});
+
+			this.showPopup(wrapper);
+			return wrapper;
+		}
+
+		initializeConfig(wrapper, config) {
+			// Set firewall status
+			if (config.firewallEnabled) {
+				wrapper.querySelector('input[type="checkbox"]').checked = true;
+			}
+
+			// Set SSL certificate path
+			if (config.sslCertPath) {
+				wrapper.querySelector('input[type="text"]').value = config.sslCertPath;
+			}
+
+			// Set certificate expiry
+			if (config.certExpiry) {
+				wrapper.querySelector('#certExpiry').textContent = `Expires in ${config.certExpiry}`;
+			}
+
+			// Set IP whitelisting
+			const ipWhitelistCheckbox = wrapper.querySelectorAll('input[type="checkbox"]')[1];
+			if (config.ipWhitelistEnabled) {
+				ipWhitelistCheckbox.checked = true;
+			}
+
+			// Set 2FA
+			const twoFACheckbox = wrapper.querySelectorAll('input[type="checkbox"]')[2];
+			if (config.twoFAEnabled) {
+				twoFACheckbox.checked = true;
+			}
+
+			// Set password policy
+			if (config.passwordPolicy) {
+				wrapper.querySelector('select').value = config.passwordPolicy;
+			}
+		}
+
+		initializeFirewallRules(wrapper, rules) {
+			const tbody = wrapper.querySelector('#firewallRules');
+			tbody.innerHTML = rules.map(rule => `
+				<tr>
+					<td class="py-2 text-neutral-700 dark:text-neutral-300">${rule.port}</td>
+					<td class="py-2 text-neutral-700 dark:text-neutral-300">${rule.protocol}</td>
+					<td class="py-2">
+						<span class="px-2 py-1 text-xs font-medium rounded-full ${
+							rule.action === 'allow' 
+								? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+								: 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+						}">${rule.action}</span>
+					</td>
+					<td class="py-2 text-right">
+						<button class="text-neutral-400 hover:text-neutral-500">
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+							</svg>
+						</button>
+					</td>
+				</tr>
+			`).join('');
+		}
+
+		initializeWhitelistedIPs(wrapper, ips) {
+			const container = wrapper.querySelector('#whitelistedIPs');
+			container.innerHTML = ips.map(ip => `
+				<div class="flex items-center justify-between py-2 border-b dark:border-neutral-700 last:border-0">
+					<span class="text-sm text-neutral-700 dark:text-neutral-300">${ip}</span>
+					<button class="text-red-500 hover:text-red-600">
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+			`).join('');
+		}
+
+		getFormData(wrapper) {
+			return {
+				firewallEnabled: wrapper.querySelector('input[type="checkbox"]').checked,
+				sslCertPath: wrapper.querySelector('input[type="text"]').value,
+				ipWhitelistEnabled: wrapper.querySelectorAll('input[type="checkbox"]')[1].checked,
+				twoFAEnabled: wrapper.querySelectorAll('input[type="checkbox"]')[2].checked,
+				passwordPolicy: wrapper.querySelector('select').value
+			};
+		}
+	}
+
+	// Initialize security settings popup manager
+	const securitySettingsPopupManager = new SecuritySettingsPopupManager();
+
+	// Example usage:
+	/*
+	securitySettingsPopupManager.showSecuritySettings({
+		firewallEnabled: true,
+		sslCertPath: '/etc/ssl/cert.pem',
+		certExpiry: '30 days',
+		ipWhitelistEnabled: true,
+		twoFAEnabled: false,
+		passwordPolicy: 'high',
+		firewallRules: [
+			{ port: 80, protocol: 'TCP', action: 'allow' },
+			{ port: 443, protocol: 'TCP', action: 'allow' },
+			{ port: 22, protocol: 'TCP', action: 'deny' }
+		],
+		whitelistedIPs: [
+			'192.168.1.100',
+			'10.0.0.50'
+		]
+	}, (config) => {
+		console.log('Saving security settings:', config);
+	});
+	*/
+</script>

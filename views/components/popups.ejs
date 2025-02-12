@@ -1,0 +1,292 @@
+<!-- Popup Container -->
+<div id="popupContainer" class="fixed inset-0 z-50"></div>
+
+<!-- Popup Templates -->
+<template id="confirmationPopup">
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-xl max-w-md w-full transform transition-all">
+			<div class="p-6">
+				<h3 class="text-lg font-semibold text-neutral-900 dark:text-white mb-2"></h3>
+				<p class="text-neutral-600 dark:text-neutral-300"></p>
+			</div>
+			<div class="px-6 py-4 bg-neutral-50 dark:bg-neutral-800 rounded-b-lg flex justify-end space-x-3">
+				<button class="cancel-btn px-4 py-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg">
+					Cancel
+				</button>
+				<button class="confirm-btn px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg">
+					Confirm
+				</button>
+			</div>
+		</div>
+	</div>
+</template>
+
+<template id="formPopup">
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-xl max-w-lg w-full transform transition-all">
+			<div class="flex items-center justify-between p-6 border-b dark:border-neutral-800">
+				<h3 class="text-lg font-semibold text-neutral-900 dark:text-white"></h3>
+				<button class="close-btn text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+				</button>
+			</div>
+			<div class="p-6">
+				<form class="space-y-4"></form>
+			</div>
+		</div>
+	</div>
+</template>
+
+<template id="alertPopup">
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-xl max-w-sm w-full transform transition-all">
+			<div class="p-6 text-center">
+				<div class="icon-container mb-4"></div>
+				<h3 class="text-lg font-semibold text-neutral-900 dark:text-white mb-2"></h3>
+				<p class="text-neutral-600 dark:text-neutral-300 mb-6"></p>
+				<button class="ok-btn w-full px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg">
+					OK
+				</button>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+	class PopupManager {
+		constructor() {
+			this.container = document.getElementById('popupContainer');
+			this.activePopups = new Set();
+			this.setupKeyboardListener();
+		}
+
+		setupKeyboardListener() {
+			document.addEventListener('keydown', (e) => {
+				if (e.key === 'Escape' && this.activePopups.size > 0) {
+					const lastPopup = Array.from(this.activePopups).pop();
+					if (lastPopup) {
+						lastPopup.close();
+					}
+				}
+			});
+		}
+
+		// Confirmation Popup
+		showConfirmation({ title, message, onConfirm, onCancel }) {
+			const template = document.getElementById('confirmationPopup');
+			const popup = template.content.cloneNode(true);
+			const wrapper = document.createElement('div');
+			wrapper.appendChild(popup);
+
+			wrapper.querySelector('h3').textContent = title;
+			wrapper.querySelector('p').textContent = message;
+
+			const confirmBtn = wrapper.querySelector('.confirm-btn');
+			const cancelBtn = wrapper.querySelector('.cancel-btn');
+
+			confirmBtn.addEventListener('click', () => {
+				if (onConfirm) onConfirm();
+				this.closePopup(wrapper);
+			});
+
+			cancelBtn.addEventListener('click', () => {
+				if (onCancel) onCancel();
+				this.closePopup(wrapper);
+			});
+
+			this.showPopup(wrapper);
+			return wrapper;
+		}
+
+		// Form Popup
+		showForm({ title, fields, onSubmit }) {
+			const template = document.getElementById('formPopup');
+			const popup = template.content.cloneNode(true);
+			const wrapper = document.createElement('div');
+			wrapper.appendChild(popup);
+
+			wrapper.querySelector('h3').textContent = title;
+			const form = wrapper.querySelector('form');
+
+			// Create form fields
+			fields.forEach(field => {
+				const fieldWrapper = document.createElement('div');
+				fieldWrapper.className = 'space-y-1';
+
+				const label = document.createElement('label');
+				label.className = 'block text-sm font-medium text-neutral-700 dark:text-neutral-300';
+				label.textContent = field.label;
+
+				const input = document.createElement(field.type === 'textarea' ? 'textarea' : 'input');
+				input.className = 'w-full px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white';
+				input.name = field.name;
+				input.type = field.type || 'text';
+				if (field.placeholder) input.placeholder = field.placeholder;
+				if (field.required) input.required = true;
+
+				fieldWrapper.appendChild(label);
+				fieldWrapper.appendChild(input);
+				form.appendChild(fieldWrapper);
+			});
+
+			// Add submit button
+			const submitBtn = document.createElement('button');
+			submitBtn.className = 'w-full px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg mt-6';
+			submitBtn.textContent = 'Submit';
+			form.appendChild(submitBtn);
+
+			form.addEventListener('submit', (e) => {
+				e.preventDefault();
+				const formData = new FormData(form);
+				const data = Object.fromEntries(formData.entries());
+				if (onSubmit) onSubmit(data);
+				this.closePopup(wrapper);
+			});
+
+			wrapper.querySelector('.close-btn').addEventListener('click', () => {
+				this.closePopup(wrapper);
+			});
+
+			this.showPopup(wrapper);
+			return wrapper;
+		}
+
+		// Alert Popup
+		showAlert({ title, message, type = 'info' }) {
+			const template = document.getElementById('alertPopup');
+			const popup = template.content.cloneNode(true);
+			const wrapper = document.createElement('div');
+			wrapper.appendChild(popup);
+
+			wrapper.querySelector('h3').textContent = title;
+			wrapper.querySelector('p').textContent = message;
+
+			// Set icon based on type
+			const iconContainer = wrapper.querySelector('.icon-container');
+			const icon = document.createElement('div');
+			icon.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full';
+			
+			switch (type) {
+				case 'success':
+					icon.className += ' bg-green-100 dark:bg-green-900';
+					icon.innerHTML = `<svg class="h-6 w-6 text-green-600 dark:text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+					</svg>`;
+					break;
+				case 'error':
+					icon.className += ' bg-red-100 dark:bg-red-900';
+					icon.innerHTML = `<svg class="h-6 w-6 text-red-600 dark:text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>`;
+					break;
+				case 'warning':
+					icon.className += ' bg-yellow-100 dark:bg-yellow-900';
+					icon.innerHTML = `<svg class="h-6 w-6 text-yellow-600 dark:text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+					</svg>`;
+					break;
+				default:
+					icon.className += ' bg-blue-100 dark:bg-blue-900';
+					icon.innerHTML = `<svg class="h-6 w-6 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+					</svg>`;
+			}
+			iconContainer.appendChild(icon);
+
+			wrapper.querySelector('.ok-btn').addEventListener('click', () => {
+				this.closePopup(wrapper);
+			});
+
+			this.showPopup(wrapper);
+			return wrapper;
+		}
+
+		showPopup(popup) {
+			this.container.appendChild(popup);
+			this.activePopups.add(popup);
+			
+			// Animation
+			requestAnimationFrame(() => {
+				popup.querySelector('div > div').classList.add('scale-100', 'opacity-100');
+				popup.querySelector('div > div').classList.remove('scale-95', 'opacity-0');
+			});
+		}
+
+		closePopup(popup) {
+			const inner = popup.querySelector('div > div');
+			inner.classList.remove('scale-100', 'opacity-100');
+			inner.classList.add('scale-95', 'opacity-0');
+			
+			setTimeout(() => {
+				this.container.removeChild(popup);
+				this.activePopups.delete(popup);
+			}, 200);
+		}
+	}
+
+	// Initialize popup manager
+	const popupManager = new PopupManager();
+
+	// Example usage:
+	/*
+	// Confirmation popup
+	popupManager.showConfirmation({
+		title: 'Delete Server',
+		message: 'Are you sure you want to delete this server? This action cannot be undone.',
+		onConfirm: () => console.log('Confirmed'),
+		onCancel: () => console.log('Cancelled')
+	});
+
+	// Form popup
+	popupManager.showForm({
+		title: 'Add New Server',
+		fields: [
+			{ name: 'name', label: 'Server Name', type: 'text', required: true },
+			{ name: 'description', label: 'Description', type: 'textarea' },
+			{ name: 'type', label: 'Server Type', type: 'select', options: ['Dedicated', 'VPS', 'Shared'] }
+		],
+		onSubmit: (data) => console.log('Form submitted:', data)
+	});
+
+	// Alert popup
+	popupManager.showAlert({
+		title: 'Success!',
+		message: 'The server has been created successfully.',
+		type: 'success'
+	});
+	*/
+</script>
+
+<style>
+	.popup-enter {
+		animation: popup-enter 0.2s ease-out;
+	}
+
+	.popup-leave {
+		animation: popup-leave 0.2s ease-in;
+	}
+
+	@keyframes popup-enter {
+		from {
+			opacity: 0;
+			transform: scale(0.95);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	@keyframes popup-leave {
+		from {
+			opacity: 1;
+			transform: scale(1);
+		}
+		to {
+			opacity: 0;
+			transform: scale(0.95);
+		}
+	}
+</style>
