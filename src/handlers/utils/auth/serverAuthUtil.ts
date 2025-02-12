@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { Request, Response, NextFunction } from 'express';
 import { WebSocket } from 'ws';
+import bcrypt from 'bcrypt';
 
 import logger from '../../logger';
 
@@ -57,50 +58,55 @@ export const isAuthenticatedForServer =
       await prisma.$disconnect();
     }
   };
-
-export const isAuthenticatedForServerWS =
-  (serverIdParam: string = 'id') =>
-  async (ws: WebSocket, req: any, next: NextFunction): Promise<void> => {
-    const prisma = new PrismaClient();
-    const userId = req.session?.user?.id || req.headers['user-id'];
-
-    if (!userId) {
-      ws.close();
-      return;
-    }
-
-    try {
-      const user = await prisma.users.findUnique({
-        where: { id: userId },
-      });
-
-      if (!user) {
+  
+  export const isAuthenticatedForServerWS =
+    (serverIdParam: string = 'id', passwordParam: string = 'password') =>
+    async (ws: WebSocket, req: any, next: NextFunction): Promise<void> => {
+      const prisma = new PrismaClient();
+      const userId = req.session?.user?.id || +req.query.userId;
+      const password = req.params[passwordParam];
+  
+      if (!userId) {
         ws.close();
         return;
       }
+  
+      try {
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+          ws.close();
+          return;
+        }
+        if (user.isAdmin) {
+          next();
+          return;
+        }
+  
+        const serverId = req.params[serverIdParam];
+        const server = await prisma.server.findUnique({
+          where: { UUID: serverId },
+          include: { owner: true },
+        });
 
-      if (user.isAdmin) {
-        next();
-        return;
+        if (server?.ownerId === req.session?.user?.id) {
+          next();
+          return;
+        }
+  
+        if (password && server?.owner?.password) {
+          const isPasswordValid = await bcrypt.compare(password, server.owner.password);
+          if (isPasswordValid) {
+            next();
+            return;
+          }
+        }
+  
+        ws.close();
+      } catch (error) {
+        logger.error('Error in isAuthenticatedForServerWS:', error);
+        ws.close();
+      } finally {
+        await prisma.$disconnect();
       }
-
-      const serverId = req.params[serverIdParam];
-
-      const server = await prisma.server.findUnique({
-        where: { UUID: serverId },
-        include: { owner: true },
-      });
-
-      if (server?.ownerId === userId) {
-        next();
-        return;
-      }
-
-      ws.close();
-    } catch (error) {
-      logger.error('Error in isAuthenticatedForServerWS:', error);
-      ws.close();
-    } finally {
-      await prisma.$disconnect();
-    }
-  };
+    };
+  
