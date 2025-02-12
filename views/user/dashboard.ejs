@@ -15,7 +15,18 @@
           <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.userDashboardTitle %></h1>
           <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.userDashboardText %></p>
         </div>
+        <% if (user.isAdmin) { %>
+          <div class="mt-4 sm:ml-16 sm:mt-0">
+            <a href="/admin/servers/create" class="inline-flex items-center px-4 py-2 text-sm font-medium text-black dark:text-black bg-white dark:bg-gray-1000 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+              Create Server
+            </a>
+          </div>
+        <% } %>
       </div>
+
 
       <!-- Error Notification -->
       <% if (req.query.err === "NOTACTIVEYET") { %>
@@ -75,7 +86,6 @@
                   <tr onclick="window.location.href = '../server/<%= server.UUID %>';" class="hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer">
                     <td class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-6"><%= server.name %></td>
                     <td class="px-3 py-4 text-sm">
-<<<<<<< HEAD
                       <span class="status-badge inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full transition-colors duration-300
                       <%= server.status === 'running' ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-700/20 text-red-700 dark:text-red-400' %>">
                       <span class="relative flex h-2 w-2 mr-1.5">
@@ -107,15 +117,6 @@
                       </div>
                       </div>
                     </td>
-=======
-                      <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full 
-                          <%= server.status === 'running' ? 'bg-green-100 dark:bg-green-500/50 text-green-700 dark:text-white' : 'bg-red-100 dark:bg-red-700/30 text-red-700 dark:text-neutral-300 border dark:border-red-600/20' %>">
-                        <%= server.status === 'running' ? 'Running' : 'Stopped' %>
-                      </span>
-                    </td>
-                    <td class="px-3 py-4 text-sm text-gray-700 dark:text-neutral-300"><span class="border border-gray-300 dark:border-neutral-600/20 bg-gray-100 dark:bg-neutral-500/10 px-2 py-0.5 rounded-lg">0 / 1GB</span></td>
-                    <td class="px-3 py-4 text-sm text-gray-700 dark:text-neutral-300"><span class="border border-gray-300 dark:border-neutral-600/20 bg-gray-100 dark:bg-neutral-500/10 px-2 py-0.5 rounded-lg">0%</span></td>
->>>>>>> 589f8dca2f23529e9a3471e72955f7db4a489313
                   </tr>
                 <% }); %>
               </tbody>
@@ -127,15 +128,26 @@
   </div>
 </main>
 
-<<<<<<< HEAD
-<!-- Enhanced Scripts -->
+<!-- Scripts -->
 <script>
 function updateServerStats() {
   const servers = document.querySelectorAll('tr');
   
   servers.forEach(server => {
     const statusBadge = server.querySelector('.status-badge');
-    if (statusBadge && statusBadge.textContent.trim() === 'Running') {
+    const serverName = server.querySelector('td').textContent;
+    
+    if (statusBadge && statusBadge.textContent.trim().includes('Running')) {
+      const wasRunning = statusBadge.dataset.running === 'true';
+      const isRunning = true;
+      
+      if (wasRunning !== isRunning) {
+        if (typeof Toast !== 'undefined') {
+          Toast.show(`${serverName} is now running`, 'success');
+        }
+        statusBadge.dataset.running = isRunning;
+      }
+      
       const ramBar = server.querySelector('.ram-usage-bar');
       const cpuBar = server.querySelector('.cpu-usage-bar');
       
@@ -143,20 +155,21 @@ function updateServerStats() {
         const ramUsage = Math.floor(Math.random() * 100);
         const cpuUsage = Math.floor(Math.random() * 100);
         
-        // Animate the bars
+        if (typeof Toast !== 'undefined') {
+          if (ramUsage > 90) {
+            Toast.show(`${serverName}: High memory usage (${ramUsage}%)`, 'warning');
+          }
+          if (cpuUsage > 90) {
+            Toast.show(`${serverName}: High CPU usage (${cpuUsage}%)`, 'warning');
+          }
+        }
+        
         ramBar.style.width = `${ramUsage}%`;
         cpuBar.style.width = `${cpuUsage}%`;
-        
-        // Update colors based on usage
         ramBar.style.backgroundColor = getUsageColor(ramUsage);
         cpuBar.style.backgroundColor = getUsageColor(cpuUsage);
-        
-        // Update text with fade effect
-        const ramText = server.querySelector('.ram-usage-text');
-        const cpuText = server.querySelector('.cpu-usage-text');
-        
-        updateTextWithFade(ramText, `${ramUsage}%`);
-        updateTextWithFade(cpuText, `${cpuUsage}%`);
+        updateTextWithFade(server.querySelector('.ram-usage-text'), `${ramUsage}%`);
+        updateTextWithFade(server.querySelector('.cpu-usage-text'), `${cpuUsage}%`);
       }
     }
   });
@@ -177,7 +190,6 @@ function updateTextWithFade(element, newValue) {
   }, 150);
 }
 
-// Keyboard shortcuts
 document.addEventListener('keydown', function(e) {
   if (e.ctrlKey && e.key === 'k') {
     e.preventDefault();
@@ -186,65 +198,9 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// Update stats every 5 seconds
 setInterval(updateServerStats, 5000);
-
-// Initial stats update
 updateServerStats();
 </script>
 
 <%- include('../components/footer') %>
-  servers.forEach(server => {
-    const statusBadge = server.querySelector('.status-badge');
-    const serverName = server.querySelector('td').textContent;
-    
-    if (statusBadge) {
-      const wasRunning = statusBadge.dataset.running === 'true';
-      const isRunning = statusBadge.textContent.trim() === 'Running';
-      
-      if (wasRunning !== isRunning) {
-        Toast.show(
-          `${serverName} is now ${isRunning ? 'running' : 'stopped'}`,
-          isRunning ? 'success' : 'error'
-        );
-        statusBadge.dataset.running = isRunning;
-      }
-      
-      if (isRunning) {
-        const ramBar = server.querySelector('.ram-usage-bar');
-        const cpuBar = server.querySelector('.cpu-usage-bar');
-        
-        if (ramBar && cpuBar) {
-          const ramUsage = Math.floor(Math.random() * 100);
-          const cpuUsage = Math.floor(Math.random() * 100);
-          
-          // Show warning toast for high usage
-          if (ramUsage > 90) {
-            Toast.show(`${serverName}: High memory usage (${ramUsage}%)`, 'warning');
-          }
-          if (cpuUsage > 90) {
-            Toast.show(`${serverName}: High CPU usage (${cpuUsage}%)`, 'warning');
-          }
-          
-          ramBar.style.width = `${ramUsage}%`;
-          cpuBar.style.width = `${cpuUsage}%`;
-          ramBar.style.backgroundColor = getUsageColor(ramUsage);
-          cpuBar.style.backgroundColor = getUsageColor(cpuUsage);
-          updateTextWithFade(server.querySelector('.ram-usage-text'), `${ramUsage}%`);
-          updateTextWithFade(server.querySelector('.cpu-usage-text'), `${cpuUsage}%`);
-        }
-      }
-    }
-  });
-}
 
-// Update stats every 5 seconds
-setInterval(updateServerStats, 5000);
-
-// Initial stats update
-updateServerStats();
-</script>
-
-=======
->>>>>>> 589f8dca2f23529e9a3471e72955f7db4a489313
-<%- include('../components/footer') %>
