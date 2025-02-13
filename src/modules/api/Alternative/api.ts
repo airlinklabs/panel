@@ -31,11 +31,9 @@ const coreModule: Module = {
 
       const authHeader = req.headers['authorization'];
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        res
-          .status(401)
-          .json({
-            error: 'Unauthorized: Missing or malformed Authorization header',
-          });
+        res.status(401).json({
+          error: 'Unauthorized: Missing or malformed Authorization header',
+        });
         return;
       }
 
@@ -51,73 +49,79 @@ const coreModule: Module = {
 
     const router = Router();
 
-    router.get('/api/application/users', validator, async (req: Request, res: Response) => {
+    router.get(
+      '/api/application/users',
+      validator,
+      async (req: Request, res: Response) => {
         try {
-            const filter = typeof req.query.filter === 'string' 
-                ? JSON.parse(req.query.filter) 
-                : req.query.filter;
-    
-            const include = req.query.include;
-            const users = await prisma.users.findMany({
-                where: filter || {},
+          const filter =
+            typeof req.query.filter === 'string'
+              ? JSON.parse(req.query.filter)
+              : req.query.filter;
+
+          const include = req.query.include;
+          const users = await prisma.users.findMany({
+            where: filter || {},
+          });
+
+          let serverData = null;
+          if (include && include === 'servers') {
+            serverData = await prisma.server.findMany({
+              where: { ownerId: { in: users.map((user) => user.id) } },
+              include: { node: true, owner: true },
             });
-    
-            let serverData = null;
-            if (include && include === 'servers') {
-                serverData = await prisma.server.findMany({
-                    where: { ownerId: { in: users.map((user) => user.id) } },
-                    include: { node: true, owner: true },
-                });
+          }
+
+          const response = users.map((user) => {
+            const userData: any = {
+              object: 'user',
+              attributes: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                root_admin: user.isAdmin,
+              },
+              relationships: {
+                servers: [],
+              },
+            };
+
+            if (include && include === 'servers' && serverData) {
+              userData.relationships.servers = serverData
+                .filter((server) => server.ownerId === user.id)
+                .map((server) => ({
+                  object: 'server',
+                  attributes: {
+                    id: server.id,
+                    name: server.name,
+                    node: server.node,
+                  },
+                }));
             }
-    
-            const response = users.map((user) => {
-                const userData: any = {
-                    object: 'user',
-                    attributes: {
-                        id: user.id,
-                        username: user.username,
-                        email: user.email,
-                        root_admin: user.isAdmin,
-                    },
-                    relationships: {
-                        servers: [],
-                    },
-                };
-    
-                if (include && include === 'servers' && serverData) {
-                    userData.relationships.servers = serverData.filter((server) => server.ownerId === user.id).map((server) => ({
-                        object: 'server',
-                        attributes: {
-                            id: server.id,
-                            name: server.name,
-                            node: server.node,
-                        },
-                    }));
-                }
-    
-                return userData;
-            });
-    
-            res.json({
-                object: 'list',
-                data: response,
-                meta: {
-                    pagination: {
-                        total: users.length,
-                        count: users.length,
-                        per_page: 50,
-                        current_page: 1,
-                        total_pages: 1,
-                        links: {},
-                    },
-                },
-            });
-            
+
+            return userData;
+          });
+
+          res.json({
+            object: 'list',
+            data: response,
+            meta: {
+              pagination: {
+                total: users.length,
+                count: users.length,
+                per_page: 50,
+                current_page: 1,
+                total_pages: 1,
+                links: {},
+              },
+            },
+          });
         } catch (error) {
-            console.error('Error fetching users:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+          console.error('Error fetching users:', error);
+          res.status(500).json({ error: 'Internal Server Error' });
         }
-    });
+      },
+    );
 
     router.get(
       '/api/application/users/:user',
@@ -167,54 +171,54 @@ const coreModule: Module = {
 
           if (include === 'servers') {
             const servers = await prisma.server.findMany({
-                where: { ownerId: user.id },
-                include: { node: true, owner: true },
-              });
-              
-              const formattedServers = servers.map((server) => ({
-                attributes: {
-                  id: server.id,
-                  UUID: server.UUID,
-                  name: server.name,
-                  description: server.description,
-                  createdAt: server.createdAt,
-                  ports: JSON.parse(server.Ports || '[]'),
-                  limits: {
-                    memory: server.Memory,
-                    disk: server.Storage,
-                    cpu: server.Cpu,
-                  },
-                  variables: JSON.parse(server.Variables || '[]'),
-                  startCommand: server.StartCommand,
-                  dockerImage: JSON.parse(server.dockerImage || '{}'),
-                  installing: server.Installing,
-                  suspended: server.Suspended,
+              where: { ownerId: user.id },
+              include: { node: true, owner: true },
+            });
+
+            const formattedServers = servers.map((server) => ({
+              attributes: {
+                id: server.id,
+                UUID: server.UUID,
+                name: server.name,
+                description: server.description,
+                createdAt: server.createdAt,
+                ports: JSON.parse(server.Ports || '[]'),
+                limits: {
+                  memory: server.Memory,
+                  disk: server.Storage,
+                  cpu: server.Cpu,
                 },
-                relationships: {
-                  node: {
-                    attributes: {
-                      id: server.node.id,
-                      name: server.node.name,
-                      ram: server.node.ram,
-                      cpu: server.node.cpu,
-                      disk: server.node.disk,
-                      address: server.node.address,
-                      port: server.node.port,
-                      key: server.node.key,
-                      createdAt: server.node.createdAt,
-                    },
-                  },
-                  owner: {
-                    attributes: {
-                      id: server.owner.id,
-                      email: server.owner.email,
-                      username: server.owner.username,
-                      isAdmin: server.owner.isAdmin,
-                      description: server.owner.description,
-                    },
+                variables: JSON.parse(server.Variables || '[]'),
+                startCommand: server.StartCommand,
+                dockerImage: JSON.parse(server.dockerImage || '{}'),
+                installing: server.Installing,
+                suspended: server.Suspended,
+              },
+              relationships: {
+                node: {
+                  attributes: {
+                    id: server.node.id,
+                    name: server.node.name,
+                    ram: server.node.ram,
+                    cpu: server.node.cpu,
+                    disk: server.node.disk,
+                    address: server.node.address,
+                    port: server.node.port,
+                    key: server.node.key,
+                    createdAt: server.node.createdAt,
                   },
                 },
-              }));
+                owner: {
+                  attributes: {
+                    id: server.owner.id,
+                    email: server.owner.email,
+                    username: server.owner.username,
+                    isAdmin: server.owner.isAdmin,
+                    description: server.owner.description,
+                  },
+                },
+              },
+            }));
 
             userResponse.attributes.relationships.servers = {
               object: 'server_list',
@@ -260,15 +264,13 @@ const coreModule: Module = {
             },
           });
 
-          res
-            .status(201)
-            .json({
-              atributes: {
-                id: newUser.id,
-                username: newUser.username,
-                email: newUser.email,
-              },
-            });
+          res.status(201).json({
+            atributes: {
+              id: newUser.id,
+              username: newUser.username,
+              email: newUser.email,
+            },
+          });
         } catch (error) {
           console.error('Error creating user:', error);
           res.status(500).json({ error: 'Internal server error' });
