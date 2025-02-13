@@ -177,6 +177,14 @@ function getFileIcon(category) {
                         aria-orientation="vertical" 
                         aria-labelledby="options-menu"
                       >
+                        <button 
+                          class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-neutral-800 dark:text-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-200 text-left" 
+                          role="menuitem" 
+                          onclick="rename('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')"
+                        >
+                          Rename
+                        </button>
+                        
                         <% if (file.type !== 'directory') { %>
                           <button 
                             class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-neutral-800 dark:text-neutral-900 hover:bg-red-50 dark:hover:bg-neutral-200 text-left" 
@@ -485,6 +493,34 @@ function openCreateFileModal() {
 
     } else {
       closeCreateFileModal();
+    }
+  }
+
+  function rename(fileName, filePath) {
+    const newName = prompt('Enter the newName :', fileName);
+    
+    if (newName && newName !== fileName) {
+      fetch(`/server/<%= server.UUID %>/rename`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          path: filePath,
+          newName: newName
+        })
+      })
+      .then(response => {
+        if (response.ok) {
+          location.reload();
+        } else {
+          showToast('Failed to rename file', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Renaming failed:', error);
+        showToast('Failed to rename file', 'error');
+      });
     }
   }
 </script>

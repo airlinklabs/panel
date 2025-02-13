@@ -18,14 +18,6 @@ interface ServerImageInfo {
   stop: string;
 }
 
-interface ServerImage {
-  info?: ServerImageInfo | string;
-}
-
-interface Server {
-  image: ServerImage;
-}
-
 interface Port {
   primary: boolean;
   Port: number;
@@ -965,6 +957,59 @@ const dashboardModule: Module = {
         }
       },
     );
+
+    router.post('/server/:id/rename', isAuthenticatedForServer('id'), async (req: Request, res: Response) => {
+      const userId = req.session?.user?.id;
+      const serverId = req.params?.id;
+      const relativePath = req.body.path;
+      const newName = req.body.newName;
+
+      try {
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+          res.status(404).json({ error: 'User not found' });
+          return;
+        }
+
+        const server = await prisma.server.findUnique({
+          where: { UUID: serverId },
+          include: { node: true, image: true },
+        });
+
+        if (!server) {
+          res.status(404).json({ error: 'Server not found' });
+          return;
+        }
+
+        try {
+          const renameRequest = {
+            method: 'POST',
+            url: `http://${server.node.address}:${server.node.port}/fs/rename`,
+            auth: {
+              username: 'Airlink',
+              password: server.node.key,
+            },
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            data: {
+              id: server.UUID,
+              path: relativePath,
+              newName: newName,
+            },
+          };
+
+          await axios(renameRequest);
+          res.status(200).json({ success: true });
+        } catch (error) {
+          console.error('Error renaming file:', error);
+          res.status(500).json({ error: 'Failed to rename file' });
+        }
+      } catch (error) {
+        logger.error('Error renaming file:', error);
+        res.status(500).json({ error: 'Failed to rename file' });
+      }
+    });
 
     return router;
   },
