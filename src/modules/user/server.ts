@@ -641,7 +641,7 @@ const dashboardModule: Module = {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
         let relativePath = req.body?.relativePath || '/';
-        const zipName = req.body?.zipname || 'server.zip';
+        const zipName = req.body?.zipname;
 
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
@@ -694,6 +694,97 @@ const dashboardModule: Module = {
             res
               .status(500)
               .json({ error: 'Failed to zip files: ' + error.message });
+          } else {
+            res.status(500).json({ error: 'An unexpected error occurred.' });
+          }
+        }
+      },
+    );
+
+    router.post(
+      '/server/:id/unzip',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+        const relativePath = req.body?.relativePath || '/';
+        const zipName = req.body?.zipname;
+
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+
+          if (!serverId) {
+            res.status(400).json({ error: 'Server ID is required.' });
+            return;
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true },
+          });
+
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+
+          console.log('Server found:', {
+            nodeAddress: server.node.address,
+            nodePort: server.node.port
+          });
+
+          const cleanPath = relativePath.replace(/\/+/g, '/').replace(/^\/|\/$/g, '');
+          const cleanZipName = zipName.replace(/^\/+|\/+$/g, '');
+
+          const requestConfig = {
+            method: 'POST',
+            url: `http://${server.node.address}:${server.node.port}/fs/unzip`,
+            auth: {
+              username: 'Airlink',
+              password: server.node.key,
+            },
+            data: {
+              id: serverId,
+              path: cleanPath,
+              zipname: cleanZipName
+            },
+          };
+
+          try {
+            const response = await axios(requestConfig);
+
+            if (response.status === 200) {
+              res.json({ success: true });
+            } else {
+              res.status(response.status).json({ 
+                error: response.data?.message || 'Failed to unzip file',
+                details: response.data
+              });
+            }
+          } catch (axiosError) {
+            if (axios.isAxiosError(axiosError)) {
+              logger.error('Axios error:', {
+                error: axiosError,
+                response: axiosError.response?.data,
+                status: axiosError.response?.status
+              });
+            } else {
+              logger.error('Unexpected error:', {
+                error: axiosError
+              });
+            }
+            }
+          }
+        catch (error) {
+          logger.error('Error unzipping files:', error);
+          if (axios.isAxiosError(error)) {
+            res
+              .status(500)
+              .json({ error: 'Failed to unzip files: ' + error.message });
           } else {
             res.status(500).json({ error: 'An unexpected error occurred.' });
           }
