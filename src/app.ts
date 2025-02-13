@@ -26,7 +26,6 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
 
-
 loadEnv();
 
 // Set max listeners
@@ -62,7 +61,7 @@ app.use(helmet.frameguard({ action: 'deny' }));
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000,
   max: 100,
-})
+});
 
 app.use(limiter);
 

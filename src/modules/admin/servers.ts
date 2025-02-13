@@ -212,11 +212,11 @@ const adminModule: Module = {
               try {
                 ServerEnv = JSON.parse(server.Variables);
                 ServerEnv.push({
-                  "env": "SERVER_PORT",
-                  "name": "Primary Port",
-                  "value": Ports.split(':')[0],
-                  "type": "text"
-              });
+                  env: 'SERVER_PORT',
+                  name: 'Primary Port',
+                  value: Ports.split(':')[0],
+                  type: 'text',
+                });
               } catch (error) {
                 console.error(
                   `Error parsing Variables for server ID ${server.id}:`,
@@ -228,8 +228,6 @@ const adminModule: Module = {
                 });
                 continue;
               }
-
-
 
               if (!Array.isArray(ServerEnv)) {
                 console.error(
@@ -275,12 +273,17 @@ const adminModule: Module = {
                   id: server.UUID,
                   env: env,
                   scripts: scripts.install.map(
-                    (script: { url: string; fileName: string; onStart: boolean; ALVKT: boolean }) => ({
+                    (script: {
+                      url: string;
+                      fileName: string;
+                      onStart: boolean;
+                      ALVKT: boolean;
+                    }) => ({
                       url: script.url,
                       onStartup: script.onStart,
                       ALVKT: script.ALVKT,
                       fileName: script.fileName,
-                    })
+                    }),
                   ),
                 };
 
