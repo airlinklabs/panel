@@ -22,6 +22,10 @@ import { translationMiddleware } from './handlers/utils/core/translation';
 import PrismaSessionStore from './handlers/sessionStore';
 import { settingsLoader } from './handlers/settingsLoader';
 import { loadPlugins } from './handlers/pluginHandler';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import hpp from 'hpp';
+
 
 loadEnv();
 
@@ -40,6 +44,7 @@ expressWs(app);
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Load views
+app.use(express.urlencoded({ extended: true }));
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 //app.set('view options', {
@@ -48,6 +53,21 @@ app.set('view engine', 'ejs');
 
 // Load compression
 app.use(compression());
+
+// Load security headers
+app.use(helmet.noSniff());
+app.use(helmet.frameguard({ action: 'deny' }));
+
+// Load rate limiter
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 100,
+})
+
+app.use(limiter);
+
+// Load hpp protection
+app.use(hpp());
 
 // Load session with Prisma store
 app.use(

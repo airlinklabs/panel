@@ -1,5 +1,3 @@
-import exp from 'constants';
-
 type Task = {
   fn: () => void;
   time: number;

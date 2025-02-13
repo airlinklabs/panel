@@ -55,18 +55,24 @@ function filterLinks(searchTerm) {
         'text-sm',
         'font-medium',
         'rounded-xl',
-        'hover:border',
+        'border',
+        'border-transparent',
         'hover:border-neutral-800/20'
       );
 
-      if (index === 0) {
+      if (window.location.href === resultLink.href) {
         selected = resultLink.href;
+        if (index === 0) {
+          resultLink.classList.add(
+            'mt-2',
+          );
+        }
+
         resultLink.classList.add(
           'bg-gray-200',
           'text-gray-900',
           'font-semibold',
           'searchLinkActive',
-          'mt-4',
           'border',
           'border-neutral-800/20'
         );
