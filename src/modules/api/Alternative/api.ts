@@ -466,7 +466,7 @@ const coreModule: Module = {
           queueer.addTask(async () => {
             const servers = await prisma.server.findMany({
               where: {
-                Installing: true,
+                Queued: true,
               },
               include: {
                 image: true,
@@ -478,7 +478,7 @@ const coreModule: Module = {
               if (!server.Variables) {
                 await prisma.server.update({
                   where: { id: server.id },
-                  data: { Installing: false },
+                  data: { Queued: false },
                 });
                 continue;
               }
@@ -493,7 +493,7 @@ const coreModule: Module = {
                 );
                 await prisma.server.update({
                   where: { id: server.id },
-                  data: { Installing: false },
+                  data: { Queued: false },
                 });
                 continue;
               }
@@ -504,7 +504,7 @@ const coreModule: Module = {
                 );
                 await prisma.server.update({
                   where: { id: server.id },
-                  data: { Installing: false },
+                  data: { Queued: false },
                 });
                 continue;
               }
@@ -531,7 +531,7 @@ const coreModule: Module = {
                   );
                   await prisma.server.update({
                     where: { id: server.id },
-                    data: { Installing: false },
+                    data: { Queued: false },
                   });
                   continue;
                 }
@@ -561,7 +561,7 @@ const coreModule: Module = {
 
                   await prisma.server.update({
                     where: { id: server.id },
-                    data: { Installing: false },
+                    data: { Queued: false },
                   });
                 } catch (error) {
                   console.error(

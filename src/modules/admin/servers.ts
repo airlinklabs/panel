@@ -191,7 +191,7 @@ const adminModule: Module = {
           queueer.addTask(async () => {
             const servers = await prisma.server.findMany({
               where: {
-                Installing: true,
+                Queued: true,
               },
               include: {
                 image: true,
@@ -203,7 +203,7 @@ const adminModule: Module = {
               if (!server.Variables) {
                 await prisma.server.update({
                   where: { id: server.id },
-                  data: { Installing: false },
+                  data: { Queued: false },
                 });
                 continue;
               }
@@ -224,7 +224,7 @@ const adminModule: Module = {
                 );
                 await prisma.server.update({
                   where: { id: server.id },
-                  data: { Installing: false },
+                  data: { Queued: false },
                 });
                 continue;
               }
@@ -235,7 +235,7 @@ const adminModule: Module = {
                 );
                 await prisma.server.update({
                   where: { id: server.id },
-                  data: { Installing: false },
+                  data: { Queued: false },
                 });
                 continue;
               }
@@ -264,7 +264,7 @@ const adminModule: Module = {
                   );
                   await prisma.server.update({
                     where: { id: server.id },
-                    data: { Installing: false },
+                    data: { Queued: false },
                   });
                   continue;
                 }
@@ -301,9 +301,29 @@ const adminModule: Module = {
                     },
                   );
 
+                  if (scripts.native) {
+                    const requestBody2 = {
+                      id: server.UUID,
+                      env: env,
+                      script: scripts.native.CMD,
+                      container: scripts.native.container,
+                    }
+
+                    await axios.post(
+                      `http://${server.node.address}:${server.node.port}/container/installer`,
+                      requestBody2,
+                      {
+                        headers: {
+                          'Content-Type': 'application/json',
+                          Authorization: `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`,
+                        },
+                      },
+                    );
+                  }
+
                   await prisma.server.update({
                     where: { id: server.id },
-                    data: { Installing: false },
+                    data: { Queued: false },
                   });
                 } catch (error) {
                   console.error(

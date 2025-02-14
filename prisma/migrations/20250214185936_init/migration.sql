@@ -32,6 +32,8 @@ CREATE TABLE "Server" (
     "Variables" TEXT,
     "StartCommand" TEXT,
     "dockerImage" TEXT,
+    "Installing" BOOLEAN NOT NULL DEFAULT true,
+    "Queued" BOOLEAN NOT NULL DEFAULT true,
     "Suspended" BOOLEAN NOT NULL DEFAULT false,
     "ownerId" INTEGER NOT NULL,
     "nodeId" INTEGER NOT NULL,
@@ -83,8 +85,19 @@ CREATE TABLE "settings" (
     "updatedAt" DATETIME NOT NULL
 );
 
+-- CreateTable
+CREATE TABLE "ApiKey" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "key" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "active" BOOLEAN NOT NULL DEFAULT true
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Users_username_key" ON "Users"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Session_session_id_key" ON "Session"("session_id");
@@ -94,3 +107,6 @@ CREATE UNIQUE INDEX "Server_UUID_key" ON "Server"("UUID");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Images_UUID_key" ON "Images"("UUID");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ApiKey_key_key" ON "ApiKey"("key");
