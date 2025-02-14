@@ -219,20 +219,20 @@ const dashboardModule: Module = {
                 ) {
                   let processedValue: string | number | boolean;
                   switch (variable.type) {
-                    case 'boolean':
-                      processedValue =
+                  case 'boolean':
+                    processedValue =
                         variable.value === 1 || variable.value === '1'
                           ? 'true'
                           : 'false';
-                      break;
-                    case 'number':
-                      processedValue = Number(variable.value);
-                      break;
-                    case 'text':
-                      processedValue = String(variable.value);
-                      break;
-                    default:
-                      processedValue = variable.value;
+                    break;
+                  case 'number':
+                    processedValue = Number(variable.value);
+                    break;
+                  case 'text':
+                    processedValue = String(variable.value);
+                    break;
+                  default:
+                    processedValue = variable.value;
                   }
                   envVariables[variable.env] = processedValue;
                 }
@@ -783,9 +783,9 @@ const dashboardModule: Module = {
 
           const primaryPort = server.Ports
             ? JSON.parse(server.Ports)
-                .filter((Port: any) => Port.primary)
-                .map((Port: any) => Port.Port.split(':')[1])
-                .pop()
+              .filter((Port: any) => Port.primary)
+              .map((Port: any) => Port.Port.split(':')[1])
+              .pop()
             : '';
 
           let features: string[] = [];

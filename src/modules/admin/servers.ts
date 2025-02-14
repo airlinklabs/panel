@@ -27,16 +27,16 @@ const adminModule: Module = {
     router.get(
       '/admin/servers',
       isAuthenticated(true),
-        async (req: Request, res: Response): Promise<void> => {
+      async (req: Request, res: Response): Promise<void> => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-            if (!user) {
+          if (!user) {
             res.redirect('/login');
             return;
-            }
+          }
 
-            const servers = await prisma.server.findMany({
+          const servers = await prisma.server.findMany({
             include: {
               node: true,
               owner: true,
@@ -48,8 +48,8 @@ const adminModule: Module = {
 
           res.render('admin/servers/servers', { user, req, settings, servers });
         } catch (error) {
-            logger.error('Error fetching servers:', error);
-            res.redirect('/login');
+          logger.error('Error fetching servers:', error);
+          res.redirect('/login');
         }
       },
     );
@@ -57,14 +57,14 @@ const adminModule: Module = {
     router.get(
       '/admin/servers/create',
       isAuthenticated(true),
-        async (req: Request, res: Response): Promise<void> => {
+      async (req: Request, res: Response): Promise<void> => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-            if (!user) {
+          if (!user) {
             res.redirect('/login');
             return;
-            }
+          }
 
           const users = await prisma.users.findMany();
           const nodes = await prisma.node.findMany();
@@ -82,8 +82,8 @@ const adminModule: Module = {
             users,
           });
         } catch (error) {
-            logger.error('Error fetching data for server creation:', error);
-            res.redirect('/login');
+          logger.error('Error fetching data for server creation:', error);
+          res.redirect('/login');
         }
       },
     );
@@ -91,7 +91,7 @@ const adminModule: Module = {
     router.post(
       '/admin/servers/create',
       isAuthenticated(true),
-        async (req: Request, res: Response): Promise<void> => {
+      async (req: Request, res: Response): Promise<void> => {
         const {
           name,
           description,
@@ -118,7 +118,7 @@ const adminModule: Module = {
           !Storage ||
           !userId
         ) {
-            res.status(400).json({ error: 'Missing required fields' });
+          res.status(400).json({ error: 'Missing required fields' });
           return;
         }
 
@@ -309,10 +309,10 @@ const adminModule: Module = {
             }
           }, 0);
 
-            res.status(200).json({ success: true, message: 'Server created successfully' });
+          res.status(200).json({ success: true, message: 'Server created successfully' });
         } catch (error) {
           logger.error('Error creating server:', error);
-            res.status(500).json({ error: 'Error creating server' });
+          res.status(500).json({ error: 'Error creating server' });
         }
       },
     );
@@ -320,96 +320,96 @@ const adminModule: Module = {
     router.get(
       '/admin/servers/edit/:id',
       isAuthenticated(true),
-        async (req: Request, res: Response): Promise<void> => {
+      async (req: Request, res: Response): Promise<void> => {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-          res.redirect('/login');
-          return;
+            res.redirect('/login');
+            return;
           }
 
           const serverId = parseInt(req.params.id);
           if (isNaN(serverId)) {
-          res.status(400).json({ error: 'Invalid server ID' });
-          return;
+            res.status(400).json({ error: 'Invalid server ID' });
+            return;
           }
 
           const server = await prisma.server.findUnique({
-          where: { id: serverId },
-          include: { node: true, image: true, owner: true },
+            where: { id: serverId },
+            include: { node: true, image: true, owner: true },
           });
 
           if (!server) {
-          res.status(404).json({ error: 'Server not found' });
-          return;
+            res.status(404).json({ error: 'Server not found' });
+            return;
           }
 
-        const users = await prisma.users.findMany();
-        const nodes = await prisma.node.findMany();
-        const images = await prisma.images.findMany();
-        const settings = await prisma.settings.findUnique({
-        where: { id: 1 },
-        });
+          const users = await prisma.users.findMany();
+          const nodes = await prisma.node.findMany();
+          const images = await prisma.images.findMany();
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
 
-        res.render('admin/servers/edit', {
-        user,
-        req,
-        settings,
-        server,
-        nodes,
-        images,
-        users,
-        });
-      } catch (error) {
-        logger.error('Error fetching server for edit:', error);
-        res.redirect('/admin/servers');
-        return;
-      }
+          res.render('admin/servers/edit', {
+            user,
+            req,
+            settings,
+            server,
+            nodes,
+            images,
+            users,
+          });
+        } catch (error) {
+          logger.error('Error fetching server for edit:', error);
+          res.redirect('/admin/servers');
+          return;
+        }
       }
     );
 
     router.put(
       '/admin/servers/edit/:id',
       isAuthenticated(true),
-        async (req: Request, res: Response): Promise<void> => {
+      async (req: Request, res: Response): Promise<void> => {
         try {
-        const serverId = parseInt(req.params.id);
-        if (isNaN(serverId)) {
-          res.status(400).json({ error: 'Invalid server ID' });
-          return;
+          const serverId = parseInt(req.params.id);
+          if (isNaN(serverId)) {
+            res.status(400).json({ error: 'Invalid server ID' });
+            return;
+          }
+
+          const {
+            name,
+            description,
+            nodeId,
+            Memory,
+            Cpu,
+            Storage,
+            ownerId,
+          } = req.body;
+
+          if (!name || !description || !nodeId || !Memory || !Cpu || !Storage || !ownerId) {
+            res.status(400).json({ error: 'Missing required fields' });
+            return;
+          }
+
+          await ServerManager.updateServer(serverId, {
+            name,
+            description,
+            nodeId: parseInt(nodeId),
+            Memory: parseInt(Memory),
+            Cpu: parseInt(Cpu),
+            Storage: parseInt(Storage),
+            ownerId: parseInt(ownerId),
+          });
+
+          res.status(200).json({ success: true, message: 'Server updated successfully' });
+        } catch (error) {
+          logger.error('Error updating server:', error);
+          res.status(500).json({ error: 'Error updating server' });
         }
-
-        const {
-        name,
-        description,
-        nodeId,
-        Memory,
-        Cpu,
-        Storage,
-        ownerId,
-        } = req.body;
-
-        if (!name || !description || !nodeId || !Memory || !Cpu || !Storage || !ownerId) {
-        res.status(400).json({ error: 'Missing required fields' });
-        return;
-        }
-
-        await ServerManager.updateServer(serverId, {
-        name,
-        description,
-        nodeId: parseInt(nodeId),
-        Memory: parseInt(Memory),
-        Cpu: parseInt(Cpu),
-        Storage: parseInt(Storage),
-        ownerId: parseInt(ownerId),
-        });
-
-        res.status(200).json({ success: true, message: 'Server updated successfully' });
-      } catch (error) {
-        logger.error('Error updating server:', error);
-        res.status(500).json({ error: 'Error updating server' });
-      }
       }
 
     );
@@ -417,39 +417,39 @@ const adminModule: Module = {
     router.delete(
       '/admin/servers/delete/:id',
       isAuthenticated(true),
-        async (req: Request, res: Response): Promise<void> => {
+      async (req: Request, res: Response): Promise<void> => {
         try {
-        const userId = req.session?.user?.id;
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {
-          res.redirect('/login');
-          return;
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.redirect('/login');
+            return;
+          }
+
+          const serverId = parseInt(req.params.id);
+          if (isNaN(serverId)) {
+            res.status(400).json({ error: 'Invalid server ID' });
+            return;
+          }
+
+          const server = await ServerManager.getServerWithDetails(serverId);
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+
+          await ServerManager.deleteServer(
+            serverId,
+            server.node.address,
+            server.node.port,
+            server.node.key
+          );
+
+          res.status(200).json({ success: true, message: 'Server deleted successfully' });
+        } catch (error) {
+          logger.error('Error in delete server route:', error);
+          res.status(500).json({ error: 'Error deleting server' });
         }
-
-        const serverId = parseInt(req.params.id);
-        if (isNaN(serverId)) {
-          res.status(400).json({ error: 'Invalid server ID' });
-          return;
-        }
-
-        const server = await ServerManager.getServerWithDetails(serverId);
-        if (!server) {
-          res.status(404).json({ error: 'Server not found' });
-          return;
-        }
-
-        await ServerManager.deleteServer(
-        serverId,
-        server.node.address,
-        server.node.port,
-        server.node.key
-        );
-
-        res.status(200).json({ success: true, message: 'Server deleted successfully' });
-      } catch (error) {
-        logger.error('Error in delete server route:', error);
-        res.status(500).json({ error: 'Error deleting server' });
-      }
       },
 
     );

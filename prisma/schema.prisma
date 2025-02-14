@@ -15,6 +15,7 @@
     isAdmin     Boolean  @default(false)
     description String?  @default("No About Me")
     servers     Server[]
+    apiKeys     ApiKey[]
   }
 
   model Session {
@@ -107,8 +108,23 @@ model settings {
 }
 
 model ApiKey {
-  id        Int      @id @default(autoincrement())
-  key       String   @unique
-  createdAt DateTime @default(now())
-  active    Boolean  @default(true)
+  id              Int       @id @default(autoincrement())
+  key             String    @unique
+  name            String
+  description     String?
+  userId          Int
+  user            Users     @relation(fields: [userId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  expiresAt       DateTime?
+  lastUsed        DateTime?
+  lastReset       DateTime  @default(now())
+  active          Boolean   @default(true)
+  ipRestrictions  String?   // Comma-separated list of allowed IPs
+  rateLimit       Int       @default(60) // Requests per minute
+  requestCount    Int       @default(0)
+  permissions     Json      // Stores permission settings for different resources
+
+  @@index([userId])
+  @@index([key])
 }

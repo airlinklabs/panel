@@ -25,6 +25,10 @@ import { loadPlugins } from './handlers/pluginHandler';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
+import coreModule from './modules/core';
+
+
+
 
 
 loadEnv();
@@ -62,9 +66,33 @@ app.use(helmet.frameguard({ action: 'deny' }));
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000,
   max: 100,
-})
+});
 
 app.use(limiter);
+
+// API-specific rate limiter
+const apiRateLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: { error: 'Too many requests from this IP, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply rate limiter to API routes
+app.use('/api', apiRateLimiter);
+
+// Add CORS for API routes
+app.use('/api', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, X-API-Key');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
 
 // Load hpp protection
 app.use(hpp());
@@ -94,6 +122,62 @@ app.use(express.json());
 
 // Load cookies
 app.use(cookieParser());
+
+// API v1 routes
+app.use('/api/v1', apiV1Router);
+
+// Update API documentation route
+app.get('/api/docs', (_req: Request, res: Response): void => {
+  res.render('admin/settings/api-docs', {
+    endpoints: [
+      {
+        path: '/api/v1/allocations',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        description: 'Manage server allocations'
+      },
+      {
+        path: '/api/v1/databases',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        description: 'Manage server databases'
+      },
+      {
+        path: '/api/v1/images',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        description: 'Manage server images'
+      },
+      {
+        path: '/api/v1/locations',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        description: 'Manage server locations'
+      },
+      {
+        path: '/api/v1/nests',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        description: 'Manage server nests'
+      },
+      {
+        path: '/api/v1/nodes',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        description: 'Manage server nodes'
+      },
+      {
+        path: '/api/v1/servers',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        description: 'Manage servers'
+      },
+      {
+        path: '/api/v1/users',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        description: 'Manage users'
+      },
+      {
+        path: '/api/v1/keys',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        description: 'Manage API keys (Admin only)'
+      }
+    ]
+  });
+});
 
 // Load translation middleware first
 app.use(translationMiddleware);

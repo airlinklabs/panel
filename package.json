@@ -40,7 +40,8 @@
     "hpp": "^0.2.3",
     "minecraft-status": "^1.1.0",
     "multer": "^1.4.5-lts.1",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

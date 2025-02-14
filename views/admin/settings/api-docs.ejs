@@ -1,0 +1,90 @@
+<%- include('../../partials/admin/header.ejs') %>
+
+<div class="container-fluid">
+	<div class="d-sm-flex align-items-center justify-content-between mb-4">
+		<h1 class="h3 mb-0 text-gray-800">API Documentation</h1>
+		<a href="/admin/api/keys" class="btn btn-primary">
+			<i class="fas fa-key"></i> Manage API Keys
+		</a>
+	</div>
+
+	<div class="card shadow mb-4">
+		<div class="card-header py-3">
+			<h6 class="m-0 font-weight-bold text-primary">API Endpoints</h6>
+		</div>
+		<div class="card-body">
+			<div class="alert alert-info">
+				<i class="fas fa-info-circle"></i> All API requests require an API key to be sent in the <code>X-API-Key</code> header.
+			</div>
+
+			<% endpoints.forEach(endpoint => { %>
+				<div class="card mb-3">
+					<div class="card-header">
+						<h6 class="mb-0">
+							<code class="text-primary"><%= endpoint.path %></code>
+						</h6>
+					</div>
+					<div class="card-body">
+						<p><%= endpoint.description %></p>
+						<div class="methods">
+							<strong>Methods:</strong>
+							<% endpoint.methods.forEach(method => { %>
+								<span class="badge badge-<%= 
+									method === 'GET' ? 'success' : 
+									method === 'POST' ? 'primary' : 
+									method === 'PUT' ? 'warning' : 
+									method === 'DELETE' ? 'danger' : 'secondary' 
+								%>">
+									<%= method %>
+								</span>
+							<% }); %>
+						</div>
+						
+						<div class="mt-3">
+							<strong>Example Request:</strong>
+							<pre class="bg-light p-3 mt-2"><code>curl -X <%= endpoint.methods[0] %> \
+	-H "X-API-Key: your-api-key" \
+	<%= process.env.URL || 'http://localhost:3000' %><%= endpoint.path %></code></pre>
+						</div>
+					</div>
+				</div>
+			<% }); %>
+
+			<div class="mt-4">
+				<h5>Authentication</h5>
+				<p>To authenticate your requests, include your API key in the <code>X-API-Key</code> header:</p>
+				<pre class="bg-light p-3"><code>X-API-Key: your-api-key</code></pre>
+			</div>
+
+			<div class="mt-4">
+				<h5>Rate Limiting</h5>
+				<p>API requests are rate-limited based on your API key's configuration. The default limit is 60 requests per minute.</p>
+				<p>Rate limit headers are included in all responses:</p>
+				<ul>
+					<li><code>X-RateLimit-Limit</code>: Maximum requests per minute</li>
+					<li><code>X-RateLimit-Remaining</code>: Remaining requests in the current window</li>
+					<li><code>X-RateLimit-Reset</code>: Time when the rate limit resets</li>
+				</ul>
+			</div>
+
+			<div class="mt-4">
+				<h5>Error Responses</h5>
+				<p>Error responses will be returned in the following format:</p>
+				<pre class="bg-light p-3"><code>{
+	"error": "Error message description"
+}</code></pre>
+				<p>Common HTTP status codes:</p>
+				<ul>
+					<li><code>400</code> - Bad Request</li>
+					<li><code>401</code> - Unauthorized (Invalid API key)</li>
+					<li><code>403</code> - Forbidden (Insufficient permissions)</li>
+					<li><code>404</code> - Not Found</li>
+					<li><code>429</code> - Too Many Requests (Rate limit exceeded)</li>
+					<li><code>500</code> - Internal Server Error</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+
+<%- include('../../partials/admin/footer.ejs') %>
