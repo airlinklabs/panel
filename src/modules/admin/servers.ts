@@ -128,7 +128,7 @@ const adminModule: Module = {
                 id: parseInt(imageId),
               },
             })
-            .then((image) => {
+            .then((image: any) => {
               if (!image) {
                 return null;
               }

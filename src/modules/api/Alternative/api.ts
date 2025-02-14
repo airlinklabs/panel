@@ -73,12 +73,12 @@ const coreModule: Module = {
           let serverData = null;
           if (include && include === 'servers') {
             serverData = await prisma.server.findMany({
-              where: { ownerId: { in: users.map((user) => user.id) } },
+              where: { ownerId: { in: users.map((user: any) => user.id) } },
               include: { node: true, owner: true },
             });
           }
 
-          const response = users.map((user) => {
+          const response = users.map((user: any) => {
             const userData: any = {
               object: 'user',
               attributes: {
@@ -94,8 +94,8 @@ const coreModule: Module = {
 
             if (include && include === 'servers' && serverData) {
               userData.relationships.servers = serverData
-                .filter((server) => server.ownerId === user.id)
-                .map((server) => ({
+                .filter((server: any) => server.ownerId === user.id)
+                .map((server: any) => ({
                   object: 'server',
                   attributes: {
                     id: server.id,
@@ -181,7 +181,7 @@ const coreModule: Module = {
               include: { node: true, owner: true },
             });
 
-            const formattedServers = servers.map((server) => ({
+            const formattedServers = servers.map((server: any) => ({
               attributes: {
                 id: server.id,
                 UUID: server.UUID,
@@ -360,7 +360,7 @@ const coreModule: Module = {
           { length: 100 },
           (_, i) => 25565 + i,
         );
-        const usedPorts = servers.flatMap((server) =>
+        const usedPorts = servers.flatMap((server: any) =>
           JSON.parse(server.Ports).map((portInfo: { Port: string }) =>
             parseInt(portInfo.Port.split(':')[0]),
           ),
@@ -403,7 +403,7 @@ const coreModule: Module = {
                 id: imageId,
               },
             })
-            .then((image) => {
+            .then((image: any) => {
               if (!image) {
                 return null;
               }

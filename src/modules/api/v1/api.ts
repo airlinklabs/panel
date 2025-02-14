@@ -20,7 +20,7 @@ const coreModule: Module = {
     async function loadApiKeys() {
       try {
         const keys = await prisma.apiKey.findMany();
-        validKeys = keys.map((key) => key.key);
+        validKeys = keys.map((key: any) => key.key);
       } catch (error) {
         console.error('Error loading API keys:', error);
       }
