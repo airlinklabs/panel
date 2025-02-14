@@ -7,6 +7,53 @@ import { ApiResponse } from '../../../types/api';
 
 const router = Router();
 
+// Public authentication endpoint
+router.post('/auth', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { username, password } = req.body;
+    const user = await prisma.users.findFirst({
+      where: { username }
+    });
+
+    if (!user) {
+      res.status(401).json({ success: false, error: 'Invalid credentials' });
+      return;
+    }
+
+    // Generate API key for user
+    const key = require('crypto').randomBytes(32).toString('hex');
+    const apiKey = await prisma.apiKey.create({
+      data: {
+        key,
+        name: `Auto-generated key for ${username}`,
+        rateLimit: 100,
+        permissions: {
+          allocations: 'read',
+          images: 'read',
+          locations: 'read',
+          nodes: 'read',
+          servers: 'read',
+          users: 'read'
+        },
+        user: { connect: { id: user.id } },
+        active: true,
+        lastReset: new Date()
+      }
+    });
+
+    res.json({ 
+      success: true, 
+      data: { 
+        apiKey: apiKey.key,
+        message: 'Use this API key in the x-api-key header for subsequent requests'
+      } 
+    });
+  } catch (error) {
+    console.error('Auth error:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
 /**
  * @openapi
  * components:
@@ -102,12 +149,15 @@ const protectedRoutes = [
     path: '/nodes',
     handler: (_req: Request, res: Response<ApiResponse<any[]>>): void => {
       prisma.node.findMany({
-        include: { location: true, servers: true }
+      include: { location: true, servers: true }
       }).then(nodes => {
-        res.json({ data: nodes });
+      res.json({ success: true, data: nodes });
       }).catch(error => {
-        console.error('Error fetching nodes:', error);
-        res.status(500).json({ error: 'Internal server error' });
+      console.error('Error fetching nodes:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Internal server error'
+      });
       });
     }
   },
@@ -115,22 +165,22 @@ const protectedRoutes = [
     path: '/servers',
     handler: (_req: Request, res: Response<ApiResponse<any[]>>): void => {
       prisma.server.findMany({
-        include: {
-          node: true,
-          image: true,
-          owner: {
-            select: {
-              id: true,
-              username: true,
-              email: true
-            }
-          }
+      include: {
+        node: true,
+        image: true,
+        owner: {
+        select: {
+          id: true,
+          username: true,
+          email: true
         }
+        }
+      }
       }).then(servers => {
-        res.json({ data: servers });
+      res.json({ success: true, data: servers });
       }).catch(error => {
-        console.error('Error fetching servers:', error);
-        res.status(500).json({ error: 'Internal server error' });
+      console.error('Error fetching servers:', error);
+      res.status(500).json({ success: false, error: 'Internal server error' });
       });
     }
   },
@@ -138,18 +188,18 @@ const protectedRoutes = [
     path: '/users',
     handler: (_req: Request, res: Response<ApiResponse<any[]>>): void => {
       prisma.users.findMany({
-        select: {
-          id: true,
-          username: true,
-          email: true,
-          isAdmin: true,
-          description: true
-        }
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        isAdmin: true,
+        description: true
+      }
       }).then(users => {
-        res.json({ data: users });
+      res.json({ success: true, data: users });
       }).catch(error => {
-        console.error('Error fetching users:', error);
-        res.status(500).json({ error: 'Internal server error' });
+      console.error('Error fetching users:', error);
+      res.status(500).json({ success: false, error: 'Internal server error' });
       });
     }
   }
