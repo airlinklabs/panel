@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
-import { PrismaClient, ApiKey, Users } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { Session } from 'express-session';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { checkAdmin } from '../../handlers/utils/auth/adminAuthMiddleware';
 import logger from '../../handlers/logger';
@@ -8,18 +9,17 @@ import logger from '../../handlers/logger';
 const prisma = new PrismaClient();
 
 interface RequestWithUser extends Request {
-  user?: {
-    id: number;
-    email: string;
-    isAdmin: boolean;
-  };
-  session?: {
+  session: Session & {
     user?: {
       id: number;
+      email: string;
       isAdmin: boolean;
+      username: string;
+      description: string;
     };
   };
 }
+
 
 const adminModule: Module = {
   info: {
@@ -90,40 +90,42 @@ const adminModule: Module = {
     });
 
     // Main settings page
-    router.get(
-      '/admin/settings',
-      isAuthenticated(true),
-      async (req: RequestWithUser, res: Response): Promise<void> => {
-        try {
-          const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
-            return res.redirect('/login');
-          }
+    router.get('/admin/settings', isAuthenticated(true), async (req: RequestWithUser, res: Response) => {
+      try {
+      const userId = req.session?.user?.id;
+      const user = await prisma.users.findUnique({ where: { id: userId } });
+      if (!user) {
+        return res.redirect('/login');
+      }
 
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
-          res.render('admin/settings/settings', { user, req, settings });
-        } catch (error) {
-          logger.error('Error fetching user:', error);
-          return res.redirect('/login');
-        }
-      },
-    );
+      const settings = await prisma.settings.findFirst();
+      const apiKeyCount = await prisma.apiKey.count();
+
+      res.render('admin/settings/settings', {
+        settings,
+        apiKeyCount,
+        user,
+        success: req.query.success,
+        error: req.query.error
+      });
+      } catch (error) {
+      logger.error('Error accessing settings page:', error);
+      return res.redirect('/login');
+      }
+    });
 
     // API Keys management page
     router.get(
       '/admin/settings/api-keys',
       isAuthenticated(true),
-      async (req: Request, res: Response) => {
-        try {
-          const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
-            return res.redirect('/login');
-          }
-          res.render('admin/settings/api-keys', { user, req });
+      async (req: RequestWithUser, res: Response) => {
+      try {
+        const userId = req.session?.user?.id;
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+        return res.redirect('/login');
+        }
+        res.render('admin/settings/api-keys', { user });
         } catch (error) {
           logger.error('Error accessing API keys page:', error);
           return res.redirect('/login');

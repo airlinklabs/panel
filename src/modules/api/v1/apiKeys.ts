@@ -3,7 +3,8 @@ import { prisma } from '../../../handlers/utils/prisma';
 import { checkAdmin } from '../../../handlers/utils/auth/adminAuthMiddleware';
 import { randomBytes } from 'crypto';
 import { z } from 'zod';
-import { Prisma, ApiKey } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { ApiResponse, PaginatedResponse, ApiKeyResponse, ApiKeyStatsResponse, CreateApiKeyDto, UpdateApiKeyDto } from '../../../types/api';
 
 const router = Router();
 
@@ -20,30 +21,32 @@ const createApiKeySchema = z.object({
 const updateApiKeySchema = createApiKeySchema.partial();
 
 // Get all API keys with pagination
-router.get('/', checkAdmin, (req: Request, res: Response): void => {
-	const page = parseInt(req.query.page as string) || 1;
-	const limit = parseInt(req.query.limit as string) || 10;
-	const skip = (page - 1) * limit;
+router.get('/', checkAdmin, async (req: Request, res: Response<PaginatedResponse<ApiKeyResponse[]>>): Promise<void> => {
+	try {
+		const page = parseInt(req.query.page as string) || 1;
+		const limit = parseInt(req.query.limit as string) || 10;
+		const skip = (page - 1) * limit;
 
-	Promise.all([
-		prisma.apiKey.findMany({
-			orderBy: { createdAt: 'desc' },
-			skip,
-			take: limit,
-			include: {
-				user: {
-					select: {
-						id: true,
-						email: true,
-						username: true
+		const [apiKeys, total] = await Promise.all([
+			prisma.apiKey.findMany({
+				orderBy: { createdAt: 'desc' },
+				skip,
+				take: limit,
+				include: {
+					user: {
+						select: {
+							id: true,
+							email: true,
+							username: true
+						}
 					}
 				}
-			}
+			}),
+			prisma.apiKey.count()
+		]);
 
-		}),
-		prisma.apiKey.count()
-	]).then(([apiKeys, total]) => {
 		res.json({
+			success: true,
 			data: apiKeys,
 			pagination: {
 				page,
@@ -52,70 +55,44 @@ router.get('/', checkAdmin, (req: Request, res: Response): void => {
 				totalPages: Math.ceil(total / limit)
 			}
 		});
-	}).catch(error => {
+	} catch (error) {
+		if (error instanceof Prisma.PrismaClientKnownRequestError) {
+			console.error('Prisma Error:', error);
+			res.status(500).json({
+				success: false,
+				error: 'Database error',
+				pagination: { page: 1, limit: 10, total: 0, totalPages: 0 }
+			});
+			return;
+		}
 		console.error('Error fetching API keys:', error);
-		res.status(500).json({ error: 'Internal server error' });
-	});
+		res.status(500).json({
+			success: false,
+			error: 'Internal server error',
+			pagination: { page: 1, limit: 10, total: 0, totalPages: 0 }
+		});
+	}
 });
 
-
 // Create new API key
-router.post('/', checkAdmin, (req: Request, res: Response): void => {
+router.post('/', checkAdmin, async (req: Request<{}, {}, CreateApiKeyDto>, res: Response<ApiResponse<ApiKeyResponse>>): Promise<void> => {
 	try {
 		const validatedData = createApiKeySchema.parse(req.body);
 		const key = randomBytes(32).toString('hex');
 
-		const data: Prisma.ApiKeyCreateInput = {
-			key,
-			name: validatedData.name,
-			description: validatedData.description,
-			rateLimit: validatedData.rateLimit,
-			ipRestrictions: validatedData.ipRestrictions,
-			expiresAt: validatedData.expiresAt ? new Date(validatedData.expiresAt) : null,
-			permissions: validatedData.permissions,
-			user: { connect: { id: req.user!.id } },
-			active: true,
-			lastReset: new Date()
-		};
-
-		prisma.apiKey.create({ data }).then(apiKey => {
-			res.status(201).json({
-				...apiKey,
-				key
-			});
-		}).catch(error => {
-			console.error('Error creating API key:', error);
-			res.status(500).json({ error: 'Internal server error' });
-		});
-	} catch (error) {
-		if (error instanceof z.ZodError) {
-			res.status(400).json({ error: 'Validation error', details: error.format() });
-			return;
-		}
-		console.error('Error creating API key:', error);
-		res.status(500).json({ error: 'Internal server error' });
-	}
-});
-
-// Update API key
-router.put('/:id', checkAdmin, (req: Request, res: Response): void => {
-	try {
-		const { id } = req.params;
-		const validatedData = updateApiKeySchema.parse(req.body);
-
-		const data: Prisma.ApiKeyUpdateInput = {
-			name: validatedData.name,
-			description: validatedData.description,
-			rateLimit: validatedData.rateLimit,
-			ipRestrictions: validatedData.ipRestrictions,
-			expiresAt: validatedData.expiresAt ? new Date(validatedData.expiresAt) : undefined,
-			permissions: validatedData.permissions,
-			updatedAt: new Date()
-		};
-
-		prisma.apiKey.update({
-			where: { id: parseInt(id) },
-			data,
+		const apiKey = await prisma.apiKey.create({
+			data: {
+				key,
+				name: validatedData.name,
+				description: validatedData.description,
+				rateLimit: validatedData.rateLimit,
+				ipRestrictions: validatedData.ipRestrictions,
+				expiresAt: validatedData.expiresAt ? new Date(validatedData.expiresAt) : null,
+				permissions: validatedData.permissions,
+				user: { connect: { id: req.user!.id } },
+				active: true,
+				lastReset: new Date()
+			},
 			include: {
 				user: {
 					select: {
@@ -125,42 +102,48 @@ router.put('/:id', checkAdmin, (req: Request, res: Response): void => {
 					}
 				}
 			}
-		}).then(apiKey => {
-			res.json(apiKey);
-		}).catch(error => {
-			if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-				res.status(404).json({ error: 'API key not found' });
-				return;
-			}
-			console.error('Error updating API key:', error);
-			res.status(500).json({ error: 'Internal server error' });
+		});
+
+		res.status(201).json({
+			success: true,
+			data: apiKey
 		});
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			res.status(400).json({ error: 'Validation error', details: error.format() });
+			res.status(400).json({
+				success: false,
+				error: 'Validation error',
+				message: error.errors[0].message
+			});
 			return;
 		}
-		console.error('Error updating API key:', error);
-		res.status(500).json({ error: 'Internal server error' });
+		if (error instanceof Prisma.PrismaClientKnownRequestError) {
+			console.error('Prisma Error:', error);
+			res.status(500).json({
+				success: false,
+				error: 'Database error'
+			});
+			return;
+		}
+		console.error('Error creating API key:', error);
+		res.status(500).json({
+			success: false,
+			error: 'Internal server error'
+		});
 	}
 });
 
-// Toggle API key status
-router.post('/:id/toggle', checkAdmin, (req: Request, res: Response): void => {
-	const { id } = req.params;
-	
-	prisma.apiKey.findUnique({
-		where: { id: parseInt(id) }
-	}).then(existingKey => {
-		if (!existingKey) {
-			res.status(404).json({ error: 'API key not found' });
-			return;
-		}
+// Update API key
+router.put('/:id', checkAdmin, async (req: Request<{ id: string }, {}, UpdateApiKeyDto>, res: Response<ApiResponse<ApiKeyResponse>>): Promise<void> => {
+	try {
+		const { id } = req.params;
+		const validatedData = updateApiKeySchema.parse(req.body);
 
-		prisma.apiKey.update({
+		const apiKey = await prisma.apiKey.update({
 			where: { id: parseInt(id) },
-			data: { 
-				active: !existingKey.active,
+			data: {
+				...validatedData,
+				expiresAt: validatedData.expiresAt ? new Date(validatedData.expiresAt) : undefined,
 				updatedAt: new Date()
 			},
 			include: {
@@ -172,60 +155,109 @@ router.post('/:id/toggle', checkAdmin, (req: Request, res: Response): void => {
 					}
 				}
 			}
-		}).then(updatedKey => {
-			res.json(updatedKey);
-		}).catch(error => {
-			console.error('Error toggling API key:', error);
-			res.status(500).json({ error: 'Internal server error' });
 		});
-	}).catch(error => {
-		console.error('Error finding API key:', error);
-		res.status(500).json({ error: 'Internal server error' });
-	});
+
+		res.json({
+			success: true,
+			data: apiKey
+		});
+	} catch (error) {
+		if (error instanceof z.ZodError) {
+			res.status(400).json({
+				success: false,
+				error: 'Validation error',
+				message: error.errors[0].message
+			});
+			return;
+		}
+		if (error instanceof Prisma.PrismaClientKnownRequestError) {
+			if (error.code === 'P2025') {
+				res.status(404).json({
+					success: false,
+					error: 'API key not found'
+				});
+				return;
+			}
+			console.error('Prisma Error:', error);
+			res.status(500).json({
+				success: false,
+				error: 'Database error'
+			});
+			return;
+		}
+		console.error('Error updating API key:', error);
+		res.status(500).json({
+			success: false,
+			error: 'Internal server error'
+		});
+	}
 });
 
-// Delete API key with confirmation
-router.delete('/:id', checkAdmin, (req: Request, res: Response): void => {
-	const { id } = req.params;
-	const { confirmation } = req.body;
+// Delete API key
+router.delete('/:id', checkAdmin, async (req: Request<{ id: string }>, res: Response<ApiResponse<void>>): Promise<void> => {
+	try {
+		const { id } = req.params;
+		const { confirmation } = req.body;
 
-	if (confirmation !== 'DELETE') {
-		res.status(400).json({ error: 'Confirmation required' });
-		return;
-	}
+		if (confirmation !== 'DELETE') {
+			res.status(400).json({
+				success: false,
+				error: 'Confirmation required'
+			});
+			return;
+		}
 
-	prisma.apiKey.delete({
-		where: { id: parseInt(id) }
-	}).then(() => {
+		await prisma.apiKey.delete({
+			where: { id: parseInt(id) }
+		});
+
 		res.status(204).send();
-	}).catch(error => {
-		if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-			res.status(404).json({ error: 'API key not found' });
+	} catch (error) {
+		if (error instanceof Prisma.PrismaClientKnownRequestError) {
+			if (error.code === 'P2025') {
+				res.status(404).json({
+					success: false,
+					error: 'API key not found'
+				});
+				return;
+			}
+			console.error('Prisma Error:', error);
+			res.status(500).json({
+				success: false,
+				error: 'Database error'
+			});
 			return;
 		}
 		console.error('Error deleting API key:', error);
-		res.status(500).json({ error: 'Internal server error' });
-	});
+		res.status(500).json({
+			success: false,
+			error: 'Internal server error'
+		});
+	}
 });
 
-// Get API key usage stats with detailed information
-router.get('/:id/stats', checkAdmin, (req: Request, res: Response): void => {
-	const { id } = req.params;
-
-	prisma.apiKey.findUnique({
-		where: { id: parseInt(id) },
-		include: {
-			user: {
-				select: {
-					id: true,
-					email: true,
-					username: true
+// Get API key stats
+router.get('/:id/stats', checkAdmin, async (req: Request<{ id: string }>, res: Response<ApiResponse<ApiKeyStatsResponse>>): Promise<void> => {
+	try {
+		const { id } = req.params;
+		const apiKey = await prisma.apiKey.findUnique({
+			where: { id: parseInt(id) },
+			include: {
+				user: {
+					select: {
+						id: true,
+						email: true,
+						username: true
+					}
 				}
 			}
-		}
-	}).then(apiKey => {
+		});
+
 		if (!apiKey) {
-			res.status(404).json({ error: 'API key not found' });
+			res.status(404).json({
+				success: false,
+				error: 'API key not found'
+			});
 			return;
 		}
 
@@ -234,22 +266,34 @@ router.get('/:id/stats', checkAdmin, (req: Request, res: Response): void => {
 		const minutesPassed = (now.getTime() - resetTime.getTime()) / (1000 * 60);
 
 		res.json({
-			...apiKey,
-			statistics: {
-				remainingRequests: Math.max(0, apiKey.rateLimit - apiKey.requestCount),
-				resetInMinutes: Math.max(0, 60 - minutesPassed),
-				usagePercentage: (apiKey.requestCount / apiKey.rateLimit) * 100,
-				isExpired: apiKey.expiresAt ? now > apiKey.expiresAt : false,
-				lastUsed: apiKey.lastUsed || null
+			success: true,
+			data: {
+				...apiKey,
+				statistics: {
+					remainingRequests: Math.max(0, apiKey.rateLimit - apiKey.requestCount),
+					resetInMinutes: Math.max(0, 60 - minutesPassed),
+					usagePercentage: (apiKey.requestCount / apiKey.rateLimit) * 100,
+					isExpired: apiKey.expiresAt ? now > apiKey.expiresAt : false,
+					lastUsed: apiKey.lastUsed || null
+				}
 			}
 		});
-
-	}).catch(error => {
+	} catch (error) {
+		if (error instanceof Prisma.PrismaClientKnownRequestError) {
+			console.error('Prisma Error:', error);
+			res.status(500).json({
+				success: false,
+				error: 'Database error'
+			});
+			return;
+		}
 		console.error('Error fetching API key stats:', error);
-		res.status(500).json({ error: 'Internal server error' });
-	});
+		res.status(500).json({
+			success: false,
+			error: 'Internal server error'
+		});
+	}
 });
-
 
 export default router;
 

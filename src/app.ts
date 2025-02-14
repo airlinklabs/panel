@@ -26,6 +26,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
 import coreModule from './modules/core';
+import apiV1Router from './modules/api/v1/api';
 
 
 
@@ -191,20 +192,17 @@ app.use((req, res, next) => {
 });
 
 // Load error handling
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   logger.error('Unhandled error:', err);
 
   if (!res.headersSent) {
     res.status(500).json({
-      error:
-        process.env.NODE_ENV === 'production'
-          ? 'Internal server error'
-          : err.message,
+      success: false,
+      error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message
     });
   }
-
-  next(err);
 });
+
 
 // Load modules, plugins, database and start the webserver
 databaseLoader()

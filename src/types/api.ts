@@ -1,44 +1,45 @@
-import { ApiKey, Users } from '@prisma/client';
+import { ApiKey, Users, Server, Location, Node, Images } from '@prisma/client';
 
-export interface ApiKeyWithUser extends ApiKey {
-	user: Users;
+export interface ApiResponse<T> {
+	success: boolean;
+	data?: T;
+	error?: string;
+	message?: string;
 }
 
-export interface ApiKeyPermissions {
-	allocations?: 'read' | 'write' | 'none';
-	databases?: 'read' | 'write' | 'none';
-	images?: 'read' | 'write' | 'none';
-	locations?: 'read' | 'write' | 'none';
-	nests?: 'read' | 'write' | 'none';
-	nodes?: 'read' | 'write' | 'none';
-	servers?: 'read' | 'write' | 'none';
-	users?: 'read' | 'write' | 'none';
-}
-
-export interface ApiKeyStats {
-	remainingRequests: number;
-	resetInMinutes: number;
-	usagePercentage: number;
-	isExpired: boolean;
-	lastUsed: Date | null;
-}
-
-export interface ApiKeyResponse {
-	id: number;
-	key: string;
-	name: string;
-	description?: string;
-	rateLimit: number;
-	ipRestrictions?: string;
-	expiresAt?: Date;
-	active: boolean;
-	requestCount: number;
-	lastReset: Date;
-	lastUsed?: Date;
-	permissions: ApiKeyPermissions;
-	user: {
-		id: number;
-		email: string;
-		username?: string;
+export interface PaginatedResponse<T> extends ApiResponse<T> {
+	pagination: {
+		page: number;
+		limit: number;
+		total: number;
+		totalPages: number;
 	};
 }
+
+export interface ApiKeyResponse extends ApiKey {
+	user: Pick<Users, 'id' | 'email' | 'username'>;
+}
+
+export interface ApiKeyStatsResponse extends ApiKeyResponse {
+	statistics: {
+		remainingRequests: number;
+		resetInMinutes: number;
+		usagePercentage: number;
+		isExpired: boolean;
+		lastUsed: Date | null;
+	};
+}
+
+export type ResourcePermission = 'read' | 'write' | 'none';
+export type ResourcePermissions = Record<string, ResourcePermission>;
+
+export interface CreateApiKeyDto {
+	name: string;
+	description?: string;
+	rateLimit?: number;
+	ipRestrictions?: string;
+	expiresAt?: string;
+	permissions: ResourcePermissions;
+}
+
+export interface UpdateApiKeyDto extends Partial<CreateApiKeyDto> {}

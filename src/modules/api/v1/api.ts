@@ -1,58 +1,100 @@
 import { Router, Request, Response } from 'express';
 import { apiKeyMiddleware, checkPermission } from '../../../handlers/utils/auth/apiAuthMiddleware';
 import apiKeysRouter from './apiKeys';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../../handlers/utils/prisma';
+import { ApiResponse } from '../../../types/api';
 
 const router = Router();
-const prisma = new PrismaClient();
+
+/**
+ * @openapi
+ * components:
+ *   securitySchemes:
+ *     ApiKeyAuth:
+ *       type: apiKey
+ *       in: header
+ *       name: x-api-key
+ */
 
 // API Key Management Routes (Admin only)
 router.use('/keys', apiKeysRouter);
 
-// Protected API Routes (Require API Key)
+// Protected API Routes
 const protectedRoutes = [
   {
     path: '/allocations',
-    handler: (req: Request, res: Response): void => {
-      prisma.server.findMany({
-        select: { Ports: true, UUID: true }
-      }).then(allocations => {
-        res.json({ data: allocations });
-      }).catch(error => {
+    /**
+     * @openapi
+     * /api/v1/allocations:
+     *   get:
+     *     tags: [Allocations]
+     *     summary: Get all server port allocations
+     *     security:
+     *       - ApiKeyAuth: []
+     *     responses:
+     *       200:
+     *         description: List of server port allocations
+     */
+    handler: async (_req: Request, res: Response<ApiResponse<any[]>>): Promise<void> => {
+      try {
+        const allocations = await prisma.server.findMany({
+          select: { Ports: true, UUID: true }
+        });
+        res.json({ success: true, data: allocations });
+      } catch (error) {
         console.error('Error fetching allocations:', error);
-        res.status(500).json({ error: 'Internal server error' });
-      });
-    }
-  },
-  {
-    path: '/databases',
-    handler: (req: Request, res: Response): void => {
-      // Implement database endpoint
-      res.json({ message: 'Databases endpoint' });
+        res.status(500).json({ success: false, error: 'Internal server error' });
+      }
     }
   },
   {
     path: '/images',
-    handler: (req: Request, res: Response): void => {
-      prisma.images.findMany().then(images => {
-        res.json({ data: images });
-      }).catch(error => {
+    /**
+     * @openapi
+     * /api/v1/images:
+     *   get:
+     *     tags: [Images]
+     *     summary: Get all available server images
+     *     security:
+     *       - ApiKeyAuth: []
+     *     responses:
+     *       200:
+     *         description: List of server images
+     */
+    handler: async (_req: Request, res: Response<ApiResponse<any[]>>): Promise<void> => {
+      try {
+        const images = await prisma.images.findMany();
+        res.json({ success: true, data: images });
+      } catch (error) {
         console.error('Error fetching images:', error);
-        res.status(500).json({ error: 'Internal server error' });
-      });
+        res.status(500).json({ success: false, error: 'Internal server error' });
+      }
     }
   },
   {
     path: '/locations',
-    handler: (req: Request, res: Response): void => {
-      prisma.location.findMany({
-        include: { nodes: true }
-      }).then(locations => {
-        res.json({ data: locations });
-      }).catch(error => {
+    /**
+     * @openapi
+     * /api/v1/locations:
+     *   get:
+     *     tags: [Locations]
+     *     summary: Get all server locations with nodes
+     *     security:
+     *       - ApiKeyAuth: []
+     *     responses:
+     *       200:
+     *         description: List of server locations
+     */
+    handler: async (_req: Request, res: Response<ApiResponse<any[]>>): Promise<void> => {
+      try {
+        const locations = await prisma.location.findMany({
+          include: { nodes: true }
+        });
+        res.json({ success: true, data: locations });
+      } catch (error) {
         console.error('Error fetching locations:', error);
-        res.status(500).json({ error: 'Internal server error' });
-      });
+        res.status(500).json({ success: false, error: 'Internal server error' });
+      }
     }
   },
   {

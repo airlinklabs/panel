@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { Module } from '../handlers/moduleInit';
 import apiV1Router from './api/v1/api';
-import alternativeApiModule from './api/Alternative/api';
 
 const coreModule: Module = {
   info: {
@@ -18,9 +17,6 @@ const coreModule: Module = {
 
     // Mount API v1 routes
     router.use('/api/v1', apiV1Router);
-
-    // Mount Alternative API routes (legacy support)
-    router.use('/api/alternative', alternativeApiModule.router);
 
     // API Documentation redirect
     router.get('/api', (_req, res) => {
@@ -41,3 +37,4 @@ const coreModule: Module = {
 };
 
 export default coreModule;
+
