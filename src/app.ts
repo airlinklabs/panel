@@ -26,7 +26,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
 import coreModule from './modules/core';
-import apiV1Router from './modules/api/v1/api';
+import apiV1Module from './modules/api/v1/api';
 
 
 
@@ -125,7 +125,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // API v1 routes
-app.use('/api/v1', apiV1Router);
+app.use('/api/v1', apiV1Module.router());
 
 // Update API documentation route
 app.get('/api/docs', (_req: Request, res: Response): void => {

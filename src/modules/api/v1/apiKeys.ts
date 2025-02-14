@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { Module } from '../../../handlers/moduleInit';
 import { prisma } from '../../../handlers/utils/prisma';
 import { checkAdmin } from '../../../handlers/utils/auth/adminAuthMiddleware';
 import { randomBytes } from 'crypto';
@@ -295,5 +296,17 @@ router.get('/:id/stats', checkAdmin, async (req: Request<{ id: string }>, res: R
 	}
 });
 
-export default router;
+const apiKeysModule: Module = {
+	info: {
+		name: 'API Keys Module',
+		description: 'API key management functionality',
+		version: '1.0.0',
+		moduleVersion: '1.0.0',
+		author: 'AirLinkLab',
+		license: 'MIT',
+	},
+	router: () => router
+};
+
+export default apiKeysModule;
 

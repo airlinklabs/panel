@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
+import { Module } from '../../../handlers/moduleInit';
 import { apiKeyMiddleware, checkPermission } from '../../../handlers/utils/auth/apiAuthMiddleware';
-import apiKeysRouter from './apiKeys';
+import apiKeysModule from './apiKeys';
 import { prisma } from '../../../handlers/utils/prisma';
 import { ApiResponse } from '../../../types/api';
 
@@ -17,7 +18,7 @@ const router = Router();
  */
 
 // API Key Management Routes (Admin only)
-router.use('/keys', apiKeysRouter);
+router.use('/keys', apiKeysModule.router());
 
 // Protected API Routes
 const protectedRoutes = [
@@ -99,7 +100,7 @@ const protectedRoutes = [
   },
   {
     path: '/nodes',
-    handler: (req: Request, res: Response): void => {
+    handler: (_req: Request, res: Response<ApiResponse<any[]>>): void => {
       prisma.node.findMany({
         include: { location: true, servers: true }
       }).then(nodes => {
@@ -112,7 +113,7 @@ const protectedRoutes = [
   },
   {
     path: '/servers',
-    handler: (req: Request, res: Response): void => {
+    handler: (_req: Request, res: Response<ApiResponse<any[]>>): void => {
       prisma.server.findMany({
         include: {
           node: true,
@@ -135,7 +136,7 @@ const protectedRoutes = [
   },
   {
     path: '/users',
-    handler: (req: Request, res: Response): void => {
+    handler: (_req: Request, res: Response<ApiResponse<any[]>>): void => {
       prisma.users.findMany({
         select: {
           id: true,
@@ -174,5 +175,17 @@ router.get('/docs', (req: Request, res: Response): void => {
   });
 });
 
-export default router;
+const apiModule: Module = {
+  info: {
+    name: 'API v1 Module',
+    description: 'API v1 endpoints and functionality',
+    version: '1.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirLinkLab',
+    license: 'MIT',
+  },
+  router: () => router
+};
+
+export default apiModule;
 

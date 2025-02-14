@@ -16,7 +16,7 @@ const coreModule: Module = {
     const router = Router();
 
     // Mount API v1 routes
-    router.use('/api/v1', apiV1Router);
+    router.use('/api/v1', apiV1Router.router());
 
     // API Documentation redirect
     router.get('/api', (_req, res) => {
