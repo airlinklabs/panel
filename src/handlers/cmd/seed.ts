@@ -106,7 +106,7 @@ class Seeder {
 
       if (existingImages > 0) {
         const shouldContinue = await this.promptUser(
-          "'images' is already set in the database. Do you want to continue seeding? (y/n) ",
+          '\'images\' is already set in the database. Do you want to continue seeding? (y/n) ',
         );
 
         if (!shouldContinue) {

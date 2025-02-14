@@ -1,0 +1,133 @@
+<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-sm p-6">
+	<div class="flex items-center justify-between mb-4">
+		<h3 class="text-lg font-semibold text-neutral-800 dark:text-white" id="chartTitle"></h3>
+		<select id="chartTypeSelector" class="px-3 py-1.5 text-sm rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500">
+			<option value="line">Line Chart</option>
+			<option value="bar">Bar Chart</option>
+			<option value="pie">Pie Chart</option>
+			<option value="doughnut">Doughnut Chart</option>
+		</select>
+	</div>
+	<div class="relative" style="height: 300px;">
+		<canvas id="chartCanvas"></canvas>
+	</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+	let currentChart = null;
+
+	function initChart(options) {
+		const {
+			type = 'line',
+			data,
+			title = 'Chart',
+			labels = [],
+			backgroundColor = [
+				'rgba(59, 130, 246, 0.5)',   // blue
+				'rgba(16, 185, 129, 0.5)',   // green
+				'rgba(239, 68, 68, 0.5)',    // red
+				'rgba(245, 158, 11, 0.5)',   // yellow
+				'rgba(139, 92, 246, 0.5)'    // purple
+			],
+			borderColor = [
+				'rgb(59, 130, 246)',
+				'rgb(16, 185, 129)',
+				'rgb(239, 68, 68)',
+				'rgb(245, 158, 11)',
+				'rgb(139, 92, 246)'
+			]
+		} = options;
+
+		// Set chart title
+		document.getElementById('chartTitle').textContent = title;
+		
+		// Set initial chart type
+		document.getElementById('chartTypeSelector').value = type;
+
+		const ctx = document.getElementById('chartCanvas').getContext('2d');
+		
+		// Destroy existing chart if it exists
+		if (currentChart) {
+			currentChart.destroy();
+		}
+
+		// Common configuration
+		const config = {
+			type: type,
+			data: {
+				labels: labels,
+				datasets: [{
+					label: title,
+					data: data,
+					backgroundColor: backgroundColor,
+					borderColor: type === 'line' ? borderColor[0] : borderColor,
+					borderWidth: 2,
+					tension: 0.4,
+					fill: type === 'line' ? false : undefined
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						display: ['pie', 'doughnut'].includes(type),
+						position: 'bottom',
+						labels: {
+							color: document.documentElement.classList.contains('dark') ? '#e5e5e5' : '#171717'
+						}
+					}
+				},
+				scales: ['line', 'bar'].includes(type) ? {
+					y: {
+						beginAtZero: true,
+						grid: {
+							color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+						},
+						ticks: {
+							color: document.documentElement.classList.contains('dark') ? '#e5e5e5' : '#171717'
+						}
+					},
+					x: {
+						grid: {
+							color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+						},
+						ticks: {
+							color: document.documentElement.classList.contains('dark') ? '#e5e5e5' : '#171717'
+						}
+					}
+				} : undefined
+			}
+		};
+
+		currentChart = new Chart(ctx, config);
+	}
+
+	// Handle chart type changes
+	document.getElementById('chartTypeSelector').addEventListener('change', (e) => {
+		if (currentChart) {
+			const newType = e.target.value;
+			const currentData = currentChart.data.datasets[0].data;
+			const currentLabels = currentChart.data.labels;
+			const currentTitle = document.getElementById('chartTitle').textContent;
+
+			initChart({
+				type: newType,
+				data: currentData,
+				labels: currentLabels,
+				title: currentTitle
+			});
+		}
+	});
+
+	// Example usage:
+	/*
+	initChart({
+		type: 'line',
+		title: 'Monthly Revenue',
+		labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+		data: [65, 59, 80, 81, 56]
+	});
+	*/
+</script>

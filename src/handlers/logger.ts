@@ -117,9 +117,12 @@ class Logger {
     this.originalConsoleLog(formattedMessage);
   }
 
-  info(message: any): void {
+  info(message: any, metadata?: Record<string, any>): void {
     const formattedMessage = this.formatMessage('info', String(message));
     this.originalConsoleLog(formattedMessage);
+    if (metadata) {
+      this.originalConsoleLog(JSON.stringify(metadata, null, 2));
+    }
   }
 
   success(message: any): void {

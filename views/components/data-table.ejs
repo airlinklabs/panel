@@ -1,0 +1,148 @@
+<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-sm">
+	<!-- Table Header with Search and Filters -->
+	<div class="p-4 border-b dark:border-neutral-800">
+		<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+			<div class="flex-1 min-w-0">
+				<div class="relative">
+					<input type="text" id="tableSearch" placeholder="Search..." class="w-full pl-10 pr-4 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+					<svg class="absolute left-3 top-2.5 w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+					</svg>
+				</div>
+			</div>
+			<div class="flex items-center space-x-2">
+				<select id="rowsPerPage" class="px-3 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+					<option value="10">10 rows</option>
+					<option value="25">25 rows</option>
+					<option value="50">50 rows</option>
+					<option value="100">100 rows</option>
+				</select>
+				<button id="filterButton" class="px-3 py-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+					</svg>
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Table Content -->
+	<div class="overflow-x-auto">
+		<table class="w-full">
+			<thead>
+				<tr class="text-left text-sm font-medium text-neutral-500 dark:text-neutral-400">
+					<th class="px-4 py-3 border-b dark:border-neutral-800">
+						<div class="flex items-center space-x-1 cursor-pointer" data-sort="name">
+							<span>Name</span>
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+							</svg>
+						</div>
+					</th>
+					<th class="px-4 py-3 border-b dark:border-neutral-800">Status</th>
+					<th class="px-4 py-3 border-b dark:border-neutral-800">Date</th>
+					<th class="px-4 py-3 border-b dark:border-neutral-800">Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% data.forEach(item => { %>
+					<tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
+						<td class="px-4 py-3 border-b dark:border-neutral-800">
+							<%= item.name %>
+						</td>
+						<td class="px-4 py-3 border-b dark:border-neutral-800">
+							<span class="px-2 py-1 text-xs font-medium rounded-full <%= item.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-neutral-100 text-neutral-700' %>">
+								<%= item.status %>
+							</span>
+						</td>
+						<td class="px-4 py-3 border-b dark:border-neutral-800 text-neutral-500 dark:text-neutral-400">
+							<%= item.date %>
+						</td>
+						<td class="px-4 py-3 border-b dark:border-neutral-800">
+							<div class="flex items-center space-x-2">
+								<button class="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white">
+									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+									</svg>
+								</button>
+								<button class="text-red-600 hover:text-red-700">
+									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+									</svg>
+								</button>
+							</div>
+						</td>
+					</tr>
+				<% }); %>
+			</tbody>
+		</table>
+	</div>
+
+	<!-- Pagination -->
+	<div class="px-4 py-3 border-t dark:border-neutral-800 flex items-center justify-between">
+		<div class="flex-1 text-sm text-neutral-500 dark:text-neutral-400">
+			Showing <span class="font-medium">1</span> to <span class="font-medium">10</span> of <span class="font-medium">20</span> results
+		</div>
+		<div class="flex items-center space-x-2">
+			<button class="px-3 py-1 rounded-lg text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800">
+				Previous
+			</button>
+			<button class="px-3 py-1 rounded-lg bg-blue-500 text-white hover:bg-blue-600">
+				1
+			</button>
+			<button class="px-3 py-1 rounded-lg text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800">
+				2
+			</button>
+			<button class="px-3 py-1 rounded-lg text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800">
+				Next
+			</button>
+		</div>
+	</div>
+</div>
+
+<script>
+	// Table search functionality
+	const tableSearch = document.getElementById('tableSearch');
+	tableSearch.addEventListener('input', (e) => {
+		const searchTerm = e.target.value.toLowerCase();
+		const rows = document.querySelectorAll('tbody tr');
+		
+		rows.forEach(row => {
+			const text = row.textContent.toLowerCase();
+			row.style.display = text.includes(searchTerm) ? '' : 'none';
+		});
+	});
+
+	// Sorting functionality
+	document.querySelectorAll('[data-sort]').forEach(header => {
+		header.addEventListener('click', () => {
+			const column = header.dataset.sort;
+			const rows = Array.from(document.querySelectorAll('tbody tr'));
+			const isAscending = header.classList.contains('sort-asc');
+			
+			rows.sort((a, b) => {
+				const aValue = a.querySelector(`td:nth-child(${getColumnIndex(column) + 1})`).textContent;
+				const bValue = b.querySelector(`td:nth-child(${getColumnIndex(column) + 1})`).textContent;
+				return isAscending ? bValue.localeCompare(aValue) : aValue.localeCompare(bValue);
+			});
+
+			header.classList.toggle('sort-asc');
+			const tbody = document.querySelector('tbody');
+			tbody.innerHTML = '';
+			rows.forEach(row => tbody.appendChild(row));
+		});
+	});
+
+	function getColumnIndex(columnName) {
+		const headers = document.querySelectorAll('th');
+		return Array.from(headers).findIndex(header => 
+			header.querySelector('[data-sort]')?.dataset.sort === columnName
+		);
+	}
+
+	// Rows per page functionality
+	document.getElementById('rowsPerPage').addEventListener('change', (e) => {
+		const rowsPerPage = parseInt(e.target.value);
+		// Implementation for changing number of visible rows
+	});
+</script>

@@ -1,0 +1,188 @@
+<%- include('../../components/header', { title: 'Edit Location' }) %>
+
+<main class="h-screen m-auto">
+	<div class="flex h-screen">
+		<!-- Sidebar -->
+		<div class="w-60 h-full">
+			<%- include('../../components/template', { user, settings }) %>
+		</div>
+		<!-- Content -->
+		<div class="flex-1 p-6 overflow-y-auto pt-16">
+			<div class="sm:flex sm:items-center px-8 pt-4">
+				<div class="sm:flex-auto">
+					<h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">Edit Location</h1>
+					<p class="mt-1 tracking-tight text-sm text-neutral-500">Modify location details and configuration</p>
+				</div>
+			</div>
+
+			<div class="mt-8 px-8">
+				<form id="locationForm" action="/admin/locations/<%= location.id %>/edit" method="POST" class="max-w-2xl mx-auto space-y-6 bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+					<div>
+						<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2" for="name">
+							Name
+						</label>
+						<input 
+							class="block w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 px-4 py-3 text-neutral-700 dark:text-neutral-200 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+							id="name" 
+							name="name" 
+							type="text" 
+							required
+							value="<%= location.name %>"
+						>
+					</div>
+
+					<div>
+						<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2" for="shortCode">
+							Short Code
+						</label>
+						<input 
+							class="block w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 px-4 py-3 text-neutral-700 dark:text-neutral-200 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+							id="shortCode" 
+							name="shortCode" 
+							type="text" 
+							required
+							value="<%= location.shortCode %>"
+						>
+						<p class="mt-1 text-sm text-neutral-500">A unique identifier for this location (e.g., NYC, LON, SG)</p>
+					</div>
+
+					<div>
+						<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2" for="description">
+							Description
+						</label>
+						<textarea 
+							class="block w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 px-4 py-3 text-neutral-700 dark:text-neutral-200 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+							id="description" 
+							name="description" 
+							rows="3"
+						><%= location.description || '' %></textarea>
+					</div>
+
+					<div class="grid grid-cols-2 gap-6">
+						<div>
+							<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2" for="latitude">
+								Latitude
+							</label>
+							<input 
+								class="block w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 px-4 py-3 text-neutral-700 dark:text-neutral-200 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+								id="latitude" 
+								name="latitude" 
+								type="number" 
+								step="any"
+								value="<%= location.latitude || '' %>"
+							>
+						</div>
+						<div>
+							<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2" for="longitude">
+								Longitude
+							</label>
+							<input 
+								class="block w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 px-4 py-3 text-neutral-700 dark:text-neutral-200 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+								id="longitude" 
+								name="longitude" 
+								type="number" 
+								step="any"
+								value="<%= location.longitude || '' %>"
+							>
+						</div>
+					</div>
+
+					<div class="flex items-center justify-end space-x-4 pt-4">
+						<a href="/admin/locations" 
+							class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white">
+							Cancel
+						</a>
+						<button 
+							id="submitButton"
+							type="submit"
+							class="px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-neutral-900">
+							Update Location
+						</button>
+					</div>
+				</form>
+
+				<script>
+				document.getElementById('locationForm').addEventListener('submit', async (e) => {
+					e.preventDefault();
+					const form = e.target;
+					const submitButton = document.getElementById('submitButton');
+					const originalText = submitButton.textContent;
+
+					// Basic validation
+					const name = form.name.value.trim();
+					const shortCode = form.shortCode.value.trim();
+					const latitude = form.latitude.value;
+					const longitude = form.longitude.value;
+
+					if (name.length < 2) {
+						alert('Name must be at least 2 characters long');
+						return;
+					}
+
+					if (shortCode.length < 2 || shortCode.length > 5) {
+						alert('Short code must be between 2 and 5 characters');
+						return;
+					}
+
+					if ((latitude && !longitude) || (!latitude && longitude)) {
+						alert('Both latitude and longitude must be provided if one is specified');
+						return;
+					}
+
+					if (latitude && (latitude < -90 || latitude > 90)) {
+						alert('Latitude must be between -90 and 90 degrees');
+						return;
+					}
+
+					if (longitude && (longitude < -180 || longitude > 180)) {
+						alert('Longitude must be between -180 and 180 degrees');
+						return;
+					}
+
+					// Show loading state
+					submitButton.disabled = true;
+					submitButton.innerHTML = `
+						<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+						</svg>
+						Updating...
+					`;
+
+					try {
+						const response = await fetch(form.action, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify({
+								name,
+								shortCode,
+								description: form.description.value.trim(),
+								latitude: latitude ? parseFloat(latitude) : null,
+								longitude: longitude ? parseFloat(longitude) : null,
+							}),
+						});
+
+						if (response.ok) {
+							window.location.href = '/admin/locations';
+						} else {
+							const data = await response.json();
+							alert(data.message || 'Error updating location');
+							submitButton.disabled = false;
+							submitButton.textContent = originalText;
+						}
+					} catch (error) {
+						console.error('Error:', error);
+						alert('Error updating location');
+						submitButton.disabled = false;
+						submitButton.textContent = originalText;
+					}
+				});
+				</script>
+			</div>
+		</div>
+	</div>
+</main>
+
+<%- include('../../components/footer') %>

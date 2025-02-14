@@ -1,0 +1,281 @@
+<div class="w-60 h-full">
+	<%- include('../../components/template') %>
+</div>
+
+<div class="p-4 sm:p-6 lg:p-8">
+	<div class="sm:flex sm:items-center">
+		<div class="sm:flex-auto">
+			<h1 class="text-2xl font-semibold text-neutral-900 dark:text-white">API Analytics</h1>
+			<p class="mt-2 text-sm text-neutral-700 dark:text-neutral-400">Monitor API usage, performance metrics, and key insights.</p>
+		</div>
+		<div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+			<div class="flex gap-3">
+				<button onclick="downloadReport()" class="flex items-center justify-center rounded-xl bg-neutral-900 dark:bg-white/10 px-3 py-2 text-sm font-semibold text-white dark:text-neutral-200 shadow-sm hover:bg-neutral-700 dark:hover:bg-white/20">
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+					</svg>
+					Export Report
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Overview Cards -->
+	<div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+		<div class="rounded-xl bg-white/50 dark:bg-white/5 shadow-sm ring-1 ring-neutral-900/5 dark:ring-white/10 p-6">
+			<div class="flex items-center">
+				<div class="w-11 h-11 flex items-center justify-center rounded-lg bg-blue-500/10 dark:bg-blue-400/10">
+					<svg class="w-6 h-6 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+					</svg>
+				</div>
+				<div class="ml-4">
+					<h3 class="text-sm font-medium text-neutral-900 dark:text-white">Total Requests</h3>
+					<p class="mt-1 text-2xl font-semibold text-neutral-900 dark:text-white" id="totalRequests">Loading...</p>
+					<p class="mt-1 text-sm text-green-600 dark:text-green-400">↑ 12% from last month</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="rounded-xl bg-white/50 dark:bg-white/5 shadow-sm ring-1 ring-neutral-900/5 dark:ring-white/10 p-6">
+			<div class="flex items-center">
+				<div class="w-11 h-11 flex items-center justify-center rounded-lg bg-green-500/10 dark:bg-green-400/10">
+					<svg class="w-6 h-6 text-green-500 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+					</svg>
+				</div>
+				<div class="ml-4">
+					<h3 class="text-sm font-medium text-neutral-900 dark:text-white">Success Rate</h3>
+					<p class="mt-1 text-2xl font-semibold text-neutral-900 dark:text-white" id="successRate">Loading...</p>
+					<p class="mt-1 text-sm text-green-600 dark:text-green-400">↑ 3% from last week</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="rounded-xl bg-white/50 dark:bg-white/5 shadow-sm ring-1 ring-neutral-900/5 dark:ring-white/10 p-6">
+			<div class="flex items-center">
+				<div class="w-11 h-11 flex items-center justify-center rounded-lg bg-yellow-500/10 dark:bg-yellow-400/10">
+					<svg class="w-6 h-6 text-yellow-500 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+					</svg>
+				</div>
+				<div class="ml-4">
+					<h3 class="text-sm font-medium text-neutral-900 dark:text-white">Avg Response Time</h3>
+					<p class="mt-1 text-2xl font-semibold text-neutral-900 dark:text-white" id="avgResponseTime">Loading...</p>
+					<p class="mt-1 text-sm text-red-600 dark:text-red-400">↓ 8ms from last hour</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="rounded-xl bg-white/50 dark:bg-white/5 shadow-sm ring-1 ring-neutral-900/5 dark:ring-white/10 p-6">
+			<div class="flex items-center">
+				<div class="w-11 h-11 flex items-center justify-center rounded-lg bg-red-500/10 dark:bg-red-400/10">
+					<svg class="w-6 h-6 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+					</svg>
+				</div>
+				<div class="ml-4">
+					<h3 class="text-sm font-medium text-neutral-900 dark:text-white">Error Rate</h3>
+					<p class="mt-1 text-2xl font-semibold text-neutral-900 dark:text-white" id="errorRate">Loading...</p>
+					<p class="mt-1 text-sm text-green-600 dark:text-green-400">↓ 2% from yesterday</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Charts Section -->
+	<div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+		<!-- Request Volume Chart -->
+		<div class="rounded-xl bg-white/50 dark:bg-white/5 shadow-sm ring-1 ring-neutral-900/5 dark:ring-white/10 p-6">
+			<h3 class="text-base font-semibold text-neutral-900 dark:text-white mb-4">Request Volume</h3>
+			<div class="h-[300px]">
+				<canvas id="requestVolumeChart"></canvas>
+			</div>
+		</div>
+
+		<!-- Response Time Distribution -->
+		<div class="rounded-xl bg-white/50 dark:bg-white/5 shadow-sm ring-1 ring-neutral-900/5 dark:ring-white/10 p-6">
+			<h3 class="text-base font-semibold text-neutral-900 dark:text-white mb-4">Response Time Distribution</h3>
+			<div class="h-[300px]">
+				<canvas id="responseTimeChart"></canvas>
+			</div>
+		</div>
+	</div>
+
+	<!-- Top Endpoints Table -->
+	<div class="mt-8">
+		<div class="rounded-xl bg-white/50 dark:bg-white/5 shadow-sm ring-1 ring-neutral-900/5 dark:ring-white/10">
+			<div class="px-6 py-4 border-b border-neutral-900/5 dark:border-white/10">
+				<h3 class="text-base font-semibold text-neutral-900 dark:text-white">Top Endpoints</h3>
+			</div>
+			<div class="flow-root">
+				<div class="overflow-x-auto">
+					<table class="min-w-full divide-y divide-neutral-900/5 dark:divide-white/10">
+						<thead>
+							<tr class="bg-neutral-50 dark:bg-white/5">
+								<th scope="col" class="py-3.5 pl-6 pr-3 text-left text-sm font-semibold text-neutral-900 dark:text-white">Endpoint</th>
+								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900 dark:text-white">Requests</th>
+								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900 dark:text-white">Avg. Response Time</th>
+								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900 dark:text-white">Error Rate</th>
+								<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900 dark:text-white">Last 24h Trend</th>
+							</tr>
+						</thead>
+						<tbody class="divide-y divide-neutral-900/5 dark:divide-white/10" id="topEndpointsBody">
+							<!-- Rows will be populated by JavaScript -->
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Initialize charts and data
+document.addEventListener('DOMContentLoaded', function() {
+	// Fetch and update metrics
+	fetchMetrics();
+	
+	// Initialize charts
+	initializeCharts();
+	
+	// Update top endpoints table
+	updateTopEndpoints();
+	
+	// Set up refresh interval
+	setInterval(fetchMetrics, 30000); // Refresh every 30 seconds
+});
+
+function fetchMetrics() {
+	// Simulate API call - Replace with actual API endpoint
+	fetch('/admin/api/analytics/metrics')
+		.then(response => response.json())
+		.then(data => {
+			document.getElementById('totalRequests').textContent = data.totalRequests.toLocaleString();
+			document.getElementById('successRate').textContent = data.successRate + '%';
+			document.getElementById('avgResponseTime').textContent = data.avgResponseTime + 'ms';
+			document.getElementById('errorRate').textContent = data.errorRate + '%';
+		})
+		.catch(error => console.error('Error fetching metrics:', error));
+}
+
+function initializeCharts() {
+	// Request Volume Chart
+	const requestCtx = document.getElementById('requestVolumeChart').getContext('2d');
+	new Chart(requestCtx, {
+		type: 'line',
+		data: {
+			labels: Array.from({length: 24}, (_, i) => `${23-i}h ago`).reverse(),
+			datasets: [{
+				label: 'Requests',
+				data: Array.from({length: 24}, () => Math.floor(Math.random() * 1000)),
+				borderColor: 'rgb(59, 130, 246)',
+				backgroundColor: 'rgba(59, 130, 246, 0.1)',
+				fill: true,
+				tension: 0.4
+			}]
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			plugins: {
+				legend: {
+					display: false
+				}
+			},
+			scales: {
+				y: {
+					beginAtZero: true,
+					grid: {
+						color: 'rgba(0, 0, 0, 0.1)'
+					}
+				},
+				x: {
+					grid: {
+						display: false
+					}
+				}
+			}
+		}
+	});
+
+	// Response Time Distribution Chart
+	const responseCtx = document.getElementById('responseTimeChart').getContext('2d');
+	new Chart(responseCtx, {
+		type: 'bar',
+		data: {
+			labels: ['0-100ms', '100-200ms', '200-300ms', '300-400ms', '400-500ms', '500ms+'],
+			datasets: [{
+				label: 'Requests',
+				data: Array.from({length: 6}, () => Math.floor(Math.random() * 100)),
+				backgroundColor: 'rgba(59, 130, 246, 0.5)',
+				borderColor: 'rgb(59, 130, 246)',
+				borderWidth: 1
+			}]
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			plugins: {
+				legend: {
+					display: false
+				}
+			},
+			scales: {
+				y: {
+					beginAtZero: true,
+					grid: {
+						color: 'rgba(0, 0, 0, 0.1)'
+					}
+				},
+				x: {
+					grid: {
+						display: false
+					}
+				}
+			}
+		}
+	});
+}
+
+function updateTopEndpoints() {
+	const endpoints = [
+		{ path: '/api/v1/servers', requests: 15234, avgResponse: 127, errorRate: 0.5, trend: 'up' },
+		{ path: '/api/v1/users', requests: 12453, avgResponse: 98, errorRate: 0.3, trend: 'down' },
+		{ path: '/api/v1/nodes', requests: 8765, avgResponse: 145, errorRate: 0.8, trend: 'up' },
+		{ path: '/api/v1/backups', requests: 6543, avgResponse: 234, errorRate: 1.2, trend: 'stable' },
+		{ path: '/api/v1/statistics', requests: 4321, avgResponse: 167, errorRate: 0.4, trend: 'up' }
+	];
+
+	const tbody = document.getElementById('topEndpointsBody');
+	tbody.innerHTML = endpoints.map(endpoint => `
+		<tr class="hover:bg-neutral-50 dark:hover:bg-white/5">
+			<td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm text-neutral-900 dark:text-white">${endpoint.path}</td>
+			<td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-700 dark:text-neutral-300">${endpoint.requests.toLocaleString()}</td>
+			<td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-700 dark:text-neutral-300">${endpoint.avgResponse}ms</td>
+			<td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-700 dark:text-neutral-300">${endpoint.errorRate}%</td>
+			<td class="whitespace-nowrap px-3 py-4 text-sm">
+				<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+					endpoint.trend === 'up' ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20' :
+					endpoint.trend === 'down' ? 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20' :
+					'bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20'
+				}">
+					${endpoint.trend === 'up' ? '↑' : endpoint.trend === 'down' ? '↓' : '→'} ${endpoint.trend}
+				</span>
+			</td>
+		</tr>
+	`).join('');
+}
+
+function downloadReport() {
+	// Implement report download functionality
+	alert('Downloading analytics report...');
+}
+</script>
+
+<%- include('../../components/toast') %>
+
+<div class="w-60 h-full">
+	<%- include('../../components/footer') %>
+</div>

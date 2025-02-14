@@ -15,6 +15,7 @@
     isAdmin     Boolean  @default(false)
     description String?  @default("No About Me")
     servers     Server[]
+    apiKeys     ApiKey[]
   }
 
   model Session {
@@ -67,17 +68,32 @@ model Images {
   servers     Server[]
 }
 
+  model Location {
+    id          Int      @id @default(autoincrement())
+    UUID        String   @unique @default(uuid())
+    shortCode   String   @unique
+    name        String
+    description String?
+    latitude    Float?
+    longitude   Float?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    nodes       Node[]
+  }
+
   model Node {
-    id        Int      @id @default(autoincrement())
-    name      String
-    ram       Int      @default(0)
-    cpu       Int      @default(0)
-    disk      Int      @default(0)
-    address   String   @default("127.0.0.1")
-    port      Int      @default(3001)
-    key       String
-    createdAt DateTime @default(now())
-    servers   Server[]
+    id          Int      @id @default(autoincrement())
+    name        String
+    ram         BigInt   @default(0)
+    cpu         BigInt   @default(0)
+    disk        Int      @default(0)
+    address     String   @default("127.0.0.1")
+    port        Int      @default(3001)
+    key         String
+    locationId  Int?
+    location    Location? @relation(fields: [locationId], references: [id])
+    createdAt   DateTime @default(now())
+    servers     Server[]
   }
 
 model settings {
@@ -92,8 +108,40 @@ model settings {
 }
 
 model ApiKey {
-  id        Int      @id @default(autoincrement())
-  key       String   @unique
-  createdAt DateTime @default(now())
-  active    Boolean  @default(true)
+  id              Int       @id @default(autoincrement())
+  key             String    @unique
+  name            String
+  description     String?
+  userId          Int
+  user            Users     @relation(fields: [userId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  expiresAt       DateTime?
+  lastUsed        DateTime?
+  lastReset       DateTime  @default(now())
+  active          Boolean   @default(true)
+  ipRestrictions  String?   // Comma-separated list of allowed IPs
+  rateLimit       Int       @default(60) // Requests per minute
+  requestCount    Int       @default(0)
+  permissions     Json      // Stores permission settings for different resources
+  requests        ApiRequest[]
+
+  @@index([userId])
+  @@index([key])
+}
+
+model ApiRequest {
+  id           Int      @id @default(autoincrement())
+  apiKeyId     Int
+  apiKey       ApiKey   @relation(fields: [apiKeyId], references: [id])
+  method       String
+  path         String
+  statusCode   Int
+  responseTime Int      // in milliseconds
+  timestamp    DateTime @default(now())
+  ipAddress    String?
+  userAgent    String?
+
+  @@index([apiKeyId])
+  @@index([timestamp])
 }

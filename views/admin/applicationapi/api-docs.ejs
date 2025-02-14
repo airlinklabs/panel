@@ -1,0 +1,156 @@
+<%- include('../../partials/admin/header.ejs') %>
+
+<div class="p-4 sm:p-6 lg:p-8">
+	<div class="sm:flex sm:items-center">
+		<div class="sm:flex-auto">
+			<h1 class="text-2xl font-semibold text-neutral-900 dark:text-white">API Documentation</h1>
+			<p class="mt-2 text-sm text-neutral-700 dark:text-neutral-400">Comprehensive guide for integrating with our API endpoints.</p>
+		</div>
+		<div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+			<a href="/admin/applicationapi/api-keys" class="flex items-center justify-center rounded-xl bg-neutral-900 dark:bg-white/10 px-3 py-2 text-sm font-semibold text-white dark:text-neutral-200 shadow-sm hover:bg-neutral-700 dark:hover:bg-white/20">
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+				</svg>
+				Manage API Keys
+			</a>
+		</div>
+	</div>
+
+	<div class="mt-8 flow-root">
+		<div class="rounded-xl bg-white/50 dark:bg-white/5 shadow-sm ring-1 ring-neutral-900/5 dark:ring-white/10">
+			<div class="p-6">
+				<div class="rounded-lg bg-neutral-900/5 dark:bg-white/5 p-4 mb-6">
+					<div class="flex items-center">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-700 dark:text-neutral-400 mr-2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+						</svg>
+						<p class="text-sm text-neutral-700 dark:text-neutral-400">All API requests require an API key to be sent in the <code class="bg-neutral-100 dark:bg-white/10 px-2 py-1 rounded text-xs">X-API-Key</code> header.</p>
+					</div>
+				</div>
+
+				<% endpoints.forEach(endpoint => { %>
+					<div class="mb-8 rounded-xl border border-neutral-900/10 dark:border-white/10 overflow-hidden">
+						<div class="bg-neutral-50 dark:bg-white/5 px-4 py-3 flex items-center justify-between">
+							<div class="flex items-center">
+								<code class="text-sm font-mono text-neutral-900 dark:text-white"><%= endpoint.path %></code>
+								<div class="ml-4 flex gap-2">
+									<% endpoint.methods.forEach(method => { %>
+										<span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium <%= 
+											method === 'GET' ? 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20' :
+											method === 'POST' ? 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20' :
+											method === 'PUT' ? 'bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20' :
+											method === 'DELETE' ? 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20' :
+											'bg-neutral-50 text-neutral-700 ring-1 ring-inset ring-neutral-600/20'
+										%>">
+											<%= method %>
+										</span>
+									<% }); %>
+								</div>
+							</div>
+						</div>
+						<div class="p-4">
+							<p class="text-sm text-neutral-700 dark:text-neutral-400 mb-4"><%= endpoint.description %></p>
+							<div class="mt-4">
+								<h4 class="text-sm font-medium text-neutral-900 dark:text-white mb-2">Example Request</h4>
+								<div class="relative">
+									<pre class="overflow-x-auto rounded-lg bg-neutral-900 p-4 text-sm text-white"><code>curl -X <%= endpoint.methods[0] %> \
+	-H "X-API-Key: your-api-key" \
+	<%= process.env.URL || 'http://localhost:3000' %><%= endpoint.path %></code></pre>
+									<button onclick="copyToClipboard(this.previousElementSibling.textContent)" class="absolute right-2 top-2 p-2 text-neutral-400 hover:text-white">
+										<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+											<path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+										</svg>
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				<% }); %>
+
+				<div class="space-y-8 mt-8">
+					<!-- Authentication Section -->
+					<div>
+						<h3 class="text-lg font-medium text-neutral-900 dark:text-white mb-4">Authentication</h3>
+						<div class="rounded-lg bg-neutral-50 dark:bg-white/5 p-4">
+							<p class="text-sm text-neutral-700 dark:text-neutral-400 mb-3">Include your API key in the <code class="bg-neutral-100 dark:bg-white/10 px-2 py-1 rounded text-xs">X-API-Key</code> header:</p>
+							<pre class="overflow-x-auto rounded-lg bg-neutral-900 p-4 text-sm text-white"><code>X-API-Key: your-api-key</code></pre>
+						</div>
+					</div>
+
+					<!-- Rate Limiting Section -->
+					<div>
+						<h3 class="text-lg font-medium text-neutral-900 dark:text-white mb-4">Rate Limiting</h3>
+						<div class="rounded-lg bg-neutral-50 dark:bg-white/5 p-4">
+							<p class="text-sm text-neutral-700 dark:text-neutral-400 mb-3">API requests are rate-limited based on your API key's configuration. The default limit is 60 requests per minute.</p>
+							<p class="text-sm text-neutral-700 dark:text-neutral-400 mb-2">Rate limit headers are included in all responses:</p>
+							<ul class="list-disc list-inside text-sm text-neutral-700 dark:text-neutral-400 space-y-1">
+								<li><code class="bg-neutral-100 dark:bg-white/10 px-2 py-1 rounded text-xs">X-RateLimit-Limit</code>: Maximum requests per minute</li>
+								<li><code class="bg-neutral-100 dark:bg-white/10 px-2 py-1 rounded text-xs">X-RateLimit-Remaining</code>: Remaining requests in the current window</li>
+								<li><code class="bg-neutral-100 dark:bg-white/10 px-2 py-1 rounded text-xs">X-RateLimit-Reset</code>: Time when the rate limit resets</li>
+							</ul>
+						</div>
+					</div>
+
+					<!-- Error Responses Section -->
+					<div>
+						<h3 class="text-lg font-medium text-neutral-900 dark:text-white mb-4">Error Responses</h3>
+						<div class="rounded-lg bg-neutral-50 dark:bg-white/5 p-4">
+							<p class="text-sm text-neutral-700 dark:text-neutral-400 mb-3">Error responses will be returned in the following format:</p>
+							<pre class="overflow-x-auto rounded-lg bg-neutral-900 p-4 text-sm text-white mb-4"><code>{
+	"error": "Error message description"
+}</code></pre>
+							<p class="text-sm text-neutral-700 dark:text-neutral-400 mb-2">Common HTTP status codes:</p>
+							<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+								<div class="flex items-center">
+									<span class="inline-flex items-center rounded-md bg-neutral-100 dark:bg-white/10 px-2 py-1 text-xs font-medium text-neutral-700 dark:text-neutral-300">400</span>
+									<span class="ml-2 text-sm text-neutral-700 dark:text-neutral-400">Bad Request</span>
+								</div>
+								<div class="flex items-center">
+									<span class="inline-flex items-center rounded-md bg-neutral-100 dark:bg-white/10 px-2 py-1 text-xs font-medium text-neutral-700 dark:text-neutral-300">401</span>
+									<span class="ml-2 text-sm text-neutral-700 dark:text-neutral-400">Unauthorized</span>
+								</div>
+								<div class="flex items-center">
+									<span class="inline-flex items-center rounded-md bg-neutral-100 dark:bg-white/10 px-2 py-1 text-xs font-medium text-neutral-700 dark:text-neutral-300">403</span>
+									<span class="ml-2 text-sm text-neutral-700 dark:text-neutral-400">Forbidden</span>
+								</div>
+								<div class="flex items-center">
+									<span class="inline-flex items-center rounded-md bg-neutral-100 dark:bg-white/10 px-2 py-1 text-xs font-medium text-neutral-700 dark:text-neutral-300">404</span>
+									<span class="ml-2 text-sm text-neutral-700 dark:text-neutral-400">Not Found</span>
+								</div>
+								<div class="flex items-center">
+									<span class="inline-flex items-center rounded-md bg-neutral-100 dark:bg-white/10 px-2 py-1 text-xs font-medium text-neutral-700 dark:text-neutral-300">429</span>
+									<span class="ml-2 text-sm text-neutral-700 dark:text-neutral-400">Too Many Requests</span>
+								</div>
+								<div class="flex items-center">
+									<span class="inline-flex items-center rounded-md bg-neutral-100 dark:bg-white/10 px-2 py-1 text-xs font-medium text-neutral-700 dark:text-neutral-300">500</span>
+									<span class="ml-2 text-sm text-neutral-700 dark:text-neutral-400">Internal Server Error</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+	navigator.clipboard.writeText(text.trim()).then(() => {
+		showToast('Copied to clipboard!', 'success');
+	});
+}
+
+function showToast(message, type) {
+	Swal.fire({
+		toast: true,
+		position: 'top-end',
+		showConfirmButton: false,
+		timer: 3000,
+		icon: type,
+		title: message
+	});
+}
+</script>
+
+<%- include('../../partials/admin/footer.ejs') %>

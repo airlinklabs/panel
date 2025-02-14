@@ -1,0 +1,92 @@
+<div class="spinner-container">
+	<!-- Default Spinner -->
+	<div class="spinner-default hidden">
+		<div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+	</div>
+
+	<!-- Dots Spinner -->
+	<div class="spinner-dots hidden">
+		<div class="flex space-x-1">
+			<div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+			<div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+			<div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+		</div>
+	</div>
+
+	<!-- Pulse Spinner -->
+	<div class="spinner-pulse hidden">
+		<div class="w-8 h-8 bg-blue-500 rounded-full animate-pulse"></div>
+	</div>
+</div>
+
+<script>
+	function showSpinner(options = {}) {
+		const {
+			type = 'default',
+			container = null,
+			size = 'medium',
+			color = 'blue'
+		} = options;
+
+		// Create spinner element
+		const spinner = document.createElement('div');
+		spinner.className = 'flex items-center justify-center p-4';
+
+		// Get the appropriate spinner HTML based on type
+		const spinnerContent = document.querySelector(`.spinner-${type}`).cloneNode(true);
+		spinnerContent.classList.remove('hidden');
+
+		// Apply size classes
+		const sizeClasses = {
+			small: 'scale-75',
+			medium: 'scale-100',
+			large: 'scale-150'
+		};
+		spinnerContent.classList.add(sizeClasses[size] || 'scale-100');
+
+		// Apply color classes
+		const elements = spinnerContent.querySelectorAll('[class*="bg-blue-"], [class*="border-blue-"]');
+		elements.forEach(element => {
+			element.className = element.className.replace(/bg-blue-|border-blue-/, `bg-${color}-`);
+		});
+
+		spinner.appendChild(spinnerContent);
+
+		// Add spinner to container or body
+		if (container) {
+			const targetContainer = typeof container === 'string' 
+				? document.querySelector(container)
+				: container;
+			
+			if (targetContainer) {
+				targetContainer.appendChild(spinner);
+			}
+		} else {
+			document.body.appendChild(spinner);
+		}
+
+		return spinner;
+	}
+
+	function hideSpinner(spinner) {
+		if (spinner && spinner.parentNode) {
+			spinner.parentNode.removeChild(spinner);
+		}
+	}
+
+	// Example usage:
+	/*
+	// Show default spinner
+	const spinner = showSpinner({
+		type: 'default',
+		size: 'medium',
+		color: 'blue',
+		container: '#loading-container'
+	});
+
+	// Hide spinner after 3 seconds
+	setTimeout(() => {
+		hideSpinner(spinner);
+	}, 3000);
+	*/
+</script>

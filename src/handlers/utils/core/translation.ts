@@ -14,30 +14,32 @@ function loadTranslations(lang: string): Record<string, unknown> {
   );
 
   try {
+    let translations;
     if (fs.existsSync(langPath)) {
-      return JSON.parse(fs.readFileSync(langPath, 'utf8'));
+      translations = JSON.parse(fs.readFileSync(langPath, 'utf8'));
+    } else {
+      translations = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
     }
-    return JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
+    logger.info(`Loaded translations for ${lang}`);
+    return translations;
   } catch (error) {
     logger.error(`Error loading translations for ${lang}:`, error);
-    try {
-      return JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
-    } catch (fallbackError) {
-      logger.error(
-        'Error loading default English translations:',
-        fallbackError,
-      );
-      return {};
-    }
+    return {};
   }
 }
+
 
 export function translationMiddleware(
   req: Request,
   res: Response,
   next: () => void,
 ) {
-  (req as any).lang = req.cookies && req.cookies.lang ? req.cookies.lang : 'en';
-  (req as any).translations = loadTranslations((req as any).lang);
+  const lang = req.cookies && req.cookies.lang ? req.cookies.lang : 'en';
+  const translations = loadTranslations(lang);
+  
+  (req as any).lang = lang;
+  (req as any).translations = translations;
+  res.locals.translations = translations;
+  
   next();
 }

@@ -21,37 +21,50 @@ function generateApiKey(length: number): string {
 interface NodeWithInstance {
   id: number;
   name: string;
-  ram: number;
-  cpu: number;
+  ram: string;  // Changed to string for JSON serialization
+  cpu: string;  // Changed to string for JSON serialization
   disk: number;
   address: string;
   port: number;
   key: string;
   createdAt: Date;
-  instances: any;
+  locationId?: number;
+  location?: {
+    id: number;
+    name: string;
+    shortCode: string;
+  };
+  servers: any[];
+  instances: any[];
 }
 
 async function listNodes(res: Response) {
   try {
-    const nodes = await prisma.node.findMany();
+    const nodes = await prisma.node.findMany({
+      include: {
+        location: true,
+        servers: true // Include servers directly in the node query
+      }
+    });
     const nodesWithStatus = [];
 
     for (const node of nodes) {
-      const instances = await prisma.server.findMany({
-        where: {
-          id: node.id,
-        },
-      });
-      (node as NodeWithInstance).instances = instances || [];
-      nodesWithStatus.push(await checkNodeStatus(node));
+      const nodeWithInstance = {
+        ...node,
+        ram: node.ram.toString(),
+        cpu: node.cpu.toString(),
+        instances: node.servers || []
+      } as NodeWithInstance;
+      nodesWithStatus.push(await checkNodeStatus(nodeWithInstance));
     }
 
     return nodesWithStatus;
   } catch (error) {
     logger.error('Error fetching nodes:', error);
-    res.status(500).json({ message: 'Error fetching nodes.' });
+    return []; // Return empty array instead of undefined
   }
 }
+
 
 const adminModule: Module = {
   info: {
@@ -77,7 +90,7 @@ const adminModule: Module = {
             return res.redirect('/login');
           }
 
-          const nodes = await listNodes(res);
+          const nodes = await listNodes(res) || []; // Ensure nodes is at least an empty array
 
           const instance = await prisma.server.findMany();
           const settings = await prisma.settings.findUnique({
@@ -110,13 +123,24 @@ const adminModule: Module = {
           }
 
           const nodes = await listNodes(res);
-
+          const locations = await prisma.location.findMany();
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
-          res.render('admin/nodes/create', { user, req, settings, nodes });
+        
+          logger.info(`Locations found: ${JSON.stringify(locations)}`);
+          logger.info(`User: ${JSON.stringify(user)}`);
+          logger.info(`Settings: ${JSON.stringify(settings)}`);
+        
+          res.render('admin/nodes/create', { 
+            user, 
+            req, 
+            settings, 
+            nodes, 
+            locations: locations || [] 
+          });
         } catch (error) {
-          logger.error('Error fetching user:', error);
+          logger.error('Error in /admin/nodes/create:', error);
           return res.redirect('/login');
         }
       },
@@ -135,7 +159,7 @@ const adminModule: Module = {
       '/admin/nodes/create',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const { name, ram, cpu, disk, address, port } = req.body;
+        const { name, ram, cpu, disk, address, port, locationId } = req.body;
 
         if (!name || typeof name !== 'string') {
           res.status(400).json({ message: 'Name must be a string.' });
@@ -197,7 +221,7 @@ const adminModule: Module = {
 
           const key = generateApiKey(32);
 
-          const ramValue = parseFloat(ram);
+          const ramValue = parseInt(ram);
           const cpuValue = parseFloat(cpu);
           const diskValue = parseFloat(disk);
           const portValue = parseInt(port);
@@ -205,12 +229,13 @@ const adminModule: Module = {
           const node = await prisma.node.create({
             data: {
               name,
-              ram: ramValue,
-              cpu: cpuValue,
+              ram: BigInt(ramValue),
+              cpu: BigInt(cpuValue),
               disk: diskValue,
               address,
               port: portValue,
               key,
+              locationId: locationId ? parseInt(locationId) : null,
               createdAt: new Date(),
             },
           });
@@ -277,7 +302,10 @@ const adminModule: Module = {
 
           const nodeId = parseInt(req.params.id);
 
-          const node = await prisma.node.findUnique({ where: { id: nodeId } });
+          const node = await prisma.node.findUnique({ 
+            where: { id: nodeId },
+            include: { location: true }
+          });
           if (!node) {
             res.status(404).json({ message: 'Node not found.' });
             return;
@@ -318,11 +346,12 @@ const adminModule: Module = {
             res.status(404).json({ message: 'Node not found.' });
             return;
           }
+          const locations = await prisma.location.findMany();
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
 
-          res.render('admin/nodes/edit', { node, user, req, settings });
+          res.render('admin/nodes/edit', { node, user, req, settings, locations });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -343,12 +372,8 @@ const adminModule: Module = {
 
           const nodeId = parseInt(req.params.id);
 
-          const name = req.body.name;
-          const ram = parseInt(req.body.ram);
-          const cpu = parseInt(req.body.cpu);
-          const disk = parseInt(req.body.disk);
-          const address = req.body.address;
-          const port = parseInt(req.body.port);
+          const { name, ram, cpu, disk, address, port, locationId } = req.body;
+
 
           if (
             !name ||
@@ -369,11 +394,12 @@ const adminModule: Module = {
             where: { id: nodeId },
             data: {
               name,
-              ram,
-              cpu,
-              disk,
+              ram: BigInt(ram),
+              cpu: BigInt(cpu),
+              disk: parseInt(disk),
               address,
-              port,
+              port: parseInt(port),
+              locationId: locationId ? parseInt(locationId) : null,
             },
           });
 

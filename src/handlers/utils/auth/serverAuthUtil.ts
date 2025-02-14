@@ -2,7 +2,6 @@ import { PrismaClient } from '@prisma/client';
 import { Request, Response, NextFunction } from 'express';
 import { WebSocket } from 'ws';
 import bcrypt from 'bcrypt';
-
 import logger from '../../logger';
 
 /**
@@ -12,11 +11,9 @@ import logger from '../../logger';
  * @param {string} serverIdParam - Name of the parameter containing the server ID (default: 'id').
  * @returns {Function} Express middleware function.
  */
-export const isAuthenticatedForServer =
-  (serverIdParam: string = 'id') =>
+export const isAuthenticatedForServer = (serverIdParam: string = 'id') =>
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const prisma = new PrismaClient();
-
     const userId = req.session?.user?.id;
 
     if (!userId) {
@@ -33,13 +30,13 @@ export const isAuthenticatedForServer =
         res.redirect('/login');
         return;
       }
+
       if (user.isAdmin) {
         next();
         return;
       }
 
       const serverId = req.params[serverIdParam];
-
       const server = await prisma.server.findUnique({
         where: { UUID: serverId },
         include: { owner: true },
@@ -59,8 +56,10 @@ export const isAuthenticatedForServer =
     }
   };
 
-export const isAuthenticatedForServerWS =
-  (serverIdParam: string = 'id', passwordParam: string = 'password') =>
+export const isAuthenticatedForServerWS = (
+  serverIdParam: string = 'id',
+  passwordParam: string = 'password'
+) =>
   async (ws: WebSocket, req: any, next: NextFunction): Promise<void> => {
     const prisma = new PrismaClient();
     const userId = req.session?.user?.id || +req.query.userId;
@@ -77,6 +76,7 @@ export const isAuthenticatedForServerWS =
         ws.close();
         return;
       }
+
       if (user.isAdmin) {
         next();
         return;
@@ -96,7 +96,7 @@ export const isAuthenticatedForServerWS =
       if (password && server?.owner?.password) {
         const isPasswordValid = await bcrypt.compare(
           password,
-          server.owner.password,
+          server.owner.password
         );
         if (isPasswordValid) {
           next();

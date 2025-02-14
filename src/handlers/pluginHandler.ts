@@ -49,7 +49,7 @@ export function loadPlugins(app: Express) {
         const pluginFunction = eval(pluginFilesMap[pluginMain]);
 
         if (typeof pluginFunction !== 'function') {
-          logger.error(`Invalid main export for plugin`, packageJson.name);
+          logger.error('Invalid main export for plugin', packageJson.name);
           continue;
         }
 
