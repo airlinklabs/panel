@@ -13,36 +13,33 @@ function loadTranslations(lang: string): Record<string, unknown> {
     '../../../../storage/lang/en/lang.json',
   );
 
-  const defaultTranslations = {
-    adminCreateNodeTitle: 'Create Node',
-    adminCreateNodeText: 'Create a new node on Airlink',
-    location: 'Location',
-    create: 'Create',
-    addressIP: 'IP Address', 
-    daemonPort: 'Daemon Port',
-    name: 'Name',
-    ram: 'RAM',
-    cpu: 'CPU',
-    disk: 'Disk'
-  };
-
   try {
+    let translations;
     if (fs.existsSync(langPath)) {
-      return { ...defaultTranslations, ...JSON.parse(fs.readFileSync(langPath, 'utf8')) };
+      translations = JSON.parse(fs.readFileSync(langPath, 'utf8'));
+    } else {
+      translations = JSON.parse(fs.readFileSync(fallbackPath, 'utf8'));
     }
-    return { ...defaultTranslations, ...JSON.parse(fs.readFileSync(fallbackPath, 'utf8')) };
+    logger.info(`Loaded translations for ${lang}`);
+    return translations;
   } catch (error) {
     logger.error(`Error loading translations for ${lang}:`, error);
-    return defaultTranslations;
+    return {};
   }
 }
+
 
 export function translationMiddleware(
   req: Request,
   res: Response,
   next: () => void,
 ) {
-  (req as any).lang = req.cookies && req.cookies.lang ? req.cookies.lang : 'en';
-  (req as any).translations = loadTranslations((req as any).lang);
+  const lang = req.cookies && req.cookies.lang ? req.cookies.lang : 'en';
+  const translations = loadTranslations(lang);
+  
+  (req as any).lang = lang;
+  (req as any).translations = translations;
+  res.locals.translations = translations;
+  
   next();
 }

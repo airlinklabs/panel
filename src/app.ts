@@ -27,8 +27,19 @@ import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
 import coreModule from './modules/core';
 import apiV1Module from './modules/api/v1/api';
-
-
+import authModule from './modules/auth/auth';
+import dashboardModule from './modules/user/dashboard';
+import adminSettingsModule from './modules/admin/settings';
+import adminNodesModule from './modules/admin/nodes';
+import adminServersModule from './modules/admin/servers';
+import adminUsersModule from './modules/admin/users';
+import adminLocationsModule from './modules/admin/locations';
+import adminImagesModule from './modules/admin/images';
+import adminOverViewModule from './modules/admin/overView';
+import userAccountModule from './modules/user/account';
+import userServerModule from './modules/user/server';
+import userServerConsoleModule from './modules/user/serverConsole';
+import userWsModule from './modules/user/wsUsers';
 
 
 loadEnv();
@@ -123,6 +134,41 @@ app.use(express.json());
 // Load cookies
 app.use(cookieParser());
 
+// Load translation middleware first
+app.use(translationMiddleware);
+
+// Load locals right after translation middleware
+app.use((req, res, next) => {
+  res.locals.name = name;
+  res.locals.airlinkVersion = airlinkVersion;
+  res.locals.translations = (req as any).translations;
+  next();
+});
+
+// Load core module first
+app.use(coreModule.router());
+
+// Load auth module after core module 
+app.use(authModule.router());
+
+// Load dashboard module
+app.use('/dashboard', dashboardModule.router());
+
+// Load user modules
+app.use('/account', userAccountModule.router());
+app.use('/server', userServerModule.router());
+app.use('/console', userServerConsoleModule.router());
+app.use('/ws', userWsModule.router());
+
+// Load admin modules
+app.use(adminSettingsModule.router());
+app.use(adminNodesModule.router());
+app.use(adminServersModule.router());
+app.use(adminUsersModule.router());
+app.use(adminLocationsModule.router());
+app.use(adminImagesModule.router());
+app.use(adminOverViewModule.router());
+
 // API v1 routes
 app.use('/api/v1', apiV1Module.router());
 
@@ -179,16 +225,8 @@ app.get('/api/docs', (_req: Request, res: Response): void => {
   });
 });
 
-// Load translation middleware first
-app.use(translationMiddleware);
 
-// Load locals after translation middleware
-app.use((req, res, next) => {
-  res.locals.name = name;
-  res.locals.airlinkVersion = airlinkVersion;
-  res.locals.translations = (req as any).translations; // Add translations to locals
-  next();
-});
+
 
 // Load error handling
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

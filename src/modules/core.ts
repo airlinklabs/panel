@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { Module } from '../handlers/moduleInit';
 import apiV1Router from './api/v1/api';
+import { isAuthenticated } from '../handlers/utils/auth/authUtil';
 
 const coreModule: Module = {
   info: {
@@ -14,6 +15,15 @@ const coreModule: Module = {
 
   router: () => {
     const router = Router();
+
+    // Root route handler
+    router.get('/', (req, res) => {
+      if (req.session?.user) {
+      res.redirect('/dashboard');
+      } else {
+      res.redirect('/login');
+      }
+    });
 
     // Mount API v1 routes
     router.use('/api/v1', apiV1Router.router());

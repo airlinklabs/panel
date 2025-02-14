@@ -23,9 +23,9 @@ interface RequestWithUser extends Request {
 
 const adminModule: Module = {
   info: {
-    name: 'Admin Nodes Module',
-    description: 'This file is for admin functionality of the Nodes.',
-    version: '1.0.0',
+    name: 'Admin Settings Module',
+    description: 'This file is for admin functionality of the Settings.',
+    version: '1.0.0', // Match AirLink version
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
     license: 'MIT',
@@ -98,34 +98,45 @@ const adminModule: Module = {
         return res.redirect('/login');
       }
 
-      const settings = await prisma.settings.findFirst();
-      const apiKeyCount = await prisma.apiKey.count();
+      const settings = await prisma.settings.findUnique({
+        where: { id: 1 },
+      });
 
-      res.render('admin/settings/settings', {
-        settings,
-        apiKeyCount,
+      // Get translations from either req or res.locals
+      const translations = (req as any).translations || res.locals.translations || {};
+      logger.info('Settings route translations:', {
+        hasTranslations: Object.keys(translations).length > 0,
+        hasAdminSettingsTitle: Boolean(translations.adminSettingsTitle),
+        hasGeneral: Boolean(translations.general),
+        adminSettingsTitle: translations.adminSettingsTitle,
+        general: translations.general
+      });
+
+      res.render('admin/settings/settings', { 
         user,
+        settings,
+        translations,
         success: req.query.success,
         error: req.query.error
       });
       } catch (error) {
-      logger.error('Error accessing settings page:', error);
+      logger.error('Error fetching user:', error);
       return res.redirect('/login');
       }
     });
 
     // API Keys management page
     router.get(
-      '/admin/settings/api-keys',
-      isAuthenticated(true),
-      async (req: RequestWithUser, res: Response) => {
-      try {
-        const userId = req.session?.user?.id;
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {
-        return res.redirect('/login');
-        }
-        res.render('admin/settings/api-keys', { user });
+        '/admin/settings/api-keys',
+        isAuthenticated(true),
+        async (_req: Request, res: Response) => {
+        try {
+          const userId = _req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            return res.redirect('/login');
+          }
+          res.render('admin/settings/api-keys', { user, _req });
         } catch (error) {
           logger.error('Error accessing API keys page:', error);
           return res.redirect('/login');

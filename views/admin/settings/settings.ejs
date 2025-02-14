@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: 'Overview' }) %>
+<%- include('../../components/header', { title: translations?.adminSettingsTitle || 'Settings' }) %>
 
 <main class="h-screen m-auto">
   <div class="flex h-screen">
@@ -10,16 +10,16 @@
     <div class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
-           <h1 class="text-base font-medium leading-6 text-white"><%= req.translations.adminSettingsTitle %></h1>
-           <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminSettingsText %></p>
-         </div>
-       </div>
+          <h1 class="text-base font-medium leading-6 text-white"><%= translations?.adminSettingsTitle || 'Settings' %></h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= translations?.adminSettingsText || 'Manage your settings' %></p>
+        </div>
+      </div>
        <div class="px-8 mt-5">
 
         <%- include('../../components/settingsTemplate') %>
 
         <div class="flex flex-col bg-white/5 pt-0 py-5 rounded-xl">
-            <h1 class="text-white text-[18px] px-5 py-4 mb-1 w-full bg-white/5 rounded-t-xl font-medium"><%= req.translations.general %></h1>
+            <h1 class="text-white text-[18px] px-5 py-4 mb-1 w-full bg-white/5 rounded-t-xl font-medium"><%= translations.general %></h1>
 
         <form id="settingsForm" class="space-y-6">
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-5 mt-5">
