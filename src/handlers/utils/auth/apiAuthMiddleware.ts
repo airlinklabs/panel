@@ -1,7 +1,8 @@
 import { RequestHandler } from 'express';
 import { prisma } from '../../utils/prisma';
-import { ApiKey, Users } from '@prisma/client';
+import { ApiKey, Users, Prisma } from '@prisma/client';
 import { ApiResponse } from '../../../types/api';
+import { performance } from 'perf_hooks';
 
 interface ApiKeyWithUser extends ApiKey {
 	user: Users;
@@ -21,6 +22,8 @@ declare global {
 }
 
 export const apiKeyMiddleware: RequestHandler = async (req, res, next): Promise<void> => {
+	const startTime = performance.now();
+	
 	try {
 		const apiKey = req.headers['x-api-key'];
 		if (!apiKey || typeof apiKey !== 'string') {
@@ -76,6 +79,30 @@ export const apiKeyMiddleware: RequestHandler = async (req, res, next): Promise<
 			}
 		}
 
+		// Add response tracking
+		const originalJson = res.json;
+		res.json = function(body) {
+			const endTime = performance.now();
+			const responseTime = Math.round(endTime - startTime);
+
+			// Track the API request
+			prisma.apiRequest.create({
+				data: {
+					apiKeyId: key.id,
+					method: req.method,
+					path: req.path,
+					statusCode: res.statusCode,
+					responseTime,
+					ipAddress: req.ip || null,
+					userAgent: req.get('user-agent') || null
+				}
+			}).catch((error: Error) => console.error('Error tracking API request:', error));
+
+
+
+			return originalJson.call(this, body);
+		};
+
 		const now = new Date();
 		if (key.lastReset) {
 			const minutesPassed = (now.getTime() - key.lastReset.getTime()) / (1000 * 60);
@@ -112,6 +139,26 @@ export const apiKeyMiddleware: RequestHandler = async (req, res, next): Promise<
 			}
 		}
 	} catch (error) {
+		const endTime = performance.now();
+		const responseTime = Math.round(endTime - startTime);
+
+		// Track failed requests
+		if (req.apiKey) {
+			prisma.apiRequest.create({
+				data: {
+					apiKeyId: req.apiKey.id,
+					method: req.method,
+					path: req.path,
+					statusCode: 500,
+					responseTime,
+					ipAddress: req.ip || null,
+					userAgent: req.get('user-agent') || null
+				}
+			}).catch((error: Error) => console.error('Error tracking API request:', error));
+
+
+		}
+
 		console.error('API Auth Error:', error);
 		res.status(500).json({
 			success: false,

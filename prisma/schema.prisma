@@ -124,7 +124,24 @@ model ApiKey {
   rateLimit       Int       @default(60) // Requests per minute
   requestCount    Int       @default(0)
   permissions     Json      // Stores permission settings for different resources
+  requests        ApiRequest[]
 
   @@index([userId])
   @@index([key])
+}
+
+model ApiRequest {
+  id           Int      @id @default(autoincrement())
+  apiKeyId     Int
+  apiKey       ApiKey   @relation(fields: [apiKeyId], references: [id])
+  method       String
+  path         String
+  statusCode   Int
+  responseTime Int      // in milliseconds
+  timestamp    DateTime @default(now())
+  ipAddress    String?
+  userAgent    String?
+
+  @@index([apiKeyId])
+  @@index([timestamp])
 }

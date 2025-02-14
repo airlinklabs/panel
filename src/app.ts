@@ -36,6 +36,7 @@ import adminUsersModule from './modules/admin/users';
 import adminLocationsModule from './modules/admin/locations';
 import adminImagesModule from './modules/admin/images';
 import adminOverViewModule from './modules/admin/overView';
+import applicationApiModule from './modules/admin/applicationapi';
 import userAccountModule from './modules/user/account';
 import userServerModule from './modules/user/server';
 import userServerConsoleModule from './modules/user/serverConsole';
@@ -168,6 +169,7 @@ app.use(adminUsersModule.router());
 app.use(adminLocationsModule.router());
 app.use(adminImagesModule.router());
 app.use(adminOverViewModule.router());
+app.use('/admin/applicationapi', applicationApiModule.router());
 
 // API v1 routes
 app.use('/api/v1', apiV1Module.router());
