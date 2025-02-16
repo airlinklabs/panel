@@ -37,11 +37,9 @@ const coreModule: Module = {
 
       const authHeader = req.headers['authorization'];
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        res
-          .status(401)
-          .json({
-            error: 'Unauthorized: Missing or malformed Authorization header',
-          });
+        res.status(401).json({
+          error: 'Unauthorized: Missing or malformed Authorization header',
+        });
         return;
       }
 
@@ -57,73 +55,79 @@ const coreModule: Module = {
 
     const router = Router();
 
-    router.get('/api/application/users', validator, async (req: Request, res: Response) => {
+    router.get(
+      '/api/application/users',
+      validator,
+      async (req: Request, res: Response) => {
         try {
-            const filter = typeof req.query.filter === 'string' 
-                ? JSON.parse(req.query.filter) 
-                : req.query.filter;
-    
-            const include = req.query.include;
-            const users = await prisma.users.findMany({
-                where: filter || {},
+          const filter =
+            typeof req.query.filter === 'string'
+              ? JSON.parse(req.query.filter)
+              : req.query.filter;
+
+          const include = req.query.include;
+          const users = await prisma.users.findMany({
+            where: filter || {},
+          });
+
+          let serverData = null;
+          if (include && include === 'servers') {
+            serverData = await prisma.server.findMany({
+              where: { ownerId: { in: users.map((user: any) => user.id) } },
+              include: { node: true, owner: true },
             });
-    
-            let serverData = null;
-            if (include && include === 'servers') {
-                serverData = await prisma.server.findMany({
-                    where: { ownerId: { in: users.map((user) => user.id) } },
-                    include: { node: true, owner: true },
-                });
+          }
+
+          const response = users.map((user: any) => {
+            const userData: any = {
+              object: 'user',
+              attributes: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                root_admin: user.isAdmin,
+              },
+              relationships: {
+                servers: [],
+              },
+            };
+
+            if (include && include === 'servers' && serverData) {
+              userData.relationships.servers = serverData
+                .filter((server: any) => server.ownerId === user.id)
+                .map((server: any) => ({
+                  object: 'server',
+                  attributes: {
+                    id: server.id,
+                    name: server.name,
+                    node: server.node,
+                  },
+                }));
             }
-    
-            const response = users.map((user) => {
-                const userData: any = {
-                    object: 'user',
-                    attributes: {
-                        id: user.id,
-                        username: user.username,
-                        email: user.email,
-                        root_admin: user.isAdmin,
-                    },
-                    relationships: {
-                        servers: [],
-                    },
-                };
-    
-                if (include && include === 'servers' && serverData) {
-                    userData.relationships.servers = serverData.filter((server) => server.ownerId === user.id).map((server) => ({
-                        object: 'server',
-                        attributes: {
-                            id: server.id,
-                            name: server.name,
-                            node: server.node,
-                        },
-                    }));
-                }
-    
-                return userData;
-            });
-    
-            res.json({
-                object: 'list',
-                data: response,
-                meta: {
-                    pagination: {
-                        total: users.length,
-                        count: users.length,
-                        per_page: 50,
-                        current_page: 1,
-                        total_pages: 1,
-                        links: {},
-                    },
-                },
-            });
-            
+
+            return userData;
+          });
+
+          res.json({
+            object: 'list',
+            data: response,
+            meta: {
+              pagination: {
+                total: users.length,
+                count: users.length,
+                per_page: 50,
+                current_page: 1,
+                total_pages: 1,
+                links: {},
+              },
+            },
+          });
         } catch (error) {
-            console.error('Error fetching users:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+          console.error('Error fetching users:', error);
+          res.status(500).json({ error: 'Internal Server Error' });
         }
-    });
+      },
+    );
 
     router.get(
       '/api/application/users/:user',
@@ -173,54 +177,54 @@ const coreModule: Module = {
 
           if (include === 'servers') {
             const servers = await prisma.server.findMany({
-                where: { ownerId: user.id },
-                include: { node: true, owner: true },
-              });
-              
-              const formattedServers = servers.map((server) => ({
-                attributes: {
-                  id: server.id,
-                  UUID: server.UUID,
-                  name: server.name,
-                  description: server.description,
-                  createdAt: server.createdAt,
-                  ports: JSON.parse(server.Ports || '[]'),
-                  limits: {
-                    memory: server.Memory,
-                    disk: server.Storage,
-                    cpu: server.Cpu,
-                  },
-                  variables: JSON.parse(server.Variables || '[]'),
-                  startCommand: server.StartCommand,
-                  dockerImage: JSON.parse(server.dockerImage || '{}'),
-                  installing: server.Installing,
-                  suspended: server.Suspended,
+              where: { ownerId: user.id },
+              include: { node: true, owner: true },
+            });
+
+            const formattedServers = servers.map((server: any) => ({
+              attributes: {
+                id: server.id,
+                UUID: server.UUID,
+                name: server.name,
+                description: server.description,
+                createdAt: server.createdAt,
+                ports: JSON.parse(server.Ports || '[]'),
+                limits: {
+                  memory: server.Memory,
+                  disk: server.Storage,
+                  cpu: server.Cpu,
                 },
-                relationships: {
-                  node: {
-                    attributes: {
-                        id: server.node.id,
-                        name: server.node.name,
-                        ram: server.node.ram.toString(),
-                        cpu: server.node.cpu.toString(),
-                        disk: server.node.disk,
-                        address: server.node.address,
-                      port: server.node.port,
-                      key: server.node.key,
-                      createdAt: server.node.createdAt,
-                    },
-                  },
-                  owner: {
-                    attributes: {
-                      id: server.owner.id,
-                      email: server.owner.email,
-                      username: server.owner.username,
-                      isAdmin: server.owner.isAdmin,
-                      description: server.owner.description,
-                    },
+                variables: JSON.parse(server.Variables || '[]'),
+                startCommand: server.StartCommand,
+                dockerImage: JSON.parse(server.dockerImage || '{}'),
+                installing: server.Installing,
+                suspended: server.Suspended,
+              },
+              relationships: {
+                node: {
+                  attributes: {
+                    id: server.node.id,
+                    name: server.node.name,
+                    ram: server.node.ram,
+                    cpu: server.node.cpu,
+                    disk: server.node.disk,
+                    address: server.node.address,
+                    port: server.node.port,
+                    key: server.node.key,
+                    createdAt: server.node.createdAt,
                   },
                 },
-              }));
+                owner: {
+                  attributes: {
+                    id: server.owner.id,
+                    email: server.owner.email,
+                    username: server.owner.username,
+                    isAdmin: server.owner.isAdmin,
+                    description: server.owner.description,
+                  },
+                },
+              },
+            }));
 
             userResponse.attributes.relationships.servers = {
               object: 'server_list',
@@ -258,7 +262,7 @@ const coreModule: Module = {
             return;
           }
 
-          password = await bcrypt.hash(password, 10)
+          password = await bcrypt.hash(password, 10);
 
           const newUser = await prisma.users.create({
             data: {
@@ -268,15 +272,13 @@ const coreModule: Module = {
             },
           });
 
-          res
-            .status(201)
-            .json({
-              atributes: {
-                id: newUser.id,
-                username: newUser.username,
-                email: newUser.email,
-              },
-            });
+          res.status(201).json({
+            atributes: {
+              id: newUser.id,
+              username: newUser.username,
+              email: newUser.email,
+            },
+          });
         } catch (error) {
           console.error('Error creating user:', error);
           res.status(500).json({ error: 'Internal server error' });
@@ -291,52 +293,55 @@ const coreModule: Module = {
         try {
           const userId = parseInt(req.params.id);
           const { username, email, first_name, last_name, password } = req.body;
-    
+
           if (!username && !email && !first_name && !last_name && !password) {
             res.status(400).json({ error: 'No fields to update' });
             return;
           }
-    
+
           const user = await prisma.users.findUnique({
             where: { id: userId },
           });
-    
+
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
           }
-    
+
           let updatedData: any = {};
-    
+
           if (username) updatedData.username = username;
           if (email) updatedData.email = email;
           if (first_name) updatedData.first_name = first_name;
           if (last_name) updatedData.last_name = last_name;
           if (password) updatedData.password = password;
 
-          updatedData.password = await bcrypt.hash(password, 10)
+          updatedData.password = await bcrypt.hash(password, 10);
 
           const updatedUser = await prisma.users.update({
             where: { id: userId },
             data: updatedData,
           });
-    
+
           res.status(200).json({
             object: 'user',
             attributes: {
               id: updatedUser.id,
               username: updatedUser.username,
-              email: updatedUser.email
+              email: updatedUser.email,
             },
           });
         } catch (error) {
           console.error('Error updating user:', error);
           res.status(500).json({ error: 'Internal server error' });
         }
-      }
+      },
     );
 
-    router.post('/api/application/servers', validator, async (req: Request, res: Response) => {
+    router.post(
+      '/api/application/servers',
+      validator,
+      async (req: Request, res: Response) => {
         const name = req.body.name;
         const description = req.body.description || 'Server Generated by API';
         const nodeId = Number(req.body.deploy.locations[0]);
@@ -346,26 +351,34 @@ const coreModule: Module = {
         const Storage = req.body.limits.disk;
         const variables = req.body.environment;
         const dockerImage = req.body.docker_image;
-      
+
         const servers = await prisma.server.findMany({
           where: { nodeId: nodeId },
         });
-      
-        const allPossiblePorts = Array.from({ length: 100 }, (_, i) => 25565 + i);
-        const usedPorts = servers.flatMap(server => 
-          JSON.parse(server.Ports).map((portInfo: { Port: string }) => parseInt(portInfo.Port.split(":")[0]))
+
+        const allPossiblePorts = Array.from(
+          { length: 100 },
+          (_, i) => 25565 + i,
         );
-      
-        const freePorts = allPossiblePorts.filter(port => !usedPorts.includes(port));
+        const usedPorts = servers.flatMap((server: any) =>
+          JSON.parse(server.Ports).map((portInfo: { Port: string }) =>
+            parseInt(portInfo.Port.split(':')[0]),
+          ),
+        );
+
+        const freePorts = allPossiblePorts.filter(
+          (port) => !usedPorts.includes(port),
+        );
         if (freePorts.length === 0) {
           res.status(400).send('No Free Ports Found.');
           return;
         }
-        const randomFreePort = freePorts[Math.floor(Math.random() * freePorts.length)];
+        const randomFreePort =
+          freePorts[Math.floor(Math.random() * freePorts.length)];
         const Ports = `${randomFreePort}:${randomFreePort}`;
-      
+
         const userId = req.body.user;
-      
+
         if (
           !name ||
           !description ||
@@ -380,9 +393,9 @@ const coreModule: Module = {
           res.status(400).send('Missing required fields');
           return;
         }
-      
+
         const Port = `[{"Port": "${Ports}", "primary": true}]`;
-      
+
         try {
           const dockerImages = await prisma.images
             .findUnique({
@@ -390,49 +403,49 @@ const coreModule: Module = {
                 id: imageId,
               },
             })
-            .then((image) => {
+            .then((image: any) => {
               if (!image) {
                 return null;
               }
               return image.dockerImages;
             });
-      
+
           if (!dockerImages) {
             res.status(400).send('Docker image not found');
             return;
           }
-      
+
           const imagesDocker = JSON.parse(dockerImages);
-      
+
           type ImageDocker = { [key: string]: string };
-      
+
           const imageDocker: ImageDocker | undefined = imagesDocker.find(
             (image: ImageDocker) => Object.values(image).includes(dockerImage),
           );
-      
+
           if (!imageDocker) {
             res.status(400).send('Docker image not found');
             return;
           }
-      
+
           const image = await prisma.images.findUnique({
             where: {
               id: parseInt(imageId),
             },
           });
-      
+
           if (!image) {
             res.status(400).send('Image not found');
             return;
           }
-      
+
           const StartCommand = image.startup;
-      
+
           if (!StartCommand) {
             res.status(400).send('Image startup command not found');
             return;
           }
-      
+
           const server = await prisma.server.create({
             data: {
               name,
@@ -449,27 +462,27 @@ const coreModule: Module = {
               dockerImage: JSON.stringify(imageDocker),
             },
           });
-      
+
           queueer.addTask(async () => {
             const servers = await prisma.server.findMany({
               where: {
-                Installing: true,
+                Queued: true,
               },
               include: {
                 image: true,
                 node: true,
               },
             });
-      
+
             for (const server of servers) {
               if (!server.Variables) {
                 await prisma.server.update({
                   where: { id: server.id },
-                  data: { Installing: false },
+                  data: { Queued: false },
                 });
                 continue;
               }
-      
+
               let ServerEnv;
               try {
                 ServerEnv = JSON.parse(server.Variables);
@@ -480,22 +493,22 @@ const coreModule: Module = {
                 );
                 await prisma.server.update({
                   where: { id: server.id },
-                  data: { Installing: false },
+                  data: { Queued: false },
                 });
                 continue;
               }
-      
+
               if (!Array.isArray(ServerEnv)) {
                 console.error(
                   `ServerEnv is not an array for server ID ${server.id}. Skipping...`,
                 );
                 await prisma.server.update({
                   where: { id: server.id },
-                  data: { Installing: false },
+                  data: { Queued: false },
                 });
                 continue;
               }
-      
+
               const env = ServerEnv.reduce(
                 (
                   acc: { [key: string]: any },
@@ -506,7 +519,7 @@ const coreModule: Module = {
                 },
                 {},
               );
-      
+
               if (server.image?.scripts) {
                 let scripts;
                 try {
@@ -518,11 +531,11 @@ const coreModule: Module = {
                   );
                   await prisma.server.update({
                     where: { id: server.id },
-                    data: { Installing: false },
+                    data: { Queued: false },
                   });
                   continue;
                 }
-      
+
                 const requestBody = {
                   id: server.UUID,
                   env: env,
@@ -533,7 +546,7 @@ const coreModule: Module = {
                     }),
                   ),
                 };
-      
+
                 try {
                   await axios.post(
                     `http://${server.node.address}:${server.node.port}/container/install`,
@@ -545,10 +558,10 @@ const coreModule: Module = {
                       },
                     },
                   );
-      
+
                   await prisma.server.update({
                     where: { id: server.id },
-                    data: { Installing: false },
+                    data: { Queued: false },
                   });
                 } catch (error) {
                   console.error(
@@ -563,13 +576,17 @@ const coreModule: Module = {
               }
             }
           }, 0);
-      
-          res.status(201).json({ message: 'Server created successfully', attributes: { id: server.UUID } });
+
+          res.status(201).json({
+            message: 'Server created successfully',
+            attributes: { id: server.UUID },
+          });
         } catch (error) {
           logger.error('Error creating server:', error);
           res.status(500).send('Error creating server');
         }
-      });
+      },
+    );
 
     return router;
   },

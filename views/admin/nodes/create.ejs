@@ -105,6 +105,7 @@
       });
 
       if (response.ok) {
+
         const result = await response.json();
         window.location.href = '/admin/nodes?err=none';
       } else {
@@ -112,9 +113,10 @@
         showToast(error.message || 'Failed to create node', 'error');
       }
     } catch (error) {
-      showToast('Error creating node: ' + error.message, 'error');
-    }
-  });
-</script>
-
-<%- include('../../components/footer') %>
+        console.log('Node created:', await response.json());
+        window.location.href = '/admin/nodes?err=none';
+      } else {
+        throw new Error('Failed to create node');
+      }
+    } catch (error) {
+      showToast('Error creating node:' + error, 'error');

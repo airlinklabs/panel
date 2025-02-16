@@ -84,7 +84,6 @@
             <% nodes.forEach(function(node) { %>
               <tr class="hover:bg-white/[0.05] transition-colors clickable-row cursor-pointer" onclick="handleRowClick(event, '/admin/node/<%= node.id %>/stats')">
               <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
-                <div class="flex items-center">
                 <div class="mr-5">
                   <% if (node.status == "Online") { %>
                   <span class="flex h-2 w-2">
@@ -136,12 +135,11 @@
               </tr>
             <% }); %>
             </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</main>
-
+          </thead>
+          <tbody class="divide-y divide-white/5 bg-white/5">
+            <% nodes.forEach(function(node) { %>
+              <tr class="hover:bg-white/[0.05] transition-colors clickable-row cursor-pointer" onclick="handleRowClick(event, '/admin/node/<%= node.id %>/stats')">
+                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
 <%- include('../../components/toast') %>
 
 <script>

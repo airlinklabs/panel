@@ -26,7 +26,6 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
 
-
 loadEnv();
 
 // Set max listeners
@@ -62,7 +61,7 @@ app.use(helmet.frameguard({ action: 'deny' }));
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000,
   max: 100,
-})
+});
 
 app.use(limiter);
 
@@ -95,14 +94,13 @@ app.use(express.json());
 // Load cookies
 app.use(cookieParser());
 
-// Load translation middleware first
+// Load translation
 app.use(translationMiddleware);
 
-// Load locals after translation middleware
+// Load locals
 app.use((req, res, next) => {
   res.locals.name = name;
   res.locals.airlinkVersion = airlinkVersion;
-  res.locals.translations = (req as any).translations; // Add translations to locals
   next();
 });
 
