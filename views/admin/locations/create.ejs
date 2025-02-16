@@ -1,0 +1,109 @@
+<%- include('../../components/header', { title: 'Create Location' }) %>
+
+<main class="h-screen m-auto">
+	<div class="flex h-screen">
+		<!-- Sidebar -->
+		<div class="w-60 h-full">
+			<%- include('../../components/template', { user, settings }) %>
+		</div>
+		<!-- Content -->
+		<div class="flex-1 p-6 overflow-y-auto pt-16">
+			<div class="sm:flex sm:items-center px-8 pt-4">
+				<div class="sm:flex-auto">
+					<h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">Create Location</h1>
+					<p class="mt-1 tracking-tight text-sm text-neutral-500">Add a new location to manage your infrastructure</p>
+				</div>
+			</div>
+
+			<div class="mt-8 px-8">
+				<form action="/admin/locations/create" method="POST" class="max-w-2xl mx-auto space-y-6 bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+
+					<div>
+						<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2" for="name">
+							Name
+						</label>
+						<input 
+							class="block w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 px-4 py-3 text-neutral-700 dark:text-neutral-200 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+							id="name" 
+							name="name" 
+							type="text" 
+							required
+							placeholder="e.g. New York City"
+						>
+					</div>
+
+					<div>
+						<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2" for="shortCode">
+							Short Code
+						</label>
+						<input 
+							class="block w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 px-4 py-3 text-neutral-700 dark:text-neutral-200 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+							id="shortCode" 
+							name="shortCode" 
+							type="text" 
+							required
+							placeholder="e.g. NYC"
+						>
+						<p class="mt-1 text-sm text-neutral-500">A unique identifier for this location (e.g., NYC, LON, SG)</p>
+					</div>
+
+					<div>
+						<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2" for="description">
+							Description
+						</label>
+						<textarea 
+							class="block w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 px-4 py-3 text-neutral-700 dark:text-neutral-200 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+							id="description" 
+							name="description" 
+							rows="3"
+							placeholder="Describe this location..."
+						></textarea>
+					</div>
+
+					<div class="grid grid-cols-2 gap-6">
+						<div>
+							<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2" for="latitude">
+								Latitude
+							</label>
+							<input 
+								class="block w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 px-4 py-3 text-neutral-700 dark:text-neutral-200 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+								id="latitude" 
+								name="latitude" 
+								type="number" 
+								step="any"
+								placeholder="e.g. 40.7128"
+							>
+						</div>
+						<div>
+							<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2" for="longitude">
+								Longitude
+							</label>
+							<input 
+								class="block w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 px-4 py-3 text-neutral-700 dark:text-neutral-200 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+								id="longitude" 
+								name="longitude" 
+								type="number" 
+								step="any"
+								placeholder="e.g. -74.0060"
+							>
+						</div>
+					</div>
+
+					<div class="flex items-center justify-end space-x-4 pt-4">
+						<a href="/admin/locations" 
+							class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white">
+							Cancel
+						</a>
+						<button 
+							type="submit"
+							class="px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-neutral-900">
+							Create Location
+						</button>
+					</div>
+				</form>
+			  </div>
+			</div>
+		  </div>
+		</main>
+
+		<%- include('../../components/footer') %>

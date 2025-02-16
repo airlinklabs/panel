@@ -1,0 +1,265 @@
+<!-- User Management Popup -->
+<template id="userManagementPopup">
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-xl max-w-4xl w-full transform transition-all">
+			<div class="flex items-center justify-between p-6 border-b dark:border-neutral-800">
+				<h3 class="text-lg font-semibold text-neutral-900 dark:text-white">User Management</h3>
+				<button class="close-btn text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+				</button>
+			</div>
+
+			<div class="p-6">
+				<!-- Tabs -->
+				<div class="border-b dark:border-neutral-800">
+					<nav class="flex space-x-4" role="tablist">
+						<button class="px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-600" role="tab" data-tab="users">Users</button>
+						<button class="px-4 py-2 text-sm font-medium text-neutral-500 hover:text-neutral-700" role="tab" data-tab="roles">Roles</button>
+						<button class="px-4 py-2 text-sm font-medium text-neutral-500 hover:text-neutral-700" role="tab" data-tab="permissions">Permissions</button>
+					</nav>
+				</div>
+
+				<!-- Users Tab -->
+				<div class="tab-panel" data-panel="users">
+					<div class="py-4">
+						<div class="flex justify-between mb-4">
+							<div class="relative">
+								<input type="text" placeholder="Search users..." class="pl-10 pr-4 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white">
+								<svg class="absolute left-3 top-2.5 w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+								</svg>
+							</div>
+							<button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Add User</button>
+						</div>
+
+						<div class="overflow-x-auto">
+							<table class="min-w-full">
+								<thead>
+									<tr class="text-left text-sm font-medium text-neutral-500">
+										<th class="px-4 py-3">User</th>
+										<th class="px-4 py-3">Role</th>
+										<th class="px-4 py-3">Status</th>
+										<th class="px-4 py-3">Last Active</th>
+										<th class="px-4 py-3">Actions</th>
+									</tr>
+								</thead>
+								<tbody class="text-sm" id="userTableBody">
+									<!-- User rows will be dynamically inserted here -->
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<!-- Roles Tab -->
+				<div class="tab-panel hidden" data-panel="roles">
+					<div class="py-4">
+						<div class="flex justify-between mb-4">
+							<h4 class="text-lg font-medium text-neutral-900 dark:text-white">Available Roles</h4>
+							<button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Add Role</button>
+						</div>
+						<div class="space-y-4" id="rolesList">
+							<!-- Role cards will be dynamically inserted here -->
+						</div>
+					</div>
+				</div>
+
+				<!-- Permissions Tab -->
+				<div class="tab-panel hidden" data-panel="permissions">
+					<div class="py-4">
+						<div class="grid grid-cols-3 gap-4" id="permissionsList">
+							<!-- Permission groups will be dynamically inserted here -->
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+	class UserManagementPopupManager extends PopupManager {
+		showUserManagement(config = {}) {
+			const template = document.getElementById('userManagementPopup');
+			const popup = template.content.cloneNode(true);
+			const wrapper = document.createElement('div');
+			wrapper.appendChild(popup);
+
+			// Initialize tabs
+			this.initializeTabs(wrapper);
+
+			// Initialize users table
+			this.initializeUsersTable(wrapper, config.users || []);
+
+			// Initialize roles list
+			this.initializeRolesList(wrapper, config.roles || []);
+
+			// Initialize permissions list
+			this.initializePermissionsList(wrapper, config.permissions || []);
+
+			// Handle close button
+			wrapper.querySelector('.close-btn').addEventListener('click', () => {
+				this.closePopup(wrapper);
+			});
+
+			this.showPopup(wrapper);
+			return wrapper;
+		}
+
+		initializeTabs(wrapper) {
+			const tabs = wrapper.querySelectorAll('[role="tab"]');
+			const panels = wrapper.querySelectorAll('.tab-panel');
+
+			tabs.forEach(tab => {
+				tab.addEventListener('click', () => {
+					// Remove active states
+					tabs.forEach(t => {
+						t.classList.remove('border-b-2', 'border-blue-500', 'text-blue-600');
+						t.classList.add('text-neutral-500', 'hover:text-neutral-700');
+					});
+
+					// Add active state to clicked tab
+					tab.classList.add('border-b-2', 'border-blue-500', 'text-blue-600');
+					tab.classList.remove('text-neutral-500', 'hover:text-neutral-700');
+
+					// Show corresponding panel
+					const targetPanel = tab.dataset.tab;
+					panels.forEach(panel => {
+						panel.classList.toggle('hidden', panel.dataset.panel !== targetPanel);
+					});
+				});
+			});
+		}
+
+		initializeUsersTable(wrapper, users) {
+			const tbody = wrapper.querySelector('#userTableBody');
+			users.forEach(user => {
+				const tr = document.createElement('tr');
+				tr.className = 'hover:bg-neutral-50 dark:hover:bg-neutral-800/50';
+				tr.innerHTML = `
+					<td class="px-4 py-3">
+						<div class="flex items-center">
+							<img src="${user.avatar}" alt="${user.name}" class="w-8 h-8 rounded-full mr-3">
+							<div>
+								<div class="font-medium text-neutral-900 dark:text-white">${user.name}</div>
+								<div class="text-neutral-500 text-xs">${user.email}</div>
+							</div>
+						</div>
+					</td>
+					<td class="px-4 py-3 text-neutral-700 dark:text-neutral-300">${user.role}</td>
+					<td class="px-4 py-3">
+						<span class="px-2 py-1 text-xs font-medium rounded-full ${
+							user.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-neutral-100 text-neutral-700'
+						}">${user.status}</span>
+					</td>
+					<td class="px-4 py-3 text-neutral-500">${user.lastActive}</td>
+					<td class="px-4 py-3">
+						<div class="flex space-x-2">
+							<button class="text-neutral-400 hover:text-neutral-500">
+								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+								</svg>
+							</button>
+							<button class="text-red-400 hover:text-red-500">
+								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+								</svg>
+							</button>
+						</div>
+					</td>
+				`;
+				tbody.appendChild(tr);
+			});
+		}
+
+		initializeRolesList(wrapper, roles) {
+			const rolesList = wrapper.querySelector('#rolesList');
+			roles.forEach(role => {
+				const div = document.createElement('div');
+				div.className = 'bg-white dark:bg-neutral-800 rounded-lg p-4 shadow';
+				div.innerHTML = `
+					<div class="flex justify-between items-start">
+						<div>
+							<h5 class="text-lg font-medium text-neutral-900 dark:text-white">${role.name}</h5>
+							<p class="text-sm text-neutral-500">${role.description}</p>
+						</div>
+						<button class="text-neutral-400 hover:text-neutral-500">
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+							</svg>
+						</button>
+					</div>
+					<div class="mt-4">
+						<div class="text-xs font-medium text-neutral-500 mb-2">Permissions</div>
+						<div class="flex flex-wrap gap-2">
+							${role.permissions.map(perm => `
+								<span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+									${perm}
+								</span>
+							`).join('')}
+						</div>
+					</div>
+				`;
+				rolesList.appendChild(div);
+			});
+		}
+
+		initializePermissionsList(wrapper, permissions) {
+			const permissionsList = wrapper.querySelector('#permissionsList');
+			permissions.forEach(group => {
+				const div = document.createElement('div');
+				div.className = 'bg-white dark:bg-neutral-800 rounded-lg p-4 shadow';
+				div.innerHTML = `
+					<h5 class="text-lg font-medium text-neutral-900 dark:text-white mb-4">${group.name}</h5>
+					<div class="space-y-3">
+						${group.permissions.map(perm => `
+							<label class="flex items-center">
+								<input type="checkbox" class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-neutral-300 rounded"
+									${perm.enabled ? 'checked' : ''}>
+								<span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">${perm.name}</span>
+							</label>
+						`).join('')}
+					</div>
+				`;
+				permissionsList.appendChild(div);
+			});
+		}
+	}
+
+	// Initialize user management popup manager
+	const userManagementPopupManager = new UserManagementPopupManager();
+
+	// Example usage:
+	/*
+	userManagementPopupManager.showUserManagement({
+		users: [
+			{
+				name: 'John Doe',
+				email: 'john@example.com',
+				avatar: 'https://ui-avatars.com/api/?name=John+Doe',
+				role: 'Admin',
+				status: 'active',
+				lastActive: '2 hours ago'
+			}
+		],
+		roles: [
+			{
+				name: 'Administrator',
+				description: 'Full system access',
+				permissions: ['manage_users', 'manage_servers', 'view_logs']
+			}
+		],
+		permissions: [
+			{
+				name: 'User Management',
+				permissions: [
+					{ name: 'Create Users', enabled: true },
+					{ name: 'Delete Users', enabled: false }
+				]
+			}
+		]
+	});
+	*/
+</script>

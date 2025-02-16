@@ -1,0 +1,315 @@
+<%- include('../components/header', { title: 'Account' }) %>
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
+
+<main class="h-screen m-auto">
+   <div class="flex h-screen">
+     <!-- Sidebar -->
+     <div class="w-60 h-full">
+       <%- include('../components/template') %>
+     </div>
+     <!-- Content -->
+     <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <!-- Page Header -->
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.userAccountTitle %></h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.userAccountText %></p>
+        </div>
+      </div>
+
+      <div class="px-4 sm:px-6 lg:px-8">
+        <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-2">
+           <div class="p-3 bg-transparent shadow-xl border border-white/5 rounded-xl overflow-hidden sm:p-6 lg:p-10 card w-full">
+              <div class="lg:flex lg:items-center lg:justify-between">
+                 <div class="min-w-0 flex-1">
+                    <h2 class="text-md font-medium tracking-tight">
+                       <span class="text-white flex flex-row"><%= req.translations.updateAccount %></span>
+                       <span id="statusBg" class="bg-neutral-600/20 hidden text-neutral-400 text-sm ml-1.5 font-medium mr-2 px-2.5 py-1 rounded-full">
+                          <span id="status"><%= user.username %></span>
+                       </span>
+                    </h2>
+                    <div class="flex flex-col sm:flex-row justify-between mt-5">
+                      <!-- Username Form -->
+                      <div class="w-full sm:w-1/2 sm:mr-4 mb-4 sm:mb-0">
+                         <form id="change-username-form" action="/change-username" method="POST">
+                            <label class="text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.username %>:</label>
+                            <div class="flex space-x-2">
+                               <input id="username" type="text" name="username" 
+                               class="rounded-xl focus:ring-0 focus:border-0 text-sm mt-1 mb-0 w-full transition-all hover:bg-white/5 px-4 py-2 border-white/5 bg-neutral-600/20 placeholder-neutral-400 text-white border" 
+                               placeholder="<%= user.username %>" />
+                               <button type="submit" id="change-username-btn" disabled
+                               class="mt-1 rounded-xl bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                  <%= req.translations.update %>
+                               </button>
+                            </div>
+                            <span id="username-feedback" class="mt-2 border border-neutral-600/30 text-neutral-400 text-xs font-medium mr-2 px-2.5 py-1 rounded-full inline-block min-w-max transition-opacity duration-300 ease-in-out"><%= req.translations.checking %></span>
+                         </form>
+                      </div>
+                   
+                      <!-- Email Form -->
+                      <div class="w-full sm:w-1/2">
+                         <form id="change-email-form">
+                            <label class="text-neutral-400 text-sm tracking-tight mt-4 sm:mt-0"><%= req.translations.email %>:</label>
+                            <div class="flex space-x-2">
+                               <input id="email" type="email" name="email" 
+                               class="text-white rounded-xl focus:ring-0 focus:border-0 text-sm mt-1 mb-0 w-full transition-all hover:bg-white/5 px-4 py-2 border-white/5 bg-neutral-600/20 placeholder:text-white/20 border" 
+                               placeholder="<%= user.email %>" />
+                               <button type="submit" id="change-email-btn"
+                               class="mt-1 rounded-xl bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2">
+                                  <%= req.translations.update %>
+                               </button>
+                            </div>
+                         </form>
+                      </div>
+                   </div>
+
+                    <form id="change-description-form" class="mt-5">
+                      <div class="mt-5">
+                          <label class="text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.description %>:</label>
+                          <textarea id="description" name="description" class="rounded-xl focus:ring-0 focus:border-0 text-sm mt-1 mb-0 w-full transition-all hover:bg-white/5 px-4 py-2 border-white/5 bg-neutral-600/20 placeholder-neutral-400 text-white border" placeholder="<%= user.description %>"><%= user.description %></textarea>
+                      </div>
+                      <button type="submit" id="change-description-btn" class="mt-4 block rounded-xl bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2"><%= req.translations.updateDescription %></button>
+                    </form>
+                  
+                    <form id="change-password-form" class="mt-5">
+                       <label class="text-neutral-400 text-sm tracking-tight mb-3"><%= req.translations.currentPassword %>:</label>
+                       <div id="current-password-feedback" class="border border-neutral-600/30 text-neutral-400 text-xs mr-2 px-2.5 py-1 rounded-full inline-block min-w-max transition-opacity duration-300 ease-in-out"><%= req.translations.checking %></div>
+                       <input id="currentPassword" type="password" name="currentPassword" class="rounded-xl focus:ring-0 focus:border-0 text-sm mt-1 mb-0 w-full transition-all hover:bg-white/5 px-4 py-2 border-white/5 bg-neutral-600/20 placeholder-neutral-400 text-white border" placeholder="<%= req.translations.currentPasswordHide %>" />
+                       <label class="block text-neutral-400 text-sm tracking-tight mt-4"><%= req.translations.newPassword %>:</label>
+                       <input id="newPassword" type="password" name="newPassword" class="rounded-xl focus:ring-0 focus:border-0 text-sm mt-1 mb-0 w-full transition-all hover:bg-white/5 px-4 py-2 border-white/5 bg-neutral-600/20 placeholder-neutral-400 text-white border" placeholder="<%= req.translations.newPasswordHide %>" disabled />
+                       <button type="submit" class="mt-4 block rounded-xl bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2"><%= req.translations.update_password %></button>
+                    </form>
+                   <% if (user['2fa'] !== true) { %>
+                    <!-- <button onclick="window.location.href = '/enable-2fa';" class="mt-4 block rounded-xl bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2"><%= req.translations.enabled2FA %></button> -->
+                     <p class="pt-4 text-sm text-neutral-400">2FA was in development, and so it is not available.</p>
+                   <% } else { %>
+                   <form action="/disable-2fa" method="POST">
+                    <button class="mt-4 block rounded-xl bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2"><%= req.translations.disable2FA %></button>
+                   </form>
+                   <% } %>
+                 </div>
+              </div>
+           </div>
+        </dl>
+      </div>
+   </div>
+   </div>
+</main>
+
+<%- include('../components/toast')%>
+
+<script>  
+  // Form Handlers
+  document.addEventListener('DOMContentLoaded', () => {
+    const { showToast } = createToastSystem();
+    let isSubmitting = false;
+  
+    // Generic form handler
+    const submitForm = async (endpoint, data, successMessage, redirectUrl = null) => {
+      if (isSubmitting) return;
+      isSubmitting = true;
+  
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+  
+        const responseBody = await response.text();
+        if (response.ok) {
+          showToast(successMessage, 'success');
+          if (redirectUrl) {
+            setTimeout(() => window.location.href = redirectUrl, 1500);
+          }
+        } else {
+          showToast(responseBody);
+        }
+      } catch (error) {
+        showToast(`Error: ${error.message}`);
+      } finally {
+        isSubmitting = false;
+      }
+    };
+  
+    // Username Form
+    document.getElementById('change-username-form')?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const usernameInput = event.target.querySelector('#username');
+      const newUsername = usernameInput.value.trim();
+
+      await submitForm(
+        '/update-username',
+        { newUsername: newUsername },
+        'Username updated successfully!',
+      );
+
+      const sidebarUsername = document.getElementById('sidebar-username');
+      sidebarUsername.textContent = newUsername;
+
+      usernameInput.placeholder = newUsername;
+    });
+
+  
+    // Email Form
+    document.getElementById('change-email-form')?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const email = event.target.querySelector('#email').value.trim();
+      await submitForm(
+        '/change-email',
+        { email },
+        'Email updated successfully!',
+      );
+    });
+  
+    // Description Form
+    document.getElementById('change-description-form')?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+       const descriptionEl = event.target.querySelector('#description');
+       const description = descriptionEl.value.trim();
+          
+       await submitForm(
+         '/update-description',
+         { description },
+         'Description updated successfully!'
+       );
+
+       const sidebarDescription = document.getElementById('sidebar-description');
+       sidebarDescription.textContent = description;
+
+       descriptionEl.placeholder = description;
+    });
+  
+    // Password Form
+    document.getElementById('change-password-form')?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      const currentPassword = form.querySelector('#currentPassword').value;
+      const newPassword = form.querySelector('#newPassword').value;
+      
+      await submitForm(
+        '/change-password',
+        { currentPassword, newPassword },
+        'Password updated successfully!',
+        '/login?err=UpdatedCredentials'
+      );
+    });
+  
+    // Username Validation
+    const usernameInput = document.getElementById('username');
+    const changeUsernameBtn = document.getElementById('change-username-btn');
+    const usernameFeedback = document.getElementById('username-feedback');
+    let usernameTimeoutId;
+  
+    async function checkUsername() {
+      const username = usernameInput.value.trim().toLowerCase();
+  
+      if (!username) {
+        usernameFeedback.style.display = 'none';
+        changeUsernameBtn.disabled = true;
+        return;
+      }
+  
+      usernameFeedback.style.display = 'inline-block';
+      showLoadingAnimation(usernameFeedback);
+  
+      try {
+        const response = await fetch(`/check-username?username=${encodeURIComponent(username)}`);
+        const data = await response.json();
+  
+        usernameFeedback.innerHTML = `<span id="username-status">
+          ${data.exists ? '<%= req.translations.usernameTaken %>' : '<%= req.translations.usernameIsNotTaken %>'}
+        </span>`;
+        changeUsernameBtn.disabled = data.exists;
+      } catch (error) {
+        console.log('Error checking username:', error);
+        usernameFeedback.innerHTML = `<span id="username-status">Error checking username</span>`;
+        changeUsernameBtn.disabled = true;
+      }
+    }
+  
+    usernameInput?.addEventListener('input', () => {
+      clearTimeout(usernameTimeoutId);
+      usernameTimeoutId = setTimeout(checkUsername, 500);
+    });
+  
+    // Password Validation
+    const currentPasswordInput = document.getElementById('currentPassword');
+    const newPasswordInput = document.getElementById('newPassword');
+    const currentPasswordFeedback = document.getElementById('current-password-feedback');
+    let currentPasswordTimeoutId;
+    let controller;
+  
+    function clearPasswordFeedback() {
+      currentPasswordFeedback.innerHTML = '';
+      currentPasswordFeedback.style.display = 'none';
+      newPasswordInput.disabled = true;
+      newPasswordInput.value = '';
+    }
+  
+    async function validateCurrentPassword(currentPassword) {
+      if (!currentPassword) {
+        clearPasswordFeedback();
+        return;
+      }
+  
+      try {
+        const response = await fetch('/validate-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentPassword })
+        });
+  
+        if (response.ok) {
+          const data = await response.json();
+          if (data.valid) {
+            currentPasswordFeedback.innerHTML = '<%= req.translations.correctPassword %>';
+            newPasswordInput.disabled = false;
+          } else {
+            currentPasswordFeedback.innerHTML = '<%= req.translations.incorrectPassword %>';
+            newPasswordInput.disabled = true;
+          }
+          currentPasswordFeedback.style.display = 'inline-block';
+        } else {
+          throw new Error('Failed to validate password');
+        }
+      } catch (error) {
+        console.error('Error validating password:', error);
+        currentPasswordFeedback.innerHTML = '<%= req.translations.validatingPasswordError %>';
+        currentPasswordFeedback.style.display = 'inline-block';
+      }
+    }
+  
+    currentPasswordInput?.addEventListener('input', () => {
+      clearTimeout(currentPasswordTimeoutId);
+      if (controller) {
+        controller.abort();
+      }
+  
+      controller = new AbortController();
+      const currentPassword = currentPasswordInput.value.trim();
+  
+      currentPasswordTimeoutId = setTimeout(() => {
+        validateCurrentPassword(currentPassword);
+      }, 500);
+    });
+  
+    // Loading Animation
+    function showLoadingAnimation(feedbackElement) {
+      if (!feedbackElement) return;
+      feedbackElement.innerHTML = `
+        <span id="status">
+          <svg class="animate-spin h-3 w-3 inline-flex mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span id="feedback-message">Checking...</span>
+        </span>
+      `;
+    }
+  });
+  </script>
+<%- include('../components/footer') %>

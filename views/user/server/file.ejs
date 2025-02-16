@@ -1,0 +1,165 @@
+<%- include('../../components/header', { title: 'Files' }) %>
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">
+            <%= server.name.charAt(0).toUpperCase() + server.name.slice(1) %>
+          </h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500">
+            <%= server.description %>
+          </p>
+        </div>
+      </div>
+
+      <div class="rounded-xl bg-red-800/10 px-4 py-6 mt-8 mx-8 mb-8 hidden" id="daemonIsDown">
+        <div class="flex">
+          <div class="flex-shrink-0 ml-1.5">
+            <svg class="animate-spin mt-2 h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <div class="ml-5">
+            <h3 class="text-sm font-medium text-red-400"><%= req.translations.connectionFailure %></h3>
+            <div class="text-sm text-red-400/50">
+              <p><%= req.translations.connectionFailureText %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <%- include('../../components/serverTemplate') %>
+
+      <div class="flex flex-col lg:flex-row px-8 mt-8">
+        <div class="overflow-hidden rounded-lg shadow-md w-full">
+          <!-- File Editor -->
+          <div class="bg-white dark:bg-neutral-800 p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-lg font-medium text-neutral-900 dark:text-white">
+                <a class="text-neutral-300 hover:text-neutral-200 transition" href="/server/<%= server.UUID %>/files">/app/data/</a>
+              <% 
+                  if (file.path) { 
+                      const parts = file.path.split('/');
+                      let currentPath = '';
+          
+                      parts.forEach((part, index) => {
+                          currentPath += part;
+          
+                          if (index < parts.length - 1) {
+                              %>
+                              <a href="/server/<%= server.UUID %>/files?path=<%= currentPath %>" class="text-neutral-300 hover:text-neutral-200 transition"><%= part %></a>/
+                              <% 
+                              currentPath += '/';
+                          } else {
+                              %>
+                              <span class="text-neutral-100"><%= part %></span>
+                              <%
+                          }
+                      });
+                  }
+              %>
+              </h2>
+              <div class="flex space-x-2">
+                <button id="saveBtn" class="px-4 py-2 bg-white text-black rounded-xl hover:bg-blue-700">
+                  Save
+                </button>
+              </div>
+            </div>
+            <div class="border border-neutral-200/80 rounded-lg h-[500px] p-2" id="editor-container"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast')%>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js"></script>
+<%
+    const fileExtension = file.extensions;
+    const language = fileExtension === 'js' ? 'javascript'
+                       : fileExtension === 'json' ? 'json'
+                       : fileExtension === 'html' ? 'html'
+                       : fileExtension === 'css' ? 'css'
+                       : fileExtension === 'ts' ? 'typescript'
+                       : fileExtension === 'md' ? 'markdown'
+                       : fileExtension === 'txt' ? 'plaintext'
+                       : fileExtension === 'py' ? 'python'
+                       : fileExtension === 'sh' ? 'shell'
+                       : fileExtension === 'go' ? 'go'
+                       : fileExtension === 'php' ? 'php'
+                       : fileExtension === 'sql' ? 'sql'
+                       : fileExtension === 'c' ? 'c'
+                       : fileExtension === 'cpp' ? 'cpp'
+                       : fileExtension === 'java' ? 'java'
+                       : fileExtension === 'rb' ? 'ruby'
+                       : fileExtension === 'pl' ? 'perl'
+                       : fileExtension === 'yml' ? 'yaml'
+                       : fileExtension === 'xml' ? 'xml'
+                       : 'plaintext';
+%>
+<script>
+  require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs' } });
+  let editor;
+
+  require(['vs/editor/editor.main'], function () {
+    editor = monaco.editor.create(document.getElementById('editor-container'), {
+      value: `<%= file.content %>`,
+      language: '<%= language %>',
+      theme: 'vs-dark',
+      automaticLayout: true,
+    });
+  });
+
+  document.getElementById('saveBtn').addEventListener('click', async () => {
+    const content = editor.getValue();
+    try {
+      const response = await fetch(`/server/<%= server.UUID %>/files/<%= file.path %>`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content }),
+      });
+
+      if (!response.ok) throw new Error('Failed to save file');
+
+      showToast('File saved successfully!', 'success');
+    } catch (error) {
+      console.error('Error saving file:', error);
+      showToast('Failed to save file', 'error');
+    }
+  });
+
+  document.addEventListener('keydown', async (event) => {
+  if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+    event.preventDefault();
+
+    const content = editor.getValue();
+    try {
+      const response = await fetch(`/server/<%= server.UUID %>/files/<%= file.path %>/save`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content }),
+      });
+
+      if (!response.ok) throw new Error('Failed to save file');
+
+      showToast('File saved successfully!', 'success');
+    } catch (error) {
+      console.error('Error saving file:', error);
+      showToast('Failed to save file', 'error');
+    }
+  }
+});
+</script>
+
+<%- include('../../components/footer') %>

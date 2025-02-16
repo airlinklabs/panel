@@ -1,0 +1,218 @@
+<!-- Logs Viewer Popup -->
+<template id="logsViewerPopup">
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-xl max-w-6xl w-full h-[80vh] transform transition-all">
+			<div class="flex items-center justify-between p-6 border-b dark:border-neutral-800">
+				<div class="flex items-center space-x-4">
+					<h3 class="text-lg font-semibold text-neutral-900 dark:text-white">System Logs</h3>
+					<select class="px-3 py-1.5 text-sm rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500">
+						<option value="all">All Logs</option>
+						<option value="error">Errors</option>
+						<option value="warning">Warnings</option>
+						<option value="info">Info</option>
+						<option value="debug">Debug</option>
+					</select>
+					<div class="relative">
+						<input type="text" placeholder="Search logs..." class="pl-10 pr-4 py-1.5 text-sm rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500">
+						<svg class="absolute left-3 top-2 w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+						</svg>
+					</div>
+				</div>
+				<div class="flex items-center space-x-2">
+					<button class="refresh-btn px-3 py-1.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+						</svg>
+					</button>
+					<button class="close-btn text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+
+			<div class="flex-1 overflow-hidden h-[calc(80vh-8rem)]">
+				<!-- Log Entries -->
+				<div class="h-full overflow-y-auto font-mono text-sm p-4 bg-neutral-50 dark:bg-neutral-900" id="logContent">
+					<!-- Log entries will be dynamically inserted here -->
+				</div>
+			</div>
+
+			<!-- Status Bar -->
+			<div class="px-6 py-3 border-t dark:border-neutral-800 flex items-center justify-between text-sm">
+				<div class="text-neutral-500 dark:text-neutral-400">
+					Showing <span id="logCount">0</span> entries
+				</div>
+				<div class="flex items-center space-x-4">
+					<label class="flex items-center">
+						<input type="checkbox" class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-neutral-300 rounded">
+						<span class="ml-2 text-neutral-700 dark:text-neutral-300">Auto-refresh</span>
+					</label>
+					<button class="px-3 py-1.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">
+						Export Logs
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+	class LogsViewerPopupManager extends PopupManager {
+		showLogsViewer(config = {}) {
+			const template = document.getElementById('logsViewerPopup');
+			const popup = template.content.cloneNode(true);
+			const wrapper = document.createElement('div');
+			wrapper.appendChild(popup);
+
+			// Initialize log content
+			this.initializeLogContent(wrapper, config.logs || []);
+
+			// Handle close button
+			wrapper.querySelector('.close-btn').addEventListener('click', () => {
+				this.closePopup(wrapper);
+			});
+
+			// Handle refresh button
+			wrapper.querySelector('.refresh-btn').addEventListener('click', () => {
+				this.refreshLogs(wrapper);
+			});
+
+			// Handle auto-refresh
+			const autoRefreshCheckbox = wrapper.querySelector('input[type="checkbox"]');
+			let autoRefreshInterval;
+			autoRefreshCheckbox.addEventListener('change', () => {
+				if (autoRefreshCheckbox.checked) {
+					autoRefreshInterval = setInterval(() => this.refreshLogs(wrapper), 5000);
+				} else {
+					clearInterval(autoRefreshInterval);
+				}
+			});
+
+			// Handle log level filter
+			wrapper.querySelector('select').addEventListener('change', (e) => {
+				this.filterLogs(wrapper, e.target.value);
+			});
+
+			// Handle search
+			wrapper.querySelector('input[type="text"]').addEventListener('input', (e) => {
+				this.searchLogs(wrapper, e.target.value);
+			});
+
+			this.showPopup(wrapper);
+			return wrapper;
+		}
+
+		initializeLogContent(wrapper, logs) {
+			const logContent = wrapper.querySelector('#logContent');
+			const logCount = wrapper.querySelector('#logCount');
+			
+			logContent.innerHTML = logs.map(log => this.createLogEntry(log)).join('');
+			logCount.textContent = logs.length;
+		}
+
+		createLogEntry(log) {
+			const levelColors = {
+				error: 'text-red-500 dark:text-red-400',
+				warning: 'text-yellow-500 dark:text-yellow-400',
+				info: 'text-blue-500 dark:text-blue-400',
+				debug: 'text-neutral-500 dark:text-neutral-400'
+			};
+
+			return `
+				<div class="py-1 border-b dark:border-neutral-800 last:border-0 ${log.level === 'error' ? 'bg-red-50 dark:bg-red-900/10' : ''}">
+					<div class="flex items-start">
+						<span class="w-24 flex-shrink-0 ${levelColors[log.level] || levelColors.info}">[${log.timestamp}]</span>
+						<span class="w-20 flex-shrink-0 ${levelColors[log.level] || levelColors.info}">${log.level.toUpperCase()}</span>
+						<span class="flex-1 text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap">${log.message}</span>
+					</div>
+					${log.details ? `
+						<div class="ml-44 mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+							${JSON.stringify(log.details, null, 2)}
+						</div>
+					` : ''}
+				</div>
+			`;
+		}
+
+		refreshLogs(wrapper) {
+			// In a real application, this would fetch new logs from the server
+			console.log('Refreshing logs...');
+		}
+
+		filterLogs(wrapper, level) {
+			const logEntries = wrapper.querySelectorAll('#logContent > div');
+			logEntries.forEach(entry => {
+				if (level === 'all' || entry.querySelector(`span:nth-child(2)`).textContent.toLowerCase() === level.toUpperCase()) {
+					entry.style.display = '';
+				} else {
+					entry.style.display = 'none';
+				}
+			});
+		}
+
+		searchLogs(wrapper, term) {
+			const logEntries = wrapper.querySelectorAll('#logContent > div');
+			const searchTerm = term.toLowerCase();
+			
+			logEntries.forEach(entry => {
+				const text = entry.textContent.toLowerCase();
+				entry.style.display = text.includes(searchTerm) ? '' : 'none';
+			});
+		}
+	}
+
+	// Initialize logs viewer popup manager
+	const logsViewerPopupManager = new LogsViewerPopupManager();
+
+	// Example usage:
+	/*
+	logsViewerPopupManager.showLogsViewer({
+		logs: [
+			{
+				timestamp: '2023-08-10 14:30:45',
+				level: 'info',
+				message: 'Server started successfully',
+				details: { port: 3000, mode: 'production' }
+			},
+			{
+				timestamp: '2023-08-10 14:30:46',
+				level: 'error',
+				message: 'Failed to connect to database',
+				details: { error: 'Connection timeout' }
+			}
+		]
+	});
+	*/
+</script>
+
+<style>
+	/* Custom scrollbar for log content */
+	#logContent::-webkit-scrollbar {
+		width: 8px;
+	}
+
+	#logContent::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	#logContent::-webkit-scrollbar-thumb {
+		background-color: rgba(156, 163, 175, 0.5);
+		border-radius: 4px;
+	}
+
+	#logContent::-webkit-scrollbar-thumb:hover {
+		background-color: rgba(156, 163, 175, 0.7);
+	}
+
+	/* Dark mode scrollbar */
+	.dark #logContent::-webkit-scrollbar-thumb {
+		background-color: rgba(75, 85, 99, 0.5);
+	}
+
+	.dark #logContent::-webkit-scrollbar-thumb:hover {
+		background-color: rgba(75, 85, 99, 0.7);
+	}
+</style>

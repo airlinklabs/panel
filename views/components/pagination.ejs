@@ -1,0 +1,151 @@
+<div class="flex items-center justify-between px-4 py-3 bg-white dark:bg-neutral-900 rounded-lg shadow-sm">
+	<!-- Mobile view -->
+	<div class="flex flex-1 justify-between sm:hidden">
+		<button onclick="changePage('prev')" class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700">
+			Previous
+		</button>
+		<button onclick="changePage('next')" class="relative ml-3 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700">
+			Next
+		</button>
+	</div>
+
+	<!-- Desktop view -->
+	<div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+		<div>
+			<p class="text-sm text-neutral-700 dark:text-neutral-300">
+				Showing
+				<span class="font-medium" id="startItem">1</span>
+				to
+				<span class="font-medium" id="endItem">10</span>
+				of
+				<span class="font-medium" id="totalItems">100</span>
+				results
+			</p>
+		</div>
+		<div>
+			<nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+				<!-- Previous button -->
+				<button onclick="changePage('prev')" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-neutral-400 ring-1 ring-inset ring-neutral-300 dark:ring-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:z-20 focus:outline-offset-0">
+					<span class="sr-only">Previous</span>
+					<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+						<path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+					</svg>
+				</button>
+
+				<!-- Page numbers -->
+				<div id="pageNumbers" class="flex"></div>
+
+				<!-- Next button -->
+				<button onclick="changePage('next')" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-neutral-400 ring-1 ring-inset ring-neutral-300 dark:ring-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:z-20 focus:outline-offset-0">
+					<span class="sr-only">Next</span>
+					<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+						<path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+					</svg>
+				</button>
+			</nav>
+		</div>
+	</div>
+</div>
+
+<script>
+	let currentPage = 1;
+	let totalPages = 10;
+	let itemsPerPage = 10;
+	let totalItems = 100;
+
+	function initPagination(options = {}) {
+		currentPage = options.currentPage || 1;
+		totalPages = options.totalPages || 10;
+		itemsPerPage = options.itemsPerPage || 10;
+		totalItems = options.totalItems || 100;
+
+		updatePaginationUI();
+		updateItemCounts();
+	}
+
+	function updatePaginationUI() {
+		const pageNumbers = document.getElementById('pageNumbers');
+		pageNumbers.innerHTML = '';
+
+		// Calculate range of pages to show
+		let startPage = Math.max(1, currentPage - 2);
+		let endPage = Math.min(totalPages, startPage + 4);
+		
+		if (endPage - startPage < 4) {
+			startPage = Math.max(1, endPage - 4);
+		}
+
+		// Add first page if not in range
+		if (startPage > 1) {
+			addPageButton(1);
+			if (startPage > 2) {
+				addEllipsis();
+			}
+		}
+
+		// Add page numbers
+		for (let i = startPage; i <= endPage; i++) {
+			addPageButton(i);
+		}
+
+		// Add last page if not in range
+		if (endPage < totalPages) {
+			if (endPage < totalPages - 1) {
+				addEllipsis();
+			}
+			addPageButton(totalPages);
+		}
+	}
+
+	function addPageButton(pageNum) {
+		const pageNumbers = document.getElementById('pageNumbers');
+		const button = document.createElement('button');
+		button.className = `relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
+			pageNum === currentPage
+				? 'z-10 bg-blue-600 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
+				: 'text-neutral-900 dark:text-neutral-100 ring-1 ring-inset ring-neutral-300 dark:ring-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:z-20 focus:outline-offset-0'
+		}`;
+		button.onclick = () => changePage(pageNum);
+		button.textContent = pageNum;
+		pageNumbers.appendChild(button);
+	}
+
+	function addEllipsis() {
+		const pageNumbers = document.getElementById('pageNumbers');
+		const span = document.createElement('span');
+		span.className = 'relative inline-flex items-center px-4 py-2 text-sm font-semibold text-neutral-700 dark:text-neutral-300 ring-1 ring-inset ring-neutral-300 dark:ring-neutral-700';
+		span.textContent = '...';
+		pageNumbers.appendChild(span);
+	}
+
+	function updateItemCounts() {
+		const startItem = ((currentPage - 1) * itemsPerPage) + 1;
+		const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+		
+		document.getElementById('startItem').textContent = startItem;
+		document.getElementById('endItem').textContent = endItem;
+		document.getElementById('totalItems').textContent = totalItems;
+	}
+
+	function changePage(target) {
+		if (typeof target === 'number') {
+			currentPage = target;
+		} else if (target === 'prev' && currentPage > 1) {
+			currentPage--;
+		} else if (target === 'next' && currentPage < totalPages) {
+			currentPage++;
+		}
+
+		updatePaginationUI();
+		updateItemCounts();
+
+		// Emit custom event
+		const event = new CustomEvent('pageChange', {
+			detail: { page: currentPage }
+		});
+		document.dispatchEvent(event);
+	}
+
+	// Initialize with default values
+	initPagination();
+</script>

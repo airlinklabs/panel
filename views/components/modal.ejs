@@ -1,0 +1,124 @@
+<div id="modal" class="fixed inset-0 z-50 hidden">
+	<!-- Backdrop -->
+	<div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+
+	<!-- Modal Container -->
+	<div class="fixed inset-0 z-50 overflow-y-auto">
+		<div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+			<div class="relative transform overflow-hidden rounded-lg bg-white dark:bg-neutral-900 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+				<!-- Modal Header -->
+				<div class="px-6 py-4 border-b dark:border-neutral-800">
+					<div class="flex items-center justify-between">
+						<h3 class="text-lg font-semibold text-neutral-900 dark:text-white" id="modalTitle"></h3>
+						<button type="button" onclick="closeModal()" class="text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300">
+							<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+							</svg>
+						</button>
+					</div>
+				</div>
+
+				<!-- Modal Content -->
+				<div class="px-6 py-4" id="modalContent"></div>
+
+				<!-- Modal Footer -->
+				<div class="px-6 py-4 border-t dark:border-neutral-800 flex justify-end space-x-2" id="modalFooter"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	const modal = document.getElementById('modal');
+	
+	function showModal(options) {
+		const { title, content, type = 'default', onConfirm, onCancel } = options;
+		
+		// Set modal title
+		document.getElementById('modalTitle').textContent = title;
+		
+		// Set modal content
+		const modalContent = document.getElementById('modalContent');
+		if (typeof content === 'string') {
+			modalContent.innerHTML = content;
+		} else {
+			modalContent.innerHTML = '';
+			modalContent.appendChild(content);
+		}
+		
+		// Set modal footer buttons based on type
+		const modalFooter = document.getElementById('modalFooter');
+		modalFooter.innerHTML = '';
+		
+		switch (type) {
+			case 'confirm':
+				modalFooter.innerHTML = `
+					<button type="button" class="px-4 py-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg" onclick="handleCancel()">
+						Cancel
+					</button>
+					<button type="button" class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg" onclick="handleConfirm()">
+						Confirm
+					</button>
+				`;
+				break;
+			case 'delete':
+				modalFooter.innerHTML = `
+					<button type="button" class="px-4 py-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg" onclick="handleCancel()">
+						Cancel
+					</button>
+					<button type="button" class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded-lg" onclick="handleConfirm()">
+						Delete
+					</button>
+				`;
+				break;
+			default:
+				modalFooter.innerHTML = `
+					<button type="button" class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg" onclick="closeModal()">
+						Close
+					</button>
+				`;
+		}
+		
+		// Store callbacks
+		modal.onConfirm = onConfirm;
+		modal.onCancel = onCancel;
+		
+		// Show modal
+		modal.classList.remove('hidden');
+		
+		// Add escape key listener
+		document.addEventListener('keydown', handleEscapeKey);
+	}
+	
+	function closeModal() {
+		modal.classList.add('hidden');
+		document.removeEventListener('keydown', handleEscapeKey);
+	}
+	
+	function handleConfirm() {
+		if (typeof modal.onConfirm === 'function') {
+			modal.onConfirm();
+		}
+		closeModal();
+	}
+	
+	function handleCancel() {
+		if (typeof modal.onCancel === 'function') {
+			modal.onCancel();
+		}
+		closeModal();
+	}
+	
+	function handleEscapeKey(e) {
+		if (e.key === 'Escape') {
+			closeModal();
+		}
+	}
+	
+	// Click outside to close
+	modal.addEventListener('click', (e) => {
+		if (e.target === modal) {
+			closeModal();
+		}
+	});
+</script>

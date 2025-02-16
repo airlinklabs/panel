@@ -1,0 +1,44 @@
+<script>
+    (function() {
+      if (window.createToastSystem) return;
+  
+      window.createToastSystem = () => {
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+          toastContainer = document.createElement('div');
+          toastContainer.id = 'toast-container';
+          toastContainer.className = 'fixed top-4 right-4 z-50 flex flex-col gap-2';
+          document.body.appendChild(toastContainer);
+        }
+  
+        const showToast = (message, type = 'error') => {
+          const toast = document.createElement('div');
+          toast.className = `
+            px-4 py-2 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out 
+            opacity-0 translate-x-full text-white
+          `;
+          toast.classList.add(type === 'error' ? 'bg-red-500' : 'bg-emerald-500');
+          toast.textContent = message;
+          toastContainer.appendChild(toast);
+  
+          requestAnimationFrame(() => {
+            toast.classList.remove('opacity-0', 'translate-x-full');
+            toast.classList.add('opacity-100', 'translate-x-0');
+          });
+  
+          setTimeout(() => {
+            toast.classList.add('opacity-0', 'translate-x-full');
+            setTimeout(() => {
+              toastContainer.removeChild(toast);
+            }, 300);
+          }, 5000);
+        };
+  
+        return { showToast };
+      };
+  
+      const { showToast } = window.createToastSystem();
+      window.showToast = showToast;
+    })();
+  </script>
+  
