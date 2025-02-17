@@ -71,8 +71,8 @@ async function deleteRole(id) {
 	}
 
 	try {
-		const response = await fetch(`/admin/roles/${id}/delete`, {
-			method: 'POST',
+		const response = await fetch(`/admin/roles/delete/${id}`, {
+			method: 'DELETE',
 			headers: { 'Content-Type': 'application/json' }
 		});
 

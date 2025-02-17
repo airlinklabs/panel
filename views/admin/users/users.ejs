@@ -1,7 +1,7 @@
 <%- include('../../components/header', { title: 'Admin Users' }) %>
 
-<main class="h-screen m-auto">
-  <div class="flex h-screen">
+<main class="min-h-screen flex flex-col">
+  <div class="flex flex-1">
     <!-- Sidebar -->
     <div class="w-60 h-full">
       <%- include('../../components/template') %>
@@ -101,20 +101,20 @@
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400">
                   <div class="mt-1 ml-2 inline-flex items-center rounded-md 
-                  <%= user.role?.name === 'Administrator' ? 'bg-emerald-600/10 text-emerald-400 ring-emerald-600/20' : 
-                     user.role?.name === 'Server Manager' ? 'bg-blue-600/10 text-blue-400 ring-blue-600/20' : 
-                     'bg-amber-600/10 text-amber-400 ring-amber-600/20' %> 
+                  <%= user.roles[0]?.role?.name === 'Administrator' ? 'bg-emerald-600/10 text-emerald-400 ring-emerald-600/20' : 
+                   user.roles[0]?.role?.name === 'Server Manager' ? 'bg-blue-600/10 text-blue-400 ring-blue-600/20' : 
+                   'bg-amber-600/10 text-amber-400 ring-amber-600/20' %> 
                   px-2 py-1 text-xs font-medium ring-1 ring-inset">
-                  <%= user.role?.name || 'User' %>
+                  <%= user.roles[0]?.role?.name || 'User' %>
                   </div>
-                  <button onclick="showRoleModal('<%= user.id %>', '<%= user.role?.id %>')" class="ml-2 text-xs text-neutral-500 hover:text-neutral-400">
+                  <button onclick="showRoleModal('<%= user.id %>', '<%= user.roles[0]?.roleId %>')" class="ml-2 text-xs text-neutral-500 hover:text-neutral-400">
                   Change Role
                   </button>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= users.length[user.id] || 0 %></td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                   <div class="flex gap-3">
-                    <a href="./users/view/<%= user.id %>">
+                    <a href="./users/user/<%= user.id %>">
                       <button type="button" class="rounded-xl bg-white border border-neutral-800/20 hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">Edit</button>
                     </a>
                     <button onclick="deleteUser('<%= user.id %>')" type="button" class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Remove</button>
@@ -160,7 +160,7 @@
 </script>
 
 <!-- Role Selection Modal -->
-<div id="roleModal" class="fixed inset-0 bg-neutral-900/80 z-50 hidden">
+<div id="roleModal" class="fixed inset-0 bg-neutral-900/80 dark:bg-neutral-200/80 z-50 hidden">
   <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
     <div class="relative transform overflow-hidden rounded-xl bg-white dark:bg-neutral-900 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
       <div class="sm:flex sm:items-start">
