@@ -1,0 +1,166 @@
+<%- include('../../components/header', { title: 'Edit Role' }) %>
+
+<main class="h-screen m-auto">
+	<div class="flex h-screen">
+		<!-- Sidebar -->
+		<div class="w-60 h-full">
+			<%- include('../../components/template', { user, settings }) %>
+		</div>
+		<!-- Content -->
+		<div class="flex-1 p-6 overflow-y-auto pt-16">
+			<div class="sm:flex sm:items-center px-8 pt-4">
+				<div class="sm:flex-auto">
+					<h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">Edit Role</h1>
+					<p class="mt-1 tracking-tight text-sm text-neutral-500">Modify role details and configuration</p>
+				</div>
+			</div>
+
+			<div class="mt-8 px-8">
+				<form id="roleForm" action="/admin/roles/edit/<%= role.id %>" method="POST" class="max-w-2xl mx-auto space-y-6 bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+					<div>
+						<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2" for="name">
+							Name
+						</label>
+						<input 
+							class="block w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 px-4 py-3 text-neutral-700 dark:text-neutral-200 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+							id="name" 
+							name="name" 
+							type="text" 
+							required
+							value="<%= role.name %>"
+						>
+					</div>
+
+					<div>
+						<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2" for="description">
+							Description
+						</label>
+						<textarea 
+							class="block w-full rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white/50 dark:bg-neutral-800/50 px-4 py-3 text-neutral-700 dark:text-neutral-200 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+							id="description" 
+							name="description" 
+							rows="3"
+						><%= role.description || '' %></textarea>
+					</div>
+
+					<div class="col-span-full">
+						<h3 class="text-lg font-medium text-neutral-900 dark:text-white mb-4">Permissions</h3>
+						
+						<!-- Admin Permissions -->
+						<div class="mb-6">
+							<h4 class="text-sm font-medium text-neutral-900 dark:text-white mb-3">Administrative</h4>
+							<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+								<% ['admin.access', 'admin.settings', 'admin.users', 'admin.servers', 'admin.nodes', 'admin.locations', 'admin.images'].forEach(function(perm) { %>
+									<div class="relative flex items-start">
+										<div class="flex h-6 items-center">
+											<input type="checkbox" name="permissions[]" value="<%= perm %>" 
+												   <%= role.permissions.some(p => p.permission === perm) ? 'checked' : '' %>
+												   class="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-500 focus:ring-neutral-600 dark:focus:ring-neutral-500 bg-transparent">
+										</div>
+										<div class="ml-3 text-sm leading-6">
+											<label class="font-medium text-neutral-900 dark:text-white">
+												<%= perm.split('.')[1].charAt(0).toUpperCase() + perm.split('.')[1].slice(1) %>
+											</label>
+										</div>
+									</div>
+								<% }); %>
+							</div>
+						</div>
+
+						<!-- User Permissions -->
+						<div class="mb-6">
+							<h4 class="text-sm font-medium text-neutral-900 dark:text-white mb-3">Server Management</h4>
+							<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+								<% ['user.create-server', 'user.delete-server', 'user.modify-server', 'user.view-servers', 
+									'user.access-console', 'user.access-sftp', 'user.view-startup', 'user.edit-startup'].forEach(function(perm) { %>
+									<div class="relative flex items-start">
+										<div class="flex h-6 items-center">
+											<input type="checkbox" name="permissions[]" value="<%= perm %>" 
+												   <%= role.permissions.some(p => p.permission === perm) ? 'checked' : '' %>
+												   class="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-500 focus:ring-neutral-600 dark:focus:ring-neutral-500 bg-transparent">
+										</div>
+										<div class="ml-3 text-sm leading-6">
+											<label class="font-medium text-neutral-900 dark:text-white">
+												<%= perm.split('.')[1].split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') %>
+											</label>
+										</div>
+									</div>
+								<% }); %>
+							</div>
+						</div>
+					</div>
+
+					<div class="flex items-center justify-end space-x-4 pt-4">
+						<a href="/admin/roles" 
+							class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white">
+							Cancel
+						</a>
+						<button 
+							id="submitButton"
+							type="submit"
+							class="px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-neutral-900">
+							Update Role
+						</button>
+					</div>
+				</form>
+
+				<script>
+				document.getElementById('roleForm').addEventListener('submit', async (e) => {
+					e.preventDefault();
+					const form = e.target;
+					const submitButton = document.getElementById('submitButton');
+					const originalText = submitButton.textContent;
+
+					// Basic validation
+					const name = form.name.value.trim();
+
+					if (name.length < 2) {
+						alert('Name must be at least 2 characters long');
+						return;
+					}
+
+					// Show loading state
+					submitButton.disabled = true;
+					submitButton.innerHTML = `
+						<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+						</svg>
+						Updating...
+					`;
+
+					try {
+						const response = await fetch(form.action, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify({
+								name,
+								description: form.description.value.trim(),
+								permissions: Array.from(form.querySelectorAll('input[name="permissions[]"]:checked')).map(el => el.value),
+							}),
+						});
+
+						if (response.ok) {
+							window.location.href = '/admin/roles';
+						} else {
+							const data = await response.json();
+							alert(data.message || 'Error updating role');
+							submitButton.disabled = false;
+							submitButton.textContent = originalText;
+						}
+					} catch (error) {
+						console.error('Error:', error);
+						alert('Error updating role');
+						submitButton.disabled = false;
+						submitButton.textContent = originalText;
+					}
+				});
+				</script>
+			</div>
+		</div>
+	</div>
+</main>
+
+<%- include('../../components/footer') %>

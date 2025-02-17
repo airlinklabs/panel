@@ -6,19 +6,8 @@ import logger from '../../handlers/logger';
 
 const prisma = new PrismaClient();
 
-declare module 'express-session' {
-  interface SessionData {
-    user: {
-      id: number;
-      email: string;
-      isAdmin: boolean;
-      username: string;
-      description: string;
-    };
-  }
-}
-
 const authServiceModule: Module = {
+
   info: {
     name: 'Auth System Module',
     description: 'This file is for authentication and authorization of users.',
@@ -33,9 +22,20 @@ const authServiceModule: Module = {
 
     const handleLogin = async (identifier: string, password: string) => {
       try {
-        const user = await prisma.users.findFirst({
-          where: { OR: [{ email: identifier }, { username: identifier }] },
-        });
+      const user = await prisma.users.findFirst({
+        where: { OR: [{ email: identifier }, { username: identifier }] },
+        include: {
+        roles: {
+          include: {
+          role: {
+            include: {
+            permissions: true
+            }
+          }
+          }
+        }
+        }
+      });
 
         const hash = user?.password ?? '$2b$10$' + 'x'.repeat(53);
         const isPasswordValid = await bcrypt.compare(password, hash);
@@ -62,15 +62,15 @@ const authServiceModule: Module = {
       try {
         const result = await handleLogin(identifier, password);
         if (result.success && result.user) {
-          if (result.user.username && result.user.description) {
             req.session.user = {
-              id: result.user.id,
-              email: result.user.email,
-              isAdmin: result.user.isAdmin,
-              description: result.user.description,
-              username: result.user.username,
+            id: result.user.id,
+            email: result.user.email,
+            isAdmin: result.user.isAdmin,
+            description: result.user.description || 'No About Me',
+            username: result.user.username || '',
+            roles: result.user.roles
             };
-          }
+
           res.redirect('/');
           return;
         }

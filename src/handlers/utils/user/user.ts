@@ -1,20 +1,35 @@
 import { Request } from 'express';
 
-export interface User {
-  username?: string;
-  id?: number;
-  description?: string;
-  isAdmin?: boolean;
-  email?: string;
+interface UserResponse {
+  id: number;
+  isAdmin: boolean;
+  username: string;
+  email: string;
+  description: string;
+  roles: Array<{
+    role: {
+      id: number;
+      name: string;
+      permissions: Array<{ permission: string }>;
+    };
+  }>;
 }
 
-export function getUser(req: Request) {
-  const user = {
-    username: req.session?.user?.username,
-    id: req.session?.user?.id,
-    description: req.session?.user?.description,
-    isAdmin: req.session?.user?.isAdmin,
-    email: req.session?.user?.email,
+export const getUser = (req: Request): UserResponse | null => {
+  if (!req.session?.user) {
+    return null;
+  }
+
+  return {
+    id: req.session.user.id,
+    isAdmin: req.session.user.isAdmin,
+    username: req.session.user.username,
+    email: req.session.user.email,
+    description: req.session.user.description,
+    roles: req.session.user.roles || []
   };
-  return user;
-}
+};
+
+export const isAuthenticated = (req: Request): boolean => {
+  return !!req.session?.user;
+};

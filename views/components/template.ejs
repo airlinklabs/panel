@@ -1,53 +1,55 @@
-<!-- Sidebar -->
+<!-- Styles -->
 <style>
-/* Add these styles to enhance animations */
-#pc-sidebar {
-  transform: translateX(-100%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#pc-sidebar.visible {
-  transform: translateX(0);
-}
-
-.nav-link {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.nav-link:hover {
-  transform: translateX(8px);
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.nav-link:hover svg {
-  transform: scale(1.15) rotate(8deg);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.dark .nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-}
-
-@media (min-width: 1024px) {
+  /* Sidebar animations */
   #pc-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  #pc-sidebar.visible {
     transform: translateX(0);
   }
-  
-  #pc-sidebar.hidden {
-    transform: translateX(-100%);
+
+  /* Navigation link animations */
+  .nav-link {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
   }
-}
 
-/* Add smooth transition for content margin */
-#colcont {
-  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+  .nav-link:hover {
+    transform: translateX(8px);
+    background-color: rgba(0, 0, 0, 0.05);
+  }
 
-#colcont.sidebar-visible {
-  margin-left: 14rem;
-}
+  .nav-link:hover svg {
+    transform: scale(1.15) rotate(8deg);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Responsive styles */
+  @media (min-width: 1024px) {
+    #pc-sidebar {
+      transform: translateX(0);
+    }
+    
+    #pc-sidebar.hidden {
+      transform: translateX(-100%);
+    }
+  }
+
+  /* Content transitions */
+  #colcont {
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  #colcont.sidebar-visible {
+    margin-left: 14rem;
+  }
 </style>
 
 <div id="pc-sidebar" class="sidebar fixed lg:flex lg:w-56 lg:flex-col left-0 transform duration-300 ease-in-out z-50 inset-y-0">
@@ -135,14 +137,22 @@
                            <span>Servers</span>
                         </a>
                      </li>
-                       <li>
+                         <li>
                         <a href="/admin/users" class=" transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 mt-0.5 h-5">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                            </svg>                                                     
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                          </svg>                                                     
                            <span>Users</span>
                         </a>
-                     </li>
+                       </li>
+                       <li>
+                        <a href="/admin/roles" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 mt-0.5 h-5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                          </svg>
+                          <span>Roles</span>
+                        </a>
+                       </li>
                        <li>
                         <a href="/admin/nodes" class=" transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 mt-0.5 h-5">

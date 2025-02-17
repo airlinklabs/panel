@@ -1,10 +1,12 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, RequestHandler } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
 import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
 import { checkEulaStatus, isWorld } from '../../handlers/features';
+import { hasPermission } from '../../handlers/permissionMiddleware';
+import { AVAILABLE_PERMISSIONS } from '../admin/permissions';
 const { MinecraftServerListPing } = require('minecraft-status');
 
 const prisma = new PrismaClient();
@@ -55,7 +57,7 @@ const dashboardModule: Module = {
     // Get server info
     router.get(
       '/server/:id',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_VIEW_SERVERS) as RequestHandler],
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
@@ -142,7 +144,7 @@ const dashboardModule: Module = {
 
     router.post(
       '/server/:id/power/:poweraction',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_MODIFY_SERVER) as RequestHandler],
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
@@ -288,7 +290,7 @@ const dashboardModule: Module = {
      */
     router.get(
       '/server/:id/files',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_ACCESS_SFTP) as RequestHandler],
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
@@ -404,7 +406,7 @@ const dashboardModule: Module = {
      */
     router.get(
       '/server/:id/files/edit/:path(*)',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_ACCESS_SFTP) as RequestHandler],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -493,7 +495,7 @@ const dashboardModule: Module = {
      */
     router.post(
       '/server/:id/files/:path(*)',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_ACCESS_SFTP) as RequestHandler],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -546,7 +548,7 @@ const dashboardModule: Module = {
 
     router.delete(
       '/server/:id/files/rm/:path(*)',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_ACCESS_SFTP) as RequestHandler],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -594,7 +596,7 @@ const dashboardModule: Module = {
 
     router.get(
       '/server/:id/files/download/:path(*)',
-      isAuthenticatedForServer('id'),
+      [isAuthenticatedForServer('id'), hasPermission(AVAILABLE_PERMISSIONS.USER_ACCESS_SFTP)],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -644,7 +646,7 @@ const dashboardModule: Module = {
 
     router.post(
       '/server/:id/zip',
-      isAuthenticatedForServer('id'),
+      [isAuthenticatedForServer('id'), hasPermission(AVAILABLE_PERMISSIONS.USER_ACCESS_SFTP)],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -711,7 +713,7 @@ const dashboardModule: Module = {
 
     router.post(
       '/server/:id/feature/eula',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_MODIFY_SERVER) as RequestHandler],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -759,7 +761,7 @@ const dashboardModule: Module = {
 
     router.get(
       '/server/:id/players',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_VIEW_SERVERS) as RequestHandler],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -863,7 +865,7 @@ const dashboardModule: Module = {
 
     router.get(
       '/server/:id/worlds',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_VIEW_SERVERS) as RequestHandler],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;

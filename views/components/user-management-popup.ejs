@@ -2,6 +2,7 @@
 <template id="userManagementPopup">
 	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
 		<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-xl max-w-4xl w-full transform transition-all">
+			<!-- Header -->
 			<div class="flex items-center justify-between p-6 border-b dark:border-neutral-800">
 				<h3 class="text-lg font-semibold text-neutral-900 dark:text-white">User Management</h3>
 				<button class="close-btn text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300">
@@ -11,13 +12,26 @@
 				</button>
 			</div>
 
+			<!-- Content -->
 			<div class="p-6">
-				<!-- Tabs -->
+				<!-- Navigation Tabs -->
 				<div class="border-b dark:border-neutral-800">
 					<nav class="flex space-x-4" role="tablist">
-						<button class="px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-600" role="tab" data-tab="users">Users</button>
-						<button class="px-4 py-2 text-sm font-medium text-neutral-500 hover:text-neutral-700" role="tab" data-tab="roles">Roles</button>
-						<button class="px-4 py-2 text-sm font-medium text-neutral-500 hover:text-neutral-700" role="tab" data-tab="permissions">Permissions</button>
+						<button class="tab-button px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-600" 
+								role="tab" 
+								data-tab="users">
+							Users
+						</button>
+						<button class="tab-button px-4 py-2 text-sm font-medium text-neutral-500 hover:text-neutral-700" 
+								role="tab" 
+								data-tab="roles">
+							Roles
+						</button>
+						<button class="tab-button px-4 py-2 text-sm font-medium text-neutral-500 hover:text-neutral-700" 
+								role="tab" 
+								data-tab="permissions">
+							Permissions
+						</button>
 					</nav>
 				</div>
 
@@ -81,56 +95,67 @@
 
 <script>
 	class UserManagementPopupManager extends PopupManager {
+		constructor() {
+			super();
+			this.activeTab = 'users';
+		}
+
 		showUserManagement(config = {}) {
 			const template = document.getElementById('userManagementPopup');
 			const popup = template.content.cloneNode(true);
 			const wrapper = document.createElement('div');
 			wrapper.appendChild(popup);
 
-			// Initialize tabs
-			this.initializeTabs(wrapper);
-
-			// Initialize users table
-			this.initializeUsersTable(wrapper, config.users || []);
-
-			// Initialize roles list
-			this.initializeRolesList(wrapper, config.roles || []);
-
-			// Initialize permissions list
-			this.initializePermissionsList(wrapper, config.permissions || []);
-
-			// Handle close button
-			wrapper.querySelector('.close-btn').addEventListener('click', () => {
-				this.closePopup(wrapper);
-			});
+			this.initializeComponents(wrapper, config);
+			this.setupEventListeners(wrapper);
 
 			this.showPopup(wrapper);
 			return wrapper;
 		}
 
-		initializeTabs(wrapper) {
+		initializeComponents(wrapper, config) {
+			this.initializeTabs(wrapper);
+			this.initializeUsersTable(wrapper, config.users || []);
+			this.initializeRolesList(wrapper, config.roles || []);
+			this.initializePermissionsList(wrapper, config.permissions || []);
+		}
+
+		setupEventListeners(wrapper) {
+			// Close button handler
+			wrapper.querySelector('.close-btn').addEventListener('click', () => {
+				this.closePopup(wrapper);
+			});
+
+			// Tab click handlers
+			wrapper.querySelectorAll('.tab-button').forEach(button => {
+				button.addEventListener('click', () => this.handleTabClick(button));
+			});
+		}
+
+		handleTabClick(tab) {
+			const targetPanel = tab.dataset.tab;
+			this.switchTab(tab.closest('.popup-wrapper'), targetPanel);
+		}
+
+		switchTab(wrapper, targetPanel) {
 			const tabs = wrapper.querySelectorAll('[role="tab"]');
 			const panels = wrapper.querySelectorAll('.tab-panel');
 
+			// Update tab styles
 			tabs.forEach(tab => {
-				tab.addEventListener('click', () => {
-					// Remove active states
-					tabs.forEach(t => {
-						t.classList.remove('border-b-2', 'border-blue-500', 'text-blue-600');
-						t.classList.add('text-neutral-500', 'hover:text-neutral-700');
-					});
-
-					// Add active state to clicked tab
-					tab.classList.add('border-b-2', 'border-blue-500', 'text-blue-600');
-					tab.classList.remove('text-neutral-500', 'hover:text-neutral-700');
-
-					// Show corresponding panel
-					const targetPanel = tab.dataset.tab;
-					panels.forEach(panel => {
-						panel.classList.toggle('hidden', panel.dataset.panel !== targetPanel);
-					});
-				});
+				const isActive = tab.dataset.tab === targetPanel;
+				tab.classList.toggle('border-b-2', isActive);
+				tab.classList.toggle('border-blue-500', isActive);
+				tab.classList.toggle('text-blue-600', isActive);
+				tab.classList.toggle('text-neutral-500', !isActive);
 			});
+
+			// Show/hide panels
+			panels.forEach(panel => {
+				panel.classList.toggle('hidden', panel.dataset.panel !== targetPanel);
+			});
+
+			this.activeTab = targetPanel;
 		}
 
 		initializeUsersTable(wrapper, users) {
