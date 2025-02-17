@@ -115,7 +115,7 @@
 					const name = form.name.value.trim();
 
 					if (name.length < 2) {
-						alert('Name must be at least 2 characters long');
+						showToast('error', 'Name must be at least 2 characters long');
 						return;
 					}
 
@@ -146,13 +146,13 @@
 							window.location.href = '/admin/roles';
 						} else {
 							const data = await response.json();
-							alert(data.message || 'Error updating role');
+							showToast('error', data.message || 'Error updating role');
 							submitButton.disabled = false;
 							submitButton.textContent = originalText;
 						}
 					} catch (error) {
 						console.error('Error:', error);
-						alert('Error updating role');
+						showToast('error', 'Error updating role');
 						submitButton.disabled = false;
 						submitButton.textContent = originalText;
 					}
@@ -163,4 +163,5 @@
 	</div>
 </main>
 
+<%- include('../../components/toast') %>
 <%- include('../../components/footer') %>

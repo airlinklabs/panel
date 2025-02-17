@@ -1,10 +1,10 @@
-<%- include('../../components/header', { title: 'Dashboard' }) %>
+<%- include('../../components/header', { title: 'Create Node' }) %>
 
 <main class="h-screen m-auto">
   <div class="flex h-screen">
     <!-- Sidebar -->
     <div class="w-60 h-full">
-      <%- include('../../components/template') %>
+        <%- include('../../components/template', { user, settings }) %>
     </div>
     <!-- Content -->
     <div class="flex-1 p-6 overflow-y-auto pt-16">
@@ -89,8 +89,8 @@
   document.getElementById('createNodeBtn').addEventListener('click', async () => {
     const nodeData = {
       name: document.getElementById('nodeName').value,
-      ram: BigInt(document.getElementById('nodeRam').value * 1024 * 1024 * 1024).toString(), // Convert GB to bytes and then to BigInt string
-      cpu: BigInt(document.getElementById('nodeProcessor').value * 100).toString(), // Convert to percentage basis and then to BigInt string
+      ram: BigInt(document.getElementById('nodeRam').value * 1024 * 1024 * 1024).toString(),
+      cpu: BigInt(document.getElementById('nodeProcessor').value * 100).toString(),
       disk: document.getElementById('nodeDisk').value,
       address: document.getElementById('nodeAddress').value,
       port: document.getElementById('nodePort').value,
@@ -105,18 +105,17 @@
       });
 
       if (response.ok) {
-
-        const result = await response.json();
         window.location.href = '/admin/nodes?err=none';
       } else {
         const error = await response.json();
         showToast(error.message || 'Failed to create node', 'error');
       }
     } catch (error) {
-        console.log('Node created:', await response.json());
-        window.location.href = '/admin/nodes?err=none';
-      } else {
-        throw new Error('Failed to create node');
-      }
-    } catch (error) {
-      showToast('Error creating node:' + error, 'error');
+      console.error('Error creating node:', error);
+      showToast('Error creating node: ' + error.message, 'error');
+    }
+  });
+</script>
+
+<%- include('../../components/footer') %>
+
