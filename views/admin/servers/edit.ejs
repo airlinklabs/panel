@@ -1,0 +1,150 @@
+<%- include('../../components/header', { title: 'Edit Server' }) %>
+
+<main class="h-screen m-auto">
+	<div class="flex h-screen">
+		<div class="w-60 h-full">
+			<%- include('../../components/template') %>
+		</div>
+		
+		<div class="flex-1 p-6 overflow-y-auto pt-16">
+			<div class="sm:flex sm:items-center px-8 pt-4">
+				<div class="sm:flex-auto">
+					<h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">Edit Server</h1>
+					<p class="mt-1 tracking-tight text-sm text-neutral-500">Modify server settings and configuration</p>
+				</div>
+				<div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+					<button type="button" 
+									onclick="showDeleteModal()"
+									class="rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500">
+						Delete Server
+					</button>
+				</div>
+			</div>
+
+			<div id="nodeForm" class="mt-6 px-8 w-full">
+				<div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+					<form id="editServerForm" method="POST" action="/admin/servers/edit/<%= server.id %>">
+						<!-- Rest of the form fields same as create.ejs but with value attributes -->
+						<div class="space-y-6">
+							<div class="border-b border-neutral-800/10 pb-6">
+								<div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+									<div class="sm:col-span-3">
+										<label for="name" class="block text-sm font-medium leading-6 text-neutral-700 dark:text-neutral-200">Server Name</label>
+										<div class="mt-2">
+											<input type="text" name="name" id="name" value="<%= server.name %>" required class="block w-full rounded-lg border-0 py-1.5 text-neutral-700 dark:text-white shadow-sm ring-1 ring-inset ring-neutral-300 dark:ring-neutral-700 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 dark:focus:ring-blue-500 sm:text-sm sm:leading-6 bg-white/5">
+										</div>
+									</div>
+
+									<div class="sm:col-span-3">
+										<label for="ip" class="block text-sm font-medium leading-6 text-neutral-700 dark:text-neutral-200">IP Address</label>
+										<div class="mt-2">
+											<input type="text" name="ip" id="ip" value="<%= server.ip %>" required class="block w-full rounded-lg border-0 py-1.5 text-neutral-700 dark:text-white shadow-sm ring-1 ring-inset ring-neutral-300 dark:ring-neutral-700 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 dark:focus:ring-blue-500 sm:text-sm sm:leading-6 bg-white/5">
+										</div>
+									</div>
+
+									<div class="sm:col-span-3">
+										<label for="port" class="block text-sm font-medium leading-6 text-neutral-700 dark:text-neutral-200">Port</label>
+										<div class="mt-2">
+											<input type="number" name="port" id="port" value="<%= server.port %>" required class="block w-full rounded-lg border-0 py-1.5 text-neutral-700 dark:text-white shadow-sm ring-1 ring-inset ring-neutral-300 dark:ring-neutral-700 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 dark:focus:ring-blue-500 sm:text-sm sm:leading-6 bg-white/5">
+										</div>
+									</div>
+
+									<div class="sm:col-span-3">
+										<label for="memory" class="block text-sm font-medium leading-6 text-neutral-700 dark:text-neutral-200">Memory (MB)</label>
+										<div class="mt-2">
+											<input type="number" name="memory" id="memory" value="<%= server.memory %>" required class="block w-full rounded-lg border-0 py-1.5 text-neutral-700 dark:text-white shadow-sm ring-1 ring-inset ring-neutral-300 dark:ring-neutral-700 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 dark:focus:ring-blue-500 sm:text-sm sm:leading-6 bg-white/5">
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="flex items-center justify-end gap-x-6">
+								<a href="/admin/servers" class="text-sm font-semibold leading-6 text-neutral-700 dark:text-neutral-200">Cancel</a>
+								<button type="submit" class="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Save Changes</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+	<div class="bg-white dark:bg-neutral-900 rounded-lg px-4 pt-5 pb-4 text-left shadow-xl sm:my-8 sm:w-full sm:max-w-lg">
+		<div class="sm:flex sm:items-start">
+			<div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+				<svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+				</svg>
+			</div>
+			<div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+				<h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">Delete Server</h3>
+				<div class="mt-2">
+					<p class="text-sm text-gray-500">Are you sure you want to delete this server? This action cannot be undone.</p>
+				</div>
+			</div>
+		</div>
+		<div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+			<button type="button" onclick="deleteServer()" class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto">Delete</button>
+			<button type="button" onclick="hideDeleteModal()" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancel</button>
+		</div>
+	</div>
+</div>
+
+<%- include('../../components/toast') %>
+
+<script>
+function showDeleteModal() {
+	document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function hideDeleteModal() {
+	document.getElementById('deleteModal').classList.add('hidden');
+}
+
+function deleteServer() {
+	fetch('/admin/servers/delete/<%= server.id %>', {
+		method: 'DELETE',
+	})
+	.then(response => response.json())
+	.then(data => {
+		if (data.success) {
+			showToast('Server deleted successfully', 'success');
+			setTimeout(() => window.location.href = '/admin/servers', 1500);
+		} else {
+			showToast('Failed to delete server', 'error');
+		}
+	})
+	.catch(error => {
+		showToast('Error deleting server', 'error');
+	});
+}
+
+document.getElementById('editServerForm').addEventListener('submit', (e) => {
+	e.preventDefault();
+	const formData = new FormData(e.target);
+	const data = Object.fromEntries(formData);
+	
+	fetch('/admin/servers/edit/<%= server.id %>', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify(data),
+	})
+	.then(response => response.json())
+	.then(data => {
+		if (data.success) {
+			showToast('Server updated successfully', 'success');
+			setTimeout(() => window.location.href = '/admin/servers', 1500);
+		} else {
+			showToast(data.error || 'Failed to update server', 'error');
+		}
+	})
+	.catch(error => {
+		showToast('Error updating server', 'error');
+	});
+});
+</script>

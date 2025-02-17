@@ -9,6 +9,34 @@ CREATE TABLE "Users" (
 );
 
 -- CreateTable
+CREATE TABLE "Role" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "RolePermission" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "roleId" INTEGER NOT NULL,
+    "permission" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "RolePermission_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "UserRole" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "userId" INTEGER NOT NULL,
+    "roleId" INTEGER NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "UserRole_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "UserRole_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- CreateTable
 CREATE TABLE "Session" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "session_id" TEXT NOT NULL,
@@ -61,16 +89,31 @@ CREATE TABLE "Images" (
 );
 
 -- CreateTable
+CREATE TABLE "Location" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "UUID" TEXT NOT NULL,
+    "shortCode" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "latitude" REAL,
+    "longitude" REAL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+-- CreateTable
 CREATE TABLE "Node" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "name" TEXT NOT NULL,
-    "ram" INTEGER NOT NULL DEFAULT 0,
-    "cpu" INTEGER NOT NULL DEFAULT 0,
+    "ram" BIGINT NOT NULL DEFAULT 0,
+    "cpu" BIGINT NOT NULL DEFAULT 0,
     "disk" INTEGER NOT NULL DEFAULT 0,
     "address" TEXT NOT NULL DEFAULT '127.0.0.1',
     "port" INTEGER NOT NULL DEFAULT 3001,
     "key" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "locationId" INTEGER,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Node_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "Location" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -100,6 +143,15 @@ CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");
 CREATE UNIQUE INDEX "Users_username_key" ON "Users"("username");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Role_name_key" ON "Role"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "RolePermission_roleId_permission_key" ON "RolePermission"("roleId", "permission");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserRole_userId_roleId_key" ON "UserRole"("userId", "roleId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Session_session_id_key" ON "Session"("session_id");
 
 -- CreateIndex
@@ -107,6 +159,12 @@ CREATE UNIQUE INDEX "Server_UUID_key" ON "Server"("UUID");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Images_UUID_key" ON "Images"("UUID");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Location_UUID_key" ON "Location"("UUID");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Location_shortCode_key" ON "Location"("shortCode");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ApiKey_key_key" ON "ApiKey"("key");

@@ -1,0 +1,68 @@
+<%- include('../../components/header', { title: 'Role Details' }) %>
+
+<main class="h-screen m-auto">
+	<div class="flex h-screen">
+		<!-- Sidebar -->
+		<div class="w-60 h-full">
+			<%- include('../../components/template') %>
+		</div>
+		<!-- Content -->
+		<div class="flex-1 p-6 overflow-y-auto pt-16">
+			<div class="sm:flex sm:items-center px-8 pt-4">
+				<div class="sm:flex-auto">
+					<div class="flex items-center gap-x-3">
+						<a href="/admin/roles" class="text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white">
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+							</svg>
+						</a>
+						<h1 class="text-2xl font-semibold text-neutral-900 dark:text-white"><%= role.name %></h1>
+					</div>
+					<p class="mt-2 text-sm text-neutral-700 dark:text-neutral-400"><%= role.description %></p>
+				</div>
+				<div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+					<a href="/admin/roles/edit/<%= role.id %>" 
+					   class="block rounded-xl bg-neutral-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-neutral-500">
+						Edit Role
+					</a>
+				</div>
+			</div>
+			
+			<div class="mt-8 px-8">
+				<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+					<div class="bg-white dark:bg-neutral-900 shadow-sm ring-1 ring-black ring-opacity-5 dark:ring-white/10 rounded-xl p-6">
+						<div class="flex items-center justify-between mb-4">
+							<h3 class="text-lg font-medium text-neutral-900 dark:text-white">Permissions</h3>
+						</div>
+						<div class="space-y-4">
+							<% ['admin.access', 'admin.settings', 'admin.users', 'admin.servers', 'admin.nodes', 'admin.locations', 'admin.images']
+								.forEach(function(perm) { 
+								const hasPermission = role.permissions.some(p => p.permission === perm);
+							%>
+								<div class="flex items-center justify-between">
+									<div class="flex items-center">
+										<% if (hasPermission) { %>
+											<svg class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+												<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+											</svg>
+										<% } else { %>
+											<svg class="h-5 w-5 text-neutral-300 dark:text-neutral-600" viewBox="0 0 20 20" fill="currentColor">
+												<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+											</svg>
+										<% } %>
+										<span class="ml-3 text-sm font-medium text-neutral-900 dark:text-white">
+											<%= perm.split('.')[1].charAt(0).toUpperCase() + perm.split('.')[1].slice(1) %>
+										</span>
+									</div>
+								</div>
+							<% }); %>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/footer') %>

@@ -1,0 +1,145 @@
+<!-- Server Management Popups -->
+<template id="serverMonitoringPopup">
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-xl max-w-4xl w-full transform transition-all">
+			<div class="p-6">
+				<h3 class="text-lg font-semibold text-neutral-900 dark:text-white mb-6">Server Monitoring</h3>
+				<div class="grid grid-cols-3 gap-4 mb-6">
+					<!-- CPU Usage -->
+					<div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+						<div class="flex justify-between items-center mb-2">
+							<span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">CPU Usage</span>
+							<span class="text-lg font-bold text-blue-500">85%</span>
+						</div>
+						<div class="h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full">
+							<div class="h-full bg-blue-500 rounded-full" style="width: 85%"></div>
+						</div>
+					</div>
+
+					<!-- Memory Usage -->
+					<div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+						<div class="flex justify-between items-center mb-2">
+							<span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Memory Usage</span>
+							<span class="text-lg font-bold text-green-500">60%</span>
+						</div>
+						<div class="h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full">
+							<div class="h-full bg-green-500 rounded-full" style="width: 60%"></div>
+						</div>
+					</div>
+
+					<!-- Disk Usage -->
+					<div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+						<div class="flex justify-between items-center mb-2">
+							<span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Disk Usage</span>
+							<span class="text-lg font-bold text-yellow-500">75%</span>
+						</div>
+						<div class="h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full">
+							<div class="h-full bg-yellow-500 rounded-full" style="width: 75%"></div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Live Processes -->
+				<div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg mb-6">
+					<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-4">Active Processes</h4>
+					<div class="overflow-x-auto">
+						<table class="min-w-full">
+							<thead>
+								<tr class="text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">
+									<th class="px-4 py-2">Process</th>
+									<th class="px-4 py-2">PID</th>
+									<th class="px-4 py-2">CPU</th>
+									<th class="px-4 py-2">Memory</th>
+									<th class="px-4 py-2">Status</th>
+								</tr>
+							</thead>
+							<tbody class="text-sm" id="processTableBody">
+								<!-- Processes will be dynamically inserted here -->
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<!-- Network Traffic -->
+				<div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+					<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-4">Network Traffic</h4>
+					<div class="flex space-x-4">
+						<div class="flex-1">
+							<div class="flex justify-between items-center mb-2">
+								<span class="text-xs text-neutral-500 dark:text-neutral-400">Incoming</span>
+								<span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">2.5 MB/s</span>
+							</div>
+							<div class="h-1 bg-neutral-200 dark:bg-neutral-700 rounded-full">
+								<div class="h-full bg-indigo-500 rounded-full animate-pulse" style="width: 65%"></div>
+							</div>
+						</div>
+						<div class="flex-1">
+							<div class="flex justify-between items-center mb-2">
+								<span class="text-xs text-neutral-500 dark:text-neutral-400">Outgoing</span>
+								<span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">1.8 MB/s</span>
+							</div>
+							<div class="h-1 bg-neutral-200 dark:bg-neutral-700 rounded-full">
+								<div class="h-full bg-purple-500 rounded-full animate-pulse" style="width: 45%"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+	class ServerPopupManager extends TaskPopupManager {
+		showServerMonitoring(serverId) {
+			const template = document.getElementById('serverMonitoringPopup');
+			const popup = template.content.cloneNode(true);
+			const wrapper = document.createElement('div');
+			wrapper.appendChild(popup);
+
+			// Initialize monitoring data
+			this.initializeMonitoringData(wrapper, serverId);
+
+			this.showPopup(wrapper);
+			return wrapper;
+		}
+
+		initializeMonitoringData(wrapper, serverId) {
+			// Sample process data - In real app, this would come from the server
+			const processes = [
+				{ name: 'nginx', pid: '1234', cpu: '2.5%', memory: '256MB', status: 'running' },
+				{ name: 'mysql', pid: '1235', cpu: '4.2%', memory: '512MB', status: 'running' },
+				{ name: 'php-fpm', pid: '1236', cpu: '1.8%', memory: '128MB', status: 'running' }
+			];
+
+			const tbody = wrapper.querySelector('#processTableBody');
+			processes.forEach(proc => {
+				const tr = document.createElement('tr');
+				tr.className = 'hover:bg-neutral-100 dark:hover:bg-neutral-700/50';
+				tr.innerHTML = `
+					<td class="px-4 py-2 text-neutral-700 dark:text-neutral-300">${proc.name}</td>
+					<td class="px-4 py-2 text-neutral-700 dark:text-neutral-300">${proc.pid}</td>
+					<td class="px-4 py-2 text-neutral-700 dark:text-neutral-300">${proc.cpu}</td>
+					<td class="px-4 py-2 text-neutral-700 dark:text-neutral-300">${proc.memory}</td>
+					<td class="px-4 py-2">
+						<span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+							${proc.status}
+						</span>
+					</td>
+				`;
+				tbody.appendChild(tr);
+			});
+
+			// In a real application, you would set up WebSocket or polling here
+			// to update the monitoring data in real-time
+		}
+	}
+
+	// Initialize server popup manager
+	const serverPopupManager = new ServerPopupManager();
+
+	// Example usage:
+	/*
+	serverPopupManager.showServerMonitoring('server123');
+	*/
+</script>

@@ -10,8 +10,15 @@ const prisma = new PrismaClient();
 
 async function listUsers(res: Response) {
   try {
-    const users = await prisma.users.findMany();
-
+    const users = await prisma.users.findMany({
+      include: {
+        roles: {
+          include: {
+            role: true
+          }
+        }
+      }
+    });
     return users;
   } catch (error) {
     logger.error('Error fetching users:', error);
@@ -43,18 +50,22 @@ const adminModule: Module = {
             return res.redirect('/login');
           }
 
-          const users = await listUsers(res);
-          const settings = await prisma.settings.findUnique({
+            const users = await listUsers(res);
+            const settings = await prisma.settings.findUnique({
             where: { id: 1 },
-          });
+            });
 
-          res.render('admin/users/users', {
+            // Fetch roles from the database 
+            const roles = await prisma.role.findMany();
+
+            res.render('admin/users/users', {
             user,
             req,
             settings,
             users,
             onlineUsers,
-          });
+            roles, // Pass roles to the template
+            });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -203,9 +214,43 @@ const adminModule: Module = {
       },
     );
 
+    router.put(
+      '/api/admin/users/:id/role',
+      isAuthenticated(true),
+      async (req: Request, res: Response): Promise<void> => {
+      try {
+        const userId = parseInt(req.params.id, 10);
+        const { roleId } = req.body;
+
+        if (!roleId) {
+        res.status(400).json({ message: 'Role ID is required' });
+        return;
+        }
+
+        // Delete existing user roles
+        await prisma.userRole.deleteMany({
+        where: { userId }
+        });
+
+        // Create new user role
+        await prisma.userRole.create({
+        data: {
+          userId,
+          roleId: parseInt(roleId, 10)
+        }
+        });
+
+        res.status(200).json({ message: 'User role updated successfully' });
+      } catch (error) {
+        logger.error('Error updating user role:', error);
+        res.status(500).json({ message: 'Error updating user role' });
+      }
+      }
+    );
+
     return router;
-  },
-};
+    },
+  };
 
 process.on('SIGINT', async () => {
   await prisma.$disconnect();

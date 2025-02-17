@@ -1,10 +1,18 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Module } from '../../../handlers/moduleInit';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Server, Node, Images } from '@prisma/client';
 import logger from '../../../handlers/logger';
 import axios from 'axios';
 import QueueHandler from '../../../handlers/utils/core/queueer';
 import bcrypt from 'bcrypt';
+import { hasPermission } from '../../../handlers/permissionMiddleware';
+import { AVAILABLE_PERMISSIONS } from '../../admin/permissions';
+
+// Define types for server with relations
+type ServerWithRelations = Server & {
+  node: Node;
+  image: Images;
+};
 
 const queueer = new QueueHandler();
 
@@ -66,9 +74,20 @@ const coreModule: Module = {
               : req.query.filter;
 
           const include = req.query.include;
-          const users = await prisma.users.findMany({
+            const users = await prisma.users.findMany({
             where: filter || {},
-          });
+            include: {
+              roles: {
+              include: {
+                role: {
+                include: {
+                  permissions: true
+                }
+                }
+              }
+              }
+            }
+            });
 
           let serverData = null;
           if (include && include === 'servers') {
@@ -81,12 +100,18 @@ const coreModule: Module = {
           const response = users.map((user: any) => {
             const userData: any = {
               object: 'user',
-              attributes: {
+                attributes: {
                 id: user.id,
                 username: user.username,
                 email: user.email,
                 root_admin: user.isAdmin,
-              },
+                roles: user.roles.map((ur: any) => ({
+                  id: ur.role.id,
+                  name: ur.role.name,
+                  description: ur.role.description,
+                  permissions: ur.role.permissions.map((p: any) => p.permission)
+                }))
+                },
               relationships: {
                 servers: [],
               },
@@ -143,15 +168,31 @@ const coreModule: Module = {
 
           let user;
 
-          if (userId) {
+            const userQuery = {
+            include: {
+              roles: {
+              include: {
+                role: {
+                include: {
+                  permissions: true
+                }
+                }
+              }
+              }
+            }
+            };
+
+            if (userId) {
             user = await prisma.users.findUnique({
               where: { id: parseInt(userId) },
+              ...userQuery
             });
-          } else if (filter?.email) {
+            } else if (filter?.email) {
             user = await prisma.users.findUnique({
               where: { email: filter.email },
+              ...userQuery
             });
-          }
+            }
 
           if (!user) {
             res.status(404).json({ error: 'Not Found' });
@@ -245,44 +286,67 @@ const coreModule: Module = {
       '/api/application/users',
       validator,
       async (req: Request, res: Response) => {
-        try {
-          let { username, email, first_name, last_name, password } = req.body;
+      try {
+        let { username, email, first_name, last_name, password } = req.body;
 
-          if (!username || !email || !first_name || !last_name || !password) {
-            res.status(400).json({ error: 'Missing required fields' });
-            return;
-          }
-
-          const existingUser = await prisma.users.findUnique({
-            where: { email },
-          });
-
-          if (existingUser) {
-            res.status(400).json({ error: 'User already exists' });
-            return;
-          }
-
-          password = await bcrypt.hash(password, 10);
-
-          const newUser = await prisma.users.create({
-            data: {
-              username,
-              email,
-              password,
-            },
-          });
-
-          res.status(201).json({
-            atributes: {
-              id: newUser.id,
-              username: newUser.username,
-              email: newUser.email,
-            },
-          });
-        } catch (error) {
-          console.error('Error creating user:', error);
-          res.status(500).json({ error: 'Internal server error' });
+        if (!username || !email || !first_name || !last_name || !password) {
+        res.status(400).json({ error: 'Missing required fields' });
+        return;
         }
+
+        const existingUser = await prisma.users.findUnique({
+        where: { email },
+        });
+
+        if (existingUser) {
+        res.status(400).json({ error: 'User already exists' });
+        return;
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Start a transaction to create user and assign default role
+        const newUser = await prisma.$transaction(async (tx) => {
+        // Create the user
+        const user = await tx.users.create({
+          data: {
+          username,
+          email,
+          password: hashedPassword,
+          description: 'No About Me'
+          },
+        });
+
+        // Find the default user role
+        const defaultRole = await tx.role.findFirst({
+          where: { name: 'User' }
+        });
+
+        if (defaultRole) {
+          // Assign default role to the user
+          await tx.userRole.create({
+          data: {
+            userId: user.id,
+            roleId: defaultRole.id
+          }
+          });
+        }
+
+        return user;
+        });
+
+        res.status(201).json({
+        object: 'user',
+        attributes: {
+          id: newUser.id,
+          username: newUser.username,
+          email: newUser.email,
+        },
+        });
+      } catch (error) {
+        logger.error('Error creating user:', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
       },
     );
 
@@ -299,38 +363,66 @@ const coreModule: Module = {
             return;
           }
 
-          const user = await prisma.users.findUnique({
+            const user = await prisma.users.findUnique({
             where: { id: userId },
-          });
+            include: {
+              roles: {
+              include: {
+                role: {
+                include: {
+                  permissions: true
+                }
+                }
+              }
+              }
+            }
+            });
 
-          if (!user) {
+            if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
-          }
+            }
 
-          let updatedData: any = {};
+            let updatedData: any = {};
 
-          if (username) updatedData.username = username;
-          if (email) updatedData.email = email;
-          if (first_name) updatedData.first_name = first_name;
-          if (last_name) updatedData.last_name = last_name;
-          if (password) updatedData.password = password;
+            if (username) updatedData.username = username;
+            if (email) updatedData.email = email;
+            if (first_name) updatedData.first_name = first_name;
+            if (last_name) updatedData.last_name = last_name;
+            if (password) {
+            updatedData.password = await bcrypt.hash(password, 10);
+            }
 
-          updatedData.password = await bcrypt.hash(password, 10);
-
-          const updatedUser = await prisma.users.update({
+            const updatedUser = await prisma.users.update({
             where: { id: userId },
             data: updatedData,
-          });
+            include: {
+              roles: {
+              include: {
+                role: {
+                include: {
+                  permissions: true
+                }
+                }
+              }
+              }
+            }
+            });
 
-          res.status(200).json({
+            res.status(200).json({
             object: 'user',
             attributes: {
               id: updatedUser.id,
               username: updatedUser.username,
               email: updatedUser.email,
+              roles: updatedUser.roles.map((ur) => ({
+              id: ur.role.id,
+              name: ur.role.name,
+              description: ur.role.description,
+              permissions: ur.role.permissions.map((p) => p.permission)
+              }))
             },
-          });
+            });
         } catch (error) {
           console.error('Error updating user:', error);
           res.status(500).json({ error: 'Internal server error' });
@@ -340,7 +432,7 @@ const coreModule: Module = {
 
     router.post(
       '/api/application/servers',
-      validator,
+      [validator, hasPermission(AVAILABLE_PERMISSIONS.USER_CREATE_SERVER)],
       async (req: Request, res: Response) => {
         const name = req.body.name;
         const description = req.body.description || 'Server Generated by API';
@@ -446,8 +538,8 @@ const coreModule: Module = {
             return;
           }
 
-          const server = await prisma.server.create({
-            data: {
+            const server = await prisma.server.create({
+              data: {
               name,
               description,
               ownerId: userId,
@@ -460,26 +552,40 @@ const coreModule: Module = {
               Variables: JSON.stringify(variables) || '[]',
               StartCommand,
               dockerImage: JSON.stringify(imageDocker),
-            },
-          });
+              Installing: true,
+              Queued: true,
+              Suspended: false
+              } as any,
+              include: {
+              image: true,
+              node: true
+              }
+            }) as ServerWithRelations;
 
-          queueer.addTask(async () => {
+            queueer.addTask(async () => {
             const servers = await prisma.server.findMany({
               where: {
-                Queued: true,
-              },
+              Queued: true
+              } as any,
               include: {
-                image: true,
-                node: true,
-              },
-            });
+              image: true,
+              node: true
+              }
+            }) as ServerWithRelations[];
+
 
             for (const server of servers) {
               if (!server.Variables) {
                 await prisma.server.update({
                   where: { id: server.id },
-                  data: { Queued: false },
-                });
+                  data: { 
+                  Queued: false 
+                  } as any,
+                  include: {
+                  image: true,
+                  node: true
+                  }
+                }) as ServerWithRelations;
                 continue;
               }
 
@@ -493,21 +599,33 @@ const coreModule: Module = {
                 );
                 await prisma.server.update({
                   where: { id: server.id },
-                  data: { Queued: false },
-                });
+                  data: { 
+                  Queued: false 
+                  } as any,
+                  include: {
+                  image: true,
+                  node: true
+                  }
+                }) as ServerWithRelations;
                 continue;
               }
 
-              if (!Array.isArray(ServerEnv)) {
+                if (!Array.isArray(ServerEnv)) {
                 console.error(
                   `ServerEnv is not an array for server ID ${server.id}. Skipping...`,
                 );
                 await prisma.server.update({
                   where: { id: server.id },
-                  data: { Queued: false },
-                });
+                  data: { 
+                  Queued: false 
+                  } as any,
+                  include: {
+                  image: true,
+                  node: true
+                  }
+                }) as ServerWithRelations;
                 continue;
-              }
+                }
 
               const env = ServerEnv.reduce(
                 (
@@ -529,10 +647,16 @@ const coreModule: Module = {
                     `Error parsing scripts for server ID ${server.id}:`,
                     error,
                   );
-                  await prisma.server.update({
-                    where: { id: server.id },
-                    data: { Queued: false },
-                  });
+                    await prisma.server.update({
+                      where: { id: server.id },
+                      data: { 
+                      Queued: false 
+                      } as any,
+                      include: {
+                      image: true,
+                      node: true
+                      }
+                    }) as ServerWithRelations;
                   continue;
                 }
 
@@ -559,10 +683,16 @@ const coreModule: Module = {
                     },
                   );
 
-                  await prisma.server.update({
+                    await prisma.server.update({
                     where: { id: server.id },
-                    data: { Queued: false },
-                  });
+                    data: { 
+                      Queued: false 
+                    } as any,
+                    include: {
+                      image: true,
+                      node: true
+                    }
+                    }) as ServerWithRelations;
                 } catch (error) {
                   console.error(
                     `Error sending install request for server ID ${server.id}:`,
