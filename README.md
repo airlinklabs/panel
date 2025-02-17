@@ -43,17 +43,26 @@ Airlink Panel is an advanced, open-source game server management platform design
     npm install --production
    ```
 
-4. Configure the Prisma database and run migrations:
+4. Rename example.env to .env
+   ```bash
+   mv example.env .env
+   ```
+   OR
+   ```bash
+   cp example.env .env
+   ```
+  
+5. Configure the Prisma database and run migrations:
    ```bash
    npm run migrate:dev
    ```
 
-5. Build the application:
+6. Build the application:
    ```bash
    npm run build-ts
    ```
 
-6. Run the application:
+7. Run the application:
    ```bash
    npm run start
    ```
