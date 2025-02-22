@@ -921,7 +921,9 @@ const dashboardModule: Module = {
                 uuid: player.id,
               })) || [];
           } catch (pingError) {
-            console.log('chicken with curry');
+            logger.error('Error pinging server:', pingError);
+            res.redirect('/server/' + serverId + '/players');
+            return;
           }
 
           const settings = await prisma.settings.findUnique({
