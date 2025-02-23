@@ -1,0 +1,12 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+	<!-- Background Circle -->
+	<circle cx="16" cy="16" r="16" fill="#3B82F6"/>
+	
+	<!-- Stylized 'A' and Link Symbol -->
+	<path d="M10 22L16 8L22 22H10Z" stroke="white" stroke-width="2" fill="none"/>
+	<path d="M13 18H19" stroke="white" stroke-width="2"/>
+	
+	<!-- Connection Lines -->
+	<path d="M8 14C12 10 20 10 24 14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+	<path d="M10 18C13 15 19 15 22 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+</svg>

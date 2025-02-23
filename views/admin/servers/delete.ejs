@@ -1,0 +1,89 @@
+<%- include('../../components/header', { title: 'Delete Server' }) %>
+
+<main class="h-screen m-auto">
+	<div class="flex h-screen">
+		<div class="w-60 h-full">
+			<%- include('../../components/template') %>
+		</div>
+		
+		<div class="flex-1 p-6 overflow-y-auto pt-16">
+			<div class="max-w-2xl mx-auto mt-16">
+				<div class="bg-white dark:bg-neutral-900 rounded-lg px-4 py-5 shadow-lg sm:p-6">
+					<div class="text-center">
+						<svg class="mx-auto h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+						</svg>
+						
+						<h3 class="mt-4 text-lg font-medium text-neutral-900 dark:text-white">Delete Server</h3>
+						<div class="mt-2">
+							<p class="text-sm text-neutral-500 dark:text-neutral-400">
+								Are you sure you want to delete server "<%= server.name %>"? This action cannot be undone.
+							</p>
+						</div>
+						
+						<div class="mt-6 space-y-4">
+							<div class="bg-neutral-50 dark:bg-neutral-800/50 rounded-lg p-4">
+								<dl class="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+									<div>
+										<dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Server Name</dt>
+										<dd class="mt-1 text-sm text-neutral-900 dark:text-white"><%= server.name %></dd>
+									</div>
+									<div>
+										<dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400">IP Address</dt>
+										<dd class="mt-1 text-sm text-neutral-900 dark:text-white"><%= server.ip %></dd>
+									</div>
+									<div>
+										<dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Port</dt>
+										<dd class="mt-1 text-sm text-neutral-900 dark:text-white"><%= server.port %></dd>
+									</div>
+									<div>
+										<dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Memory</dt>
+										<dd class="mt-1 text-sm text-neutral-900 dark:text-white"><%= server.memory %> MB</dd>
+									</div>
+								</dl>
+							</div>
+							
+							<div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+								<button type="button" id="confirmDelete" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:col-start-2 sm:text-sm">
+									Delete Server
+								</button>
+								<a href="/admin/servers" class="mt-3 w-full inline-flex justify-center rounded-md border border-neutral-300 dark:border-neutral-700 shadow-sm px-4 py-2 bg-white dark:bg-neutral-800 text-base font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm">
+									Cancel
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
+
+<%- include('../../components/toast') %>
+
+<script>
+document.getElementById('confirmDelete').addEventListener('click', function() {
+	this.disabled = true;
+	this.innerHTML = '<svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+
+	fetch('/admin/servers/delete/<%= server.id %>', {
+		method: 'DELETE',
+	})
+	.then(response => response.json())
+	.then(data => {
+		if (data.success) {
+			showToast('Server deleted successfully', 'success');
+			setTimeout(() => window.location.href = '/admin/servers', 1500);
+		} else {
+			showToast(data.error || 'Failed to delete server', 'error');
+			this.disabled = false;
+			this.textContent = 'Delete Server';
+		}
+	})
+	.catch(error => {
+		showToast('Error deleting server', 'error');
+		this.disabled = false;
+		this.textContent = 'Delete Server';
+	});
+});
+</script>

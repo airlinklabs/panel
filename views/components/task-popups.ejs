@@ -1,0 +1,165 @@
+<!-- Task-specific Popup Templates -->
+<template id="serverActionPopup">
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-xl max-w-lg w-full transform transition-all">
+			<div class="p-6 space-y-4">
+				<h3 class="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Server Actions</h3>
+				<div class="grid grid-cols-2 gap-4">
+					<button class="action-btn p-4 bg-neutral-100 dark:bg-neutral-800 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors" data-action="start">
+						<svg class="w-6 h-6 mb-2 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+						</svg>
+						<span class="block text-sm font-medium">Start Server</span>
+					</button>
+
+					<button class="action-btn p-4 bg-neutral-100 dark:bg-neutral-800 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors" data-action="stop">
+						<svg class="w-6 h-6 mb-2 mx-auto text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+						</svg>
+						<span class="block text-sm font-medium">Stop Server</span>
+					</button>
+
+					<button class="action-btn p-4 bg-neutral-100 dark:bg-neutral-800 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors" data-action="restart">
+						<svg class="w-6 h-6 mb-2 mx-auto text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+						</svg>
+						<span class="block text-sm font-medium">Restart Server</span>
+					</button>
+
+					<button class="action-btn p-4 bg-neutral-100 dark:bg-neutral-800 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors" data-action="backup">
+						<svg class="w-6 h-6 mb-2 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
+						</svg>
+						<span class="block text-sm font-medium">Backup Server</span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<template id="backupOptionsPopup">
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-xl max-w-lg w-full transform transition-all">
+			<div class="p-6">
+				<h3 class="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Backup Options</h3>
+				<div class="space-y-4">
+					<div class="space-y-2">
+						<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Backup Type</label>
+						<div class="space-y-2">
+							<label class="flex items-center">
+								<input type="radio" name="backupType" value="full" class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-neutral-300 dark:border-neutral-700">
+								<span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Full Backup</span>
+							</label>
+							<label class="flex items-center">
+								<input type="radio" name="backupType" value="incremental" class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-neutral-300 dark:border-neutral-700">
+								<span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Incremental Backup</span>
+							</label>
+						</div>
+					</div>
+
+					<div class="space-y-2">
+						<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Compression Level</label>
+						<select class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white">
+							<option value="none">No Compression</option>
+							<option value="fast">Fast Compression</option>
+							<option value="normal" selected>Normal Compression</option>
+							<option value="max">Maximum Compression</option>
+						</select>
+					</div>
+
+					<div class="space-y-2">
+						<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Backup Location</label>
+						<div class="flex space-x-2">
+							<input type="text" class="flex-1 px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white" placeholder="/path/to/backup">
+							<button class="px-4 py-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700">
+								Browse
+							</button>
+						</div>
+					</div>
+				</div>
+
+				<div class="mt-6 flex justify-end space-x-3">
+					<button class="cancel-btn px-4 py-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">
+						Cancel
+					</button>
+					<button class="confirm-btn px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg">
+						Start Backup
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+	// Extend PopupManager with task-specific methods
+	class TaskPopupManager extends PopupManager {
+		showServerActions(serverId, callbacks = {}) {
+			const template = document.getElementById('serverActionPopup');
+			const popup = template.content.cloneNode(true);
+			const wrapper = document.createElement('div');
+			wrapper.appendChild(popup);
+
+			// Add click handlers for each action button
+			wrapper.querySelectorAll('.action-btn').forEach(btn => {
+				btn.addEventListener('click', () => {
+					const action = btn.dataset.action;
+					if (action === 'backup') {
+						this.showBackupOptions(serverId, callbacks.onBackup);
+					} else if (callbacks[action]) {
+						callbacks[action]();
+					}
+					this.closePopup(wrapper);
+				});
+			});
+
+			this.showPopup(wrapper);
+			return wrapper;
+		}
+
+		showBackupOptions(serverId, onBackup) {
+			const template = document.getElementById('backupOptionsPopup');
+			const popup = template.content.cloneNode(true);
+			const wrapper = document.createElement('div');
+			wrapper.appendChild(popup);
+
+			const form = wrapper.querySelector('form') || wrapper.querySelector('.p-6');
+			const cancelBtn = wrapper.querySelector('.cancel-btn');
+			const confirmBtn = wrapper.querySelector('.confirm-btn');
+
+			cancelBtn.addEventListener('click', () => {
+				this.closePopup(wrapper);
+			});
+
+			confirmBtn.addEventListener('click', () => {
+				const backupType = wrapper.querySelector('input[name="backupType"]:checked')?.value;
+				const compression = wrapper.querySelector('select').value;
+				const location = wrapper.querySelector('input[type="text"]').value;
+
+				if (onBackup) {
+					onBackup({ backupType, compression, location });
+				}
+				this.closePopup(wrapper);
+			});
+
+			this.showPopup(wrapper);
+			return wrapper;
+		}
+	}
+
+	// Initialize task popup manager
+	const taskPopupManager = new TaskPopupManager();
+
+	// Example usage:
+	/*
+	taskPopupManager.showServerActions('server123', {
+		start: () => console.log('Starting server...'),
+		stop: () => console.log('Stopping server...'),
+		restart: () => console.log('Restarting server...'),
+		onBackup: (options) => console.log('Backup options:', options)
+	});
+	*/
+</script>

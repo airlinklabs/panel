@@ -1,0 +1,234 @@
+<!-- Backup Configuration Popup -->
+<template id="backupConfigPopup">
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+		<div class="bg-white dark:bg-neutral-900 rounded-lg shadow-xl max-w-2xl w-full transform transition-all">
+			<div class="flex items-center justify-between p-6 border-b dark:border-neutral-800">
+				<h3 class="text-lg font-semibold text-neutral-900 dark:text-white">Backup Configuration</h3>
+				<button class="close-btn text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+				</button>
+			</div>
+
+			<div class="p-6">
+				<form class="space-y-6">
+					<!-- Backup Schedule -->
+					<div class="space-y-4">
+						<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Backup Schedule</h4>
+						<div class="grid grid-cols-2 gap-4">
+							<div>
+								<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Frequency</label>
+								<select class="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+									<option value="daily">Daily</option>
+									<option value="weekly">Weekly</option>
+									<option value="monthly">Monthly</option>
+									<option value="custom">Custom</option>
+								</select>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Time</label>
+								<input type="time" class="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+							</div>
+						</div>
+					</div>
+
+					<!-- Backup Type -->
+					<div class="space-y-4">
+						<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Backup Type</h4>
+						<div class="space-y-2">
+							<label class="flex items-center">
+								<input type="radio" name="backupType" value="full" class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-neutral-300">
+								<span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Full Backup</span>
+							</label>
+							<label class="flex items-center">
+								<input type="radio" name="backupType" value="incremental" class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-neutral-300">
+								<span class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Incremental Backup</span>
+							</label>
+						</div>
+					</div>
+
+					<!-- Retention Policy -->
+					<div class="space-y-4">
+						<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Retention Policy</h4>
+						<div class="grid grid-cols-2 gap-4">
+							<div>
+								<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Keep Backups For</label>
+								<div class="flex space-x-2">
+									<input type="number" min="1" class="w-20 px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+									<select class="px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+										<option value="days">Days</option>
+										<option value="weeks">Weeks</option>
+										<option value="months">Months</option>
+									</select>
+								</div>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Maximum Size</label>
+								<div class="flex space-x-2">
+									<input type="number" min="1" class="w-20 px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+									<select class="px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500">
+										<option value="gb">GB</option>
+										<option value="tb">TB</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Storage Location -->
+					<div class="space-y-4">
+						<h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Storage Location</h4>
+						<div class="space-y-4">
+							<div>
+								<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Primary Location</label>
+								<div class="flex space-x-2">
+									<input type="text" class="flex-1 px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500" placeholder="/path/to/backup">
+									<button type="button" class="px-4 py-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700">
+										Browse
+									</button>
+								</div>
+							</div>
+							<div class="flex items-center">
+								<input type="checkbox" id="redundantBackup" class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-neutral-300 rounded">
+								<label for="redundantBackup" class="ml-2 text-sm text-neutral-700 dark:text-neutral-300">Enable Redundant Backup</label>
+							</div>
+							<div class="pl-6">
+								<label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Secondary Location</label>
+								<div class="flex space-x-2">
+									<input type="text" class="flex-1 px-3 py-2 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500" placeholder="/path/to/backup" disabled>
+									<button type="button" class="px-4 py-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700" disabled>
+										Browse
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+
+			<div class="px-6 py-4 bg-neutral-50 dark:bg-neutral-800 border-t dark:border-neutral-700 flex justify-end space-x-3">
+				<button class="cancel-btn px-4 py-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg">
+					Cancel
+				</button>
+				<button class="save-btn px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg">
+					Save Configuration
+				</button>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+	class BackupConfigPopupManager extends PopupManager {
+		showBackupConfig(config = {}, onSave) {
+			const template = document.getElementById('backupConfigPopup');
+			const popup = template.content.cloneNode(true);
+			const wrapper = document.createElement('div');
+			wrapper.appendChild(popup);
+
+			// Initialize form with existing config
+			this.initializeForm(wrapper, config);
+
+			// Handle redundant backup toggle
+			const redundantCheckbox = wrapper.querySelector('#redundantBackup');
+			const secondaryLocation = wrapper.querySelector('input[disabled]');
+			const secondaryBrowse = wrapper.querySelector('button[disabled]');
+
+			redundantCheckbox.addEventListener('change', () => {
+				secondaryLocation.disabled = !redundantCheckbox.checked;
+				secondaryBrowse.disabled = !redundantCheckbox.checked;
+			});
+
+			// Handle form submission
+			wrapper.querySelector('.save-btn').addEventListener('click', () => {
+				const formData = this.getFormData(wrapper);
+				if (onSave) {
+					onSave(formData);
+				}
+				this.closePopup(wrapper);
+			});
+
+			// Handle cancel
+			wrapper.querySelector('.cancel-btn').addEventListener('click', () => {
+				this.closePopup(wrapper);
+			});
+
+			// Handle close button
+			wrapper.querySelector('.close-btn').addEventListener('click', () => {
+				this.closePopup(wrapper);
+			});
+
+			this.showPopup(wrapper);
+			return wrapper;
+		}
+
+		initializeForm(wrapper, config) {
+			const form = wrapper.querySelector('form');
+			
+			// Set frequency and time
+			if (config.frequency) {
+				form.querySelector('select').value = config.frequency;
+			}
+			if (config.time) {
+				form.querySelector('input[type="time"]').value = config.time;
+			}
+
+			// Set backup type
+			if (config.backupType) {
+				form.querySelector(`input[name="backupType"][value="${config.backupType}"]`).checked = true;
+			}
+
+			// Set retention policy
+			if (config.retention) {
+				const [value, unit] = config.retention.split(' ');
+				form.querySelector('input[type="number"]').value = value;
+				form.querySelector('select').value = unit;
+			}
+
+			// Set storage locations
+			if (config.primaryLocation) {
+				form.querySelector('input[type="text"]').value = config.primaryLocation;
+			}
+			if (config.redundantBackup) {
+				const checkbox = form.querySelector('#redundantBackup');
+				checkbox.checked = true;
+				checkbox.dispatchEvent(new Event('change'));
+				if (config.secondaryLocation) {
+					form.querySelectorAll('input[type="text"]')[1].value = config.secondaryLocation;
+				}
+			}
+		}
+
+		getFormData(wrapper) {
+			const form = wrapper.querySelector('form');
+			return {
+				frequency: form.querySelector('select').value,
+				time: form.querySelector('input[type="time"]').value,
+				backupType: form.querySelector('input[name="backupType"]:checked').value,
+				retention: `${form.querySelector('input[type="number"]').value} ${form.querySelector('select').value}`,
+				primaryLocation: form.querySelector('input[type="text"]').value,
+				redundantBackup: form.querySelector('#redundantBackup').checked,
+				secondaryLocation: form.querySelectorAll('input[type="text"]')[1].value
+			};
+		}
+	}
+
+	// Initialize backup config popup manager
+	const backupConfigPopupManager = new BackupConfigPopupManager();
+
+	// Example usage:
+	/*
+	backupConfigPopupManager.showBackupConfig({
+		frequency: 'daily',
+		time: '02:00',
+		backupType: 'incremental',
+		retention: '30 days',
+		primaryLocation: '/backups/primary',
+		redundantBackup: true,
+		secondaryLocation: '/backups/secondary'
+	}, (config) => {
+		console.log('Saving backup config:', config);
+	});
+	*/
+</script>

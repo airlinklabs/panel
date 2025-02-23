@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
@@ -26,28 +26,55 @@ const accountModule: Module = {
     const router = Router();
 
     router.get(
-      '/account',
-      isAuthenticated(),
-      async (req: Request, res: Response) => {
-        // todo : remove this fucking shit use like flash or somethings like that but not that bro, idk why we do that
+        '/account',
+        isAuthenticated() as RequestHandler,
+        async (req: Request, res: Response): Promise<void> => {
         const errorMessage: ErrorMessage = {};
         try {
           const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
-            errorMessage.message = 'User not found.';
-            res.render('user/account', { errorMessage, user, req });
-            return;
+          const user = await prisma.users.findUnique({ 
+          where: { id: userId },
+          include: {
+            roles: {
+            include: {
+              role: {
+              include: {
+                permissions: true
+              }
+              }
+            }
+            }
           }
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
           });
 
+          if (!user) {
+          errorMessage.message = 'User not found.';
+          res.render('user/account', { errorMessage, user, req });
+          return;
+          }
+
+          const settings = await prisma.settings.findUnique({
+          where: { id: 1 },
+          });
+
+          // Get all available roles for admin users
+          const allRoles = req.session.user?.isAdmin ? 
+          await prisma.role.findMany({
+            include: {
+            permissions: true
+            }
+          }) : [];
+
           res.render('user/account', {
-            errorMessage,
-            user,
-            req,
-            settings,
+          errorMessage,
+          user,
+          req,
+          settings,
+          roles: user.roles.map(ur => ({
+            ...ur.role,
+            permissions: ur.role.permissions.map(p => p.permission)
+          })),
+          allRoles: req.session.user?.isAdmin ? allRoles : []
           });
         } catch (error) {
           logger.error('Error fetching user:', error);
@@ -62,13 +89,84 @@ const accountModule: Module = {
             settings,
           });
         }
-      },
-    );
+        },
+      );
 
-    router.post(
-      '/update-description',
-      isAuthenticated(),
-      async (req: Request, res: Response) => {
+      // Add endpoint to manage user roles (admin only)
+        router.post('/account/roles', isAuthenticated() as RequestHandler, async (req: Request, res: Response): Promise<void> => {
+        if (!req.session.user?.isAdmin) {
+          res.status(403).json({ error: 'Unauthorized' });
+          return;
+        }
+
+        const { userId, roleId, action } = req.body;
+
+        try {
+        if (action === 'add') {
+          await prisma.userRole.create({
+          data: {
+            userId: parseInt(userId),
+            roleId: parseInt(roleId)
+          }
+          });
+        } else if (action === 'remove') {
+          await prisma.userRole.deleteMany({
+          where: {
+            userId: parseInt(userId),
+            roleId: parseInt(roleId)
+          }
+          });
+        }
+
+        res.status(200).json({ message: 'Roles updated successfully' });
+        } catch (error) {
+        logger.error('Error managing roles:', error);
+        res.status(500).json({ error: 'Internal server error' });
+        }
+      });
+
+      // Add endpoint to get user permissions
+        router.get('/account/permissions', isAuthenticated() as RequestHandler, async (req: Request, res: Response): Promise<void> => {
+        try {
+        const userId = req.session.user?.id;
+        const user = await prisma.users.findUnique({
+          where: { id: userId },
+          include: {
+          roles: {
+            include: {
+            role: {
+              include: {
+              permissions: true
+              }
+            }
+            }
+          }
+          }
+        });
+
+        if (!user) {
+          res.status(404).json({ error: 'User not found' });
+          return;
+        }
+
+        const permissions = new Set<string>();
+        user.roles.forEach(userRole => {
+          userRole.role.permissions.forEach(permission => {
+          permissions.add(permission.permission);
+          });
+        });
+
+        res.json({ permissions: Array.from(permissions) });
+        } catch (error) {
+        logger.error('Error fetching permissions:', error);
+        res.status(500).json({ error: 'Internal server error' });
+        }
+      });
+
+      router.post(
+        '/update-description',
+        isAuthenticated() as RequestHandler,
+        async (req: Request, res: Response): Promise<void> => {
         const { description } = req.body;
         if (!description) {
           res.status(400).send('Description parameter is required.');
@@ -106,9 +204,9 @@ const accountModule: Module = {
     );
 
     router.post(
-      '/update-username',
-      isAuthenticated(),
-      async (req: Request, res: Response) => {
+        '/update-username',
+        isAuthenticated() as RequestHandler,
+        async (req: Request, res: Response): Promise<void> => {
         const { newUsername } = req.body;
         const userId = req.session?.user?.id;
 
@@ -150,9 +248,9 @@ const accountModule: Module = {
     );
 
     router.get(
-      '/check-username',
-      isAuthenticated(),
-      async (req: Request, res: Response) => {
+        '/check-username',
+        isAuthenticated() as RequestHandler,
+        async (req: Request, res: Response): Promise<void> => {
         const { username } = req.query;
 
         if (!username) {
@@ -180,9 +278,9 @@ const accountModule: Module = {
     );
 
     router.post(
-      '/change-password',
-      isAuthenticated(),
-      async (req: Request, res: Response) => {
+        '/change-password',
+        isAuthenticated() as RequestHandler,
+        async (req: Request, res: Response): Promise<void> => {
         const { currentPassword, newPassword } = req.body;
 
         if (!currentPassword || !newPassword) {
@@ -228,9 +326,9 @@ const accountModule: Module = {
     );
 
     router.post(
-      '/validate-password',
-      isAuthenticated(),
-      async (req: Request, res: Response) => {
+        '/validate-password',
+        isAuthenticated() as RequestHandler,
+        async (req: Request, res: Response): Promise<void> => {
         try {
           const { currentPassword } = req.body;
 
@@ -269,9 +367,9 @@ const accountModule: Module = {
     );
 
     router.post(
-      '/change-email',
-      isAuthenticated(),
-      async (req: Request, res: Response) => {
+        '/change-email',
+        isAuthenticated() as RequestHandler,
+        async (req: Request, res: Response): Promise<void> => {
         const { email } = req.body;
 
         if (!email) {

@@ -21,7 +21,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/images',
-      isAuthenticated(true),
+        isAuthenticated(),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -53,7 +53,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/images/create',
-      isAuthenticated(true),
+        isAuthenticated(),
       async (req: Request, res: Response) => {
         const { name, scripts, variables, image } = req.body;
 
@@ -68,7 +68,7 @@ const adminModule: Module = {
 
     router.delete(
       '/admin/images/delete/:id',
-      isAuthenticated(true),
+        isAuthenticated(),
       async (req: Request, res: Response) => {
         const { id } = req.params;
 

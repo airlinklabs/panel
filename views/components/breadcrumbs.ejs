@@ -1,0 +1,68 @@
+<nav class="flex items-center space-x-2 px-4 py-3 bg-white dark:bg-neutral-900 shadow-sm rounded-lg mb-4">
+	<!-- Breadcrumb List -->
+	<div class="flex items-center flex-1 min-w-0">
+		<ol class="flex items-center space-x-2 text-sm">
+			<li class="flex items-center min-w-0">
+				<a href="/" class="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white truncate">
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+					</svg>
+				</a>
+			</li>
+
+			<% breadcrumbs.forEach((item, index) => { %>
+				<li class="flex items-center min-w-0">
+					<svg class="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+					</svg>
+					<a href="<%= item.url %>" class="ml-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white truncate">
+						<%= item.label %>
+					</a>
+				</li>
+			<% }); %>
+		</ol>
+	</div>
+
+	<!-- Action Buttons -->
+	<div class="flex items-center space-x-2">
+		<button class="px-3 py-1.5 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-neutral-900">
+			New
+		</button>
+		<div class="relative">
+			<button id="actionMenuButton" class="p-1.5 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-neutral-900">
+				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+				</svg>
+			</button>
+			<!-- Action Dropdown Menu -->
+			<div id="actionMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-neutral-900 rounded-lg shadow-lg py-1 z-10">
+				<a href="#" class="block px-4 py-2 text-sm text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800">
+					Edit
+				</a>
+				<a href="#" class="block px-4 py-2 text-sm text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800">
+					Share
+				</a>
+				<hr class="my-1 border-neutral-200 dark:border-neutral-700">
+				<a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-800">
+					Delete
+				</a>
+			</div>
+		</div>
+	</div>
+</nav>
+
+<script>
+	const actionMenuButton = document.getElementById('actionMenuButton');
+	const actionMenu = document.getElementById('actionMenu');
+
+	actionMenuButton.addEventListener('click', (event) => {
+		event.stopPropagation();
+		actionMenu.classList.toggle('hidden');
+	});
+
+	document.addEventListener('click', (event) => {
+		if (!actionMenuButton.contains(event.target) && !actionMenu.contains(event.target)) {
+			actionMenu.classList.add('hidden');
+		}
+	});
+</script>
