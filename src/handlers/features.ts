@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
+import { checkNodeStatus } from './utils/node/nodeStatus';
 
 const prisma = new PrismaClient();
 
@@ -35,6 +36,12 @@ export async function checkEulaStatus(
 
     if (!server) {
       return { accepted: false };
+    }
+
+    const isNodeOnline = (await checkNodeStatus(server.node)).status;
+
+    if (isNodeOnline == "Offline") {
+      return { accepted: true }
     }
 
     const eulaResponse = await axios({

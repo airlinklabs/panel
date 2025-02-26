@@ -177,6 +177,14 @@ function getFileIcon(category) {
                         aria-orientation="vertical" 
                         aria-labelledby="options-menu"
                       >
+                        <button 
+                          class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-neutral-800 dark:text-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-200 text-left" 
+                          role="menuitem" 
+                          onclick="rename('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')"
+                        >
+                          Rename
+                        </button>
+                        
                         <% if (file.type !== 'directory') { %>
                           <button 
                             class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-neutral-800 dark:text-neutral-900 hover:bg-red-50 dark:hover:bg-neutral-200 text-left" 
@@ -185,6 +193,16 @@ function getFileIcon(category) {
                           >
                             Download
                           </button>
+                        <% } %>
+                        
+                        <% if (file.name.toLowerCase().endsWith('.zip')) { %>
+                        <button 
+                            class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-neutral-800 dark:text-neutral-900 hover:bg-green-50 dark:hover:bg-neutral-200 text-left" 
+                            role="menuitem" 
+                            onclick="extractZip('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')"
+                        >
+                            Extract Here
+                        </button>
                         <% } %>
                         
                         <button 
@@ -485,6 +503,62 @@ function openCreateFileModal() {
 
     } else {
       closeCreateFileModal();
+    }
+  }
+
+  function rename(fileName, filePath) {
+    const newName = prompt('Enter the newName :', fileName);
+    
+    if (newName && newName !== fileName) {
+      fetch(`/server/<%= server.UUID %>/rename`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          path: filePath,
+          newName: newName
+        })
+      })
+      .then(response => {
+        if (response.ok) {
+          location.reload();
+        } else {
+          showToast('Failed to rename file', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Renaming failed:', error);
+        showToast('Failed to rename file', 'error');
+      });
+    }
+  }
+
+  async function extractZip(fileName, filePath) {
+    try {
+        const parentPath = filePath.substring(0, filePath.lastIndexOf('/'));
+        
+        const response = await fetch(`/server/<%= server.UUID %>/unzip`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                relativePath: parentPath || '/',
+                zipname: fileName
+            })
+        });
+
+        if (response.ok) {
+            showToast('File extracted successfully', 'success');
+            location.reload();
+        } else {
+            const error = await response.json();
+            showToast(error.error || 'Failed to extract file', 'error');
+        }
+    } catch (error) {
+        console.error('Error extracting file:', error);
+        showToast('Failed to extract file', 'error');
     }
   }
 </script>

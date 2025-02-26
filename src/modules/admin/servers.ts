@@ -128,7 +128,7 @@ const adminModule: Module = {
                 id: parseInt(imageId),
               },
             })
-            .then((image) => {
+            .then((image: any) => {
               if (!image) {
                 return null;
               }
@@ -191,7 +191,7 @@ const adminModule: Module = {
           queueer.addTask(async () => {
             const servers = await prisma.server.findMany({
               where: {
-                Installing: true,
+                Queued: true,
               },
               include: {
                 image: true,
@@ -203,7 +203,7 @@ const adminModule: Module = {
               if (!server.Variables) {
                 await prisma.server.update({
                   where: { id: server.id },
-                  data: { Installing: false },
+                  data: { Queued: false },
                 });
                 continue;
               }
@@ -212,11 +212,11 @@ const adminModule: Module = {
               try {
                 ServerEnv = JSON.parse(server.Variables);
                 ServerEnv.push({
-                  "env": "SERVER_PORT",
-                  "name": "Primary Port",
-                  "value": Ports.split(':')[0],
-                  "type": "text"
-              });
+                  env: 'SERVER_PORT',
+                  name: 'Primary Port',
+                  value: Ports.split(':')[0],
+                  type: 'text',
+                });
               } catch (error) {
                 console.error(
                   `Error parsing Variables for server ID ${server.id}:`,
@@ -224,12 +224,10 @@ const adminModule: Module = {
                 );
                 await prisma.server.update({
                   where: { id: server.id },
-                  data: { Installing: false },
+                  data: { Queued: false },
                 });
                 continue;
               }
-
-
 
               if (!Array.isArray(ServerEnv)) {
                 console.error(
@@ -237,7 +235,7 @@ const adminModule: Module = {
                 );
                 await prisma.server.update({
                   where: { id: server.id },
-                  data: { Installing: false },
+                  data: { Queued: false },
                 });
                 continue;
               }
@@ -266,7 +264,7 @@ const adminModule: Module = {
                   );
                   await prisma.server.update({
                     where: { id: server.id },
-                    data: { Installing: false },
+                    data: { Queued: false },
                   });
                   continue;
                 }
@@ -275,12 +273,17 @@ const adminModule: Module = {
                   id: server.UUID,
                   env: env,
                   scripts: scripts.install.map(
-                    (script: { url: string; fileName: string; onStart: boolean; ALVKT: boolean }) => ({
+                    (script: {
+                      url: string;
+                      fileName: string;
+                      onStart: boolean;
+                      ALVKT: boolean;
+                    }) => ({
                       url: script.url,
                       onStartup: script.onStart,
                       ALVKT: script.ALVKT,
                       fileName: script.fileName,
-                    })
+                    }),
                   ),
                 };
 
@@ -298,9 +301,29 @@ const adminModule: Module = {
                     },
                   );
 
+                  if (scripts.native) {
+                    const requestBody2 = {
+                      id: server.UUID,
+                      env: env,
+                      script: scripts.native.CMD,
+                      container: scripts.native.container,
+                    }
+
+                    await axios.post(
+                      `http://${server.node.address}:${server.node.port}/container/installer`,
+                      requestBody2,
+                      {
+                        headers: {
+                          'Content-Type': 'application/json',
+                          Authorization: `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`,
+                        },
+                      },
+                    );
+                  }
+
                   await prisma.server.update({
                     where: { id: server.id },
-                    data: { Installing: false },
+                    data: { Queued: false },
                   });
                 } catch (error) {
                   console.error(
