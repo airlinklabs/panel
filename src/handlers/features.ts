@@ -44,8 +44,6 @@ export async function checkEulaStatus(
       return { accepted: true }
     }
 
-    console.log(isNodeOnline)
-
     const eulaResponse = await axios({
       method: 'GET',
       url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
