@@ -1,0 +1,72 @@
+<div id="notificationContainer" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+<script>
+	function showNotification(options) {
+		const { message, type = 'info', duration = 3000 } = options;
+		
+		const notification = document.createElement('div');
+		notification.className = `transform transition-all duration-300 translate-x-full`;
+		
+		// Set background color based on type
+		const bgColorClass = {
+			success: 'bg-green-500',
+			error: 'bg-red-500',
+			warning: 'bg-yellow-500',
+			info: 'bg-blue-500'
+		}[type] || 'bg-blue-500';
+		
+		// Set icon based on type
+		const icon = {
+			success: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+					</svg>`,
+			error: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>`,
+			warning: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+					</svg>`,
+			info: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+					</svg>`
+		}[type];
+		
+		notification.innerHTML = `
+			<div class="flex items-center p-4 rounded-lg shadow-lg ${bgColorClass} text-white min-w-[300px] max-w-md">
+				<div class="flex-shrink-0">
+					${icon}
+				</div>
+				<div class="ml-3 flex-1">
+					<p class="text-sm font-medium">${message}</p>
+				</div>
+				<button onclick="closeNotification(this.parentElement.parentElement)" class="ml-4 flex-shrink-0 rounded-lg p-1.5 hover:bg-white hover:bg-opacity-10 focus:outline-none">
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+				</button>
+			</div>
+		`;
+		
+		const container = document.getElementById('notificationContainer');
+		container.appendChild(notification);
+		
+		// Trigger animation
+		setTimeout(() => {
+			notification.classList.remove('translate-x-full');
+		}, 10);
+		
+		// Auto remove after duration
+		if (duration > 0) {
+			setTimeout(() => {
+				closeNotification(notification);
+			}, duration);
+		}
+	}
+	
+	function closeNotification(notification) {
+		notification.classList.add('translate-x-full');
+		setTimeout(() => {
+			notification.remove();
+		}, 300);
+	}
+</script>

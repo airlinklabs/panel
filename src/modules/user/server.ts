@@ -1,10 +1,12 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, RequestHandler } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
 import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
 import { checkEulaStatus, isWorld } from '../../handlers/features';
+import { hasPermission } from '../../handlers/permissionMiddleware';
+import { AVAILABLE_PERMISSIONS } from '../admin/permissions';
 const { MinecraftServerListPing } = require('minecraft-status');
 
 const prisma = new PrismaClient();
@@ -16,6 +18,14 @@ interface ErrorMessage {
 interface ServerImageInfo {
   features: string[];
   stop: string;
+}
+
+interface ServerImage {
+  info?: ServerImageInfo | string;
+}
+
+interface Server {
+  image: ServerImage;
 }
 
 interface Port {
@@ -47,7 +57,7 @@ const dashboardModule: Module = {
     // Get server info
     router.get(
       '/server/:id',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_VIEW_SERVERS) as RequestHandler],
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
@@ -134,7 +144,7 @@ const dashboardModule: Module = {
 
     router.post(
       '/server/:id/power/:poweraction',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_MODIFY_SERVER) as RequestHandler],
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
@@ -280,7 +290,7 @@ const dashboardModule: Module = {
      */
     router.get(
       '/server/:id/files',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_ACCESS_SFTP) as RequestHandler],
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
@@ -396,7 +406,7 @@ const dashboardModule: Module = {
      */
     router.get(
       '/server/:id/files/edit/:path(*)',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_ACCESS_SFTP) as RequestHandler],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -485,7 +495,7 @@ const dashboardModule: Module = {
      */
     router.post(
       '/server/:id/files/:path(*)',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_ACCESS_SFTP) as RequestHandler],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -538,7 +548,7 @@ const dashboardModule: Module = {
 
     router.delete(
       '/server/:id/files/rm/:path(*)',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_ACCESS_SFTP) as RequestHandler],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -586,7 +596,7 @@ const dashboardModule: Module = {
 
     router.get(
       '/server/:id/files/download/:path(*)',
-      isAuthenticatedForServer('id'),
+      [isAuthenticatedForServer('id'), hasPermission(AVAILABLE_PERMISSIONS.USER_ACCESS_SFTP)],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -636,12 +646,12 @@ const dashboardModule: Module = {
 
     router.post(
       '/server/:id/zip',
-      isAuthenticatedForServer('id'),
+      [isAuthenticatedForServer('id'), hasPermission(AVAILABLE_PERMISSIONS.USER_ACCESS_SFTP)],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
         let relativePath = req.body?.relativePath || '/';
-        const zipName = req.body?.zipname;
+        const zipName = req.body?.zipname || 'server.zip';
 
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
@@ -702,99 +712,8 @@ const dashboardModule: Module = {
     );
 
     router.post(
-      '/server/:id/unzip',
-      isAuthenticatedForServer('id'),
-      async (req: Request, res: Response) => {
-        const userId = req.session?.user?.id;
-        const serverId = req.params?.id;
-        const relativePath = req.body?.relativePath || '/';
-        const zipName = req.body?.zipname;
-
-        try {
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
-            res.status(404).json({ error: 'User not found' });
-            return;
-          }
-
-          if (!serverId) {
-            res.status(400).json({ error: 'Server ID is required.' });
-            return;
-          }
-
-          const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
-            include: { node: true },
-          });
-
-          if (!server) {
-            res.status(404).json({ error: 'Server not found' });
-            return;
-          }
-
-          console.log('Server found:', {
-            nodeAddress: server.node.address,
-            nodePort: server.node.port
-          });
-
-          const cleanPath = relativePath.replace(/\/+/g, '/').replace(/^\/|\/$/g, '');
-          const cleanZipName = zipName.replace(/^\/+|\/+$/g, '');
-
-          const requestConfig = {
-            method: 'POST',
-            url: `http://${server.node.address}:${server.node.port}/fs/unzip`,
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
-            data: {
-              id: serverId,
-              path: cleanPath,
-              zipname: cleanZipName
-            },
-          };
-
-          try {
-            const response = await axios(requestConfig);
-
-            if (response.status === 200) {
-              res.json({ success: true });
-            } else {
-              res.status(response.status).json({ 
-                error: response.data?.message || 'Failed to unzip file',
-                details: response.data
-              });
-            }
-          } catch (axiosError) {
-            if (axios.isAxiosError(axiosError)) {
-              logger.error('Axios error:', {
-                error: axiosError,
-                response: axiosError.response?.data,
-                status: axiosError.response?.status
-              });
-            } else {
-              logger.error('Unexpected error:', {
-                error: axiosError
-              });
-            }
-            }
-          }
-        catch (error) {
-          logger.error('Error unzipping files:', error);
-          if (axios.isAxiosError(error)) {
-            res
-              .status(500)
-              .json({ error: 'Failed to unzip files: ' + error.message });
-          } else {
-            res.status(500).json({ error: 'An unexpected error occurred.' });
-          }
-        }
-      },
-    );
-
-    router.post(
       '/server/:id/feature/eula',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_MODIFY_SERVER) as RequestHandler],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -842,7 +761,7 @@ const dashboardModule: Module = {
 
     router.get(
       '/server/:id/players',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_VIEW_SERVERS) as RequestHandler],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -948,7 +867,7 @@ const dashboardModule: Module = {
 
     router.get(
       '/server/:id/worlds',
-      isAuthenticatedForServer('id'),
+        [isAuthenticatedForServer('id') as RequestHandler, hasPermission(AVAILABLE_PERMISSIONS.USER_VIEW_SERVERS) as RequestHandler],
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -1050,59 +969,6 @@ const dashboardModule: Module = {
         }
       },
     );
-
-    router.post('/server/:id/rename', isAuthenticatedForServer('id'), async (req: Request, res: Response) => {
-      const userId = req.session?.user?.id;
-      const serverId = req.params?.id;
-      const relativePath = req.body.path;
-      const newName = req.body.newName;
-
-      try {
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {
-          res.status(404).json({ error: 'User not found' });
-          return;
-        }
-
-        const server = await prisma.server.findUnique({
-          where: { UUID: serverId },
-          include: { node: true, image: true },
-        });
-
-        if (!server) {
-          res.status(404).json({ error: 'Server not found' });
-          return;
-        }
-
-        try {
-          const renameRequest = {
-            method: 'POST',
-            url: `http://${server.node.address}:${server.node.port}/fs/rename`,
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            data: {
-              id: server.UUID,
-              path: relativePath,
-              newName: newName,
-            },
-          };
-
-          await axios(renameRequest);
-          res.status(200).json({ success: true });
-        } catch (error) {
-          console.error('Error renaming file:', error);
-          res.status(500).json({ error: 'Failed to rename file' });
-        }
-      } catch (error) {
-        logger.error('Error renaming file:', error);
-        res.status(500).json({ error: 'Failed to rename file' });
-      }
-    });
 
     return router;
   },
