@@ -28,9 +28,9 @@
           <ul role="list" class="flex flex-1 flex-col gap-y-7 mt-2">
               <li>
                   <ul role="list" class="-mx-2 space-y-1 relative">
-                    <div id="active-background" class=" ml-1.5 absolute left-2 w-[calc(97%-1.5rem)] h-9 transition-transform duration-200 ease-in-out z-[-1] bg-neutral-500/20 border border-neutral-700/10 dark:border-neutral-300/5 dark:bg-white/5 rounded-xl"></div>
+                    <div id="active-background" class="ml-1.5 absolute left-2 w-[calc(97%-1.5rem)] h-9 transition-none duration-0 z-[-1] bg-neutral-500/20 border border-neutral-700/10 dark:border-neutral-300/5 dark:bg-white/5 rounded-xl opacity-0"></div>
                       <li class="nav-item">
-                          <a href="/" class="nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" data-search="container instances servers" data-subterm="jegli:/server/servername">
+                          <a href="/" class="nav-link mt-1 text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" data-search="container instances servers" data-subterm="jegli:/server/servername">
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 mt-0.5">
                                   <path d="M12.378 1.602a.75.75 0 0 0-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03ZM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 0 0 .372-.648V7.93ZM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 0 0 .372.648l8.628 5.033Z" />
                               </svg>
@@ -146,50 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   };
 
-  // Background animation functions
-  const updateActiveBackground = (link) => {
-      if (!link?.closest) return;
-
-      const linkRect = link.getBoundingClientRect();
-      const navContainer = link.closest('ul');
-      if (!navContainer) return;
-
-      const navRect = navContainer.getBoundingClientRect();
-      const topOffset = linkRect.top - navRect.top + navContainer.scrollTop;
-
-      requestAnimationFrame(() => {
-          activeBackground.style.height = `${linkRect.height}px`;
-          activeBackground.style.transform = `translateY(${topOffset}px)`;
-      });
-
-      setCookie('lastActiveLink', link.id, 7);
-      currentActiveLink = link;
-  };
-
-  // Navigation handling
-  const handleNavigation = (href) => {
-      if (isAnimating) return;
-      isAnimating = true;
-
-      requestAnimationFrame(() => {
-          setTimeout(() => {
-              window.location.href = href;
-          }, 300);
-      });
-  };
-
-  // Event listeners
-  navLinks.forEach(link => {
-      link.addEventListener('click', (e) => {
-          e.preventDefault();
-          const href = link.getAttribute('href');
-          if (href) {
-              updateActiveBackground(link);
-              handleNavigation(href);
-          }
-      });
-  });
-
   // Initialize active state
   const initializeActiveState = () => {
       const currentPath = normalizePath(window.location.pathname);
@@ -200,14 +156,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (activeLink) {
           activeLink.classList.add('active', 'text-neutral-950', 'font-[405]', 'dark:text-white');
-          setTimeout(() => updateActiveBackground(activeLink), 0);
+          
+          const linkRect = activeLink.getBoundingClientRect();
+          const navContainer = activeLink.closest('ul');
+          const navRect = navContainer.getBoundingClientRect();
+          const topOffset = linkRect.top - navRect.top + navContainer.scrollTop;
+          
+          activeBackground.style.transition = 'none';
+          activeBackground.style.height = `${linkRect.height}px`;
+          activeBackground.style.transform = `translateY(${topOffset}px)`;
+          
+          activeBackground.offsetHeight;
+          
+          activeBackground.style.transition = 'opacity 0.2s ease-in-out';
+          activeBackground.style.opacity = '1';
+          
+          setTimeout(() => {
+              activeBackground.style.transition = 'all 0.2s ease-in-out';
+          }, 0);
+          
+          currentActiveLink = activeLink;
       }
   };
 
   initializeActiveState();
-  window.addEventListener('popstate', initializeActiveState);
 
-  // WebSocket connection
   const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   const ws = new WebSocket(`${wsProtocol}//${window.location.host}/online-check`);
   ws.addEventListener('open', () => console.log('WebSocket connected'));
