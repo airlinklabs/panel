@@ -92,6 +92,51 @@
                  </div>
               </div>
            </div>
+           
+           <!-- Login History Card -->
+           <div class="p-3 bg-transparent shadow-xl border border-white/5 rounded-xl overflow-hidden sm:p-6 lg:p-10 card w-full">
+              <div class="lg:flex lg:items-center lg:justify-between">
+                 <div class="min-w-0 flex-1">
+                    <h2 class="text-md font-medium tracking-tight mb-4">
+                       <span class="text-white flex flex-row">Login History</span>
+                    </h2>
+                    <div class="overflow-x-auto">
+                      <table class="min-w-full divide-y divide-neutral-700">
+                        <thead>
+                          <tr>
+                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-neutral-400 sm:pl-0">Date & Time</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-400">IP Address</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-400">Browser/Device</th>
+                          </tr>
+                        </thead>
+                        <tbody class="divide-y divide-neutral-700">
+                          <% if (loginHistory && loginHistory.length > 0) { %>
+                            <% loginHistory.forEach(login => { %>
+                              <tr>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-white sm:pl-0">
+                                  <%= new Date(login.timestamp).toLocaleString() %>
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400">
+                                  <%= login.ipAddress || 'Unknown' %>
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400 truncate max-w-[200px]">
+                                  <%= login.userAgent || 'Unknown' %>
+                                </td>
+                              </tr>
+                            <% }) %>
+                          <% } else { %>
+                            <tr>
+                              <td colspan="3" class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-neutral-400 sm:pl-0 text-center">
+                                No login history available
+                              </td>
+                            </tr>
+                          <% } %>
+                        </tbody>
+                      </table>
+                    </div>
+                 </div>
+              </div>
+           </div>
         </dl>
       </div>
    </div>

@@ -39,6 +39,14 @@ const accountModule: Module = {
             res.render('user/account', { errorMessage, user, req });
             return;
           }
+          
+          // Fetch login history
+          const loginHistory = await prisma.loginHistory.findMany({
+            where: { userId },
+            orderBy: { timestamp: 'desc' },
+            take: 10 // Limit to last 10 logins
+          });
+          
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
@@ -48,6 +56,7 @@ const accountModule: Module = {
             user,
             req,
             settings,
+            loginHistory,
           });
         } catch (error) {
           logger.error('Error fetching user:', error);
@@ -60,6 +69,7 @@ const accountModule: Module = {
             user: getUser(req),
             req,
             settings,
+            loginHistory: [],
           });
         }
       },
@@ -303,6 +313,7 @@ const accountModule: Module = {
         }
       },
     );
+
     return router;
   },
 };

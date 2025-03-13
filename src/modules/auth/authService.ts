@@ -71,6 +71,15 @@ const authServiceModule: Module = {
               username: result.user.username,
             };
           }
+          
+          await prisma.loginHistory.create({
+            data: {
+              userId: result.user.id,
+              ipAddress: req.ip,
+              userAgent: req.headers['user-agent'] || null
+            }
+          });
+          
           res.redirect('/');
           return;
         }
