@@ -21,7 +21,7 @@
         <div class="flex flex-col bg-white/5 pt-0 py-5 rounded-xl">
             <h1 class="text-white text-[18px] px-5 py-4 mb-1 w-full bg-white/5 rounded-t-xl font-medium"><%= req.translations.general %></h1>
 
-        <form id="settingsForm" class="space-y-6">
+        <form id="settingsForm" class="space-y-6" enctype="multipart/form-data">
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-5 mt-5">
               <div>
                   <label class="block text-white text-sm font-medium mb-2">Site Title</label>
@@ -41,6 +41,30 @@
                       name="logo" 
                       class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 transition-all"
                   >
+                  <% if (settings.logo) { %>
+                  <div class="mt-2">
+                      <p class="text-white text-xs mb-1">Current Logo:</p>
+                      <img src="<%= settings.logo %>" alt="Current Logo" class="h-10 object-contain">
+                  </div>
+                  <% } %>
+              </div>
+
+              <!-- Upload Favicon -->
+              <div>
+                  <label class="block text-white text-sm font-medium mb-2">Upload Favicon</label>
+                  <input 
+                      type="file" 
+                      name="favicon" 
+                      accept=".ico,.png,.jpg,.jpeg"
+                      class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 transition-all"
+                  >
+                  <% if (settings.favicon) { %>
+                  <div class="mt-2">
+                      <p class="text-white text-xs mb-1">Current Favicon:</p>
+                      <img src="<%= settings.favicon %>" alt="Current Favicon" class="h-10 object-contain">
+                  </div>
+                  <% } %>
+                  <p class="text-neutral-400 text-xs mt-1">You can upload .ico, .png, or .jpg files. Images will be automatically converted to 32x32 .ico format.</p>
               </div>
 
               <div>
@@ -99,6 +123,53 @@
   document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('settingsForm');
       const resetButton = document.getElementById('resetButton');
+      const faviconInput = form.querySelector('input[name="favicon"]');
+
+      function createFavicon(file) {
+          return new Promise((resolve, reject) => {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              const img = new Image();
+
+              canvas.width = 32;
+              canvas.height = 32;
+
+              img.onload = () => {
+                  ctx.drawImage(img, 0, 0, 32, 32);
+                  
+                  canvas.toBlob((blob) => {
+                      const icoFile = new File([blob], 'favicon.ico', { type: 'image/x-icon' });
+                      resolve(icoFile);
+                  }, 'image/x-icon');
+              };
+
+              img.onerror = () => {
+                  reject(new Error('Failed to load image'));
+              };
+
+              img.src = URL.createObjectURL(file);
+          });
+      }
+
+      faviconInput.addEventListener('change', async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          if (file.name.toLowerCase().endsWith('.ico')) return;
+
+          try {
+              const icoFile = await createFavicon(file);
+              
+              const dataTransfer = new DataTransfer();
+              dataTransfer.items.add(icoFile);
+              faviconInput.files = dataTransfer.files;
+              
+              showToast('Image converted to favicon format', 'success');
+          } catch (error) {
+              console.error('Error converting favicon:', error);
+              showToast('Failed to convert image to favicon', 'error');
+          }
+      });
 
       async function fetchSettings() {
           try {
@@ -106,7 +177,7 @@
               const settings = await response.json();
               Object.entries(settings).forEach(([key, value]) => {
                   const input = form.querySelector(`[name="${key}"]`);
-                  if (input) input.value = value;
+                  if (input && input.type !== 'file') input.value = value;
               });
           } catch (error) {
               console.error('Error fetching settings:', error);
@@ -116,19 +187,18 @@
       form.addEventListener('submit', async (e) => {
           e.preventDefault();
           const formData = new FormData(form);
-          const settings = Object.fromEntries(formData.entries());
-
+          
           try {
               const response = await fetch('/admin/settings', {
                   method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify(settings)
+                  body: formData
               });
 
               if (response.ok) {
                   showToast('Settings saved successfully!', 'success');
+                  setTimeout(() => {
+                      window.location.reload();
+                  }, 1500);
               } else {
                   throw new Error('Failed to save settings');
               }
@@ -143,8 +213,10 @@
               try {
                   const response = await fetch('/admin/settings/reset', { method: 'POST' });
                   if (response.ok) {
-                      await fetchSettings();
                       showToast('Settings reset to default!', 'success');
+                      setTimeout(() => {
+                          window.location.reload();
+                      }, 1500);
                   } else {
                       throw new Error('Failed to reset settings');
                   }
@@ -154,8 +226,6 @@
               }
           }
       });
-
-      fetchSettings();
   });
 </script>
 

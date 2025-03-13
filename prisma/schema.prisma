@@ -87,6 +87,7 @@ model settings {
   title       String @default("Airlink")
   description String @default("AirLink is a free and open source project by AirlinkLabs")
   logo      String @default("../assets/logo.png")
+  favicon   String @default("../assets/favicon.ico")
   theme     String @default("default")
   language  String @default("en")
   createdAt DateTime @default(now())
