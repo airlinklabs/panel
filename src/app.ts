@@ -65,7 +65,6 @@ app.use(rateLimit({
 }));
 
 // Load session with Prisma store
-const isHttp = process.env.URL?.startsWith('http://') ?? false;
 const isProduction = process.env.NODE_ENV === 'production';
 const useSecureCookie = isProduction || (process.env.URL?.startsWith('https://') ?? false);
 
@@ -78,7 +77,7 @@ app.use(
     store: new PrismaSessionStore(),
     cookie: {
       secure: useSecureCookie,
-      httpOnly: isHttp,
+      httpOnly: true,
       sameSite: 'strict',
       maxAge: 3600000 * 72, // 3 days
     },
