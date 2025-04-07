@@ -4,8 +4,13 @@ import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { checkForUpdates, performUpdate } from '../../handlers/updater';
+import { registerPermission } from '../../handlers/permisions';
 
 const prisma = new PrismaClient();
+
+registerPermission("airlink.admin.overview.main");
+registerPermission("airlink.admin.overview.checkForUpdates");
+registerPermission("airlink.admin.overview.performUpdate");
 
 interface ErrorMessage {
   message?: string;
@@ -26,7 +31,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/overview',
-      isAuthenticated(true),
+      isAuthenticated(true, "airlink.admin.overview.main"),
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
 
@@ -35,10 +40,6 @@ const adminModule: Module = {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
-          }
-
-          if (!user.isAdmin) {
-            return res.redirect('/');
           }
 
           const userCount = await prisma.users.count();
@@ -68,7 +69,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/check-update',
-      isAuthenticated(true),
+      isAuthenticated(true, "airlink.admin.overview.checkForUpdates"),
       async (req: Request, res: Response) => {
         try {
           const updateInfo = await checkForUpdates();
@@ -82,7 +83,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/perform-update',
-      isAuthenticated(true),
+      isAuthenticated(true, "airlink.admin.overview.performUpdate"),
       async (req: Request, res: Response) => {
         try {
           const success = await performUpdate();

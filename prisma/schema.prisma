@@ -15,6 +15,7 @@
     isAdmin     Boolean  @default(false)
     description String?  @default("No About Me")
     servers     Server[]
+    permissions String?
     loginHistory LoginHistory[]
   }
 
