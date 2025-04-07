@@ -1,5 +1,6 @@
 {
     "watch": ["src"],
     "ext": "ts",
-    "exec": "npm run build-ts && npm run start" 
-}
+    "exec": "ts-node-dev --respawn --transpile-only src/app.ts"
+  }
+  

@@ -82,6 +82,14 @@ class Logger {
     return now.toISOString().replace('T', ' ').split('.')[0];
   }
 
+  private async writeToFile(filePath: string, data: string): Promise<void> {
+    fs.appendFile(filePath, data, (err) => {
+      if (err) {
+        this.originalConsoleLog(`Failed to write to log file: ${err}`);
+      }
+    });
+  }
+  
   private formatMessage(
     level: keyof typeof logLevels,
     message: string,
@@ -95,7 +103,9 @@ class Logger {
       level === 'error' ? 'error.log' : 'combined.log',
     );
     try {
-      fs.appendFileSync(logFile, fileOutput);
+      // :skull:
+      //fs.appendFileSync(logFile, fileOutput);
+      this.writeToFile(logFile, fileOutput);
     } catch (err) {
       this.originalConsoleLog(`Failed to write to log file: ${err}`);
     }

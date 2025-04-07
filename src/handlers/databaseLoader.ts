@@ -41,7 +41,5 @@ export const databaseLoader = async () => {
       );
     }
     throw error;
-  } finally {
-    await prisma.$disconnect();
   }
 };

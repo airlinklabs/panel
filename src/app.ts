@@ -43,7 +43,6 @@ expressWs(app);
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Load views
-app.use(express.urlencoded({ extended: true }));
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 //app.set('view options', {
@@ -53,22 +52,23 @@ app.set('view engine', 'ejs');
 // Load compression
 app.use(compression());
 
-// Load security headers
-app.use(helmet.noSniff());
-app.use(helmet.frameguard({ action: 'deny' }));
-
-// Load rate limiter
-const limiter = rateLimit({
+// Security middleware
+app.use(helmet({
+  noSniff: true,
+  frameguard: { action: 'deny' },
+  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false
+}));
+app.use(hpp());
+app.use(rateLimit({
   windowMs: 1 * 60 * 1000,
   max: 100,
-});
-
-app.use(limiter);
-
-// Load hpp protection
-app.use(hpp());
+}));
 
 // Load session with Prisma store
+const isHttp = process.env.URL?.startsWith('http://') ?? false;
+const isProduction = process.env.NODE_ENV === 'production';
+const useSecureCookie = isProduction || (process.env.URL?.startsWith('https://') ?? false);
+
 app.use(
   session({
     secret:
@@ -77,10 +77,8 @@ app.use(
     saveUninitialized: false,
     store: new PrismaSessionStore(),
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: process.env.URL
-        ? process.env.URL.startsWith('https://')
-        : false,
+      secure: useSecureCookie,
+      httpOnly: isHttp,
       sameSite: 'strict',
       maxAge: 3600000 * 72, // 3 days
     },
@@ -109,11 +107,10 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   logger.error('Unhandled error:', err);
 
   if (!res.headersSent) {
+    const errorMessage = isProduction ? 'Internal server error' : err.message;
+    
     res.status(500).json({
-      error:
-        process.env.NODE_ENV === 'production'
-          ? 'Internal server error'
-          : err.message,
+      error: errorMessage
     });
   }
 
@@ -121,20 +118,32 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 // Load modules, plugins, database and start the webserver
-databaseLoader()
-  .then(async () => {
+(async () => {
+  try {
+    await databaseLoader();
     await settingsLoader();
-    return loadModules(app, airlinkVersion).then(async () => {
-      loadPlugins(app);
-    });
-  })
-  .then(() => {
-    app.listen(port, () => {
+    await loadModules(app, airlinkVersion);
+    loadPlugins(app);
+    
+    const server = app.listen(port, () => {
       logger.info(`Server is running on http://localhost:${port}`);
     });
-  })
-  .catch((err) => {
+    
+    // on close of the application 
+    process.on('SIGINT', () => {
+      logger.info('Shutting down...');
+      // database close
+      const { PrismaClient } = require('@prisma/client');
+      const prisma = new PrismaClient();
+      prisma.$disconnect();
+      // server close
+      server.close(() => {
+        logger.info('Server closed');
+      });
+    });
+  } catch (err) {
     logger.error('Failed to load modules or database:', err);
-  });
+  }
+})();
 
 export default app;
