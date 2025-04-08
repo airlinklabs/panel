@@ -6,6 +6,7 @@ import logger from '../../handlers/logger';
 import axios from 'axios';
 import { checkEulaStatus, isWorld } from '../../handlers/features';
 const { MinecraftServerListPing } = require('minecraft-status');
+import { checkForServerInstallation } from '../../handlers/checkForServerInstallation';
 
 const prisma = new PrismaClient();
 
@@ -111,6 +112,7 @@ const dashboardModule: Module = {
           return res.render('user/server/manage', {
             errorMessage,
             features,
+            installed: await checkForServerInstallation(serverId),
             user,
             req,
             server,
@@ -367,6 +369,7 @@ const dashboardModule: Module = {
             errorMessage,
             user,
             features,
+            installed: await checkForServerInstallation(serverId),
             files,
             currentPath: path,
             req,
@@ -463,6 +466,7 @@ const dashboardModule: Module = {
             errorMessage: {},
             user,
             features,
+            installed: await checkForServerInstallation(serverId),
             file: {
               name: filePath.split('/').pop(),
               path: filePath,
@@ -901,6 +905,7 @@ const dashboardModule: Module = {
               errorMessage: { message: 'No primary port found' },
               user,
               features,
+              installed: await checkForServerInstallation(serverId),
               players: [],
               server,
               req,
@@ -923,7 +928,7 @@ const dashboardModule: Module = {
               })) || [];
           } catch (pingError) {
             logger.error('Error pinging server:', pingError);
-            res.redirect('/server/' + serverId + '/players');
+            res.redirect('/server/' + serverId + '/');
             return;
           }
 
@@ -936,6 +941,7 @@ const dashboardModule: Module = {
             user,
             players,
             features,
+            installed: await checkForServerInstallation(serverId),
             server,
             req,
             settings,
@@ -1037,6 +1043,7 @@ const dashboardModule: Module = {
               user,
               worlds,
               features,
+              installed: await checkForServerInstallation(serverId),
               server,
               req,
               settings,
