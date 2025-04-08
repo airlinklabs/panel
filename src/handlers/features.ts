@@ -47,6 +47,7 @@ export async function checkEulaStatus(
     const eulaResponse = await axios({
       method: 'GET',
       url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
+      responseType: 'text',
       params: { id: server.UUID, path: 'eula.txt' },
       auth: {
         username: 'Airlink',
@@ -54,7 +55,7 @@ export async function checkEulaStatus(
       },
     });
 
-    const eulaAccepted = (eulaResponse.data.content as string).includes(
+    const eulaAccepted = (eulaResponse.data as string).includes(
       'eula=true',
     );
     return { accepted: eulaAccepted };

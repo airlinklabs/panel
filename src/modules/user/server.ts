@@ -422,6 +422,7 @@ const dashboardModule: Module = {
           const response = await axios({
             method: 'GET',
             url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
+            responseType: 'text',
             params: { id: server.UUID, path: filePath },
             auth: {
               username: 'Airlink',
@@ -465,7 +466,7 @@ const dashboardModule: Module = {
             file: {
               name: filePath.split('/').pop(),
               path: filePath,
-              content: response.data.content,
+              content: response.data,
               extension,
             },
             server,

@@ -110,7 +110,7 @@
 
   require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(document.getElementById('editor-container'), {
-      value: `<%= file.content %>`,
+      value: `<%- file.content %>`,
       language: '<%= language %>',
       theme: 'vs-dark',
       automaticLayout: true,
