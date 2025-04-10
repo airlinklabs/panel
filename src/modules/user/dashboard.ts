@@ -51,7 +51,7 @@ const dashboardModule: Module = {
             page = 1;
         }
 
-        const perPage = 5;
+        const perPage = 8;
         const startIndex = (page - 1) * perPage;
         const endIndex = page * perPage;
 
