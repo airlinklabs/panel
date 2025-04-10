@@ -182,8 +182,8 @@ const dashboardModule: Module = {
             };
 
             try {
-              const response = await axios(requestData);
-              logger.info('Container stopped successfully:' + response.data);
+              await axios(requestData);
+              logger.info('Container stopped successfully: ' + serverId);
               res
                 .status(200)
                 .json({ message: 'Container stopped successfully.' });
@@ -265,8 +265,8 @@ const dashboardModule: Module = {
             },
           };
 
-          const startResponse = await axios(startRequestData);
-          logger.info('Container started successfully:' + startResponse.data);
+          await axios(startRequestData);
+          logger.info('Container started successfully: ' + serverId);
 
           res.status(200).json({ message: 'Container started successfully.' });
           return;
