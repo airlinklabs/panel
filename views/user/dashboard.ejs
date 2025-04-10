@@ -87,6 +87,31 @@
               </tbody>
             </table>
           </div>
+
+
+          <!-- Paginator -->
+          <div class="flex justify-center py-4">
+            <% if (currentPage > 1) { %>
+              <a href="/?page=<%= currentPage - 1 %>" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition duration-300 ease-in-out mr-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="h-5 w-5 text-white mr-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                <%= currentPage - 1 %>
+              </a>
+            <% } %>
+            <div class="inline-flex items-center text-sm font-medium text-gray-700 dark:text-neutral-300">
+              Page <span class="font-semibold text-blue-600 dark:text-blue-400 ml-1 mr-1"><%= currentPage %></span> of <span class="font-semibold text-blue-600 dark:text-blue-400 ml-1"><%= totalPages %></span>
+            </div>
+            <% if (currentPage < totalPages) { %>
+              <a href="/?page=<%= currentPage + 1 %>" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition duration-300 ease-in-out ml-2">
+                <%= currentPage + 1 %>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="h-5 w-5 text-white ml-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </a>
+            <% } %>
+          </div>
+
         <% } %>
       </div>
     </div>

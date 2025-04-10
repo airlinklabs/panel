@@ -2819,6 +2819,10 @@ select {
   padding-bottom: 1rem;
 }
 
+.pl-0 {
+  padding-left: 0px;
+}
+
 .pl-3 {
   padding-left: 0.75rem;
 }
@@ -2885,10 +2889,6 @@ select {
 
 .pt-6 {
   padding-top: 1.5rem;
-}
-
-.pl-0 {
-  padding-left: 0px;
 }
 
 .text-left {
@@ -3020,6 +3020,11 @@ select {
 .text-blue-500 {
   --tw-text-opacity: 1;
   color: rgb(59 130 246 / var(--tw-text-opacity, 1));
+}
+
+.text-blue-600 {
+  --tw-text-opacity: 1;
+  color: rgb(37 99 235 / var(--tw-text-opacity, 1));
 }
 
 .text-emerald-100 {
@@ -3677,6 +3682,11 @@ select {
   background-position: 200% 0,0 0;
 }
 
+.hover\:text-blue-800:hover {
+  --tw-text-opacity: 1;
+  color: rgb(30 64 175 / var(--tw-text-opacity, 1));
+}
+
 .hover\:text-gray-800:hover {
   --tw-text-opacity: 1;
   color: rgb(31 41 55 / var(--tw-text-opacity, 1));
@@ -3887,17 +3897,9 @@ select {
   border-color: rgb(82 82 82 / 0.1);
 }
 
-.dark\:border-neutral-600\/20:is(.dark *) {
-  border-color: rgb(82 82 82 / 0.2);
-}
-
 .dark\:border-neutral-700:is(.dark *) {
   --tw-border-opacity: 1;
   border-color: rgb(64 64 64 / var(--tw-border-opacity, 1));
-}
-
-.dark\:border-red-600\/20:is(.dark *) {
-  border-color: rgb(220 38 38 / 0.2);
 }
 
 .dark\:border-white\/10:is(.dark *) {
@@ -3906,6 +3908,14 @@ select {
 
 .dark\:border-white\/5:is(.dark *) {
   border-color: rgb(255 255 255 / 0.05);
+}
+
+.dark\:border-red-600\/20:is(.dark *) {
+  border-color: rgb(220 38 38 / 0.2);
+}
+
+.dark\:border-neutral-600\/20:is(.dark *) {
+  border-color: rgb(82 82 82 / 0.2);
 }
 
 .dark\:bg-\[\#141414\]:is(.dark *) {
@@ -3921,16 +3931,8 @@ select {
   background-color: rgb(6 95 70 / 0.1);
 }
 
-.dark\:bg-green-500\/50:is(.dark *) {
-  background-color: rgb(34 197 94 / 0.5);
-}
-
 .dark\:bg-neutral-400\/20:is(.dark *) {
   background-color: rgb(163 163 163 / 0.2);
-}
-
-.dark\:bg-neutral-500\/10:is(.dark *) {
-  background-color: rgb(115 115 115 / 0.1);
 }
 
 .dark\:bg-neutral-600\/20:is(.dark *) {
@@ -3950,10 +3952,6 @@ select {
   background-color: rgb(23 23 23 / 0.5);
 }
 
-.dark\:bg-red-700\/30:is(.dark *) {
-  background-color: rgb(185 28 28 / 0.3);
-}
-
 .dark\:bg-transparent:is(.dark *) {
   background-color: transparent;
 }
@@ -3965,6 +3963,18 @@ select {
 
 .dark\:bg-white\/5:is(.dark *) {
   background-color: rgb(255 255 255 / 0.05);
+}
+
+.dark\:bg-green-500\/50:is(.dark *) {
+  background-color: rgb(34 197 94 / 0.5);
+}
+
+.dark\:bg-red-700\/30:is(.dark *) {
+  background-color: rgb(185 28 28 / 0.3);
+}
+
+.dark\:bg-neutral-500\/10:is(.dark *) {
+  background-color: rgb(115 115 115 / 0.1);
 }
 
 .dark\:text-amber-400:is(.dark *) {

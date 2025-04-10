@@ -41,12 +41,33 @@ const dashboardModule: Module = {
         });
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
+        let page: number = 1;
+
+        if (typeof req.query.page === 'string') {
+            page = parseInt(req.query.page, 10);
+        }
+
+        if (isNaN(page)) {
+            page = 1;
+        }
+
+        const perPage = 5;
+        const startIndex = (page - 1) * perPage;
+        const endIndex = page * perPage;
+
+        const paginatedServers = servers.slice(startIndex, endIndex);
+
+
+
+
         res.render('user/dashboard', {
           errorMessage,
           user,
           req,
           settings,
-          servers,
+          servers: paginatedServers,
+          currentPage: page,
+          totalPages: Math.ceil(servers.length / perPage)
         });
       } catch (error) {
         logger.error('Error fetching user:', error);
