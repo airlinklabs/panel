@@ -38,7 +38,6 @@ async function listNodes(res: Response) {
     const nodesWithStatus = [];
 
     for (const node of nodes) {
-      console.log(node.id)
       const instances = await prisma.server.findMany({
         where: {
           nodeId: node.id,
