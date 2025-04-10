@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
 import logger from '../../handlers/logger';
+import { Server } from 'http';
 
 const prisma = new PrismaClient();
 
@@ -37,9 +38,10 @@ async function listNodes(res: Response) {
     const nodesWithStatus = [];
 
     for (const node of nodes) {
+      console.log(node.id)
       const instances = await prisma.server.findMany({
         where: {
-          id: node.id,
+          nodeId: node.id,
         },
       });
       (node as NodeWithInstance).instances = instances || [];
