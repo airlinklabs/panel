@@ -36,12 +36,12 @@
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Server Count</h2>
           <p class="text-4xl font-normal text-neutral-800 dark:text-white">
-            <%= Object.values(instance.length).reduce((a, b) => a + b, 0) %>
+            <%= nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0) %>
           </p>
           <% if (instance.length > 0) { %>
             <p class="text-sm text-neutral-400 mt-2">
               <%= req.translations.averageInstanceDensity %>: 
-              <%= (Object.values(instance.length).reduce((a, b) => a + b, 0) / nodes.length).toFixed(2) %>
+              <%= (nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0) / nodes.length).toFixed(2) %>
             </p>
           <% } else { %>
             <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noInstancesAvailable %></p>
