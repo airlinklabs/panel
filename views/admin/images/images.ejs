@@ -36,7 +36,7 @@
           <thead class="bg-white/5">
             <tr>
               <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Name</th>
-              <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Image</th>
+              <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Author</th>
               <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Created At</th>
               <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Actions</th>
             </tr>
@@ -45,7 +45,7 @@
             <% images.forEach(function(image) { %>
               <tr class="hover:bg-white/[0.05] transition-colors">
                 <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-white"><%= image.name %></td>
-                <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-neutral-400"><%= image.image %></td>
+                <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-neutral-400"><%= image.author %></td>
                 <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-500"><%= new Date(image.createdAt).toLocaleDateString() %></td>
                 <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-white">
                   <div class="flex gap-3">
