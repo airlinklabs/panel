@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
 import logger from '../../handlers/logger';
-import { Server } from 'http';
+import axios from 'axios';
 
 const prisma = new PrismaClient();
 
@@ -387,6 +387,50 @@ const adminModule: Module = {
         }
       },
     );
+
+    router.get(
+      '/admin/node/:id/stats',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+          return res.redirect('/login');
+        }
+    
+        const nodeId = parseInt(req.params.id);
+
+        const node = await prisma.node.findUnique({ where: { id: nodeId } });
+        if (!node) {
+          res.status(404).json({ message: 'Node not found.' });
+          return;
+        }
+
+        const settings = await prisma.settings.findUnique({
+          where: { id: 1 },
+        });
+    
+        let stats = {};
+    
+        try {
+          const response = await axios.get(
+            `http://${node.address}:${node.port}/stats`,
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Basic ${Buffer.from(`Airlink:${node.key}`).toString('base64')}`,
+              },
+            }
+          );
+
+          stats = response.data;
+        } catch (error) {
+          stats = { error: 'Unable to fetch stats from the node.' };
+        }
+        res.render('admin/nodes/stats', { node, user, req, settings, stats });
+      }
+    );
+
 
     return router;
   },

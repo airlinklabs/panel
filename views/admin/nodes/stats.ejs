@@ -1,0 +1,189 @@
+<%- include('../../components/header', { title: 'Dashboard' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminNodesTitle %></h1>
+            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminNodesText %></p>
+        </div>
+        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <button onclick="location.href='/admin/nodes'" type="button" class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+            Back
+          </button>
+        </div>
+      </div>
+
+      <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
+        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+            <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Status</h2>
+            <%
+            const lastStat = stats.totalStats && stats.totalStats.length ? stats.totalStats.at(-1) : null;
+            const isOnline = lastStat && (new Date() - new Date(lastStat.timestamp)) <= 10 * 1000;
+            %>
+            <p class="text-4xl font-normal <%= isOnline ? 'text-green-500' : 'text-red-500' %>">
+                <%= isOnline ? 'Online' : 'Offline' %>
+            </p>
+            <p class="text-sm text-neutral-400 mt-2">
+                Last Update: <%= lastStat ? new Date(lastStat.timestamp).toLocaleTimeString() : 'N/A' %>
+            </p>
+        </div>
+
+        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+        <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Uptime</h2>
+        <p class="text-4xl font-normal text-neutral-800 dark:text-white">
+            <%= isOnline ? stats.uptime : 'N/A' %> 
+        </p>
+        <% if (!isOnline) { %>
+            <p class="text-sm text-neutral-400 mt-2">System is offline, uptime unavailable</p>
+        <% } else { %>
+            <p class="text-sm text-neutral-400 mt-2">System has been running since last start</p>
+        <% } %>
+        </div>
+      
+      </div>
+
+      <div id="charts" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
+        <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg">
+          <h2 class="text-lg font-semibold text-neutral-800 dark:text-white mb-4">RAM Usage</h2>
+          <canvas id="ramChart" class="w-full h-64"></canvas>
+        </div>
+
+        <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg">
+          <h2 class="text-lg font-semibold text-neutral-800 dark:text-white mb-4">CPU Usage</h2>
+          <canvas id="cpuChart" class="w-full h-64"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const stats = <%- JSON.stringify(stats.totalStats) || '[]' %>;
+
+  function parseRam(ramString) {
+    return parseFloat(ramString.replace(' MB', ''));
+  }
+
+  function parseCpu(cpuString) {
+    return parseFloat(cpuString.replace('%', ''));
+  }
+
+  const ramTimestamps = stats.length ? stats.map(stat => new Date(stat.timestamp).toLocaleTimeString()) : ['0:00', '0:00', '0:00']; 
+  const ramData = stats.length ? stats.map(stat => parseRam(stat.Ram)) : [0, 0, 0];
+  const ramMax = stats.length ? Math.max(...ramData, parseRam(stats[0].RamMax)) : 1;
+
+  const ctxRam = document.getElementById('ramChart').getContext('2d');
+  const ramChart = new Chart(ctxRam, {
+    type: 'line',
+    data: {
+      labels: ramTimestamps,
+      datasets: [{
+        label: 'RAM Usage (MB)',
+        data: ramData,
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 2,
+      }]
+    },
+    options: {
+      responsive: false,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: '#FFFFFF'
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#FFFFFF'
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          }
+        },
+        y: {
+          suggestedMax: ramMax,
+          beginAtZero: true,
+          ticks: {
+            color: '#FFFFFF'
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          }
+        }
+      }
+    }
+  });
+
+  const cpuData = stats.length ? stats.map(stat => parseCpu(stat.Cores)) : [0, 0, 0];
+  const cpuMax = 100;
+
+  const ctxCpu = document.getElementById('cpuChart').getContext('2d');
+  const cpuChart = new Chart(ctxCpu, {
+    type: 'line',
+    data: {
+      labels: ramTimestamps,
+      datasets: [{
+        label: 'CPU Usage (%)',
+        data: cpuData,
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 2,
+      }]
+    },
+    options: {
+      responsive: false,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: '#FFFFFF'
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#FFFFFF'
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          }
+        },
+        y: {
+          suggestedMax: cpuMax,
+          beginAtZero: true,
+          ticks: {
+            color: '#FFFFFF'
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          }
+        }
+      }
+    }
+  });
+</script>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/footer') %>
