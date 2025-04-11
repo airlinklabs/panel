@@ -23,8 +23,15 @@
             <div class="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <label for="serverName" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.name %>:</label>
-                <input id="serverName" name="name" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server">
-              </div>
+                <div class="flex items-center space-x-2">
+                    <input id="serverName" name="name" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server">
+                    <div class="flex-shrink-0 p-2 mb-1 -ml-5" onclick="generateRandomName()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-neutral-300">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
 
               <div>
                 <label for="serverDescription" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.description %>:</label>
@@ -302,3 +309,30 @@
     });
   });
 </script>
+<script>
+const listA = [
+    "Charged", "Fiery", "Mystical", "Dark", "Angry", "Enchanted", 
+    "Blazing", "Cursed", "Frozen", "Swift", "Ancient", "Wicked", 
+    "Luminous", "Vengeful", "Radiant", "Thunderous", "Shadow", 
+    "Frost", "Vibrant", "Spectral", "Nether", "Ender", "Caving", 
+    "Toxic", "Haunted", "Radiant", "Ghostly"
+];
+
+const listB = [
+    "Creeper", "Dragon", "Zombie", "Ghoul", "Enderman", "Skeleton", 
+    "Wither", "Magma Cube", "Blaze", "Witch", "Slime", "Spider", 
+    "Phantom", "Villager", "Pillager", "Vindicator", "Drowned", 
+    "Illager", "Ender Dragon", "Husk", "Stray", "Ravager", "Piglin", 
+    "Hoglin", "Shulker", "Warden"
+];
+  
+  function generateRandomName() {
+      let randomA, randomB;
+      do {
+          randomA = listA[Math.floor(Math.random() * listA.length)];
+          randomB = listB[Math.floor(Math.random() * listB.length)];
+      } while (randomA === randomB);
+      const randomName = randomA + " " + randomB;
+      document.getElementById("serverName").value = randomName;
+  }
+  </script>
