@@ -112,12 +112,13 @@
 
   require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(document.getElementById('editor-container'), {
-      value: `<%- file.content %>`,
+      value: `<%- file.content.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$') %>`,
       language: '<%= language %>',
       theme: 'vs-dark',
       automaticLayout: true,
     });
   });
+
 
   document.getElementById('saveBtn').addEventListener('click', async () => {
     const content = editor.getValue();

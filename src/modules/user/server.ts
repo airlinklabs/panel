@@ -109,11 +109,48 @@ const dashboardModule: Module = {
             }
           }
 
+
+          let alshID = "";
+          let alshPASSWORD = "";
+
+          if (features.includes('alsh')) {
+            try {
+              const idresponse = await axios({
+                method: 'GET',
+                url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
+                responseType: 'text',
+                params: { id: server.UUID, path: "./airlink/alshid.txt" },
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+              });
+          
+              const passresponse = await axios({
+                method: 'GET',
+                url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
+                responseType: 'text',
+                params: { id: server.UUID, path: "./airlink/password.txt" },
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+              });
+          
+              alshID = idresponse.data;
+              alshPASSWORD = passresponse.data;
+            } catch (error: any) {
+              console.error("Error:", error.message);
+            }
+          }
+
           return res.render('user/server/manage', {
             errorMessage,
             features,
             installed: await checkForServerInstallation(serverId),
             user,
+            alshID,
+            alshPASSWORD,
             req,
             server,
             settings,
