@@ -1,0 +1,210 @@
+<%- include('../../components/header', { title: 'Server Settings' }) %>
+
+<main class="h-screen m-auto text-white">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </aside>
+
+    <!-- Main Content -->
+    <section class="flex-1 p-6 overflow-y-auto pt-16">
+      <!-- Page Header -->
+      <header class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-xl font-semibold text-neutral-800 dark:text-white">
+            <%= server.name.charAt(0).toUpperCase() + server.name.slice(1) %>
+          </h1>
+          <p class="mt-1 text-sm text-neutral-500">
+            <%= server.description %>
+          </p>
+        </div>
+      </header>
+
+      <%- include('../../components/installHeader') %>
+
+      <!-- Server Template -->
+      <%- include('../../components/serverTemplate') %>
+
+      <!-- Server Settings -->
+      <div class="px-8 mt-8">
+        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+          <h2 class="text-lg font-semibold mb-4 text-white">Server Settings</h2>
+          <p class="text-sm text-neutral-400 mb-4">Configure your server's basic settings.</p>
+
+          <form id="serverSettingsForm">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="serverName" class="block text-sm font-medium text-neutral-300 mb-2">Server Name</label>
+                <input type="text" id="serverName" name="name" value="<%= server.name %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-white text-sm px-4 py-2 bg-neutral-600/20 border border-white/5">
+              </div>
+
+              <div>
+                <label for="serverDescription" class="block text-sm font-medium text-neutral-300 mb-2">Description</label>
+                <input type="text" id="serverDescription" name="description" value="<%= server.description || '' %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-white text-sm px-4 py-2 bg-neutral-600/20 border border-white/5">
+              </div>
+            </div>
+
+            <div class="mt-6">
+              <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-blue-500 transition">Save Settings</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Server Information -->
+        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20 mt-8">
+          <h2 class="text-lg font-semibold mb-4 text-white">Server Information</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 class="text-sm font-medium text-neutral-300 mb-2">Server ID</h3>
+              <p class="text-neutral-400"><%= server.UUID %></p>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-medium text-neutral-300 mb-2">Created</h3>
+              <p class="text-neutral-400"><%= new Date(server.createdAt).toLocaleString() %></p>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-medium text-neutral-300 mb-2">Node</h3>
+              <p class="text-neutral-400"><%= server.node.name %></p>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-medium text-neutral-300 mb-2">Image</h3>
+              <p class="text-neutral-400"><%= server.image.name || 'Unknown' %></p>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-medium text-neutral-300 mb-2">Memory</h3>
+              <p class="text-neutral-400"><%= server.Memory %> GB</p>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-medium text-neutral-300 mb-2">CPU</h3>
+              <p class="text-neutral-400"><%= server.Cpu %>%</p>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-medium text-neutral-300 mb-2">Storage</h3>
+              <p class="text-neutral-400"><%= server.Storage %> GB</p>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-medium text-neutral-300 mb-2">Status</h3>
+              <p class="text-neutral-400">
+                <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset
+                  <%= server.Suspended ? 'bg-yellow-600/10 text-yellow-400 ring-yellow-600/20' : 'bg-emerald-600/10 text-emerald-400 ring-emerald-600/20' %>">
+                  <%= server.Suspended ? 'Suspended' : 'Active' %>
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="bg-red-950/20 rounded-xl p-6 shadow-lg border border-red-800/20 mt-8">
+          <h2 class="text-lg font-semibold mb-4 text-white">Danger Zone</h2>
+
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3 class="text-sm font-medium text-neutral-300">Restart Server</h3>
+              <p class="text-sm text-neutral-400">Force a restart of your server</p>
+            </div>
+            <button id="restartButton" type="button" class="rounded-xl bg-red-600 px-4 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Restart</button>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium text-neutral-300">Reinstall Server</h3>
+              <p class="text-sm text-neutral-400">Reinstall your server from scratch (all data will be lost)</p>
+            </div>
+            <button id="reinstallButton" type="button" class="rounded-xl bg-red-600 px-4 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Reinstall</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const serverSettingsForm = document.getElementById('serverSettingsForm');
+    const restartButton = document.getElementById('restartButton');
+    const reinstallButton = document.getElementById('reinstallButton');
+
+    serverSettingsForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(serverSettingsForm);
+      const settings = {
+        name: formData.get('name'),
+        description: formData.get('description')
+      };
+
+      fetch(`/server/<%= server.UUID %>/settings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settings),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Server settings updated successfully!');
+          window.location.reload();
+        } else {
+          alert('Failed to update server settings: ' + (data.error || 'Unknown error'));
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating the server settings.');
+      });
+    });
+
+    restartButton.addEventListener('click', function() {
+      if (confirm('Are you sure you want to restart the server? This will disconnect all users.')) {
+        fetch(`/server/<%= server.UUID %>/power/restart`, {
+          method: 'POST',
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success || data.message) {
+            alert('Server restart initiated.');
+          } else {
+            alert('Failed to restart server: ' + (data.error || 'Unknown error'));
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while restarting the server.');
+        });
+      }
+    });
+
+    reinstallButton.addEventListener('click', function() {
+      if (confirm('WARNING: Are you sure you want to reinstall the server? This will DELETE ALL DATA and reinstall the server from scratch. This action cannot be undone.')) {
+        if (confirm('FINAL WARNING: All server data will be permanently deleted. Continue with reinstallation?')) {
+          fetch(`/server/<%= server.UUID %>/reinstall`, {
+            method: 'POST',
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              alert('Server reinstallation initiated. This may take a few minutes to complete.');
+            } else {
+              alert('Failed to reinstall server: ' + (data.error || 'Unknown error'));
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while reinstalling the server.');
+          });
+        }
+      }
+    });
+  });
+</script>

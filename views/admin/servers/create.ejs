@@ -52,7 +52,7 @@
                   <%= req.translations.Node %>:
                 </label>
                 <div class="relative mt-2 mb-4">
-                  <select id="serverNode" name="nodeId" 
+                  <select id="serverNode" name="nodeId"
                           class="block w-full rounded-xl bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 text-neutral-800 dark:text-white text-sm px-4 py-2 focus:outline-none focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 hover:bg-white/5 dark:hover:bg-neutral-700/30">
                     <% if (nodes.length > 0) { %>
                       <% nodes.forEach(node => { %>
@@ -90,7 +90,7 @@
             <div class="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <label for="serverImage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.Image %>:</label>
-                <select id="serverImage" name="imageId" 
+                <select id="serverImage" name="imageId"
                         class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
                   <% images.forEach(image => { %>
                     <option value="<%= image.id %>" data-docker-images='<%= image.dockerImages %>' data-variables='<%= image.variables %>'>
@@ -102,7 +102,7 @@
 
               <div>
                 <label for="dockerImage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.DockerImage %>:</label>
-                <select id="dockerImage" name="dockerImage" 
+                <select id="dockerImage" name="dockerImage"
                         class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
                   <option value="" disabled selected>Select a Docker image</option>
                 </select>
@@ -115,10 +115,12 @@
 
             </div>
 
-            <h2 class="text-neutral-700 dark:text-neutral-300 text-md font-semibold mb-4">Variables</h2>
+            <div id="variablesSection" style="display: none;">
+              <h2 class="text-neutral-700 dark:text-neutral-300 text-md font-semibold mb-4">Variables</h2>
 
-            <div class="grid grid-cols-4 gap-4 mb-6" id="variablesContainer">
-              <!-- here come the variables -->
+              <div class="grid grid-cols-4 gap-4 mb-6" id="variablesContainer">
+                <!-- here come the variables -->
+              </div>
             </div>
 
             <!-- Submit Button -->
@@ -164,13 +166,21 @@
     function updateVariables() {
       const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
       const variables = JSON.parse(selectedOption.getAttribute('data-variables')) || [];
+      const variablesSection = document.getElementById('variablesSection');
 
       variablesContainer.innerHTML = '';
+
+      if (variables.length === 0) {
+        variablesSection.style.display = 'none';
+        return;
+      } else {
+        variablesSection.style.display = 'block';
+      }
 
       variables.forEach(variable => {
         const variableDiv = document.createElement('div');
         variableDiv.classList.add('mb-4', 'flex', 'items-center');
-        
+
         const label = document.createElement('label');
         label.setAttribute('for', variable.env);
         label.classList.add('text-neutral-700', 'dark:text-neutral-400', 'text-sm', 'tracking-tight', 'mr-2');
@@ -221,24 +231,24 @@
             input.type = 'text';
             break;
         }
-        
+
         if (variable.type !== 'boolean') {
           input.classList.add(
-            'rounded-xl', 
-            'focus:ring', 
-            'focus:ring-neutral-800/10', 
-            'focus:border-neutral-800/20', 
-            'text-neutral-800', 
-            'dark:text-white', 
-            'text-sm', 
-            'w-full', 
-            'hover:bg-white/5', 
-            'px-4', 
-            'py-2', 
-            'bg-neutral-400/10', 
-            'dark:bg-neutral-600/20', 
-            'border', 
-            'border-neutral-800/10', 
+            'rounded-xl',
+            'focus:ring',
+            'focus:ring-neutral-800/10',
+            'focus:border-neutral-800/20',
+            'text-neutral-800',
+            'dark:text-white',
+            'text-sm',
+            'w-full',
+            'hover:bg-white/5',
+            'px-4',
+            'py-2',
+            'bg-neutral-400/10',
+            'dark:bg-neutral-600/20',
+            'border',
+            'border-neutral-800/10',
             'dark:border-white/5'
           );
         }
@@ -311,21 +321,21 @@
 </script>
 <script>
 const listA = [
-    "Charged", "Fiery", "Mystical", "Dark", "Angry", "Enchanted", 
-    "Blazing", "Cursed", "Frozen", "Swift", "Ancient", "Wicked", 
-    "Luminous", "Vengeful", "Radiant", "Thunderous", "Shadow", 
-    "Frost", "Vibrant", "Spectral", "Nether", "Ender", "Caving", 
+    "Charged", "Fiery", "Mystical", "Dark", "Angry", "Enchanted",
+    "Blazing", "Cursed", "Frozen", "Swift", "Ancient", "Wicked",
+    "Luminous", "Vengeful", "Radiant", "Thunderous", "Shadow",
+    "Frost", "Vibrant", "Spectral", "Nether", "Ender", "Caving",
     "Toxic", "Haunted", "Radiant", "Ghostly"
 ];
 
 const listB = [
-    "Creeper", "Dragon", "Zombie", "Ghoul", "Enderman", "Skeleton", 
-    "Wither", "Magma Cube", "Blaze", "Witch", "Slime", "Spider", 
-    "Phantom", "Villager", "Pillager", "Vindicator", "Drowned", 
-    "Illager", "Ender Dragon", "Husk", "Stray", "Ravager", "Piglin", 
+    "Creeper", "Dragon", "Zombie", "Ghoul", "Enderman", "Skeleton",
+    "Wither", "Magma Cube", "Blaze", "Witch", "Slime", "Spider",
+    "Phantom", "Villager", "Pillager", "Vindicator", "Drowned",
+    "Illager", "Ender Dragon", "Husk", "Stray", "Ravager", "Piglin",
     "Hoglin", "Shulker", "Warden"
 ];
-  
+
   function generateRandomName() {
       let randomA, randomB;
       do {

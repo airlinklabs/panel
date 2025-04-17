@@ -83,7 +83,7 @@
       </div>
 
       <%- include('../../components/installHeader') %>
-      
+
       <div class="rounded-xl bg-red-800/10 px-4 py-6 mt-8 ml-8 mb-8 mr-8 hidden" id="daemonIsDown">
         <div class="flex">
             <div class="flex-shrink-0 ml-1.5">
@@ -174,14 +174,14 @@
     <div class="relative">
         <input id="input" type="text" autocomplete="off" placeholder="Type a command..."
             class="w-full px-4 py-3  bg-neutral-200 dark:bg-neutral-600/20 text-neutral-800 dark:text-white rounded-b-xl text-sm border-t border-neutral-600/20 select-none focus:ring-1  focus:ring-neutral-500/50 dark:focus:ring-neutral-100/20 focus:border-transparent placeholder:font-medium placeholder:text-neutral-600 dark:placeholder:text-neutral-500">
-        
+
             <% if (features.includes('auto-complete')) { %>
         <div id="settings-icon" class="absolute right-4 top-3 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-neutral-600 dark:text-neutral-400">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
             </svg>
         </div>
-        
+
         <div id="suggestions" class="absolute bg-neutral-800 text-white border border-neutral-600 rounded-b-lg w-full max-h-40 overflow-y-auto hidden -mt-2">
             <!-- Auto Complete thingys come here -->
         </div>
@@ -194,7 +194,7 @@
         <% } %>
     </div>
 </div>
-        
+
         <!-- Right side: Stats Cards -->
         <div class="w-full lg:w-1/3 mt-4 lg:mt-0 space-y-4 flex flex-col">
             <!-- Status Card -->
@@ -205,7 +205,7 @@
                     <h2 class="text-sm font-medium text-neutral-400"><%= req.translations.Status %>:</h2>
                     <p id="status" class="mt-1 text-lg font-medium tracking-tight text-white">-</p>
                   </div>
-              
+
                 <% if (features.includes('players')) { %>
                   <div id="players-deco" class="flex items-center transition-all duration-[1.5s,15s] translate-y-32">
                     <div class="relative inline-flex items-center">
@@ -232,7 +232,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-neutral-400">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
                           </svg>
-                          
+
                     </div>
                     </button>
 
@@ -249,8 +249,8 @@
                   <% } %>
                 </div>
               </div>
-              
-    
+
+
             <!-- RAM Usage Card -->
             <div class="bg-neutral-500/20 border border-neutral-700/10 dark:bg-white/5 rounded-xl px-4 py-5 shadow sm:p-6 h-full relative overflow-hidden flex-1">
                 <canvas id="ramChart" class="absolute inset-0 w-full h-full"></canvas>
@@ -259,7 +259,7 @@
                     <p id="ramUsage" class="mt-1 text-lg font-medium tracking-tight text-white">0% (0 Bytes / 0 Bytes)</p>
                 </div>
             </div>
-    
+
             <!-- CPU Usage Card -->
             <div class="bg-neutral-500/20 border border-neutral-700/10 dark:bg-white/5 rounded-xl px-4 py-5 shadow sm:p-6 h-full relative overflow-hidden flex-1">
                 <canvas id="cpuChart" class="absolute inset-0 w-full h-full"></canvas>
@@ -268,7 +268,7 @@
                     <p id="cpuUsage" class="mt-1 text-lg font-medium tracking-tight text-white">0%</p>
                 </div>
             </div>
-    
+
             <!-- Disk Usage Card -->
             <div class="bg-neutral-500/20 border border-neutral-700/10 dark:bg-white/5 rounded-xl px-4 py-5 shadow sm:p-6 h-full relative overflow-hidden flex-1">
                 <canvas id="diskChart" class="absolute inset-0 w-full h-full hidden"></canvas>
@@ -354,6 +354,10 @@ function setTerminalTheme() {
     let socket;
 
 let isReconnecting = false;
+let reconnectAttempts = 0;
+let maxReconnectAttempts = 10;
+let reconnectInterval = 2000;
+let reconnectTimer = null;
 
 function connectWebSocket() {
     if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN)) {
@@ -361,39 +365,73 @@ function connectWebSocket() {
         return;
     }
 
+    if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+    }
+
     isReconnecting = true;
 
     if (socket) {
         console.log("Closing existing WebSocket connection...");
-        socket.close();
+        try {
+            socket.close();
+        } catch (e) {
+            console.error("Error closing socket:", e);
+        }
     }
 
-    socket = new WebSocket(socketUrl);
+    try {
+        socket = new WebSocket(socketUrl);
 
-    socket.onopen = () => {
-        console.log('WebSocket connection established');
-        writeConsole('system', 'system', 'WebSocket connection established');
-        isReconnecting = false;
-    };
+        socket.onopen = () => {
+            console.log('WebSocket connection established');
+            writeConsole('system', 'system', 'WebSocket connection established');
+            isReconnecting = false;
+            reconnectAttempts = 0;
+            reconnectInterval = 2000;
+            document.getElementById('daemonIsDown').classList.add('hidden');
+        };
 
-    socket.onmessage = handleWebSocketMessage;
+        socket.onmessage = handleWebSocketMessage;
 
-    socket.onerror = (error) => {
-        console.error('WebSocket Error:', error.message);
-        writeConsole('system', 'error', `WebSocket Error: ${error.message}`);
-    };
+        socket.onerror = (error) => {
+            console.error('WebSocket Error:', error);
+            writeConsole('system', 'error', `WebSocket Error: Connection failed`);
+            document.getElementById('daemonIsDown').classList.remove('hidden');
+        };
 
-    socket.onclose = () => {
-        console.log('WebSocket connection closed. Reconnecting...');
-        writeConsole('system', 'system', 'WebSocket connection closed. Reconnecting...');
+        socket.onclose = (event) => {
+            console.log(`WebSocket connection closed (${event.code}). Reconnecting...`);
+            writeConsole('system', 'system', 'WebSocket connection closed. Reconnecting...');
 
-        if (!isReconnecting) {
-            isReconnecting = true;
-            setTimeout(() => {
-                connectWebSocket();
-            }, 5000);
-        }
-    };
+            if (!isReconnecting) {
+                scheduleReconnect();
+            }
+        };
+    } catch (error) {
+        console.error('Error creating WebSocket:', error);
+        scheduleReconnect();
+    }
+}
+
+function scheduleReconnect() {
+    isReconnecting = true;
+    reconnectAttempts++;
+
+    const backoffTime = Math.min(30000, reconnectInterval * Math.pow(1.5, reconnectAttempts - 1));
+
+    console.log(`Scheduling reconnect attempt ${reconnectAttempts} in ${backoffTime}ms`);
+
+    if (reconnectAttempts <= maxReconnectAttempts) {
+        reconnectTimer = setTimeout(() => {
+            console.log(`Attempting reconnect ${reconnectAttempts} of ${maxReconnectAttempts}`);
+            connectWebSocket();
+        }, backoffTime);
+    } else {
+        console.log('Maximum reconnect attempts reached. Please refresh the page.');
+        writeConsole('system', 'error', 'Maximum reconnect attempts reached. Please refresh the page.');
+    }
 }
 
 connectWebSocket();
@@ -555,46 +593,103 @@ connectWebSocket();
         inputElement.addEventListener('keydown', handleKeyUp);
     });
 
+    let statsWs;
+    let statsReconnectTimer;
+    let statsReconnectAttempts = 0;
+    let maxStatsReconnectAttempts = 10;
+    let statsReconnectInterval = 2000;
+    let isStatsReconnecting = false;
+
     function initStatsWebSocket() {
-        const statsWs = new WebSocket(`${protocol}//${host}/status/<%= server.UUID %>`);
-        
-        statsWs.onmessage = event => {
-            if (isValidJson(event.data)) {
-                const stats = JSON.parse(event.data);
-                if (stats.error) {
-                    console.error('Error fetching stats:', stats.error);
-                    return;
-                }
-    
-                updateRamUsage(stats);
-                updateCpuUsage(stats);
-                updateDiskUsage(stats);
-                updateStatus(stats);
-            } else {
-                console.log('Received non-JSON data:', event.data);
+        if (statsReconnectTimer) {
+            clearTimeout(statsReconnectTimer);
+            statsReconnectTimer = null;
+        }
+
+        if (statsWs && (statsWs.readyState === WebSocket.CONNECTING || statsWs.readyState === WebSocket.OPEN)) {
+            console.log("Stats WebSocket is already connecting or open. Skipping new connection.");
+            return;
+        }
+
+        isStatsReconnecting = true;
+
+        if (statsWs) {
+            try {
+                statsWs.close();
+            } catch (e) {
+                console.error("Error closing stats socket:", e);
             }
-        };
+        }
 
+        try {
+            statsWs = new WebSocket(`${protocol}//${host}/status/<%= server.UUID %>`);
 
-        statsWs.onopen = () => {
-            console.log('WebSocket Stats connection established');
-        };
+            statsWs.onmessage = event => {
+                if (isValidJson(event.data)) {
+                    const stats = JSON.parse(event.data);
+                    if (stats.error) {
+                        console.error('Error fetching stats:', stats.error);
+                        return;
+                    }
 
-        statsWs.onclose = () => {
-            console.log('WebSocket Stats connection closed, attempting to reconnect...');
+                    updateRamUsage(stats);
+                    updateCpuUsage(stats);
+                    updateDiskUsage(stats);
+                    updateStatus(stats);
+                } else {
+                    console.log('Received non-JSON data:', event.data);
+                }
+            };
 
-            <% if (features.includes('players')) { %>
-            const playersDeco = document.getElementById('players-deco');
-            <% } %>
+            statsWs.onopen = () => {
+                console.log('WebSocket Stats connection established');
+                isStatsReconnecting = false;
+                statsReconnectAttempts = 0;
+                statsReconnectInterval = 2000;
+                document.getElementById('daemonIsDown').classList.add('hidden');
+            };
 
-            const statusElement = document.getElementById('status');
+            statsWs.onerror = (error) => {
+                console.error('Stats WebSocket Error:', error);
+            };
 
-            statusElement.textContent = 'Connection Lost!';
-            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
-            <% if (features.includes('players')) { %>
-            playersDeco.classList.add('translate-y-32');
-            <% } %>
-        };
+            statsWs.onclose = (event) => {
+                console.log(`WebSocket Stats connection closed (${event.code}). Reconnecting...`);
+
+                const statusElement = document.getElementById('status');
+                statusElement.textContent = 'Connection Lost!';
+                statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
+
+                <% if (features.includes('players')) { %>
+                const playersDeco = document.getElementById('players-deco');
+                playersDeco.classList.add('translate-y-32');
+                <% } %>
+
+                if (!isStatsReconnecting) {
+                    scheduleStatsReconnect();
+                }
+            };
+        } catch (error) {
+            console.error('Error creating Stats WebSocket:', error);
+            scheduleStatsReconnect();
+        }
+    }
+
+    function scheduleStatsReconnect() {
+        isStatsReconnecting = true;
+        statsReconnectAttempts++;
+        const backoffTime = Math.min(30000, statsReconnectInterval * Math.pow(1.5, statsReconnectAttempts - 1));
+
+        console.log(`Scheduling stats reconnect attempt ${statsReconnectAttempts} in ${backoffTime}ms`);
+
+        if (statsReconnectAttempts <= maxStatsReconnectAttempts) {
+            statsReconnectTimer = setTimeout(() => {
+                console.log(`Attempting stats reconnect ${statsReconnectAttempts} of ${maxStatsReconnectAttempts}`);
+                initStatsWebSocket();
+            }, backoffTime);
+        } else {
+            console.log('Maximum stats reconnect attempts reached. Please refresh the page.');
+        }
     }
 
     function formatBytes(bytes, decimals = 2) {
@@ -635,7 +730,7 @@ connectWebSocket();
                 }
             });
         }
-        
+
     const statusChart = createBackgroundChart('statusChart');
     const ramChart = createBackgroundChart('ramChart');
     const cpuChart = createBackgroundChart('cpuChart');

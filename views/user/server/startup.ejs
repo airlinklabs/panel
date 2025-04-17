@@ -1,0 +1,161 @@
+<%- include('../../components/header', { title: 'Startup' }) %>
+
+<main class="h-screen m-auto text-neutral-800 dark:text-white">
+  <!-- Success/Error Messages -->
+  <div id="message-container" class="fixed top-4 right-4 z-50 max-w-md"></div>
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </aside>
+
+    <!-- Main Content -->
+    <section class="flex-1 p-6 overflow-y-auto pt-16">
+      <!-- Page Header -->
+      <header class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-xl font-semibold text-neutral-800 dark:text-white">
+            <%= server.name.charAt(0).toUpperCase() + server.name.slice(1) %>
+          </h1>
+          <p class="mt-1 text-sm text-neutral-500">
+            <%= server.description %>
+          </p>
+        </div>
+      </header>
+
+      <%- include('../../components/installHeader') %>
+
+      <!-- Server Template -->
+      <%- include('../../components/serverTemplate') %>
+
+      <!-- Startup Configuration -->
+      <div class="px-8 mt-8">
+        <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-300 dark:border-neutral-800/20">
+          <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white">Startup Command</h2>
+          <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4">Customize the command used to start your server.</p>
+
+          <form id="startupForm" action="/server/<%= server.UUID %>/startup/command" method="POST" enctype="application/x-www-form-urlencoded">
+            <div class="mb-6">
+              <label for="startCommand" class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2">Startup Command</label>
+              <textarea id="startCommand" name="startCommand" rows="3" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5"><%= server.StartCommand %></textarea>
+              <p class="mt-2 text-xs text-neutral-500">Use $ALVKT(VARIABLE_NAME) to reference environment variables.</p>
+            </div>
+
+            <div class="mt-6">
+              <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-lg hover:bg-blue-700 hover:scale-105 transition-all duration-200">Save Command</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Server Variables -->
+        <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-300 dark:border-neutral-800/20 mt-8">
+          <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white">Server Variables</h2>
+          <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4">Configure environment variables for your server.</p>
+
+          <form id="variablesForm" action="/server/<%= server.UUID %>/startup/variables" method="POST" enctype="application/x-www-form-urlencoded">
+            <div id="variablesContainer" class="space-y-4">
+              <% if (serverVariables && serverVariables.length > 0) { %>
+                <% serverVariables.forEach((variable, index) => { %>
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-neutral-100 dark:bg-neutral-700/20 rounded-lg border border-neutral-300 dark:border-white/5">
+                    <div>
+                      <label class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= variable.name %></label>
+                      <p class="text-xs text-neutral-500">Environment: <%= variable.env %></p>
+                    </div>
+                    <div class="md:col-span-2">
+                      <% if (variable.type === 'boolean') { %>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" name="var_<%= variable.env %>" class="sr-only peer" <%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'checked' : '' %>>
+                          <div class="w-11 h-6 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                          <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300"><%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'Enabled' : 'Disabled' %></span>
+                        </label>
+                      <% } else if (variable.type === 'number') { %>
+                        <input type="number" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5">
+                      <% } else { %>
+                        <input type="text" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5">
+                      <% } %>
+                      <p class="mt-1 text-xs text-neutral-500">Type: <%= variable.type %></p>
+                    </div>
+                  </div>
+                <% }); %>
+              <% } else { %>
+                <p class="text-neutral-600 dark:text-neutral-400">No variables available for this server.</p>
+              <% } %>
+            </div>
+
+            <div class="mt-6">
+              <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-lg hover:bg-blue-700 hover:scale-105 transition-all duration-200">Save Variables</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    const error = urlParams.get('error');
+    const message = urlParams.get('message');
+
+    if (message) {
+      if (success === 'true') {
+        showMessage(message, 'success');
+      } else if (error === 'true') {
+        showMessage(message, 'error');
+      }
+    }
+
+    function showMessage(message, type) {
+      const messageContainer = document.getElementById('message-container');
+      const messageElement = document.createElement('div');
+      messageElement.className = `p-4 mb-4 rounded-xl shadow-lg ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`;
+      messageElement.innerHTML = `
+        <div class="flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            ${type === 'success'
+              ? '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>'
+              : '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>'}
+          </svg>
+          <span>${message}</span>
+        </div>
+      `;
+
+      messageContainer.appendChild(messageElement);
+
+      setTimeout(() => {
+        messageElement.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+        setTimeout(() => {
+          messageContainer.removeChild(messageElement);
+        }, 500);
+      }, 5000);
+    }
+    const startupForm = document.getElementById('startupForm');
+    const variablesForm = document.getElementById('variablesForm');
+
+    startupForm.addEventListener('submit', function(e) {
+
+      const submitButton = startupForm.querySelector('button[type="submit"]');
+      const originalButtonText = submitButton.textContent;
+      submitButton.textContent = 'Saving...';
+      submitButton.disabled = true;
+
+      setTimeout(() => {
+        submitButton.textContent = originalButtonText;
+        submitButton.disabled = false;
+      }, 5000);
+    });
+
+    variablesForm.addEventListener('submit', function(e) {
+      const submitButton = variablesForm.querySelector('button[type="submit"]');
+      const originalButtonText = submitButton.textContent;
+      submitButton.textContent = 'Saving...';
+      submitButton.disabled = true;
+      setTimeout(() => {
+        submitButton.textContent = originalButtonText;
+        submitButton.disabled = false;
+      }, 5000);
+    });
+  });
+</script>
