@@ -1,0 +1,180 @@
+<%- include('../components/header', { title: 'API Documentation' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../components/template') %>
+    </div>
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">API Documentation</h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500">Learn how to use the AirLink API</p>
+        </div>
+      </div>
+      <div class="px-8 mt-5">
+        <div class="rounded-xl bg-neutral-700/10 dark:bg-neutral-900 p-6">
+          <div class="sm:flex sm:items-center">
+            <div class="sm:flex-auto">
+              <h1 class="text-base font-semibold leading-6 text-neutral-800 dark:text-white">Getting Started</h1>
+              <p class="mt-2 text-sm text-neutral-500">To use the API, you need an API key with the appropriate permissions.</p>
+            </div>
+          </div>
+          <div class="mt-4">
+            <p class="text-sm text-neutral-600 dark:text-neutral-300">API keys can be created in the <a href="/admin/apikeys" class="text-blue-600 dark:text-blue-400 hover:underline">API Keys</a> section of the admin panel.</p>
+            <p class="text-sm text-neutral-600 dark:text-neutral-300 mt-2">All API requests must include an <code class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded">Authorization</code> header with a Bearer token:</p>
+            <pre class="mt-2 bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto"><code>Authorization: Bearer YOUR_API_KEY</code></pre>
+          </div>
+
+          <div class="mt-8">
+            <h2 class="text-lg font-semibold leading-6 text-neutral-800 dark:text-white">Available Endpoints</h2>
+
+            <div class="mt-4 space-y-6">
+              <!-- Users Endpoints -->
+              <div>
+                <h3 class="text-md font-medium text-neutral-800 dark:text-white">Users</h3>
+                <div class="mt-2 space-y-4">
+                  <div class="border border-neutral-200 dark:border-neutral-700 rounded-md overflow-hidden">
+                    <div class="bg-neutral-100 dark:bg-neutral-800 px-4 py-2 flex items-center">
+                      <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30 mr-2">GET</span>
+                      <code class="text-sm font-mono">/api/v1/users</code>
+                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.users.read</span>
+                    </div>
+                    <div class="px-4 py-3">
+                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Get a list of all users.</p>
+                    </div>
+                  </div>
+
+                  <div class="border border-neutral-200 dark:border-neutral-700 rounded-md overflow-hidden">
+                    <div class="bg-neutral-100 dark:bg-neutral-800 px-4 py-2 flex items-center">
+                      <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30 mr-2">GET</span>
+                      <code class="text-sm font-mono">/api/v1/users/:id</code>
+                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.users.read</span>
+                    </div>
+                    <div class="px-4 py-3">
+                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Get details for a specific user.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Servers Endpoints -->
+              <div>
+                <h3 class="text-md font-medium text-neutral-800 dark:text-white">Servers</h3>
+                <div class="mt-2 space-y-4">
+                  <div class="border border-neutral-200 dark:border-neutral-700 rounded-md overflow-hidden">
+                    <div class="bg-neutral-100 dark:bg-neutral-800 px-4 py-2 flex items-center">
+                      <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30 mr-2">GET</span>
+                      <code class="text-sm font-mono">/api/v1/servers</code>
+                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.servers.read</span>
+                    </div>
+                    <div class="px-4 py-3">
+                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Get a list of all servers.</p>
+                    </div>
+                  </div>
+
+                  <div class="border border-neutral-200 dark:border-neutral-700 rounded-md overflow-hidden">
+                    <div class="bg-neutral-100 dark:bg-neutral-800 px-4 py-2 flex items-center">
+                      <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30 mr-2">GET</span>
+                      <code class="text-sm font-mono">/api/v1/servers/:id</code>
+                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.servers.read</span>
+                    </div>
+                    <div class="px-4 py-3">
+                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Get details for a specific server.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Nodes Endpoints -->
+              <div>
+                <h3 class="text-md font-medium text-neutral-800 dark:text-white">Nodes</h3>
+                <div class="mt-2 space-y-4">
+                  <div class="border border-neutral-200 dark:border-neutral-700 rounded-md overflow-hidden">
+                    <div class="bg-neutral-100 dark:bg-neutral-800 px-4 py-2 flex items-center">
+                      <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30 mr-2">GET</span>
+                      <code class="text-sm font-mono">/api/v1/nodes</code>
+                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.nodes.read</span>
+                    </div>
+                    <div class="px-4 py-3">
+                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Get a list of all nodes.</p>
+                    </div>
+                  </div>
+
+                  <div class="border border-neutral-200 dark:border-neutral-700 rounded-md overflow-hidden">
+                    <div class="bg-neutral-100 dark:bg-neutral-800 px-4 py-2 flex items-center">
+                      <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30 mr-2">GET</span>
+                      <code class="text-sm font-mono">/api/v1/nodes/:id</code>
+                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.nodes.read</span>
+                    </div>
+                    <div class="px-4 py-3">
+                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Get details for a specific node.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Settings Endpoints -->
+              <div>
+                <h3 class="text-md font-medium text-neutral-800 dark:text-white">Settings</h3>
+                <div class="mt-2 space-y-4">
+                  <div class="border border-neutral-200 dark:border-neutral-700 rounded-md overflow-hidden">
+                    <div class="bg-neutral-100 dark:bg-neutral-800 px-4 py-2 flex items-center">
+                      <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30 mr-2">GET</span>
+                      <code class="text-sm font-mono">/api/v1/settings</code>
+                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.settings.read</span>
+                    </div>
+                    <div class="px-4 py-3">
+                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Get the panel settings.</p>
+                    </div>
+                  </div>
+
+                  <div class="border border-neutral-200 dark:border-neutral-700 rounded-md overflow-hidden">
+                    <div class="bg-neutral-100 dark:bg-neutral-800 px-4 py-2 flex items-center">
+                      <span class="inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 text-xs font-medium text-yellow-700 dark:text-yellow-400 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-500/30 mr-2">PATCH</span>
+                      <code class="text-sm font-mono">/api/v1/settings</code>
+                      <span class="ml-auto text-xs text-neutral-500">Permission: airlink.api.settings.update</span>
+                    </div>
+                    <div class="px-4 py-3">
+                      <p class="text-sm text-neutral-600 dark:text-neutral-300">Update the panel settings.</p>
+                      <div class="mt-2">
+                        <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Request Body:</p>
+                        <pre class="mt-1 bg-neutral-800 text-neutral-200 p-2 rounded-md overflow-x-auto text-xs"><code>{
+  "title": "My Panel",         // Optional
+  "description": "My custom panel", // Optional
+  "logo": "/path/to/logo.png",  // Optional
+  "favicon": "/path/to/favicon.ico", // Optional
+  "theme": "default",         // Optional
+  "language": "en"            // Optional
+}</code></pre>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-8">
+            <h2 class="text-lg font-semibold leading-6 text-neutral-800 dark:text-white">Response Format</h2>
+            <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-300">All successful responses return a JSON object with a <code class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded">data</code> property containing the requested information.</p>
+            <pre class="mt-2 bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto"><code>{
+  "data": {
+    // Response data here
+  }
+}</code></pre>
+
+            <p class="mt-4 text-sm text-neutral-600 dark:text-neutral-300">Error responses include an <code class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded">error</code> property with a description of the error.</p>
+            <pre class="mt-2 bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto"><code>{
+  "error": "Error message"
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../components/footer') %>
