@@ -80,8 +80,8 @@
                         <%= server.status === 'running' ? 'Running' : 'Stopped' %>
                       </span>
                     </td>
-                    <td class="px-3 py-4 text-sm text-gray-700 dark:text-neutral-300"><span class="border border-gray-300 dark:border-neutral-600/20 bg-gray-100 dark:bg-neutral-500/10 px-2 py-0.5 rounded-lg">0 / 1GB</span></td>
-                    <td class="px-3 py-4 text-sm text-gray-700 dark:text-neutral-300"><span class="border border-gray-300 dark:border-neutral-600/20 bg-gray-100 dark:bg-neutral-500/10 px-2 py-0.5 rounded-lg">0%</span></td>
+                    <td class="px-3 py-4 text-sm text-gray-700 dark:text-neutral-300"><span class="border border-gray-300 dark:border-neutral-600/20 bg-gray-100 dark:bg-neutral-500/10 px-2 py-0.5 rounded-lg"><%= server.ramUsage %>% / <%= server.ramLimit %></span></td>
+                    <td class="px-3 py-4 text-sm text-gray-700 dark:text-neutral-300"><span class="border border-gray-300 dark:border-neutral-600/20 bg-gray-100 dark:bg-neutral-500/10 px-2 py-0.5 rounded-lg"><%= server.cpuUsage %>%</span></td>
                   </tr>
                 <% }); %>
               </tbody>

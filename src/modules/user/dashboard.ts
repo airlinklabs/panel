@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { getUser } from '../../handlers/utils/user/user';
 import logger from '../../handlers/logger';
+import axios from 'axios';
 
 const prisma = new PrismaClient();
 
@@ -55,10 +56,72 @@ const dashboardModule: Module = {
         const startIndex = (page - 1) * perPage;
         const endIndex = page * perPage;
 
-        const paginatedServers = servers.slice(startIndex, endIndex);
+        const serversWithStats = await Promise.all(
+          servers.map(async (server) => {
+            try {
+              const statusResponse = await axios({
+                method: 'GET',
+                url: `http://${server.node.address}:${server.node.port}/container/status`,
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+                params: { id: server.UUID },
+                timeout: 2000,
+              });
 
+              const isRunning = statusResponse.data?.running === true;
+              let ramUsage = '0';
+              let cpuUsage = '0';
+              let ramLimit = '1GB';
 
+              if (isRunning) {
+                try {
+                  const statsResponse = await axios({
+                    method: 'GET',
+                    url: `http://${server.node.address}:${server.node.port}/container/stats`,
+                    auth: {
+                      username: 'Airlink',
+                      password: server.node.key,
+                    },
+                    params: { id: server.UUID },
+                    timeout: 2000,
+                  });
 
+                  if (statsResponse.data) {
+                    ramUsage = statsResponse.data.memory?.percentage || '0';
+                    cpuUsage = statsResponse.data.cpu?.percentage || '0';
+
+                    const memLimitBytes = statsResponse.data.memory?.limit || 0;
+                    const memLimitGB = (memLimitBytes / (1024 * 1024 * 1024)).toFixed(1);
+                    ramLimit = `${memLimitGB}GB`;
+                  }
+                } catch (statsError) {
+                  logger.error(`Error fetching stats for server ${server.UUID}:`, statsError);
+                }
+              }
+
+              return {
+                ...server,
+                status: isRunning ? 'running' : 'stopped',
+                ramUsage,
+                cpuUsage,
+                ramLimit
+              };
+            } catch (error) {
+              logger.error(`Error fetching status for server ${server.UUID}:`, error);
+              return {
+                ...server,
+                status: 'stopped',
+                ramUsage: '0',
+                cpuUsage: '0',
+                ramLimit: '1GB'
+              };
+            }
+          })
+        );
+
+        const paginatedServers = serversWithStats.slice(startIndex, endIndex);
 
         res.render('user/dashboard', {
           errorMessage,
