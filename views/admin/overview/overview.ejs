@@ -50,14 +50,14 @@
               <span class="text-xs text-neutral-400">(<%= process.env.NODE_ENV %>)</span>
             </p>
           </div>
-          
+
           <!-- Rechte Seite -->
           <div class="flex-grow ml-0 sm:ml-8 mt-4 sm:mt-0">
             <div class="flex space-x-4">
-              <button id="checkUpdateBtn" class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">
+              <button id="checkUpdateBtn" class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
                 Check for Updates
               </button>
-              <button id="performUpdateBtn" class="hidden bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition">
+              <button id="performUpdateBtn" class="hidden w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
                 Install Update
               </button>
             </div>
@@ -66,11 +66,11 @@
         </div>
 
         <%- include('../../components/toast') %>
-        
+
         <script>
           const currentVersion = '<%= airlinkVersion %>';
           document.getElementById('currentVersion').textContent = currentVersion;
-        
+
           document.getElementById('checkUpdateBtn').addEventListener('click', async () => {
             try {
               const response = await fetch('/admin/check-update');
@@ -78,7 +78,7 @@
               const statusDiv = document.getElementById('updateStatus');
               const updateBtn = document.getElementById('performUpdateBtn');
               const updateInfo = document.getElementById('updateInfo');
-        
+
               if (data.hasUpdate) {
                 statusDiv.innerHTML = `A new version (${data.latestVersion}) is available. Current version: ${data.currentVersion}`;
                 statusDiv.className = 'text-amber-500 mb-4';
@@ -97,7 +97,7 @@
               console.error('Error:', error);
             }
           });
-        
+
           document.getElementById('performUpdateBtn').addEventListener('click', async () => {
             if (confirm('Do you want to perform the update? The server will restart automatically.')) {
               try {
@@ -122,18 +122,18 @@
             <a href="// comming soon" class="block rounded-xl bg-blue-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-blue-700 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 w-full">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 inline-flex mr-1">
                     <path d="M10.75 16.82A7.462 7.462 0 0 1 15 15.5c.71 0 1.396.098 2.046.282A.75.75 0 0 0 18 15.06v-11a.75.75 0 0 0-.546-.721A9.006 9.006 0 0 0 15 3a8.963 8.963 0 0 0-4.25 1.065V16.82ZM9.25 4.065A8.963 8.963 0 0 0 5 3c-.85 0-1.673.118-2.454.339A.75.75 0 0 0 2 4.06v11a.75.75 0 0 0 .954.721A7.506 7.506 0 0 1 5 15.5c1.579 0 3.042.487 4.25 1.32V4.065Z" />
-                </svg>                  
+                </svg>
                 Documentation
             </a>
             <a href="https://github.com/airlinklabs" class="block rounded-xl bg-blue-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-blue-700 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 w-full">
-                <svg class="h-5 w-5 text-white inline-flex mr-1" height="1792" viewBox="0 0 1792 1792" width="1792" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M1664 896q0 251-146.5 451.5t-378.5 277.5q-27 5-39.5-7t-12.5-30v-211q0-97-52-142 57-6 102.5-18t94-39 81-66.5 53-105 20.5-150.5q0-121-79-206 37-91-8-204-28-9-81 11t-92 44l-38 24q-93-26-192-26t-192 26q-16-11-42.5-27t-83.5-38.5-86-13.5q-44 113-7 204-79 85-79 206 0 85 20.5 150t52.5 105 80.5 67 94 39 102.5 18q-40 36-49 103-21 10-45 15t-57 5-65.5-21.5-55.5-62.5q-19-32-48.5-52t-49.5-24l-20-3q-21 0-29 4.5t-5 11.5 9 14 13 12l7 5q22 10 43.5 38t31.5 51l10 23q13 38 44 61.5t67 30 69.5 7 55.5-3.5l23-4q0 38 .5 89t.5 54q0 18-13 30t-40 7q-232-77-378.5-277.5t-146.5-451.5q0-209 103-385.5t279.5-279.5 385.5-103 385.5 103 279.5 279.5 103 385.5z"/></svg>            
+                <svg class="h-5 w-5 text-white inline-flex mr-1" height="1792" viewBox="0 0 1792 1792" width="1792" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M1664 896q0 251-146.5 451.5t-378.5 277.5q-27 5-39.5-7t-12.5-30v-211q0-97-52-142 57-6 102.5-18t94-39 81-66.5 53-105 20.5-150.5q0-121-79-206 37-91-8-204-28-9-81 11t-92 44l-38 24q-93-26-192-26t-192 26q-16-11-42.5-27t-83.5-38.5-86-13.5q-44 113-7 204-79 85-79 206 0 85 20.5 150t52.5 105 80.5 67 94 39 102.5 18q-40 36-49 103-21 10-45 15t-57 5-65.5-21.5-55.5-62.5q-19-32-48.5-52t-49.5-24l-20-3q-21 0-29 4.5t-5 11.5 9 14 13 12l7 5q22 10 43.5 38t31.5 51l10 23q13 38 44 61.5t67 30 69.5 7 55.5-3.5l23-4q0 38 .5 89t.5 54q0 18-13 30t-40 7q-232-77-378.5-277.5t-146.5-451.5q0-209 103-385.5t279.5-279.5 385.5-103 385.5 103 279.5 279.5 103 385.5z"/></svg>
                 GitHub
             </a>
             <a href="https://ko-fi.com/airlinklabs#checkoutModal" class="block rounded-xl bg-emerald-500 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-emerald-600 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 w-full">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 inline-flex mr-1">
                     <path d="M10.75 10.818v2.614A3.13 3.13 0 0 0 11.888 13c.482-.315.612-.648.612-.875 0-.227-.13-.56-.612-.875a3.13 3.13 0 0 0-1.138-.432ZM8.33 8.62c.053.055.115.11.184.164.208.16.46.284.736.363V6.603a2.45 2.45 0 0 0-.35.13c-.14.065-.27.143-.386.233-.377.292-.514.627-.514.909 0 .184.058.39.202.592.037.051.08.102.128.152Z" />
                     <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-6a.75.75 0 0 1 .75.75v.316a3.78 3.78 0 0 1 1.653.713c.426.33.744.74.925 1.2a.75.75 0 0 1-1.395.55 1.35 1.35 0 0 0-.447-.563 2.187 2.187 0 0 0-.736-.363V9.3c.698.093 1.383.32 1.959.696.787.514 1.29 1.27 1.29 2.13 0 .86-.504 1.616-1.29 2.13-.576.377-1.261.603-1.96.696v.299a.75.75 0 1 1-1.5 0v-.3c-.697-.092-1.382-.318-1.958-.695-.482-.315-.857-.717-1.078-1.188a.75.75 0 1 1 1.359-.636c.08.173.245.376.54.569.313.205.706.353 1.138.432v-2.748a3.782 3.782 0 0 1-1.653-.713C6.9 9.433 6.5 8.681 6.5 7.875c0-.805.4-1.558 1.097-2.096a3.78 3.78 0 0 1 1.653-.713V4.75A.75.75 0 0 1 10 4Z" clip-rule="evenodd" />
-                </svg>                                 
+                </svg>
                 Support the Project
             </a>
          </div>

@@ -1,0 +1,218 @@
+<%- include('../../components/header', { title: 'Addons' }) %>
+<%- include('../../components/toast') %>
+<%- include('../../components/loadingPopup') %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+           <h1 class="text-base font-medium leading-6 text-white">Addons Management</h1>
+           <p class="mt-1 tracking-tight text-sm text-neutral-500">Manage your panel addons</p>
+         </div>
+       </div>
+       <div class="px-8 mt-5">
+        <div class="rounded-xl bg-neutral-900 p-6">
+          <div class="sm:flex sm:items-center">
+            <div class="sm:flex-auto">
+              <h1 class="text-base font-semibold leading-6 text-white">Installed Addons</h1>
+              <p class="mt-2 text-sm text-neutral-400">A list of all addons installed on your panel.</p>
+            </div>
+            <div class="mt-4 sm:ml-16 sm:mt-0">
+              <button id="reloadAddonsBtn" type="button" class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block mr-1">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+                Reload Addons
+              </button>
+            </div>
+          </div>
+          <div class="mt-8 flow-root">
+            <% if (!addonTableExists) { %>
+              <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-5 mb-6">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-amber-500">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 3.014-1.874 2.148-3.374L16.5 7.5l-4.5-2.625L7.5 7.5l-5.803 10.126Z" />
+                    </svg>
+                  </div>
+                  <div class="ml-4">
+                    <h3 class="text-base font-medium text-amber-500">Database Migration Required</h3>
+                    <div class="mt-2 text-sm text-amber-400/90">
+                      <p>The Addon table does not exist in the database. Please run the following command to create it:</p>
+                      <div class="mt-3 p-3 bg-neutral-800 rounded-lg font-mono text-sm">
+                        <code>npm run migrate:dev</code>
+                      </div>
+                      <p class="mt-3 text-sm">After running the migration, restart the server to enable the addons system.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+            <div class="py-2">
+              <% if (addons && addons.length > 0) { %>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <% addons.forEach(addon => { %>
+                    <div class="bg-white/5 rounded-xl overflow-hidden shadow-md border border-neutral-800/20 hover:border-neutral-700/30 transition-all" data-addon-slug="<%= addon.slug %>">
+                      <div class="p-5">
+                        <div class="flex justify-between items-start">
+                          <div>
+                            <h3 class="text-lg font-medium text-white"><%= addon.name %></h3>
+                            <p class="text-sm text-neutral-400 mt-1"><%= addon.version %></p>
+                          </div>
+                          <div>
+                            <% if (addon.enabled) { %>
+                              <span class="status-badge inline-flex items-center rounded-full bg-green-100 dark:bg-green-500/50 text-green-700 dark:text-white px-2.5 py-0.5 text-xs font-medium">Enabled</span>
+                            <% } else { %>
+                              <span class="status-badge inline-flex items-center rounded-full bg-red-100 dark:bg-red-700/30 text-red-700 dark:text-neutral-300 border dark:border-red-600/20 px-2.5 py-0.5 text-xs font-medium">Disabled</span>
+                            <% } %>
+                          </div>
+                        </div>
+
+                        <% if (addon.description) { %>
+                          <p class="text-sm text-neutral-300 mt-3"><%= addon.description %></p>
+                        <% } %>
+
+                        <div class="mt-4 flex items-center text-sm text-neutral-400">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                          </svg>
+                          <span><%= addon.author || 'Unknown' %></span>
+                        </div>
+                      </div>
+
+                      <div class="px-5 py-4 bg-neutral-800/50 border-t border-neutral-700/30">
+                        <button
+                          onclick="toggleAddonStatus('<%= addon.slug %>', <%= !addon.enabled %>)"
+                          class="w-full rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2"
+                          <%= !addonTableExists ? 'disabled' : '' %>>
+                          <%= addon.enabled ? 'Disable' : 'Enable' %>
+                        </button>
+                      </div>
+                    </div>
+                  <% }); %>
+                </div>
+              <% } else { %>
+                <div class="bg-white/5 rounded-xl p-8 text-center border border-neutral-800/20">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 mx-auto text-neutral-500 mb-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
+                  </svg>
+                  <h3 class="text-xl font-medium text-white">
+                    <% if (addonTableExists) { %>
+                      No addons installed
+                    <% } else { %>
+                      Addons will appear here after running database migrations
+                    <% } %>
+                  </h3>
+                  <p class="mt-3 text-sm text-neutral-400 max-w-md mx-auto">
+                    <% if (addonTableExists) { %>
+                      Add addons to the <code class="px-1.5 py-0.5 bg-neutral-800 rounded text-xs">storage/addons</code> directory to get started
+                    <% } else { %>
+                      Run the database migrations to enable the addons system
+                    <% } %>
+                  </p>
+                  <% if (addonTableExists) { %>
+                    <div class="mt-6">
+                      <a href="https://github.com/airlinklabs/panel/wiki/Addons" target="_blank" class="inline-flex items-center rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-4 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                        </svg>
+                        Learn about addons
+                      </a>
+                    </div>
+                  <% } %>
+                </div>
+              <% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  function toggleAddonStatus(slug, enabled) {
+    showLoadingPopup('Updating addon status...');
+
+    fetch(`/admin/addons/toggle/${slug}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ enabled: enabled.toString() }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      hideLoadingPopup();
+      if (data.success) {
+        showToast('Addon status updated successfully', 'success');
+        updateAddonUI(slug, enabled);
+      } else {
+        showToast(data.message || 'Failed to update addon status', 'error');
+      }
+    })
+    .catch(error => {
+      hideLoadingPopup();
+      showToast('An error occurred while updating addon status', 'error');
+      console.error('Error:', error);
+    });
+  }
+
+  function updateAddonUI(slug, enabled) {
+    const addonCard = document.querySelector(`[data-addon-slug="${slug}"]`);
+    if (!addonCard) return;
+
+    const statusBadge = addonCard.querySelector('.status-badge');
+    if (statusBadge) {
+      if (enabled) {
+        statusBadge.className = 'status-badge inline-flex items-center rounded-full bg-green-100 dark:bg-green-500/50 text-green-700 dark:text-white px-2.5 py-0.5 text-xs font-medium';
+        statusBadge.textContent = 'Enabled';
+      } else {
+        statusBadge.className = 'status-badge inline-flex items-center rounded-full bg-red-100 dark:bg-red-700/30 text-red-700 dark:text-neutral-300 border dark:border-red-600/20 px-2.5 py-0.5 text-xs font-medium';
+        statusBadge.textContent = 'Disabled';
+      }
+    }
+
+    const toggleButton = addonCard.querySelector('button');
+    if (toggleButton) {
+      toggleButton.textContent = enabled ? 'Disable' : 'Enable';
+      toggleButton.onclick = function() { toggleAddonStatus(slug, !enabled); };
+    }
+  }
+
+  function reloadAddons() {
+    showLoadingPopup('Reloading addons...');
+
+    fetch('/admin/addons/reload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      hideLoadingPopup();
+      if (data.success) {
+        showToast('Addons reloaded successfully', 'success');
+      } else {
+        showToast(data.message || 'Failed to reload addons', 'error');
+      }
+    })
+    .catch(error => {
+      hideLoadingPopup();
+      showToast('An error occurred while reloading addons', 'error');
+      console.error('Error:', error);
+    });
+  }
+
+  document.getElementById('reloadAddonsBtn').addEventListener('click', reloadAddons);
+</script>
+
+<%- include('../../components/footer') %>

@@ -4,7 +4,11 @@
           <nav class="flex relative">
             <div id="sliding-background" class="absolute w-fit h-9 px-3 transition-transform duration-200 ease-in-out z-0 bg-neutral-200 border border-neutral-300 dark:bg-white/5 dark:border-neutral-300/5 rounded-xl"></div>
              <ul role="list" class="flex min-w-full mt-1.5 flex-none gap-x-2 text-sm font-normal leading-6 text-neutral-600 dark:text-neutral-400">
-                <li class=" transition">
+                <%
+                const menuItems = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
+                if (!menuItems || menuItems.length === 0) {
+                %>
+                <li class="transition">
                    <a href="/server/<%= server.UUID %>" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5 mb-0.5 inline-flex mr-1">
                       <path fill-rule="evenodd" d="M2.25 6a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V6Zm3.97.97a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 0 1-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 0 1 0-1.06Zm4.28 4.28a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" clip-rule="evenodd" />
@@ -55,11 +59,71 @@
                    Settings
                 </a>
              </li>
+             <% } else {
+                menuItems.forEach(item => {
+                  if (item.feature && !features.includes(item.feature)) return;
+                  const url = item.url.replace(':uuid', server.UUID);
+             %>
+                <li class="transition">
+                  <a href="<%= url %>" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl">
+                    <%- item.icon %>
+                    <%= item.label %>
+                  </a>
+                </li>
+             <% }); } %>
              </ul>
           </nav>
        </div>
     </div>
  </div>
+
+ <!-- Server Sections -->
+ <% if (global.uiComponentStore) {
+    const sections = global.uiComponentStore.getServerSections();
+
+    if (sections && sections.length > 0) {
+ %>
+ <div class="px-8 mt-8">
+    <% sections.forEach(section => { %>
+      <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-300 dark:border-neutral-800/20 mb-6">
+        <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white"><%= section.title %></h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <%
+            const items = section.items || [];
+
+            items.forEach(item => {
+              let value = item.value;
+
+              if (value.includes(':uuid')) value = value.replace(':uuid', server.UUID);
+              if (value.includes(':address')) {
+                const primaryPort = server.Ports ? JSON.parse(server.Ports).find(p => p.primary) : null;
+                const portNumber = primaryPort ? primaryPort.Port.split(':')[1] : '';
+                value = value.replace(':address', `${server.node.address}:${portNumber}`);
+              }
+              if (value.includes(':image')) value = value.replace(':image', server.image.name || 'Unknown');
+              if (value.includes(':node')) value = value.replace(':node', server.node.name);
+              if (value.includes(':memory')) value = value.replace(':memory', `${server.Memory} MB`);
+              if (value.includes(':cpu')) value = value.replace(':cpu', `${server.Cpu}%`);
+              if (value.includes(':disk')) value = value.replace(':disk', `${server.Storage} MB`);
+          %>
+            <div>
+              <h3 class="text-sm font-medium text-neutral-300 mb-2"><%= item.label %></h3>
+              <% if (item.type === 'link') { %>
+                <a href="<%= item.url %>" class="text-neutral-400 hover:text-neutral-300 transition"><%= value %></a>
+              <% } else if (item.type === 'button') { %>
+                <button onclick="<%= item.onClick %>" class="text-neutral-400 hover:text-neutral-300 transition"><%= value %></button>
+              <% } else { %>
+                <p class="text-neutral-400"><%= value %></p>
+              <% } %>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    <% }); %>
+ </div>
+ <% } } %>
+
  <script>
    document.addEventListener("DOMContentLoaded", function() {
      var currentPagePath = window.location.pathname;

@@ -1,0 +1,8 @@
+{
+  "name": "Test Addon",
+  "version": "1.0.0",
+  "description": "A test addon for AirLink Panel",
+  "author": "AirLink Labs",
+  "main": "index.ts",
+  "router": "/test-addon"
+}

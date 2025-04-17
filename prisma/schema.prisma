@@ -110,3 +110,16 @@ model LoginHistory {
   userAgent String?
   timestamp DateTime @default(now())
 }
+
+model Addon {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  description String?
+  version     String
+  author      String?
+  enabled     Boolean  @default(true)
+  mainFile    String   @default("index.ts")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

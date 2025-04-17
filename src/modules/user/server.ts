@@ -73,6 +73,7 @@ const dashboardModule: Module = {
             errorMessage.message = 'Server not found.';
             return res.render('user/server/manage', {
               errorMessage,
+              features: [],
               user,
               req,
               settings,
@@ -147,7 +148,7 @@ const dashboardModule: Module = {
 
           return res.render('user/server/manage', {
             errorMessage,
-            features,
+            features: features || [],
             installed: await checkForServerInstallation(serverId),
             user,
             alshID,
@@ -164,6 +165,7 @@ const dashboardModule: Module = {
           errorMessage.message = 'Error fetching user data.';
           return res.render('user/server/manage', {
             errorMessage,
+            features: [],
             user: req.session?.user,
             req,
             settings,

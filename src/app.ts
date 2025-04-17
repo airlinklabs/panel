@@ -1,7 +1,7 @@
 /**
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
  *      AirLink - Open Source Project by AirlinkLabs
- *      Repository: https://github.com/airlinklabs/airlink
+ *      Repository: https://github.com/airlinklabs/panel
  *
  *     © 2024 AirlinkLabs. Licensed under the MIT License
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
@@ -21,10 +21,12 @@ import compression from 'compression';
 import { translationMiddleware } from './handlers/utils/core/translation';
 import PrismaSessionStore from './handlers/sessionStore';
 import { settingsLoader } from './handlers/settingsLoader';
-import { loadPlugins } from './handlers/pluginHandler';
+import { loadAddons } from './handlers/addonHandler';
+import { initializeDefaultUIComponents, uiComponentStore } from './handlers/uiComponentHandler';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
+import fs from 'fs';
 
 loadEnv();
 
@@ -43,11 +45,45 @@ expressWs(app);
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Load views
-app.set('views', path.join(__dirname, '../views'));
+const viewsPath = path.join(__dirname, '../views');
+app.set('views', viewsPath);
 app.set('view engine', 'ejs');
-//app.set('view options', {
-//  compileDebug: process.env.NODE_ENV === 'development',
-//});
+
+const ejs = require('ejs');
+const originalRenderFile = ejs.renderFile;
+
+ejs.renderFile = function(file: string, data: any, options: any, callback: any) {
+  try {
+    if (fs.existsSync(file)) {
+      return originalRenderFile(file, data, options, callback);
+    }
+
+    const viewName = path.basename(file);
+    const addonViewsDir = path.join(__dirname, '../../storage/addons');
+
+    if (fs.existsSync(addonViewsDir)) {
+      const addonDirs = fs.readdirSync(addonViewsDir, { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => dirent.name);
+
+      for (const addonDir of addonDirs) {
+        const addonViewPath = path.join(addonViewsDir, addonDir, 'views', viewName);
+        if (fs.existsSync(addonViewPath)) {
+          return originalRenderFile(addonViewPath, data, options, callback);
+        }
+      }
+    }
+    const mainViewPath = path.join(viewsPath, viewName);
+    if (fs.existsSync(mainViewPath)) {
+      return originalRenderFile(mainViewPath, data, options, callback);
+    }
+
+    return originalRenderFile(file, data, options, callback);
+  } catch (error) {
+    console.error(`Error in EJS renderFile override:`, error);
+    return originalRenderFile(file, data, options, callback);
+  }
+};
 
 // Load compression
 app.use(compression());
@@ -98,6 +134,8 @@ app.use(translationMiddleware);
 app.use((req, res, next) => {
   res.locals.name = name;
   res.locals.airlinkVersion = airlinkVersion;
+  // Make UI component store available globally
+  global.uiComponentStore = uiComponentStore;
   next();
 });
 
@@ -107,7 +145,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
   if (!res.headersSent) {
     const errorMessage = isProduction ? 'Internal server error' : err.message;
-    
+
     res.status(500).json({
       error: errorMessage
     });
@@ -121,14 +159,16 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   try {
     await databaseLoader();
     await settingsLoader();
+    // Initialize default UI components
+    initializeDefaultUIComponents();
     await loadModules(app, airlinkVersion);
-    loadPlugins(app);
-    
+    await loadAddons(app);
+
     const server = app.listen(port, () => {
       logger.info(`Server is running on http://localhost:${port}`);
     });
-    
-    // on close of the application 
+
+    // on close of the application
     process.on('SIGINT', () => {
       logger.info('Shutting down...');
       // database close
