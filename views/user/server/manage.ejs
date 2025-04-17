@@ -50,7 +50,7 @@
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex gap-2.5">
             <button id="startButton" type="button"
-                class="block rounded-xl bg-emerald-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-emerald-500 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                class="w-full md:w-auto rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                     class="size-4 inline-flex mr-1 text-emerald-100 mb-0.5">
                     <path fill-rule="evenodd"
@@ -60,7 +60,7 @@
                 <%= req.translations.start %>
             </button>
             <button id="restartButton" type="button"
-                class="block rounded-xl bg-neutral-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-neutral-700/95 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                class="w-full md:w-auto rounded-xl bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                     class="size-4 inline-flex mr-1 text-zinc-200 mb-0.5">
                     <path fill-rule="evenodd"
@@ -70,7 +70,7 @@
                 <%= req.translations.restart %>
             </button>
             <button id="stopButton" type="button"
-                class="block rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                     class="size-4 inline-flex mr-1 text-red-100 mb-0.5">
                     <path fill-rule="evenodd"
@@ -284,6 +284,9 @@
     </div>
   </div>
 </main>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/loadingPopup') %>
 
 <%- include('../../components/footer') %>
 
@@ -556,30 +559,149 @@ connectWebSocket();
 
     document.getElementById('startButton').addEventListener('click', () => {
         const serverUUID = '<%= server.UUID %>';
+        const loader = showLoadingPopup('Starting Server', 'Sending start command...');
+
         fetch(`/server/${serverUUID}/power/start`, {
             method: 'POST',
         })
             .then(response => response.json())
             .then(data => {
-                restartWebSocket();
+                loader.updateProgress(100, 'Server starting...');
+                setTimeout(() => {
+                    loader.close();
+                    showToast('Server start command sent successfully', 'success');
+                    restartWebSocket();
+                }, 1000);
             })
             .catch(error => {
+                loader.close();
                 console.error('Error:', error);
+                showToast('Failed to start server', 'error');
             });
+    });
+
+    document.getElementById('restartButton').addEventListener('click', () => {
+        const serverUUID = '<%= server.UUID %>';
+
+        // Create confirmation modal
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300';
+        modal.id = 'restartServerModal';
+
+        modal.innerHTML = `
+          <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
+            <h2 class="text-2xl font-medium mb-1 text-neutral-800">Confirm Restart Server</h2>
+            <p class="mb-6 text-neutral-600">Are you sure you want to restart the server? This will disconnect all users.</p>
+            <div class="flex justify-end space-x-4">
+              <button id="cancelRestartBtn" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
+              <button id="confirmRestartBtn" class="w-full md:w-auto rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Restart Server</button>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        setTimeout(() => {
+          modal.classList.remove('opacity-0', 'pointer-events-none');
+          modal.querySelector('div').classList.remove('scale-95');
+          modal.querySelector('div').classList.add('scale-100');
+        }, 10);
+
+        document.getElementById('cancelRestartBtn').addEventListener('click', () => {
+          modal.classList.add('opacity-0', 'pointer-events-none');
+          modal.querySelector('div').classList.remove('scale-100');
+          modal.querySelector('div').classList.add('scale-95');
+          setTimeout(() => document.body.removeChild(modal), 300);
+        });
+
+        document.getElementById('confirmRestartBtn').addEventListener('click', () => {
+          modal.classList.add('opacity-0', 'pointer-events-none');
+          modal.querySelector('div').classList.remove('scale-100');
+          modal.querySelector('div').classList.add('scale-95');
+          setTimeout(() => document.body.removeChild(modal), 300);
+
+          const loader = showLoadingPopup('Restarting Server', 'Sending restart command...');
+
+          fetch(`/server/${serverUUID}/power/restart`, {
+              method: 'POST',
+          })
+              .then(response => response.json())
+              .then(data => {
+                  loader.updateProgress(100, 'Server restarting...');
+                  setTimeout(() => {
+                      loader.close();
+                      showToast('Server restart command sent successfully', 'success');
+                      restartWebSocket();
+                  }, 1000);
+              })
+              .catch(error => {
+                  loader.close();
+                  console.error('Error:', error);
+                  showToast('Failed to restart server', 'error');
+              });
+        });
     });
 
     document.getElementById('stopButton').addEventListener('click', () => {
         const serverUUID = '<%= server.UUID %>';
-        fetch(`/server/${serverUUID}/power/stop`, {
-            method: 'POST',
-        })
-            .then(response => response.json())
-            .then(data => {
-                restartWebSocket();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+
+        // Create confirmation modal
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300';
+        modal.id = 'stopServerModal';
+
+        modal.innerHTML = `
+          <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
+            <h2 class="text-2xl font-medium mb-1 text-neutral-800">Confirm Stop Server</h2>
+            <p class="mb-6 text-neutral-600">Are you sure you want to stop the server? This will disconnect all users.</p>
+            <div class="flex justify-end space-x-4">
+              <button id="cancelStopBtn" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
+              <button id="confirmStopBtn" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Stop Server</button>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        setTimeout(() => {
+          modal.classList.remove('opacity-0', 'pointer-events-none');
+          modal.querySelector('div').classList.remove('scale-95');
+          modal.querySelector('div').classList.add('scale-100');
+        }, 10);
+
+        document.getElementById('cancelStopBtn').addEventListener('click', () => {
+          modal.classList.add('opacity-0', 'pointer-events-none');
+          modal.querySelector('div').classList.remove('scale-100');
+          modal.querySelector('div').classList.add('scale-95');
+          setTimeout(() => document.body.removeChild(modal), 300);
+        });
+
+        document.getElementById('confirmStopBtn').addEventListener('click', () => {
+          modal.classList.add('opacity-0', 'pointer-events-none');
+          modal.querySelector('div').classList.remove('scale-100');
+          modal.querySelector('div').classList.add('scale-95');
+          setTimeout(() => document.body.removeChild(modal), 300);
+
+          const loader = showLoadingPopup('Stopping Server', 'Sending stop command...');
+
+          fetch(`/server/${serverUUID}/power/stop`, {
+              method: 'POST',
+          })
+              .then(response => response.json())
+              .then(data => {
+                  loader.updateProgress(100, 'Server stopping...');
+                  setTimeout(() => {
+                      loader.close();
+                      showToast('Server stop command sent successfully', 'success');
+                      restartWebSocket();
+                  }, 1000);
+              })
+              .catch(error => {
+                  loader.close();
+                  console.error('Error:', error);
+                  showToast('Failed to stop server', 'error');
+              });
+        });
     });
 
     document.addEventListener('DOMContentLoaded', () => {

@@ -6,24 +6,24 @@ function getFileIcon(category) {
     'Configuration Files': `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
       <path fill-rule="evenodd" d="M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6Zm14.25 6a.75.75 0 0 1-.22.53l-2.25 2.25a.75.75 0 1 1-1.06-1.06L15.44 12l-1.72-1.72a.75.75 0 1 1 1.06-1.06l2.25 2.25c.141.14.22.331.22.53Zm-10.28-.53a.75.75 0 0 0 0 1.06l2.25 2.25a.75.75 0 1 0 1.06-1.06L8.56 12l1.72-1.72a.75.75 0 1 0-1.06-1.06l-2.25 2.25Z" clip-rule="evenodd" />
-    </svg>    
+    </svg>
     `,
     'Documents': `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
       <path fill-rule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clip-rule="evenodd" />
       <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-    </svg>    
+    </svg>
     `,
     'Folder': `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
       <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z" />
-    </svg>    
+    </svg>
     `,
     'No Category': `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
       <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
       <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-    </svg>    
+    </svg>
     `,
   };
 
@@ -57,8 +57,8 @@ function getFileIcon(category) {
                 <path fill-rule="evenodd" d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875ZM12.75 12a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V18a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V12Z" clip-rule="evenodd" />
                 <path d="M14.25 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Z" />
               </svg>
-              
-              
+
+
               Create File
           </button>
       </div>
@@ -86,18 +86,18 @@ function getFileIcon(category) {
       <div class="flex-grow px-8 mt-8 -mb-4">
         <h1 class="text-white text-sm">
           <a class="text-neutral-300 hover:text-neutral-200 transition" href="./files">/app/data/</a>
-          <% 
-              if (req.query.path) { 
+          <%
+              if (req.query.path) {
                   const parts = req.query.path.split('/');
                   let currentPath = '';
-      
+
                   parts.forEach((part, index) => {
                       currentPath += part;
-      
+
                       if (index < parts.length - 1) {
                           %>
                           <a href="./files?path=<%= currentPath %>" class="text-neutral-300 hover:text-neutral-200 transition"><%= part %></a>/
-                          <% 
+                          <%
                           currentPath += '/';
                       } else {
                           %>
@@ -143,7 +143,7 @@ function getFileIcon(category) {
                               ? currentPath.replace(/^\/+/, '') + '/' + file.name
                               : file.name
                           )
-                    %>" 
+                    %>"
                        class="flex items-center">
                     <span class="mr-4">
                       <%- getFileIcon(
@@ -154,7 +154,7 @@ function getFileIcon(category) {
                     </a>
                   </td>
                   <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
-                    <% 
+                    <%
                       const sizes = ['Bytes', 'KB', 'MB', 'GB'];
                       let size = file.size;
                       let unitIndex = 0;
@@ -169,47 +169,47 @@ function getFileIcon(category) {
                     <button onclick="toggleDropdown(event, '<%= file.name %>')" class="text-neutral-400 hover:text-white transition">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                      </svg>    
+                      </svg>
                     </button>
 
                     <div id="dropdown-<%= file.name %>" class="absolute right-0 mt-2 w-fit mr-20 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10 transform opacity-0 scale-95 transition-all duration-200 ease-out pointer-events-none">
-                      <div 
-                        class="p-2 bg-gray-900 dark:bg-white rounded-lg shadow-md" 
-                        role="menu" 
-                        aria-orientation="vertical" 
+                      <div
+                        class="p-2 bg-gray-900 dark:bg-white rounded-lg shadow-md"
+                        role="menu"
+                        aria-orientation="vertical"
                         aria-labelledby="options-menu"
                       >
-                        <button 
-                          class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-neutral-800 dark:text-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-200 text-left" 
-                          role="menuitem" 
+                        <button
+                          class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-neutral-800 dark:text-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-200 text-left"
+                          role="menuitem"
                           onclick="rename('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')"
                         >
                           Rename
                         </button>
-                        
+
                         <% if (file.type !== 'directory') { %>
-                          <button 
-                            class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-neutral-800 dark:text-neutral-900 hover:bg-red-50 dark:hover:bg-neutral-200 text-left" 
-                            role="menuitem" 
+                          <button
+                            class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-neutral-800 dark:text-neutral-900 hover:bg-red-50 dark:hover:bg-neutral-200 text-left"
+                            role="menuitem"
                             onclick="downloadfile('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')"
                           >
                             Download
                           </button>
                         <% } %>
-                        
+
                         <% if (file.name.toLowerCase().endsWith('.zip')) { %>
-                        <button 
-                            class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-neutral-800 dark:text-neutral-900 hover:bg-green-50 dark:hover:bg-neutral-200 text-left" 
-                            role="menuitem" 
+                        <button
+                            class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-neutral-800 dark:text-neutral-900 hover:bg-green-50 dark:hover:bg-neutral-200 text-left"
+                            role="menuitem"
                             onclick="extractZip('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')"
                         >
                             Extract Here
                         </button>
                         <% } %>
-                        
-                        <button 
-                          class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-red-500 dark:text-red-600 hover:bg-red-50 dark:hover:bg-red-50 text-left" 
-                          role="menuitem" 
+
+                        <button
+                          class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-red-500 dark:text-red-600 hover:bg-red-50 dark:hover:bg-red-50 text-left"
+                          role="menuitem"
                           onclick="deletefile('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')"
                         >
                           Delete
@@ -232,10 +232,10 @@ function getFileIcon(category) {
    <div id="floatingActionBar" class="fixed bottom-0 w-full bg-neutral-800 z-50 backdrop-blur text-white py-4 px-6 transform transition-transform duration-300 ease-in-out flex justify-between items-center">
     <span id="selectedFilesCount">0 files selected</span>
     <div class="flex gap-4">
-        <button id="massDeleteBtn" class="bg-red-500 hover:bg-red-600 text-white font-normal py-2 px-4 rounded-xl transition">
+        <button id="massDeleteBtn" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
             Delete Selected
         </button>
-        <button id="massArchiveBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-normal py-2 px-4 rounded-xl transition">
+        <button id="massArchiveBtn" class="w-full md:w-auto rounded-xl bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
             Archive Selected
         </button>
     </div>
@@ -243,11 +243,11 @@ function getFileIcon(category) {
  <!-- Mass Delete Confirmation Modal -->
  <div id="massDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
     <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
-       <h2 class="text-2xl font-medium mb-4 text-neutral-800">Confirm Mass Deletion</h2>
+       <h2 class="text-2xl font-medium mb-1 text-neutral-800">Confirm Mass Deletion</h2>
        <p id="massDeleteMessage" class="mb-6 text-neutral-600"></p>
        <div class="flex justify-end space-x-4">
           <button onclick="closeMassDeleteModal()" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
-          <button id="confirmMassDelete" class="px-5 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition">Delete</button>
+          <button id="confirmMassDelete" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Delete</button>
        </div>
     </div>
  </div>
@@ -256,14 +256,14 @@ function getFileIcon(category) {
     <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
         <h2 class="text-2xl font-medium mb-1 text-neutral-800">Create File</h2>
         <p class="mb-6 text-neutral-600">Please choose a name for this file.</p>
-        <input type="text" 
-        id="FileName" 
-        class="w-full px-3 py-2 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition mb-4" 
+        <input type="text"
+        id="FileName"
+        class="w-full px-3 py-2 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition mb-4 text-neutral-800"
         placeholder="Enter file name"
         onkeydown="handleFileNameKeyPress(event)">
         <div class="flex justify-end space-x-4">
           <button onclick="closeCreateFileModal()" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
-          <button onclick="confirmCreateFile()" class="px-5 py-2 bg-neutral-800 text-white rounded-xl hover:bg-neutral-700 transition">Create</button>
+          <button onclick="confirmCreateFile()" class="w-full md:w-auto rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Create</button>
         </div>
     </div>
   </div>
@@ -272,6 +272,22 @@ function getFileIcon(category) {
 </main>
 
 <%- include('../../components/toast')%>
+<%- include('../../components/loadingPopup')%>
+
+<!-- Rename Modal -->
+<div id="renameModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+  <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
+    <h2 class="text-2xl font-medium mb-1 text-neutral-800">Rename File</h2>
+    <p class="mb-6 text-neutral-600">Please enter a new name for this file.</p>
+    <input type="text" id="newFileName" class="w-full px-3 py-2 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition mb-4 text-neutral-800" placeholder="Enter new name">
+    <input type="hidden" id="currentFileName">
+    <input type="hidden" id="currentFilePath">
+    <div class="flex justify-end space-x-4">
+      <button onclick="closeRenameModal()" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
+      <button onclick="confirmRename()" class="w-full md:w-auto rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Rename</button>
+    </div>
+  </div>
+</div>
 
 <script>
   function handleFileNameKeyPress(event) {
@@ -285,7 +301,7 @@ function getFileIcon(category) {
     document.addEventListener('contextmenu', (event) => {
       event.preventDefault();
       const target = event.target.closest('tr');
-      
+
       if (target) {
         const fileName = target.querySelector('button').getAttribute('onclick').match(/'(.+?)'/)[1];
         showDropdown(event, fileName);
@@ -299,7 +315,7 @@ function getFileIcon(category) {
 
   function showDropdown(event, fileName) {
     const dropdown = document.getElementById(`dropdown-${fileName}`);
-    
+
     const { clientX: mouseX, clientY: mouseY } = event;
     const dropdownRect = dropdown.getBoundingClientRect();
     const bodyWidth = document.body.clientWidth;
@@ -321,8 +337,60 @@ function getFileIcon(category) {
   }
 
   function deletefile(fileName, filePath) {
-    fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(filePath), { method: 'DELETE' }).then(() => {
-      location.reload();
+    // Create confirmation modal
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300';
+    modal.id = 'deleteFileModal';
+
+    modal.innerHTML = `
+      <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
+        <h2 class="text-2xl font-medium mb-1 text-neutral-800">Confirm Deletion</h2>
+        <p class="mb-6 text-neutral-600">Are you sure you want to delete <strong>${fileName}</strong>? This action cannot be undone.</p>
+        <div class="flex justify-end space-x-4">
+          <button id="cancelDeleteBtn" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
+          <button id="confirmDeleteBtn" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Delete</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    setTimeout(() => {
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('scale-95');
+      modal.querySelector('div').classList.add('scale-100');
+    }, 10);
+
+    document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('scale-100');
+      modal.querySelector('div').classList.add('scale-95');
+      setTimeout(() => document.body.removeChild(modal), 300);
+    });
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('scale-100');
+      modal.querySelector('div').classList.add('scale-95');
+      setTimeout(() => document.body.removeChild(modal), 300);
+
+      const loader = showLoadingPopup('Deleting File', 'Removing file from server...');
+
+      fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(filePath), { method: 'DELETE' })
+      .then(response => {
+        loader.close();
+        if (response.ok) {
+          showToast(`File ${fileName} deleted successfully`, 'success');
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          showToast('Failed to delete file', 'error');
+        }
+      })
+      .catch(error => {
+        loader.close();
+        console.error('Error:', error);
+        showToast('An error occurred while deleting the file', 'error');
+      });
     });
   }
 
@@ -378,11 +446,45 @@ function getFileIcon(category) {
 
 document.getElementById('massArchiveBtn').addEventListener('click', () => {
     if (selectedFiles.length > 0) {
-        const confirmArchive = confirm(`Are you sure you want to archive ${selectedFiles.length} selected file${selectedFiles.length !== 1 ? 's' : ''}?`);
-        
-        if (confirmArchive) {
-            archiveFiles(selectedFiles);
-        }
+        // Create archive confirmation modal
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300';
+        modal.id = 'archiveConfirmModal';
+
+        modal.innerHTML = `
+          <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
+            <h2 class="text-2xl font-medium mb-1 text-neutral-800">Confirm Archive</h2>
+            <p class="mb-6 text-neutral-600">Are you sure you want to archive ${selectedFiles.length} selected file${selectedFiles.length !== 1 ? 's' : ''}?</p>
+            <div class="flex justify-end space-x-4">
+              <button id="cancelArchiveBtn" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
+              <button id="confirmArchiveBtn" class="w-full md:w-auto rounded-xl bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Archive</button>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        setTimeout(() => {
+          modal.classList.remove('opacity-0', 'pointer-events-none');
+          modal.querySelector('div').classList.remove('scale-95');
+          modal.querySelector('div').classList.add('scale-100');
+        }, 10);
+
+        document.getElementById('cancelArchiveBtn').addEventListener('click', () => {
+          modal.classList.add('opacity-0', 'pointer-events-none');
+          modal.querySelector('div').classList.remove('scale-100');
+          modal.querySelector('div').classList.add('scale-95');
+          setTimeout(() => document.body.removeChild(modal), 300);
+        });
+
+        document.getElementById('confirmArchiveBtn').addEventListener('click', () => {
+          modal.classList.add('opacity-0', 'pointer-events-none');
+          modal.querySelector('div').classList.remove('scale-100');
+          modal.querySelector('div').classList.add('scale-95');
+          setTimeout(() => document.body.removeChild(modal), 300);
+
+          archiveFiles(selectedFiles);
+        });
     }
 });
 
@@ -409,25 +511,38 @@ document.querySelectorAll('.file-checkbox').forEach(checkbox => {
 });
 
 function archiveFiles(files) {
+    const loader = showLoadingPopup('Creating Archive', 'Preparing files for archiving...');
+    loader.updateProgress(20, 'Compressing files...');
+
     fetch('/server/<%= server.UUID %>/zip', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           relativePath: files,
           zipname: 'archive'
          })
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {
-            showToast('Files archived successfully!', 'success');
-            selectedFiles = [];
-            updateSelectedFiles();
-        } else {
-            showToast('Failed to archive files', 'error');
-        }
+        loader.updateProgress(100, 'Archive created!');
+        setTimeout(() => {
+            loader.close();
+            if (data.success) {
+                showToast('Files archived successfully!', 'success');
+                selectedFiles = [];
+                updateSelectedFiles();
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast('Failed to archive files', 'error');
+            }
+        }, 500);
+    })
+    .catch(error => {
+        loader.close();
+        console.error('Error:', error);
+        showToast('An error occurred while creating the archive', 'error');
     });
 }
 
@@ -446,15 +561,24 @@ function closeMassDeleteModal() {
 
 confirmMassDeleteBtn.addEventListener('click', async function() {
   closeMassDeleteModal();
-  
-  const deletePromises = selectedFiles.map(fileName => 
+
+  const loader = showLoadingPopup('Deleting Files', `Removing ${selectedFiles.length} files...`);
+  loader.updateProgress(10, 'Processing deletion requests...');
+
+  const deletePromises = selectedFiles.map(fileName =>
     fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(fileName), { method: 'DELETE' })
   );
 
   try {
     await Promise.all(deletePromises);
-    window.location.reload();
+    loader.updateProgress(100, 'Files deleted successfully!');
+    setTimeout(() => {
+      loader.close();
+      showToast(`${selectedFiles.length} files deleted successfully`, 'success');
+      setTimeout(() => window.location.reload(), 1000);
+    }, 500);
   } catch (error) {
+    loader.close();
     console.error('Error deleting files:', error);
     showToast('Failed to delete files', 'error');
   }
@@ -472,7 +596,7 @@ updateSelectedFiles();
 function openCreateFileModal() {
     const modal = document.getElementById('createFileModal');
     const input = document.getElementById('FileName');
-    
+
     modal.classList.remove('opacity-0', 'pointer-events-none');
     modal.querySelector('div').classList.remove('scale-95');
     modal.querySelector('div').classList.add('scale-100');
@@ -490,28 +614,78 @@ function openCreateFileModal() {
   async function confirmCreateFile() {
     const FileName = document.getElementById('FileName').value.trim();
     if (FileName) {
-      const encodedFileName = encodeURIComponent(FileName);
-      const createFile = await fetch(`/server/<%= server.UUID %>/files/<%= currentPath %>/${encodedFileName}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content: '' }),
-      });
+      closeCreateFileModal();
+      const loader = showLoadingPopup('Creating File', 'Creating new file...');
 
-      if (createFile.ok) {
-        location.reload();
+      try {
+        const encodedFileName = encodeURIComponent(FileName);
+        const createFile = await fetch(`/server/<%= server.UUID %>/files/<%= currentPath %>/${encodedFileName}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ content: '' }),
+        });
+
+        if (createFile.ok) {
+          loader.updateProgress(100, 'File created successfully!');
+          setTimeout(() => {
+            loader.close();
+            showToast(`File ${FileName} created successfully`, 'success');
+            setTimeout(() => location.reload(), 1000);
+          }, 500);
+        } else {
+          loader.close();
+          showToast('Failed to create file', 'error');
+        }
+      } catch (error) {
+        loader.close();
+        console.error('Error creating file:', error);
+        showToast('An error occurred while creating the file', 'error');
       }
-
     } else {
       closeCreateFileModal();
     }
   }
 
-  function rename(fileName, filePath) {
-    const newName = prompt('Enter the newName :', fileName);
-    
+  function openRenameModal(fileName, filePath) {
+    const modal = document.getElementById('renameModal');
+    const input = document.getElementById('newFileName');
+    document.getElementById('currentFileName').value = fileName;
+    document.getElementById('currentFilePath').value = filePath;
+
+    input.value = fileName;
+
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.querySelector('div').classList.remove('scale-95');
+    modal.querySelector('div').classList.add('scale-100');
+
+    // Select the filename part without the extension
+    const lastDotIndex = fileName.lastIndexOf('.');
+    if (lastDotIndex > 0) {
+      input.setSelectionRange(0, lastDotIndex);
+    } else {
+      input.select();
+    }
+    input.focus();
+  }
+
+  function closeRenameModal() {
+    const modal = document.getElementById('renameModal');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    modal.querySelector('div').classList.remove('scale-100');
+    modal.querySelector('div').classList.add('scale-95');
+  }
+
+  function confirmRename() {
+    const newName = document.getElementById('newFileName').value.trim();
+    const fileName = document.getElementById('currentFileName').value;
+    const filePath = document.getElementById('currentFilePath').value;
+
     if (newName && newName !== fileName) {
+      closeRenameModal();
+      const loader = showLoadingPopup('Renaming File', 'Processing rename request...');
+
       fetch(`/server/<%= server.UUID %>/rename`, {
         method: 'POST',
         headers: {
@@ -523,23 +697,43 @@ function openCreateFileModal() {
         })
       })
       .then(response => {
+        loader.close();
         if (response.ok) {
-          location.reload();
+          showToast(`File renamed to ${newName} successfully`, 'success');
+          setTimeout(() => location.reload(), 1000);
         } else {
           showToast('Failed to rename file', 'error');
         }
       })
       .catch(error => {
+        loader.close();
         console.error('Renaming failed:', error);
         showToast('Failed to rename file', 'error');
       });
+    } else {
+      closeRenameModal();
     }
+  }
+
+  // Add event listener for Enter key in rename modal
+  document.getElementById('newFileName').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      confirmRename();
+    }
+  });
+
+  function rename(fileName, filePath) {
+    openRenameModal(fileName, filePath);
   }
 
   async function extractZip(fileName, filePath) {
     try {
+        const loader = showLoadingPopup('Extracting Archive', 'Preparing to extract files...');
+        loader.updateProgress(20, 'Extracting files...');
+
         const parentPath = filePath.substring(0, filePath.lastIndexOf('/'));
-        
+
         const response = await fetch(`/server/<%= server.UUID %>/unzip`, {
             method: 'POST',
             headers: {
@@ -552,9 +746,14 @@ function openCreateFileModal() {
         });
 
         if (response.ok) {
-            showToast('File extracted successfully', 'success');
-            location.reload();
+            loader.updateProgress(100, 'Files extracted successfully!');
+            setTimeout(() => {
+                loader.close();
+                showToast('File extracted successfully', 'success');
+                setTimeout(() => location.reload(), 1000);
+            }, 500);
         } else {
+            loader.close();
             const error = await response.json();
             showToast(error.error || 'Failed to extract file', 'error');
         }

@@ -112,7 +112,7 @@
               <h3 class="text-sm font-medium text-neutral-300">Restart Server</h3>
               <p class="text-sm text-neutral-400">Force a restart of your server</p>
             </div>
-            <button id="restartButton" type="button" class="rounded-xl bg-red-600 px-4 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Restart</button>
+            <button id="restartButton" type="button" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Restart</button>
           </div>
 
           <div class="flex items-center justify-between">
@@ -120,13 +120,16 @@
               <h3 class="text-sm font-medium text-neutral-300">Reinstall Server</h3>
               <p class="text-sm text-neutral-400">Reinstall your server from scratch (all data will be lost)</p>
             </div>
-            <button id="reinstallButton" type="button" class="rounded-xl bg-red-600 px-4 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Reinstall</button>
+            <button id="reinstallButton" type="button" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Reinstall</button>
           </div>
         </div>
       </div>
     </section>
   </div>
 </main>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/loadingPopup') %>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -143,6 +146,8 @@
         description: formData.get('description')
       };
 
+      const loader = showLoadingPopup('Updating Server Settings', 'Saving your changes...');
+
       fetch(`/server/<%= server.UUID %>/settings`, {
         method: 'POST',
         headers: {
@@ -152,59 +157,187 @@
       })
       .then(response => response.json())
       .then(data => {
+        loader.close();
         if (data.success) {
-          alert('Server settings updated successfully!');
-          window.location.reload();
+          showToast('Server settings updated successfully!', 'success');
+          setTimeout(() => window.location.reload(), 1500);
         } else {
-          alert('Failed to update server settings: ' + (data.error || 'Unknown error'));
+          showToast('Failed to update server settings: ' + (data.error || 'Unknown error'), 'error');
         }
       })
       .catch(error => {
+        loader.close();
         console.error('Error:', error);
-        alert('An error occurred while updating the server settings.');
+        showToast('An error occurred while updating the server settings.', 'error');
       });
     });
 
-    restartButton.addEventListener('click', function() {
-      if (confirm('Are you sure you want to restart the server? This will disconnect all users.')) {
+    // Restart confirmation modal
+    const createRestartModal = () => {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300';
+      modal.id = 'restartModal';
+
+      modal.innerHTML = `
+        <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
+          <h2 class="text-2xl font-medium mb-1 text-neutral-800">Confirm Restart</h2>
+          <p class="mb-6 text-neutral-600">Are you sure you want to restart the server? This will disconnect all users.</p>
+          <div class="flex justify-end space-x-4">
+            <button id="cancelRestartBtn" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
+            <button id="confirmRestartBtn" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Restart</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      setTimeout(() => {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.querySelector('div').classList.remove('scale-95');
+        modal.querySelector('div').classList.add('scale-100');
+      }, 10);
+
+      document.getElementById('cancelRestartBtn').addEventListener('click', () => {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.querySelector('div').classList.remove('scale-100');
+        modal.querySelector('div').classList.add('scale-95');
+        setTimeout(() => document.body.removeChild(modal), 300);
+      });
+
+      document.getElementById('confirmRestartBtn').addEventListener('click', () => {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.querySelector('div').classList.remove('scale-100');
+        modal.querySelector('div').classList.add('scale-95');
+        setTimeout(() => document.body.removeChild(modal), 300);
+
+        const loader = showLoadingPopup('Restarting Server', 'Initiating server restart...');
+
         fetch(`/server/<%= server.UUID %>/power/restart`, {
           method: 'POST',
         })
         .then(response => response.json())
         .then(data => {
+          loader.close();
           if (data.success || data.message) {
-            alert('Server restart initiated.');
+            showToast('Server restart initiated.', 'success');
           } else {
-            alert('Failed to restart server: ' + (data.error || 'Unknown error'));
+            showToast('Failed to restart server: ' + (data.error || 'Unknown error'), 'error');
           }
         })
         .catch(error => {
+          loader.close();
           console.error('Error:', error);
-          alert('An error occurred while restarting the server.');
+          showToast('An error occurred while restarting the server.', 'error');
         });
-      }
-    });
+      });
+    };
 
-    reinstallButton.addEventListener('click', function() {
-      if (confirm('WARNING: Are you sure you want to reinstall the server? This will DELETE ALL DATA and reinstall the server from scratch. This action cannot be undone.')) {
-        if (confirm('FINAL WARNING: All server data will be permanently deleted. Continue with reinstallation?')) {
+    restartButton.addEventListener('click', createRestartModal);
+
+    // Reinstall confirmation modal
+    const createReinstallModal = () => {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300';
+      modal.id = 'reinstallModal';
+
+      modal.innerHTML = `
+        <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
+          <h2 class="text-2xl font-medium mb-1 text-neutral-800">Confirm Reinstallation</h2>
+          <p class="mb-2 text-neutral-600">WARNING: Are you sure you want to reinstall the server?</p>
+          <p class="mb-6 text-red-500 font-medium">This will DELETE ALL DATA and reinstall the server from scratch. This action cannot be undone.</p>
+          <div class="flex justify-end space-x-4">
+            <button id="cancelReinstallBtn" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
+            <button id="confirmReinstallBtn" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Reinstall</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      setTimeout(() => {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.querySelector('div').classList.remove('scale-95');
+        modal.querySelector('div').classList.add('scale-100');
+      }, 10);
+
+      document.getElementById('cancelReinstallBtn').addEventListener('click', () => {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.querySelector('div').classList.remove('scale-100');
+        modal.querySelector('div').classList.add('scale-95');
+        setTimeout(() => document.body.removeChild(modal), 300);
+      });
+
+      document.getElementById('confirmReinstallBtn').addEventListener('click', () => {
+        // Create final warning modal
+        const finalWarningModal = document.createElement('div');
+        finalWarningModal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300';
+        finalWarningModal.id = 'finalWarningModal';
+
+        finalWarningModal.innerHTML = `
+          <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
+            <h2 class="text-2xl font-medium mb-1 text-neutral-800">FINAL WARNING</h2>
+            <p class="mb-6 text-red-500 font-medium">All server data will be permanently deleted. Continue with reinstallation?</p>
+            <div class="flex justify-end space-x-4">
+              <button id="cancelFinalWarningBtn" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
+              <button id="confirmFinalWarningBtn" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Proceed</button>
+            </div>
+          </div>
+        `;
+
+        // Close first modal
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.querySelector('div').classList.remove('scale-100');
+        modal.querySelector('div').classList.add('scale-95');
+        setTimeout(() => document.body.removeChild(modal), 300);
+
+        // Show final warning modal
+        document.body.appendChild(finalWarningModal);
+        setTimeout(() => {
+          finalWarningModal.classList.remove('opacity-0', 'pointer-events-none');
+          finalWarningModal.querySelector('div').classList.remove('scale-95');
+          finalWarningModal.querySelector('div').classList.add('scale-100');
+        }, 10);
+
+        document.getElementById('cancelFinalWarningBtn').addEventListener('click', () => {
+          finalWarningModal.classList.add('opacity-0', 'pointer-events-none');
+          finalWarningModal.querySelector('div').classList.remove('scale-100');
+          finalWarningModal.querySelector('div').classList.add('scale-95');
+          setTimeout(() => document.body.removeChild(finalWarningModal), 300);
+        });
+
+        document.getElementById('confirmFinalWarningBtn').addEventListener('click', () => {
+          finalWarningModal.classList.add('opacity-0', 'pointer-events-none');
+          finalWarningModal.querySelector('div').classList.remove('scale-100');
+          finalWarningModal.querySelector('div').classList.add('scale-95');
+          setTimeout(() => document.body.removeChild(finalWarningModal), 300);
+
+          const loader = showLoadingPopup('Reinstalling Server', 'Initiating server reinstallation...');
+          loader.updateProgress(10, 'Preparing for reinstallation...');
+
           fetch(`/server/<%= server.UUID %>/reinstall`, {
             method: 'POST',
           })
           .then(response => response.json())
           .then(data => {
-            if (data.success) {
-              alert('Server reinstallation initiated. This may take a few minutes to complete.');
-            } else {
-              alert('Failed to reinstall server: ' + (data.error || 'Unknown error'));
-            }
+            loader.updateProgress(100, 'Reinstallation initiated!');
+            setTimeout(() => {
+              loader.close();
+              if (data.success) {
+                showToast('Server reinstallation initiated. This may take a few minutes to complete.', 'success');
+              } else {
+                showToast('Failed to reinstall server: ' + (data.error || 'Unknown error'), 'error');
+              }
+            }, 1000);
           })
           .catch(error => {
+            loader.close();
             console.error('Error:', error);
-            alert('An error occurred while reinstalling the server.');
+            showToast('An error occurred while reinstalling the server.', 'error');
           });
-        }
-      }
-    });
+        });
+      });
+    };
+
+    reinstallButton.addEventListener('click', createReinstallModal);
   });
 </script>
