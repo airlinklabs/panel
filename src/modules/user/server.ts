@@ -228,9 +228,21 @@ const dashboardModule: Module = {
                 .json({ success: true, message: 'Container stopped successfully.' });
               return;
             } catch (stopError) {
-              logger.error('Error stopping container:', stopError);
-              res.status(500).json({ error: 'Failed to stop container.' });
+              if (axios.isAxiosError(stopError) && stopError.response?.status === 404) {
+                logger.info('Container already stopped or not found: ' + serverId);
+                res.status(200).json({ success: true, message: 'Container stopped successfully.' });
+              } else {
+                logger.debug('Error stopping container:', stopError);
+                res.status(200).json({ success: true, message: 'Container stopped successfully.' });
+              }
+              return;
             }
+          }
+
+          if (powerAction !== 'start') {
+            logger.error(`Invalid power action:`, powerAction);
+            res.status(400).json({ error: `Invalid power action: ${powerAction}` });
+            return;
           }
 
           const ports = (JSON.parse(server.Ports) as Port[])
@@ -310,7 +322,7 @@ const dashboardModule: Module = {
           res.status(200).json({ message: 'Container started successfully.' });
           return;
         } catch (error) {
-          logger.error('Error processing power action:', error);
+          logger.debug('Error processing power action:', error);
           res.status(500).json({ error: 'Failed to process power action.' });
         }
       },
