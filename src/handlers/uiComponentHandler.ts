@@ -9,6 +9,7 @@ export interface SidebarItem {
   section?: string;
   permissions?: string[];
   isActive?: (path: string) => boolean;
+  isAdminItem?: boolean;
 }
 
 export interface ServerMenuItem {
@@ -61,11 +62,19 @@ class UIComponentStore {
     logger.debug(`Removed sidebar item: ${id}`);
   }
 
-  public getSidebarItems(section?: string): SidebarItem[] {
+  public getSidebarItems(section?: string, isAdmin?: boolean): SidebarItem[] {
     let items = this.sidebarItems;
 
     if (section) {
       items = items.filter(item => item.section === section);
+    }
+
+    if (isAdmin !== undefined) {
+      if (isAdmin) {
+        items = items.filter(item => item.isAdminItem === true);
+      } else {
+        items = items.filter(item => item.isAdminItem !== true);
+      }
     }
 
     return [...items].sort((a, b) => b.priority - a.priority);

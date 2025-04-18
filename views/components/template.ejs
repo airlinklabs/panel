@@ -30,7 +30,7 @@
                   <ul role="list" class="-mx-2 space-y-1 relative">
                     <div id="active-background" class="ml-1.5 absolute left-2 w-[calc(97%-1.5rem)] h-9 transition-none duration-0 z-[-1] bg-neutral-200 border border-neutral-300 dark:bg-white/5 dark:border-neutral-300/5 rounded-xl opacity-0"></div>
                     <%
-                    const sidebarItems = global.uiComponentStore ? global.uiComponentStore.getSidebarItems() : [];
+                    const sidebarItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
                     if (!sidebarItems || sidebarItems.length === 0) {
                     %>
                       <li class="nav-item">
@@ -129,6 +129,16 @@
                            <span>API Keys</span>
                         </a>
                      </li>
+                     <% if (adminMenuItems && adminMenuItems.length > 0) {
+                       adminMenuItems.forEach(item => {
+                     %>
+                     <li>
+                        <a href="<%= item.url %>" class=" transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
+                           <%- item.icon %>
+                           <span><%= item.label %></span>
+                        </a>
+                     </li>
+                     <% }); } %>
                       <% } %>
                   </ul>
               </li>

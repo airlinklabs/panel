@@ -136,6 +136,8 @@ app.use((req, res, next) => {
   res.locals.airlinkVersion = airlinkVersion;
   // Make UI component store available globally
   global.uiComponentStore = uiComponentStore;
+  res.locals.adminMenuItems = uiComponentStore.getSidebarItems(undefined, true);
+  res.locals.regularMenuItems = uiComponentStore.getSidebarItems(undefined, false);
   next();
 });
 

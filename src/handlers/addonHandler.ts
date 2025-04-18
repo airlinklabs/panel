@@ -47,7 +47,7 @@ export interface AddonAPI {
   ui: {
     addSidebarItem: (item: SidebarItem) => void;
     removeSidebarItem: (id: string) => void;
-    getSidebarItems: (section?: string) => SidebarItem[];
+    getSidebarItems: (section?: string, isAdmin?: boolean) => SidebarItem[];
 
     addServerMenuItem: (item: ServerMenuItem) => void;
     removeServerMenuItem: (id: string) => void;
@@ -203,7 +203,7 @@ export async function loadAddons(app: Express) {
           ui: {
             addSidebarItem: (item: SidebarItem) => uiComponentStore.addSidebarItem(item),
             removeSidebarItem: (id: string) => uiComponentStore.removeSidebarItem(id),
-            getSidebarItems: (section?: string) => uiComponentStore.getSidebarItems(section),
+            getSidebarItems: (section?: string, isAdmin?: boolean) => uiComponentStore.getSidebarItems(section, isAdmin),
             addServerMenuItem: (item: ServerMenuItem) => uiComponentStore.addServerMenuItem(item),
             removeServerMenuItem: (id: string) => uiComponentStore.removeServerMenuItem(id),
             getServerMenuItems: (feature?: string) => uiComponentStore.getServerMenuItems(feature),
