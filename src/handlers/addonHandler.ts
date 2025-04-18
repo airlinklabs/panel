@@ -7,6 +7,11 @@ import logger from './logger';
 
 const prisma = new PrismaClient();
 
+interface MigrationTemplate {
+  name: string;
+  sql: string;
+}
+
 interface AddonPackageJson {
   name: string;
   version: string;
@@ -15,6 +20,7 @@ interface AddonPackageJson {
   main?: string;
   router?: string;
   enabled?: boolean;
+  migrations?: MigrationTemplate[];
 }
 
 export interface AddonAPI {
@@ -123,6 +129,16 @@ export async function loadAddons(app: Express) {
             });
 
             if (!addonRecord) {
+              // This is a new addon, apply migrations if it's enabled
+              if (packageJson.enabled !== false) {
+                const migrationResult = await applyAddonMigrations(folder, packageJson);
+                if (!migrationResult.success) {
+                  logger.error(`Failed to apply migrations for new addon ${packageJson.name}:`, migrationResult.message);
+                  // Continue with installation but disable the addon
+                  addonEnabled = false;
+                }
+              }
+
               addonRecord = await prisma.addon.create({
                 data: {
                   name: packageJson.name,
@@ -130,7 +146,7 @@ export async function loadAddons(app: Express) {
                   description: packageJson.description || '',
                   version: packageJson.version,
                   author: packageJson.author || '',
-                  enabled: packageJson.enabled !== false,
+                  enabled: addonEnabled,
                   mainFile: packageJson.main || 'index.ts'
                 }
               });
@@ -345,6 +361,67 @@ export async function loadAddons(app: Express) {
   }
 }
 
+/**
+ * Apply migrations defined in an addon's package.json
+ * @param slug The addon slug
+ * @param packageJson The addon's package.json content
+ */
+async function applyAddonMigrations(slug: string, packageJson: AddonPackageJson) {
+  if (!packageJson.migrations || packageJson.migrations.length === 0) {
+    return { success: true, message: 'No migrations to apply' };
+  }
+
+  logger.info(`Applying ${packageJson.migrations.length} migrations for addon ${packageJson.name}`);
+
+  try {
+    // Create a migrations table for addons if it doesn't exist
+    await prisma.$executeRaw`
+      CREATE TABLE IF NOT EXISTS AddonMigration (
+        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+        addonSlug TEXT NOT NULL,
+        migrationName TEXT NOT NULL,
+        appliedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(addonSlug, migrationName)
+      )
+    `;
+
+    // Get already applied migrations for this addon
+    const appliedMigrations = await prisma.$queryRaw<{ migrationName: string }[]>`
+      SELECT migrationName FROM AddonMigration WHERE addonSlug = ${slug}
+    `;
+    const appliedMigrationNames = appliedMigrations.map(m => m.migrationName);
+
+    // Apply each migration that hasn't been applied yet
+    for (const migration of packageJson.migrations) {
+      if (appliedMigrationNames.includes(migration.name)) {
+        logger.info(`Migration ${migration.name} already applied, skipping`);
+        continue;
+      }
+
+      try {
+        // Execute the migration SQL
+        await prisma.$executeRawUnsafe(migration.sql);
+
+        // Record the migration as applied
+        await prisma.$executeRaw`
+          INSERT INTO AddonMigration (addonSlug, migrationName)
+          VALUES (${slug}, ${migration.name})
+        `;
+
+        logger.info(`Successfully applied migration ${migration.name} for addon ${packageJson.name}`);
+      } catch (error: any) {
+        logger.error(`Failed to apply migration ${migration.name}:`, error.message);
+        return { success: false, message: `Failed to apply migration ${migration.name}: ${error.message}` };
+      }
+    }
+
+    return { success: true, message: `Successfully applied ${packageJson.migrations.length} migrations` };
+  } catch (error: any) {
+    logger.error(`Failed to apply migrations for addon ${packageJson.name}:`, error.message);
+    return { success: false, message: `Failed to apply migrations: ${error.message}` };
+  }
+}
+
 export async function toggleAddonStatus(slug: string, enabled: boolean) {
   try {
     try {
@@ -360,6 +437,29 @@ export async function toggleAddonStatus(slug: string, enabled: boolean) {
 
     if (!addon) {
       throw new Error(`Addon ${slug} not found`);
+    }
+
+    // If enabling the addon, apply migrations
+    if (enabled && !addon.enabled) {
+      const addonsDir = path.join(__dirname, '../../storage/addons');
+      const addonPath = path.join(addonsDir, slug);
+      const packageJsonPath = path.join(addonPath, 'package.json');
+
+      if (fs.existsSync(packageJsonPath)) {
+        try {
+          const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf-8');
+          const packageJson: AddonPackageJson = JSON.parse(packageJsonContent);
+
+          const migrationResult = await applyAddonMigrations(slug, packageJson);
+          if (!migrationResult.success) {
+            logger.error(`Failed to enable addon ${packageJson.name} due to migration errors:`, migrationResult.message);
+            return false;
+          }
+        } catch (error: any) {
+          logger.error(`Failed to read package.json for addon ${slug}:`, error.message);
+          // Continue with enabling the addon even if we can't read the package.json
+        }
+      }
     }
 
     await prisma.addon.update({

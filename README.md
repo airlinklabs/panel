@@ -7,13 +7,13 @@
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
-  
+
 [![License](https://img.shields.io/github/license/AirlinkLabs/panel)](https://github.com/AirlinkLabs/panel/blob/main/LICENSE)
 [![Discord](https://img.shields.io/discord/1302020587316707420)](https://discord.gg/D8YbT9rDqz)
 
 ## 📖 Overview
 
-Airlink Panel is an advanced, open-source game server management platform designed to simplify server deployment, monitoring, and administration.
+Airlink Panel is an advanced, open-source game server management platform designed to simplify server deployment, monitoring, and administration. With its powerful addon system, you can extend the functionality of the panel to suit your specific needs.
 
 ## 🛠 Prerequisites
 
@@ -90,6 +90,25 @@ Airlink Panel is an advanced, open-source game server management platform design
 - Write unit tests for new features
 - Maintain clean, readable code
 - Update documentation
+
+## 🧩 Addon System
+
+AirLink Panel features a powerful addon system that allows you to extend its functionality. Addons can add new features, modify existing ones, and integrate with external services.
+
+### Creating Addons
+
+To create an addon, follow these steps:
+
+1. Create a new directory in the `panel/storage/addons/` folder with your addon's slug
+2. Create a `package.json` file with your addon's metadata
+3. Create an entry point file (default: `index.ts`)
+4. Implement your addon's functionality
+
+For more information, check out these resources:
+
+- [Quick Start Guide](docs/addon-quickstart.md)
+- [Complete Addon Documentation](docs/addons.md)
+- [Database Migrations Guide](docs/addon-migrations.md)
 
 ## 📄 License
 
