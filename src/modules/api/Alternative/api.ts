@@ -5,6 +5,7 @@ import logger from '../../../handlers/logger';
 import axios from 'axios';
 import QueueHandler from '../../../handlers/utils/core/queueer';
 import bcrypt from 'bcrypt';
+import { Buffer } from 'buffer';
 
 const queueer = new QueueHandler();
 
@@ -308,7 +309,7 @@ const coreModule: Module = {
             return;
           }
 
-          let updatedData: any = {};
+          const updatedData: any = {};
 
           if (username) updatedData.username = username;
           if (email) updatedData.email = email;

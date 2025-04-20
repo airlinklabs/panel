@@ -12,47 +12,47 @@ const prisma = new PrismaClient();
 
 export const isAuthenticated =
   (isAdminRequired = false, requiredPermission: string | null = null) =>
-  async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.session.user?.id;
+    async (req: Request, res: Response, next: NextFunction) => {
+      const userId = req.session.user?.id;
 
-    if (!userId) {
-      return res.redirect('/login');
-    }
-
-    const user = await prisma.users.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      return res.redirect('/login');
-    }
-
-    if (requiredPermission) {
-      let userPermissions: string[] = [];
-
-      try {
-        userPermissions = JSON.parse(user.permissions || '[]');
-      } catch (e) {
-        return res.redirect('/');
+      if (!userId) {
+        return res.redirect('/login');
       }
 
-      const hasPermission = userPermissions.some((perm: string) => {
-        if (perm === requiredPermission) return true;
-        if (perm.endsWith('.*')) {
-          const base = perm.slice(0, -2);
-          return requiredPermission.startsWith(`${base}.`);
-        }
-
-        return false;
+      const user = await prisma.users.findUnique({
+        where: { id: userId },
       });
 
-      if (hasPermission) {
-        return next();
+      if (!user) {
+        return res.redirect('/login');
       }
-    }
 
-    if (isAdminRequired && !user.isAdmin) {
-      return res.redirect('/');
-    }
-    next();
-  };
+      if (requiredPermission) {
+        let userPermissions: string[] = [];
+
+        try {
+          userPermissions = JSON.parse(user.permissions || '[]');
+        } catch (e) {
+          return res.redirect('/');
+        }
+
+        const hasPermission = userPermissions.some((perm: string) => {
+          if (perm === requiredPermission) return true;
+          if (perm.endsWith('.*')) {
+            const base = perm.slice(0, -2);
+            return requiredPermission.startsWith(`${base}.`);
+          }
+
+          return false;
+        });
+
+        if (hasPermission) {
+          return next();
+        }
+      }
+
+      if (isAdminRequired && !user.isAdmin) {
+        return res.redirect('/');
+      }
+      next();
+    };

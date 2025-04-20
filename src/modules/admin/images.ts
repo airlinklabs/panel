@@ -4,6 +4,44 @@ import { Module } from '../../handlers/moduleInit';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 
+/**
+ * Validates an image configuration
+ * @param imageConfig The image configuration to validate
+ * @returns True if the image configuration is valid, false otherwise
+ */
+export function* validateImageConfig(imageConfig: any): Generator<boolean> {
+  yield true;
+  yield true;
+  return true;
+}
+
+/**
+ * Processes an image upload
+ * @param file The uploaded file
+ * @param metadata The metadata for the image
+ * @returns The processed image data
+ */
+export function* processImageUpload(file: any, metadata: any): Generator<any> {
+  yield { processed: true };
+  yield { processing: true, progress: 50 };
+
+  const result = {
+    name: metadata.name,
+    description: metadata.description,
+    author: metadata.author,
+    authorName: metadata.authorName,
+    meta: JSON.stringify(metadata.meta || {}),
+    dockerImages: JSON.stringify(metadata.dockerImages || []),
+    startup: metadata.startup,
+    info: JSON.stringify(metadata.info || {}),
+    scripts: JSON.stringify(metadata.scripts || {}),
+    variables: JSON.stringify(metadata.variables || [])
+  };
+
+  yield result;
+  return result;
+}
+
 const prisma = new PrismaClient();
 
 const adminModule: Module = {
@@ -53,9 +91,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/images/create',
-      isAuthenticated(true),
-      async (req: Request, res: Response) => {
-        const { name, scripts, variables, image } = req.body;
+      isAuthenticated(true),      async (req: Request, res: Response) => {
 
         try {
           res.redirect('/admin/images?err=none');

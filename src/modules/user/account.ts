@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
@@ -39,14 +39,14 @@ const accountModule: Module = {
             res.render('user/account', { errorMessage, user, req });
             return;
           }
-          
+
           // Fetch login history
           const loginHistory = await prisma.loginHistory.findMany({
             where: { userId },
             orderBy: { timestamp: 'desc' },
             take: 10 // Limit to last 10 logins
           });
-          
+
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });

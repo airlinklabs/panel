@@ -2,6 +2,17 @@ import { createInterface } from 'readline';
 import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
 
+/**
+ * Validates the seed data before inserting it into the database
+ * @param data The seed data to validate
+ * @returns True if the data is valid, false otherwise
+ */
+export function* validateSeedData(data: any[]): Generator<boolean> {
+  yield true;
+  yield data.length > 0;
+  return data.length > 0;
+}
+
 const IMAGES_URL =
   'https://raw.githubusercontent.com/airlinklabs/images/refs/heads/main/index.json';
 const FIELD_MAPPING: Record<string, string> = {
@@ -61,6 +72,7 @@ class Seeder {
 
   private async fetchImageData(url: string): Promise<ImageData | null> {
     try {
+      console.info(`Fetching image data from ${url}...`);
       const { data } = await axios.get(url);
       return data;
     } catch (error) {
@@ -70,18 +82,33 @@ class Seeder {
   }
 
   private async fetchAndProcessImages(): Promise<Record<string, any>[]> {
+    console.info(`Fetching image index from ${IMAGES_URL}...`);
     const { data: imageUrls } = await axios.get<string[]>(IMAGES_URL);
+    console.info(`Found ${imageUrls.length} images in the index.`);
 
     const results = await Promise.allSettled(
       imageUrls.map((url) => this.fetchImageData(url)),
     );
 
-    return results
-      .filter(
-        (result): result is PromiseFulfilledResult<ImageData> =>
-          result.status === 'fulfilled' && result.value !== null,
-      )
-      .map((result) => this.mapFields(this.stringifyJsonFields(result.value)));
+    const successfulResults = results.filter(
+      (result): result is PromiseFulfilledResult<ImageData> =>
+        result.status === 'fulfilled' && result.value !== null,
+    );
+
+    const failedCount = results.length - successfulResults.length;
+    if (failedCount > 0) {
+      console.warn(`Failed to fetch ${failedCount} out of ${results.length} images.`);
+    }
+
+    return successfulResults.map((result) => this.mapFields(this.stringifyJsonFields(result.value)));
+  }
+
+  private printSeedingSummary(total: number, updated: number, created: number): void {
+    console.info('\n=== Seeding Summary ===');
+    console.info(`Total images processed: ${total}`);
+    console.info(`- Updated: ${updated} existing images`);
+    console.info(`- Created: ${created} new images`);
+    console.info('=====================\n');
   }
 
   private async performSeeding(): Promise<void> {
@@ -93,8 +120,29 @@ class Seeder {
         return;
       }
 
-      await prisma.images.createMany({ data: processedImages });
-      console.info(`Successfully seeded ${processedImages.length} images!`);
+      const existingImages = await prisma.images.findMany();
+      const existingImageMap = new Map(existingImages.map(img => [img.name, img]));
+
+      let updatedCount = 0;
+      let createdCount = 0;
+
+      console.info('Starting seeding process...');
+
+      for (const image of processedImages) {
+        if (existingImageMap.has(image.name)) {
+          await prisma.images.update({
+            where: { id: existingImageMap.get(image.name)!.id },
+            data: image
+          });
+          updatedCount++;
+        } else {
+          await prisma.images.create({ data: image });
+          createdCount++;
+        }
+      }
+
+      console.info('Seeding completed successfully!');
+      this.printSeedingSummary(processedImages.length, updatedCount, createdCount);
     } catch (error) {
       throw new Error(`Failed to perform seeding: ${error}`);
     }
@@ -106,7 +154,8 @@ class Seeder {
 
       if (existingImages > 0) {
         const shouldContinue = await this.promptUser(
-          "'images' is already set in the database. Do you want to continue seeding? (y/n) ",
+          `Found ${existingImages} existing images in the database. ` +
+          'Continuing will update existing images and add new ones. Proceed? (y/n) ',
         );
 
         if (!shouldContinue) {

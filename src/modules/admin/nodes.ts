@@ -5,6 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
 import logger from '../../handlers/logger';
 import axios from 'axios';
+import { Buffer } from 'buffer';
 
 const prisma = new PrismaClient();
 
@@ -19,7 +20,7 @@ function generateApiKey(length: number): string {
   return result;
 }
 
-interface NodeWithInstance {
+type NodeWithInstances = {
   id: number;
   name: string;
   ram: number;
@@ -29,7 +30,7 @@ interface NodeWithInstance {
   port: number;
   key: string;
   createdAt: Date;
-  instances: any;
+  instances: any[];
 }
 
 async function listNodes(res: Response) {
@@ -43,8 +44,11 @@ async function listNodes(res: Response) {
           nodeId: node.id,
         },
       });
-      (node as NodeWithInstance).instances = instances || [];
-      nodesWithStatus.push(await checkNodeStatus(node));
+      const nodeWithInstances: NodeWithInstances = {
+        ...node,
+        instances: instances || []
+      };
+      nodesWithStatus.push(await checkNodeStatus(nodeWithInstances));
     }
 
     return nodesWithStatus;
@@ -126,7 +130,7 @@ const adminModule: Module = {
     router.get(
       '/admin/nodes/list',
       isAuthenticated(true),
-      async (req: Request, res: Response) => {
+      async (_req: Request, res: Response) => {
         const listNode = await listNodes(res);
         res.json(listNode);
       },
@@ -397,7 +401,7 @@ const adminModule: Module = {
         if (!user) {
           return res.redirect('/login');
         }
-    
+
         const nodeId = parseInt(req.params.id);
 
         const node = await prisma.node.findUnique({ where: { id: nodeId } });
@@ -409,9 +413,9 @@ const adminModule: Module = {
         const settings = await prisma.settings.findUnique({
           where: { id: 1 },
         });
-    
+
         let stats = {};
-    
+
         try {
           const response = await axios.get(
             `http://${node.address}:${node.port}/stats`,
@@ -424,7 +428,7 @@ const adminModule: Module = {
           );
 
           stats = response.data;
-        } catch (error) {
+        } catch (_error) {
           stats = { error: 'Unable to fetch stats from the node.' };
         }
         res.render('admin/nodes/stats', { node, user, req, settings, stats });

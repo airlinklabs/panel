@@ -12,7 +12,7 @@ const prisma = new PrismaClient();
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     let uploadDir;
-    
+
     if (file.fieldname === 'logo') {
       uploadDir = path.join(process.cwd(), 'public', 'uploads', 'logos');
     } else if (file.fieldname === 'favicon') {
@@ -20,7 +20,7 @@ const storage = multer.diskStorage({
     } else {
       uploadDir = path.join(process.cwd(), 'public', 'uploads');
     }
-    
+
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
-    
+
     if (file.fieldname === 'favicon') {
       cb(null, 'favicon' + ext);
     } else {
@@ -47,7 +47,7 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCa
   }
 };
 
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
@@ -99,48 +99,48 @@ const adminModule: Module = {
     );
 
     router.post(
-      '/admin/settings', 
-      isAuthenticated(true), 
+      '/admin/settings',
+      isAuthenticated(true),
       upload.fields([
         { name: 'logo', maxCount: 1 },
         { name: 'favicon', maxCount: 1 }
-      ]), 
+      ]),
       async (req, res) => {
         try {
           const rawData = req.body;
           const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-          
+
           const settingsData: SettingsData = {
             title: typeof rawData.title === 'string' ? rawData.title : undefined,
             theme: typeof rawData.theme === 'string' ? rawData.theme : undefined,
             language: typeof rawData.language === 'string' ? rawData.language : undefined,
           };
-          
+
           if (files.logo && files.logo[0]) {
             const logoPath = `/uploads/logos/${files.logo[0].filename}`;
             settingsData.logo = logoPath;
           }
-          
+
           if (files.favicon && files.favicon[0]) {
             const faviconPath = `/uploads/favicons/${files.favicon[0].filename}`;
             settingsData.favicon = faviconPath;
-            
+
             const sourcePath = files.favicon[0].path;
             const destPath = path.join(process.cwd(), 'public', 'favicon.ico');
             fs.copyFileSync(sourcePath, destPath);
           }
-          
+
           const cleanData = Object.fromEntries(
-            Object.entries(settingsData).filter(([_, value]) => value !== undefined)
+            Object.entries(settingsData).filter(([, value]) => value !== undefined)
           );
-          
+
           if (Object.keys(cleanData).length > 0) {
             await prisma.settings.update({
               where: { id: 1 },
               data: cleanData,
             });
           }
-          
+
           res.json({ success: true });
         } catch (error) {
           logger.error('Error updating settings:', error);
@@ -164,14 +164,14 @@ const adminModule: Module = {
               language: 'en',
             },
           });
-          
+
           const defaultFaviconPath = path.join(process.cwd(), 'public', 'assets', 'favicon.ico');
           const destPath = path.join(process.cwd(), 'public', 'favicon.ico');
-          
+
           if (fs.existsSync(defaultFaviconPath)) {
             fs.copyFileSync(defaultFaviconPath, destPath);
           }
-          
+
           res.json({ success: true });
         } catch (error) {
           logger.error('Error resetting settings:', error);

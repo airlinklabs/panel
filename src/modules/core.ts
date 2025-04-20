@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { Module } from '../handlers/moduleInit';
 
 const coreModule: Module = {
@@ -16,7 +16,7 @@ const coreModule: Module = {
 
     // ok what will go here?
 
-    // many thinks
+    // many things
 
     return router;
   },

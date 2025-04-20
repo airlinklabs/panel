@@ -5,7 +5,6 @@ import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUt
 import logger from '../../handlers/logger';
 import axios from 'axios';
 import { checkEulaStatus, isWorld } from '../../handlers/features';
-const { MinecraftServerListPing } = require('minecraft-status');
 import { checkForServerInstallation } from '../../handlers/checkForServerInstallation';
 import { queueer } from '../../handlers/queueer';
 
@@ -112,8 +111,8 @@ const dashboardModule: Module = {
           }
 
 
-          let alshID = "";
-          let alshPASSWORD = "";
+          let alshID = '';
+          let alshPASSWORD = '';
 
           if (features.includes('alsh')) {
             try {
@@ -121,7 +120,7 @@ const dashboardModule: Module = {
                 method: 'GET',
                 url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
                 responseType: 'text',
-                params: { id: server.UUID, path: "./airlink/alshid.txt" },
+                params: { id: server.UUID, path: './airlink/alshid.txt' },
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -132,7 +131,7 @@ const dashboardModule: Module = {
                 method: 'GET',
                 url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
                 responseType: 'text',
-                params: { id: server.UUID, path: "./airlink/password.txt" },
+                params: { id: server.UUID, path: './airlink/password.txt' },
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -142,7 +141,7 @@ const dashboardModule: Module = {
               alshID = idresponse.data;
               alshPASSWORD = passresponse.data;
             } catch (error: any) {
-              console.error("Error:", error.message);
+              console.error('Error:', error.message);
             }
           }
 
@@ -242,7 +241,7 @@ const dashboardModule: Module = {
           }
 
           if (powerAction !== 'start') {
-            logger.error(`Invalid power action:`, powerAction);
+            logger.error('Invalid power action:', powerAction);
             res.status(400).json({ error: `Invalid power action: ${powerAction}` });
             return;
           }
@@ -266,20 +265,20 @@ const dashboardModule: Module = {
                 ) {
                   let processedValue: string | number | boolean;
                   switch (variable.type) {
-                    case 'boolean':
-                      processedValue =
+                  case 'boolean':
+                    processedValue =
                         variable.value === 1 || variable.value === '1'
                           ? 'true'
                           : 'false';
-                      break;
-                    case 'number':
-                      processedValue = Number(variable.value);
-                      break;
-                    case 'text':
-                      processedValue = String(variable.value);
-                      break;
-                    default:
-                      processedValue = variable.value;
+                    break;
+                  case 'number':
+                    processedValue = Number(variable.value);
+                    break;
+                  case 'text':
+                    processedValue = String(variable.value);
+                    break;
+                  default:
+                    processedValue = variable.value;
                   }
                   envVariables[variable.env] = processedValue;
                 }
@@ -835,8 +834,8 @@ const dashboardModule: Module = {
                 error: axiosError
               });
             }
-            }
           }
+        }
         catch (error) {
           logger.error('Error unzipping files:', error);
           if (axios.isAxiosError(error)) {
@@ -924,9 +923,9 @@ const dashboardModule: Module = {
 
           const primaryPort = server.Ports
             ? JSON.parse(server.Ports)
-                .filter((Port: any) => Port.primary)
-                .map((Port: any) => Port.Port.split(':')[1])
-                .pop()
+              .filter((Port: any) => Port.primary)
+              .map((Port: any) => Port.Port.split(':')[1])
+              .pop()
             : '';
 
           let features: string[] = [];
@@ -967,32 +966,72 @@ const dashboardModule: Module = {
           }
 
           let players: Array<{ name: string; uuid: string }> = [];
+          let serverInfo = {
+            maxPlayers: 0,
+            onlinePlayers: 0,
+            version: 'Unknown'
+          };
+          let hadFetchError = false;
+          let serverIsOnline = false;
+
           try {
-            const pingResponse = await MinecraftServerListPing.ping(
-              4,
-              server.node.address,
-              parseInt(primaryPort, 10),
-              3000,
-            );
-            players =
-              pingResponse.players?.sample?.map((player: any) => ({
-                name: player.name,
-                uuid: player.id,
-              })) || [];
-          } catch (pingError) {
-            logger.error('Error pinging server:', pingError);
-            res.redirect('/server/' + serverId + '/');
-            return;
+            logger.info(`Fetching players for server ${serverId} on port ${primaryPort}`);
+
+            const playersResponse = await axios({
+              method: 'GET',
+              url: `http://${server.node.address}:${server.node.port}/minecraft/players`,
+              params: {
+                id: server.UUID,
+                host: server.node.address,
+                port: parseInt(primaryPort, 10)
+              },
+              auth: {
+                username: 'Airlink',
+                password: server.node.key,
+              },
+              timeout: 8000
+            });
+
+            if (playersResponse.data) {
+              serverIsOnline = typeof playersResponse.data.online === 'boolean'
+                ? playersResponse.data.online
+                : !!playersResponse.data.version;
+
+              if (Array.isArray(playersResponse.data.players)) {
+                players = playersResponse.data.players;
+              }
+
+              serverInfo = {
+                maxPlayers: playersResponse.data.maxPlayers || 0,
+                onlinePlayers: playersResponse.data.onlinePlayers || 0,
+                version: playersResponse.data.version || 'Unknown'
+              };
+
+              logger.info(`Successfully fetched server data for ${serverId}`);
+              logger.info(`Server version: ${serverInfo.version}, Players: ${players.length} (${serverInfo.onlinePlayers}/${serverInfo.maxPlayers})`);
+              logger.info(`Server online status: ${serverIsOnline ? 'Online' : 'Offline'}`);
+            } else {
+              logger.warn(`No valid data returned for server ${serverId}`);
+              hadFetchError = true;
+            }
+          } catch (error) {
+            logger.error(`Error fetching players from daemon for server ${serverId}:`, error);
+            hadFetchError = true;
           }
 
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
+          const hasError = hadFetchError && !serverIsOnline;
 
           return res.render('user/server/players', {
-            errorMessage: {},
+            errorMessage: hasError ?
+              { message: 'Unable to fetch players. The server may be offline or not responding.' } :
+              {},
+            serverIsOnline,
             user,
             players,
+            serverInfo,
             features,
             installed: await checkForServerInstallation(serverId),
             server,
@@ -1364,20 +1403,20 @@ const dashboardModule: Module = {
                     ) {
                       let processedValue: string | number | boolean;
                       switch (variable.type) {
-                        case 'boolean':
-                          processedValue =
+                      case 'boolean':
+                        processedValue =
                             variable.value === 1 || variable.value === '1'
                               ? 'true'
                               : 'false';
-                          break;
-                        case 'number':
-                          processedValue = Number(variable.value);
-                          break;
-                        case 'text':
-                          processedValue = String(variable.value);
-                          break;
-                        default:
-                          processedValue = variable.value;
+                        break;
+                      case 'number':
+                        processedValue = Number(variable.value);
+                        break;
+                      case 'text':
+                        processedValue = String(variable.value);
+                        break;
+                      default:
+                        processedValue = variable.value;
                       }
                       envVariables[variable.env] = processedValue;
                     }
@@ -1472,7 +1511,7 @@ const dashboardModule: Module = {
               serverVariables = JSON.parse(server.Variables);
             }
           } catch (error) {
-            logger.error(`Error parsing server variables:`, error);
+            logger.error('Error parsing server variables:', error);
             serverVariables = [];
           }
 
@@ -1572,20 +1611,20 @@ const dashboardModule: Module = {
                   ) {
                     let processedValue: string | number | boolean;
                     switch (variable.type) {
-                      case 'boolean':
-                        processedValue =
+                    case 'boolean':
+                      processedValue =
                           variable.value === 1 || variable.value === '1'
                             ? 'true'
                             : 'false';
-                        break;
-                      case 'number':
-                        processedValue = Number(variable.value);
-                        break;
-                      case 'text':
-                        processedValue = String(variable.value);
-                        break;
-                      default:
-                        processedValue = variable.value;
+                      break;
+                    case 'number':
+                      processedValue = Number(variable.value);
+                      break;
+                    case 'text':
+                      processedValue = String(variable.value);
+                      break;
+                    default:
+                      processedValue = variable.value;
                     }
                     envVariables[variable.env] = processedValue;
                   }
@@ -1839,20 +1878,20 @@ const dashboardModule: Module = {
                 ) {
                   let processedValue: string | number | boolean;
                   switch (variable.type) {
-                    case 'boolean':
-                      processedValue =
+                  case 'boolean':
+                    processedValue =
                         variable.value === 1 || variable.value === '1'
                           ? 'true'
                           : 'false';
-                      break;
-                    case 'number':
-                      processedValue = Number(variable.value);
-                      break;
-                    case 'text':
-                      processedValue = String(variable.value);
-                      break;
-                    default:
-                      processedValue = variable.value;
+                    break;
+                  case 'number':
+                    processedValue = Number(variable.value);
+                    break;
+                  case 'text':
+                    processedValue = String(variable.value);
+                    break;
+                  default:
+                    processedValue = variable.value;
                   }
                   envVariables[variable.env] = processedValue;
                 }

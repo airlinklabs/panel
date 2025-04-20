@@ -80,7 +80,7 @@ ejs.renderFile = function(file: string, data: any, options: any, callback: any) 
 
     return originalRenderFile(file, data, options, callback);
   } catch (error) {
-    console.error(`Error in EJS renderFile override:`, error);
+    console.error('Error in EJS renderFile override:', error);
     return originalRenderFile(file, data, options, callback);
   }
 };
@@ -130,19 +130,37 @@ app.use(cookieParser());
 // Load translation
 app.use(translationMiddleware);
 
-// Load locals
-app.use((req, res, next) => {
+interface SidebarItem {
+  id: string;
+  label: string;
+  link: string;
+}
+
+interface GlobalWithCustomProperties extends NodeJS.Global {
+  uiComponentStore: typeof import('./handlers/uiComponentHandler').uiComponentStore;
+  appName: string;
+  airlinkVersion: string;
+  adminMenuItems: SidebarItem[];
+  regularMenuItems: SidebarItem[];
+}
+
+declare const global: GlobalWithCustomProperties;
+
+
+app.use((_req, res, next) => {
   res.locals.name = name;
   res.locals.airlinkVersion = airlinkVersion;
-  // Make UI component store available globally
   global.uiComponentStore = uiComponentStore;
+  global.appName = name;
+  global.airlinkVersion = airlinkVersion;
+  
   res.locals.adminMenuItems = uiComponentStore.getSidebarItems(undefined, true);
   res.locals.regularMenuItems = uiComponentStore.getSidebarItems(undefined, false);
   next();
 });
 
 // Load error handling
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
   logger.error('Unhandled error:', err);
 
   if (!res.headersSent) {

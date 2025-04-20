@@ -5,6 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
 import QueueHandler from '../../handlers/utils/core/queueer';
+import { Buffer } from 'buffer';
 
 const queueer = new QueueHandler();
 
@@ -307,7 +308,7 @@ const adminModule: Module = {
                       env: env,
                       script: scripts.native.CMD,
                       container: scripts.native.container,
-                    }
+                    };
 
                     await axios.post(
                       `http://${server.node.address}:${server.node.port}/container/installer`,

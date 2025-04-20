@@ -45,11 +45,11 @@ const dashboardModule: Module = {
         let page: number = 1;
 
         if (typeof req.query.page === 'string') {
-            page = parseInt(req.query.page, 10);
+          page = parseInt(req.query.page, 10);
         }
 
         if (isNaN(page)) {
-            page = 1;
+          page = 1;
         }
 
         const perPage = 8;

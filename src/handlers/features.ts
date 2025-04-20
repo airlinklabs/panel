@@ -40,8 +40,8 @@ export async function checkEulaStatus(
 
     const isNodeOnline = (await checkNodeStatus(server.node)).status;
 
-    if (isNodeOnline == "Offline") {
-      return { accepted: true }
+    if (isNodeOnline == 'Offline') {
+      return { accepted: true };
     }
 
     const eulaResponse = await axios({

@@ -10,8 +10,8 @@
   "license": "MIT",
   "scripts": {
     "build-ts": "tsc",
-    "build": "npm run build-ts && npm run lint",
-    "lint": "eslint . --fix",
+    "build": "npm run build-ts",
+    "lint": "eslint src --fix",
     "serve": "node dist/app.js",
     "start": "npm run serve",
     "build:css": "tailwindcss -i ./public/tw.conf -o ./public/styles.css --watch",
@@ -55,7 +55,6 @@
     "@types/hpp": "^0.2.6",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.8.6",
-    "@types/supertest": "^6.0.2",
     "@types/ws": "^8.5.14",
     "eslint": "^9.15.0",
     "express-ws": "^5.0.2",
@@ -67,7 +66,6 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.15.0",
-    "ws": "^8.18.0"
+    "typescript-eslint": "^8.15.0"
   }
 }

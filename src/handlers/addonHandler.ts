@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import express, { Express, Router, Request, Response } from 'express';
+import { Express, Router } from 'express';
 import { uiComponentStore, SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from './uiComponentHandler';
 import { PrismaClient } from '@prisma/client';
 import logger from './logger';
@@ -61,8 +61,8 @@ export interface AddonAPI {
   };
 }
 
-export async function loadAddons(app: Express) {
-  for (const [slug, _] of loadedAddons.entries()) {
+export async function loadAddons(app: Express | any) {
+  for (const [slug] of loadedAddons.entries()) {
     unloadAddon(app, slug);
   }
 
@@ -80,7 +80,7 @@ export async function loadAddons(app: Express) {
   let addonTableExists = true;
   try {
     await prisma.$queryRaw`SELECT 1 FROM Addon LIMIT 1`;
-  } catch (error) {
+  } catch (_error) {
     addonTableExists = false;
     logger.warn('Addon table does not exist yet. Run migrations to create it.');
   }
@@ -242,7 +242,7 @@ export async function loadAddons(app: Express) {
                 });
                 return user?.isAdmin === true;
               } catch (error) {
-                logger.error(`Error checking if user is admin:`, error);
+                logger.error('Error checking if user is admin:', error);
                 return false;
               }
             },
@@ -258,7 +258,7 @@ export async function loadAddons(app: Express) {
                   }
                 });
               } catch (error) {
-                logger.error(`Error getting server by ID:`, error);
+                logger.error('Error getting server by ID:', error);
                 return null;
               }
             },
@@ -273,7 +273,7 @@ export async function loadAddons(app: Express) {
                   }
                 });
               } catch (error) {
-                logger.error(`Error getting server by UUID:`, error);
+                logger.error('Error getting server by UUID:', error);
                 return null;
               }
             },
@@ -282,7 +282,7 @@ export async function loadAddons(app: Express) {
                 if (!server.Ports) return [];
                 return JSON.parse(server.Ports);
               } catch (error) {
-                logger.error(`Error parsing server ports:`, error);
+                logger.error('Error parsing server ports:', error);
                 return [];
               }
             },
@@ -292,7 +292,7 @@ export async function loadAddons(app: Express) {
                 const ports = JSON.parse(server.Ports);
                 return ports.find((port: any) => port.primary === true);
               } catch (error) {
-                logger.error(`Error getting primary port:`, error);
+                logger.error('Error getting primary port:', error);
                 return null;
               }
             }
@@ -361,14 +361,22 @@ async function applyAddonMigrations(slug: string, packageJson: AddonPackageJson)
     `;
     const appliedMigrationNames = appliedMigrations.map(m => m.migrationName);
 
-    // Apply each migration that hasn't been applied yet
-    for (const migration of packageJson.migrations) {
-      if (appliedMigrationNames.includes(migration.name)) {
-        logger.info(`Migration ${migration.name} already applied, skipping`);
-        continue;
-      }
+    const pendingMigrations = packageJson.migrations.filter(
+      migration => !appliedMigrationNames.includes(migration.name)
+    );
 
+    if (pendingMigrations.length === 0) {
+      logger.info(`No new migrations to apply for addon ${packageJson.name}`);
+      return { success: true, message: 'No new migrations to apply' };
+    }
+
+    logger.info(`Found ${pendingMigrations.length} pending migrations for addon ${packageJson.name}`);
+
+    // Apply each migration that hasn't been applied yet
+    for (const migration of pendingMigrations) {
       try {
+        logger.info(`Applying migration ${migration.name} for addon ${packageJson.name}...`);
+
         // Execute the migration SQL
         await prisma.$executeRawUnsafe(migration.sql);
 
@@ -385,7 +393,11 @@ async function applyAddonMigrations(slug: string, packageJson: AddonPackageJson)
       }
     }
 
-    return { success: true, message: `Successfully applied ${packageJson.migrations.length} migrations` };
+    return {
+      success: true,
+      message: `Successfully applied ${pendingMigrations.length} migrations for addon ${packageJson.name}`,
+      migrationsApplied: pendingMigrations.length
+    };
   } catch (error: any) {
     logger.error(`Failed to apply migrations for addon ${packageJson.name}:`, error.message);
     return { success: false, message: `Failed to apply migrations: ${error.message}` };
@@ -396,9 +408,9 @@ export async function toggleAddonStatus(slug: string, enabled: boolean) {
   try {
     try {
       await prisma.$queryRaw`SELECT 1 FROM Addon LIMIT 1`;
-    } catch (error) {
+    } catch (_error) {
       logger.warn('Addon table does not exist yet. Run migrations to create it.');
-      return false;
+      return { success: false, message: 'Addon table does not exist yet' };
     }
 
     const addon = await prisma.addon.findUnique({
@@ -410,6 +422,7 @@ export async function toggleAddonStatus(slug: string, enabled: boolean) {
     }
 
     // If enabling the addon, apply migrations
+    let migrationsApplied = 0;
     if (enabled && !addon.enabled) {
       const addonsDir = path.join(__dirname, '../../storage/addons');
       const addonPath = path.join(addonsDir, slug);
@@ -420,10 +433,19 @@ export async function toggleAddonStatus(slug: string, enabled: boolean) {
           const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf-8');
           const packageJson: AddonPackageJson = JSON.parse(packageJsonContent);
 
-          const migrationResult = await applyAddonMigrations(slug, packageJson);
-          if (!migrationResult.success) {
-            logger.error(`Failed to enable addon ${packageJson.name} due to migration errors:`, migrationResult.message);
-            return false;
+          if (packageJson.migrations && packageJson.migrations.length > 0) {
+            logger.info(`Checking migrations for addon ${packageJson.name} before enabling...`);
+            const migrationResult = await applyAddonMigrations(slug, packageJson);
+
+            if (!migrationResult.success) {
+              logger.error(`Failed to enable addon ${packageJson.name} due to migration errors:`, migrationResult.message);
+              return { success: false, message: `Failed to enable addon: ${migrationResult.message}` };
+            }
+
+            if (migrationResult.migrationsApplied) {
+              migrationsApplied = migrationResult.migrationsApplied;
+              logger.info(`Applied ${migrationsApplied} migrations for addon ${packageJson.name}`);
+            }
           }
         } catch (error: any) {
           logger.error(`Failed to read package.json for addon ${slug}:`, error.message);
@@ -437,10 +459,15 @@ export async function toggleAddonStatus(slug: string, enabled: boolean) {
       data: { enabled }
     });
 
-    return true;
+    const statusText = enabled ? 'enabled' : 'disabled';
+    const message = migrationsApplied > 0
+      ? `Addon ${addon.name} ${statusText} successfully with ${migrationsApplied} migrations applied`
+      : `Addon ${addon.name} ${statusText} successfully`;
+
+    return { success: true, message, migrationsApplied };
   } catch (error: any) {
-    logger.error(`Failed to toggle addon status:`, error.message);
-    return false;
+    logger.error('Failed to toggle addon status:', error.message);
+    return { success: false, message: `Failed to toggle addon status: ${error.message}` };
   }
 }
 
@@ -448,7 +475,7 @@ export async function getAllAddons() {
   try {
     try {
       await prisma.$queryRaw`SELECT 1 FROM Addon LIMIT 1`;
-    } catch (error) {
+    } catch (_error) {
       logger.warn('Addon table does not exist yet. Run migrations to create it.');
       return [];
     }
@@ -457,14 +484,14 @@ export async function getAllAddons() {
       orderBy: { name: 'asc' }
     });
   } catch (error: any) {
-    logger.error(`Failed to get addons:`, error.message);
+    logger.error('Failed to get addons:', error.message);
     return [];
   }
 }
 
 const loadedAddons: Map<string, { router: Router, path: string }> = new Map();
 
-function unloadAddon(app: Express, slug: string) {
+function unloadAddon(app: Express | any, slug: string) {
   const addon = loadedAddons.get(slug);
   if (addon) {
     const routerStack = (app as any)._router.stack;
@@ -480,8 +507,9 @@ function unloadAddon(app: Express, slug: string) {
   }
 }
 
-export async function reloadAddons(app: Express) {
+export async function reloadAddons(app: Express | any) {
   logger.info('Reloading addons...');
+  let migrationsApplied = 0;
 
   try {
     const addons = await prisma.addon.findMany();
@@ -491,6 +519,30 @@ export async function reloadAddons(app: Express) {
 
     if (enabledAddons.length > 0) {
       logger.info(`Enabled addons: ${enabledAddons.map(a => a.name).join(', ')}`);
+
+      for (const addon of enabledAddons) {
+        const addonsDir = path.join(__dirname, '../../storage/addons');
+        const addonPath = path.join(addonsDir, addon.slug);
+        const packageJsonPath = path.join(addonPath, 'package.json');
+
+        if (fs.existsSync(packageJsonPath)) {
+          try {
+            const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf-8');
+            const packageJson: AddonPackageJson = JSON.parse(packageJsonContent);
+
+            if (packageJson.migrations && packageJson.migrations.length > 0) {
+              const migrationResult = await applyAddonMigrations(addon.slug, packageJson);
+              if (migrationResult.success && migrationResult.migrationsApplied) {
+                migrationsApplied += migrationResult.migrationsApplied;
+              } else if (!migrationResult.success) {
+                logger.error(`Failed to apply migrations for addon ${addon.name}:`, migrationResult.message);
+              }
+            }
+          } catch (error: any) {
+            logger.error(`Failed to read package.json for addon ${addon.slug}:`, error.message);
+          }
+        }
+      }
     }
 
     if (disabledAddons.length > 0) {
@@ -504,9 +556,15 @@ export async function reloadAddons(app: Express) {
     }
   } catch (error) {
     logger.error('Failed to get addons:', error);
+    return { success: false, message: 'Failed to reload addons due to database error' };
   }
 
+  // Reload all addons
   await loadAddons(app);
 
-  return { success: true, message: 'Addons reloaded successfully' };
+  const message = migrationsApplied > 0
+    ? `Addons reloaded successfully with ${migrationsApplied} migrations applied`
+    : 'Addons reloaded successfully';
+
+  return { success: true, message, migrationsApplied };
 }

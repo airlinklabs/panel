@@ -8,9 +8,9 @@ import { registerPermission } from '../../handlers/permisions';
 
 const prisma = new PrismaClient();
 
-registerPermission("airlink.admin.overview.main");
-registerPermission("airlink.admin.overview.checkForUpdates");
-registerPermission("airlink.admin.overview.performUpdate");
+registerPermission('airlink.admin.overview.main');
+registerPermission('airlink.admin.overview.checkForUpdates');
+registerPermission('airlink.admin.overview.performUpdate');
 
 interface ErrorMessage {
   message?: string;
@@ -31,7 +31,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/overview',
-      isAuthenticated(true, "airlink.admin.overview.main"),
+      isAuthenticated(true, 'airlink.admin.overview.main'),
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
 
@@ -69,7 +69,7 @@ const adminModule: Module = {
 
     router.get(
       '/admin/check-update',
-      isAuthenticated(true, "airlink.admin.overview.checkForUpdates"),
+      isAuthenticated(true, 'airlink.admin.overview.checkForUpdates'),
       async (req: Request, res: Response) => {
         try {
           const updateInfo = await checkForUpdates();
@@ -83,7 +83,7 @@ const adminModule: Module = {
 
     router.post(
       '/admin/perform-update',
-      isAuthenticated(true, "airlink.admin.overview.performUpdate"),
+      isAuthenticated(true, 'airlink.admin.overview.performUpdate'),
       async (req: Request, res: Response) => {
         try {
           const success = await performUpdate();

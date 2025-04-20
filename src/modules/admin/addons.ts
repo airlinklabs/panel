@@ -14,17 +14,12 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { getAllAddons, toggleAddonStatus, reloadAddons } from '../../handlers/addonHandler';
 import { registerPermission } from '../../handlers/permisions';
-import express from 'express';
 
 const prisma = new PrismaClient();
 
-registerPermission("airlink.admin.addons.view");
-registerPermission("airlink.admin.addons.toggle");
-registerPermission("airlink.admin.addons.reload");
-
-interface ErrorMessage {
-  message?: string;
-}
+registerPermission('airlink.admin.addons.view');
+registerPermission('airlink.admin.addons.toggle');
+registerPermission('airlink.admin.addons.reload');
 
 const addonsModule: Module = {
   info: {
@@ -41,7 +36,7 @@ const addonsModule: Module = {
 
     router.get(
       '/admin/addons',
-      isAuthenticated(true, "airlink.admin.addons.view"),
+      isAuthenticated(true, 'airlink.admin.addons.view'),
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
@@ -58,7 +53,7 @@ const addonsModule: Module = {
           let addonTableExists = true;
           try {
             await prisma.$queryRaw`SELECT 1 FROM Addon LIMIT 1`;
-          } catch (error) {
+          } catch (_error) {
             addonTableExists = false;
           }
 
@@ -79,7 +74,7 @@ const addonsModule: Module = {
 
     router.post(
       '/admin/addons/toggle/:slug',
-      isAuthenticated(true, "airlink.admin.addons.toggle"),
+      isAuthenticated(true, 'airlink.admin.addons.toggle'),
       async (req: Request, res: Response) => {
         try {
           const { slug } = req.params;
@@ -87,13 +82,28 @@ const addonsModule: Module = {
 
           const enabledBool = enabled === 'true' || enabled === true;
           logger.info(`Toggling addon ${slug} to ${enabledBool ? 'enabled' : 'disabled'}`);
-          const success = await toggleAddonStatus(slug, enabledBool);
+          const result = await toggleAddonStatus(slug, enabledBool);
 
-          if (success) {
-            await reloadAddons(req.app);
-            res.json({ success: true, message: 'Addon status updated successfully' });
+          if (result.success) {
+            const reloadResult = await reloadAddons(req.app);
+
+            let message = result.message;
+            if (reloadResult.migrationsApplied && result.migrationsApplied) {
+              message = `${result.message}. ${reloadResult.message}`;
+            } else if (reloadResult.migrationsApplied) {
+              message = reloadResult.message;
+            }
+
+            res.json({
+              success: true,
+              message,
+              migrationsApplied: (result.migrationsApplied || 0) + (reloadResult.migrationsApplied || 0)
+            });
           } else {
-            res.status(500).json({ success: false, message: 'Failed to update addon status' });
+            res.status(500).json({
+              success: false,
+              message: result.message || 'Failed to update addon status'
+            });
           }
         } catch (error: any) {
           logger.error('Error toggling addon status:', error);
@@ -104,11 +114,16 @@ const addonsModule: Module = {
 
     router.post(
       '/admin/addons/reload',
-      isAuthenticated(true, "airlink.admin.addons.reload"),
+      isAuthenticated(true, 'airlink.admin.addons.reload'),
       async (req: Request, res: Response) => {
         try {
           const result = await reloadAddons(req.app);
-          res.json(result);
+
+          res.json({
+            success: result.success,
+            message: result.message,
+            migrationsApplied: result.migrationsApplied || 0
+          });
         } catch (error: any) {
           logger.error('Error reloading addons:', error);
           res.status(500).json({ success: false, message: error.message });

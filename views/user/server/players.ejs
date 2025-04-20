@@ -39,59 +39,196 @@
         </div>
       </div>
 
+      <!-- Error Message -->
+      <% if (errorMessage && errorMessage.message) { %>
+      <div class="rounded-xl bg-red-800/10 px-6 py-4 mt-8 mx-8">
+        <div class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div>
+            <h3 class="text-sm font-medium text-red-400">Error</h3>
+            <p class="text-sm text-red-400/50">
+              <%= errorMessage.message %>
+            </p>
+          </div>
+        </div>
+      </div>
+      <% } %>
+
       <!-- Server Template -->
       <%- include('../../components/serverTemplate') %>
 
-      <!-- Players Grid -->
+      <!-- Players Section -->
       <div class="p-6">
-        <% if (players.length !== 0) { %>
-        <div id="PlayersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <% players.forEach(player => { %>
-            <div class="relative p-4 bg-neutral-800 rounded-xl shadow-lg text-center group">
-              <img 
-                src="https://crafatar.com/avatars/<%= player.uuid %>?size=64&overlay" 
-                alt="<%= player.name %>'s Avatar" 
-                class="mx-auto rounded-full mb-3 border border-gray-700"
-                width="64" 
-                height="64"
-              />
-              <p class="text-lg font-bold text-white"><%= player.name %></p>
-            </div>
-            </div>
-          <% }) %>
-          <% } else { %>
-
-            <div id="no-players-message" class="text-center py-12">
-              <div class="flex justify-center mb-6">
-                <div class="relative inline-flex items-center">
-                    <div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white/10 transform hover:-translate-y-2 transition-all duration-200 relative z-30">
-                        <img src="https://mc-heads.net/avatar/privt" alt="" class="w-full h-full" />
-                    </div>
-                    <div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white/10 transform -translate-y-1 hover:-translate-y-3 transition-all duration-200 -ml-4 relative z-20">
-                        <img src="https://mc-heads.net/avatar/achul123" alt="" class="w-full h-full" />
-                    </div>
-                    <div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white/10 transform hover:-translate-y-4 transition-all duration-200 -ml-4 relative z-10">
-                        <img src="https://mc-heads.net/avatar/dc7431" alt="" class="w-full h-full" />
-                    </div>
-                </div>
-            </div>
-              <h2 class="text-xl font-semibold text-neutral-300">No players online!</h2>
-              <p class="mt-2 text-sm text-neutral-500">
-                It seems quiet here. Once players join, they’ll show up in this list.
+        <!-- Server Info Card -->
+        <div class="bg-neutral-800/50 rounded-xl p-6 mb-6 shadow-lg">
+          <div class="flex flex-col md:flex-row justify-between items-center mb-4">
+            <div>
+              <h2 class="text-xl font-semibold text-white mb-1">Players</h2>
+              <p class="text-neutral-400 text-sm">
+                <% if (typeof serverInfo !== 'undefined') { %>
+                  <span class="font-medium"><%= serverInfo.onlinePlayers || 0 %></span> / <span><%= serverInfo.maxPlayers || 0 %></span> players online
+                  <% if (serverInfo.version) { %>
+                    • <span class="text-neutral-500">Version: <%= serverInfo.version %></span>
+                  <% } %>
+                <% } else { %>
+                  Manage your server's player list
+                <% } %>
               </p>
-              <div class="mt-6">
-                <a 
-                  href="/invite/<%= req.params.id %>"
-                  class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-200"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Invite friends to join
-                </a>
+            </div>
+            <div class="mt-4 md:mt-0">
+              <a
+                href="/invite/<%= req.params.id %>"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-all duration-200 inline-flex items-center"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Invite Players
+              </a>
+            </div>
+          </div>
+
+          <!-- Auto-refresh notice -->
+          <div class="text-xs text-neutral-500 mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>
+              Refreshing in <span id="refresh-countdown">30</span> seconds
+              <button onclick="window.location.reload()" class="ml-2 text-blue-400 hover:text-blue-300 transition-colors duration-200 inline-flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh now
+              </button>
+            </span>
+          </div>
+        </div>
+
+        <!-- Players Grid -->
+        <% if (players && players.length > 0) { %>
+        <div id="PlayersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <% players.forEach(player => { %>
+            <div class="relative p-4 bg-neutral-800 rounded-xl shadow-lg group hover:bg-neutral-700/50 transition-all duration-200">
+              <div class="flex items-center">
+                <img
+                  src="https://crafatar.com/avatars/<%= player.uuid %>?size=64&overlay"
+                  alt="<%= player.name %>'s Avatar"
+                  class="rounded-lg border border-gray-700 mr-4"
+                  width="64"
+                  height="64"
+                />
+                <div>
+                  <p class="text-lg font-bold text-white"><%= player.name %></p>
+                  <div class="flex items-center mt-1">
+                    <span class="inline-flex h-2 w-2 rounded-full bg-green-500 mr-2"></span>
+                    <span class="text-xs text-neutral-400">Online</span>
+                  </div>
+                </div>
               </div>
             </div>
-          <% } %>
+          <% }) %>
+        </div>
+        <% } else { %>
+          <div id="no-players-message" class="bg-neutral-800/30 rounded-xl p-8 text-center">
+            <% if (!serverIsOnline && errorMessage && errorMessage.message) { %>
+              <!-- Server Offline Message -->
+              <div class="flex justify-center mb-6">
+                <div class="w-16 h-16 rounded-full bg-neutral-700/50 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m3 3 8.735 8.735m0 0a.374.374 0 1 1 .53.53m-.53-.53.53.53m0 0L21 21M14.652 9.348a3.75 3.75 0 0 1 0 5.304m2.121-7.425a6.75 6.75 0 0 1 0 9.546m2.121-11.667c3.808 3.807 3.808 9.98 0 13.788m-9.546-4.242a3.733 3.733 0 0 1-1.06-2.122m-1.061 4.243a6.75 6.75 0 0 1-1.625-6.929m-.496 9.05c-3.068-3.067-3.664-7.67-1.79-11.334M12 12h.008v.008H12V12Z" />
+                  </svg>                  
+                </div>
+              </div>
+              <h2 class="text-xl font-semibold text-neutral-300">Server Offline</h2>
+              <p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
+                The server appears to be offline. Start your server to see online players.
+              </p>
+              <div class="mt-6">
+                <button onclick="window.location.reload()" class="px-4 py-2 bg-neutral-700 text-white rounded-lg shadow hover:bg-neutral-600 transition-all duration-200 inline-flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Refresh
+                </button>
+              </div>
+            <% } else if (serverIsOnline) { %>
+              <!-- Server Online but No Players Message -->
+              <div class="flex justify-center mb-6">
+                <div class="w-16 h-16 rounded-full bg-green-700/20 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                  </svg>
+                </div>
+              </div>
+              <h2 class="text-xl font-semibold text-neutral-300">Server is online</h2>
+              <p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
+                Your server is running but no players are currently connected. Players will appear here when they join.
+              </p>
+              <div class="mt-4 text-sm text-neutral-400">
+                <div class="flex items-center justify-center gap-4">
+                  <div>
+                    <span class="font-semibold">Version:</span> <%= serverInfo.version %>
+                  </div>
+                  <div>
+                    <span class="font-semibold">Capacity:</span> <%= serverInfo.onlinePlayers %>/<%= serverInfo.maxPlayers %>
+                  </div>
+                </div>
+              </div>
+            <% } else { %>
+              <!-- Unknown Status Message -->
+              <div class="flex justify-center mb-6">
+                <div class="w-16 h-16 rounded-full bg-yellow-700/20 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+              <h2 class="text-xl font-semibold text-neutral-300">Status Unknown</h2>
+              <p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
+                We couldn't determine if your server is online. It may be starting up or in an unusual state.
+              </p>
+            <% } %>
+          </div>
+        <% } %>
       </div>
+
+      <!-- Auto-refresh script -->
+      <script>
+        // Auto-refresh with exponential backoff if there are errors
+        (function() {
+          const hasError = <%= errorMessage && errorMessage.message ? 'true' : 'false' %>;
+          const refreshInterval = hasError ? 60000 : 30000; // 1 minute if error, 30 seconds otherwise
+
+          console.log(`Player list will refresh in ${refreshInterval/1000} seconds`);
+
+          setTimeout(() => {
+            window.location.reload();
+          }, refreshInterval);
+
+          // Update the countdown timer
+          const startTime = Date.now();
+          const timerElement = document.getElementById('refresh-countdown');
+
+          if (timerElement) {
+            const updateTimer = () => {
+              const elapsed = Date.now() - startTime;
+              const remaining = Math.max(0, Math.floor((refreshInterval - elapsed) / 1000));
+              timerElement.textContent = remaining;
+
+              if (remaining > 0) {
+                requestAnimationFrame(updateTimer);
+              }
+            };
+
+            updateTimer();
+          }
+        })();
+      </script>
     </section>
   </div>
 </main>
