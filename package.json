@@ -33,11 +33,13 @@
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0",
     "express-session": "^1.18.1",
+    "express-ws": "^5.0.2",
     "helmet": "^8.0.0",
     "hpp": "^0.2.3",
     "minecraft-status": "^1.1.0",
     "multer": "^1.4.5-lts.1",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "ws": "^8.14.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
@@ -57,7 +59,6 @@
     "@types/node": "^22.8.6",
     "@types/ws": "^8.5.14",
     "eslint": "^9.15.0",
-    "express-ws": "^5.0.2",
     "fs-extra": "^11.2.0",
     "nodemon": "^3.1.9",
     "prettier": "^3.3.3",
