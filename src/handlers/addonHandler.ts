@@ -30,7 +30,6 @@ export interface AddonAPI {
 
   utils: {
     isUserAdmin: (userId: number) => Promise<boolean>;
-    checkServerAccess: (userId: number, serverId: number) => Promise<boolean>;
     getServerById: (serverId: number) => Promise<any>;
     getServerByUUID: (uuid: string) => Promise<any>;
     getServerPorts: (server: any) => any[];
@@ -247,34 +246,7 @@ export async function loadAddons(app: Express) {
                 return false;
               }
             },
-            checkServerAccess: async (userId: number, serverId: number) => {
-              try {
-                const server = await prisma.server.findFirst({
-                  where: {
-                    id: serverId,
-                    ownerId: userId
-                  }
-                });
 
-                if (server) return true;
-
-                try {
-                  const permission = await prisma.serverPermission.findFirst({
-                    where: {
-                      serverId,
-                      userId
-                    }
-                  });
-
-                  return !!permission;
-                } catch (error) {
-                  return false;
-                }
-              } catch (error) {
-                logger.error(`Error checking server access:`, error);
-                return false;
-              }
-            },
             getServerById: async (serverId: number) => {
               try {
                 return await prisma.server.findUnique({
@@ -283,7 +255,6 @@ export async function loadAddons(app: Express) {
                     node: true,
                     image: true,
                     owner: true,
-                    subdomains: true
                   }
                 });
               } catch (error) {
@@ -299,7 +270,6 @@ export async function loadAddons(app: Express) {
                     node: true,
                     image: true,
                     owner: true,
-                    subdomains: true
                   }
                 });
               } catch (error) {
