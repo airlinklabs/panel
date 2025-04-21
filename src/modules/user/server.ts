@@ -593,6 +593,10 @@ const dashboardModule: Module = {
       },
     );
 
+    /**
+     * Delete a file or directory
+     * Used by both the files page and the worlds page
+     */
     router.delete(
       '/server/:id/files/rm/:path(*)',
       isAuthenticatedForServer('id'),
@@ -601,9 +605,12 @@ const dashboardModule: Module = {
         const serverId = req.params?.id;
         const filePath = req.params?.path;
 
+        logger.info(`Deleting file/directory: ${filePath} from server ${serverId}`);
+
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
+            logger.warn(`User not found: ${userId}`);
             res.status(404).json({ error: 'User not found' });
             return;
           }
@@ -614,27 +621,56 @@ const dashboardModule: Module = {
           });
 
           if (!server) {
+            logger.warn(`Server not found: ${serverId}`);
             res.status(404).json({ error: 'Server not found' });
             return;
           }
 
-          await axios({
-            method: 'DELETE',
-            url: `http://${server.node.address}:${server.node.port}/fs/rm`,
-            data: {
-              id: server.UUID,
-              path: filePath,
-            },
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
+          // Check if the server is a Minecraft world
+          const isMinecraftWorld = await isWorld(filePath, {
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            serverUUID: server.UUID,
+            nodeKey: server.node.key,
           });
 
-          res.json({ success: true });
-          return;
+          if (isMinecraftWorld) {
+            logger.info(`Deleting Minecraft world: ${filePath}`);
+          }
+
+          try {
+            await axios({
+              method: 'DELETE',
+              url: `http://${server.node.address}:${server.node.port}/fs/rm`,
+              data: {
+                id: server.UUID,
+                path: filePath,
+              },
+              auth: {
+                username: 'Airlink',
+                password: server.node.key,
+              },
+              timeout: 10000, // 10 second timeout for large directories
+            });
+
+            logger.success(`Successfully deleted ${isMinecraftWorld ? 'world' : 'file/directory'}: ${filePath}`);
+            res.json({ success: true });
+            return;
+          } catch (axiosError) {
+            if (axios.isAxiosError(axiosError)) {
+              const statusCode = axiosError.response?.status || 500;
+              const errorMessage = axiosError.response?.data?.error || 'Failed to delete file';
+
+              logger.error(`Error deleting ${filePath}: ${errorMessage}`, axiosError);
+              res.status(statusCode).json({ error: errorMessage });
+            } else {
+              logger.error(`Unexpected error deleting ${filePath}:`, axiosError);
+              res.status(500).json({ error: 'An unexpected error occurred' });
+            }
+            return;
+          }
         } catch (error) {
-          logger.error('Error deleting file:', error);
+          logger.error('Error in file deletion endpoint:', error);
           res.status(500).json({ error: 'Failed to delete file' });
           return;
         }
@@ -1088,7 +1124,7 @@ const dashboardModule: Module = {
               serverUUID: server.UUID,
               nodeKey: server.node.key,
             };
-            const axios = require('axios');
+            // Use the imported axios instead of requiring it again
             const response = await axios(worldsRequest);
             const Folders = response.data;
 
@@ -1117,7 +1153,7 @@ const dashboardModule: Module = {
                   features = parsedInfo.features;
                 }
               } catch (error) {
-                console.error('Failed to parse server.image.info:', error);
+                logger.error('Failed to parse server.image.info:', error);
               }
             } else if (
               server.image &&
@@ -1141,12 +1177,42 @@ const dashboardModule: Module = {
               settings,
             });
           } catch (fileRequestError) {
-            console.error('Error fetching files:', fileRequestError);
-            res.status(500).json({ error: 'Failed to fetch files' });
+            logger.error('Error fetching files:', fileRequestError);
+
+            // Render the worlds page with an error message instead of returning JSON
+            const settings = await prisma.settings.findUnique({
+              where: { id: 1 },
+            });
+
+            return res.render('user/server/worlds', {
+              errorMessage: { message: 'Failed to fetch worlds. The server may be offline or not responding.' },
+              user,
+              worlds: [],
+              features: [],
+              installed: await checkForServerInstallation(serverId),
+              server,
+              req,
+              settings,
+            });
           }
         } catch (error) {
           logger.error('Error getting worlds:', error);
-          res.status(500).json({ error: 'Failed to get worlds' });
+
+          // Render the worlds page with an error message
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
+
+          return res.render('user/server/worlds', {
+            errorMessage: { message: 'Failed to load worlds. Please try again later.' },
+            user: req.session?.user,
+            worlds: [],
+            features: [],
+            installed: false,
+            server: null,
+            req,
+            settings,
+          });
         }
       },
     );

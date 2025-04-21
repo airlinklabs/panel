@@ -43,8 +43,34 @@
       <%- include('../../components/serverTemplate') %>
 
       <div class="p-6">
-              <!-- Table of worlds -->
-      <div class="overflow-hidden shadow rounded-lg m-8 border border-neutral-800/20" id="serverTable">
+        <!-- Loading indicator -->
+        <div id="loadingIndicator" class="justify-center items-center py-8 hidden" style="display: none;">
+          <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span class="ml-3 text-neutral-400">Loading worlds...</span>
+        </div>
+
+        <!-- No worlds message -->
+        <div id="noWorldsMessage" class="<%= worlds.length > 0 ? 'hidden' : '' %> rounded-xl bg-blue-800/10 px-6 py-4 mt-8 mx-8">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-blue-400">No worlds found</h3>
+              <p class="text-sm text-blue-400/50 mt-1">
+                No Minecraft worlds were detected on this server. Worlds will appear here once they are created.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table of worlds -->
+        <div class="overflow-hidden shadow rounded-lg m-8 border border-neutral-800/20 <%= worlds.length === 0 ? 'hidden' : '' %>" id="serverTable">
         <table class="min-w-full divide-y divide-white/10">
           <thead class="bg-white/5">
             <tr>
@@ -65,12 +91,16 @@
                 </td>
 
 
-            
+
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                   <div class="flex gap-3">
-                    <a href="#" onclick="deletefile('<%= world.name %>')">
-                      <button  type="button" class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Remove</button>
-                    </a>
+                    <button
+                      type="button"
+                      class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition"
+                      onclick="confirmDeleteWorld('<%= world.name %>')"
+                    >
+                      Remove
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -84,12 +114,100 @@
   </div>
 </main>
 
+<!-- Delete World Confirmation Modal -->
+<div id="deleteWorldModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+  <div class="bg-neutral-800 rounded-xl p-6 max-w-md w-full transform scale-95 transition-transform duration-300">
+    <h3 class="text-lg font-medium text-white mb-4">Delete World</h3>
+    <p class="text-neutral-400 mb-6">Are you sure you want to delete the world <span id="worldNameToDelete" class="font-semibold text-white"></span>? This action cannot be undone.</p>
+    <div class="flex justify-end gap-3">
+      <button id="cancelDeleteBtn" class="px-4 py-2 rounded-lg bg-neutral-700 text-white hover:bg-neutral-600 transition">Cancel</button>
+      <button id="confirmDeleteBtn" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-500 transition">Delete</button>
+    </div>
+  </div>
+</div>
+
+<%- include('../../components/toast') %>
 <%- include('../../components/footer') %>
 
 <script>
-      function deletefile(fileName) {
-    fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(fileName), { method: 'DELETE' }).then(() => {
-      location.reload();
+  // Show loading indicator when checking server status
+  document.addEventListener('DOMContentLoaded', function() {
+    const wsCheck = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/server/<%= server.UUID %>/status`);
+
+    wsCheck.onopen = function() {
+      // Connection established
+    };
+
+    wsCheck.onmessage = function(event) {
+      const data = JSON.parse(event.data);
+      if (data.status === 'offline') {
+        document.getElementById('daemonIsDown').classList.remove('hidden');
+      } else {
+        document.getElementById('daemonIsDown').classList.add('hidden');
+      }
+    };
+
+    wsCheck.onerror = function() {
+      document.getElementById('daemonIsDown').classList.remove('hidden');
+    };
+  });
+
+  // Delete world confirmation modal
+  const deleteWorldModal = document.getElementById('deleteWorldModal');
+  const worldNameToDelete = document.getElementById('worldNameToDelete');
+  const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+  const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+  let currentWorldToDelete = '';
+
+  function confirmDeleteWorld(worldName) {
+    currentWorldToDelete = worldName;
+    worldNameToDelete.textContent = worldName;
+
+    // Show modal
+    deleteWorldModal.classList.remove('opacity-0', 'pointer-events-none');
+    deleteWorldModal.querySelector('div').classList.remove('scale-95');
+    deleteWorldModal.querySelector('div').classList.add('scale-100');
+  }
+
+  function closeDeleteModal() {
+    deleteWorldModal.classList.add('opacity-0', 'pointer-events-none');
+    deleteWorldModal.querySelector('div').classList.remove('scale-100');
+    deleteWorldModal.querySelector('div').classList.add('scale-95');
+  }
+
+  cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+
+  confirmDeleteBtn.addEventListener('click', function() {
+    closeDeleteModal();
+    deleteWorld(currentWorldToDelete);
+  });
+
+  function deleteWorld(worldName) {
+    // Show loading toast
+    showToast(`Deleting world ${worldName}...`, 'info');
+
+    fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(worldName), {
+      method: 'DELETE'
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(data => {
+          throw new Error(data.error || 'Failed to delete world');
+        });
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        showToast(`World ${worldName} deleted successfully`, 'success');
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        showToast(data.error || 'Failed to delete world', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error deleting world:', error);
+      showToast(error.message || 'Failed to delete world', 'error');
     });
   }
 </script>
