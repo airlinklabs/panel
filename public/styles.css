@@ -1519,6 +1519,10 @@ select {
   height: 2.25rem;
 }
 
+.h-96 {
+  height: 24rem;
+}
+
 .h-\[500px\] {
   height: 500px;
 }
@@ -2547,6 +2551,10 @@ select {
   background-color: rgb(0 0 0 / 0.2);
 }
 
+.bg-black\/50 {
+  background-color: rgb(0 0 0 / 0.5);
+}
+
 .bg-blue-50 {
   --tw-bg-opacity: 1;
   background-color: rgb(239 246 255 / var(--tw-bg-opacity, 1));
@@ -2560,6 +2568,10 @@ select {
 .bg-blue-600 {
   --tw-bg-opacity: 1;
   background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1));
+}
+
+.bg-blue-800\/10 {
+  background-color: rgb(30 64 175 / 0.1);
 }
 
 .bg-blue-900 {
@@ -2663,6 +2675,14 @@ select {
 .bg-green-600 {
   --tw-bg-opacity: 1;
   background-color: rgb(22 163 74 / var(--tw-bg-opacity, 1));
+}
+
+.bg-green-700\/20 {
+  background-color: rgb(21 128 61 / 0.2);
+}
+
+.bg-green-800\/10 {
+  background-color: rgb(22 101 52 / 0.1);
 }
 
 .bg-green-900 {
@@ -2883,6 +2903,10 @@ select {
   background-color: rgb(202 138 4 / 0.1);
 }
 
+.bg-yellow-700\/20 {
+  background-color: rgb(161 98 7 / 0.2);
+}
+
 .bg-yellow-900 {
   --tw-bg-opacity: 1;
   background-color: rgb(113 63 18 / var(--tw-bg-opacity, 1));
@@ -2891,6 +2915,26 @@ select {
 .bg-zinc-950 {
   --tw-bg-opacity: 1;
   background-color: rgb(9 9 11 / var(--tw-bg-opacity, 1));
+}
+
+.bg-blue-800 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(30 64 175 / var(--tw-bg-opacity, 1));
+}
+
+.bg-green-700 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(21 128 61 / var(--tw-bg-opacity, 1));
+}
+
+.bg-green-800 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(22 101 52 / var(--tw-bg-opacity, 1));
+}
+
+.bg-yellow-700 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(161 98 7 / var(--tw-bg-opacity, 1));
 }
 
 .bg-opacity-50 {
@@ -3352,6 +3396,10 @@ select {
   color: rgb(96 165 250 / var(--tw-text-opacity, 1));
 }
 
+.text-blue-400\/50 {
+  color: rgb(96 165 250 / 0.5);
+}
+
 .text-blue-500 {
   --tw-text-opacity: 1;
   color: rgb(59 130 246 / var(--tw-text-opacity, 1));
@@ -3424,6 +3472,10 @@ select {
 .text-green-400 {
   --tw-text-opacity: 1;
   color: rgb(74 222 128 / var(--tw-text-opacity, 1));
+}
+
+.text-green-400\/50 {
+  color: rgb(74 222 128 / 0.5);
 }
 
 .text-green-500 {

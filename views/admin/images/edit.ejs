@@ -1,0 +1,170 @@
+<%- include('../../components/header', { title: 'Edit Image' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">Edit Image: <%= image.name %></h1>
+          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-300">Edit the image configuration or export it as JSON.</p>
+        </div>
+        <!-- Action Buttons -->
+        <div class="mt-4 sm:mt-0 sm:ml-4 sm:flex-none">
+          <a href="/admin/images/export/<%= image.id %>" class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2">
+            Export JSON
+          </a>
+          <a href="/admin/images" class="border border-neutral-800/20 rounded-xl ml-2 bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2">
+            Back to Images
+          </a>
+        </div>
+      </div>
+
+      <!-- Success Message -->
+      <% if (req.query.success) { %>
+        <div class="rounded-xl bg-green-800/10 px-6 py-4 mt-8 mx-8">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-green-400">Image updated successfully</h3>
+              <p class="text-sm text-green-400/50 mt-1">
+                Your changes have been saved.
+              </p>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Edit Form -->
+      <div class="mt-8 mx-8">
+        <div class="grid grid-cols-1 gap-6">
+          <!-- Basic Information -->
+          <div class="bg-white dark:bg-neutral-800 shadow-md rounded-xl p-6 border border-neutral-800/20">
+            <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-4">Basic Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="name" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Name</label>
+                <input type="text" id="name" name="name" value="<%= image.name %>" class="mt-1 block w-full rounded-md border-neutral-300 dark:border-neutral-700 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 dark:bg-neutral-700 dark:text-white sm:text-sm p-2">
+              </div>
+              <div>
+                <label for="author" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Author</label>
+                <input type="text" id="author" name="author" value="<%= image.author %>" class="mt-1 block w-full rounded-md border-neutral-300 dark:border-neutral-700 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 dark:bg-neutral-700 dark:text-white sm:text-sm p-2">
+              </div>
+              <div>
+                <label for="authorName" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Author Name</label>
+                <input type="text" id="authorName" name="authorName" value="<%= image.authorName %>" class="mt-1 block w-full rounded-md border-neutral-300 dark:border-neutral-700 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 dark:bg-neutral-700 dark:text-white sm:text-sm p-2">
+              </div>
+              <div>
+                <label for="startup" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Startup Command</label>
+                <input type="text" id="startup" name="startup" value="<%= image.startup %>" class="mt-1 block w-full rounded-md border-neutral-300 dark:border-neutral-700 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 dark:bg-neutral-700 dark:text-white sm:text-sm p-2">
+              </div>
+              <div class="md:col-span-2">
+                <label for="description" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Description</label>
+                <textarea id="description" name="description" rows="3" class="mt-1 block w-full rounded-md border-neutral-300 dark:border-neutral-700 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 dark:bg-neutral-700 dark:text-white sm:text-sm p-2"><%= image.description %></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- JSON Editor -->
+          <div class="bg-white dark:bg-neutral-800 shadow-md rounded-xl p-6 border border-neutral-800/20">
+            <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-4">JSON Configuration</h2>
+            <p class="text-sm text-neutral-500 dark:text-neutral-400 mb-4">Edit the JSON configuration directly. Make sure to maintain valid JSON format.</p>
+            <div id="jsonEditor" class="w-full h-96 border border-neutral-300 dark:border-neutral-700 rounded-md"></div>
+            <div class="mt-4 flex justify-end">
+              <button id="saveButton" type="button" class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2">
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast')%>
+
+<!-- Monaco Editor -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+<script>
+  require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
+  require(['vs/editor/editor.main'], function() {
+    // Initialize the editor
+    const editor = monaco.editor.create(document.getElementById('jsonEditor'), {
+      value: `<%- imageJson.replace(/\n/g, '\\n').replace(/"/g, '\\"') %>`,
+      language: 'json',
+      theme: document.documentElement.classList.contains('dark') ? 'vs-dark' : 'vs',
+      automaticLayout: true,
+      minimap: { enabled: false },
+      scrollBeyondLastLine: false,
+      fontSize: 14,
+      tabSize: 2
+    });
+
+    // Handle form submission
+    document.getElementById('saveButton').addEventListener('click', function() {
+      try {
+        // Get the JSON from the editor
+        const jsonValue = editor.getValue();
+        const parsedJson = JSON.parse(jsonValue);
+        
+        // Update form fields with values from JSON
+        document.getElementById('name').value = parsedJson.name || '';
+        document.getElementById('author').value = parsedJson.author || '';
+        document.getElementById('authorName').value = parsedJson.authorName || '';
+        document.getElementById('startup').value = parsedJson.startup || '';
+        document.getElementById('description').value = parsedJson.description || '';
+        
+        // Submit the JSON to the server
+        fetch('/admin/images/edit/<%= image.id %>', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: jsonValue
+        })
+        .then(response => {
+          if (response.ok) {
+            window.location.href = '/admin/images/edit/<%= image.id %>?success=true';
+          } else {
+            return response.json().then(data => {
+              throw new Error(data.error || 'Failed to update image');
+            });
+          }
+        })
+        .catch(error => {
+          showToast(error.message || 'Failed to update image', 'error');
+        });
+      } catch (error) {
+        showToast('Invalid JSON format: ' + error.message, 'error');
+      }
+    });
+
+    // Update JSON when form fields change
+    const formFields = ['name', 'author', 'authorName', 'startup', 'description'];
+    formFields.forEach(field => {
+      document.getElementById(field).addEventListener('change', function() {
+        try {
+          const jsonValue = editor.getValue();
+          const parsedJson = JSON.parse(jsonValue);
+          
+          parsedJson[field] = this.value;
+          
+          editor.setValue(JSON.stringify(parsedJson, null, 2));
+        } catch (error) {
+          showToast('Invalid JSON format: ' + error.message, 'error');
+        }
+      });
+    });
+  });
+</script>
+
+<%- include('../../components/footer') %>
