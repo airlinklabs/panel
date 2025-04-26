@@ -204,13 +204,45 @@
         return;
       }
 
-      // Add each port as an option
+      // Get ports that are already in use by existing servers
+      const usedPorts = new Set();
+      if (node.servers && node.servers.length > 0) {
+        node.servers.forEach(server => {
+          try {
+            if (server.Ports) {
+              const ports = JSON.parse(server.Ports);
+              ports.forEach(portInfo => {
+                const port = parseInt(portInfo.Port.split(':')[0]);
+                if (!isNaN(port)) {
+                  usedPorts.add(port);
+                }
+              });
+            }
+          } catch (e) {
+            console.error('Error parsing server ports:', e);
+          }
+        });
+      }
+
+      // Add each available port as an option (filtering out used ports)
+      let availablePortsCount = 0;
       node.parsedPorts.forEach(port => {
-        const option = document.createElement('option');
-        option.value = `${port}:${port}`;
-        option.textContent = `${nodeAddress}:${port}`;
-        serverPortsSelect.appendChild(option);
+        if (!usedPorts.has(port)) {
+          const option = document.createElement('option');
+          option.value = `${port}:${port}`;
+          option.textContent = `${nodeAddress}:${port}`;
+          serverPortsSelect.appendChild(option);
+          availablePortsCount++;
+        }
       });
+
+      // If all ports are in use, show a message
+      if (availablePortsCount === 0 && node.parsedPorts.length > 0) {
+        const option = document.createElement('option');
+        option.disabled = true;
+        option.textContent = 'All allocated ports are currently in use';
+        serverPortsSelect.appendChild(option);
+      }
     }
 
     function updateDockerImages() {

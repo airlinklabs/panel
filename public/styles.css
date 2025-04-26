@@ -2972,6 +2972,15 @@ select {
   background-color: rgb(38 38 38 / 0.1);
 }
 
+.bg-amber-600\/20 {
+  background-color: rgb(217 119 6 / 0.2);
+}
+
+.bg-amber-700 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(180 83 9 / var(--tw-bg-opacity, 1));
+}
+
 .bg-opacity-50 {
   --tw-bg-opacity: 0.5;
 }
@@ -3698,6 +3707,10 @@ select {
 
 .opacity-70 {
   opacity: 0.7;
+}
+
+.opacity-50 {
+  opacity: 0.5;
 }
 
 .shadow {
@@ -4727,6 +4740,10 @@ select {
 
 .dark\:bg-yellow-900\/20:is(.dark *) {
   background-color: rgb(113 63 18 / 0.2);
+}
+
+.dark\:bg-amber-700\/20:is(.dark *) {
+  background-color: rgb(180 83 9 / 0.2);
 }
 
 .dark\:text-amber-400:is(.dark *) {

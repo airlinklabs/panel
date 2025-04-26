@@ -31,9 +31,10 @@ type NodeWithInstances = {
   key: string;
   createdAt: Date;
   instances: any[];
+  servers?: any[]; // For port allocation UI
 }
 
-async function listNodes(res: Response) {
+async function listNodes(res: Response, includeServers = false) {
   try {
     const nodes = await prisma.node.findMany();
     const nodesWithStatus = [];
@@ -44,10 +45,18 @@ async function listNodes(res: Response) {
           nodeId: node.id,
         },
       });
+
+      // Create a node object with instances
       const nodeWithInstances: NodeWithInstances = {
         ...node,
         instances: instances || []
       };
+
+      // Add servers data if requested (for port allocation UI)
+      if (includeServers) {
+        nodeWithInstances.servers = instances;
+      }
+
       nodesWithStatus.push(await checkNodeStatus(nodeWithInstances));
     }
 
@@ -131,7 +140,8 @@ const adminModule: Module = {
       '/admin/nodes/list',
       isAuthenticated(true),
       async (_req: Request, res: Response) => {
-        const listNode = await listNodes(res);
+        // Include servers data for port allocation UI
+        const listNode = await listNodes(res, true);
         res.json(listNode);
       },
     );
@@ -318,11 +328,19 @@ const adminModule: Module = {
 
           const nodeId = parseInt(req.params.id);
 
-          const node = await prisma.node.findUnique({ where: { id: nodeId } });
+          // Get node with its servers for port allocation UI
+          const node = await prisma.node.findUnique({
+            where: { id: nodeId },
+            include: {
+              servers: true
+            }
+          });
+
           if (!node) {
             res.status(404).json({ message: 'Node not found.' });
             return;
           }
+
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
@@ -384,9 +402,9 @@ const adminModule: Module = {
                 throw new Error('Each port must be a number between 1024 and 65535');
               }
             }
-          } catch (error) {
+          } catch (error: any) {
             res.status(400).json({
-              message: 'Invalid allocated ports format: ' + error.message,
+              message: 'Invalid allocated ports format: ' + (error.message || 'Unknown error'),
             });
             return;
           }

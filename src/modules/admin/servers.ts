@@ -120,7 +120,7 @@ const adminModule: Module = {
           return;
         }
 
-        // Validate that the selected port is allocated to the node
+        // Validate that the selected port is allocated to the node and not already in use
         try {
           const node = await prisma.node.findUnique({
             where: { id: parseInt(nodeId) }
@@ -149,6 +149,30 @@ const adminModule: Module = {
           if (!allocatedPorts.includes(portNumber)) {
             res.status(400).send(`Port ${portNumber} is not allocated to the selected node`);
             return;
+          }
+
+          // Check if the port is already in use by another server on this node
+          const existingServers = await prisma.server.findMany({
+            where: {
+              nodeId: parseInt(nodeId)
+            }
+          });
+
+          // Check each server's ports to see if our port is already in use
+          for (const server of existingServers) {
+            try {
+              const serverPorts = JSON.parse(server.Ports);
+              for (const portInfo of serverPorts) {
+                const usedPort = parseInt(portInfo.Port.split(':')[0]);
+                if (usedPort === portNumber) {
+                  res.status(400).send(`Port ${portNumber} is already in use by server "${server.name}"`);
+                  return;
+                }
+              }
+            } catch (error) {
+              logger.error(`Error parsing ports for server ${server.id}:`, error);
+              // Continue checking other servers even if one has invalid port data
+            }
           }
         } catch (error) {
           logger.error('Error validating port allocation:', error);

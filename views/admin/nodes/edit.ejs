@@ -89,6 +89,30 @@
   // Initialize allocated ports
   let allocatedPorts = <%= node.allocatedPorts ? node.allocatedPorts : '[]' %>;
 
+  // Get ports that are already in use by existing servers
+  function getUsedPorts() {
+    const usedPorts = new Set();
+
+    // Check if node has servers
+    <% if (node.servers && node.servers.length > 0) { %>
+      <% node.servers.forEach(function(server) { %>
+        try {
+          const ports = JSON.parse('<%= server.Ports %>');
+          ports.forEach(portInfo => {
+            const port = parseInt(portInfo.Port.split(':')[0]);
+            if (!isNaN(port)) {
+              usedPorts.add(port);
+            }
+          });
+        } catch (e) {
+          console.error('Error parsing server ports:', e);
+        }
+      <% }); %>
+    <% } %>
+
+    return usedPorts;
+  }
+
   // Render allocated ports
   function renderAllocatedPorts() {
     const portsList = document.getElementById('allocatedPortsList');
@@ -102,21 +126,41 @@
       return;
     }
 
+    // Get ports that are already in use
+    const usedPorts = getUsedPorts();
+
     allocatedPorts.forEach(port => {
       const portTag = document.createElement('div');
-      portTag.className = 'flex items-center justify-between rounded-lg bg-neutral-800/10 dark:bg-neutral-700/20 px-3 py-1.5 text-sm';
+      const isUsed = usedPorts.has(port);
+
+      // Add different styling for used ports
+      portTag.className = `flex items-center justify-between rounded-lg ${isUsed ? 'bg-amber-600/10 dark:bg-amber-700/20' : 'bg-neutral-800/10 dark:bg-neutral-700/20'} px-3 py-1.5 text-sm`;
 
       const portText = document.createElement('span');
-      portText.className = 'text-neutral-800 dark:text-neutral-300';
-      portText.textContent = port;
+      portText.className = isUsed ? 'text-amber-600 dark:text-amber-400 flex items-center' : 'text-neutral-800 dark:text-neutral-300';
+
+      // Add indicator for used ports
+      if (isUsed) {
+        portText.innerHTML = `${port} <span class="ml-2 text-xs bg-amber-600/20 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded">In use</span>`;
+      } else {
+        portText.textContent = port;
+      }
 
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'ml-2 text-neutral-500 hover:text-red-500 transition-colors';
       deleteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>';
-      deleteBtn.onclick = (e) => {
-        e.preventDefault();
-        removePort(port);
-      };
+
+      // Disable delete button for ports that are in use
+      if (isUsed) {
+        deleteBtn.disabled = true;
+        deleteBtn.title = 'Cannot remove port that is in use by a server';
+        deleteBtn.className += ' opacity-50 cursor-not-allowed';
+      } else {
+        deleteBtn.onclick = (e) => {
+          e.preventDefault();
+          removePort(port);
+        };
+      }
 
       portTag.appendChild(portText);
       portTag.appendChild(deleteBtn);
@@ -160,6 +204,13 @@
 
   // Remove port function
   function removePort(port) {
+    // Check if port is in use
+    const usedPorts = getUsedPorts();
+    if (usedPorts.has(port)) {
+      showToast('Cannot remove port that is in use by a server', 'error');
+      return;
+    }
+
     allocatedPorts = allocatedPorts.filter(p => p !== port);
     renderAllocatedPorts();
   }
