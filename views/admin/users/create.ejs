@@ -66,11 +66,14 @@
 
 <script>
   document.getElementById('createuserBtn').addEventListener('click', async () => {
+    // Get the admin status as a boolean
+    const isAdmin = document.getElementById('userIsAdminSwitch').checked;
+
     const userData = {
       email: document.getElementById('userEmail').value,
       username: document.getElementById('userUsername').value,
       password: document.getElementById('userPassword').value,
-      isAdmin: document.getElementById('userIsAdminSwitch').checked
+      isAdmin: isAdmin // This is a boolean value
     };
 
     // Validate required fields
@@ -100,8 +103,9 @@
           }, 1000);
         }, 500);
       } else {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
         loader.close();
-        throw new Error('Failed to create user');
+        throw new Error(errorData.message || 'Failed to create user');
       }
     } catch (error) {
       loader.close();

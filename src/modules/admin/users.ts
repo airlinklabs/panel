@@ -92,8 +92,7 @@ const adminModule: Module = {
       '/admin/users/create-user',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        let isAdmin = req.body.isAdmin;
-        const { email, username, password } = req.body;
+        const { email, username, password, isAdmin } = req.body;
 
         if (!email || !username || !password) {
           res.status(400).json({
@@ -102,7 +101,11 @@ const adminModule: Module = {
           return;
         }
 
-        isAdmin = isAdmin === 'true';
+        // Convert isAdmin to boolean if it's not already
+        const isAdminBool = typeof isAdmin === 'boolean' ? isAdmin : isAdmin === 'true';
+
+        // Log the admin status for debugging
+        logger.info(`Creating user with admin status: ${isAdminBool}, original value: ${isAdmin}, type: ${typeof isAdmin}`);
 
         try {
           const existingUser = await prisma.users.findFirst({
@@ -124,7 +127,7 @@ const adminModule: Module = {
                 email,
                 username,
                 password: await bcrypt.hash(password, 10),
-                isAdmin,
+                isAdmin: isAdminBool,
               },
             });
           }
