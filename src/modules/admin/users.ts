@@ -10,7 +10,11 @@ const prisma = new PrismaClient();
 
 async function listUsers(res: Response) {
   try {
-    const users = await prisma.users.findMany();
+    const users = await prisma.users.findMany({
+      include: {
+        servers: true
+      }
+    });
 
     return users;
   } catch (error) {

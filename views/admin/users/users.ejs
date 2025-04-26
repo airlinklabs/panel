@@ -21,9 +21,9 @@
           </div>
         </div>
       </div>
-      
+
       <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
-       
+
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.totalUsers %></h2>
           <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= users.length %></p>
@@ -52,7 +52,7 @@
               <div class="flex-shrink-0 ml-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mt-2 text-emerald-400">
                   <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-                </svg>                
+                </svg>
               </div>
               <div class="ml-5">
                 <h3 class="text-sm font-medium text-emerald-400"><%= req.translations.success %>!</h3>
@@ -95,12 +95,12 @@
                   </div>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400">
-                  <div class="mt-1 ml-2 inline-flex items-center rounded-md 
-                  <%= user.isAdmin ? 'bg-emerald-600/10 text-emerald-400 ring-emerald-600/20' : 'bg-amber-600/10 text-amber-400 ring-red-600/20' %> 
+                  <div class="mt-1 ml-2 inline-flex items-center rounded-md
+                  <%= user.isAdmin ? 'bg-emerald-600/10 text-emerald-400 ring-emerald-600/20' : 'bg-amber-600/10 text-amber-400 ring-red-600/20' %>
                   px-2 py-1 text-xs font-medium ring-1 ring-inset">
                     <%= user.isAdmin ? 'Admin' : 'User' %>
                   </div></td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= users.length[user.id] || 0 %></td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= user.servers ? user.servers.length : 0 %></td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                   <div class="flex gap-3">
                     <a href="./users/view/<%= user.id %>">
