@@ -44,18 +44,18 @@
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-lg font-medium text-neutral-900 dark:text-white">
                 <a class="text-neutral-300 hover:text-neutral-200 transition" href="/server/<%= server.UUID %>/files">/app/data/</a>
-              <% 
-                  if (file.path) { 
+              <%
+                  if (file.path) {
                       const parts = file.path.split('/');
                       let currentPath = '';
-          
+
                       parts.forEach((part, index) => {
                           currentPath += part;
-          
+
                           if (index < parts.length - 1) {
                               %>
                               <a href="/server/<%= server.UUID %>/files?path=<%= currentPath %>" class="text-neutral-300 hover:text-neutral-200 transition"><%= part %></a>/
-                              <% 
+                              <%
                               currentPath += '/';
                           } else {
                               %>
@@ -67,12 +67,41 @@
               %>
               </h2>
               <div class="flex space-x-2">
-                <button id="saveBtn" class="px-4 py-2 bg-white text-black rounded-xl hover:bg-blue-700">
+                <button id="saveBtn" class="px-4 py-2 bg-white dark:bg-neutral-700 text-neutral-800 dark:text-white rounded-xl hover:bg-blue-500 hover:text-white dark:hover:bg-blue-600 transition-colors duration-200 shadow-sm border border-neutral-300 dark:border-neutral-600 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg>
                   Save
                 </button>
               </div>
             </div>
-            <div class="border border-neutral-200/80 rounded-lg h-[500px] p-2" id="editor-container"></div>
+            <div class="border border-neutral-300 dark:border-neutral-600 rounded-lg shadow-inner overflow-hidden" id="editor-container-wrapper">
+              <div class="h-[490px]" id="editor-container"></div>
+              <div class="flex justify-between items-center px-3 py-1.5 bg-neutral-100 dark:bg-neutral-700 border-t border-neutral-300 dark:border-neutral-600 text-xs text-neutral-500 dark:text-neutral-400 font-mono">
+                <div class="flex items-center space-x-3">
+                  <div id="editor-status">Line: 1, Column: 1</div>
+                  <div id="file-info" class="px-2 py-0.5 bg-neutral-200 dark:bg-neutral-600 rounded text-neutral-600 dark:text-neutral-300">Loading...</div>
+                </div>
+                <div class="flex space-x-4">
+                  <div class="flex items-center">
+                    <span class="opacity-75 mr-1.5">Word Wrap:</span>
+                    <button id="toggle-wordwrap" class="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-600 hover:bg-neutral-300 dark:hover:bg-neutral-500 transition-colors">Off</button>
+                  </div>
+                  <div class="flex items-center">
+                    <span class="opacity-75 mr-1.5">Minimap:</span>
+                    <button id="toggle-minimap" class="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-600 hover:bg-neutral-300 dark:hover:bg-neutral-500 transition-colors">Off</button>
+                  </div>
+                  <div class="flex items-center">
+                    <span class="opacity-75 mr-1.5">Theme:</span>
+                    <button id="toggle-theme" class="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-600 hover:bg-neutral-300 dark:hover:bg-neutral-500 transition-colors">Auto</button>
+                  </div>
+                  <div class="flex items-center">
+                    <span class="opacity-75 mr-1.5">Save:</span>
+                    <span class="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-600">Ctrl+S</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -109,18 +138,192 @@
 <script>
   require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs' } });
   let editor;
+  let wordWrapEnabled = false;
+  let minimapEnabled = false;
+  let themeMode = 'auto'; // 'auto', 'light', or 'dark'
 
   require(['vs/editor/editor.main'], function () {
+    // Define custom themes
+    monaco.editor.defineTheme('custom-dark', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        { token: 'comment', foreground: '6A9955', fontStyle: 'italic' },
+        { token: 'keyword', foreground: 'C586C0', fontStyle: 'bold' },
+        { token: 'string', foreground: 'CE9178' }
+      ],
+      colors: {
+        'editor.background': '#1E1E1E',
+        'editor.foreground': '#D4D4D4',
+        'editor.lineHighlightBackground': '#2A2A2A',
+        'editor.selectionBackground': '#264F78',
+        'editor.selectionHighlightBackground': '#2D3B40',
+        'editorCursor.foreground': '#AEAFAD',
+        'editorWhitespace.foreground': '#3B3B3B'
+      }
+    });
+
+    monaco.editor.defineTheme('custom-light', {
+      base: 'vs',
+      inherit: true,
+      rules: [
+        { token: 'comment', foreground: '008000', fontStyle: 'italic' },
+        { token: 'keyword', foreground: '0000FF', fontStyle: 'bold' },
+        { token: 'string', foreground: 'A31515' }
+      ],
+      colors: {
+        'editor.background': '#FFFFFF',
+        'editor.foreground': '#000000',
+        'editor.lineHighlightBackground': '#F5F5F5',
+        'editor.selectionBackground': '#ADD6FF',
+        'editor.selectionHighlightBackground': '#E5EBF1',
+        'editorCursor.foreground': '#000000',
+        'editorWhitespace.foreground': '#DDDDDD'
+      }
+    });
+
+    // Create editor with enhanced options
     editor = monaco.editor.create(document.getElementById('editor-container'), {
       value: `<%- file.content.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$') %>`,
       language: '<%= language %>',
-      theme: 'vs-dark',
+      theme: document.documentElement.classList.contains('dark') ? 'custom-dark' : 'custom-light',
       automaticLayout: true,
+      lineNumbers: 'on',
+      roundedSelection: true,
+      scrollBeyondLastLine: false,
+      renderLineHighlight: 'all',
+      cursorBlinking: 'smooth',
+      cursorSmoothCaretAnimation: 'on',
+      minimap: {
+        enabled: minimapEnabled,
+        scale: 1,
+        showSlider: 'mouseover'
+      },
+      wordWrap: wordWrapEnabled ? 'on' : 'off',
+      fontSize: 14,
+      fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+      fontLigatures: true,
+      contextmenu: true,
+      rulers: [],
+      bracketPairColorization: {
+        enabled: true
+      },
+      padding: {
+        top: 10
+      },
+      folding: true,
+      foldingStrategy: 'auto',
+      matchBrackets: 'always',
+      autoIndent: 'full',
+      formatOnPaste: true,
+      formatOnType: true,
+      renderWhitespace: 'selection',
+      renderControlCharacters: true,
+      renderIndentGuides: true,
+      renderFinalNewline: true,
+      colorDecorators: true,
+      suggest: {
+        showMethods: true,
+        showFunctions: true,
+        showConstructors: true,
+        showFields: true,
+        showVariables: true,
+        showClasses: true,
+        showStructs: true,
+        showInterfaces: true,
+        showModules: true,
+        showProperties: true,
+        showEvents: true,
+        showOperators: true,
+        showUnits: true,
+        showValues: true,
+        showConstants: true,
+        showEnums: true,
+        showEnumMembers: true,
+        showKeywords: true,
+        showWords: true,
+        showColors: true,
+        showFiles: true,
+        showReferences: true,
+        showFolders: true,
+        showTypeParameters: true,
+        showSnippets: true
+      }
     });
+
+    // Update status bar with cursor position
+    editor.onDidChangeCursorPosition(function(e) {
+      document.getElementById('editor-status').textContent = `Line: ${e.position.lineNumber}, Column: ${e.position.column}`;
+    });
+
+    // Set file info in the status bar
+    document.getElementById('file-info').textContent = '<%= fileExtension %>' || 'plaintext';
+
+    // Toggle word wrap
+    document.getElementById('toggle-wordwrap').addEventListener('click', function() {
+      wordWrapEnabled = !wordWrapEnabled;
+      editor.updateOptions({ wordWrap: wordWrapEnabled ? 'on' : 'off' });
+      this.textContent = wordWrapEnabled ? 'On' : 'Off';
+    });
+
+    // Toggle minimap
+    document.getElementById('toggle-minimap').addEventListener('click', function() {
+      minimapEnabled = !minimapEnabled;
+      editor.updateOptions({ minimap: { enabled: minimapEnabled } });
+      this.textContent = minimapEnabled ? 'On' : 'Off';
+    });
+
+    // Function to update editor theme
+    function updateEditorTheme() {
+      let theme;
+      if (themeMode === 'auto') {
+        theme = document.documentElement.classList.contains('dark') ? 'custom-dark' : 'custom-light';
+      } else if (themeMode === 'dark') {
+        theme = 'custom-dark';
+      } else {
+        theme = 'custom-light';
+      }
+      editor.updateOptions({ theme: theme });
+    }
+
+    // Toggle theme button
+    document.getElementById('toggle-theme').addEventListener('click', function() {
+      if (themeMode === 'auto') {
+        themeMode = 'light';
+      } else if (themeMode === 'light') {
+        themeMode = 'dark';
+      } else {
+        themeMode = 'auto';
+      }
+      this.textContent = themeMode.charAt(0).toUpperCase() + themeMode.slice(1);
+      updateEditorTheme();
+    });
+
+    // Adjust theme when system theme changes
+    const darkModeObserver = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.attributeName === 'class' && themeMode === 'auto') {
+          updateEditorTheme();
+        }
+      });
+    });
+
+    darkModeObserver.observe(document.documentElement, { attributes: true });
   });
 
 
   document.getElementById('saveBtn').addEventListener('click', async () => {
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    saveBtn.classList.add('opacity-75');
+    saveBtn.innerHTML = `
+      <svg class="animate-spin h-4 w-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Saving...
+    `;
+
     const content = editor.getValue();
     try {
       const response = await fetch(`/server/<%= server.UUID %>/files/<%= file.path %>`, {
@@ -137,32 +340,64 @@
     } catch (error) {
       console.error('Error saving file:', error);
       showToast('Failed to save file', 'error');
+    } finally {
+      // Restore button state
+      saveBtn.disabled = false;
+      saveBtn.classList.remove('opacity-75');
+      saveBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+        </svg>
+        Save
+      `;
     }
   });
 
   document.addEventListener('keydown', async (event) => {
-  if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-    event.preventDefault();
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
 
-    const content = editor.getValue();
-    try {
-      const response = await fetch(`/server/<%= server.UUID %>/files/<%= file.path %>/save`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content }),
-      });
+      // Show saving state in the button
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.classList.add('opacity-75');
+      saveBtn.innerHTML = `
+        <svg class="animate-spin h-4 w-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Saving...
+      `;
 
-      if (!response.ok) throw new Error('Failed to save file');
+      const content = editor.getValue();
+      try {
+        const response = await fetch(`/server/<%= server.UUID %>/files/<%= file.path %>/save`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ content }),
+        });
 
-      showToast('File saved successfully!', 'success');
-    } catch (error) {
-      console.error('Error saving file:', error);
-      showToast('Failed to save file', 'error');
+        if (!response.ok) throw new Error('Failed to save file');
+
+        showToast('File saved successfully!', 'success');
+      } catch (error) {
+        console.error('Error saving file:', error);
+        showToast('Failed to save file', 'error');
+      } finally {
+        // Restore button state
+        saveBtn.disabled = false;
+        saveBtn.classList.remove('opacity-75');
+        saveBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+          </svg>
+          Save
+        `;
+      }
     }
-  }
-});
+  });
 </script>
 
 <%- include('../../components/footer') %>
