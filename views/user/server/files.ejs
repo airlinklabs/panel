@@ -42,14 +42,7 @@ function getFileIcon(category) {
     <div class="flex-1 p-6 overflow-y-auto pt-16">
       <!-- Page Header -->
       <div class="sm:flex sm:items-center px-8 pt-4">
-        <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">
-            <%= server.name.charAt(0).toUpperCase() + server.name.slice(1) %>
-          </h1>
-          <p class="mt-1 tracking-tight text-sm text-neutral-500">
-            <%= server.description %>
-          </p>
-        </div>
+        <%- include('../../components/serverHeader') %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex gap-2.5">
           <button id="createFile" onclick="openCreateFileModal()" type="button"
               class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">

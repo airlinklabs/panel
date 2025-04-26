@@ -40,14 +40,7 @@
     <div class="flex-1 p-6 overflow-y-auto pt-16">
       <!-- Page Header -->
       <div class="sm:flex sm:items-center px-8 pt-4">
-        <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">
-            <%= server.name.charAt(0).toUpperCase() + server.name.slice(1) %>
-          </h1>
-          <p class="mt-1 tracking-tight text-sm text-neutral-500">
-            <%= server.description %>
-          </p>
-        </div>
+        <%- include('../../components/serverHeader') %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex gap-2.5">
             <button id="startButton" type="button"
                 class="w-full md:w-auto rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
