@@ -1,0 +1,53 @@
+{
+  "name": "Cryptocurrency Miner Scanner",
+  "description": "Scans for potential cryptocurrency mining software",
+  "version": "1.0.0",
+  "patterns": [
+    {
+      "type": "filename",
+      "pattern": "xmrig|ethminer|cgminer|cpuminer|minerd|bfgminer|easyminer|nicehash|minergate",
+      "description": "Known cryptocurrency miner software"
+    },
+    {
+      "type": "extension",
+      "pattern": "\\.sh$",
+      "content": "cryptonight|monero|ethereum|bitcoin|stratum\\+tcp|pool\\.minergate|xmr-stak|hashrate",
+      "description": "Shell script with cryptocurrency mining references"
+    },
+    {
+      "type": "extension",
+      "pattern": "\\.jar$",
+      "size_less_than": 100000,
+      "size_greater_than": 5000,
+      "content": "stratum\\+tcp|minergate|nanopool|dwarfpool|supportxmr|hashrate|cryptonight|monero|litecoin",
+      "description": "Suspicious JAR file with mining-related content"
+    },
+    {
+      "type": "filename",
+      "pattern": "^(?!.*libraries/).*miner.*\\.jar$",
+      "description": "JAR file with 'miner' in the name (excluding libraries directory)"
+    },
+    {
+      "type": "filename",
+      "pattern": "^(?!.*libraries/).*coin.*\\.jar$",
+      "description": "JAR file with 'coin' in the name (excluding libraries directory)"
+    },
+    {
+      "type": "filename",
+      "pattern": "^(?!.*libraries/).*crypto.*\\.jar$",
+      "description": "JAR file with 'crypto' in the name (excluding libraries directory)"
+    },
+    {
+      "type": "filename",
+      "pattern": "^(?!.*libraries/).*hash.*\\.jar$",
+      "description": "JAR file with 'hash' in the name (excluding libraries directory)"
+    },
+    {
+      "type": "extension",
+      "pattern": "\\.jar$",
+      "size_less_than": 50000,
+      "content": "java\\.lang\\.Runtime.*exec|ProcessBuilder.*start",
+      "description": "Small JAR file with process execution capabilities (potential backdoor)"
+    }
+  ]
+}

@@ -31,7 +31,7 @@
               <div class="flex-shrink-0 ml-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mt-2 text-emerald-400">
                   <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-                </svg>                
+                </svg>
               </div>
               <div class="ml-5">
                 <h3 class="text-sm font-medium text-emerald-400"><%= req.translations.success %>!</h3>
@@ -93,19 +93,37 @@
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= server.node.address %>:<%= JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.Port.split(':')[1]).pop() %>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400">
-                    <div class="mt-1 ml-2 inline-flex items-center rounded-md 
+                    <div class="mt-1 ml-2 inline-flex items-center rounded-md
                     <%= server.Suspended ? 'bg-yellow-600/10 text-yellow-400 ring-yellow-600/20' : 'bg-emerald-600/10 text-emerald-400 ring-emerald-600/20' %>
                     px-2 py-1 text-xs font-medium ring-1 ring-inset">
                     <%= server.Suspended ? 'Suspended' : 'Active' %>
                     </div></td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                   <div class="flex gap-3">
-                    <a href="./server/<%= server.id %>">
-                      <button type="button" class="rounded-xl bg-white border border-neutral-800/20 hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">Edit</button>
+                    <a href="./server/<%= server.id %>" class="group relative">
+                      <button type="button" class="rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/30 px-3 py-2 text-center text-sm font-medium shadow-lg hover:bg-neutral-800 dark:hover:bg-neutral-700 transition-all duration-200" aria-label="Edit Server">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-300">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                        </svg>
+                      </button>
+                      <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-auto px-2.5 py-1 bg-black/80 text-white text-xs rounded pointer-events-none opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity duration-300 z-50 after:content-[''] after:absolute after:top-full after:left-1/2 after:-ml-1 after:border-4 after:border-transparent after:border-t-black/80">Edit Server</span>
                     </a>
-                    <a href="/admin/server/delete/<%= server.id %>">
-                      <button  type="button" class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Remove</button>
-                    </a>
+                    <div class="group relative">
+                      <button type="button" onclick="openRadarScanModal('<%= server.id %>', '<%= server.name %>')" class="rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/30 px-3 py-2 text-center text-sm font-medium shadow-lg hover:bg-neutral-800 dark:hover:bg-neutral-700 transition-all duration-200" aria-label="Run Radar Scan">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-300">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-12-3a3 3 0 0 1 3-3m0 0a3 3 0 0 1 3 3m-3-3v1.5m0 0a3 3 0 0 1-3 3m3-3a3 3 0 0 1 3-3m-3 3a3 3 0 0 1-3-3m3 3h1.5m-1.5 0a3 3 0 0 1-3 3m3-3a3 3 0 0 1 3 3m-3 3v-1.5m0 0a3 3 0 0 1-3-3m3 3a3 3 0 0 1 3-3" />
+                        </svg>
+                      </button>
+                      <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-auto px-2.5 py-1 bg-black/80 text-white text-xs rounded pointer-events-none opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity duration-300 z-50 after:content-[''] after:absolute after:top-full after:left-1/2 after:-ml-1 after:border-4 after:border-transparent after:border-t-black/80">Run Radar Scan</span>
+                    </div>
+                    <div class="group relative">
+                      <button type="button" onclick="confirmDelete('<%= server.id %>', '<%= server.name %>')" class="rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/30 px-3 py-2 text-center text-sm font-medium shadow-lg hover:bg-red-900/80 transition-all duration-200" aria-label="Delete Server">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-red-400">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                        </svg>
+                      </button>
+                      <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-auto px-2.5 py-1 bg-black/80 text-white text-xs rounded pointer-events-none opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity duration-300 z-50 after:content-[''] after:absolute after:top-full after:left-1/2 after:-ml-1 after:border-4 after:border-transparent after:border-t-black/80">Delete Server</span>
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -119,10 +137,307 @@
 
 <%- include('../../components/toast') %>
 
+<!-- Delete Confirmation Modal -->
+<div id="deleteConfirmModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" id="deleteConfirmModalBackdrop"></div>
+    <div class="relative bg-white dark:bg-neutral-800 rounded-xl shadow-xl max-w-md w-full p-6 overflow-hidden transform transition-all">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-medium text-neutral-800 dark:text-white" id="deleteConfirmModalTitle">Delete Server</h3>
+        <button type="button" class="text-neutral-400 hover:text-neutral-500" onclick="closeDeleteConfirmModal()">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="mb-6">
+        <p class="text-sm text-neutral-500 mb-2">Are you sure you want to delete this server?</p>
+        <p class="text-sm font-medium text-neutral-800 dark:text-white" id="deleteServerName"></p>
+        <p class="text-xs text-red-500 mt-4">This action cannot be undone. All server data will be permanently deleted.</p>
+      </div>
+      <div class="flex justify-end gap-3">
+        <button type="button" class="rounded-xl bg-white border border-neutral-800/20 hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition" onclick="closeDeleteConfirmModal()">Cancel</button>
+        <button type="button" id="confirmDeleteButton" class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+          </svg>
+          Delete Server
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Radar Scan Modal -->
+<div id="radarScanModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" id="radarScanModalBackdrop"></div>
+    <div class="relative bg-white dark:bg-neutral-800 rounded-xl shadow-xl max-w-lg w-full p-6 overflow-hidden transform transition-all">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-medium text-neutral-800 dark:text-white" id="radarScanModalTitle">Run Radar Scan</h3>
+        <button type="button" class="text-neutral-400 hover:text-neutral-500" onclick="closeRadarScanModal()">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="mb-4">
+        <p class="text-sm text-neutral-500 mb-4">Select a radar script to scan the server volume:</p>
+        <div class="mb-4">
+          <label for="scriptSelect" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Script:</label>
+          <select id="scriptSelect" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5">
+            <option value="">Loading scripts...</option>
+          </select>
+        </div>
+        <div id="scriptDescription" class="text-sm text-neutral-500 italic mb-4"></div>
+      </div>
+      <div id="scanResults" class="mb-4 max-h-60 overflow-y-auto hidden">
+        <h4 class="text-md font-medium text-neutral-800 dark:text-white mb-2">Scan Results</h4>
+        <div id="resultsContent" class="text-sm text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-700/50 rounded-lg p-3"></div>
+      </div>
+      <div class="flex justify-end gap-3">
+        <button type="button" class="rounded-xl bg-white border border-neutral-800/20 hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition" onclick="closeRadarScanModal()">Cancel</button>
+        <button type="button" id="runScanButton" class="rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/30 px-4 py-2 text-center text-sm font-medium text-neutral-300 shadow-lg hover:bg-neutral-800 dark:hover:bg-neutral-700 transition-all duration-200 flex items-center gap-2" onclick="runRadarScan()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-12-3a3 3 0 0 1 3-3m0 0a3 3 0 0 1 3 3m-3-3v1.5m0 0a3 3 0 0 1-3 3m3-3a3 3 0 0 1 3-3m-3 3a3 3 0 0 1-3-3m3 3h1.5m-1.5 0a3 3 0 0 1-3 3m3-3a3 3 0 0 1 3 3m-3 3v-1.5m0 0a3 3 0 0 1-3-3m3 3a3 3 0 0 1 3-3" />
+          </svg>
+          Run Scan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
+  let currentServerId = null;
+  let availableScripts = [];
+
   function handleRowClick(event, url) {
     event.preventDefault();
     showToast("Sorry this feature is not available yet.", "error");
+  }
+
+  function openRadarScanModal(serverId, serverName) {
+    event.stopPropagation();
+    currentServerId = serverId;
+    document.getElementById('radarScanModalTitle').textContent = `Run Radar Scan: ${serverName}`;
+    document.getElementById('radarScanModal').classList.remove('hidden');
+    document.getElementById('scanResults').classList.add('hidden');
+    document.getElementById('resultsContent').innerHTML = '';
+
+    // Fetch available scripts
+    fetchRadarScripts();
+  }
+
+  function closeRadarScanModal() {
+    document.getElementById('radarScanModal').classList.add('hidden');
+    currentServerId = null;
+  }
+
+  // Close modal when clicking outside
+  document.getElementById('radarScanModalBackdrop').addEventListener('click', closeRadarScanModal);
+
+  async function fetchRadarScripts() {
+    try {
+      const response = await fetch('/admin/radar/scripts');
+      const data = await response.json();
+
+      if (data.success && data.scripts) {
+        availableScripts = data.scripts;
+        const scriptSelect = document.getElementById('scriptSelect');
+        scriptSelect.innerHTML = '';
+
+        if (availableScripts.length === 0) {
+          scriptSelect.innerHTML = '<option value="">No scripts available</option>';
+          document.getElementById('scriptDescription').textContent = 'No radar scripts found in the storage/radar directory.';
+          document.getElementById('runScanButton').disabled = true;
+        } else {
+          availableScripts.forEach(script => {
+            const option = document.createElement('option');
+            option.value = script.id;
+            option.textContent = script.name;
+            scriptSelect.appendChild(option);
+          });
+
+          // Show description for the first script
+          updateScriptDescription();
+          document.getElementById('runScanButton').disabled = false;
+        }
+      } else {
+        showToast('Failed to fetch radar scripts', 'error');
+      }
+    } catch (error) {
+      console.error('Error fetching radar scripts:', error);
+      showToast('Failed to fetch radar scripts', 'error');
+    }
+  }
+
+  function updateScriptDescription() {
+    const scriptId = document.getElementById('scriptSelect').value;
+    const script = availableScripts.find(s => s.id === scriptId);
+
+    if (script) {
+      document.getElementById('scriptDescription').textContent = script.description;
+    } else {
+      document.getElementById('scriptDescription').textContent = '';
+    }
+  }
+
+  // Update description when script selection changes
+  document.getElementById('scriptSelect').addEventListener('change', updateScriptDescription);
+
+  async function runRadarScan() {
+    if (!currentServerId) {
+      showToast('No server selected', 'error');
+      return;
+    }
+
+    const scriptId = document.getElementById('scriptSelect').value;
+    if (!scriptId) {
+      showToast('Please select a script', 'error');
+      return;
+    }
+
+    try {
+      const runButton = document.getElementById('runScanButton');
+      runButton.disabled = true;
+      runButton.classList.add('opacity-70');
+
+      // Save original button content
+      const originalContent = runButton.innerHTML;
+
+      // Set scanning state
+      runButton.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-neutral-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Scanning...
+      `;
+
+      const response = await fetch(`/admin/radar/scan/${currentServerId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ scriptId })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showToast('Radar scan completed', 'success');
+        displayScanResults(data.results);
+      } else {
+        showToast(`Scan failed: ${data.error || 'Unknown error'}`, 'error');
+      }
+    } catch (error) {
+      console.error('Error running radar scan:', error);
+      showToast('Failed to run radar scan', 'error');
+    } finally {
+      const runButton = document.getElementById('runScanButton');
+      runButton.disabled = false;
+      runButton.classList.remove('opacity-70');
+
+      // Restore original button content
+      runButton.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-12-3a3 3 0 0 1 3-3m0 0a3 3 0 0 1 3 3m-3-3v1.5m0 0a3 3 0 0 1-3 3m3-3a3 3 0 0 1 3-3m-3 3a3 3 0 0 1-3-3m3 3h1.5m-1.5 0a3 3 0 0 1-3 3m3-3a3 3 0 0 1 3 3m-3 3v-1.5m0 0a3 3 0 0 1-3-3m3 3a3 3 0 0 1 3-3" />
+        </svg>
+        Run Scan
+      `;
+    }
+  }
+
+  function displayScanResults(results) {
+    const resultsDiv = document.getElementById('resultsContent');
+    resultsDiv.innerHTML = '';
+
+    if (!results || !results.results || results.results.length === 0) {
+      resultsDiv.innerHTML = '<p>No suspicious files found.</p>';
+    } else {
+      let html = '<div class="space-y-3">';
+
+      results.results.forEach(result => {
+        html += `<div class="border-b border-neutral-200 dark:border-neutral-700 pb-2">`;
+        html += `<p class="font-medium">${result.pattern.description}</p>`;
+        html += `<p class="text-xs text-neutral-500">Pattern: ${result.pattern.pattern}</p>`;
+        html += `<ul class="mt-1 list-disc list-inside">`;
+
+        result.matches.forEach(match => {
+          const sizeStr = match.size ? ` (${formatFileSize(match.size)})` : '';
+          html += `<li class="text-xs">${match.path}${sizeStr}</li>`;
+        });
+
+        html += `</ul></div>`;
+      });
+
+      html += '</div>';
+      resultsDiv.innerHTML = html;
+    }
+
+    document.getElementById('scanResults').classList.remove('hidden');
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    else if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
+    else return (bytes / 1073741824).toFixed(1) + ' GB';
+  }
+
+  // Delete server functionality
+  let serverToDelete = null;
+
+  function confirmDelete(serverId, serverName) {
+    event.stopPropagation();
+    serverToDelete = serverId;
+    document.getElementById('deleteServerName').textContent = serverName;
+    document.getElementById('deleteConfirmModal').classList.remove('hidden');
+
+    // Set up the confirm button to actually delete the server
+    document.getElementById('confirmDeleteButton').onclick = () => {
+      deleteServer(serverId);
+    };
+  }
+
+  function closeDeleteConfirmModal() {
+    document.getElementById('deleteConfirmModal').classList.add('hidden');
+    serverToDelete = null;
+  }
+
+  // Close modal when clicking outside
+  document.getElementById('deleteConfirmModalBackdrop').addEventListener('click', closeDeleteConfirmModal);
+
+  async function deleteServer(serverId) {
+    try {
+      const deleteButton = document.getElementById('confirmDeleteButton');
+      deleteButton.disabled = true;
+      deleteButton.classList.add('opacity-70');
+
+      // Set deleting state
+      const originalContent = deleteButton.innerHTML;
+      deleteButton.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Deleting...
+      `;
+
+      // Redirect to the delete URL
+      window.location.href = `/admin/server/delete/${serverId}`;
+
+    } catch (error) {
+      console.error('Error deleting server:', error);
+      showToast('Failed to delete server', 'error');
+
+      // Reset button state
+      const deleteButton = document.getElementById('confirmDeleteButton');
+      deleteButton.disabled = false;
+      deleteButton.classList.remove('opacity-70');
+      deleteButton.innerHTML = originalContent;
+    }
   }
 </script>
 

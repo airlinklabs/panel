@@ -46,7 +46,7 @@ const adminModule: Module = {
           });
 
           res.render('admin/servers/servers', { user, req, settings, servers });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching servers:', error);
           return res.redirect('/login');
         }
@@ -79,7 +79,7 @@ const adminModule: Module = {
             images,
             users,
           });
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error fetching data for server creation:', error);
           return res.redirect('/login');
         }
@@ -218,7 +218,7 @@ const adminModule: Module = {
                   value: Ports.split(':')[0],
                   type: 'text',
                 });
-              } catch (error) {
+              } catch (error: unknown) {
                 console.error(
                   `Error parsing Variables for server ID ${server.id}:`,
                   error,
@@ -252,13 +252,11 @@ const adminModule: Module = {
                 {},
               );
 
-              console.log(env);
-
               if (server.image?.scripts) {
                 let scripts;
                 try {
                   scripts = JSON.parse(server.image.scripts);
-                } catch (error) {
+                } catch (error: unknown) {
                   console.error(
                     `Error parsing scripts for server ID ${server.id}:`,
                     error,
@@ -287,8 +285,6 @@ const adminModule: Module = {
                     }),
                   ),
                 };
-
-                console.log(requestBody);
 
                 try {
                   await axios.post(
@@ -326,7 +322,7 @@ const adminModule: Module = {
                     where: { id: server.id },
                     data: { Queued: false },
                   });
-                } catch (error) {
+                } catch (error: unknown) {
                   console.error(
                     `Error sending install request for server ID ${server.id}:`,
                     error,
@@ -341,7 +337,7 @@ const adminModule: Module = {
           }, 0);
 
           res.status(200).send('Server created successfully');
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error creating server:', error);
           res.status(500).send('Error creating server');
         }
@@ -379,36 +375,63 @@ const adminModule: Module = {
           }
 
           try {
-            const response = await axios.delete(
-              `http://${server.node.address}:${server.node.port}/container/delete`,
-              {
-                auth: {
-                  username: 'Airlink',
-                  password: server.node.key,
-                },
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                data: {
-                  id: serverId,
-                  deleteCmd: 'delete',
-                },
-              },
-            );
+            logger.info(`Deleting container ${server.UUID} on node ${server.node.address}:${server.node.port}`);
 
-            if (response.status !== 200) {
-              throw new Error('Failed to delete server container');
+            try {
+              const response = await axios.delete(
+                `http://${server.node.address}:${server.node.port}/container`,
+                {
+                  auth: {
+                    username: 'Airlink',
+                    password: server.node.key,
+                  },
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  data: {
+                    id: server.UUID,
+                    deleteCmd: 'delete',
+                  },
+                },
+              );
+
+              if (response.status !== 200) {
+                throw new Error(`Daemon returned status ${response.status}: ${JSON.stringify(response.data)}`);
+              }
+
+              logger.info(`Successfully deleted container ${server.UUID} on daemon`);
+            } catch (error: unknown) {
+              logger.error(`Error deleting container on daemon:`, error);
+
+              const daemonError = error as any;
+              const isNotFoundError =
+                daemonError.response &&
+                (daemonError.response.status === 404 ||
+                 (daemonError.response.data && daemonError.response.data.error &&
+                  typeof daemonError.response.data.error === 'string' &&
+                  daemonError.response.data.error.includes('not exist')));
+
+              if (!isNotFoundError) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                throw new Error(`Failed to delete container on daemon: ${errorMessage}`);
+              } else {
+                logger.warn(`Container ${server.UUID} not found on daemon, proceeding with database cleanup`);
+              }
             }
 
+            logger.info(`Deleting server ${serverId} from database`);
             await prisma.server.delete({ where: { id: serverId } });
+
+            logger.info(`Server ${serverId} successfully deleted`);
             res.redirect('/admin/servers');
             return;
-          } catch (error) {
-            logger.error('Error deleting server container:', error);
-            res.status(500).send(`Failed to delete server container: ${error}`);
+          } catch (error: unknown) {
+            logger.error('Error deleting server:', error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            res.status(500).send(`Failed to delete server: ${errorMessage}`);
             return;
           }
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error('Error in delete server route:', error);
           res.status(500).send('Error deleting server');
           return;
