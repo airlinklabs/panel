@@ -7,6 +7,7 @@ import axios from 'axios';
 import { checkEulaStatus, isWorld } from '../../handlers/features';
 import { checkForServerInstallation } from '../../handlers/checkForServerInstallation';
 import { queueer } from '../../handlers/queueer';
+import { getServerStatus } from '../../handlers/utils/server/serverStatus';
 
 const prisma = new PrismaClient();
 
@@ -145,6 +146,15 @@ const dashboardModule: Module = {
             }
           }
 
+          // Get server status including uptime
+          const serverInfos = {
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            serverUUID: server.UUID,
+            nodeKey: server.node.key,
+          };
+          const serverStatus = await getServerStatus(serverInfos);
+
           return res.render('user/server/manage', {
             errorMessage,
             features: features || [],
@@ -154,6 +164,7 @@ const dashboardModule: Module = {
             alshPASSWORD,
             req,
             server,
+            serverStatus,
             settings,
           });
         } catch (error) {
@@ -173,6 +184,42 @@ const dashboardModule: Module = {
       },
     );
 
+
+    // Get server status
+    router.get(
+      '/server/:id/status',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const serverId = req.params?.id;
+
+        try {
+          const server = await prisma.server.findUnique({
+            where: { UUID: String(serverId) },
+            include: { node: true },
+          });
+
+          if (!server) {
+            return res.status(404).json({ status: 'error', message: 'Server not found' });
+          }
+
+          // Get server status including uptime
+          const serverInfos = {
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            serverUUID: server.UUID,
+            nodeKey: server.node.key,
+          };
+
+          const serverStatus = await getServerStatus(serverInfos);
+          res.status(200).json(serverStatus);
+          return;
+        } catch (error) {
+          logger.error('Error fetching server status:', error);
+          res.status(500).json({ status: 'error', message: 'Failed to fetch server status' });
+          return;
+        }
+      }
+    );
 
     router.post(
       '/server/:id/power/:poweraction',
@@ -417,6 +464,15 @@ const dashboardModule: Module = {
             }
           }
 
+          // Get server status including uptime
+          const serverInfos = {
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            serverUUID: server.UUID,
+            nodeKey: server.node.key,
+          };
+          const serverStatus = await getServerStatus(serverInfos);
+
           return res.render('user/server/files', {
             errorMessage,
             user,
@@ -426,6 +482,7 @@ const dashboardModule: Module = {
             currentPath: path,
             req,
             server,
+            serverStatus,
             settings,
           });
         } catch (error) {
@@ -514,6 +571,15 @@ const dashboardModule: Module = {
             }
           }
 
+          // Get server status including uptime
+          const serverInfos = {
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            serverUUID: server.UUID,
+            nodeKey: server.node.key,
+          };
+          const serverStatus = await getServerStatus(serverInfos);
+
           return res.render('user/server/file', {
             errorMessage: {},
             user,
@@ -526,6 +592,7 @@ const dashboardModule: Module = {
               extension,
             },
             server,
+            serverStatus,
             req,
             settings,
           });
@@ -1060,6 +1127,15 @@ const dashboardModule: Module = {
           });
           const hasError = hadFetchError && !serverIsOnline;
 
+          // Get server status including uptime
+          const serverInfos = {
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            serverUUID: server.UUID,
+            nodeKey: server.node.key,
+          };
+          const serverStatus = await getServerStatus(serverInfos);
+
           return res.render('user/server/players', {
             errorMessage: hasError ?
               { message: 'Unable to fetch players. The server may be offline or not responding.' } :
@@ -1071,6 +1147,7 @@ const dashboardModule: Module = {
             features,
             installed: await checkForServerInstallation(serverId),
             server,
+            serverStatus,
             req,
             settings,
           });
@@ -1166,6 +1243,9 @@ const dashboardModule: Module = {
               }
             }
 
+            // Get server status including uptime
+            const serverStatus = await getServerStatus(serverInfos);
+
             return res.render('user/server/worlds', {
               errorMessage: {},
               user,
@@ -1173,6 +1253,7 @@ const dashboardModule: Module = {
               features,
               installed: await checkForServerInstallation(serverId),
               server,
+              serverStatus,
               req,
               settings,
             });
@@ -1184,6 +1265,14 @@ const dashboardModule: Module = {
               where: { id: 1 },
             });
 
+            // Get server status including uptime
+            const serverStatus = await getServerStatus({
+              nodeAddress: server.node.address,
+              nodePort: server.node.port,
+              serverUUID: server.UUID,
+              nodeKey: server.node.key,
+            });
+
             return res.render('user/server/worlds', {
               errorMessage: { message: 'Failed to fetch worlds. The server may be offline or not responding.' },
               user,
@@ -1191,6 +1280,7 @@ const dashboardModule: Module = {
               features: [],
               installed: await checkForServerInstallation(serverId),
               server,
+              serverStatus,
               req,
               settings,
             });
@@ -1347,6 +1437,15 @@ const dashboardModule: Module = {
             }
           }
 
+          // Get server status including uptime
+          const serverInfos = {
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            serverUUID: server.UUID,
+            nodeKey: server.node.key,
+          };
+          const serverStatus = await getServerStatus(serverInfos);
+
           return res.render('user/server/startup', {
             errorMessage,
             features,
@@ -1354,6 +1453,7 @@ const dashboardModule: Module = {
             user,
             req,
             server,
+            serverStatus,
             serverVariables,
             settings,
           });

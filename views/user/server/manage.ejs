@@ -77,26 +77,7 @@
 
       <%- include('../../components/installHeader') %>
 
-      <div class="rounded-xl bg-red-800/10 px-4 py-6 mt-8 ml-8 mb-8 mr-8 hidden" id="daemonIsDown">
-        <div class="flex">
-            <div class="flex-shrink-0 ml-1.5">
-                <svg class="animate-spin mt-2 h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg"
-                    fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                    </circle>
-                    <path class="opacity-75" fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                    </path>
-                </svg>
-            </div>
-            <div class="ml-5">
-                <h3 class="text-sm font-medium text-red-400"><%= req.translations.connectionFailure %></h3>
-                <div class="text-sm text-red-400/50">
-                    <p><%= req.translations.connectionFailureText %></p>
-                </div>
-            </div>
-        </div>
-    </div>
+      <!-- Daemon down message removed as requested -->
 
       <%- include('../../components/serverTemplate') %>
 
@@ -461,9 +442,7 @@ connectWebSocket();
 
             if (trimmedLine.includes("airlinkd server appears to be down")) {
                 socket.close();
-                document.getElementById('daemonIsDown').classList.remove('hidden');
-            } else {
-                document.getElementById('daemonIsDown').classList.add('hidden');
+                // No need to show daemon down message as it's been removed
             }
 
             isFirstLine = false;
@@ -744,15 +723,32 @@ connectWebSocket();
                     const stats = JSON.parse(event.data);
                     if (stats.error) {
                         console.error('Error fetching stats:', stats.error);
+                        setAllStatsOffline();
                         return;
                     }
 
+                    // Check if server is offline based on the event data
+                    if (stats.event === 'status' && stats.data && stats.data.running === false) {
+                        console.log('Server is offline, updating all stats');
+                        setAllStatsOffline();
+                        return;
+                    }
+
+                    // Check if memory usage is NaN, which indicates server is offline
+                    if (stats.data && stats.data.memory && stats.data.memory.percentage === "NaN") {
+                        console.log('Server appears to be offline (NaN memory usage), updating all stats');
+                        setAllStatsOffline();
+                        return;
+                    }
+
+                    // Server is online, update all stats normally
                     updateRamUsage(stats);
                     updateCpuUsage(stats);
                     updateDiskUsage(stats);
                     updateStatus(stats);
                 } else {
                     console.log('Received non-JSON data:', event.data);
+                    setAllStatsOffline();
                 }
             };
 
@@ -761,24 +757,25 @@ connectWebSocket();
                 isStatsReconnecting = false;
                 statsReconnectAttempts = 0;
                 statsReconnectInterval = 2000;
-                document.getElementById('daemonIsDown').classList.add('hidden');
+                // No need to hide daemon down message as it's been removed
             };
 
             statsWs.onerror = (error) => {
                 console.error('Stats WebSocket Error:', error);
+                // Set all stats to offline on WebSocket error
+                setAllStatsOffline();
             };
 
             statsWs.onclose = (event) => {
                 console.log(`WebSocket Stats connection closed (${event.code}). Reconnecting...`);
 
+                // Set all stats to offline when connection is lost
+                setAllStatsOffline();
+
+                // Update status text to show connection lost
                 const statusElement = document.getElementById('status');
                 statusElement.textContent = 'Connection Lost!';
                 statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
-
-                <% if (features.includes('players')) { %>
-                const playersDeco = document.getElementById('players-deco');
-                playersDeco.classList.add('translate-y-32');
-                <% } %>
 
                 if (!isStatsReconnecting) {
                     scheduleStatsReconnect();
@@ -898,13 +895,23 @@ connectWebSocket();
         const statusElement = document.getElementById('status');
         const ramUsageRaw = stats.data.memory.percentage;
 
-        if (ramUsageRaw !== "NaN") {
+        // Check if server is in starting state
+        if (stats.data && stats.data.starting === true) {
+            statusElement.textContent = 'Starting';
+            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
+            <% if (features.includes('players')) { %>
+            playersDeco.classList.add('translate-y-32');
+            <% } %>
+            updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
+            // No need to hide daemon down message as it's been removed
+        } else if (ramUsageRaw !== "NaN") {
             statusElement.textContent = 'Online';
             statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
             <% if (features.includes('players')) { %>
             playersDeco.classList.remove('translate-y-32');
             <% } %>
             updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
+            // No need to hide daemon down message as it's been removed
         } else {
             statusElement.textContent = 'Offline';
             statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
@@ -935,14 +942,406 @@ connectWebSocket();
         statusChart.update();
     }
 
+    // Function to set all stats to offline state
+    function setAllStatsOffline() {
+        // Update status display
+        const statusElement = document.getElementById('status');
+        statusElement.textContent = 'Offline';
+        statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
+
+        // Update status chart
+        updateStatusChart('rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.2)');
+
+        // Update RAM usage
+        document.getElementById('ramUsage').textContent = `0% (0 Bytes / ${formatBytes(<%- server.Memory %> * 1024 * 1024 * 1024)})`;
+
+        // Update CPU usage
+        document.getElementById('cpuUsage').textContent = `0% / ${<%- server.Cpu %>}%`;
+
+        // Update disk usage
+        document.getElementById('diskUsage').textContent = '0% (0 Bytes / 10 GB)';
+
+        // Hide players decoration if it exists
+        <% if (features.includes('players')) { %>
+        const playersDeco = document.getElementById('players-deco');
+        playersDeco.classList.add('translate-y-32');
+        <% } %>
+
+        // No need to show daemon down message as it's been removed
+
+        // Reset charts
+        resetCharts();
+    }
+
+    // Function to reset all charts
+    function resetCharts() {
+        // Reset RAM chart
+        ramChart.data.labels = [];
+        ramChart.data.datasets[0].data = [];
+        ramChart.update();
+
+        // Reset CPU chart
+        cpuChart.data.labels = [];
+        cpuChart.data.datasets[0].data = [];
+        cpuChart.update();
+    }
+
     function isValidJson(str) {
-            try {
-              JSON.parse(str);
-            } catch (e) {
-              return false;
-            }
-            return true;
+        try {
+            JSON.parse(str);
+        } catch (e) {
+            return false;
         }
+        return true;
+    }
 
     initStatsWebSocket();
+
+    // Create a global WebSocket for server status that can be shared
+    // This will be used by both the page and the server header component
+    if (!window.serverStatusWebSocket) {
+      window.serverStatusWebSocket = new WebSocket(`${protocol}//${host}/ws/server/<%= server.UUID %>/status`);
+
+      window.serverStatusWebSocket.onopen = function() {
+        console.log('Global server status WebSocket connection established');
+
+        // Dispatch a custom event that other components can listen for
+        window.dispatchEvent(new CustomEvent('serverStatusWebSocketOpen'));
+      };
+
+      window.serverStatusWebSocket.onclose = function() {
+        console.log('Global server status WebSocket connection closed');
+
+        // Dispatch a custom event that other components can listen for
+        window.dispatchEvent(new CustomEvent('serverStatusWebSocketClose'));
+
+        // Clean up the global reference
+        window.serverStatusWebSocket = null;
+      };
+
+      window.serverStatusWebSocket.onerror = function(error) {
+        console.error('Global server status WebSocket error:', error);
+        // No need to show daemon down message as it's been removed
+
+        // Dispatch a custom event that other components can listen for
+        window.dispatchEvent(new CustomEvent('serverStatusWebSocketError', { detail: error }));
+      };
+    }
+
+    // Set up message handler for the manage page
+    window.serverStatusWebSocket.addEventListener('message', function(event) {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('Server status update received (manage page):', data);
+
+        // Extract the actual status data, handling different message formats
+        let statusData = data;
+        if (data.event === 'status' && data.data) {
+          statusData = data.data;
+        }
+
+        // Check for starting state
+        if (statusData.starting === true ||
+            statusData.status === 'starting' ||
+            data.status === 'starting') {
+          console.log('Server is starting, updating status');
+
+          // Update status display
+          const statusElement = document.getElementById('status');
+          statusElement.textContent = 'Starting';
+          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
+
+          // Update status chart
+          updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
+
+          // No need to hide daemon down message as it's been removed
+
+          <% if (features.includes('players')) { %>
+          // Hide players decoration
+          const playersDeco = document.getElementById('players-deco');
+          playersDeco.classList.add('translate-y-32');
+          <% } %>
+        }
+        // Check for offline status
+        else if (statusData.running === false ||
+                statusData.status === 'offline' ||
+                data.status === 'offline') {
+          console.log('Server is offline, updating all stats');
+          setAllStatsOffline();
+        }
+        // Check for online status
+        else if (statusData.running === true ||
+                statusData.status === 'online' ||
+                data.status === 'online') {
+          console.log('Server is online, updating status');
+
+          // Update status display
+          const statusElement = document.getElementById('status');
+          statusElement.textContent = 'Online';
+          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+
+          // Update status chart
+          updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
+
+          <% if (features.includes('players')) { %>
+          const playersDeco = document.getElementById('players-deco');
+          playersDeco.classList.remove('translate-y-32');
+          <% } %>
+        }
+      } catch (error) {
+        console.error('Error processing server status message:', error);
+      }
+    });
+
+    // Listen for server start events
+    document.getElementById('startButton').addEventListener('click', function() {
+      console.log('Start button clicked, setting up status polling');
+
+      // Update status immediately to "Starting"
+      const statusElement = document.getElementById('status');
+      statusElement.textContent = 'Starting';
+      statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
+      updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
+
+      // No need to hide daemon down message as it's been removed
+
+      // Set up initial status check after 5 seconds
+      setTimeout(function() {
+        console.log('Performing initial server status check after start button click');
+
+        // Create a variable to track if we've found the server online
+        let serverFoundOnline = false;
+
+        // Set up polling to detect when server is fully started (every 5 seconds)
+        const startupPoll = setInterval(function() {
+          // Skip if we've already found the server online
+          if (serverFoundOnline) return;
+
+          console.log('Checking server status (5-second interval)');
+          fetch(`/server/<%= server.UUID %>/status`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json'
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Server startup status check:', data);
+
+            if (data.online) {
+              console.log('Server is now online, updating display');
+              serverFoundOnline = true;
+              clearInterval(startupPoll);
+
+              // Update status display
+              statusElement.textContent = 'Online';
+              statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+              updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
+
+              <% if (features.includes('players')) { %>
+              const playersDeco = document.getElementById('players-deco');
+              playersDeco.classList.remove('translate-y-32');
+              <% } %>
+
+              // Start local uptime counter for smooth updates
+              if (data.startedAt) {
+                const startTime = new Date(data.startedAt).getTime();
+                const uptimeElement = document.getElementById('uptime');
+
+                if (uptimeElement) {
+                  // Initial update
+                  updateLocalUptime(startTime, uptimeElement);
+
+                  // Update every second
+                  const uptimeInterval = setInterval(function() {
+                    updateLocalUptime(startTime, uptimeElement);
+                  }, 1000);
+
+                  // Store the interval ID in a data attribute for cleanup
+                  uptimeElement.dataset.intervalId = uptimeInterval;
+                }
+              }
+            }
+          })
+          .catch(error => {
+            console.error('Error checking server status during startup:', error);
+          });
+        }, 5000); // Check every 5 seconds
+
+        // Do an initial check
+        fetch(`/server/<%= server.UUID %>/status`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Initial server status check:', data);
+
+          if (data.online) {
+            serverFoundOnline = true;
+            clearInterval(startupPoll);
+
+            // Update status display
+            statusElement.textContent = 'Online';
+            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+            updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
+
+            <% if (features.includes('players')) { %>
+            const playersDeco = document.getElementById('players-deco');
+            playersDeco.classList.remove('translate-y-32');
+            <% } %>
+          }
+        })
+        .catch(error => {
+          console.error('Error checking initial server status:', error);
+        });
+      }, 5000); // Wait 5 seconds before first check
+
+      // Stop polling after 60 seconds to avoid resource waste
+      setTimeout(function() {
+        console.log('Stopping startup polling after 60 seconds');
+        if (typeof startupPoll !== 'undefined') {
+          clearInterval(startupPoll);
+        }
+      }, 60000);
+    });
+
+    // Listen for server stop events
+    document.getElementById('stopButton').addEventListener('click', function() {
+      // Add a delay to check server status after stop command is sent
+      setTimeout(function() {
+        console.log('Checking server status after stop command');
+        // Force update stats to offline state
+        setAllStatsOffline();
+      }, 2000);
+    });
+
+    // Function to update local uptime display
+    function updateLocalUptime(startTime, element) {
+      if (!startTime || !element) return;
+
+      const now = Date.now();
+      const uptimeSeconds = Math.floor((now - startTime) / 1000);
+      element.textContent = formatUptime(uptimeSeconds);
+    }
+
+    // Function to format uptime in a human-readable format
+    function formatUptime(seconds) {
+      if (typeof seconds !== 'number' || isNaN(seconds)) {
+        return '0s';
+      }
+
+      const days = Math.floor(seconds / 86400);
+      const hours = Math.floor((seconds % 86400) / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = Math.floor(seconds % 60);
+
+      if (days > 0) {
+        return `${days}d ${hours}h ${minutes}m`;
+      } else if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+      } else if (minutes > 0) {
+        return `${minutes}m ${secs}s`;
+      } else {
+        return `${secs}s`;
+      }
+    }
+
+    // Check server status periodically (every 5 seconds)
+    setInterval(function() {
+      // Make a direct API call to check server status
+      fetch(`/server/<%= server.UUID %>/status`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Server status check:', data);
+
+        // Handle starting state
+        if (data.starting) {
+          console.log('Server is starting (from status check), updating status');
+
+          // Update status display
+          const statusElement = document.getElementById('status');
+          statusElement.textContent = 'Starting';
+          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
+
+          // Update status chart
+          updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
+
+          // No need to hide daemon down message as it's been removed
+
+          <% if (features.includes('players')) { %>
+          // Hide players decoration
+          const playersDeco = document.getElementById('players-deco');
+          playersDeco.classList.add('translate-y-32');
+          <% } %>
+        }
+        // Handle online state
+        else if (data.online) {
+          console.log('Server is online (from status check), updating status');
+
+          // Update status display
+          const statusElement = document.getElementById('status');
+          statusElement.textContent = 'Online';
+          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+
+          // Update status chart
+          updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
+
+          // No need to hide daemon down message as it's been removed
+
+          <% if (features.includes('players')) { %>
+          // Show players decoration
+          const playersDeco = document.getElementById('players-deco');
+          playersDeco.classList.remove('translate-y-32');
+          <% } %>
+
+          // Update uptime if we have a start time
+          if (data.startedAt) {
+            const startTime = new Date(data.startedAt).getTime();
+            const uptimeElement = document.getElementById('uptime');
+
+            if (uptimeElement) {
+              // Clear any existing interval
+              const existingInterval = uptimeElement.dataset.intervalId;
+              if (existingInterval) {
+                clearInterval(parseInt(existingInterval));
+              }
+
+              // Initial update
+              updateLocalUptime(startTime, uptimeElement);
+
+              // Update every second
+              const uptimeInterval = setInterval(function() {
+                updateLocalUptime(startTime, uptimeElement);
+              }, 1000);
+
+              // Store the interval ID for cleanup
+              uptimeElement.dataset.intervalId = uptimeInterval;
+            }
+          }
+        }
+        // Handle offline state
+        else if (data.status === 'offline' || !data.online) {
+          console.log('Server is offline (from status check), updating all stats');
+          setAllStatsOffline();
+
+          // Clear any uptime interval
+          const uptimeElement = document.getElementById('uptime');
+          if (uptimeElement && uptimeElement.dataset.intervalId) {
+            clearInterval(parseInt(uptimeElement.dataset.intervalId));
+            delete uptimeElement.dataset.intervalId;
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error checking server status:', error);
+      });
+    }, 5000); // Check every 5 seconds
 </script>
