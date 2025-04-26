@@ -72,16 +72,17 @@ model Images {
 }
 
   model Node {
-    id        Int      @id @default(autoincrement())
-    name      String
-    ram       Int      @default(0)
-    cpu       Int      @default(0)
-    disk      Int      @default(0)
-    address   String   @default("127.0.0.1")
-    port      Int      @default(3001)
-    key       String
-    createdAt DateTime @default(now())
-    servers   Server[]
+    id            Int      @id @default(autoincrement())
+    name          String
+    ram           Int      @default(0)
+    cpu           Int      @default(0)
+    disk          Int      @default(0)
+    address       String   @default("127.0.0.1")
+    port          Int      @default(3001)
+    key           String
+    createdAt     DateTime @default(now())
+    allocatedPorts String?  @default("[]") // JSON array of allocated ports
+    servers       Server[]
   }
 
 model settings {

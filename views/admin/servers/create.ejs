@@ -110,7 +110,10 @@
 
             <div>
                 <label for="serverPorts" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.Ports %>:</label>
-                <input id="serverPorts" name="Ports" type="text" placeholder="25565:25565" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                <select id="serverPorts" name="Ports" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                  <option value="" disabled selected>Select a port</option>
+                  <!-- Port options will be populated based on selected node -->
+                </select>
             </div>
 
             </div>
@@ -143,15 +146,78 @@
   document.addEventListener('DOMContentLoaded', () => {
     const serverImageSelect = document.getElementById('serverImage');
     const dockerImageSelect = document.getElementById('dockerImage');
+    const serverNodeSelect = document.getElementById('serverNode');
+    const serverPortsSelect = document.getElementById('serverPorts');
     const variablesContainer = document.getElementById('variablesContainer');
     const form = document.getElementById('createServerForm');
+
+    // Store node data
+    let nodesData = {};
+
+    // Fetch nodes data with allocated ports
+    async function fetchNodesData() {
+      try {
+        const response = await fetch('/admin/nodes/list');
+        const nodes = await response.json();
+
+        // Store nodes data for later use
+        nodes.forEach(node => {
+          let ports = [];
+          try {
+            if (node.allocatedPorts) {
+              ports = JSON.parse(node.allocatedPorts);
+            }
+          } catch (e) {
+            console.error('Error parsing allocated ports:', e);
+          }
+
+          nodesData[node.id] = {
+            ...node,
+            parsedPorts: ports
+          };
+        });
+
+        // Update ports when a node is selected
+        updatePortsForSelectedNode();
+      } catch (error) {
+        console.error('Error fetching nodes:', error);
+      }
+    }
+
+    // Update available ports based on selected node
+    function updatePortsForSelectedNode() {
+      const selectedNodeId = serverNodeSelect.value;
+      serverPortsSelect.innerHTML = '<option value="" disabled selected>Select a port</option>';
+
+      if (!selectedNodeId || !nodesData[selectedNodeId]) {
+        return;
+      }
+
+      const node = nodesData[selectedNodeId];
+      const nodeAddress = node.address;
+
+      if (!node.parsedPorts || node.parsedPorts.length === 0) {
+        const option = document.createElement('option');
+        option.disabled = true;
+        option.textContent = 'No ports allocated for this node';
+        serverPortsSelect.appendChild(option);
+        return;
+      }
+
+      // Add each port as an option
+      node.parsedPorts.forEach(port => {
+        const option = document.createElement('option');
+        option.value = `${port}:${port}`;
+        option.textContent = `${nodeAddress}:${port}`;
+        serverPortsSelect.appendChild(option);
+      });
+    }
 
     function updateDockerImages() {
       const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
       const dockerImagesData = selectedOption.getAttribute('data-docker-images');
 
       dockerImageSelect.innerHTML = '<option value="" disabled selected>Select a Docker image</option>';
-
 
       if (dockerImagesData) {
         const dockerImages = JSON.parse(dockerImagesData);
@@ -329,12 +395,21 @@
         });
     });
 
+    // Fetch nodes data on page load
+    fetchNodesData();
+
+    // Initialize UI
     updateDockerImages();
     updateVariables();
 
+    // Event listeners
     serverImageSelect.addEventListener('change', () => {
       updateDockerImages();
       updateVariables();
+    });
+
+    serverNodeSelect.addEventListener('change', () => {
+      updatePortsForSelectedNode();
     });
   });
 </script>

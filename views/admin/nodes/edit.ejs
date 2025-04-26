@@ -14,7 +14,7 @@
             <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminEditNodeText %></p>
         </div>
       </div>
-      
+
       <div id="nodeForm" class="mt-6 px-8 w-full">
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
           <form>
@@ -23,27 +23,27 @@
                 <label for="nodeName" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.name %>:</label>
                 <input id="nodeName" value="<%= node.name %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="My node">
               </div>
-      
+
               <div>
                 <label for="nodeRam" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.ram %> (GB):</label>
                 <input id="nodeRam" value="<%= node.ram %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="This is only for information purposes.">
               </div>
-      
+
               <div>
                 <label for="nodeDisk" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.disk %> (GB):</label>
                 <input id="nodeDisk" value="<%= node.disk %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="This is only for information purposes.">
               </div>
-      
+
               <div>
                 <label for="nodeProcessor" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.cpu %>:</label>
                 <input id="nodeProcessor" value="<%= node.cpu %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="This is only for information purposes.">
               </div>
-      
+
               <div>
                 <label for="nodeAddress" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.addressIP %>:</label>
                 <input id="nodeAddress" value="<%= node.address %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="localhost">
               </div>
-      
+
               <div>
                 <label for="nodePort" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.daemonPort %>:</label>
                 <input id="nodePort" value="<%= node.port %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="3002">
@@ -53,8 +53,23 @@
                 <label for="nodeKey" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.daemonKey %>:</label>
                 <input id="nodeKey" value="<%= node.key %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= node.key %>" disabled>
               </div>
-      
+
               <div class="col-span-2">
+                <label for="allocatedPorts" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Allocated Ports:</label>
+                <div class="flex flex-col space-y-2">
+                  <div id="allocatedPortsList" class="grid grid-cols-4 gap-2 mb-2">
+                    <!-- Port tags will be inserted here -->
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <input id="newPortInput" type="text" placeholder="25565 or 25565-25570" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                    <button id="addPortBtn" type="button" class="rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/30 px-3 py-2 text-center text-sm font-medium shadow-lg hover:bg-neutral-800 dark:hover:bg-neutral-700 transition-all duration-200 text-neutral-300">
+                      Add Port
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-span-2 mt-4">
                 <button id="updateNodeBtn" type="button" class="w-full md:w-auto rounded-lg bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
                     <%= req.translations.update %>
                 </button>
@@ -63,7 +78,7 @@
           </form>
         </div>
       </div>
-      
+
     </div>
   </div>
 </main>
@@ -71,6 +86,106 @@
 <%- include('../../components/toast') %>
 
 <script>
+  // Initialize allocated ports
+  let allocatedPorts = <%= node.allocatedPorts ? node.allocatedPorts : '[]' %>;
+
+  // Render allocated ports
+  function renderAllocatedPorts() {
+    const portsList = document.getElementById('allocatedPortsList');
+    portsList.innerHTML = '';
+
+    if (allocatedPorts.length === 0) {
+      const emptyMessage = document.createElement('div');
+      emptyMessage.className = 'col-span-4 text-sm text-neutral-500 italic';
+      emptyMessage.textContent = 'No ports allocated yet. Add ports that will be available for servers.';
+      portsList.appendChild(emptyMessage);
+      return;
+    }
+
+    allocatedPorts.forEach(port => {
+      const portTag = document.createElement('div');
+      portTag.className = 'flex items-center justify-between rounded-lg bg-neutral-800/10 dark:bg-neutral-700/20 px-3 py-1.5 text-sm';
+
+      const portText = document.createElement('span');
+      portText.className = 'text-neutral-800 dark:text-neutral-300';
+      portText.textContent = port;
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'ml-2 text-neutral-500 hover:text-red-500 transition-colors';
+      deleteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>';
+      deleteBtn.onclick = (e) => {
+        e.preventDefault();
+        removePort(port);
+      };
+
+      portTag.appendChild(portText);
+      portTag.appendChild(deleteBtn);
+      portsList.appendChild(portTag);
+    });
+  }
+
+  // Add port function
+  function addPort(input) {
+    // Check if it's a range (e.g., 25565-25570)
+    if (input.includes('-')) {
+      const [start, end] = input.split('-').map(p => parseInt(p.trim()));
+      if (isNaN(start) || isNaN(end) || start >= end || start < 1024 || end > 65535) {
+        showToast('Invalid port range. Format should be start-end (e.g., 25565-25570) with ports between 1024 and 65535.', 'error');
+        return;
+      }
+
+      // Add each port in the range
+      for (let port = start; port <= end; port++) {
+        if (!allocatedPorts.includes(port)) {
+          allocatedPorts.push(port);
+        }
+      }
+    } else {
+      // Single port
+      const port = parseInt(input.trim());
+      if (isNaN(port) || port < 1024 || port > 65535) {
+        showToast('Invalid port. Port must be between 1024 and 65535.', 'error');
+        return;
+      }
+
+      if (!allocatedPorts.includes(port)) {
+        allocatedPorts.push(port);
+      }
+    }
+
+    // Sort ports numerically
+    allocatedPorts.sort((a, b) => a - b);
+    renderAllocatedPorts();
+  }
+
+  // Remove port function
+  function removePort(port) {
+    allocatedPorts = allocatedPorts.filter(p => p !== port);
+    renderAllocatedPorts();
+  }
+
+  // Add port button click handler
+  document.getElementById('addPortBtn').addEventListener('click', () => {
+    const input = document.getElementById('newPortInput').value.trim();
+    if (input) {
+      addPort(input);
+      document.getElementById('newPortInput').value = '';
+    }
+  });
+
+  // Enter key in input field
+  document.getElementById('newPortInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const input = e.target.value.trim();
+      if (input) {
+        addPort(input);
+        e.target.value = '';
+      }
+    }
+  });
+
+  // Update node button click handler
   document.getElementById('updateNodeBtn').addEventListener('click', async () => {
     const nodeData = {
       name: document.getElementById('nodeName').value,
@@ -78,7 +193,8 @@
       cpu: document.getElementById('nodeProcessor').value,
       disk: document.getElementById('nodeDisk').value,
       address: document.getElementById('nodeAddress').value,
-      port: document.getElementById('nodePort').value
+      port: document.getElementById('nodePort').value,
+      allocatedPorts: JSON.stringify(allocatedPorts)
     };
 
     try {
@@ -90,14 +206,20 @@
 
       if (response.ok) {
         console.log('Node updated:', await response.json());
-        window.location.href = '/admin/nodes?err=none';
+        showToast('Node updated successfully', 'success');
+        setTimeout(() => {
+          window.location.href = '/admin/nodes?err=none';
+        }, 1000);
       } else {
         throw new Error('Failed to update node');
       }
     } catch (error) {
-      showToast('Error updating node:' + error, 'error');
+      showToast('Error updating node: ' + error, 'error');
     }
   });
+
+  // Initialize the UI
+  renderAllocatedPorts();
 </script>
 
 <%- include('../../components/footer') %>

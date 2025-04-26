@@ -354,6 +354,7 @@ const adminModule: Module = {
           const disk = parseInt(req.body.disk);
           const address = req.body.address;
           const port = parseInt(req.body.port);
+          const allocatedPorts = req.body.allocatedPorts || '[]';
 
           if (
             !name ||
@@ -370,6 +371,26 @@ const adminModule: Module = {
             return;
           }
 
+          // Validate allocated ports
+          try {
+            const parsedPorts = JSON.parse(allocatedPorts);
+            if (!Array.isArray(parsedPorts)) {
+              throw new Error('Allocated ports must be an array');
+            }
+
+            // Validate each port
+            for (const port of parsedPorts) {
+              if (typeof port !== 'number' || port < 1024 || port > 65535) {
+                throw new Error('Each port must be a number between 1024 and 65535');
+              }
+            }
+          } catch (error) {
+            res.status(400).json({
+              message: 'Invalid allocated ports format: ' + error.message,
+            });
+            return;
+          }
+
           const node = await prisma.node.update({
             where: { id: nodeId },
             data: {
@@ -379,6 +400,7 @@ const adminModule: Module = {
               disk,
               address,
               port,
+              allocatedPorts,
             },
           });
 

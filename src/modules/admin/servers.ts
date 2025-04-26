@@ -120,6 +120,42 @@ const adminModule: Module = {
           return;
         }
 
+        // Validate that the selected port is allocated to the node
+        try {
+          const node = await prisma.node.findUnique({
+            where: { id: parseInt(nodeId) }
+          });
+
+          if (!node) {
+            res.status(400).send('Selected node not found');
+            return;
+          }
+
+          // Extract the port number from the port string (e.g., "25565:25565" -> 25565)
+          const portNumber = parseInt(Ports.split(':')[0]);
+
+          // Check if the port is allocated to the node
+          let allocatedPorts = [];
+          try {
+            if (node.allocatedPorts) {
+              allocatedPorts = JSON.parse(node.allocatedPorts);
+            }
+          } catch (error) {
+            logger.error('Error parsing allocated ports:', error);
+            res.status(500).send('Error validating port allocation');
+            return;
+          }
+
+          if (!allocatedPorts.includes(portNumber)) {
+            res.status(400).send(`Port ${portNumber} is not allocated to the selected node`);
+            return;
+          }
+        } catch (error) {
+          logger.error('Error validating port allocation:', error);
+          res.status(500).send('Error validating port allocation');
+          return;
+        }
+
         const Port = `[{"Port": "${Ports}", "primary": true}]`;
 
         try {
