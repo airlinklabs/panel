@@ -15,12 +15,13 @@
         </div>
         <!-- Action Buttons -->
         <div class="mt-4 sm:mt-0 sm:ml-4 sm:flex-none">
+
           <button
-          id="uploadimage"
-          class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
-        >
-          Upload Image
-        </button>
+            id="uploadimage"
+            class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
+          >
+            Upload Image
+          </button>
           <button
             onclick="openModal('createModal')"
             class="border border-neutral-800/20 rounded-xl ml-2 bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
@@ -138,6 +139,8 @@
 
 <%- include('../../components/toast')%>
 
+
+
 <script>
   function openModal(id) {
     document.getElementById(id).classList.remove('hidden');
@@ -167,6 +170,8 @@
         });
     }
   }
+
+
 </script>
 <script>
     document.addEventListener("DOMContentLoaded", async function(event) {
