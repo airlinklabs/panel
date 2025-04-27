@@ -1,6 +1,13 @@
 import axios from 'axios';
 import logger from '../../logger';
 
+// Declare global serverStoppingStates
+declare global {
+  var serverStoppingStates: {
+    [key: string]: boolean;
+  };
+}
+
 interface ServerInfo {
   nodeAddress: string;
   nodePort: number;
@@ -11,6 +18,7 @@ interface ServerInfo {
 interface ServerStatus {
   online: boolean;
   starting: boolean;
+  stopping: boolean;
   uptime: number | null;
   startedAt: string | null;
 }
@@ -40,12 +48,24 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
     const status: ServerStatus = {
       online: false,
       starting: false,
+      stopping: false,
       uptime: null,
       startedAt: null
     };
 
     // Check if the server is running
     if (data && data.running === true) {
+      // Check if the server is in stopping state
+      // This is determined by checking if a stop command was recently sent
+      const cacheKey = `server_stopping_${serverInfo.serverUUID}`;
+      if (global.serverStoppingStates && global.serverStoppingStates[cacheKey]) {
+        // Server is in stopping state
+        status.online = false;
+        status.starting = false;
+        status.stopping = true;
+        return status;
+      }
+
       // Check if the server is in starting state
       // This requires checking the logs for the startup_line regex
       try {
@@ -124,6 +144,7 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
     return {
       online: false,
       starting: false,
+      stopping: false,
       uptime: null,
       startedAt: null
     };

@@ -409,7 +409,7 @@ function formatUptime(seconds) {
 
     // Add handler for server status updates
     function updateServerHeaderStatus(statusData) {
-      // Check for any indication that the server is running or starting
+      // Check for any indication that the server is running, starting, or stopping
       const isRunning = statusData.running === true ||
                        statusData.status === 'online' ||
                        statusData.status === 'online';
@@ -417,6 +417,10 @@ function formatUptime(seconds) {
       const isStarting = statusData.starting === true ||
                         statusData.status === 'starting' ||
                         statusData.status === 'starting';
+
+      const isStopping = statusData.stopping === true ||
+                        statusData.status === 'stopping' ||
+                        statusData.status === 'stopping';
 
       const isOffline = statusData.running === false ||
                        statusData.status === 'offline' ||
@@ -456,6 +460,45 @@ function formatUptime(seconds) {
         setTimeout(function() {
           console.log('Stopping recovery polling after 30 seconds');
           clearInterval(recoveryPoll);
+        }, 30000);
+      }
+      // Handle stopping state
+      else if (isStopping) {
+        console.log('Server is stopping, updating header');
+
+        // Update status container
+        const statusContainer = document.querySelector('[data-server-status-container]');
+        if (statusContainer) {
+          statusContainer.innerHTML = `
+            <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+              <span class="relative flex h-2 w-2 mr-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+              </span>
+              <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Stopping</span>
+            </div>
+          `;
+        }
+
+        // Keep the started time visible during stopping
+        const startedTimeContainer = document.querySelector('[data-server-started-container]');
+        if (startedTimeContainer) {
+          startedTimeContainer.style.display = 'flex';
+        }
+
+        // Stop the uptime counter during stopping
+        stopUptimeCounter();
+
+        // Set up a polling mechanism to detect when server is fully stopped (every 5 seconds)
+        const stoppingPoll = setInterval(function() {
+          console.log('Stopping poll: checking if server is fully stopped (5-second interval)');
+          fetchUptimeFromBackend();
+        }, 5000);
+
+        // Stop the stopping polling after 30 seconds
+        setTimeout(function() {
+          console.log('Stopping shutdown polling after 30 seconds');
+          clearInterval(stoppingPoll);
         }, 30000);
       }
       // Handle starting state

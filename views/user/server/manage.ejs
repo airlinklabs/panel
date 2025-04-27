@@ -645,10 +645,28 @@ connectWebSocket();
           modal.classList.add('opacity-0', 'pointer-events-none');
           modal.querySelector('div').classList.remove('scale-100');
           modal.querySelector('div').classList.add('scale-95');
-          setTimeout(() => document.body.removeChild(modal), 300);
+          setTimeout(() => {
+            document.body.removeChild(modal);
+          }, 300);
         });
 
         document.getElementById('confirmStopBtn').addEventListener('click', () => {
+          // Set the server status to stopping AFTER confirmation
+          console.log('Stop confirmed, setting status to stopping');
+
+          // Update status to "Stopping"
+          const statusElement = document.getElementById('status');
+          statusElement.textContent = 'Stopping';
+          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-orange-500';
+          updateStatusChart('rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.2)');
+
+          <% if (features.includes('players')) { %>
+          // Hide players decoration
+          const playersDeco = document.getElementById('players-deco');
+          playersDeco.classList.add('translate-y-32');
+          <% } %>
+
+          // Close the modal
           modal.classList.add('opacity-0', 'pointer-events-none');
           modal.querySelector('div').classList.remove('scale-100');
           modal.querySelector('div').classList.add('scale-95');
@@ -656,6 +674,7 @@ connectWebSocket();
 
           const loader = showLoadingPopup('Stopping Server', 'Sending stop command...');
 
+          // Send the stop command to the server
           fetch(`/server/${serverUUID}/power/stop`, {
               method: 'POST',
           })
@@ -666,12 +685,57 @@ connectWebSocket();
                       loader.close();
                       showToast('Server stop command sent successfully', 'success');
                       restartWebSocket();
+
+                      // Set up polling to detect when server is fully stopped
+                      const stoppingPoll = setInterval(function() {
+                        console.log('Checking if server is fully stopped (5-second interval)');
+                        fetch(`/server/${serverUUID}/status`, {
+                          method: 'GET',
+                          headers: {
+                            'Accept': 'application/json'
+                          }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                          console.log('Server stopping status check:', data);
+
+                          if (!data.online && !data.starting && !data.stopping) {
+                            console.log('Server is now offline, updating display');
+                            clearInterval(stoppingPoll);
+
+                            // Force update stats to offline state
+                            setAllStatsOffline();
+                          }
+                        })
+                        .catch(error => {
+                          console.error('Error checking server status during shutdown:', error);
+                        });
+                      }, 5000); // Check every 5 seconds
+
+                      // Stop polling after 30 seconds to avoid resource waste
+                      setTimeout(function() {
+                        console.log('Stopping shutdown polling after 30 seconds');
+                        clearInterval(stoppingPoll);
+
+                        // Force update stats to offline state if still not detected
+                        setAllStatsOffline();
+                      }, 30000);
                   }, 1000);
               })
               .catch(error => {
                   loader.close();
                   console.error('Error:', error);
                   showToast('Failed to stop server', 'error');
+
+                  // Revert status to online if there's an error
+                  statusElement.textContent = 'Online';
+                  statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+                  updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
+
+                  <% if (features.includes('players')) { %>
+                  // Show players decoration again
+                  playersDeco.classList.remove('translate-y-32');
+                  <% } %>
               });
         });
     });
@@ -1062,6 +1126,28 @@ connectWebSocket();
           playersDeco.classList.add('translate-y-32');
           <% } %>
         }
+        // Check for stopping state
+        else if (statusData.stopping === true ||
+                statusData.status === 'stopping' ||
+                data.status === 'stopping') {
+          console.log('Server is stopping, updating status');
+
+          // Update status display
+          const statusElement = document.getElementById('status');
+          statusElement.textContent = 'Stopping';
+          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-orange-500';
+
+          // Update status chart
+          updateStatusChart('rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.2)');
+
+          // No need to hide daemon down message as it's been removed
+
+          <% if (features.includes('players')) { %>
+          // Hide players decoration
+          const playersDeco = document.getElementById('players-deco');
+          playersDeco.classList.add('translate-y-32');
+          <% } %>
+        }
         // Check for offline status
         else if (statusData.running === false ||
                 statusData.status === 'offline' ||
@@ -1208,15 +1294,7 @@ connectWebSocket();
       }, 60000);
     });
 
-    // Listen for server stop events
-    document.getElementById('stopButton').addEventListener('click', function() {
-      // Add a delay to check server status after stop command is sent
-      setTimeout(function() {
-        console.log('Checking server status after stop command');
-        // Force update stats to offline state
-        setAllStatsOffline();
-      }, 2000);
-    });
+    // The stop button event listener is now defined above
 
     // Function to update local uptime display
     function updateLocalUptime(startTime, element) {
@@ -1273,6 +1351,26 @@ connectWebSocket();
 
           // Update status chart
           updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
+
+          // No need to hide daemon down message as it's been removed
+
+          <% if (features.includes('players')) { %>
+          // Hide players decoration
+          const playersDeco = document.getElementById('players-deco');
+          playersDeco.classList.add('translate-y-32');
+          <% } %>
+        }
+        // Handle stopping state
+        else if (data.stopping) {
+          console.log('Server is stopping (from status check), updating status');
+
+          // Update status display
+          const statusElement = document.getElementById('status');
+          statusElement.textContent = 'Stopping';
+          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-orange-500';
+
+          // Update status chart
+          updateStatusChart('rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.2)');
 
           // No need to hide daemon down message as it's been removed
 

@@ -9,6 +9,13 @@ import { checkForServerInstallation } from '../../handlers/checkForServerInstall
 import { queueer } from '../../handlers/queueer';
 import { getServerStatus } from '../../handlers/utils/server/serverStatus';
 
+// Declare global serverStoppingStates
+declare global {
+  var serverStoppingStates: {
+    [key: string]: boolean;
+  };
+}
+
 const prisma = new PrismaClient();
 
 interface ErrorMessage {
@@ -252,36 +259,79 @@ const dashboardModule: Module = {
           }
 
           if (powerAction === 'stop') {
-            const requestData = {
-              method: 'POST',
-              url: `http://${server.node.address}:${server.node.port}/container/stop`,
-              auth: {
-                username: 'Airlink',
-                password: server.node.key,
-              },
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              data: {
-                id: String(serverId),
-                stopCmd: 'stop',
-              },
-            };
-
+            // First, update the server status to indicate it's stopping
             try {
+              // Get current server status
+              const serverInfos = {
+                nodeAddress: server.node.address,
+                nodePort: server.node.port,
+                serverUUID: server.UUID,
+                nodeKey: server.node.key,
+              };
+
+              // Create a custom status object with stopping=true
+              const stoppingStatus = {
+                online: true,
+                starting: false,
+                stopping: true,
+                uptime: null,
+                startedAt: null
+              };
+
+              // Create a cache key for this server's stopping state
+              const cacheKey = `server_stopping_${serverId}`;
+
+              // Store the stopping state in a global variable or cache
+              // This will be used by the getServerStatus function
+              global.serverStoppingStates = global.serverStoppingStates || {};
+              global.serverStoppingStates[cacheKey] = true;
+
+              // Set a timeout to clear the stopping state after 2 minutes
+              setTimeout(() => {
+                if (global.serverStoppingStates && global.serverStoppingStates[cacheKey]) {
+                  delete global.serverStoppingStates[cacheKey];
+                  logger.info(`Cleared stopping state for server ${serverId} after timeout`);
+                }
+              }, 120000); // 2 minutes
+
+              // Return the stopping status to the client
+              res.status(200).json({
+                success: true,
+                message: 'Server is stopping...',
+                status: stoppingStatus
+              });
+
+              // Now actually stop the container
+              const requestData = {
+                method: 'POST',
+                url: `http://${server.node.address}:${server.node.port}/container/stop`,
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                data: {
+                  id: String(serverId),
+                  stopCmd: 'stop',
+                },
+              };
+
               await axios(requestData);
               logger.info('Container stopped successfully: ' + serverId);
-              res
-                .status(200)
-                .json({ success: true, message: 'Container stopped successfully.' });
               return;
             } catch (stopError) {
               if (axios.isAxiosError(stopError) && stopError.response?.status === 404) {
                 logger.info('Container already stopped or not found: ' + serverId);
-                res.status(200).json({ success: true, message: 'Container stopped successfully.' });
+
+                // Clear the stopping state if the container is already stopped
+                const cacheKey = `server_stopping_${serverId}`;
+                if (global.serverStoppingStates && global.serverStoppingStates[cacheKey]) {
+                  delete global.serverStoppingStates[cacheKey];
+                }
               } else {
                 logger.debug('Error stopping container:', stopError);
-                res.status(200).json({ success: true, message: 'Container stopped successfully.' });
               }
               return;
             }
