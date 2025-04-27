@@ -15,6 +15,24 @@
           <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.userDashboardTitle %></h1>
           <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.userDashboardText %></p>
         </div>
+        <% if (servers && servers.length > 0) { %>
+        <div class="mt-4 sm:mt-0">
+          <div class="flex items-center space-x-2 bg-gray-100 dark:bg-neutral-800 p-1 rounded-lg">
+            <button id="gridViewBtn" class="view-toggle-btn px-3 py-1.5 text-sm font-medium rounded-md flex items-center justify-center active">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+              Grid
+            </button>
+            <button id="listViewBtn" class="view-toggle-btn px-3 py-1.5 text-sm font-medium rounded-md flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+              List
+            </button>
+          </div>
+        </div>
+        <% } %>
       </div>
 
       <!-- Error Notification -->
@@ -59,8 +77,73 @@
             </p>
           </div>
         <% } else { %>
-          <!-- Servers Table -->
-          <div class="overflow-hidden shadow ring-1 ring-gray-200 dark:ring-white/5 rounded-lg bg-white dark:bg-transparent">
+          <!-- Grid View -->
+          <div id="gridView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <% servers.forEach(server => { %>
+              <div onclick="window.location.href = '../server/<%= server.UUID %>';"
+                  class="bg-white dark:bg-neutral-800/50 shadow rounded-xl overflow-hidden border border-gray-200 dark:border-neutral-700/30 hover:shadow-lg dark:hover:bg-neutral-700/50 transition-all duration-200 cursor-pointer">
+                <div class="p-5">
+                  <div class="flex justify-between items-start">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate"><%= server.name %></h3>
+                    <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-md shadow-sm
+                        <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' %>">
+                      <span class="relative flex h-2 w-2 mr-1.5">
+                        <% if (server.status === 'running') { %>
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        <% } else { %>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                        <% } %>
+                      </span>
+                      <%= server.status === 'running' ? 'Running' : 'Stopped' %>
+                    </span>
+                  </div>
+
+                  <div class="mt-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm text-gray-500 dark:text-neutral-400">RAM Usage</span>
+                      <span class="text-sm font-medium text-gray-700 dark:text-neutral-300 border border-gray-200 dark:border-neutral-700/30 bg-gray-50 dark:bg-neutral-800/50 px-2.5 py-1 rounded-md shadow-sm"><%= server.ramUsage %>%</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm text-gray-500 dark:text-neutral-400">CPU Usage</span>
+                      <span class="text-sm font-medium text-gray-700 dark:text-neutral-300 border border-gray-200 dark:border-neutral-700/30 bg-gray-50 dark:bg-neutral-800/50 px-2.5 py-1 rounded-md shadow-sm"><%= server.cpuUsage %>%</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-gray-50 dark:bg-neutral-700/30 px-5 py-3">
+                  <div class="text-sm text-gray-500 dark:text-neutral-400 flex justify-between items-center">
+                    <span class="inline-block">
+                      <% if (server.status === 'running') { %>
+                        <span class="flex items-center">
+                          <span class="relative flex h-2 w-2 mr-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                          </span>
+                          Online
+                        </span>
+                      <% } else { %>
+                        <span class="flex items-center">
+                          <span class="relative flex h-2 w-2 mr-2">
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                          </span>
+                          Offline
+                        </span>
+                      <% } %>
+                    </span>
+                    <a href="../server/<%= server.UUID %>" class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
+                      Manage
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+
+          <!-- List View -->
+          <div id="listView" class="overflow-hidden shadow ring-1 ring-gray-200 dark:ring-white/5 rounded-lg bg-white dark:bg-transparent hidden">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-white/10">
               <thead class="bg-gray-50 dark:bg-white/5">
                 <tr>
@@ -75,13 +158,21 @@
                   <tr onclick="window.location.href = '../server/<%= server.UUID %>';" class="hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer">
                     <td class="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-6"><%= server.name %></td>
                     <td class="px-3 py-4 text-sm">
-                      <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full
-                          <%= server.status === 'running' ? 'bg-green-100 dark:bg-green-500/50 text-green-700 dark:text-white' : 'bg-red-100 dark:bg-red-700/30 text-red-700 dark:text-neutral-300 border dark:border-red-600/20' %>">
+                      <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-md shadow-sm
+                          <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' %>">
+                        <span class="relative flex h-2 w-2 mr-1.5">
+                          <% if (server.status === 'running') { %>
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                          <% } else { %>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                          <% } %>
+                        </span>
                         <%= server.status === 'running' ? 'Running' : 'Stopped' %>
                       </span>
                     </td>
-                    <td class="px-3 py-4 text-sm text-gray-700 dark:text-neutral-300"><span class="border border-gray-300 dark:border-neutral-600/20 bg-gray-100 dark:bg-neutral-500/10 px-2 py-0.5 rounded-lg"><%= server.ramUsage %>% / <%= server.ramLimit %></span></td>
-                    <td class="px-3 py-4 text-sm text-gray-700 dark:text-neutral-300"><span class="border border-gray-300 dark:border-neutral-600/20 bg-gray-100 dark:bg-neutral-500/10 px-2 py-0.5 rounded-lg"><%= server.cpuUsage %>%</span></td>
+                    <td class="px-3 py-4 text-sm text-gray-700 dark:text-neutral-300"><span class="border border-gray-200 dark:border-neutral-700/30 bg-gray-50 dark:bg-neutral-800/50 px-2.5 py-1 rounded-md shadow-sm"><%= server.ramUsage %>%</span></td>
+                    <td class="px-3 py-4 text-sm text-gray-700 dark:text-neutral-300"><span class="border border-gray-200 dark:border-neutral-700/30 bg-gray-50 dark:bg-neutral-800/50 px-2.5 py-1 rounded-md shadow-sm"><%= server.cpuUsage %>%</span></td>
                   </tr>
                 <% }); %>
               </tbody>
@@ -119,3 +210,56 @@
 </main>
 
 <%- include('../components/footer') %>
+
+<style>
+  .view-toggle-btn.active {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+  }
+
+  .dark .view-toggle-btn.active {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get view elements
+    const gridView = document.getElementById('gridView');
+    const listView = document.getElementById('listView');
+    const gridViewBtn = document.getElementById('gridViewBtn');
+    const listViewBtn = document.getElementById('listViewBtn');
+
+    // Check if elements exist (they might not if there are no servers)
+    if (!gridView || !listView || !gridViewBtn || !listViewBtn) return;
+
+    // Get saved view preference from localStorage
+    const savedView = localStorage.getItem('serverViewPreference') || 'grid';
+
+    // Set initial view based on saved preference
+    if (savedView === 'list') {
+      gridView.classList.add('hidden');
+      listView.classList.remove('hidden');
+      gridViewBtn.classList.remove('active');
+      listViewBtn.classList.add('active');
+    }
+
+    // Add click event listeners to buttons
+    gridViewBtn.addEventListener('click', function() {
+      gridView.classList.remove('hidden');
+      listView.classList.add('hidden');
+      gridViewBtn.classList.add('active');
+      listViewBtn.classList.remove('active');
+      localStorage.setItem('serverViewPreference', 'grid');
+    });
+
+    listViewBtn.addEventListener('click', function() {
+      gridView.classList.add('hidden');
+      listView.classList.remove('hidden');
+      gridViewBtn.classList.remove('active');
+      listViewBtn.classList.add('active');
+      localStorage.setItem('serverViewPreference', 'list');
+    });
+  });
+</script>

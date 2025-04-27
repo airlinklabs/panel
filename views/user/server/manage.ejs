@@ -938,7 +938,7 @@ connectWebSocket();
             cpuUsagePercent = 0;
         }
 
-        document.getElementById('cpuUsage').textContent = `${cpuUsagePercent}% / ${<%- server.Cpu %>}%`;
+        document.getElementById('cpuUsage').textContent = `${cpuUsagePercent}% / ${<%- server.Cpu * 100 %>}%`;
 
         if (cpuUsagePercent > 0) {
             updateChart(cpuChart, cpuUsagePercent);
