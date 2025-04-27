@@ -29,7 +29,7 @@
                <dd class="mt-3 text-3xl font-semibold tracking-tight text-white">
                 <%= userCount %>
                </dd>
-               <p class="mt-1 text-sm text-blue-400/70">Total registered users</p>
+               <p class="mt-1 text-sm text-blue-400/70"><%= req.translations.totalRegisteredUsers || 'Total registered users' %></p>
             </div>
 
             <!-- Instances Card -->
@@ -104,7 +104,7 @@
             <!-- Update Section -->
             <div class="flex-grow bg-gradient-to-br from-neutral-700/5 to-neutral-800/5 border border-neutral-700/10 rounded-xl p-6 shadow-sm">
               <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold text-white">Updates</h3>
+                <h3 class="text-lg font-semibold text-white"><%= req.translations.updates || 'Updates' %></h3>
               </div>
 
               <!-- Panel Update Section -->
@@ -122,7 +122,7 @@
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
                       </svg>
-                      Update
+                      <%= req.translations.update || 'Update' %>
                     </button>
                   </div>
                 </div>

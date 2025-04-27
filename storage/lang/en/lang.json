@@ -8,7 +8,7 @@
 
     "adminImagesTitle": "Manage Images",
     "adminImagesText": "Easily upload or manually create images for your instances.",
-  
+
     "adminSettingsTitle": "Settings",
     "adminSettingsText": "A list of all the settings on the Airlink panel.",
 
@@ -35,7 +35,7 @@
 
     "adminUserTitle": "User",
     "adminUserText": "Manage an individual user.",
-    
+
   "_commentary_user": "Category section user",
 
     "userDashboardTitle": "Dashboard",
@@ -145,5 +145,40 @@
   "daemonKey": "Daemon Key",
   "DockerImage": "Docker Image",
   "adminSettingsSave": "Save",
-  "general": "General"
+  "general": "General",
+  "language": "Language",
+  "languagePreference": "Language Preferences",
+  "saveLanguagePreference": "Save Language Preference",
+  "loginHistory": "Login History",
+  "dateTime": "Date & Time",
+  "ipAddress": "IP Address",
+  "browserDevice": "Browser/Device",
+  "unknown": "Unknown",
+  "noLoginHistory": "No login history available",
+  "siteTitle": "Site Title",
+  "uploadLogo": "Upload Logo",
+  "currentLogo": "Current Logo",
+  "uploadFavicon": "Upload Favicon",
+  "currentFavicon": "Current Favicon",
+  "faviconUploadHelp": "You can upload .ico, .png, or .jpg files. Images will be automatically converted to 32x32 .ico format.",
+  "theme": "Theme",
+  "defaultLanguage": "Default Language",
+  "resetToDefault": "Reset to Default",
+  "saveSettings": "Save Settings",
+  "settingsSaved": "Settings saved successfully!",
+  "failedToSaveSettings": "Failed to save settings",
+  "resetSettingsConfirm": "Reset all settings to default?",
+  "settingsReset": "Settings reset to default!",
+  "failedToResetSettings": "Failed to reset settings",
+  "imageConvertedToFavicon": "Image converted to favicon format",
+  "failedToConvertImage": "Failed to convert image to favicon",
+  "updates": "Updates",
+  "totalRegisteredUsers": "Total registered users",
+  "serverCount": "Server Count",
+  "totalServers": "Total servers",
+  "admins": "Admins",
+  "noUsersOnline": "No Users Online",
+  "errorCheckingUsername": "Error checking username",
+  "areYouSureDeleteUser": "Are you sure you want to delete this user?",
+  "failedToDeleteUser": "Failed to delete user."
 }

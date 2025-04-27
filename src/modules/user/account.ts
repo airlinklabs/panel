@@ -314,6 +314,40 @@ const accountModule: Module = {
       },
     );
 
+    router.post(
+      '/set-language',
+      isAuthenticated(),
+      async (req: Request, res: Response) => {
+        const { language } = req.body;
+
+        if (!language) {
+          res.status(400).send('Language parameter is required.');
+          return;
+        }
+
+        // Validate language is supported
+        const supportedLanguages = ['en', 'fr'];
+        if (!supportedLanguages.includes(language)) {
+          res.status(400).send('Unsupported language.');
+          return;
+        }
+
+        try {
+          // Set the language cookie
+          res.cookie('lang', language, {
+            maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
+            httpOnly: true,
+            sameSite: 'strict'
+          });
+
+          res.status(200).json({ message: 'Language preference saved.' });
+        } catch (error) {
+          logger.error('Error setting language preference:', error);
+          res.status(500).send('Internal Server Error');
+        }
+      },
+    );
+
     return router;
   },
 };
