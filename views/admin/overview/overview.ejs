@@ -97,7 +97,7 @@
                 </div>
               </div>
               <p class="text-sm mt-4 font-normal text-neutral-300">
-                <%= req.translations.sysInfoText %>
+                <%= req.translations.sysInfoText %> <span class="text-blue-400 font-medium"><span id="currentVersion"></span></span>
               </p>
             </div>
 
@@ -140,7 +140,10 @@
         <script>
           // Set current version
           const currentVersion = '<%= airlinkVersion %>';
-          document.getElementById('currentVersion').textContent = currentVersion;
+          // Update all instances of currentVersion elements
+          document.querySelectorAll('#currentVersion').forEach(el => {
+            el.textContent = currentVersion;
+          });
 
           // Check for updates
           document.getElementById('checkUpdateBtn').addEventListener('click', async () => {
