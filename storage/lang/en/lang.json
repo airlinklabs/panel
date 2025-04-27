@@ -1,48 +1,47 @@
 {
-
   "_commentary": "Category section title and description",
-    "_commentary_admin": "Category section admin",
+  "_commentary_admin": "Category section admin",
 
-    "adminOverviewTitle": "Overview",
-    "adminOverviewText": "A simple overview of your Panel.",
+  "adminOverviewTitle": "Overview",
+  "adminOverviewText": "A simple overview of your Panel.",
 
-    "adminImagesTitle": "Manage Images",
-    "adminImagesText": "Easily upload or manually create images for your instances.",
+  "adminImagesTitle": "Manage Images",
+  "adminImagesText": "Easily upload or manually create images for your instances.",
 
-    "adminSettingsTitle": "Settings",
-    "adminSettingsText": "A list of all the settings on the Airlink panel.",
+  "adminSettingsTitle": "Settings",
+  "adminSettingsText": "A list of all the settings on the Airlink panel.",
 
-    "adminEditNodeTitle": "Edit Node",
-    "adminEditNodeText": "Edit an individual node.",
+  "adminEditNodeTitle": "Edit Node",
+  "adminEditNodeText": "Edit an individual node.",
 
-    "adminNodesTitle": "Nodes",
-    "adminNodesText": "A list of all the nodes set up on the Airlink panel.",
+  "adminNodesTitle": "Nodes",
+  "adminNodesText": "A list of all the nodes set up on the Airlink panel.",
 
-    "adminCreateNodeTitle": "Create Node",
-    "adminCreateNodeText": "Create a new node on Airlink.",
+  "adminCreateNodeTitle": "Create Node",
+  "adminCreateNodeText": "Create a new node on Airlink.",
 
-    "adminCreateServerTitle": "Create Server",
-    "adminCreateServerText": "Create a new Server on Airlink.",
+  "adminCreateServerTitle": "Create Server",
+  "adminCreateServerText": "Create a new Server on Airlink.",
 
-    "adminServersTitle": "Servers",
-    "adminServersText": "A list of all the servers set up on the Airlink panel.",
+  "adminServersTitle": "Servers",
+  "adminServersText": "A list of all the servers set up on the Airlink panel.",
 
-    "adminCreateUserTitle": "Create User",
-    "adminCreateUserText": "Create a new user on Airlink.",
+  "adminCreateUserTitle": "Create User",
+  "adminCreateUserText": "Create a new user on Airlink.",
 
-    "adminUsersTitle": "Users",
-    "adminUsersText": "A list of all the users on the Airlink panel.",
+  "adminUsersTitle": "Users",
+  "adminUsersText": "A list of all the users on the Airlink panel.",
 
-    "adminUserTitle": "User",
-    "adminUserText": "Manage an individual user.",
+  "adminUserTitle": "User",
+  "adminUserText": "Manage an individual user.",
 
   "_commentary_user": "Category section user",
 
-    "userDashboardTitle": "Dashboard",
-    "userDashboardText": "View and manage your servers.",
+  "userDashboardTitle": "Dashboard",
+  "userDashboardText": "View and manage your servers.",
 
-    "userAccountTitle": "Account",
-    "userAccountText": "Manage your account settings.",
+  "userAccountTitle": "Account",
+  "userAccountText": "Manage your account settings.",
 
   "_commentary_other": "Category section other",
 
@@ -99,12 +98,16 @@
   "createNewUser": "Create new user",
   "totalUsers": "Total Users",
   "onlineUsers": "Online Users",
+  "onlineUsersCount": "Online Users",
+  "onlineUsersStatus": "Online Users",
   "userNotFound": "User not found",
   "userUpdatedSuccess": "User updated successfully!",
   "userDeletedSuccess": "User deleted successfully!",
   "userCreatedSuccess": "User created successfully!",
   "addNewUser": "Add new user",
   "update": "Update",
+  "updateBtn": "Update",
+  "updateAction": "Update",
   "delete": "Delete",
   "cancel": "Cancel",
   "createUser": "Create User",
