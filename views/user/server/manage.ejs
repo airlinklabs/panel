@@ -83,60 +83,71 @@
 
 
     <!-- Info Cards -->
-      <div class="mt-8 ml-8 mb-4">
-        <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-4 mr-8">
+    <div class="mt-6 ml-8 mb-4">
+      <dl class="grid grid-cols-1 gap-4 sm:grid-cols-4 mr-8">
 
-          <div class="overflow-hidden bg-neutral-500/20 border border-neutral-700/10 dark:bg-white/5 rounded-xl px-4 py-5 shadow sm:p-6 flex items-center">
+        <div class="overflow-hidden bg-neutral-800/50 backdrop-blur-sm border border-neutral-700/30 rounded-xl px-4 py-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-neutral-700/30 group">
+          <div class="flex items-center">
             <div class="flex-grow">
-                <dt class="truncate text-sm font-medium text-neutral-400"><%= req.translations.addressIP %>:</dt>
-                <dd class="mt-1 text-lg font-medium tracking-tight text-white">
-                    <span>
-                      <%= server.node.address %><span class="text-neutral-400">:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.Port.split(':')[1]).pop() : '' %></span>
-                    </span>
-                </dd>
+              <dt class="truncate text-xs font-medium text-neutral-400 group-hover:text-neutral-300 transition-colors duration-300"><%= req.translations.addressIP %>:</dt>
+              <dd class="mt-0.5 text-base font-medium tracking-tight text-white">
+                <span>
+                  <%= server.node.address %><span class="text-neutral-400">:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.Port.split(':')[1]).pop() : '' %></span>
+                </span>
+              </dd>
             </div>
-            <div class="ml-4 shadow border border-white/10 rounded-xl p-2">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-6 w-6 text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M240,120a8,8,0,0,1-8,8H200v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H176a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H72v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H24a8,8,0,0,1,0-16h96V88h-8A16,16,0,0,1,96,72V40a16,16,0,0,1,16-16h32a16,16,0,0,1,16,16V72a16,16,0,0,1-16,16h-8v24h96A8,8,0,0,1,240,120Z"/></svg>
+            <div class="ml-3 shadow-md border border-white/10 rounded-lg p-2 bg-neutral-700/50 group-hover:bg-neutral-600/50 transition-all duration-300 transform group-hover:scale-110">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-5 w-5 text-neutral-300 group-hover:text-white transition-colors duration-300"><rect width="256" height="256" fill="none"/><path d="M240,120a8,8,0,0,1-8,8H200v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H176a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H72v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H24a8,8,0,0,1,0-16h96V88h-8A16,16,0,0,1,96,72V40a16,16,0,0,1,16-16h32a16,16,0,0,1,16,16V72a16,16,0,0,1-16,16h-8v24h96A8,8,0,0,1,240,120Z"/></svg>
             </div>
-        </div>
-        <div class="overflow-hidden bg-neutral-500/20 border border-neutral-700/10 dark:bg-white/5 rounded-xl px-4 py-5 shadow sm:p-6 flex items-center">
-            <div class="flex-grow">
-                <dt class="truncate text-sm font-medium text-neutral-400"><%= req.translations.Image %>:</dt>
-                <dd class="mt-1 text-lg font-medium tracking-tight text-white">
-                    <span>
-                        <%= server.image.name %>
-                    </span>
-                </dd>
-            </div>
-            <div class="ml-4 shadow border border-white/10 rounded-xl p-2">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-6 w-6 text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/></svg>
-            </div>
-        </div>
-        <div class="overflow-hidden bg-neutral-500/20 border border-neutral-700/10 dark:bg-white/5 rounded-xl px-4 py-5 shadow sm:p-6 flex items-center">
-            <div class="flex-grow">
-                <dt class="truncate text-sm font-medium text-neutral-400"><%= req.translations.Node %>:</dt>
-                <dd class="mt-1 text-lg font-medium tracking-tight text-white">
-                    <%= server.node.name %> <span class="text-neutral-500">(<%= server.node.address %>)</span>
-                </dd>
-            </div>
-            <div class="ml-4 shadow border border-white/10 rounded-xl p-2">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-6 w-6 text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M208,40H48A16,16,0,0,0,32,56v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40ZM180,92a12,12,0,1,1,12-12A12,12,0,0,1,180,92Z"/><path d="M208,136H48a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V152A16,16,0,0,0,208,136Zm-28,52a12,12,0,1,1,12-12A12,12,0,0,1,180,188Z"/></svg>
-            </div>
-        </div>
-        <div class="overflow-hidden bg-neutral-500/20 border border-neutral-700/10 dark:bg-white/5 rounded-xl px-4 py-5 shadow sm:p-6 flex items-center">
-            <div class="flex-grow">
-                <dt class="truncate text-sm font-medium text-neutral-400"><%= req.translations.identifier %>:</dt>
-                <dd class="mt-1 text-lg font-medium tracking-tight text-white">
-                    <%= server.UUID.split('-')[0] %>
-                </dd>
-            </div>
-            <div class="ml-4 shadow border border-white/10 rounded-xl p-2">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-6 w-6 text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M116.25,112h31.5l-8,32h-31.5ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48Zm-16,56a8,8,0,0,0-8-8H168.25l7.51-30.06a8,8,0,0,0-15.52-3.88L151.75,96h-31.5l7.51-30.06a8,8,0,0,0-15.52-3.88L103.75,96H64a8,8,0,0,0,0,16H99.75l-8,32H56a8,8,0,0,0,0,16H87.75l-7.51,30.06a8,8,0,0,0,5.82,9.7,8.13,8.13,0,0,0,2,.24,8,8,0,0,0,7.75-6.06L104.25,160h31.5l-7.51,30.06a8,8,0,0,0,5.82,9.7A8.13,8.13,0,0,0,136,200a8,8,0,0,0,7.75-6.06L152.25,160H192a8,8,0,0,0,0-16H156.25l8-32H200A8,8,0,0,0,208,104Z"/></svg>
-            </div>
+          </div>
         </div>
 
-        </dl>
-      </div>
+        <div class="overflow-hidden bg-neutral-800/50 backdrop-blur-sm border border-neutral-700/30 rounded-xl px-4 py-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-neutral-700/30 group">
+          <div class="flex items-center">
+            <div class="flex-grow">
+              <dt class="truncate text-xs font-medium text-neutral-400 group-hover:text-neutral-300 transition-colors duration-300"><%= req.translations.Image %>:</dt>
+              <dd class="mt-0.5 text-base font-medium tracking-tight text-white">
+                <span>
+                  <%= server.image.name %>
+                </span>
+              </dd>
+            </div>
+            <div class="ml-3 shadow-md border border-white/10 rounded-lg p-2 bg-neutral-700/50 group-hover:bg-neutral-600/50 transition-all duration-300 transform group-hover:scale-110">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-5 w-5 text-neutral-300 group-hover:text-white transition-colors duration-300"><rect width="256" height="256" fill="none"/><path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-hidden bg-neutral-800/50 backdrop-blur-sm border border-neutral-700/30 rounded-xl px-4 py-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-neutral-700/30 group">
+          <div class="flex items-center">
+            <div class="flex-grow">
+              <dt class="truncate text-xs font-medium text-neutral-400 group-hover:text-neutral-300 transition-colors duration-300"><%= req.translations.Node %>:</dt>
+              <dd class="mt-0.5 text-base font-medium tracking-tight text-white">
+                <%= server.node.name %> <span class="text-neutral-500">(<%= server.node.address %>)</span>
+              </dd>
+            </div>
+            <div class="ml-3 shadow-md border border-white/10 rounded-lg p-2 bg-neutral-700/50 group-hover:bg-neutral-600/50 transition-all duration-300 transform group-hover:scale-110">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-5 w-5 text-neutral-300 group-hover:text-white transition-colors duration-300"><rect width="256" height="256" fill="none"/><path d="M208,40H48A16,16,0,0,0,32,56v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40ZM180,92a12,12,0,1,1,12-12A12,12,0,0,1,180,92Z"/><path d="M208,136H48a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V152A16,16,0,0,0,208,136Zm-28,52a12,12,0,1,1,12-12A12,12,0,0,1,180,188Z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-hidden bg-neutral-800/50 backdrop-blur-sm border border-neutral-700/30 rounded-xl px-4 py-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-neutral-700/30 group">
+          <div class="flex items-center">
+            <div class="flex-grow">
+              <dt class="truncate text-xs font-medium text-neutral-400 group-hover:text-neutral-300 transition-colors duration-300"><%= req.translations.identifier %>:</dt>
+              <dd class="mt-0.5 text-base font-medium tracking-tight text-white">
+                <%= server.UUID.split('-')[0] %>
+              </dd>
+            </div>
+            <div class="ml-3 shadow-md border border-white/10 rounded-lg p-2 bg-neutral-700/50 group-hover:bg-neutral-600/50 transition-all duration-300 transform group-hover:scale-110">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-5 w-5 text-neutral-300 group-hover:text-white transition-colors duration-300"><rect width="256" height="256" fill="none"/><path d="M116.25,112h31.5l-8,32h-31.5ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48Zm-16,56a8,8,0,0,0-8-8H168.25l7.51-30.06a8,8,0,0,0-15.52-3.88L151.75,96h-31.5l7.51-30.06a8,8,0,0,0-15.52-3.88L103.75,96H64a8,8,0,0,0,0,16H99.75l-8,32H56a8,8,0,0,0,0,16H87.75l-7.51,30.06a8,8,0,0,0,5.82,9.7,8.13,8.13,0,0,0,2,.24,8,8,0,0,0,7.75-6.06L104.25,160h31.5l-7.51,30.06a8,8,0,0,0,5.82,9.7A8.13,8.13,0,0,0,136,200a8,8,0,0,0,7.75-6.06L152.25,160H192a8,8,0,0,0,0-16H156.25l8-32H200A8,8,0,0,0,208,104Z"/></svg>
+            </div>
+          </div>
+        </div>
+
+      </dl>
+    </div>
 
       <div class="flex flex-col lg:flex-row px-8">
 
