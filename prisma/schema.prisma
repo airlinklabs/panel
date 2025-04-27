@@ -119,6 +119,17 @@ model LoginHistory {
   timestamp DateTime @default(now())
 }
 
+model PlayerStats {
+  id           Int      @id @default(autoincrement())
+  timestamp    DateTime @default(now())
+  totalPlayers Int      @default(0)
+  maxPlayers   Int      @default(0)
+  onlineServers Int     @default(0)
+  totalServers Int      @default(0)
+
+  @@index([timestamp])
+}
+
 model Addon {
   id          Int      @id @default(autoincrement())
   name        String

@@ -23,6 +23,8 @@ import PrismaSessionStore from './handlers/sessionStore';
 import { settingsLoader } from './handlers/settingsLoader';
 import { loadAddons } from './handlers/addonHandler';
 import { initializeDefaultUIComponents, uiComponentStore } from './handlers/uiComponentHandler';
+import { startPlayerStatsCollection } from './handlers/playerStatsCollector';
+import { createPlayerStatsTable } from './handlers/createPlayerStatsTable';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
@@ -153,7 +155,7 @@ app.use((_req, res, next) => {
   global.uiComponentStore = uiComponentStore;
   global.appName = name;
   global.airlinkVersion = airlinkVersion;
-  
+
   res.locals.adminMenuItems = uiComponentStore.getSidebarItems(undefined, true);
   res.locals.regularMenuItems = uiComponentStore.getSidebarItems(undefined, false);
   next();
@@ -186,6 +188,11 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
 
     const server = app.listen(port, () => {
       logger.info(`Server is running on http://localhost:${port}`);
+
+      // Create PlayerStats table and start collection
+      createPlayerStatsTable().then(() => {
+        startPlayerStatsCollection();
+      });
     });
 
     // on close of the application

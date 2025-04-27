@@ -9,10 +9,10 @@
     <!-- Content -->
     <div class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">
-        <div class="sm:flex-auto">
-           <h1 class="text-xl font-semibold leading-6 text-white"><%= req.translations.adminOverviewTitle %></h1>
-           <p class="mt-2 tracking-tight text-sm text-neutral-400"><%= req.translations.adminOverviewText %></p>
-         </div>
+        <%- include('../../components/pageTitle', {
+          title: req.translations.adminOverviewTitle,
+          description: req.translations.adminOverviewText
+        }) %>
        </div>
        <div class="px-8 mt-6">
         <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

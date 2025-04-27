@@ -1,0 +1,376 @@
+<%- include('../../components/header', { title: 'Player Statistics' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <%- include('../../components/pageTitle', {
+          title: 'Player Statistics',
+          description: 'View player statistics across all Minecraft servers'
+        }) %>
+         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <button id="refreshBtn" class="border border-neutral-800/20 block rounded-xl bg-white/5 hover:bg-white/10 text-white px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+            Refresh Data
+          </button>
+        </div>
+       </div>
+
+       <!-- Error Message -->
+      <% if (errorMessage && errorMessage.message) { %>
+      <div class="rounded-xl bg-red-800/10 px-6 py-4 mt-8 mx-8">
+        <div class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div>
+            <h3 class="text-sm font-medium text-red-400">Error</h3>
+            <p class="text-sm text-red-400/50">
+              <%= errorMessage.message %>
+            </p>
+          </div>
+        </div>
+      </div>
+      <% } %>
+
+       <div class="px-8 mt-6">
+        <!-- Stats Cards -->
+        <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <!-- Total Players Card -->
+            <div class="overflow-hidden rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
+               <div class="flex items-center justify-between">
+                 <dt class="truncate text-sm font-medium text-blue-400">Total Players</dt>
+                 <div class="rounded-lg bg-blue-500/20 p-2">
+                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                     <circle cx="9" cy="7" r="4"></circle>
+                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                   </svg>
+                 </div>
+               </div>
+               <dd id="totalPlayers" class="mt-3 text-3xl font-semibold tracking-tight text-white">
+                0
+               </dd>
+               <p class="mt-1 text-sm text-blue-400/70">Players across all servers</p>
+            </div>
+
+            <!-- Max Capacity Card -->
+            <div class="overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
+               <div class="flex items-center justify-between">
+                 <dt class="truncate text-sm font-medium text-emerald-400">Max Capacity</dt>
+                 <div class="rounded-lg bg-emerald-500/20 p-2">
+                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                     <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                     <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                   </svg>
+                 </div>
+               </div>
+               <dd id="maxCapacity" class="mt-3 text-3xl font-semibold tracking-tight text-white">
+                0
+               </dd>
+               <p class="mt-1 text-sm text-emerald-400/70">Total player capacity</p>
+            </div>
+
+            <!-- Online Servers Card -->
+            <div class="overflow-hidden rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
+               <div class="flex items-center justify-between">
+                 <dt class="truncate text-sm font-medium text-amber-400">Online Servers</dt>
+                 <div class="rounded-lg bg-amber-500/20 p-2">
+                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                     <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                     <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                     <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                     <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                   </svg>
+                 </div>
+               </div>
+               <dd id="onlineServers" class="mt-3 text-3xl font-semibold tracking-tight text-white">
+                0
+               </dd>
+               <p class="mt-1 text-sm text-amber-400/70">Servers currently online</p>
+            </div>
+
+            <!-- Utilization Card -->
+            <div class="overflow-hidden rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
+               <div class="flex items-center justify-between">
+                 <dt class="truncate text-sm font-medium text-purple-400">Utilization</dt>
+                 <div class="rounded-lg bg-purple-500/20 p-2">
+                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                     <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                   </svg>
+                 </div>
+               </div>
+               <dd id="utilization" class="mt-3 text-3xl font-semibold tracking-tight text-white">
+                0%
+               </dd>
+               <p class="mt-1 text-sm text-purple-400/70">Player capacity utilization</p>
+            </div>
+         </dl>
+
+         <!-- Player Graph -->
+         <div class="bg-gradient-to-br from-neutral-800/20 to-neutral-900/10 border border-neutral-700/20 rounded-xl mt-8 shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-lg font-semibold text-white">Player Count History</h2>
+              <div class="text-xs text-neutral-400">Data collected every 5 minutes (last 48 hours)</div>
+            </div>
+            <div class="h-60">
+              <canvas id="playerChart" class="w-full h-full"></canvas>
+            </div>
+            <div class="mt-2 text-xs text-neutral-400 text-center">
+              <p>Double-click the Refresh button to manually trigger data collection</p>
+            </div>
+         </div>
+
+         <!-- Server Table -->
+         <div class="bg-gradient-to-br from-neutral-800/20 to-neutral-900/10 border border-neutral-700/20 rounded-xl mt-8 shadow-md p-6">
+            <h2 class="text-lg font-semibold text-white mb-4">Server Player Counts</h2>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-neutral-700/20">
+                <thead>
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">Server</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">Players</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">Version</th>
+                  </tr>
+                </thead>
+                <tbody id="serverTableBody" class="divide-y divide-neutral-700/20">
+                  <tr>
+                    <td colspan="4" class="px-6 py-4 text-center text-neutral-400">Loading server data...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+         </div>
+       </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  // Initialize chart with empty data
+  const ctx = document.getElementById('playerChart').getContext('2d');
+  const playerChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Total Players',
+        data: [],
+        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        borderColor: 'rgba(59, 130, 246, 1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 2,
+        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(59, 130, 246, 1)',
+        pointHoverBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: '#FFFFFF'
+          }
+        },
+        tooltip: {
+          callbacks: {
+            title: function(tooltipItems) {
+              return new Date(tooltipItems[0].label).toLocaleString();
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#FFFFFF',
+            maxRotation: 45,
+            minRotation: 45,
+            callback: function(value, index, values) {
+              // Show fewer labels on x-axis for readability
+              if (index % 12 === 0) {
+                const date = new Date(this.getLabelForValue(value));
+                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              }
+              return '';
+            }
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          }
+        },
+        y: {
+          position: 'right',
+          beginAtZero: true,
+          ticks: {
+            color: '#FFFFFF',
+            padding: 10,
+            font: {
+              weight: 'bold'
+            }
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          },
+          title: {
+            display: true,
+            text: 'Players',
+            color: '#FFFFFF',
+            font: {
+              size: 12
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Function to fetch player data
+  async function fetchPlayerData() {
+    try {
+      const response = await fetch('/api/admin/playerstats');
+      const data = await response.json();
+
+      if (data.error) {
+        console.error('Error fetching player data:', data.error);
+        return;
+      }
+
+      // Update stats cards
+      document.getElementById('totalPlayers').textContent = data.totalPlayers;
+      document.getElementById('maxCapacity').textContent = data.totalMaxPlayers;
+      document.getElementById('onlineServers').textContent = data.onlineServers;
+
+      const utilizationPercent = data.totalMaxPlayers > 0
+        ? Math.round((data.totalPlayers / data.totalMaxPlayers) * 100)
+        : 0;
+      document.getElementById('utilization').textContent = `${utilizationPercent}%`;
+
+      // Update server table
+      const tableBody = document.getElementById('serverTableBody');
+      tableBody.innerHTML = '';
+
+      if (data.servers.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td colspan="4" class="px-6 py-4 text-center text-neutral-400">No servers found</td>`;
+        tableBody.appendChild(row);
+      } else {
+        data.servers.forEach(server => {
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-white/5';
+
+          const statusClass = server.online ? 'text-green-400' : 'text-red-400';
+          const statusText = server.online ? 'Online' : 'Offline';
+
+          row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-white">${server.serverName}</div>
+                  <div class="text-sm text-neutral-400">${server.serverId}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-opacity-10 ${statusClass} bg-${server.online ? 'green' : 'red'}-100">
+                ${statusText}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
+              ${server.playerCount} / ${server.maxPlayers}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-400">
+              ${server.version || 'Unknown'}
+            </td>
+          `;
+
+          tableBody.appendChild(row);
+        });
+      }
+
+      // Update chart with historical data
+      if (data.historicalData && data.historicalData.length > 0) {
+        const labels = data.historicalData.map(entry => new Date(entry.timestamp).toISOString());
+        const playerCounts = data.historicalData.map(entry => entry.totalPlayers);
+
+        // Add current data point
+        labels.push(new Date().toISOString());
+        playerCounts.push(data.totalPlayers);
+
+        // Update chart
+        playerChart.data.labels = labels;
+        playerChart.data.datasets[0].data = playerCounts;
+        playerChart.update();
+      } else {
+        // If no historical data, just add the current point
+        const now = new Date().toISOString();
+
+        // Update chart
+        playerChart.data.labels = [now];
+        playerChart.data.datasets[0].data = [data.totalPlayers];
+        playerChart.update();
+      }
+
+    } catch (error) {
+      console.error('Error fetching player data:', error);
+    }
+  }
+
+  // Initial fetch
+  fetchPlayerData();
+
+  // Set up auto-refresh every 5 minutes (300000 ms)
+  const refreshInterval = setInterval(fetchPlayerData, 300000);
+
+  // Manual refresh button
+  document.getElementById('refreshBtn').addEventListener('click', fetchPlayerData);
+
+  // Manually trigger data collection
+  async function triggerDataCollection() {
+    try {
+      const response = await fetch('/api/admin/playerstats/collect', {
+        method: 'POST'
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        console.log('Player statistics collected successfully');
+        // Refresh the data after collection
+        setTimeout(fetchPlayerData, 1000);
+      } else {
+        console.error('Error collecting player statistics:', data.error);
+      }
+    } catch (error) {
+      console.error('Error triggering data collection:', error);
+    }
+  }
+
+  // Add collection button event listener
+  document.getElementById('refreshBtn').addEventListener('dblclick', (e) => {
+    e.preventDefault();
+    triggerDataCollection();
+  });
+
+  // Clean up on page unload
+  window.addEventListener('beforeunload', () => {
+    clearInterval(refreshInterval);
+  });
+</script>
+
+<%- include('../../components/footer') %>

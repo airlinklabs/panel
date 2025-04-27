@@ -196,7 +196,7 @@ const dashboardModule: Module = {
     router.get(
       '/server/:id/status',
       isAuthenticatedForServer('id'),
-      async (req: Request, res: Response) => {
+      async (req: Request, res: Response): Promise<void> => {
         const serverId = req.params?.id;
 
         try {
@@ -206,7 +206,8 @@ const dashboardModule: Module = {
           });
 
           if (!server) {
-            return res.status(404).json({ status: 'error', message: 'Server not found' });
+            res.status(404).json({ status: 'error', message: 'Server not found' });
+            return;
           }
 
           // Get server status including uptime

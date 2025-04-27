@@ -9,10 +9,10 @@
     <!-- Content -->
     <div class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">
-        <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminImagesTitle %></h1>
-          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-300"><%= req.translations.adminImagesText %></p>
-        </div>
+        <%- include('../../components/pageTitle', {
+          title: req.translations.adminImagesTitle,
+          description: req.translations.adminImagesText
+        }) %>
         <!-- Action Buttons -->
         <div class="mt-4 sm:mt-0 sm:ml-4 sm:flex-none">
 

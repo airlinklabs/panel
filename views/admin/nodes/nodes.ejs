@@ -9,10 +9,10 @@
     <!-- Content -->
     <div class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">
-        <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminNodesTitle %></h1>
-          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminNodesText %></p>
-        </div>
+        <%- include('../../components/pageTitle', {
+          title: req.translations.adminNodesTitle,
+          description: req.translations.adminNodesText
+        }) %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <div class="flex gap-2">
             <button id="createButton" type="button" class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
@@ -21,9 +21,9 @@
           </div>
         </div>
       </div>
-      
+
       <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
-       
+
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.totalNodes %></h2>
           <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= nodes.length %></p>
@@ -40,7 +40,7 @@
           </p>
           <% if (instance.length > 0) { %>
             <p class="text-sm text-neutral-400 mt-2">
-              <%= req.translations.averageInstanceDensity %>: 
+              <%= req.translations.averageInstanceDensity %>:
               <%= (nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0) / nodes.length).toFixed(2) %>
             </p>
           <% } else { %>
@@ -57,7 +57,7 @@
               <div class="flex-shrink-0 ml-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mt-2 text-emerald-400">
                   <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-                </svg>                
+                </svg>
               </div>
               <div class="ml-5">
                 <h3 class="text-sm font-medium text-emerald-400"><%= req.translations.success %>!</h3>
@@ -105,8 +105,8 @@
                   </div>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= node.address %>:<%= node.port %>
-                  <div class="mt-1 ml-2 inline-flex items-center rounded-md 
-                  <%= node.versionRelease ? 'bg-emerald-600/10 text-emerald-400 ring-emerald-600/20' : 'bg-red-600/10 text-red-400 ring-red-600/20' %> 
+                  <div class="mt-1 ml-2 inline-flex items-center rounded-md
+                  <%= node.versionRelease ? 'bg-emerald-600/10 text-emerald-400 ring-emerald-600/20' : 'bg-red-600/10 text-red-400 ring-red-600/20' %>
                   px-2 py-1 text-xs font-medium ring-1 ring-inset">
                     <%= node.versionRelease || 'unknown' %>
                   </div></td>
