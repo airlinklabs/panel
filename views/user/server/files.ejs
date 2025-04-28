@@ -19,6 +19,11 @@ function getFileIcon(category) {
       <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z" />
     </svg>
     `,
+    'Images': `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+      <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z" clip-rule="evenodd" />
+    </svg>
+    `,
     'No Category': `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
       <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
@@ -27,7 +32,14 @@ function getFileIcon(category) {
     `,
   };
 
-  return icons[category];
+  return icons[category] || icons['No Category'];
+}
+
+// Function to check if a file is an image based on extension
+function isImageFile(filename) {
+  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'tiff'];
+  const extension = filename.split('.').pop().toLowerCase();
+  return imageExtensions.includes(extension);
 }
 %>
 
@@ -112,20 +124,28 @@ function getFileIcon(category) {
                     <input type="checkbox" class="form-checkbox h-5 w-5 text-neutral-500 bg-white/5 border border-white/10 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>">
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white border-none">
-                    <a href="/server/<%= server.UUID %>/files<%=
-                      file.type === 'directory'
-                        ? '?path=' + encodeURIComponent(
-                            currentPath && currentPath !== '/'
-                              ? currentPath.replace(/^\/+/, '') + '/' + file.name
-                              : file.name
-                          )
-                        : '/edit/' + encodeURIComponent(
-                            currentPath && currentPath !== '/'
-                              ? currentPath.replace(/^\/+/, '') + '/' + file.name
-                              : file.name
-                          )
-                    %>"
-                       class="flex items-center">
+                    <%
+                      const isImage = file.type !== 'directory' && isImageFile(file.name);
+                      const filePath = currentPath && currentPath !== '/'
+                        ? currentPath.replace(/^\/+/, '') + '/' + file.name
+                        : file.name;
+                      const fileHref = file.type === 'directory'
+                        ? `/server/${server.UUID}/files?path=${encodeURIComponent(filePath)}`
+                        : isImage
+                          ? '#'
+                          : `/server/${server.UUID}/files/edit/${encodeURIComponent(filePath)}`;
+                      const fileSize = (() => {
+                        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                        let size = file.size;
+                        let unitIndex = 0;
+                        while (size >= 1024 && unitIndex < sizes.length - 1) {
+                          size /= 1024;
+                          unitIndex++;
+                        }
+                        return `${size.toFixed(2)} ${sizes[unitIndex]}`;
+                      })();
+                    %>
+                    <a href="<%= fileHref %>" class="flex items-center" <% if (isImage) { %>onclick="event.preventDefault(); showImageViewer('<%= file.name %>', '<%= filePath %>', '<%= fileSize %>', '<%= server.UUID %>');"<% } %>>
                     <span class="mr-4">
                       <%- getFileIcon(
                           file.type === 'directory' ? 'Folder' : file.category || 'No Category'
@@ -135,16 +155,7 @@ function getFileIcon(category) {
                     </a>
                   </td>
                   <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
-                    <%
-                      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                      let size = file.size;
-                      let unitIndex = 0;
-                      while (size >= 1024 && unitIndex < sizes.length - 1) {
-                        size /= 1024;
-                        unitIndex++;
-                      }
-                    %>
-                    <%= size.toFixed(2) %> <%= sizes[unitIndex] %>
+                    <%= fileSize %>
                   </td>
                   <td class="px-6 py-4 text-sm">
                     <button onclick="toggleDropdown(event, '<%= file.name %>')" class="text-neutral-400 hover:text-white transition">
@@ -254,6 +265,7 @@ function getFileIcon(category) {
 
 <%- include('../../components/toast')%>
 <%- include('../../components/loadingPopup')%>
+<%- include('../../components/imageViewer')%>
 
 <!-- Rename Modal -->
 <div id="renameModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
@@ -279,6 +291,13 @@ function getFileIcon(category) {
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    if (typeof window.showImageViewer !== 'function' && typeof window.imageViewerSystem === 'function') {
+      const { showImageViewer, closeImageViewer, downloadViewedImage } = window.imageViewerSystem();
+      window.showImageViewer = showImageViewer;
+      window.closeImageViewer = closeImageViewer;
+      window.downloadViewedImage = downloadViewedImage;
+    }
+
     document.addEventListener('contextmenu', (event) => {
       event.preventDefault();
       const target = event.target.closest('tr');
