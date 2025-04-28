@@ -142,20 +142,19 @@
                                   <div class="flex justify-between items-center mb-2">
                                     <h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Test Endpoint
                                     </h4>
-                                    <% const dynamicParams=endpoint.path.match(/:([a-zA-Z0-9_]+)/g); if (dynamicParams)
-                                      { dynamicParams.forEach(param=> {
-                                      const paramName = param.replace(':', '');
-                                      %>
-                                      <div class="mb-2">
-                                        <label
-                                          class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                                          <%= paramName %>:
-                                        </label>
-                                        <input type="text" data-param-name="<%= paramName %>"
-                                          class="block w-full rounded-md border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 text-xs px-2 py-1"
-                                          placeholder="Enter <%= paramName %>" />
-                                      </div>
-                                      <% }); } %>
+                                    <% const dynamicParams = endpoint.path.match(/:([a-zA-Z0-9_]+)/g); if (dynamicParams) { %>
+                                      <div class="flex items-center space-x-2 mb-2">
+                                        <% dynamicParams.forEach(param => { 
+                                          const paramName = param.replace(':', '');
+                                        %>
+                                          <input 
+                                            type="text" 
+                                            data-param-name="<%= paramName %>"
+                                            class="inline-block w-12 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white text-xs px-2 py-1 shadow-sm focus:border-neutral-500 focus:ring-neutral-500"
+                                            placeholder="<%= paramName %>"
+                                          />
+                                        <% }); %>
+                                    
                                         <button type="button"
                                           class="test-endpoint-btn text-xs rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-3 py-1 font-medium shadow-sm transition focus:outline-none"
                                           data-method="<%= endpoint.method %>" data-path="<%= endpoint.path %>"
@@ -164,6 +163,18 @@
                                           disabled>
                                           Test
                                         </button>
+                                      </div>
+                                    <% } %>
+                                    <% if (!dynamicParams) { %>
+                                      <button type="button"
+                                        class="test-endpoint-btn text-xs rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-3 py-1 font-medium shadow-sm transition focus:outline-none"
+                                        data-method="<%= endpoint.method %>" data-path="<%= endpoint.path %>"
+                                        data-permission="<%= endpoint.permission %>"
+                                        data-request="<%= endpoint.requestExample ? encodeURIComponent(endpoint.requestExample) : '' %>"
+                                        disabled>
+                                        Test
+                                      </button>
+                                    <% } %>
                                   </div>
 
                                   <% if (endpoint.method !=='GET' ) { %>
