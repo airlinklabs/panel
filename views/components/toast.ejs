@@ -19,13 +19,13 @@
           `;
 
           if (type === 'error') {
-            toast.classList.add('bg-white', 'text-red-600', 'border-red-200');
+            toast.classList.add('bg-white', 'dark:bg-neutral-800', 'text-red-600', 'dark:text-red-400', 'border-red-200', 'dark:border-red-500/20');
           } else if (type === 'success') {
-            toast.classList.add('bg-white', 'text-emerald-600', 'border-emerald-200');
+            toast.classList.add('bg-white', 'dark:bg-neutral-800', 'text-emerald-600', 'dark:text-emerald-400', 'border-emerald-200', 'dark:border-emerald-500/20');
           } else if (type === 'warning') {
-            toast.classList.add('bg-white', 'text-amber-600', 'border-amber-200');
+            toast.classList.add('bg-white', 'dark:bg-neutral-800', 'text-amber-600', 'dark:text-amber-400', 'border-amber-200', 'dark:border-amber-500/20');
           } else {
-            toast.classList.add('bg-white', 'text-blue-600', 'border-blue-200');
+            toast.classList.add('bg-white', 'dark:bg-neutral-800', 'text-blue-600', 'dark:text-blue-400', 'border-blue-200', 'dark:border-blue-500/20');
           }
 
           const icon = document.createElement('span');

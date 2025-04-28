@@ -25,6 +25,9 @@
       function updateActiveLink(clickedLink = null) {
         var activeLink = null;
         navLinks2.forEach(function(link) {
+          // Skip disabled links
+          if (link.classList.contains('cursor-not-allowed')) return;
+
           if (currentPagePath.startsWith(link.getAttribute('href'))) {
             activeLink = link;
           }
@@ -32,13 +35,17 @@
 
         if (activeLink) {
           navLinks2.forEach(link => {
-            link.classList.remove('text-neutral-900', 'dark:text-white', 'font-medium', 'bg-white/10', 'shadow-sm');
+            if (!link.classList.contains('cursor-not-allowed')) {
+              link.classList.remove('text-blue-500', 'font-semibold');
+            }
           });
 
-          activeLink.classList.add('text-neutral-900', 'dark:text-white', 'font-medium');
+          activeLink.classList.add('text-blue-500', 'font-semibold');
           var linkRect = activeLink.getBoundingClientRect();
           var navRect = activeLink.closest('nav').getBoundingClientRect();
-          slidingBackground.style.width = linkRect.width + 'px';
+
+          // Set width and position of sliding background
+          slidingBackground.style.width = `${linkRect.width}px`;
           slidingBackground.style.transform = `translateX(${linkRect.left - navRect.left}px)`;
         }
       }
@@ -47,10 +54,20 @@
       updateActiveLink();
 
       navLinks2.forEach(function(link) {
+        // Skip disabled links
+        if (link.classList.contains('cursor-not-allowed')) return;
+
         link.addEventListener('click', function(e) {
           e.preventDefault();
           var href = this.getAttribute('href');
           updateActiveLink(this);
+
+          // Add a subtle animation effect
+          this.classList.add('scale-105');
+          setTimeout(() => {
+            this.classList.remove('scale-105');
+          }, 150);
+
           setTimeout(() => {
             window.location.href = href;
           }, 300);
