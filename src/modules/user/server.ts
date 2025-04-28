@@ -259,6 +259,14 @@ const dashboardModule: Module = {
             });
           }
 
+          // Check if server is suspended and trying to start
+          if (server.Suspended && powerAction === 'start') {
+            logger.warn(`Attempt to start suspended server ${serverId} by user ${userId}`);
+            return res.status(403).json({
+              error: 'This server is suspended. Please contact an administrator for assistance.'
+            });
+          }
+
           if (powerAction === 'stop') {
             // First, update the server status to indicate it's stopping
             try {
@@ -1562,7 +1570,11 @@ const dashboardModule: Module = {
           }
 
           // Check if startup command editing is allowed
-          if (!server.allowStartupEdit) {
+          // Get the allowStartupEdit value from the database
+          const allowStartupEdit = await prisma.$queryRaw`SELECT "allowStartupEdit" FROM "Server" WHERE "UUID" = ${serverId}`;
+          const isEditAllowed = allowStartupEdit && Array.isArray(allowStartupEdit) && allowStartupEdit.length > 0 && allowStartupEdit[0].allowStartupEdit === true;
+
+          if (!isEditAllowed) {
             logger.warn(`Startup command editing not allowed for server ${serverId}`);
             const acceptsJson = req.headers.accept?.includes('application/json');
             if (acceptsJson) {

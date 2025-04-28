@@ -30,7 +30,15 @@
                 <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Startup Command</h2>
                 <p class="text-sm text-neutral-600 dark:text-neutral-400">Customize the command used to start your server.</p>
               </div>
-              <% if (!server.allowStartupEdit) { %>
+              <%
+                let isStartupEditAllowed = false;
+                try {
+                  isStartupEditAllowed = server.allowStartupEdit === true;
+                } catch (e) {
+                  isStartupEditAllowed = false;
+                }
+                if (!isStartupEditAllowed) {
+              %>
                 <div class="flex items-center">
                   <span class="inline-flex items-center rounded-md bg-red-50 dark:bg-red-900/20 px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-600/20 dark:ring-red-500/30">
                     <svg class="mr-1.5 h-3 w-3 text-red-500" viewBox="0 0 20 20" fill="currentColor">
@@ -55,8 +63,8 @@
               <div class="p-5">
                 <div class="mb-4">
                   <label for="startCommand" class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2">Startup Command</label>
-                  <textarea id="startCommand" name="startCommand" rows="3" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 <%= !server.allowStartupEdit ? 'bg-neutral-100 dark:bg-neutral-800/50 cursor-not-allowed' : 'bg-white dark:bg-neutral-600/20' %> border border-neutral-300 dark:border-white/5" <%= !server.allowStartupEdit ? 'readonly' : '' %>><%= server.StartCommand %></textarea>
-                  <% if (!server.allowStartupEdit) { %>
+                  <textarea id="startCommand" name="startCommand" rows="3" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 <%= !isStartupEditAllowed ? 'bg-neutral-100 dark:bg-neutral-800/50 cursor-not-allowed' : 'bg-white dark:bg-neutral-600/20' %> border border-neutral-300 dark:border-white/5" <%= !isStartupEditAllowed ? 'readonly' : '' %>><%= server.StartCommand %></textarea>
+                  <% if (!isStartupEditAllowed) { %>
                     <p class="mt-2 text-xs text-red-500">Startup command editing is disabled for this server. Contact an administrator to enable this feature.</p>
                   <% } else { %>
                     <p class="mt-2 text-xs text-neutral-500">Use $ALVKT(VARIABLE_NAME) to reference environment variables.</p>
@@ -65,7 +73,7 @@
               </div>
 
               <div class="px-5 py-4 bg-neutral-50 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-neutral-700">
-                <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors duration-200 <%= !server.allowStartupEdit ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg' %>" <%= !server.allowStartupEdit ? 'disabled' : '' %>>Save Command</button>
+                <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors duration-200 <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %>>Save Command</button>
               </div>
             </form>
           </div>

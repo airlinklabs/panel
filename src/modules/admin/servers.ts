@@ -54,6 +54,174 @@ const adminModule: Module = {
     );
 
     router.get(
+      '/admin/servers/edit/:id',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.redirect('/login');
+            return;
+          }
+
+          const serverId = parseInt(req.params.id);
+          if (isNaN(serverId)) {
+            res.status(400).send('Invalid server ID');
+            return;
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            include: {
+              node: true,
+              owner: true,
+              image: true,
+            },
+          });
+
+          if (!server) {
+            res.status(404).send('Server not found');
+            return;
+          }
+
+          const users = await prisma.users.findMany();
+          const nodes = await prisma.node.findMany();
+          const images = await prisma.images.findMany();
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
+
+          res.render('admin/servers/edit', {
+            user,
+            req,
+            settings,
+            server,
+            nodes,
+            images,
+            users,
+          });
+        } catch (error: unknown) {
+          logger.error('Error fetching server for editing:', error);
+          res.redirect('/admin/servers');
+          return;
+        }
+      },
+    );
+
+    router.post(
+      '/admin/servers/edit/:id',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+          }
+
+          const serverId = parseInt(req.params.id);
+          if (isNaN(serverId)) {
+            res.status(400).json({ error: 'Invalid server ID' });
+            return;
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            include: { node: true, image: true },
+          });
+
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+
+          const {
+            name,
+            description,
+            nodeId,
+            imageId,
+            Memory,
+            Cpu,
+            Storage,
+            ownerId,
+            allowStartupEdit,
+            Suspended,
+            StartCommand,
+          } = req.body;
+
+          // Validate required fields
+          if (!name || !nodeId || !imageId || !Memory || !Cpu || !Storage || !ownerId) {
+            res.status(400).json({ error: 'Missing required fields' });
+            return;
+          }
+
+          // Check if suspension status is changing
+          const currentSuspendedState = server.Suspended;
+          const newSuspendedState = Suspended === 'true';
+          const suspensionChanged = currentSuspendedState !== newSuspendedState;
+
+          // Update server in database
+          await prisma.server.update({
+            where: { id: serverId },
+            data: {
+              name,
+              description,
+              ownerId: parseInt(ownerId),
+              nodeId: parseInt(nodeId),
+              imageId: parseInt(imageId),
+              Memory: parseInt(Memory),
+              Cpu: parseInt(Cpu),
+              Storage: parseInt(Storage),
+              StartCommand,
+              Suspended: newSuspendedState,
+            },
+          });
+
+          // Update allowStartupEdit field using raw SQL
+          await prisma.$executeRaw`UPDATE "Server" SET "allowStartupEdit" = ${allowStartupEdit === 'true'} WHERE "id" = ${serverId}`;
+
+          // If server is being suspended, stop it
+          if (suspensionChanged && newSuspendedState) {
+            try {
+              logger.info(`Stopping server ${server.UUID} due to suspension`);
+
+              const stopRequestData = {
+                method: 'POST',
+                url: `http://${server.node.address}:${server.node.port}/container/stop`,
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                data: {
+                  id: String(server.UUID),
+                  stopCmd: 'stop',
+                },
+              };
+
+              await axios(stopRequestData);
+              logger.info(`Server ${server.UUID} stopped successfully due to suspension`);
+            } catch (stopError) {
+              logger.error(`Error stopping server ${server.UUID} during suspension:`, stopError);
+              // Continue with the update even if stopping fails
+            }
+          }
+
+          logger.info(`Server ${serverId} updated successfully`);
+          res.status(200).json({ success: true });
+        } catch (error: unknown) {
+          logger.error('Error updating server:', error);
+          res.status(500).json({ error: 'Failed to update server' });
+          return;
+        }
+      },
+    );
+
+    router.get(
       '/admin/servers/create',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
@@ -233,7 +401,8 @@ const adminModule: Module = {
             return;
           }
 
-          await prisma.server.create({
+          // Create server
+          const createdServer = await prisma.server.create({
             data: {
               name,
               description,
@@ -247,9 +416,11 @@ const adminModule: Module = {
               Variables: JSON.stringify(variables) || '[]',
               StartCommand,
               dockerImage: JSON.stringify(imageDocker),
-              allowStartupEdit: allowStartupEdit === 'true',
             },
           });
+
+          // Update allowStartupEdit field using raw SQL
+          await prisma.$executeRaw`UPDATE "Server" SET "allowStartupEdit" = ${allowStartupEdit === 'true'} WHERE "id" = ${createdServer.id}`;
 
           queueer.addTask(async () => {
             const servers = await prisma.server.findMany({

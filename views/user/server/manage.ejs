@@ -43,7 +43,7 @@
         <%- include('../../components/serverHeader') %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex gap-2.5">
             <button id="startButton" type="button"
-                class="w-full md:w-auto rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+                class="w-full md:w-auto rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2 <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                     class="size-4 inline-flex mr-1 text-emerald-100 mb-0.5">
                     <path fill-rule="evenodd"
@@ -53,7 +53,7 @@
                 <%= req.translations.start %>
             </button>
             <button id="restartButton" type="button"
-                class="w-full md:w-auto rounded-xl bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+                class="w-full md:w-auto rounded-xl bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2 <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                     class="size-4 inline-flex mr-1 text-zinc-200 mb-0.5">
                     <path fill-rule="evenodd"
@@ -63,7 +63,7 @@
                 <%= req.translations.restart %>
             </button>
             <button id="stopButton" type="button"
-                class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+                class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2 <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                     class="size-4 inline-flex mr-1 text-red-100 mb-0.5">
                     <path fill-rule="evenodd"
@@ -76,6 +76,21 @@
       </div>
 
       <%- include('../../components/installHeader') %>
+
+      <!-- Server Suspended Warning -->
+      <% if (server.Suspended) { %>
+      <div class="mx-8 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center">
+        <div class="flex-shrink-0 mr-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-sm font-medium text-red-500">Server Suspended</h3>
+          <p class="text-xs text-red-400">This server has been suspended by an administrator. You cannot start or manage this server until the suspension is lifted. Please contact an administrator for assistance.</p>
+        </div>
+      </div>
+      <% } %>
 
       <!-- Daemon down message removed as requested -->
 
@@ -540,7 +555,9 @@ connectWebSocket();
 
     let id = 0;
 
-    document.getElementById('startButton').addEventListener('click', () => {
+    const startButton = document.getElementById('startButton');
+    <% if (!server.Suspended) { %>
+    startButton.addEventListener('click', () => {
         const serverUUID = '<%= server.UUID %>';
         const loader = showLoadingPopup('Starting Server', 'Sending start command...');
 
@@ -562,8 +579,15 @@ connectWebSocket();
                 showToast('Failed to start server', 'error');
             });
     });
+    <% } else { %>
+    startButton.addEventListener('click', () => {
+        showToast('This server is suspended. Please contact an administrator for assistance.', 'error');
+    });
+    <% } %>
 
-    document.getElementById('restartButton').addEventListener('click', () => {
+    const restartButton = document.getElementById('restartButton');
+    <% if (!server.Suspended) { %>
+    restartButton.addEventListener('click', () => {
         const serverUUID = '<%= server.UUID %>';
 
         // Create confirmation modal
@@ -624,8 +648,15 @@ connectWebSocket();
               });
         });
     });
+    <% } else { %>
+    restartButton.addEventListener('click', () => {
+        showToast('This server is suspended. Please contact an administrator for assistance.', 'error');
+    });
+    <% } %>
 
-    document.getElementById('stopButton').addEventListener('click', () => {
+    const stopButton = document.getElementById('stopButton');
+    <% if (!server.Suspended) { %>
+    stopButton.addEventListener('click', () => {
         const serverUUID = '<%= server.UUID %>';
 
         // Create confirmation modal
@@ -750,6 +781,11 @@ connectWebSocket();
               });
         });
     });
+    <% } else { %>
+    stopButton.addEventListener('click', () => {
+        showToast('This server is suspended. Please contact an administrator for assistance.', 'error');
+    });
+    <% } %>
 
     document.addEventListener('DOMContentLoaded', () => {
         const inputElement = document.getElementById('input');

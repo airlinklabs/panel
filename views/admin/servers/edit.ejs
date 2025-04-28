@@ -1,0 +1,271 @@
+<%- include('../../components/header', { title: 'Edit Server' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">Edit Server: <%= server.name %></h1>
+            <p class="mt-1 tracking-tight text-sm text-neutral-500">Modify server settings and configuration.</p>
+        </div>
+        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <a href="/admin/servers" class="rounded-xl bg-neutral-200 dark:bg-neutral-800 px-3 py-2 text-center text-sm font-medium text-neutral-700 dark:text-neutral-200 shadow-sm hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-all duration-200">
+            Back to Servers
+          </a>
+        </div>
+      </div>
+
+      <div id="serverForm" class="mt-6 px-8 w-full">
+        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+          <form id="editServerForm">
+            <!-- General Category -->
+            <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">General</h2>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <label for="serverName" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.name %>:</label>
+                <input id="serverName" name="name" value="<%= server.name %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+              </div>
+
+              <div>
+                <label for="serverDescription" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.description %>:</label>
+                <input id="serverDescription" name="description" value="<%= server.description || '' %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="Server description">
+              </div>
+            </div>
+
+            <!-- Server Configuration -->
+            <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Server Configuration</h2>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <label for="serverOwner" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Owner:</label>
+                <select id="serverOwner" name="ownerId" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5">
+                  <% users.forEach(userOption => { %>
+                    <option value="<%= userOption.id %>" <%= userOption.id === server.ownerId ? 'selected' : '' %>><%= userOption.username %></option>
+                  <% }); %>
+                </select>
+              </div>
+
+              <div>
+                <label for="serverNode" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Node:</label>
+                <select id="serverNode" name="nodeId" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5">
+                  <% nodes.forEach(node => { %>
+                    <option value="<%= node.id %>" <%= node.id === server.nodeId ? 'selected' : '' %>><%= node.name %> (<%= node.address %>)</option>
+                  <% }); %>
+                </select>
+              </div>
+
+              <div>
+                <label for="serverImage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Image:</label>
+                <select id="serverImage" name="imageId" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5">
+                  <% images.forEach(image => { %>
+                    <option value="<%= image.id %>" <%= image.id === server.imageId ? 'selected' : '' %>><%= image.name %></option>
+                  <% }); %>
+                </select>
+              </div>
+            </div>
+
+            <!-- Resource Allocation -->
+            <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Resource Allocation</h2>
+            <div class="grid grid-cols-3 gap-4 mb-6">
+              <div>
+                <label for="serverMemory" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Memory (GB):</label>
+                <input id="serverMemory" name="Memory" type="number" value="<%= server.Memory %>" min="1" max="64" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+              </div>
+
+              <div>
+                <label for="serverCpu" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">CPU Cores:</label>
+                <input id="serverCpu" name="Cpu" type="number" value="<%= server.Cpu %>" min="1" max="16" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+              </div>
+
+              <div>
+                <label for="serverStorage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Storage (GB):</label>
+                <input id="serverStorage" name="Storage" type="number" value="<%= server.Storage %>" min="1" max="500" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+              </div>
+            </div>
+
+            <!-- Startup Configuration -->
+            <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Startup Configuration</h2>
+            <div class="mb-6">
+              <div>
+                <label for="startCommand" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Startup Command:</label>
+                <textarea id="startCommand" name="StartCommand" rows="3" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5"><%= server.StartCommand %></textarea>
+              </div>
+
+              <div class="bg-neutral-100 dark:bg-neutral-700/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between">
+                  <div class="flex items-center mb-2 md:mb-0">
+                    <div class="flex-shrink-0 mr-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
+                      <p class="text-xs text-neutral-600 dark:text-neutral-400">When enabled, users can modify the startup command for this server.</p>
+                    </div>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true" <%= server.allowStartupEdit ? 'checked' : '' %>>
+                    <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="allowStartupEditLabel"><%= server.allowStartupEdit ? 'Enabled' : 'Disabled' %></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Server Status -->
+            <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Server Status</h2>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <div class="flex items-center space-x-2 mb-4">
+                  <div class="flex-shrink-0">
+                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full <%= server.Suspended ? 'bg-red-100 text-red-500' : 'bg-green-100 text-green-500' %>">
+                      <% if (server.Suspended) { %>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                      <% } else { %>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                      <% } %>
+                    </span>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Status: <span class="<%= server.Suspended ? 'text-red-500' : 'text-green-500' %>"><%= server.Suspended ? 'Suspended' : 'Active' %></span></p>
+                    <p class="text-xs text-neutral-500">Server ID: <%= server.UUID %></p>
+                  </div>
+                </div>
+
+                <div class="bg-neutral-100 dark:bg-neutral-700/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
+                  <div class="flex flex-col md:flex-row md:items-center justify-between">
+                    <div class="flex items-center mb-2 md:mb-0">
+                      <div class="flex-shrink-0 mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Server Suspension</h3>
+                        <p class="text-xs text-neutral-600 dark:text-neutral-400">When enabled, the server will be suspended and stopped. Users will not be able to start the server while it's suspended.</p>
+                      </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" name="Suspended" id="suspendServer" class="sr-only peer" value="true" <%= server.Suspended ? 'checked' : '' %>>
+                      <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-600"></div>
+                      <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="suspendServerLabel"><%= server.Suspended ? 'Suspended' : 'Active' %></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex items-center space-x-2 mb-4">
+                  <div class="flex-shrink-0">
+                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 text-blue-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                      </svg>
+                    </span>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Created</p>
+                    <p class="text-xs text-neutral-500"><%= new Date(server.createdAt).toLocaleString() %></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-between items-center">
+              <button type="submit" id="updateServerBtn" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-lg hover:bg-blue-700 hover:scale-105 transition-all duration-200">
+                Update Server
+              </button>
+
+              <a href="/admin/servers" class="rounded-xl bg-neutral-200 dark:bg-neutral-800 px-3 py-2 text-center text-sm font-medium text-neutral-700 dark:text-neutral-200 shadow-sm hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-all duration-200">
+                Cancel
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/loadingPopup') %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editServerForm');
+    const allowStartupEditToggle = document.getElementById('allowStartupEdit');
+    const allowStartupEditLabel = document.getElementById('allowStartupEditLabel');
+    const suspendServerToggle = document.getElementById('suspendServer');
+    const suspendServerLabel = document.getElementById('suspendServerLabel');
+
+    allowStartupEditToggle.addEventListener('change', function() {
+      allowStartupEditLabel.textContent = this.checked ? 'Enabled' : 'Disabled';
+    });
+
+    suspendServerToggle.addEventListener('change', function() {
+      suspendServerLabel.textContent = this.checked ? 'Suspended' : 'Active';
+
+      if (this.checked) {
+        showToast('Warning: Suspending the server will stop it and prevent users from starting it.', 'warning');
+      }
+    });
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+
+      // Handle checkbox values
+      if (!formData.has('allowStartupEdit')) {
+        data.allowStartupEdit = 'false';
+      }
+
+      if (!formData.has('Suspended')) {
+        data.Suspended = 'false';
+      }
+
+      const loader = showLoadingPopup('Updating Server', 'Processing server update...');
+      loader.updateProgress(20, 'Sending server configuration...');
+
+      try {
+        const response = await fetch('/admin/servers/edit/<%= server.id %>', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          loader.updateProgress(100, 'Server updated successfully!');
+          setTimeout(() => {
+            loader.close();
+            showToast('Server updated successfully!', 'success');
+            setTimeout(() => {
+              window.location.href = '/admin/servers';
+            }, 1000);
+          }, 500);
+        } else {
+          loader.close();
+          showToast('Failed to update server: ' + (result.error || 'Unknown error'), 'error');
+        }
+      } catch (error) {
+        loader.close();
+        showToast('Failed to update server: ' + error.message, 'error');
+      }
+    });
+  });
+</script>
