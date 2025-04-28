@@ -76,7 +76,7 @@
           </thead>
           <tbody class="divide-y divide-white/5 bg-white/5">
             <% users.forEach(function(user) { %>
-              <tr class="hover:bg-white/[0.05] transition-colors clickable-row cursor-pointer" onclick="handleRowClick(event, '/admin/user/<%= user.id %>/')">
+              <tr class="hover:bg-white/[0.05] transition-colors clickable-row cursor-pointer" onclick="handleRowClick(event, '/admin/users/view/<%= user.id %>/')">
                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                   <div class="flex items-center">
                     <div class="mr-5">
@@ -103,8 +103,11 @@
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= user.servers ? user.servers.length : 0 %></td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                   <div class="flex gap-3">
-                    <a href="./users/view/<%= user.id %>">
-                      <button type="button" class="rounded-xl bg-white border border-neutral-800/20 hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">Edit</button>
+                    <a href="/admin/users/view/<%= user.id %>/">
+                      <button type="button" class="rounded-xl bg-white border border-neutral-800/20 hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">View</button>
+                    </a>
+                    <a href="/admin/users/edit/<%= user.id %>/">
+                      <button type="button" class="rounded-xl bg-blue-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-blue-500 transition">Edit</button>
                     </a>
                     <button onclick="deleteUser('<%= user.id %>')" type="button" class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Remove</button>
                   </div>

@@ -10,11 +10,63 @@
     <div class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
-           <h1 class="text-base font-medium leading-6 text-white"><%= req.translations.adminUserTitle %></h1>
+           <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminUserTitle %></h1>
            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminUserText %></p>
+         </div>
+         <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+           <a href="/admin/users/edit/<%= dataUser.id %>" class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+             </svg>
+             <%= req.translations.editUser || 'Edit User' %>
+           </a>
          </div>
        </div>
        <div class="px-8 mt-5">
+         <!-- User details will be displayed here -->
+         <div class="bg-white dark:bg-neutral-800/50 rounded-xl p-6 shadow-lg border border-neutral-200 dark:border-neutral-700/30">
+           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div>
+               <h2 class="text-lg font-medium text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-700/30 pb-2 mb-4">
+                 <%= req.translations.userInformation || 'User Information' %>
+               </h2>
+               <div class="space-y-4">
+                 <div>
+                   <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.username || 'Username' %></p>
+                   <p class="mt-1 text-base font-medium text-neutral-800 dark:text-white"><%= dataUser.username %></p>
+                 </div>
+                 <div>
+                   <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.email || 'Email' %></p>
+                   <p class="mt-1 text-base font-medium text-neutral-800 dark:text-white"><%= dataUser.email %></p>
+                 </div>
+                 <div>
+                   <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.role || 'Role' %></p>
+                   <p class="mt-1">
+                     <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
+                       <%= dataUser.isAdmin ? 'bg-emerald-600/10 text-emerald-400 ring-emerald-600/20' : 'bg-amber-600/10 text-amber-400 ring-red-600/20' %> ring-1 ring-inset">
+                       <%= dataUser.isAdmin ? 'Admin' : 'User' %>
+                     </span>
+                   </p>
+                 </div>
+                 <div>
+                   <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.description || 'Description' %></p>
+                   <p class="mt-1 text-base font-medium text-neutral-800 dark:text-white"><%= dataUser.description || 'No description provided' %></p>
+                 </div>
+               </div>
+             </div>
+             <div>
+               <h2 class="text-lg font-medium text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-700/30 pb-2 mb-4">
+                 <%= req.translations.serverInformation || 'Server Information' %>
+               </h2>
+               <div class="space-y-4">
+                 <div>
+                   <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.totalServers || 'Total Servers' %></p>
+                   <p class="mt-1 text-base font-medium text-neutral-800 dark:text-white"><%= dataUser.servers ? dataUser.servers.length : 0 %></p>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
        </div>
     </div>
   </div>

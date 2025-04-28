@@ -157,6 +157,9 @@ const adminModule: Module = {
 
           const dataUser = await prisma.users.findUnique({
             where: { id: parseInt(req.params.id, 10) },
+            include: {
+              servers: true
+            }
           });
           if (!dataUser) {
             return res.redirect('/admin/users');
@@ -165,14 +168,40 @@ const adminModule: Module = {
             where: { id: 1 },
           });
 
-          // todo:
-          //     - render data user
-          //     - update user
-          //     - see how many time he connected
-          //     - see which page was he see
-          //     - him request ...
-
           res.render('admin/users/user', { user, req, settings, dataUser });
+        } catch (error) {
+          logger.error('Error fetching user:', error);
+          return res.redirect('/login');
+        }
+      },
+    );
+
+    router.get(
+      '/admin/users/edit/:id/',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            return res.redirect('/login');
+          }
+
+          const dataUser = await prisma.users.findUnique({
+            where: { id: parseInt(req.params.id, 10) },
+            include: {
+              servers: true
+            }
+          });
+          if (!dataUser) {
+            return res.redirect('/admin/users');
+          }
+
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
+
+          res.render('admin/users/edit', { user, req, settings, dataUser });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -206,6 +235,90 @@ const adminModule: Module = {
         } catch (error) {
           logger.error('Error deleting user:', error);
           return res.redirect('/login');
+        }
+      },
+    );
+
+    router.post(
+      '/admin/users/update/:id/',
+      isAuthenticated(true),
+      async (req: Request, res: Response): Promise<void> => {
+        try {
+          const userId = req.session?.user?.id;
+          const adminUser = await prisma.users.findUnique({ where: { id: userId } });
+          if (!adminUser) {
+            res.status(401).json({ error: 'Unauthorized' });
+            return;
+          }
+
+          const targetUserId = parseInt(req.params.id, 10);
+          const targetUser = await prisma.users.findUnique({
+            where: { id: targetUserId },
+          });
+
+          if (!targetUser) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+
+          const { email, username, description, isAdmin, password } = req.body;
+
+          // Check if email or username is already taken by another user
+          if (email && email !== targetUser.email) {
+            const existingUserWithEmail = await prisma.users.findFirst({
+              where: {
+                email,
+                id: { not: targetUserId }
+              },
+            });
+
+            if (existingUserWithEmail) {
+              res.status(400).json({ error: 'Email already in use' });
+              return;
+            }
+          }
+
+          if (username && username !== targetUser.username) {
+            const existingUserWithUsername = await prisma.users.findFirst({
+              where: {
+                username,
+                id: { not: targetUserId }
+              },
+            });
+
+            if (existingUserWithUsername) {
+              res.status(400).json({ error: 'Username already in use' });
+              return;
+            }
+          }
+
+          // Prepare update data
+          const updateData: any = {};
+
+          if (email) updateData.email = email;
+          if (username) updateData.username = username;
+          if (description) updateData.description = description;
+
+          // Handle isAdmin field (convert to boolean)
+          if (isAdmin !== undefined) {
+            updateData.isAdmin = isAdmin === true || isAdmin === 'true';
+          }
+
+          // Handle password update if provided
+          if (password && password.trim() !== '') {
+            updateData.password = await bcrypt.hash(password, 10);
+          }
+
+          // Update user
+          await prisma.users.update({
+            where: { id: targetUserId },
+            data: updateData,
+          });
+
+          res.status(200).json({ message: 'User updated successfully' });
+        } catch (error) {
+          logger.error('Error updating user:', error);
+          res.status(500).json({ error: 'Internal server error' });
         }
       },
     );

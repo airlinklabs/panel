@@ -5019,6 +5019,11 @@ select {
   --tw-ring-color: rgb(38 38 38 / 0.1);
 }
 
+.focus\:ring-blue-500:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(59 130 246 / var(--tw-ring-opacity, 1));
+}
+
 .focus\:ring-offset-2:focus {
   --tw-ring-offset-width: 2px;
 }
@@ -5030,6 +5035,26 @@ select {
 .focus-visible\:outline-none:focus-visible {
   outline: 2px solid transparent;
   outline-offset: 2px;
+}
+
+.focus-visible\:outline:focus-visible {
+  outline-style: solid;
+}
+
+.focus-visible\:outline-2:focus-visible {
+  outline-width: 2px;
+}
+
+.focus-visible\:outline-offset-2:focus-visible {
+  outline-offset: 2px;
+}
+
+.focus-visible\:outline-neutral-600:focus-visible {
+  outline-color: #525252;
+}
+
+.focus-visible\:outline-blue-600:focus-visible {
+  outline-color: #2563eb;
 }
 
 .focus-visible\:ring-transparent:focus-visible {
@@ -5212,6 +5237,10 @@ select {
 
 .dark\:border-yellow-500\/20:is(.dark *) {
   border-color: rgb(234 179 8 / 0.2);
+}
+
+.dark\:border-neutral-600\/50:is(.dark *) {
+  border-color: rgb(82 82 82 / 0.5);
 }
 
 .dark\:bg-\[\#141414\]:is(.dark *) {
