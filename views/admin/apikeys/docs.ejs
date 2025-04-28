@@ -1,86 +1,105 @@
 <%- include('../../components/header', { title: 'API Documentation' }) %>
 
-<main class="h-screen m-auto">
-  <div class="flex h-screen">
-    <!-- Sidebar -->
-    <div class="w-60 h-full">
-      <%- include('../../components/template') %>
-    </div>
-    <!-- Content -->
-    <div class="flex-1 p-6 overflow-y-auto pt-16">
-      <div class="sm:flex sm:items-center px-8 pt-4">
-        <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">API Documentation</h1>
-          <p class="mt-1 tracking-tight text-sm text-neutral-500">Comprehensive documentation for the AirLink API</p>
-        </div>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <div class="flex gap-2">
-            <a href="/admin/apikeys" class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
-              Manage API Keys
-            </a>
-          </div>
-        </div>
+  <main class="h-screen m-auto">
+    <div class="flex h-screen">
+      <!-- Sidebar -->
+      <div class="w-60 h-full">
+        <%- include('../../components/template') %>
       </div>
-
-      <!-- API Key Selection for Testing -->
-      <div class="px-8 mt-4">
-        <div class="rounded-xl bg-neutral-700/10 dark:bg-neutral-900 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div class="flex-grow">
-            <label for="apiKeySelect" class="block text-sm font-medium text-neutral-800 dark:text-white mb-1">Select API Key for Testing</label>
-            <select id="apiKeySelect" class="block w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm">
-              <option value="">Select an API key...</option>
-              <% apiKeys.forEach(key => { %>
-                <% if (key.active) { %>
-                  <option value="<%= key.key %>" data-permissions="<%= key.permissions %>"><%= key.name %></option>
-                <% } %>
-              <% }); %>
-            </select>
+      <!-- Content -->
+      <div class="flex-1 p-6 overflow-y-auto pt-16">
+        <div class="sm:flex sm:items-center px-8 pt-4">
+          <div class="sm:flex-auto">
+            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">API Documentation</h1>
+            <p class="mt-1 tracking-tight text-sm text-neutral-500">Comprehensive documentation for the AirLink API</p>
           </div>
-          <div class="flex-shrink-0 self-end sm:self-center">
-            <button id="saveApiKeyBtn" class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2" disabled>
-              Use for Testing
-            </button>
+          <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+            <div class="flex gap-2">
+              <a href="/admin/apikeys"
+                class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+                Manage API Keys
+              </a>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="px-8 mt-5">
-        <div class="rounded-xl bg-neutral-700/10 dark:bg-neutral-900 p-6">
-          <div class="mb-6">
-            <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Getting Started</h2>
-            <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-300">To use the API, you need an API key with the appropriate permissions.</p>
-            <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-300">All API requests must include an <code class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded">Authorization</code> header with a Bearer token:</p>
-            <pre class="mt-2 bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto"><code>Authorization: Bearer YOUR_API_KEY</code></pre>
+        <!-- API Key Selection for Testing -->
+        <div class="px-8 mt-4">
+          <div
+            class="rounded-xl bg-neutral-700/10 dark:bg-neutral-900 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div class="flex-grow">
+              <label for="apiKeySelect" class="block text-sm font-medium text-neutral-800 dark:text-white mb-1">Select
+                API Key for Testing</label>
+              <select id="apiKeySelect"
+                class="block w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm">
+                <option value="">Select an API key...</option>
+                <% apiKeys.forEach(key=> { %>
+                  <% if (key.active) { %>
+                    <option value="<%= key.key %>" data-permissions="<%= key.permissions %>">
+                      <%= key.name %>
+                    </option>
+                    <% } %>
+                      <% }); %>
+              </select>
+            </div>
+            <div class="flex-shrink-0 self-end sm:self-center">
+              <button id="saveApiKeyBtn"
+                class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2"
+                disabled>
+                Use for Testing
+              </button>
+            </div>
           </div>
+        </div>
 
-          <div class="mb-6">
-            <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Response Format</h2>
-            <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-300">All successful responses return a JSON object with a <code class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded">data</code> property containing the requested information.</p>
-            <pre class="mt-2 bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto"><code>{
+        <div class="px-8 mt-5">
+          <div class="rounded-xl bg-neutral-700/10 dark:bg-neutral-900 p-6">
+            <div class="mb-6">
+              <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Getting Started</h2>
+              <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-300">To use the API, you need an API key with
+                the appropriate permissions.</p>
+              <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-300">All API requests must include an <code
+                  class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded">Authorization</code> header with a
+                Bearer token:</p>
+              <pre
+                class="mt-2 bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto"><code>Authorization: Bearer YOUR_API_KEY</code></pre>
+            </div>
+
+            <div class="mb-6">
+              <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Response Format</h2>
+              <p class="mt-2 text-sm text-neutral-600 dark:text-neutral-300">All successful responses return a JSON
+                object with a <code class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded">data</code> property
+                containing the requested information.</p>
+              <pre class="mt-2 bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto"><code>{
   "data": {
     // Response data here
   }
 }</code></pre>
 
-            <p class="mt-4 text-sm text-neutral-600 dark:text-neutral-300">Error responses include an <code class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded">error</code> property with a description of the error.</p>
-            <pre class="mt-2 bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto"><code>{
+              <p class="mt-4 text-sm text-neutral-600 dark:text-neutral-300">Error responses include an <code
+                  class="bg-neutral-200 dark:bg-neutral-800 px-1 py-0.5 rounded">error</code> property with a
+                description of the error.</p>
+              <pre class="mt-2 bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto"><code>{
   "error": "Error message"
 }</code></pre>
-          </div>
+            </div>
 
-          <div>
-            <h2 class="text-lg font-semibold text-neutral-800 dark:text-white mb-4">API Endpoints</h2>
+            <div>
+              <h2 class="text-lg font-semibold text-neutral-800 dark:text-white mb-4">API Endpoints</h2>
 
-            <div class="space-y-8">
-              <% apiEndpoints.forEach(category => { %>
-                <div>
-                  <h3 class="text-md font-medium text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-700 pb-2 mb-4"><%= category.category %> Endpoints</h3>
+              <div class="space-y-8">
+                <% apiEndpoints.forEach(category=> { %>
+                  <div>
+                    <h3
+                      class="text-md font-medium text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-700 pb-2 mb-4">
+                      <%= category.category %> Endpoints
+                    </h3>
 
-                  <div class="space-y-6">
-                    <% category.endpoints.forEach(endpoint => { %>
-                      <div class="border border-neutral-200 dark:border-neutral-700 rounded-xl overflow-hidden">
-                        <div class="bg-neutral-100 dark:bg-neutral-800 px-4 py-3 flex items-center">
-                          <span class="inline-flex items-center rounded-md
+                    <div class="space-y-6">
+                      <% category.endpoints.forEach(endpoint=> { %>
+                        <div class="border border-neutral-200 dark:border-neutral-700 rounded-xl overflow-hidden">
+                          <div class="bg-neutral-100 dark:bg-neutral-800 px-4 py-3 flex items-center">
+                            <span class="inline-flex items-center rounded-md
                             <% if (endpoint.method === 'GET') { %>
                               bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 ring-green-600/20 dark:ring-green-500/30
                             <% } else if (endpoint.method === 'POST') { %>
@@ -91,258 +110,303 @@
                               bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 ring-red-600/20 dark:ring-red-500/30
                             <% } %>
                             px-2 py-1 text-xs font-medium ring-1 ring-inset mr-2">
-                            <%= endpoint.method %>
-                          </span>
-                          <code class="text-sm font-mono"><%= endpoint.path %></code>
-                          <span class="ml-auto text-xs text-neutral-500">Permission: <%= endpoint.permission %></span>
-                        </div>
-
-                        <div class="px-4 py-3">
-                          <p class="text-sm text-neutral-600 dark:text-neutral-300"><%= endpoint.description %></p>
-
-                          <% if (endpoint.requestExample) { %>
-                            <div class="mt-3">
-                              <h4 class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Request Body:</h4>
-                              <pre class="bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto text-xs"><code><%= endpoint.requestExample %></code></pre>
-                            </div>
-                          <% } %>
-
-                          <div class="mt-3">
-                            <h4 class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Response:</h4>
-                            <pre class="bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto text-xs"><code><%= endpoint.responseExample %></code></pre>
+                              <%= endpoint.method %>
+                            </span>
+                            <code class="text-sm font-mono"><%= endpoint.path %></code>
+                            <span class="ml-auto text-xs text-neutral-500">Permission: <%= endpoint.permission %></span>
                           </div>
 
-                          <!-- Test Endpoint Section -->
-                          <div class="mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-700">
-                            <div class="flex justify-between items-center mb-2">
-                              <h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Test Endpoint</h4>
-                              <button
-                                type="button"
-                                class="test-endpoint-btn text-xs rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-2 py-1 font-medium shadow-sm transition focus:outline-none"
-                                data-method="<%= endpoint.method %>"
-                                data-path="<%= endpoint.path %>"
-                                data-permission="<%= endpoint.permission %>"
-                                data-request="<%= endpoint.requestExample ? encodeURIComponent(endpoint.requestExample) : '' %>"
-                                disabled
-                              >
-                                Test
-                              </button>
-                            </div>
+                          <div class="px-4 py-3">
+                            <p class="text-sm text-neutral-600 dark:text-neutral-300">
+                              <%= endpoint.description %>
+                            </p>
 
-                            <% if (endpoint.method !== 'GET') { %>
-                              <div class="mb-2">
-                                <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Request Body:</label>
-                                <textarea
-                                  class="request-body block w-full rounded-md border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 text-xs h-24"
-                                  placeholder="Enter request body in JSON format"
-                                  data-endpoint-path="<%= endpoint.path %>"
-                                ><%= endpoint.requestExample ? endpoint.requestExample.replace(/\n/g, '\n').trim() : '' %></textarea>
+                            <% if (endpoint.requestExample) { %>
+                              <div class="mt-3">
+                                <h4 class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Request
+                                  Body:</h4>
+                                <pre
+                                  class="bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto text-xs"><code><%= endpoint.requestExample %></code></pre>
                               </div>
-                            <% } %>
+                              <% } %>
 
-                            <div class="response-container hidden">
-                              <div class="flex justify-between items-center mb-1">
-                                <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300">Response:</label>
-                                <span class="response-status text-xs font-medium"></span>
-                              </div>
-                              <pre class="response-output bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto text-xs h-32 overflow-y-auto"><code>No response yet</code></pre>
-                            </div>
+                                <div class="mt-3">
+                                  <h4 class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Response:
+                                  </h4>
+                                  <pre
+                                    class="bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto text-xs"><code><%= endpoint.responseExample %></code></pre>
+                                </div>
+
+                                <!-- Test Endpoint Section -->
+                                <div class="mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-700">
+                                  <div class="flex justify-between items-center mb-2">
+                                    <h4 class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Test Endpoint
+                                    </h4>
+                                    <% const dynamicParams = endpoint.path.match(/:([a-zA-Z0-9_]+)/g); if (dynamicParams) { %>
+                                      <div class="flex items-center space-x-2 mb-2">
+                                        <% dynamicParams.forEach(param => { 
+                                          const paramName = param.replace(':', '');
+                                        %>
+                                          <input 
+                                            type="text" 
+                                            data-param-name="<%= paramName %>"
+                                            class="inline-block w-12 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white text-xs px-2 py-1 shadow-sm focus:border-neutral-500 focus:ring-neutral-500"
+                                            placeholder="<%= paramName %>"
+                                          />
+                                        <% }); %>
+                                    
+                                        <button type="button"
+                                          class="test-endpoint-btn text-xs rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-3 py-1 font-medium shadow-sm transition focus:outline-none"
+                                          data-method="<%= endpoint.method %>" data-path="<%= endpoint.path %>"
+                                          data-permission="<%= endpoint.permission %>"
+                                          data-request="<%= endpoint.requestExample ? encodeURIComponent(endpoint.requestExample) : '' %>"
+                                          disabled>
+                                          Test
+                                        </button>
+                                      </div>
+                                    <% } %>
+                                    <% if (!dynamicParams) { %>
+                                      <button type="button"
+                                        class="test-endpoint-btn text-xs rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-3 py-1 font-medium shadow-sm transition focus:outline-none"
+                                        data-method="<%= endpoint.method %>" data-path="<%= endpoint.path %>"
+                                        data-permission="<%= endpoint.permission %>"
+                                        data-request="<%= endpoint.requestExample ? encodeURIComponent(endpoint.requestExample) : '' %>"
+                                        disabled>
+                                        Test
+                                      </button>
+                                    <% } %>
+                                  </div>
+
+                                  <% if (endpoint.method !=='GET' ) { %>
+                                    <div class="mb-2">
+                                      <label
+                                        class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Request
+                                        Body:</label>
+                                      <textarea
+                                        class="request-body block w-full rounded-md border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 text-xs h-24"
+                                        placeholder="Enter request body in JSON format"
+                                        data-endpoint-path="<%= endpoint.path %>"><%= endpoint.requestExample ? endpoint.requestExample.replace(/\n/g, '\n').trim() : '' %></textarea>
+                                    </div>
+                                    <% } %>
+
+                                      <div class="response-container hidden">
+                                        <div class="flex justify-between items-center mb-1">
+                                          <label
+                                            class="block text-xs font-medium text-neutral-700 dark:text-neutral-300">Response:</label>
+                                          <span class="response-status text-xs font-medium"></span>
+                                        </div>
+                                        <pre
+                                          class="response-output bg-neutral-800 text-neutral-200 p-3 rounded-md overflow-x-auto text-xs h-32 overflow-y-auto"><code>No response yet</code></pre>
+                                      </div>
+                                </div>
                           </div>
                         </div>
-                      </div>
-                    <% }); %>
+                        <% }); %>
+                    </div>
                   </div>
-                </div>
-              <% }); %>
+                  <% }); %>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</main>
+  </main>
 
-<script>
-  // Toast notification function
-  function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `fixed bottom-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg transition-opacity duration-500 ${type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
+  <script>
+    // Toast notification function
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `fixed bottom-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg transition-opacity duration-500 ${type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
 
-    // Fade in
-    setTimeout(() => {
-      toast.style.opacity = '1';
-    }, 10);
-
-    // Fade out and remove
-    setTimeout(() => {
-      toast.style.opacity = '0';
+      // Fade in
       setTimeout(() => {
-        document.body.removeChild(toast);
-      }, 500);
-    }, 3000);
-  }
+        toast.style.opacity = '1';
+      }, 10);
 
-  // API Key Selection and Storage
-  const apiKeySelect = document.getElementById('apiKeySelect');
-  const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
-  const testButtons = document.querySelectorAll('.test-endpoint-btn');
-  let selectedApiKey = localStorage.getItem('apiTestKey') || '';
-  let selectedApiKeyPermissions = [];
-
-  // Initialize from localStorage if available
-  if (selectedApiKey) {
-    const storedPermissions = localStorage.getItem('apiTestKeyPermissions');
-    if (storedPermissions) {
-      try {
-        selectedApiKeyPermissions = JSON.parse(storedPermissions);
-        enableTestButtons();
-      } catch (e) {
-        console.error('Error parsing stored permissions:', e);
-        localStorage.removeItem('apiTestKeyPermissions');
-      }
+      // Fade out and remove
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => {
+          document.body.removeChild(toast);
+        }, 500);
+      }, 3000);
     }
-  }
 
-  // Update select if we have a stored key
-  if (selectedApiKey) {
-    for (let i = 0; i < apiKeySelect.options.length; i++) {
-      if (apiKeySelect.options[i].value === selectedApiKey) {
-        apiKeySelect.selectedIndex = i;
-        saveApiKeyBtn.disabled = false;
-        break;
-      }
-    }
-  }
+    // API Key Selection and Storage
+    const apiKeySelect = document.getElementById('apiKeySelect');
+    const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+    const testButtons = document.querySelectorAll('.test-endpoint-btn');
+    let selectedApiKey = localStorage.getItem('apiTestKey') || '';
+    let selectedApiKeyPermissions = [];
 
-  // Handle API key selection change
-  apiKeySelect.addEventListener('change', function() {
-    saveApiKeyBtn.disabled = this.value === '';
-  });
-
-  // Save selected API key
-  saveApiKeyBtn.addEventListener('click', function() {
-    const selectedKey = apiKeySelect.value;
-    const selectedOption = apiKeySelect.options[apiKeySelect.selectedIndex];
-
-    if (selectedKey) {
-      selectedApiKey = selectedKey;
-      localStorage.setItem('apiTestKey', selectedKey);
-
-      // Get permissions from data attribute
-      const permissionsAttr = selectedOption.getAttribute('data-permissions');
-      try {
-        selectedApiKeyPermissions = JSON.parse(permissionsAttr || '[]');
-        localStorage.setItem('apiTestKeyPermissions', permissionsAttr || '[]');
-        enableTestButtons();
-        showToast('API key selected for testing');
-      } catch (e) {
-        console.error('Error parsing permissions:', e);
-        selectedApiKeyPermissions = [];
-        localStorage.setItem('apiTestKeyPermissions', '[]');
-      }
-    }
-  });
-
-  // Enable/disable test buttons based on permissions
-  function enableTestButtons() {
-    testButtons.forEach(button => {
-      const requiredPermission = button.getAttribute('data-permission');
-      const hasPermission = selectedApiKeyPermissions.includes(requiredPermission);
-      button.disabled = !hasPermission;
-
-      if (hasPermission) {
-        button.title = 'Test this endpoint';
-      } else {
-        button.title = 'API key does not have the required permission';
-      }
-    });
-  }
-
-  // Handle test endpoint button clicks
-  testButtons.forEach(button => {
-    button.addEventListener('click', async function() {
-      const method = this.getAttribute('data-method');
-      const path = this.getAttribute('data-path');
-      const parentSection = this.closest('.mt-4');
-      const responseContainer = parentSection.querySelector('.response-container');
-      const responseOutput = parentSection.querySelector('.response-output code');
-      const responseStatus = parentSection.querySelector('.response-status');
-
-      // Show response container
-      responseContainer.classList.remove('hidden');
-
-      // Get request body for non-GET requests
-      let requestBody = null;
-      if (method !== 'GET') {
-        const textArea = parentSection.querySelector('.request-body');
-        if (textArea) {
-          try {
-            requestBody = textArea.value.trim();
-            // Validate JSON
-            if (requestBody) {
-              JSON.parse(requestBody);
-            }
-          } catch (e) {
-            responseOutput.textContent = `Error: Invalid JSON in request body - ${e.message}`;
-            responseStatus.textContent = 'Error';
-            responseStatus.className = 'response-status text-xs font-medium text-red-500';
-            return;
-          }
-        }
-      }
-
-      // Show loading state
-      this.disabled = true;
-      this.textContent = 'Testing...';
-      responseOutput.textContent = 'Loading...';
-      responseStatus.textContent = '';
-
-      try {
-        // Make the API request
-        const options = {
-          method,
-          headers: {
-            'Authorization': `Bearer ${selectedApiKey}`,
-            'Content-Type': 'application/json'
-          }
-        };
-
-        if (requestBody && method !== 'GET') {
-          options.body = requestBody;
-        }
-
-        const response = await fetch(path, options);
-        const responseData = await response.text();
-
-        // Try to parse as JSON for pretty printing
+    // Initialize from localStorage if available
+    if (selectedApiKey) {
+      const storedPermissions = localStorage.getItem('apiTestKeyPermissions');
+      if (storedPermissions) {
         try {
-          const jsonData = JSON.parse(responseData);
-          responseOutput.textContent = JSON.stringify(jsonData, null, 2);
+          selectedApiKeyPermissions = JSON.parse(storedPermissions);
+          enableTestButtons();
         } catch (e) {
-          responseOutput.textContent = responseData;
+          console.error('Error parsing stored permissions:', e);
+          localStorage.removeItem('apiTestKeyPermissions');
         }
+      }
+    }
 
-        // Set status color
-        if (response.ok) {
-          responseStatus.textContent = `${response.status} ${response.statusText}`;
-          responseStatus.className = 'response-status text-xs font-medium text-green-500';
-        } else {
-          responseStatus.textContent = `${response.status} ${response.statusText}`;
-          responseStatus.className = 'response-status text-xs font-medium text-red-500';
+    // Update select if we have a stored key
+    if (selectedApiKey) {
+      for (let i = 0; i < apiKeySelect.options.length; i++) {
+        if (apiKeySelect.options[i].value === selectedApiKey) {
+          apiKeySelect.selectedIndex = i;
+          saveApiKeyBtn.disabled = false;
+          break;
         }
-      } catch (error) {
-        responseOutput.textContent = `Error: ${error.message}`;
-        responseStatus.textContent = 'Error';
-        responseStatus.className = 'response-status text-xs font-medium text-red-500';
-      } finally {
-        // Reset button state
-        this.disabled = false;
-        this.textContent = 'Test';
+      }
+    }
+
+    // Handle API key selection change
+    apiKeySelect.addEventListener('change', function () {
+      saveApiKeyBtn.disabled = this.value === '';
+    });
+
+    // Save selected API key
+    saveApiKeyBtn.addEventListener('click', function () {
+      const selectedKey = apiKeySelect.value;
+      const selectedOption = apiKeySelect.options[apiKeySelect.selectedIndex];
+
+      if (selectedKey) {
+        selectedApiKey = selectedKey;
+        localStorage.setItem('apiTestKey', selectedKey);
+
+        // Get permissions from data attribute
+        const permissionsAttr = selectedOption.getAttribute('data-permissions');
+        try {
+          selectedApiKeyPermissions = JSON.parse(permissionsAttr || '[]');
+          localStorage.setItem('apiTestKeyPermissions', permissionsAttr || '[]');
+          enableTestButtons();
+          showToast('API key selected for testing');
+        } catch (e) {
+          console.error('Error parsing permissions:', e);
+          selectedApiKeyPermissions = [];
+          localStorage.setItem('apiTestKeyPermissions', '[]');
+        }
       }
     });
-  });
-</script>
 
-<%- include('../../components/footer') %>
+    // Enable/disable test buttons based on permissions
+    function enableTestButtons() {
+      testButtons.forEach(button => {
+        const requiredPermission = button.getAttribute('data-permission');
+        const hasPermission = selectedApiKeyPermissions.includes(requiredPermission);
+        button.disabled = !hasPermission;
+
+        if (hasPermission) {
+          button.title = 'Test this endpoint';
+        } else {
+          button.title = 'API key does not have the required permission';
+        }
+      });
+    }
+
+    // Handle test endpoint button clicks
+    testButtons.forEach(button => {
+      button.addEventListener('click', async function () {
+        const method = this.getAttribute('data-method');
+        // const path = this.getAttribute('data-path');
+
+        let path = this.getAttribute('data-path');
+        const parentSection = this.closest('.mt-4');
+
+        // Handle dynamic params like :id
+        const paramInputs = parentSection.querySelectorAll('[data-param-name]');
+        paramInputs.forEach(input => {
+          const paramName = input.getAttribute('data-param-name');
+          const paramValue = input.value.trim();
+          if (paramValue) {
+            path = path.replace(`:${paramName}`, encodeURIComponent(paramValue));
+          }
+        });
+
+        const responseContainer = parentSection.querySelector('.response-container');
+        const responseOutput = parentSection.querySelector('.response-output code');
+        const responseStatus = parentSection.querySelector('.response-status');
+
+        // Show response container
+        responseContainer.classList.remove('hidden');
+
+        // Get request body for non-GET requests
+        let requestBody = null;
+        if (method !== 'GET') {
+          const textArea = parentSection.querySelector('.request-body');
+          if (textArea) {
+            try {
+              requestBody = textArea.value.trim();
+              // Validate JSON
+              if (requestBody) {
+                JSON.parse(requestBody);
+              }
+            } catch (e) {
+              responseOutput.textContent = `Error: Invalid JSON in request body - ${e.message}`;
+              responseStatus.textContent = 'Error';
+              responseStatus.className = 'response-status text-xs font-medium text-red-500';
+              return;
+            }
+          }
+        }
+
+        // Show loading state
+        this.disabled = true;
+        this.textContent = 'Testing...';
+        responseOutput.textContent = 'Loading...';
+        responseStatus.textContent = '';
+
+        try {
+          // Make the API request
+          const options = {
+            method,
+            headers: {
+              'Authorization': `Bearer ${selectedApiKey}`,
+              'Content-Type': 'application/json'
+            }
+          };
+
+          if (requestBody && method !== 'GET') {
+            options.body = requestBody;
+          }
+
+          const response = await fetch(path, options);
+          const responseData = await response.text();
+
+          // Try to parse as JSON for pretty printing
+          try {
+            const jsonData = JSON.parse(responseData);
+            responseOutput.textContent = JSON.stringify(jsonData, null, 2);
+          } catch (e) {
+            responseOutput.textContent = responseData;
+          }
+
+          // Set status color
+          if (response.ok) {
+            responseStatus.textContent = `${response.status} ${response.statusText}`;
+            responseStatus.className = 'response-status text-xs font-medium text-green-500';
+          } else {
+            responseStatus.textContent = `${response.status} ${response.statusText}`;
+            responseStatus.className = 'response-status text-xs font-medium text-red-500';
+          }
+        } catch (error) {
+          responseOutput.textContent = `Error: ${error.message}`;
+          responseStatus.textContent = 'Error';
+          responseStatus.className = 'response-status text-xs font-medium text-red-500';
+        } finally {
+          // Reset button state
+          this.disabled = false;
+          this.textContent = 'Test';
+        }
+      });
+    });
+  </script>
+
+  <%- include('../../components/footer') %>
