@@ -42,6 +42,7 @@
     Variables String?
     StartCommand String?
     dockerImage String?
+    allowStartupEdit Boolean @default(false)
     Installing Boolean @default(true)
     Queued   Boolean  @default(true)
     Suspended Boolean  @default(false)

@@ -108,14 +108,34 @@
                 </select>
               </div>
 
-            <div>
+              <div>
                 <label for="serverPorts" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.Ports %>:</label>
                 <select id="serverPorts" name="Ports" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
                   <option value="" disabled selected>Select a port</option>
                   <!-- Port options will be populated based on selected node -->
                 </select>
-            </div>
+              </div>
 
+              <div class="bg-neutral-100 dark:bg-neutral-700/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between">
+                  <div class="flex items-center mb-2 md:mb-0">
+                    <div class="flex-shrink-0 mr-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
+                      <p class="text-xs text-neutral-600 dark:text-neutral-400">When enabled, users can modify the startup command for this server.</p>
+                    </div>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true">
+                    <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="allowStartupEditLabel">Disabled</span>
+                  </label>
+                </div>
+              </div>
             </div>
 
             <div id="variablesSection" style="display: none;">
@@ -305,9 +325,10 @@
           case 'boolean':
             input = document.createElement('div');
             input.classList.add('flex', 'items-center', 'space-x-2', 'mt-1');
+
             const checkboxContainer = document.createElement('label');
             checkboxContainer.setAttribute('for', variable.env);
-            checkboxContainer.classList.add('relative', 'inline-block', 'w-12', 'h-6');
+            checkboxContainer.classList.add('relative', 'inline-flex', 'items-center', 'cursor-pointer');
 
             const checkboxInput = document.createElement('input');
             checkboxInput.type = 'checkbox';
@@ -316,15 +337,21 @@
             checkboxInput.classList.add('sr-only', 'peer');
             checkboxInput.checked = variable.value || false;
 
-            const checkboxSpan = document.createElement('span');
-            checkboxSpan.classList.add('block', 'w-12', 'h-6', 'bg-neutral-400', 'peer-checked:bg-blue-500', 'rounded-full');
+            const toggleTrack = document.createElement('div');
+            toggleTrack.classList.add('w-11', 'h-6', 'bg-neutral-300', 'dark:bg-neutral-700', 'peer-focus:ring-2', 'peer-focus:ring-blue-300', 'dark:peer-focus:ring-blue-800', 'rounded-full', 'peer', 'peer-checked:after:translate-x-full', 'rtl:peer-checked:after:-translate-x-full', 'peer-checked:after:border-white', 'after:content-[\'\']', 'after:absolute', 'after:top-[2px]', 'after:start-[2px]', 'after:bg-white', 'after:border-gray-300', 'after:border', 'after:rounded-full', 'after:h-5', 'after:w-5', 'after:transition-all', 'peer-checked:bg-blue-600');
 
-            const circleSpan = document.createElement('span');
-            circleSpan.classList.add('absolute', 'left-0.5', 'top-0.5', 'w-5', 'h-5', 'bg-white', 'rounded-full', 'peer-checked:translate-x-6', 'transition');
+            const toggleLabel = document.createElement('span');
+            toggleLabel.classList.add('ms-3', 'text-sm', 'font-medium', 'text-neutral-600', 'dark:text-neutral-300');
+            toggleLabel.textContent = checkboxInput.checked ? 'Enabled' : 'Disabled';
+
+            // Update label when toggle changes
+            checkboxInput.addEventListener('change', function() {
+              toggleLabel.textContent = this.checked ? 'Enabled' : 'Disabled';
+            });
 
             checkboxContainer.appendChild(checkboxInput);
-            checkboxContainer.appendChild(checkboxSpan);
-            checkboxContainer.appendChild(circleSpan);
+            checkboxContainer.appendChild(toggleTrack);
+            checkboxContainer.appendChild(toggleLabel);
             input.appendChild(checkboxContainer);
             break;
           default:
@@ -433,6 +460,14 @@
     // Initialize UI
     updateDockerImages();
     updateVariables();
+
+    // Toggle for startup command edit permission
+    const allowStartupEditToggle = document.getElementById('allowStartupEdit');
+    const allowStartupEditLabel = document.getElementById('allowStartupEditLabel');
+
+    allowStartupEditToggle.addEventListener('change', function() {
+      allowStartupEditLabel.textContent = this.checked ? 'Enabled' : 'Disabled';
+    });
 
     // Event listeners
     serverImageSelect.addEventListener('change', () => {

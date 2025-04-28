@@ -102,6 +102,7 @@ const adminModule: Module = {
           dockerImage,
           variables,
           ownerId,
+          allowStartupEdit,
         } = req.body;
 
         const userId = +ownerId;
@@ -246,6 +247,7 @@ const adminModule: Module = {
               Variables: JSON.stringify(variables) || '[]',
               StartCommand,
               dockerImage: JSON.stringify(imageDocker),
+              allowStartupEdit: allowStartupEdit === 'true',
             },
           });
 

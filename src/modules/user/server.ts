@@ -1561,6 +1561,18 @@ const dashboardModule: Module = {
             return;
           }
 
+          // Check if startup command editing is allowed
+          if (!server.allowStartupEdit) {
+            logger.warn(`Startup command editing not allowed for server ${serverId}`);
+            const acceptsJson = req.headers.accept?.includes('application/json');
+            if (acceptsJson) {
+              res.status(403).json({ error: 'Startup command editing not allowed for this server' });
+            } else {
+              res.redirect(`/server/${serverId}/startup?error=true&message=Startup+command+editing+not+allowed+for+this+server`);
+            }
+            return;
+          }
+
           await prisma.server.update({
             where: { UUID: serverId },
             data: { StartCommand: startCommand },
@@ -1693,6 +1705,221 @@ const dashboardModule: Module = {
             res.status(500).json({ error: 'Failed to update startup command' });
           } else {
             res.redirect(`/server/${serverId}/startup?error=true&message=Failed+to+update+startup+command`);
+          }
+        }
+      },
+    );
+
+    router.post(
+      '/server/:id/startup/docker-image',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+        const dockerImage = req.body.dockerImage;
+
+        logger.info(`Updating Docker image for server ${serverId} to ${dockerImage}`);
+
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            logger.warn(`User not found: ${userId}`);
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true, image: true },
+          });
+
+          if (!server) {
+            logger.warn(`Server not found: ${serverId}`);
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+
+          // Validate that the Docker image exists in the available images
+          let availableDockerImages = [];
+          let validImage = false;
+
+          try {
+            if (server.image && server.image.dockerImages) {
+              const dockerImagesArray = JSON.parse(server.image.dockerImages);
+              dockerImagesArray.forEach(imageObj => {
+                Object.keys(imageObj).forEach(key => {
+                  availableDockerImages.push(key);
+                  if (key === dockerImage) {
+                    validImage = true;
+                  }
+                });
+              });
+            }
+          } catch (e) {
+            logger.error(`Error parsing Docker images for server ${serverId}:`, e);
+            availableDockerImages = [];
+          }
+
+          if (!validImage) {
+            logger.warn(`Invalid Docker image selected for server ${serverId}: ${dockerImage}`);
+            const acceptsJson = req.headers.accept?.includes('application/json');
+            if (acceptsJson) {
+              res.status(400).json({ error: 'Invalid Docker image selected' });
+            } else {
+              res.redirect(`/server/${serverId}/startup?error=true&message=Invalid+Docker+image+selected`);
+            }
+            return;
+          }
+
+          // Find the Docker image object that contains the selected image
+          let dockerImageObj = {};
+          try {
+            if (server.image && server.image.dockerImages) {
+              const dockerImagesArray = JSON.parse(server.image.dockerImages);
+              for (const imageObj of dockerImagesArray) {
+                if (Object.keys(imageObj).includes(dockerImage)) {
+                  dockerImageObj = { [dockerImage]: imageObj[dockerImage] };
+                  break;
+                }
+              }
+            }
+          } catch (e) {
+            logger.error(`Error finding Docker image object for server ${serverId}:`, e);
+          }
+
+          // Update the server with the new Docker image
+          await prisma.server.update({
+            where: { UUID: serverId },
+            data: { dockerImage: JSON.stringify(dockerImageObj) },
+          });
+
+          logger.info(`Docker image updated in database for server ${serverId}`);
+
+          // Check if the server is running and restart it if necessary
+          try {
+            const statusRequest = {
+              method: 'GET',
+              url: `http://${server.node.address}:${server.node.port}/container/status`,
+              auth: {
+                username: 'Airlink',
+                password: server.node.key,
+              },
+              params: { id: serverId },
+            };
+
+            const statusResponse = await axios(statusRequest);
+            logger.info(`Server status response: ${JSON.stringify(statusResponse.data)}`);
+            const isRunning = statusResponse.data?.running === true;
+
+            if (isRunning) {
+              const restartRequestData = {
+                method: 'POST',
+                url: `http://${server.node.address}:${server.node.port}/container/stop`,
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                data: {
+                  id: String(serverId),
+                  stopCmd: 'stop',
+                },
+              };
+
+              await axios(restartRequestData);
+              logger.info('Container stopped to apply new Docker image: ' + serverId);
+
+              await new Promise(resolve => setTimeout(resolve, 2000));
+
+              const ports = (JSON.parse(server.Ports) as Port[])
+                .filter((port) => port.primary)
+                .map((port) => port.Port)
+                .pop();
+
+              const envVariables: Record<string, string | number | boolean> = {};
+              if (server.Variables) {
+                try {
+                  const serverVariables = JSON.parse(
+                    server.Variables,
+                  ) as ServerVariable[];
+                  serverVariables.forEach((variable) => {
+                    if (
+                      variable.env &&
+                      variable.value !== undefined &&
+                      variable.type
+                    ) {
+                      let processedValue: string | number | boolean;
+                      switch (variable.type) {
+                      case 'boolean':
+                        processedValue =
+                            variable.value === 1 || variable.value === '1'
+                              ? 'true'
+                              : 'false';
+                        break;
+                      case 'number':
+                        processedValue = Number(variable.value);
+                        break;
+                      case 'text':
+                        processedValue = String(variable.value);
+                        break;
+                      default:
+                        processedValue = variable.value;
+                      }
+                      envVariables[variable.env] = processedValue;
+                    }
+                  });
+                } catch (error) {
+                  logger.error('Error processing server.Variables:', error);
+                  throw new Error('Invalid format in server.Variables');
+                }
+              }
+
+              const startRequestData = {
+                method: 'POST',
+                url: `http://${server.node.address}:${server.node.port}/container/start`,
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                data: {
+                  id: String(serverId),
+                  image: dockerImage,
+                  ports: ports,
+                  Memory: server.Memory * 1024,
+                  Cpu: server.Cpu,
+                  env: envVariables,
+                  StartCommand: server.StartCommand,
+                },
+              };
+
+              await axios(startRequestData);
+              logger.info('Container restarted with new Docker image: ' + serverId);
+            }
+          } catch (statusError) {
+            logger.warn(`Could not check server status or restart server: ${statusError}`);
+          }
+
+          logger.info(`Successfully updated Docker image for server ${serverId}`);
+
+          const acceptsJson = req.headers.accept?.includes('application/json');
+          if (acceptsJson) {
+            res.status(200).json({ success: true });
+          } else {
+            res.redirect(`/server/${serverId}/startup?success=true&message=Docker+image+updated+successfully`);
+          }
+        } catch (error) {
+          logger.error(`Error updating Docker image for server ${serverId}:`, error);
+
+          const acceptsJson = req.headers.accept?.includes('application/json');
+          if (acceptsJson) {
+            res.status(500).json({ error: 'Failed to update Docker image' });
+          } else {
+            res.redirect(`/server/${serverId}/startup?error=true&message=Failed+to+update+Docker+image`);
           }
         }
       },
