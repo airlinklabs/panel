@@ -59,6 +59,7 @@
                 <div class="flex items-center space-x-3">
                   <div id="editor-status">Line: 1, Column: 1</div>
                   <div id="file-info" class="px-2 py-0.5 bg-neutral-200 dark:bg-neutral-600 rounded text-neutral-600 dark:text-neutral-300">Loading...</div>
+                  <div id="vim-status" class="hidden px-2 py-0.5 bg-neutral-200 dark:bg-neutral-700 rounded text-neutral-700 dark:text-neutral-300 min-w-[100px] border-l-2 border-transparent"></div>
                 </div>
                 <div class="flex space-x-4">
                   <div class="flex items-center">
@@ -68,6 +69,10 @@
                   <div class="flex items-center">
                     <span class="opacity-75 mr-1.5">Minimap:</span>
                     <button id="toggle-minimap" class="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-600 hover:bg-neutral-300 dark:hover:bg-neutral-500 transition-colors">Off</button>
+                  </div>
+                  <div class="flex items-center">
+                    <span class="opacity-75 mr-1.5">Vim Mode:</span>
+                    <button id="toggle-vim" class="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-600 hover:bg-neutral-300 dark:hover:bg-neutral-500 transition-colors">Off</button>
                   </div>
                   <div class="flex items-center">
                     <span class="opacity-75 mr-1.5">Theme:</span>
@@ -114,13 +119,20 @@
                        : 'plaintext';
 %>
 <script>
-  require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs' } });
+  require.config({
+    paths: {
+      'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs',
+      'monaco-vim': 'https://unpkg.com/monaco-vim@0.4.0/dist/monaco-vim'
+    }
+  });
   let editor;
+  let vimMode;
   let wordWrapEnabled = false;
   let minimapEnabled = false;
+  let vimModeEnabled = false;
   let themeMode = 'auto'; // 'auto', 'light', or 'dark'
 
-  require(['vs/editor/editor.main'], function () {
+  require(['vs/editor/editor.main', 'monaco-vim'], function (_, MonacoVim) {
     // Define custom themes
     monaco.editor.defineTheme('custom-dark', {
       base: 'vs-dark',
@@ -276,6 +288,107 @@
       this.textContent = themeMode.charAt(0).toUpperCase() + themeMode.slice(1);
       updateEditorTheme();
     });
+
+    // Initialize Vim mode from localStorage (if previously enabled)
+    try {
+      vimModeEnabled = localStorage.getItem('vimModeEnabled') === 'true';
+      if (vimModeEnabled) {
+        initVimMode();
+        document.getElementById('toggle-vim').textContent = 'On';
+      }
+    } catch (e) {
+      console.error('Error loading Vim mode preference:', e);
+    }
+
+    // Toggle Vim mode
+    document.getElementById('toggle-vim').addEventListener('click', function() {
+      vimModeEnabled = !vimModeEnabled;
+
+      try {
+        localStorage.setItem('vimModeEnabled', vimModeEnabled);
+      } catch (e) {
+        console.error('Error saving Vim mode preference:', e);
+      }
+
+      if (vimModeEnabled) {
+        initVimMode();
+        this.textContent = 'On';
+      } else {
+        disposeVimMode();
+        this.textContent = 'Off';
+      }
+    });
+
+    // Function to initialize Vim mode
+    function initVimMode() {
+      if (!vimMode && MonacoVim) {
+        const statusNode = document.getElementById('vim-status');
+        statusNode.classList.remove('hidden');
+        statusNode.classList.add('flex', 'items-center');
+
+        try {
+          statusNode.classList.add('border-green-500');
+          vimMode = MonacoVim.initVimMode(editor, statusNode);
+
+          const vimStatusInput = statusNode.querySelector('input');
+          if (vimStatusInput) {
+            vimStatusInput.classList.add('bg-transparent', 'border-none', 'outline-none', 'text-inherit', 'font-mono', 'px-1', 'ml-1', 'min-w-[80px]');
+
+            const vimPrefix = document.createElement('span');
+            vimPrefix.textContent = 'VIM:';
+            vimPrefix.classList.add('mr-1', 'font-semibold');
+            statusNode.prepend(vimPrefix);
+
+            vimStatusInput.addEventListener('focus', function() {
+              statusNode.classList.remove('border-green-500', 'border-blue-500', 'border-purple-500');
+              statusNode.classList.add('border-yellow-500');
+            });
+          }
+
+          const observer = new MutationObserver(function(mutations) {
+            const statusText = statusNode.textContent.toLowerCase();
+
+            statusNode.classList.remove('border-green-500', 'border-blue-500', 'border-purple-500', 'border-yellow-500');
+
+            if (statusText.includes('normal')) {
+              statusNode.classList.add('border-green-500');
+            } else if (statusText.includes('insert')) {
+              statusNode.classList.add('border-blue-500');
+            } else if (statusText.includes('visual')) {
+              statusNode.classList.add('border-purple-500');
+            } else if (statusText.includes(':')) {
+              statusNode.classList.add('border-yellow-500');
+            }
+          });
+
+          observer.observe(statusNode, { childList: true, subtree: true, characterData: true });
+
+        } catch (e) {
+          console.error('Error initializing Vim mode:', e);
+          statusNode.classList.add('hidden');
+          statusNode.classList.remove('active');
+        }
+      }
+    }
+
+    // Function to dispose Vim mode
+    function disposeVimMode() {
+      if (vimMode) {
+        vimMode.dispose();
+        vimMode = null;
+        const statusNode = document.getElementById('vim-status');
+        statusNode.classList.add('hidden');
+        statusNode.classList.remove('flex', 'items-center');
+
+        // Remove all border color classes
+        statusNode.classList.remove(
+          'border-green-500',
+          'border-blue-500',
+          'border-purple-500',
+          'border-yellow-500'
+        );
+      }
+    }
 
     // Adjust theme when system theme changes
     const darkModeObserver = new MutationObserver(function(mutations) {
