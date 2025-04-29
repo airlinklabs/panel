@@ -21,6 +21,8 @@ interface ServerStatus {
   stopping: boolean;
   uptime: number | null;
   startedAt: string | null;
+  error?: string;
+  daemonOffline?: boolean;
 }
 
 /**
@@ -139,14 +141,37 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
     }
 
     return status;
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error getting server status:', error);
-    return {
+
+    // Default error status
+    const errorStatus: ServerStatus = {
       online: false,
       starting: false,
       stopping: false,
       uptime: null,
-      startedAt: null
+      startedAt: null,
+      daemonOffline: true
     };
+
+    // Provide more detailed error information
+    if (axios.isAxiosError(error)) {
+      if (error.code === 'ECONNREFUSED') {
+        errorStatus.error = 'Connection refused - daemon may be offline';
+      } else if (error.code === 'ETIMEDOUT') {
+        errorStatus.error = 'Connection timed out';
+      } else if (error.code === 'ENOTFOUND') {
+        errorStatus.error = 'Host not found - check node address';
+      } else if (error.response) {
+        errorStatus.error = `Server responded with ${error.response.status}: ${error.response.statusText}`;
+        errorStatus.daemonOffline = false;
+      } else {
+        errorStatus.error = 'Connection failed';
+      }
+    } else {
+      errorStatus.error = 'An unexpected error occurred';
+    }
+
+    return errorStatus;
   }
 }

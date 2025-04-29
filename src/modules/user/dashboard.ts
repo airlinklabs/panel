@@ -56,9 +56,62 @@ const dashboardModule: Module = {
         const startIndex = (page - 1) * perPage;
         const endIndex = page * perPage;
 
+        // Check if any node is offline
+        let anyNodeOffline = false;
+        const nodeStatuses = {};
+
+        // First check node statuses
+        for (const server of servers) {
+          if (!nodeStatuses[server.node.id]) {
+            try {
+              const nodeResponse = await axios({
+                method: 'GET',
+                url: `http://${server.node.address}:${server.node.port}`,
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+                timeout: 2000,
+              });
+              nodeStatuses[server.node.id] = { online: true };
+            } catch (error) {
+              logger.error(`Node ${server.node.id} (${server.node.address}:${server.node.port}) is offline:`, error);
+              nodeStatuses[server.node.id] = { online: false };
+              anyNodeOffline = true;
+            }
+          }
+        }
+
+        // If any node is offline, render the page with a daemon offline error
+        if (anyNodeOffline) {
+          return res.render('user/dashboard', {
+            errorMessage: { message: 'One or more nodes are offline. Some server information may be unavailable.' },
+            user,
+            req,
+            settings,
+            servers,
+            currentPage: 1,
+            totalPages: 1,
+            daemonOffline: true,
+            nodeStatuses
+          });
+        }
+
         const serversWithStats = await Promise.all(
           servers.map(async (server) => {
             try {
+              // Skip servers on offline nodes
+              if (nodeStatuses[server.node.id] && !nodeStatuses[server.node.id].online) {
+                return {
+                  ...server,
+                  status: 'unknown',
+                  ramUsage: '0',
+                  cpuUsage: '0',
+                  ramLimit: '1GB',
+                  nodeOffline: true
+                };
+              }
+
               const statusResponse = await axios({
                 method: 'GET',
                 url: `http://${server.node.address}:${server.node.port}/container/status`,
@@ -106,16 +159,18 @@ const dashboardModule: Module = {
                 status: isRunning ? 'running' : 'stopped',
                 ramUsage,
                 cpuUsage,
-                ramLimit
+                ramLimit,
+                nodeOffline: false
               };
             } catch (error) {
               logger.error(`Error fetching status for server ${server.UUID}:`, error);
               return {
                 ...server,
-                status: 'stopped',
+                status: 'unknown',
                 ramUsage: '0',
                 cpuUsage: '0',
-                ramLimit: '1GB'
+                ramLimit: '1GB',
+                nodeOffline: true
               };
             }
           })

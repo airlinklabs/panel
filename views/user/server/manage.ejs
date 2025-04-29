@@ -92,7 +92,23 @@
       </div>
       <% } %>
 
-      <!-- Daemon down message removed as requested -->
+      <!-- Daemon Offline Warning -->
+      <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline) { %>
+      <div id="daemonOfflineWarning" class="mx-8 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center">
+        <div class="flex-shrink-0 mr-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-sm font-medium text-red-500">Connection Error</h3>
+          <p class="text-xs text-red-400"><%= serverStatus.error || 'The daemon appears to be offline. Server information and controls are unavailable.' %></p>
+          <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors">
+            Retry Connection
+          </button>
+        </div>
+      </div>
+      <% } %>
 
       <%- include('../../components/serverTemplate') %>
 
@@ -393,7 +409,12 @@ function connectWebSocket() {
             isReconnecting = false;
             reconnectAttempts = 0;
             reconnectInterval = 2000;
-            document.getElementById('daemonIsDown').classList.add('hidden');
+
+            // Hide daemon offline warning if it exists
+            const daemonOfflineWarning = document.getElementById('daemonOfflineWarning');
+            if (daemonOfflineWarning) {
+                daemonOfflineWarning.classList.add('hidden');
+            }
         };
 
         socket.onmessage = handleWebSocketMessage;
@@ -401,7 +422,12 @@ function connectWebSocket() {
         socket.onerror = (error) => {
             console.error('WebSocket Error:', error);
             writeConsole('system', 'error', `WebSocket Error: Connection failed`);
-            document.getElementById('daemonIsDown').classList.remove('hidden');
+
+            // Show daemon offline warning if it exists
+            const daemonOfflineWarning = document.getElementById('daemonOfflineWarning');
+            if (daemonOfflineWarning) {
+                daemonOfflineWarning.classList.remove('hidden');
+            }
         };
 
         socket.onclose = (event) => {
@@ -468,7 +494,12 @@ connectWebSocket();
 
             if (trimmedLine.includes("airlinkd server appears to be down")) {
                 socket.close();
-                // No need to show daemon down message as it's been removed
+
+                // Show daemon offline warning if it exists
+                const daemonOfflineWarning = document.getElementById('daemonOfflineWarning');
+                if (daemonOfflineWarning) {
+                    daemonOfflineWarning.classList.remove('hidden');
+                }
             }
 
             isFirstLine = false;

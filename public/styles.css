@@ -3195,6 +3195,10 @@ select {
   background-color: rgb(9 9 11 / var(--tw-bg-opacity, 1));
 }
 
+.bg-red-600\/20 {
+  background-color: rgb(220 38 38 / 0.2);
+}
+
 .bg-opacity-10 {
   --tw-bg-opacity: 0.1;
 }
@@ -4175,6 +4179,10 @@ select {
   color: inherit;
 }
 
+.text-red-500\/70 {
+  color: rgb(239 68 68 / 0.7);
+}
+
 .underline {
   text-decoration-line: underline;
 }
@@ -4852,6 +4860,11 @@ select {
   background-color: rgb(255 255 255 / 0.05);
 }
 
+.hover\:bg-red-700:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(185 28 28 / var(--tw-bg-opacity, 1));
+}
+
 .hover\:bg-\[position\:200\%_0\2c 0_0\]:hover {
   background-position: 200% 0,0 0;
 }
@@ -5270,6 +5283,11 @@ select {
   border-color: rgb(255 255 255 / 0.05);
 }
 
+.dark\:border-neutral-300:is(.dark *) {
+  --tw-border-opacity: 1;
+  border-color: rgb(212 212 212 / var(--tw-border-opacity, 1));
+}
+
 .dark\:bg-\[\#141414\]:is(.dark *) {
   --tw-bg-opacity: 1;
   background-color: rgb(20 20 20 / var(--tw-bg-opacity, 1));
@@ -5393,6 +5411,10 @@ select {
   background-color: rgb(113 63 18 / 0.2);
 }
 
+.dark\:bg-red-800\/10:is(.dark *) {
+  background-color: rgb(153 27 27 / 0.1);
+}
+
 .dark\:text-amber-400:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(251 191 36 / var(--tw-text-opacity, 1));
@@ -5484,6 +5506,10 @@ select {
 .dark\:text-yellow-400:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(250 204 21 / var(--tw-text-opacity, 1));
+}
+
+.dark\:text-red-400\/50:is(.dark *) {
+  color: rgb(248 113 113 / 0.5);
 }
 
 .dark\:placeholder-neutral-500:is(.dark *)::-moz-placeholder {

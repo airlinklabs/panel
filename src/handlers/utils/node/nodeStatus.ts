@@ -23,23 +23,34 @@ export async function checkNodeStatus(node: Node): Promise<Node> {
       headers: {
         'Content-Type': 'application/json',
       },
+      timeout: 3000, // Add timeout to prevent long waiting times
     };
 
     const response = await axios(requestData);
     const { versionFamily, versionRelease, status, remote } = response.data;
 
-    node.status = status;
+    node.status = status || 'Online';
     node.versionFamily = versionFamily;
     node.versionRelease = versionRelease;
     node.remote = remote;
+    node.error = null;
 
     return node;
   } catch (error) {
+    node.status = 'Offline';
+
     if (axios.isAxiosError(error)) {
-      node.status = 'Offline';
-      node.error = error.response?.data?.message || 'Unknown error';
+      // Provide more detailed error information based on error code
+      if (error.code === 'ECONNREFUSED') {
+        node.error = 'Connection refused - daemon may be offline';
+      } else if (error.code === 'ETIMEDOUT') {
+        node.error = 'Connection timed out';
+      } else if (error.code === 'ENOTFOUND') {
+        node.error = 'Host not found - check address';
+      } else {
+        node.error = error.response?.data?.message || 'Connection failed';
+      }
     } else {
-      node.status = 'Offline';
       node.error = 'An unexpected error occurred';
     }
 

@@ -35,7 +35,7 @@
         <% } %>
       </div>
 
-      <!-- Error Notification -->
+      <!-- Error Notifications -->
       <% if (req.query.err === "NOTACTIVEYET") { %>
         <div class="rounded-xl bg-amber-100 dark:bg-amber-800/10 px-4 py-6 m-7">
           <div class="flex">
@@ -48,6 +48,25 @@
             <div class="ml-5">
               <h3 class="text-sm font-medium text-amber-700 dark:text-amber-400">Awaiting Installation</h3>
               <p class="text-sm text-amber-500 dark:text-amber-400/50">The server either isn't installed yet, or is in a failed state.</p>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <% if (typeof daemonOffline !== 'undefined' && daemonOffline) { %>
+        <div class="rounded-xl bg-red-100 dark:bg-red-800/10 px-4 py-6 m-7">
+          <div class="flex">
+            <div class="flex-shrink-0 ml-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 dark:text-red-400 mt-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div class="ml-5">
+              <h3 class="text-sm font-medium text-red-700 dark:text-red-400">Connection Error</h3>
+              <p class="text-sm text-red-500 dark:text-red-400/50">One or more nodes are offline. Some server information may be unavailable.</p>
+              <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors">
+                Retry Connection
+              </button>
             </div>
           </div>
         </div>

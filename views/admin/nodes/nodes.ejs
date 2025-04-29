@@ -68,6 +68,28 @@
         </div>
       <% } %>
 
+      <!-- Daemon offline warning -->
+      <% if (nodes.some(node => node.status === 'Offline')) { %>
+        <div class="mt-6 ml-8 mr-8">
+          <div class="rounded-xl bg-red-600/20 dark:bg-red-800/10 px-4 py-6 shadow-lg border border-neutral-800/20">
+            <div class="flex">
+              <div class="flex-shrink-0 ml-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-2 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div class="ml-5">
+                <h3 class="text-sm font-medium text-red-500 dark:text-red-400">Connection Error</h3>
+                <p class="text-sm text-red-500/70 dark:text-red-400/50">One or more nodes are offline. Some information may be unavailable.</p>
+                <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors">
+                  Retry Connection
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
       <!-- Table of nodes -->
       <div class="overflow-hidden shadow rounded-lg m-8 border border-neutral-800/20" id="nodeTable">
         <table class="min-w-full divide-y divide-white/10">
@@ -91,8 +113,13 @@
                           <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                         </span>
                       <% } else if (node.status == "Offline") { %>
-                        <span class="flex h-2 w-2">
-                          <span class="relative inline-flex rounded-full h-2 w-2 bg-neutral-500"></span>
+                        <span class="flex h-2 w-2 group relative">
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                          <% if (node.error) { %>
+                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 w-48 bg-neutral-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+                              <%= node.error %>
+                            </div>
+                          <% } %>
                         </span>
                       <% } else { %>
                         <span class="flex h-2 w-2">
