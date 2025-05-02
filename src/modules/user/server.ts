@@ -1429,6 +1429,172 @@ const dashboardModule: Module = {
       }
     });
 
+    const multer = require('multer');
+    const upload = multer({
+      storage: multer.memoryStorage(),
+      limits: {
+        fileSize: 100 * 1024 * 1024 // 100MB
+      }
+    });
+
+    router.post('/server/:id/upload', isAuthenticatedForServer('id'), upload.single('file'), async (req: Request, res: Response) => {
+      const userId = req.session?.user?.id;
+      const serverId = req.params?.id;
+      const relativePath = req.body.path || '/';
+      const fileName = req.body.fileName || (req.file ? req.file.originalname : '');
+
+      logger.info(`Upload request received for file ${fileName} to path ${relativePath} for server ${serverId}`);
+
+      try {
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+          logger.warn(`User not found: ${userId}`);
+          res.status(404).json({ error: 'User not found' });
+          return;
+        }
+
+        const server = await prisma.server.findUnique({
+          where: { UUID: serverId },
+          include: { node: true, image: true },
+        });
+
+        if (!server) {
+          logger.warn(`Server not found: ${serverId}`);
+          res.status(404).json({ error: 'Server not found' });
+          return;
+        }
+
+        if (!fileName) {
+          logger.warn('File name is required');
+          res.status(400).json({ error: 'File name is required' });
+          return;
+        }
+
+        if (!req.file) {
+          logger.warn('File content is required');
+          res.status(400).json({ error: 'File content is required' });
+          return;
+        }
+
+        try {
+          logger.info(`Sending upload request to node at ${server.node.address}:${server.node.port}`);
+          logger.info(`File size: ${req.file.size} bytes`);
+
+          if (req.file.size < 10 * 1024 * 1024) {
+            const fileContent = req.file.buffer.toString('base64');
+            const fileContentWithMeta = `data:${req.file.mimetype};base64,${fileContent}`;
+
+            const uploadRequest = {
+              method: 'POST',
+              url: `http://${server.node.address}:${server.node.port}/fs/upload`,
+              auth: {
+                username: 'Airlink',
+                password: server.node.key,
+              },
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              data: {
+                id: server.UUID,
+                path: relativePath,
+                fileName: fileName,
+                fileContent: fileContentWithMeta
+              },
+              maxContentLength: 15 * 1024 * 1024, // 15MB
+              maxBodyLength: 15 * 1024 * 1024,    // 15MB
+              timeout: 60000
+            };
+
+            const response = await axios(uploadRequest);
+            logger.info(`File ${fileName} successfully uploaded to ${relativePath}`);
+            res.status(200).json({
+              success: true,
+              fileName: response.data.fileName,
+              path: response.data.path
+            });
+          } else {
+            const createEmptyFileRequest = {
+              method: 'POST',
+              url: `http://${server.node.address}:${server.node.port}/fs/create-empty-file`,
+              auth: {
+                username: 'Airlink',
+                password: server.node.key,
+              },
+              data: {
+                id: server.UUID,
+                path: relativePath,
+                fileName: fileName
+              },
+              timeout: 10000
+            };
+
+            await axios(createEmptyFileRequest);
+            logger.info(`Created empty file ${fileName} in ${relativePath}`);
+
+            const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks
+            const totalChunks = Math.ceil(req.file.size / CHUNK_SIZE);
+
+            for (let i = 0; i < totalChunks; i++) {
+              const start = i * CHUNK_SIZE;
+              const end = Math.min(start + CHUNK_SIZE, req.file.size);
+              const chunk = req.file.buffer.slice(start, end);
+              const chunkContent = chunk.toString('base64');
+              const chunkContentWithMeta = `data:${req.file.mimetype};base64,${chunkContent}`;
+
+              const uploadChunkRequest = {
+                method: 'POST',
+                url: `http://${server.node.address}:${server.node.port}/fs/append-file`,
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+                data: {
+                  id: server.UUID,
+                  path: relativePath,
+                  fileName: fileName,
+                  fileContent: chunkContentWithMeta,
+                  chunkIndex: i,
+                  totalChunks: totalChunks
+                },
+                timeout: 30000 // 30 seconds per chunk
+              };
+
+              await axios(uploadChunkRequest);
+              logger.info(`Uploaded chunk ${i+1}/${totalChunks} for file ${fileName}`);
+            }
+
+            logger.info(`File ${fileName} successfully uploaded to ${relativePath} in ${totalChunks} chunks`);
+            res.status(200).json({
+              success: true,
+              fileName: fileName,
+              path: relativePath
+            });
+          }
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            if (error.response) {
+              logger.error(`Error uploading file - Status: ${error.response.status}, Data:`, error.response.data);
+              res.status(error.response.status).json({
+                error: error.response.data.error || 'Failed to upload file',
+                details: error.response.data
+              });
+            } else if (error.request) {
+              logger.error('Error uploading file - No response received:', error.message);
+              res.status(500).json({ error: 'Connection error during file upload. Please try again with a smaller file.' });
+            } else {
+              logger.error('Error uploading file - Request setup error:', error.message);
+              res.status(500).json({ error: 'Error setting up upload request' });
+            }
+          } else {
+            logger.error('Error uploading file:', error);
+            res.status(500).json({ error: 'Failed to upload file' });
+          }
+        }
+      } catch (error) {
+        logger.error('Error uploading file:', error);
+        res.status(500).json({ error: 'Failed to upload file' });
+      }
+    });
 
     router.get(
       '/server/:id/startup',
