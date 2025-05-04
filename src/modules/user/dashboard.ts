@@ -58,7 +58,7 @@ const dashboardModule: Module = {
 
         // Check if any node is offline
         let anyNodeOffline = false;
-        const nodeStatuses = {};
+        const nodeStatuses: Record<number, { online: boolean }> = {};
 
         // First check node statuses
         for (const server of servers) {

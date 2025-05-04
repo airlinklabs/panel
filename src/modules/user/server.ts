@@ -232,7 +232,7 @@ const dashboardModule: Module = {
     router.post(
       '/server/:id/power/:poweraction',
       isAuthenticatedForServer('id'),
-      async (req: Request, res: Response) => {
+      async (req: Request, res: Response): Promise<void> => {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -262,9 +262,10 @@ const dashboardModule: Module = {
           // Check if server is suspended and trying to start
           if (server.Suspended && powerAction === 'start') {
             logger.warn(`Attempt to start suspended server ${serverId} by user ${userId}`);
-            return res.status(403).json({
+            res.status(403).json({
               error: 'This server is suspended. Please contact an administrator for assistance.'
             });
+            return;
           }
 
           if (powerAction === 'stop') {
@@ -1924,7 +1925,7 @@ const dashboardModule: Module = {
           try {
             if (server.image && server.image.dockerImages) {
               const dockerImagesArray = JSON.parse(server.image.dockerImages);
-              dockerImagesArray.forEach(imageObj => {
+              dockerImagesArray.forEach((imageObj: Record<string, string>) => {
                 Object.keys(imageObj).forEach(key => {
                   availableDockerImages.push(key);
                   if (key === dockerImage) {

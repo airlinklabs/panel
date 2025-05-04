@@ -33,7 +33,7 @@ export async function checkNodeStatus(node: Node): Promise<Node> {
     node.versionFamily = versionFamily;
     node.versionRelease = versionRelease;
     node.remote = remote;
-    node.error = null;
+    node.error = undefined;
 
     return node;
   } catch (error) {
