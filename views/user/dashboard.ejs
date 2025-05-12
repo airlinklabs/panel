@@ -87,7 +87,7 @@
               Oops! We couldn't find any servers associated with your account.
             </h3>
             <p class="mt-1 text-sm text-gray-400 dark:text-neutral-400">
-              You don’t have any servers yet.
+              You don't have any servers yet.
               <% if (user.isAdmin) { %>
                 Why not create one now? <a href="/admin/servers/create" class="text-blue-500 hover:underline">Create a server</a>
               <% } else { %>
@@ -240,6 +240,25 @@
     background-color: rgba(59, 130, 246, 0.2);
     color: #60a5fa;
   }
+
+  /* Add transition styles */
+  #gridView, #listView {
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  #gridView.hidden, #listView.hidden {
+    display: none;
+    opacity: 0;
+  }
+
+  #gridView.fade-out, #listView.fade-out {
+    opacity: 0;
+  }
+
+  #gridView.fade-in, #listView.fade-in {
+    opacity: 1;
+  }
 </style>
 
 <script>
@@ -264,18 +283,39 @@
       listViewBtn.classList.add('active');
     }
 
+    // Function to handle view transition
+    function switchView(showElement, hideElement) {
+      // Start fade out
+      hideElement.classList.add('fade-out');
+      
+      // After fade out, hide element and show new element
+      setTimeout(() => {
+        hideElement.classList.add('hidden');
+        showElement.classList.remove('hidden');
+        
+        // Force reflow
+        showElement.offsetHeight;
+        
+        // Start fade in
+        showElement.classList.add('fade-in');
+        showElement.classList.remove('fade-out');
+      }, 300);
+    }
+
     // Add click event listeners to buttons
     gridViewBtn.addEventListener('click', function() {
-      gridView.classList.remove('hidden');
-      listView.classList.add('hidden');
+      if (!gridView.classList.contains('hidden')) return;
+      
+      switchView(gridView, listView);
       gridViewBtn.classList.add('active');
       listViewBtn.classList.remove('active');
       localStorage.setItem('serverViewPreference', 'grid');
     });
 
     listViewBtn.addEventListener('click', function() {
-      gridView.classList.add('hidden');
-      listView.classList.remove('hidden');
+      if (!listView.classList.contains('hidden')) return;
+      
+      switchView(listView, gridView);
       gridViewBtn.classList.remove('active');
       listViewBtn.classList.add('active');
       localStorage.setItem('serverViewPreference', 'list');
