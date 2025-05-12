@@ -23,8 +23,46 @@
         </div>
       </div>
 
+      <!-- Tab Navigation -->
+      <div class="mt-6 mb-8 px-8">
+        <div class="relative sm:block">
+          <div id="sliding-background" class="absolute w-fit h-9 px-3 transition-transform duration-200 ease-in-out z-0 bg-neutral-200 border border-neutral-300 dark:bg-white/5 dark:border-neutral-300/5 rounded-xl"></div>
+          <nav class="flex relative">
+            <ul role="list" class="flex min-w-full mt-1.5 gap-x-2 text-sm font-normal leading-6 text-neutral-600 dark:text-neutral-400">
+              <li class="transition">
+                <a href="#settings" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 mb-0.5 inline-flex mr-1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+                  </svg>
+                  Settings
+                </a>
+              </li>
+              <li class="transition">
+                <a href="#security" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 mb-0.5 inline-flex mr-1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                  </svg>
+                  Security
+                </a>
+              </li>
+              <li class="transition">
+                <a href="#connections" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 mb-0.5 inline-flex mr-1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                  </svg>
+                  Connections
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+
       <div class="px-4 sm:px-6 lg:px-8">
-        <dl class="mt-5 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
+        <div id="tab-content" class="mt-5 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
+          <!-- Settings Tab -->
+          <div id="settings-tab" class="col-span-2">
+            <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
            <!-- Account Settings Card -->
            <div class="overflow-hidden rounded-xl bg-neutral-800/20 border border-neutral-700/20 shadow-md hover:shadow-lg transition-all duration-300 p-6">
               <div class="flex items-center justify-between mb-4">
@@ -36,6 +74,7 @@
                 </div>
               </div>
 
+                <!-- Username and Email Forms -->
               <div class="min-w-0 flex-1">
                 <div class="flex flex-col sm:flex-row justify-between mt-5">
                   <!-- Username Form -->
@@ -83,41 +122,6 @@
                     <%= req.translations.updateDescription %>
                   </button>
                 </form>
-
-                <!-- Password Form -->
-                <form id="change-password-form" class="mt-6 p-4 rounded-xl bg-neutral-700/10 border border-neutral-600/20">
-                  <h3 class="text-sm font-medium text-white mb-3"><%= req.translations.changePassword || 'Change Password' %></h3>
-
-                  <label class="block text-neutral-400 text-sm font-medium mb-2"><%= req.translations.currentPassword %>:</label>
-                  <div id="current-password-feedback" class="border border-neutral-600/30 text-neutral-400 text-xs mr-2 px-2.5 py-1 rounded-full inline-block min-w-max transition-opacity duration-300 ease-in-out mb-2"><%= req.translations.checking %></div>
-                  <input id="currentPassword" type="password" name="currentPassword"
-                    class="rounded-xl focus:ring-1 focus:ring-neutral-500/30 text-sm mt-1 mb-4 w-full transition-all hover:bg-white/5 px-4 py-2 border-neutral-600/30 bg-neutral-700/20 placeholder-neutral-400 text-white border"
-                    placeholder="<%= req.translations.currentPasswordHide %>" />
-
-                  <label class="block text-neutral-400 text-sm font-medium mb-2"><%= req.translations.newPassword %>:</label>
-                  <input id="newPassword" type="password" name="newPassword"
-                    class="rounded-xl focus:ring-1 focus:ring-neutral-500/30 text-sm mt-1 mb-4 w-full transition-all hover:bg-white/5 px-4 py-2 border-neutral-600/30 bg-neutral-700/20 placeholder-neutral-400 text-white border"
-                    placeholder="<%= req.translations.newPasswordHide %>" disabled />
-
-                  <button type="submit"
-                    class="block rounded-xl bg-white hover:bg-neutral-200 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2">
-                    <%= req.translations.update_password %>
-                  </button>
-                </form>
-
-                <!-- 2FA Section -->
-                <div class="mt-6 p-4 rounded-xl bg-neutral-700/10 border border-neutral-600/20">
-                  <h3 class="text-sm font-medium text-white mb-3"><%= req.translations.twoFactorAuth || 'Two-Factor Authentication' %></h3>
-                  <% if (user['2fa'] !== true) { %>
-                    <p class="text-sm text-neutral-400">2FA was in development, and so it is not available.</p>
-                  <% } else { %>
-                    <form action="/disable-2fa" method="POST">
-                      <button class="block rounded-xl bg-white hover:bg-neutral-200 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2">
-                        <%= req.translations.disable2FA %>
-                      </button>
-                    </form>
-                  <% } %>
-                </div>
               </div>
            </div>
 
@@ -147,9 +151,68 @@
                 </form>
               </div>
            </div>
+            </dl>
+          </div>
+
+          <!-- Security Tab -->
+          <div id="security-tab" class="col-span-2 hidden">
+            <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
+              <!-- Password Form -->
+              <div class="overflow-hidden rounded-xl bg-neutral-800/20 border border-neutral-700/20 shadow-md hover:shadow-lg transition-all duration-300 p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <dt class="truncate text-sm font-medium text-white"><%= req.translations.changePassword || 'Change Password' %></dt>
+                  <div class="rounded-lg bg-neutral-700/20 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                    </svg>
+                  </div>
+                </div>
+
+                <form id="change-password-form" class="mt-6">
+                  <label class="block text-neutral-400 text-sm font-medium mb-2"><%= req.translations.currentPassword %>:</label>
+                  <div id="current-password-feedback" class="border border-neutral-600/30 text-neutral-400 text-xs mr-2 px-2.5 py-1 rounded-full inline-block min-w-max transition-opacity duration-300 ease-in-out mb-2"><%= req.translations.checking %></div>
+                  <input id="currentPassword" type="password" name="currentPassword"
+                    class="rounded-xl focus:ring-1 focus:ring-neutral-500/30 text-sm mt-1 mb-4 w-full transition-all hover:bg-white/5 px-4 py-2 border-neutral-600/30 bg-neutral-700/20 placeholder-neutral-400 text-white border"
+                    placeholder="<%= req.translations.currentPasswordHide %>" />
+
+                  <label class="block text-neutral-400 text-sm font-medium mb-2"><%= req.translations.newPassword %>:</label>
+                  <input id="newPassword" type="password" name="newPassword"
+                    class="rounded-xl focus:ring-1 focus:ring-neutral-500/30 text-sm mt-1 mb-4 w-full transition-all hover:bg-white/5 px-4 py-2 border-neutral-600/30 bg-neutral-700/20 placeholder-neutral-400 text-white border"
+                    placeholder="<%= req.translations.newPasswordHide %>" disabled />
+
+                  <button type="submit"
+                    class="block rounded-xl bg-white hover:bg-neutral-200 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2">
+                    <%= req.translations.update_password %>
+                  </button>
+                </form>
+              </div>
+
+              <!-- 2FA Section -->
+              <div class="overflow-hidden rounded-xl bg-neutral-800/20 border border-neutral-700/20 shadow-md hover:shadow-lg transition-all duration-300 p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <dt class="truncate text-sm font-medium text-white"><%= req.translations.twoFactorAuth || 'Two-Factor Authentication' %></dt>
+                  <div class="rounded-lg bg-neutral-700/20 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 004.5 10.5a7.464 7.464 0 01-1.15 3.993m1.989 3.559A11.209 11.209 0 008.25 10.5a3.75 3.75 0 117.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 01-3.6 9.75m6.633-4.596a18.666 18.666 0 01-2.485 5.33" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div class="min-w-0 flex-1">
+                  <% if (user['2fa'] !== true) { %>
+                    <p class="text-sm text-neutral-400">2FA was in development, and so it is not available.</p>
+                  <% } else { %>
+                    <form action="/disable-2fa" method="POST">
+                      <button class="block rounded-xl bg-white hover:bg-neutral-200 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2">
+                        <%= req.translations.disable2FA %>
+                      </button>
+                    </form>
+                  <% } %>
+              </div>
+           </div>
 
            <!-- Login History Card -->
-           <div class="overflow-hidden rounded-xl bg-neutral-800/20 border border-neutral-700/20 shadow-md hover:shadow-lg transition-all duration-300 p-6 col-span-1 sm:col-span-2">
+              <div class="overflow-hidden rounded-xl bg-neutral-800/20 border border-neutral-700/20 shadow-md hover:shadow-lg transition-all duration-300 p-6 col-span-2">
               <div class="flex items-center justify-between mb-4">
                 <dt class="truncate text-sm font-medium text-white"><%= req.translations.loginHistory || 'Login History' %></dt>
                 <div class="rounded-lg bg-neutral-700/20 p-2">
@@ -197,6 +260,175 @@
               </div>
            </div>
         </dl>
+          </div>
+
+          <!-- Connections Tab -->
+          <div id="connections-tab" class="col-span-2 hidden">
+            <div class="overflow-hidden rounded-xl bg-neutral-800/20 border border-neutral-700/20 shadow-md hover:shadow-lg transition-all duration-300 p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                  <dt class="truncate text-sm font-medium text-white">Connected Accounts</dt>
+                  <span class="inline-flex items-center rounded-md bg-yellow-400/10 px-2 py-1 text-xs font-medium text-yellow-500 ring-1 ring-inset ring-yellow-400/20">Coming Soon</span>
+                </div>
+                <div class="rounded-lg bg-neutral-700/20 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-neutral-400">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                  </svg>
+                </div>
+              </div>
+
+              <div class="min-w-0 flex-1">
+                <p class="text-sm text-neutral-400 mb-6">Connect your account with other services to enable additional features.</p>
+                <div class="space-y-3">
+                  <!-- X (Twitter) Connection -->
+                  <div class="group rounded-xl bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/20 transition-all duration-200">
+                    <div class="flex items-center justify-between p-4">
+                      <div class="flex items-center gap-3">
+                        <div class="flex-shrink-0">
+                          <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 class="text-sm font-medium text-white">X</h3>
+                          <div class="flex items-center gap-2">
+                            <p class="text-xs text-neutral-400">Not connected</p>
+                            <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">Under Development</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button class="rounded-lg bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors duration-200">
+                        Connect
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Discord Connection -->
+                  <div class="group rounded-xl bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/20 transition-all duration-200">
+                    <div class="flex items-center justify-between p-4">
+                      <div class="flex items-center gap-3">
+                        <div class="flex-shrink-0">
+                          <svg class="h-6 w-6 text-[#5865F2]" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 class="text-sm font-medium text-white">Discord</h3>
+                          <div class="flex items-center gap-2">
+                            <p class="text-xs text-neutral-400">Not connected</p>
+                            <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">Under Development</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button class="rounded-lg bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors duration-200">
+                        Connect
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- GitHub Connection -->
+                  <div class="group rounded-xl bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/20 transition-all duration-200">
+                    <div class="flex items-center justify-between p-4">
+                      <div class="flex items-center gap-3">
+                        <div class="flex-shrink-0">
+                          <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 class="text-sm font-medium text-white">GitHub</h3>
+                          <div class="flex items-center gap-2">
+                            <p class="text-xs text-neutral-400">Not connected</p>
+                            <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">Under Development</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button class="rounded-lg bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors duration-200">
+                        Connect
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Google Connection -->
+                  <div class="group rounded-xl bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/20 transition-all duration-200">
+                    <div class="flex items-center justify-between p-4">
+                      <div class="flex items-center gap-3">
+                        <div class="flex-shrink-0">
+                          <svg class="h-6 w-6" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 class="text-sm font-medium text-white">Google</h3>
+                          <div class="flex items-center gap-2">
+                            <p class="text-xs text-neutral-400">Not connected</p>
+                            <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">Under Development</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button class="rounded-lg bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors duration-200">
+                        Connect
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Microsoft Connection -->
+                  <div class="group rounded-xl bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/20 transition-all duration-200">
+                    <div class="flex items-center justify-between p-4">
+                      <div class="flex items-center gap-3">
+                        <div class="flex-shrink-0">
+                          <svg class="h-6 w-6" viewBox="0 0 23 23">
+                            <path fill="#F25022" d="M0 0h11v11H0z"/>
+                            <path fill="#00A4EF" d="M0 12h11v11H0z"/>
+                            <path fill="#7FBA00" d="M12 0h11v11H12z"/>
+                            <path fill="#FFB900" d="M12 12h11v11H12z"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 class="text-sm font-medium text-white">Microsoft</h3>
+                          <div class="flex items-center gap-2">
+                            <p class="text-xs text-neutral-400">Not connected</p>
+                            <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">Under Development</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button class="rounded-lg bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors duration-200">
+                        Connect
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Steam Connection -->
+                  <div class="group rounded-xl bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/20 transition-all duration-200">
+                    <div class="flex items-center justify-between p-4">
+                      <div class="flex items-center gap-3">
+                        <div class="flex-shrink-0">
+                          <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0C5.427 0 0 5.427 0 12c0 5.327 3.467 9.832 8.25 11.413v-2.063c-3.575-1.404-6-4.887-6-8.85 0-5.223 4.277-9.5 9.5-9.5s9.5 4.277 9.5 9.5c0 3.963-2.425 7.446-6 8.85v2.063C20.533 21.832 24 17.327 24 12c0-6.573-5.427-12-12-12zM8.5 12c0-1.934 1.566-3.5 3.5-3.5s3.5 1.566 3.5 3.5-1.566 3.5-3.5 3.5S8.5 13.934 8.5 12zm5.5 0c0-1.105-.895-2-2-2s-2 .895-2 2 .895 2 2 2 2-.895 2-2z"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 class="text-sm font-medium text-white">Steam</h3>
+                          <div class="flex items-center gap-2">
+                            <p class="text-xs text-neutral-400">Not connected</p>
+                            <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">Under Development</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button class="rounded-lg bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors duration-200">
+                        Connect
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
    </div>
    </div>
@@ -205,6 +437,70 @@
 <%- include('../components/toast')%>
 
 <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const { showToast } = createToastSystem();
+    let isSubmitting = false;
+
+    // Tab Navigation
+    const tabs = {
+      settings: document.getElementById('settings-tab'),
+      security: document.getElementById('security-tab'),
+      connections: document.getElementById('connections-tab')
+    };
+
+    const navLinks = document.querySelectorAll('.nav-link2');
+    const slidingBackground = document.getElementById('sliding-background');
+
+    function showTab(tabId) {
+      // Hide all tabs
+      Object.values(tabs).forEach(tab => tab.classList.add('hidden'));
+      
+      // Show the selected tab
+      const selectedTab = tabs[tabId.replace('#', '')];
+      if (selectedTab) {
+        selectedTab.classList.remove('hidden');
+      }
+
+      // Update navigation
+      navLinks.forEach(link => {
+        if (link.getAttribute('href') === tabId) {
+          link.classList.add('text-neutral-900', 'dark:text-white', 'font-medium');
+        } else {
+          link.classList.remove('text-neutral-900', 'dark:text-white', 'font-medium');
+        }
+      });
+
+      // Update sliding background
+      const activeLink = Array.from(navLinks).find(link => link.getAttribute('href') === tabId);
+      if (activeLink) {
+        const linkRect = activeLink.getBoundingClientRect();
+        const navRect = activeLink.closest('nav').getBoundingClientRect();
+        slidingBackground.style.width = `${linkRect.width}px`;
+        slidingBackground.style.transform = `translateX(${linkRect.left - navRect.left}px)`;
+      }
+
+      // Update URL hash
+      window.location.hash = tabId;
+    }
+
+    // Handle tab clicks
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tabId = link.getAttribute('href');
+        showTab(tabId);
+      });
+    });
+
+    // Show initial tab based on URL hash or default to settings
+    const initialTab = window.location.hash || '#settings';
+    showTab(initialTab);
+
+    // Handle browser back/forward
+    window.addEventListener('hashchange', () => {
+      showTab(window.location.hash || '#settings');
+    });
+
   // Form Handlers
   document.addEventListener('DOMContentLoaded', () => {
     const { showToast } = createToastSystem();
@@ -446,6 +742,7 @@
         </span>
       `;
     }
+    });
   });
   </script>
 <%- include('../components/footer') %>

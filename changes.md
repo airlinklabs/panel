@@ -50,3 +50,74 @@ This update focuses on improving the user interface by customizing and hiding sc
 **Note:**
 - These changes are primarily visual and do not affect the core functionality of the application.
 - If visible scrollbars are needed for accessibility or usability reasons, consider revisiting these styles or providing an option to toggle them. 
+
+---
+
+# Change Log: Account Page Enhancements with Tab Navigation and Connected Accounts
+
+## Commit: Implement Modern Tab Navigation and Connected Accounts Section
+
+### Summary
+This update introduces a comprehensive overhaul of the account page, featuring a modern tab-based navigation system and a new Connected Accounts section. The changes improve user experience with intuitive navigation and prepare for future social integrations.
+
+---
+
+## Files Changed
+
+### 1. `views/user/account.ejs`
+**Added:**
+- Tab navigation system with three main sections:
+  - Settings (Account management and language preferences)
+  - Security (Password management, 2FA, and login history)
+  - Connections (Social account integrations)
+- Modern sliding background effect for active tab indication
+- Connected Accounts section with integration cards for:
+  - X (formerly Twitter)
+  - Discord
+  - GitHub
+  - Google
+  - Microsoft
+  - Steam
+
+**Details:**
+- Implemented responsive tab navigation with smooth transitions
+- Added status indicators and development tags for each service
+- Created consistent card layouts with hover effects
+- Integrated service-specific icons and branding colors
+- Added "Coming Soon" and "Under Development" status indicators
+
+**Purpose:**
+- To provide a more organized and intuitive account management interface
+- To prepare for future social media integrations
+- To improve user experience with modern UI patterns
+
+---
+
+### 2. JavaScript Enhancements
+**Added:**
+- Tab switching functionality with URL hash support
+- Smooth transitions for tab changes
+- Form validation and submission handlers
+- Real-time username availability checking
+- Password validation system
+- Language preference handling
+
+**Purpose:**
+- To ensure smooth and responsive user interactions
+- To provide immediate feedback on user actions
+- To maintain state consistency with browser navigation
+
+---
+
+## Impact
+- Improved organization of account management features
+- Enhanced user experience with modern UI patterns
+- Prepared infrastructure for future social integrations
+- Better visual feedback for user actions
+- Consistent styling across all account management features
+
+---
+
+**Note:**
+- Social integrations are marked as "Under Development" and will be implemented in future updates
+- The UI maintains the dark theme with consistent use of neutral colors and proper spacing 
