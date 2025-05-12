@@ -1,0 +1,14 @@
+/* Hide scrollbar for Chrome, Safari and Opera */
+* {
+  scrollbar-width: none !important;  /* Firefox */
+  -ms-overflow-style: none !important;  /* IE and Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none !important;  /* Chrome, Safari and Opera */
+}
+
+/* Ensure scroll functionality remains */
+* {
+  -webkit-overflow-scrolling: touch;  /* Enable smooth scrolling on iOS */
+} 

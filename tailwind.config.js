@@ -7,7 +7,18 @@ export default {
   ],
   darkMode: 'class',
   theme: {
-    extend: {},
+    extend: {
+      // Add custom scrollbar styles
+      // Hide scrollbar for Chrome, Safari and Opera
+      '::-webkit-scrollbar': {
+        display: 'none'
+      },
+      // Hide scrollbar for IE, Edge and Firefox
+      html: {
+        'scrollbar-width': 'none',  /* Firefox */
+        '-ms-overflow-style': 'none'  /* IE and Edge */
+      }
+    },
   },
   plugins: [
     require('@tailwindcss/forms')
