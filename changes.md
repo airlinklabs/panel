@@ -55,6 +55,50 @@ This update focuses on improving the user interface by customizing and hiding sc
 
 # Change Log: Account Page Enhancements with Tab Navigation and Connected Accounts
 
+## Commit: Add Development Status for API and SSH Keys [Current Date]
+
+### Summary
+This update adds clear development status indicators for the API Keys and SSH Keys features, ensuring users are aware of the in-progress state of these features while maintaining the ability to preview the interfaces.
+
+---
+
+## Files Changed
+
+### 1. `views/user/account.ejs`
+**Modified:**
+- Added "Under Development" tags to API Keys and SSH Keys sections
+- Implemented development status notifications when attempting to use these features
+- Preserved existing UI while disabling backend functionality
+- Added visual indicators to inform users about feature status
+
+**Details:**
+- Added purple "Under Development" badges next to action buttons
+- Implemented toast notifications for development status
+- Maintained form dialogs for preview purposes
+- Disabled actual API calls while preserving UI interaction
+
+**Purpose:**
+- To clearly communicate feature development status to users
+- To maintain UI consistency while features are being developed
+- To prevent confusion about feature availability
+
+---
+
+## Impact
+- Improved user communication about feature status
+- Maintained consistent UI experience
+- Prevented unintended API calls for in-development features
+
+---
+
+**Note:**
+- API Keys and SSH Keys functionality will be implemented in future updates
+- UI remains fully styled and interactive for preview purposes
+
+---
+
+# Change Log: Account Page Enhancements with Tab Navigation and Connected Accounts
+
 ## Commit: Implement Modern Tab Navigation and Connected Accounts Section [49e396a3610851b83dfb856e414bc2a48e90cc15]
 
 ### Summary

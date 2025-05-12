@@ -46,11 +46,19 @@
                 </a>
               </li>
               <li class="transition">
-                <a href="#connections" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl">
+                <a href="#api-keys" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 mb-0.5 inline-flex mr-1">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
                   </svg>
-                  Connections
+                  API Keys
+                </a>
+              </li>
+              <li class="transition">
+                <a href="#ssh-keys" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 mb-0.5 inline-flex mr-1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 004.5 10.5a7.464 7.464 0 01-1.15 3.993m1.989 3.559A11.209 11.209 0 008.25 10.5a3.75 3.75 0 117.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 01-3.6 9.75m6.633-4.596a18.666 18.666 0 01-2.485 5.33" />
+                  </svg>
+                  SSH Keys
                 </a>
               </li>
             </ul>
@@ -149,6 +157,68 @@
                     <%= req.translations.saveLanguagePreference || 'Save Language Preference' %>
                   </button>
                 </form>
+              </div>
+           </div>
+
+           <!-- Connected Accounts Card - Moved to below the Language Preferences Card -->
+           <div class="overflow-hidden rounded-xl bg-neutral-800/20 border border-neutral-700/20 shadow-md hover:shadow-lg transition-all duration-300 p-6 col-span-2">
+              <div class="flex items-center justify-between mb-4">
+                <dt class="truncate text-sm font-medium text-white"><%= req.translations.connectedAccounts || 'Connected Accounts' %></dt>
+                <div class="rounded-lg bg-neutral-700/20 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-neutral-400">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                  </svg>
+                </div>
+              </div>
+
+              <div class="min-w-0 flex-1">
+                <div class="overflow-x-auto p-4 rounded-xl bg-neutral-700/10 border border-neutral-600/20">
+                  <table class="min-w-full divide-y divide-neutral-600/20">
+                    <thead>
+                      <tr>
+                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-white sm:pl-0"><%= req.translations.service || 'Service' %></th>
+                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white"><%= req.translations.status || 'Status' %></th>
+                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white"><%= req.translations.connectedOn || 'Connected On' %></th>
+                        <th scope="col" class="px-3 py-3.5 text-right text-sm font-semibold text-white"><%= req.translations.actions || 'Actions' %></th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-600/20">
+                      <% if (user.connectedAccounts && user.connectedAccounts.length > 0) { %>
+                        <% user.connectedAccounts.forEach(account => { %>
+                          <tr class="hover:bg-neutral-700/10 transition-colors">
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-white sm:pl-0">
+                              <%= account.service %>
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm">
+                              <span class="inline-flex items-center rounded-md bg-green-400/10 px-2 py-1 text-xs font-medium text-green-400 ring-1 ring-inset ring-green-400/20">
+                                <%= req.translations.connected || 'Connected' %>
+                              </span>
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400">
+                              <%= account.connectedOn ? new Date(account.connectedOn).toLocaleDateString() : (req.translations.unknown || 'Unknown') %>
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-right">
+                              <button class="text-red-400 hover:text-red-300 transition-colors">
+                                <%= req.translations.disconnect || 'Disconnect' %>
+                              </button>
+                            </td>
+                          </tr>
+                        <% }) %>
+                      <% } else { %>
+                        <tr>
+                          <td colspan="4" class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-neutral-400 sm:pl-0 text-center">
+                            <%= req.translations.noConnectedAccounts || 'No connected accounts. Connect your account with other services to enable additional features.' %>
+                          </td>
+                        </tr>
+                      <% } %>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="mt-4">
+                <button id="show-connections-dialog" class="w-full rounded-xl bg-white hover:bg-neutral-200 text-neutral-800 px-4 py-2 text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2">
+                  <%= req.translations.connectAccount || 'Connect Account' %>
+                </button>
+                </div>
               </div>
            </div>
             </dl>
@@ -262,171 +332,142 @@
         </dl>
           </div>
 
-          <!-- Connections Tab -->
-          <div id="connections-tab" class="col-span-2 hidden">
-            <div class="overflow-hidden rounded-xl bg-neutral-800/20 border border-neutral-700/20 shadow-md hover:shadow-lg transition-all duration-300 p-6">
-              <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-3">
-                  <dt class="truncate text-sm font-medium text-white">Connected Accounts</dt>
-                  <span class="inline-flex items-center rounded-md bg-yellow-400/10 px-2 py-1 text-xs font-medium text-yellow-500 ring-1 ring-inset ring-yellow-400/20">Coming Soon</span>
-                </div>
-                <div class="rounded-lg bg-neutral-700/20 p-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-neutral-400">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
-                  </svg>
-                </div>
-              </div>
+          <!-- API Keys Tab -->
+          <div id="api-keys-tab" class="col-span-2 hidden">
+            <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
+              <!-- API Keys Card -->
+              <div class="overflow-hidden rounded-xl bg-neutral-800/20 border border-neutral-700/20 shadow-md hover:shadow-lg transition-all duration-300 p-6 col-span-2">
+                <div class="flex items-center justify-between mb-4">
+                  <dt class="truncate text-sm font-medium text-white"><%= req.translations.apiKeys || 'API Keys' %></dt>
+                  <div class="rounded-lg bg-neutral-700/20 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-neutral-400">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                    </svg>
+        </div>
+      </div>
 
-              <div class="min-w-0 flex-1">
-                <p class="text-sm text-neutral-400 mb-6">Connect your account with other services to enable additional features.</p>
-                <div class="space-y-3">
-                  <!-- X (Twitter) Connection -->
-                  <div class="group rounded-xl bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/20 transition-all duration-200">
-                    <div class="flex items-center justify-between p-4">
-                      <div class="flex items-center gap-3">
-                        <div class="flex-shrink-0">
-                          <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <h3 class="text-sm font-medium text-white">X</h3>
-                          <div class="flex items-center gap-2">
-                            <p class="text-xs text-neutral-400">Not connected</p>
-                            <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">Under Development</span>
-                          </div>
-                        </div>
-                      </div>
-                      <button class="rounded-lg bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors duration-200">
-                        Connect
-                      </button>
-                    </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm text-neutral-400 mb-6"><%= req.translations.apiKeysDesc || 'API keys allow external applications to authenticate with our services on your behalf.' %></p>
+                  
+                  <div class="overflow-x-auto p-4 rounded-xl bg-neutral-700/10 border border-neutral-600/20">
+                    <table class="min-w-full divide-y divide-neutral-600/20">
+                      <thead>
+                        <tr>
+                          <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-white sm:pl-0"><%= req.translations.description || 'Description' %></th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white"><%= req.translations.lastUsed || 'Last Used' %></th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white"><%= req.translations.createdAt || 'Created' %></th>
+                          <th scope="col" class="px-3 py-3.5 text-right text-sm font-semibold text-white"><%= req.translations.actions || 'Actions' %></th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-neutral-600/20">
+                        <% if (user.apiKeys && user.apiKeys.length > 0) { %>
+                          <% user.apiKeys.forEach(key => { %>
+                            <tr class="hover:bg-neutral-700/10 transition-colors">
+                              <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-white sm:pl-0">
+                                <%= key.description %>
+                              </td>
+                              <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400">
+                                <%= key.lastUsed ? new Date(key.lastUsed).toLocaleString() : (req.translations.never || 'Never') %>
+                              </td>
+                              <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400">
+                                <%= new Date(key.createdAt).toLocaleDateString() %>
+                              </td>
+                              <td class="whitespace-nowrap px-3 py-4 text-sm text-right">
+                                <button class="text-red-400 hover:text-red-300 transition-colors">
+                                  <%= req.translations.revoke || 'Revoke' %>
+                                </button>
+                              </td>
+                            </tr>
+                          <% }); %>
+                        <% } else { %>
+                          <tr>
+                            <td colspan="4" class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-neutral-400 sm:pl-0 text-center">
+                              <%= req.translations.noApiKeys || 'You have not created any API keys.' %>
+                            </td>
+                          </tr>
+                        <% } %>
+                      </tbody>
+                    </table>
                   </div>
-
-                  <!-- Discord Connection -->
-                  <div class="group rounded-xl bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/20 transition-all duration-200">
-                    <div class="flex items-center justify-between p-4">
-                      <div class="flex items-center gap-3">
-                        <div class="flex-shrink-0">
-                          <svg class="h-6 w-6 text-[#5865F2]" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <h3 class="text-sm font-medium text-white">Discord</h3>
-                          <div class="flex items-center gap-2">
-                            <p class="text-xs text-neutral-400">Not connected</p>
-                            <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">Under Development</span>
-                          </div>
-                        </div>
-                      </div>
-                      <button class="rounded-lg bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors duration-200">
-                        Connect
-                      </button>
-                    </div>
+                  
+                  <div class="mt-4">
+                    <button id="create-api-key-btn" class="w-full rounded-xl bg-white hover:bg-neutral-200 text-neutral-800 px-4 py-2 text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2">
+                      <%= req.translations.createNewApiKey || 'Create New API Key' %>
+                    </button>
+                    <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20 mt-2">Under Development</span>
                   </div>
-
-                  <!-- GitHub Connection -->
-                  <div class="group rounded-xl bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/20 transition-all duration-200">
-                    <div class="flex items-center justify-between p-4">
-                      <div class="flex items-center gap-3">
-                        <div class="flex-shrink-0">
-                          <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <h3 class="text-sm font-medium text-white">GitHub</h3>
-                          <div class="flex items-center gap-2">
-                            <p class="text-xs text-neutral-400">Not connected</p>
-                            <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">Under Development</span>
-                          </div>
-                        </div>
-                      </div>
-                      <button class="rounded-lg bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors duration-200">
-                        Connect
-                      </button>
-                    </div>
-                  </div>
-
-                  <!-- Google Connection -->
-                  <div class="group rounded-xl bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/20 transition-all duration-200">
-                    <div class="flex items-center justify-between p-4">
-                      <div class="flex items-center gap-3">
-                        <div class="flex-shrink-0">
-                          <svg class="h-6 w-6" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <h3 class="text-sm font-medium text-white">Google</h3>
-                          <div class="flex items-center gap-2">
-                            <p class="text-xs text-neutral-400">Not connected</p>
-                            <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">Under Development</span>
-                          </div>
-                        </div>
-                      </div>
-                      <button class="rounded-lg bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors duration-200">
-                        Connect
-                      </button>
-                    </div>
-                  </div>
-
-                  <!-- Microsoft Connection -->
-                  <div class="group rounded-xl bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/20 transition-all duration-200">
-                    <div class="flex items-center justify-between p-4">
-                      <div class="flex items-center gap-3">
-                        <div class="flex-shrink-0">
-                          <svg class="h-6 w-6" viewBox="0 0 23 23">
-                            <path fill="#F25022" d="M0 0h11v11H0z"/>
-                            <path fill="#00A4EF" d="M0 12h11v11H0z"/>
-                            <path fill="#7FBA00" d="M12 0h11v11H12z"/>
-                            <path fill="#FFB900" d="M12 12h11v11H12z"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <h3 class="text-sm font-medium text-white">Microsoft</h3>
-                          <div class="flex items-center gap-2">
-                            <p class="text-xs text-neutral-400">Not connected</p>
-                            <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">Under Development</span>
-                          </div>
-                        </div>
-                      </div>
-                      <button class="rounded-lg bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors duration-200">
-                        Connect
-                      </button>
-                    </div>
-                  </div>
-
-                  <!-- Steam Connection -->
-                  <div class="group rounded-xl bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/20 transition-all duration-200">
-                    <div class="flex items-center justify-between p-4">
-                      <div class="flex items-center gap-3">
-                        <div class="flex-shrink-0">
-                          <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 0C5.427 0 0 5.427 0 12c0 5.327 3.467 9.832 8.25 11.413v-2.063c-3.575-1.404-6-4.887-6-8.85 0-5.223 4.277-9.5 9.5-9.5s9.5 4.277 9.5 9.5c0 3.963-2.425 7.446-6 8.85v2.063C20.533 21.832 24 17.327 24 12c0-6.573-5.427-12-12-12zM8.5 12c0-1.934 1.566-3.5 3.5-3.5s3.5 1.566 3.5 3.5-1.566 3.5-3.5 3.5S8.5 13.934 8.5 12zm5.5 0c0-1.105-.895-2-2-2s-2 .895-2 2 .895 2 2 2 2-.895 2-2z"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <h3 class="text-sm font-medium text-white">Steam</h3>
-                          <div class="flex items-center gap-2">
-                            <p class="text-xs text-neutral-400">Not connected</p>
-                            <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">Under Development</span>
-                          </div>
-                        </div>
-                      </div>
-                      <button class="rounded-lg bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors duration-200">
-                        Connect
-                      </button>
-                    </div>
-                  </div>
-
                 </div>
               </div>
-            </div>
+            </dl>
+          </div>
+
+          <!-- SSH Keys Tab -->
+          <div id="ssh-keys-tab" class="col-span-2 hidden">
+            <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
+              <!-- SSH Keys Card -->
+              <div class="overflow-hidden rounded-xl bg-neutral-800/20 border border-neutral-700/20 shadow-md hover:shadow-lg transition-all duration-300 p-6 col-span-2">
+                <div class="flex items-center justify-between mb-4">
+                  <dt class="truncate text-sm font-medium text-white"><%= req.translations.sshKeys || 'SSH Keys' %></dt>
+                  <div class="rounded-lg bg-neutral-700/20 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-neutral-400">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 004.5 10.5a7.464 7.464 0 01-1.15 3.993m1.989 3.559A11.209 11.209 0 008.25 10.5a3.75 3.75 0 117.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 01-3.6 9.75m6.633-4.596a18.666 18.666 0 01-2.485 5.33" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm text-neutral-400 mb-6"><%= req.translations.sshKeysDesc || 'SSH keys allow secure access to your game servers without a password.' %></p>
+                  
+                  <div class="overflow-x-auto p-4 rounded-xl bg-neutral-700/10 border border-neutral-600/20">
+                    <table class="min-w-full divide-y divide-neutral-600/20">
+                      <thead>
+                        <tr>
+                          <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-white sm:pl-0"><%= req.translations.name || 'Name' %></th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white"><%= req.translations.fingerprint || 'Fingerprint' %></th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-white"><%= req.translations.createdAt || 'Created' %></th>
+                          <th scope="col" class="px-3 py-3.5 text-right text-sm font-semibold text-white"><%= req.translations.actions || 'Actions' %></th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-neutral-600/20">
+                        <% if (user.sshKeys && user.sshKeys.length > 0) { %>
+                          <% user.sshKeys.forEach(key => { %>
+                            <tr class="hover:bg-neutral-700/10 transition-colors">
+                              <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-white sm:pl-0">
+                                <%= key.name %>
+                              </td>
+                              <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400 font-mono text-xs truncate max-w-[200px]">
+                                <%= key.fingerprint %>
+                              </td>
+                              <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400">
+                                <%= new Date(key.createdAt).toLocaleDateString() %>
+                              </td>
+                              <td class="whitespace-nowrap px-3 py-4 text-sm text-right">
+                                <button class="text-red-400 hover:text-red-300 transition-colors">
+                                  <%= req.translations.delete || 'Delete' %>
+                                </button>
+                              </td>
+                            </tr>
+                          <% }); %>
+                        <% } else { %>
+                          <tr>
+                            <td colspan="4" class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-neutral-400 sm:pl-0 text-center">
+                              <%= req.translations.noSshKeys || 'You have not added any SSH keys.' %>
+                            </td>
+                          </tr>
+                        <% } %>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div class="mt-4">
+                    <button id="add-ssh-key-btn" class="w-full rounded-xl bg-white hover:bg-neutral-200 text-neutral-800 px-4 py-2 text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2">
+                      <%= req.translations.addNewSshKey || 'Add New SSH Key' %>
+                    </button>
+                    <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20 mt-2">Under Development</span>
+                  </div>
+                </div>
+              </div>
+            </dl>
           </div>
         </div>
       </div>
@@ -436,16 +477,242 @@
 
 <%- include('../components/toast')%>
 
+<!-- Connection Dialog -->
+<div id="connection-dialog" class="hidden fixed inset-0 bg-neutral-900/80 backdrop-blur-sm z-50">
+  <div class="fixed inset-0 w-screen overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div class="relative transform overflow-hidden rounded-xl bg-neutral-800 border border-neutral-700/20 shadow-xl transition-all w-full max-w-lg">
+        <!-- Dialog Header -->
+        <div class="border-b border-neutral-700/20 p-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-medium text-white"><%= req.translations.connectAccount || 'Connect Account' %></h3>
+            <button id="close-connection-dialog" class="rounded-lg bg-neutral-700/20 p-2 hover:bg-neutral-600/40 transition-colors">
+              <svg class="h-5 w-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dialog Content -->
+        <div class="p-6">
+          <div class="space-y-4">
+            <!-- Discord Connection -->
+            <div class="group rounded-xl bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/20 transition-all duration-200">
+              <div class="flex items-center justify-between p-4">
+                <div class="flex items-center gap-3">
+                  <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-[#5865F2]" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-medium text-white">Discord</h3>
+                    <div class="flex items-center gap-2">
+                      <p class="text-xs text-neutral-400">Not connected</p>
+                      <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">Under Development</span>
+                    </div>
+                  </div>
+                </div>
+                <button class="rounded-lg bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors duration-200">
+                  Connect
+                </button>
+              </div>
+            </div>
+
+            <!-- GitHub Connection -->
+            <div class="group rounded-xl bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/20 transition-all duration-200">
+              <div class="flex items-center justify-between p-4">
+                <div class="flex items-center gap-3">
+                  <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-medium text-white">GitHub</h3>
+                    <div class="flex items-center gap-2">
+                      <p class="text-xs text-neutral-400">Not connected</p>
+                      <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">Under Development</span>
+                    </div>
+                  </div>
+                </div>
+                <button class="rounded-lg bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors duration-200">
+                  Connect
+                </button>
+              </div>
+            </div>
+
+            <!-- Google Connection -->
+            <div class="group rounded-xl bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/20 transition-all duration-200">
+              <div class="flex items-center justify-between p-4">
+                <div class="flex items-center gap-3">
+                  <div class="flex-shrink-0">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-medium text-white">Google</h3>
+                    <div class="flex items-center gap-2">
+                      <p class="text-xs text-neutral-400">Not connected</p>
+                      <span class="inline-flex items-center rounded-md bg-purple-400/10 px-2 py-1 text-xs font-medium text-purple-400 ring-1 ring-inset ring-purple-400/20">Under Development</span>
+                    </div>
+                  </div>
+                </div>
+                <button class="rounded-lg bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors duration-200">
+                  Connect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- API Key Creation Dialog -->
+<div id="api-key-dialog" class="hidden fixed inset-0 bg-neutral-900/80 backdrop-blur-sm z-50">
+  <div class="fixed inset-0 w-screen overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div class="relative transform overflow-hidden rounded-xl bg-neutral-800 border border-neutral-700/20 shadow-xl transition-all w-full max-w-lg">
+        <!-- Dialog Header -->
+        <div class="border-b border-neutral-700/20 p-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-medium text-white"><%= req.translations.createNewApiKey || 'Create New API Key' %></h3>
+            <button id="close-api-key-dialog" class="rounded-lg bg-neutral-700/20 p-2 hover:bg-neutral-600/40 transition-colors">
+              <svg class="h-5 w-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dialog Content -->
+        <div class="p-6">
+          <form id="create-api-key-form">
+            <div class="space-y-4">
+              <div>
+                <label for="api-key-description" class="block text-sm font-medium text-neutral-400 mb-1"><%= req.translations.description || 'Description' %> <span class="text-red-400">*</span></label>
+                <input type="text" id="api-key-description" name="description" required
+                  class="rounded-xl focus:ring-1 focus:ring-neutral-500/30 text-sm mt-1 mb-0 w-full transition-all hover:bg-white/5 px-4 py-2 border-neutral-600/30 bg-neutral-700/20 placeholder-neutral-400 text-white border"
+                  placeholder="<%= req.translations.apiKeyDescriptionPlaceholder || 'My Application API Key' %>" />
+                <p class="mt-1 text-xs text-neutral-500"><%= req.translations.apiKeyDescriptionHelp || 'A name to help you remember what this API key is used for.' %></p>
+              </div>
+              
+              <!-- API Key Permissions -->
+              <div>
+                <div class="relative flex items-start pb-2">
+                  <div class="min-w-0 flex-1 text-sm leading-6">
+                    <label for="permissions-account" class="font-medium text-neutral-400"><%= req.translations.accountPermissions || 'Account Permissions' %></label>
+                    <p class="text-xs text-neutral-500"><%= req.translations.accountPermissionsHelp || 'Allow viewing and management of your account details.' %></p>
+                  </div>
+                  <div class="ml-3 flex items-center h-6">
+                    <input id="permissions-account" name="permissions" value="account" type="checkbox" checked
+                      class="h-4 w-4 rounded border-neutral-600 text-blue-600 focus:ring-blue-500">
+                  </div>
+                </div>
+                <div class="relative flex items-start pb-2">
+                  <div class="min-w-0 flex-1 text-sm leading-6">
+                    <label for="permissions-servers" class="font-medium text-neutral-400"><%= req.translations.serverPermissions || 'Server Permissions' %></label>
+                    <p class="text-xs text-neutral-500"><%= req.translations.serverPermissionsHelp || 'Allow viewing and management of your servers.' %></p>
+                  </div>
+                  <div class="ml-3 flex items-center h-6">
+                    <input id="permissions-servers" name="permissions" value="servers" type="checkbox"
+                      class="h-4 w-4 rounded border-neutral-600 text-blue-600 focus:ring-blue-500">
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-6 flex justify-end gap-3">
+              <button type="button" id="cancel-api-key" class="rounded-xl bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors">
+                <%= req.translations.cancel || 'Cancel' %>
+              </button>
+              <button type="submit" class="rounded-xl bg-white hover:bg-neutral-200 text-neutral-800 px-4 py-2 text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2">
+                <%= req.translations.create || 'Create' %>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SSH Key Dialog -->
+<div id="ssh-key-dialog" class="hidden fixed inset-0 bg-neutral-900/80 backdrop-blur-sm z-50">
+  <div class="fixed inset-0 w-screen overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div class="relative transform overflow-hidden rounded-xl bg-neutral-800 border border-neutral-700/20 shadow-xl transition-all w-full max-w-lg">
+        <!-- Dialog Header -->
+        <div class="border-b border-neutral-700/20 p-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-medium text-white"><%= req.translations.addNewSshKey || 'Add New SSH Key' %></h3>
+            <button id="close-ssh-key-dialog" class="rounded-lg bg-neutral-700/20 p-2 hover:bg-neutral-600/40 transition-colors">
+              <svg class="h-5 w-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dialog Content -->
+        <div class="p-6">
+          <form id="add-ssh-key-form">
+            <div class="space-y-4">
+              <div>
+                <label for="ssh-key-name" class="block text-sm font-medium text-neutral-400 mb-1"><%= req.translations.name || 'Name' %> <span class="text-red-400">*</span></label>
+                <input type="text" id="ssh-key-name" name="name" required
+                  class="rounded-xl focus:ring-1 focus:ring-neutral-500/30 text-sm mt-1 mb-0 w-full transition-all hover:bg-white/5 px-4 py-2 border-neutral-600/30 bg-neutral-700/20 placeholder-neutral-400 text-white border"
+                  placeholder="<%= req.translations.sshKeyNamePlaceholder || 'Work Laptop' %>" />
+                <p class="mt-1 text-xs text-neutral-500"><%= req.translations.sshKeyNameHelp || 'A name to identify this SSH key.' %></p>
+              </div>
+              
+              <div>
+                <label for="ssh-key-public" class="block text-sm font-medium text-neutral-400 mb-1"><%= req.translations.publicKey || 'Public Key' %> <span class="text-red-400">*</span></label>
+                <textarea id="ssh-key-public" name="publicKey" required
+                  class="rounded-xl focus:ring-1 focus:ring-neutral-500/30 text-sm mt-1 mb-0 w-full transition-all hover:bg-white/5 px-4 py-2 border-neutral-600/30 bg-neutral-700/20 placeholder-neutral-400 text-white border min-h-[120px] font-mono text-xs"
+                  placeholder="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQ..."></textarea>
+                <p class="mt-1 text-xs text-neutral-500"><%= req.translations.sshKeyHelp || 'Paste your public SSH key content here. Typically starts with "ssh-rsa" or "ssh-ed25519".' %></p>
+              </div>
+            </div>
+            
+            <div class="mt-6 flex justify-end gap-3">
+              <button type="button" id="cancel-ssh-key" class="rounded-xl bg-neutral-700/20 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-600/40 transition-colors">
+                <%= req.translations.cancel || 'Cancel' %>
+              </button>
+              <button type="submit" class="rounded-xl bg-white hover:bg-neutral-200 text-neutral-800 px-4 py-2 text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2">
+                <%= req.translations.add || 'Add' %>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
+  // Define showToast at the global scope
+  let showToast;
+  
   document.addEventListener('DOMContentLoaded', () => {
-    const { showToast } = createToastSystem();
+    // Initialize toast system and expose it globally
+    const toastSystem = createToastSystem();
+    showToast = toastSystem.showToast;
     let isSubmitting = false;
 
     // Tab Navigation
     const tabs = {
       settings: document.getElementById('settings-tab'),
       security: document.getElementById('security-tab'),
-      connections: document.getElementById('connections-tab')
+      'api-keys': document.getElementById('api-keys-tab'),
+      'ssh-keys': document.getElementById('ssh-keys-tab')
     };
 
     const navLinks = document.querySelectorAll('.nav-link2');
@@ -742,6 +1009,203 @@
         </span>
       `;
     }
+    });
+
+    // Connection Dialog
+    const connectionDialog = document.getElementById('connection-dialog');
+    const showConnectionsButton = document.getElementById('show-connections-dialog');
+    const closeConnectionButton = document.getElementById('close-connection-dialog');
+
+    showConnectionsButton?.addEventListener('click', () => {
+      connectionDialog.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    });
+
+    closeConnectionButton?.addEventListener('click', () => {
+      connectionDialog.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    });
+
+    // Close dialog when clicking outside
+    connectionDialog?.addEventListener('click', (e) => {
+      if (e.target === connectionDialog) {
+        connectionDialog.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+      }
+    });
+
+    // Close dialog on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !connectionDialog.classList.contains('hidden')) {
+        connectionDialog.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+      }
+    });
+
+    // API Key Dialog
+    const apiKeyDialog = document.getElementById('api-key-dialog');
+    const showApiKeyButton = document.getElementById('create-api-key-btn');
+    const closeApiKeyButton = document.getElementById('close-api-key-dialog');
+    const cancelApiKeyButton = document.getElementById('cancel-api-key');
+    const apiKeyForm = document.getElementById('create-api-key-form');
+
+    showApiKeyButton?.addEventListener('click', () => {
+      apiKeyDialog.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    });
+
+    closeApiKeyButton?.addEventListener('click', () => {
+      apiKeyDialog.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    });
+
+    cancelApiKeyButton?.addEventListener('click', () => {
+      apiKeyDialog.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    });
+
+    // Close dialog when clicking outside
+    apiKeyDialog?.addEventListener('click', (e) => {
+      if (e.target === apiKeyDialog) {
+        apiKeyDialog.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+      }
+    });
+
+    // API Key Form Submission
+    apiKeyForm?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const description = document.getElementById('api-key-description').value.trim();
+      const permissionsAccount = document.getElementById('permissions-account').checked;
+      const permissionsServers = document.getElementById('permissions-servers').checked;
+      
+      // Show under development notification
+      showToast(req.translations.featureUnderDevelopment || 'This feature is still under development', 'warning');
+      
+      // Close the dialog
+      apiKeyDialog.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+      
+      return; // Prevent execution of the rest of the function
+      
+      const permissions = [];
+      if (permissionsAccount) permissions.push('account');
+      if (permissionsServers) permissions.push('servers');
+
+      try {
+        const response = await fetch('/api/account/api-keys', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description, permissions })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          apiKeyDialog.classList.add('hidden');
+          document.body.style.overflow = 'auto';
+          
+          // Show success message with the new API key
+          showToast(`${req.translations.apiKeyCreated || 'API Key created successfully'}: ${data.apiToken}`, 'success', 0);
+          
+          // Reload the page after a delay to show the new key in the list
+          setTimeout(() => {
+            window.location.reload();
+          }, 10000); // 10 seconds to copy the key
+        } else {
+          const errorData = await response.json();
+          showToast(errorData.error || 'Error creating API key', 'error');
+        }
+      } catch (error) {
+        showToast('Error creating API key: ' + error.message, 'error');
+      }
+    });
+
+    // SSH Key Dialog
+    const sshKeyDialog = document.getElementById('ssh-key-dialog');
+    const showSshKeyButton = document.getElementById('add-ssh-key-btn');
+    const closeSshKeyButton = document.getElementById('close-ssh-key-dialog');
+    const cancelSshKeyButton = document.getElementById('cancel-ssh-key');
+    const sshKeyForm = document.getElementById('add-ssh-key-form');
+
+    showSshKeyButton?.addEventListener('click', () => {
+      sshKeyDialog.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    });
+
+    closeSshKeyButton?.addEventListener('click', () => {
+      sshKeyDialog.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    });
+
+    cancelSshKeyButton?.addEventListener('click', () => {
+      sshKeyDialog.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    });
+
+    // Close dialog when clicking outside
+    sshKeyDialog?.addEventListener('click', (e) => {
+      if (e.target === sshKeyDialog) {
+        sshKeyDialog.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+      }
+    });
+
+    // SSH Key Form Submission
+    sshKeyForm?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const name = document.getElementById('ssh-key-name').value.trim();
+      const publicKey = document.getElementById('ssh-key-public').value.trim();
+
+      // Show under development notification
+      showToast(req.translations.featureUnderDevelopment || 'This feature is still under development', 'warning');
+      
+      // Close the dialog
+      sshKeyDialog.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+      
+      return; // Prevent execution of the rest of the function
+
+      try {
+        const response = await fetch('/api/account/ssh-keys', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, publicKey })
+        });
+
+        if (response.ok) {
+          sshKeyDialog.classList.add('hidden');
+          document.body.style.overflow = 'auto';
+          showToast(req.translations.sshKeyAdded || 'SSH Key added successfully', 'success');
+          
+          // Reload to show the new key
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          const errorData = await response.json();
+          showToast(errorData.error || 'Error adding SSH key', 'error');
+        }
+      } catch (error) {
+        showToast('Error adding SSH key: ' + error.message, 'error');
+      }
+    });
+
+    // Close dialog on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (!connectionDialog.classList.contains('hidden')) {
+          connectionDialog.classList.add('hidden');
+          document.body.style.overflow = 'auto';
+        }
+        if (!apiKeyDialog.classList.contains('hidden')) {
+          apiKeyDialog.classList.add('hidden');
+          document.body.style.overflow = 'auto';
+        }
+        if (!sshKeyDialog.classList.contains('hidden')) {
+          sshKeyDialog.classList.add('hidden');
+          document.body.style.overflow = 'auto';
+        }
+      }
     });
   });
   </script>
