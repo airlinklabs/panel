@@ -194,12 +194,10 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
     await settingsLoader();
     // Initialize default UI components
     initializeDefaultUIComponents();
-    await loadModules(app, airlinkVersion);
+    await loadModules(app, airlinkVersion, Number(port));
     await loadAddons(app);
 
     const server = app.listen(port, () => {
-      logger.info(`Server is running on http://localhost:${port}`);
-
       // Create PlayerStats table and start collection
       createPlayerStatsTable().then(() => {
         startPlayerStatsCollection();

@@ -23,7 +23,7 @@ export const databaseLoader = async () => {
 
   try {
     await prisma.$connect();
-    logger.info('Database connection established successfully');
+    logger.info('Database connected');
 
     await prisma.$queryRaw`SELECT 1`;
 

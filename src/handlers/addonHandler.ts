@@ -104,7 +104,7 @@ export async function loadAddons(app: Express | any) {
   }
 
   if (addonFolders.length > 0) {
-    logger.info(`---- Loading ${addonFolders.length} Addons ----`);
+    logger.debug(`Loading ${addonFolders.length} addons`);
 
     for (const folder of addonFolders) {
       const addonPath = path.join(addonsDir, folder);
@@ -112,7 +112,7 @@ export async function loadAddons(app: Express | any) {
 
       try {
         if (!fs.existsSync(packageJsonPath)) {
-          logger.warn(`Addon ${folder} is missing package.json, skipping`);
+          logger.warn(`Addon ${folder} missing package.json, skipping`);
           continue;
         }
 
@@ -308,14 +308,14 @@ export async function loadAddons(app: Express | any) {
             Object.defineProperty(addonRouter, 'name', { value: `router_${folder}` });
             app.use(routerPath, addonRouter);
             loadedAddons.set(folder, { router: addonRouter, path: routerPath });
-            logger.info(`Loaded addon: ${packageJson.name} (v${packageJson.version})`);
+            logger.debug(`Loaded addon: ${packageJson.name}`);
           } else if (addonModule.default && typeof addonModule.default === 'function') {
             addonModule.default(addonRouter, addonAPI);
             const routerPath = packageJson.router || '/';
             Object.defineProperty(addonRouter, 'name', { value: `router_${folder}` });
             app.use(routerPath, addonRouter);
             loadedAddons.set(folder, { router: addonRouter, path: routerPath });
-            logger.info(`Loaded addon: ${packageJson.name} (v${packageJson.version})`);
+            logger.debug(`Loaded addon: ${packageJson.name}`);
           } else {
             logger.error(`Invalid main export for addon ${packageJson.name}`, null);
           }
@@ -327,7 +327,7 @@ export async function loadAddons(app: Express | any) {
       }
     }
   } else {
-    logger.info('---- Found 0 Addons ----');
+    logger.debug('No addons found');
   }
 }
 

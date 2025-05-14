@@ -11,10 +11,14 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import logger from './logger';
+import chalk from 'chalk';
 
 type ModuleResult =
   | { file: string; mod: any }
   | { file: string; error: any };
+
+// Check if debug mode is enabled
+const isDebugMode = process.env.DEBUG === 'true';
 
 // Basic ANSI color codes
 const colors = {
@@ -27,6 +31,7 @@ const colors = {
   red: '\x1b[31m',
   magenta: '\x1b[35m',
   blue: '\x1b[34m',
+  white: '\x1b[37m',
 };
 
 // Helper function to get a consistent timestamp
@@ -38,9 +43,28 @@ const getTimestamp = (): string => {
   return `${hours}:${minutes}:${seconds}`;
 };
 
+// Animated loading indicator that doesn't take up space
+const startLoadingAnimation = (message: string): { stop: () => void } => {
+  if (!isDebugMode) return { stop: () => {} };
+
+  const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+  let i = 0;
+  const intervalId = setInterval(() => {
+    process.stdout.write(`\r${colors.cyan}${frames[i = ++i % frames.length]} ${message}${colors.reset}`);
+  }, 80);
+
+  return {
+    stop: () => {
+      clearInterval(intervalId);
+      process.stdout.write('\r' + ' '.repeat(message.length + 2) + '\r');
+    }
+  };
+};
+
 export const loadModules = async (
   app: express.Express,
   airlinkVersion: string,
+  serverPort?: number
 ) => {
   const modulesDir = path.join(__dirname, '../modules');
 
@@ -55,33 +79,49 @@ export const loadModules = async (
 
   const files = getFilesRecursively(modulesDir);
 
-  // Show startup banner
-  const timestamp = `${colors.dim}${getTimestamp()}${colors.reset}`;
-  const padding = ' '.repeat(Math.max(0, 100 - 56 - timestamp.length));
-  
-  console.log(`
-${colors.cyan}${colors.bright}╔══════════════════════════════════════════════════════════════╗${colors.reset}${padding}${timestamp}
-${colors.cyan}${colors.bright}║                                                              ║${colors.reset}${padding}${timestamp}
-${colors.cyan}${colors.bright}║  ${colors.magenta} █████  ██ ██████  ██      ██ ███    ██ ██   ██ ${colors.cyan}            ║${colors.reset}${padding}${timestamp}
-${colors.cyan}${colors.bright}║  ${colors.magenta}██   ██ ██ ██   ██ ██      ██ ████   ██ ██  ██  ${colors.cyan}            ║${colors.reset}${padding}${timestamp}
-${colors.cyan}${colors.bright}║  ${colors.magenta}███████ ██ ██████  ██      ██ ██ ██  ██ █████   ${colors.cyan}            ║${colors.reset}${padding}${timestamp}
-${colors.cyan}${colors.bright}║  ${colors.magenta}██   ██ ██ ██   ██ ██      ██ ██  ██ ██ ██  ██  ${colors.cyan}            ║${colors.reset}${padding}${timestamp}
-${colors.cyan}${colors.bright}║  ${colors.magenta}██   ██ ██ ██   ██ ███████ ██ ██   ████ ██   ██ ${colors.cyan}            ║${colors.reset}${padding}${timestamp}
-${colors.cyan}${colors.bright}║                                                              ║${colors.reset}${padding}${timestamp}
-${colors.cyan}${colors.bright}║  ${colors.green}Starting AirLink Panel - Open Source Game Server Management${colors.cyan} ║${colors.reset}${padding}${timestamp}
-${colors.cyan}${colors.bright}║                                                              ║${colors.reset}${padding}${timestamp}
-${colors.cyan}${colors.bright}╚══════════════════════════════════════════════════════════════╝${colors.reset}${padding}${timestamp}
-`);
+// ASCII
 
-  logger.box({
-    title: '🚀 Initializing',
-    message: 'Loading core modules and components...',
-    style: { 
-      borderColor: 'cyan',
-      titleColor: 'blue',
-      padding: 1
-    }
-  });
+const ascii = [
+  '                                              ',
+  '  /$$$$$$ /$$         /$$/$$         /$$      ',
+  ' /$$__  $|__/        | $|__/        | $$      ',
+  '| $$  \\ $$/$$ /$$$$$$| $$/$$/$$$$$$$| $$   /$$',
+  '| $$$$$$$| $$/$$__  $| $| $| $$__  $| $$  /$$/',
+  '| $$__  $| $| $$  \\__| $| $| $$  \\ $| $$$$$$/ ',
+  '| $$  | $| $| $$     | $| $| $$  | $| $$_  $$ ',
+  '| $$  | $| $| $$     | $| $| $$  | $| $$ \\  $$',
+  '|__/  |__|__|__/     |__|__|__/  |__|__/  \\__/',
+  '                                              ',
+];
+
+const gradientSteps = ascii.length;
+const getGradientColor = (index: number) => {
+  const step = index / (gradientSteps - 5.2);
+  const channel = Math.floor(255 - step * (255 - 204));
+  const hex = `#${channel.toString(16).padStart(2, '0').repeat(3)}`;
+  return hex;
+};
+
+ascii.forEach((line, i) => {
+  const color = getGradientColor(i);
+  console.log(chalk.hex(color)(line));
+});
+
+// Boxed message
+const boxWidth = 55;
+const border = chalk.gray('+' + '-'.repeat(boxWidth) + '+');
+
+// Helper function to pad content to fixed width
+const padContent = (text: string): string => {
+  const padding = ' '.repeat(Math.max(0, boxWidth - text.length));
+  return chalk.greenBright('|') + chalk.whiteBright(text) + chalk.whiteBright(padding) + chalk.greenBright('|');
+};
+
+const content = padContent("Initializing - Loading core modules and components.");
+
+console.log(border);
+console.log(content);
+
 
   const modulePromises: Promise<ModuleResult>[] = files.map((file) =>
     import(file)
@@ -90,14 +130,16 @@ ${colors.cyan}${colors.bright}╚═══════════════�
   );
 
   const totalModules = modulePromises.length;
-  console.log(`${colors.dim}Found ${totalModules} potential modules to load${colors.reset}`);
+  logger.debug(`Found ${totalModules} modules to load`);
+
+  const loader = startLoadingAnimation(`Loading modules (0/${totalModules})`);
 
   const modules = await Promise.all(modulePromises);
   let loadedCount = 0;
   let skippedCount = 0;
   let errorCount = 0;
 
-  // Group modules by type for organized display
+  // Group modules by type for tracking
   const moduleGroups: Record<string, string[]> = {
     'Core': [],
     'Admin': [],
@@ -121,58 +163,45 @@ ${colors.cyan}${colors.bright}╚═══════════════�
       const { info, router } = module;
 
       if (info.version === airlinkVersion) {
-        // Get module type emoji
-        let typeEmoji = '📦';
+        // Determine module group
         let moduleGroup = 'Other';
-        
+
         if (info.name.toLowerCase().includes('admin')) {
-          typeEmoji = '⚡';
           moduleGroup = 'Admin';
         }
         if (info.name.toLowerCase().includes('auth')) {
-          typeEmoji = '🔒';
           moduleGroup = 'Auth';
         }
         if (info.name.toLowerCase().includes('api')) {
-          typeEmoji = '🔌';
           moduleGroup = 'API';
         }
         if (info.name.toLowerCase().includes('core')) {
-          typeEmoji = '🎯';
           moduleGroup = 'Core';
         }
         if (info.name.toLowerCase().includes('player')) {
-          typeEmoji = '👥';
           moduleGroup = 'User';
         }
         if (info.name.toLowerCase().includes('user')) {
-          typeEmoji = '👤';
           moduleGroup = 'User';
         }
         if (info.name.toLowerCase().includes('server')) {
-          typeEmoji = '🖥️';
           moduleGroup = 'Server';
         }
         if (info.name.toLowerCase().includes('dashboard')) {
-          typeEmoji = '📊';
           moduleGroup = 'User';
         }
 
         // Add to appropriate group
-        moduleGroups[moduleGroup].push(`${typeEmoji}  ${info.name} v${info.moduleVersion}`);
-        
-        // Show progress and load module
-        const progress = Math.round((loadedCount / totalModules) * 100);
-        const progressBar = createProgressBar(progress);
-        
-        // Format with consistent timestamp
-        const timestamp = `${colors.dim}${getTimestamp()}${colors.reset}`;
-        const padding = ' '.repeat(Math.max(0, 100 - progressBar.length - 20 - timestamp.length));
-        
-        process.stdout.write(`\r${colors.dim}Loading modules: ${progressBar} ${progress}%${colors.reset}${padding}${timestamp}`);
-        
+        moduleGroups[moduleGroup].push(`${info.name}`);
+
+        // Load module without verbose output
         app.use(router());
         loadedCount++;
+
+        // Update loading animation
+        if (isDebugMode) {
+          process.stdout.write(`\r${colors.cyan}⠼ Loading modules (${loadedCount}/${totalModules})${colors.reset}`);
+        }
       } else {
         logger.warn(
           `⚠️  Skipping incompatible module: ${info.name} (requires v${info.version}, found v${airlinkVersion})`,
@@ -187,49 +216,25 @@ ${colors.cyan}${colors.bright}╚═══════════════�
     }
   }
 
-  // Clear progress line and add newline
-  process.stdout.write('\n\n');
+  // Stop the loading animation
+  loader.stop();
 
-  // Display modules by category
-  for (const [group, modules] of Object.entries(moduleGroups)) {
-    if (modules.length > 0) {
-      // Format with consistent timestamp
-      const timestamp = `${colors.dim}${getTimestamp()}${colors.reset}`;
-      const headerPadding = ' '.repeat(Math.max(0, 100 - group.length - 20 - timestamp.length));
-      
-      console.log(`${colors.bright}${colors.cyan}▌${colors.reset} ${colors.bright}${group} Modules:${colors.reset}${headerPadding}${timestamp}`);
-      
-      modules.forEach(module => {
-        const modulePadding = ' '.repeat(Math.max(0, 100 - module.length - 4 - timestamp.length));
-        console.log(`  ${module}${modulePadding}${timestamp}`);
-      });
-      
-      console.log(''); // Add a blank line between groups
+  // Display detailed module info only in debug mode
+  if (isDebugMode) {
+    const moduleCountsByType = Object.entries(moduleGroups)
+      .filter(([_, modules]) => modules.length > 0)
+      .map(([group, modules]) => `${group}: ${modules.length}`);
+
+    if (moduleCountsByType.length > 0) {
+      logger.debug(`Modules loaded by type: ${moduleCountsByType.join(', ')}`);
     }
   }
 
-  // Summary box
-  logger.box({
-    title: '📊 Module Loading Summary',
-    message: [
-      `✅ Successfully loaded: ${loadedCount} modules`,
-      `⚠️  Skipped: ${skippedCount} modules`,
-      `❌ Errors: ${errorCount} modules`,
-    ],
-    style: {
-      borderColor: 'green',
-      titleColor: 'green'
-    }
-  });
-};
+  console.log(padContent(`Loaded ${loadedCount} modules, skipped ${skippedCount}, errors ${errorCount}`));
 
-// Helper function to create a progress bar
-function createProgressBar(percentage: number, length = 30): string {
-  const filled = Math.round(length * (percentage / 100));
-  const empty = length - filled;
-  
-  const filledBar = colors.green + '█'.repeat(filled);
-  const emptyBar = colors.dim + '░'.repeat(empty);
-  
-  return `${filledBar}${emptyBar}${colors.reset}`;
-}
+  // Add server running message if port is provided
+  if (serverPort) {
+    console.log(padContent(`Server running on http://localhost:${serverPort}`));
+    console.log(border);
+  }
+};
