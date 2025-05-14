@@ -117,7 +117,7 @@ export async function collectPlayerStats(): Promise<void> {
       });
     }
 
-    logger.info(`Collected player stats: ${totalPlayers} players, ${onlineServers}/${totalServers} servers online`);
+    logger.debug(`Collected player stats: ${totalPlayers} players, ${onlineServers}/${totalServers} servers online`);
   } catch (error) {
     logger.error('Error collecting player stats:', error);
   }
@@ -138,7 +138,7 @@ export function startPlayerStatsCollection(): void {
 
   // Then set up interval
   statsCollectionInterval = setInterval(collectPlayerStats, COLLECTION_INTERVAL);
-  logger.info(`Player stats collection started (interval: ${COLLECTION_INTERVAL / 1000} seconds)`);
+  logger.debug(`Player stats collection started (interval: ${COLLECTION_INTERVAL / 1000} seconds)`);
 }
 
 /**
