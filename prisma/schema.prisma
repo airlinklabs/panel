@@ -72,19 +72,31 @@ model Images {
   servers     Server[]
 }
 
-  model Node {
-    id            Int      @id @default(autoincrement())
-    name          String
-    ram           Int      @default(0)
-    cpu           Int      @default(0)
-    disk          Int      @default(0)
-    address       String   @default("127.0.0.1")
-    port          Int      @default(3001)
-    key           String
-    createdAt     DateTime @default(now())
-    allocatedPorts String?  @default("[]") // JSON array of allocated ports
-    servers       Server[]
-  }
+model Location {
+  id            Int      @id @default(autoincrement())
+  name          String
+  shortCode     String?
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  nodes         Node[]
+}
+
+model Node {
+  id            Int      @id @default(autoincrement())
+  name          String
+  ram           Int      @default(0)
+  cpu           Int      @default(0)
+  disk          Int      @default(0)
+  address       String   @default("127.0.0.1")
+  port          Int      @default(3001)
+  key           String
+  createdAt     DateTime @default(now())
+  allocatedPorts String?  @default("[]") // JSON array of allocated ports
+  locationId    Int?
+  location      Location? @relation(fields: [locationId], references: [id])
+  servers       Server[]
+}
 
 model settings {
   id          Int      @id @default(autoincrement())

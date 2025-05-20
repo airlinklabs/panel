@@ -54,6 +54,19 @@
                 <input id="nodeKey" value="<%= node.key %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= node.key %>" disabled>
               </div>
 
+              <div>
+                <label for="nodeLocation" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Location:</label>
+                <select id="nodeLocation" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5">
+                  <option value="">Select a location (optional)</option>
+                  <% if (locations && locations.length > 0) { %>
+                    <% locations.forEach(function(location) { %>
+                      <option value="<%= location.id %>" <%= String(node.locationId) === String(location.id) ? 'selected' : '' %>><%= location.name %><% if (location.shortCode) { %> (<%= location.shortCode %>)<% } %></option>
+                    <% }); %>
+                  <% } %>
+                </select>
+                <p class="text-xs text-neutral-500">Assign this node to a datacenter location</p>
+              </div>
+
               <div class="col-span-2">
                 <label for="allocatedPorts" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Allocated Ports:</label>
                 <div class="flex flex-col space-y-2">
@@ -245,6 +258,7 @@
       disk: document.getElementById('nodeDisk').value,
       address: document.getElementById('nodeAddress').value,
       port: document.getElementById('nodePort').value,
+      locationId: document.getElementById('nodeLocation').value || null,
       allocatedPorts: JSON.stringify(allocatedPorts)
     };
 
