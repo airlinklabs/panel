@@ -97,6 +97,7 @@
             <tr>
               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.name %></th>
               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.connection %></th>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6">Location</th>
               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.instances %></th>
               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.actions %></th>
             </tr>
@@ -137,6 +138,16 @@
                   px-2 py-1 text-xs font-medium ring-1 ring-inset">
                     <%= node.versionRelease || 'unknown' %>
                   </div></td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400">
+                  <% if (node.location) { %>
+                    <div class="font-medium text-neutral-600 dark:text-neutral-300"><%= node.location.name %></div>
+                    <% if (node.location.shortCode) { %>
+                      <div class="text-xs text-neutral-500"><%= node.location.shortCode %></div>
+                    <% } %>
+                  <% } else { %>
+                    <span class="text-neutral-500">None</span>
+                  <% } %>
+                </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= node.instances ? node.instances.length : 0 %></td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                   <div class="flex gap-3">

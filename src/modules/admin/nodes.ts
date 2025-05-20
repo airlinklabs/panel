@@ -36,7 +36,11 @@ type NodeWithInstances = {
 
 async function listNodes(res: Response, includeServers = false) {
   try {
-    const nodes = await prisma.node.findMany();
+    const nodes = await prisma.node.findMany({
+      include: {
+        location: true
+      }
+    });
     const nodesWithStatus = [];
 
     for (const node of nodes) {
@@ -124,11 +128,12 @@ const adminModule: Module = {
           }
 
           const nodes = await listNodes(res);
+          const locations = await prisma.location.findMany();
 
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
-          res.render('admin/nodes/create', { user, req, settings, nodes });
+          res.render('admin/nodes/create', { user, req, settings, nodes, locations });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -150,7 +155,7 @@ const adminModule: Module = {
       '/admin/nodes/create',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const { name, ram, cpu, disk, address, port } = req.body;
+        const { name, ram, cpu, disk, address, port, locationId } = req.body;
 
         if (!name || typeof name !== 'string') {
           res.status(400).json({ message: 'Name must be a string.' });
@@ -201,6 +206,26 @@ const adminModule: Module = {
             .json({ message: 'Port must be a number between 1025 and 65535.' });
           return;
         }
+        
+        // Validate locationId if provided
+        let locationIdInt = null;
+        if (locationId) {
+          locationIdInt = parseInt(locationId);
+          if (isNaN(locationIdInt)) {
+            res.status(400).json({ message: 'Invalid location ID.' });
+            return;
+          }
+          
+          // Check if location exists
+          const locationExists = await prisma.location.findUnique({
+            where: { id: locationIdInt }
+          });
+          
+          if (!locationExists) {
+            res.status(400).json({ message: 'Location does not exist.' });
+            return;
+          }
+        }
 
         try {
           const userId = req.session?.user?.id;
@@ -226,6 +251,7 @@ const adminModule: Module = {
               address,
               port: portValue,
               key,
+              locationId: locationIdInt,
               createdAt: new Date(),
             },
           });
@@ -233,9 +259,8 @@ const adminModule: Module = {
           res.status(200).json({ message: 'Node created successfully.', node });
           return;
         } catch (error) {
-          logger.error('Error when creating the node:', error);
-          res.status(500).json({ message: 'Error when creating the node.' });
-          return;
+          logger.error('Error creating node:', error);
+          res.status(500).json({ message: 'Error creating node.' });
         }
       },
     );
@@ -332,7 +357,8 @@ const adminModule: Module = {
           const node = await prisma.node.findUnique({
             where: { id: nodeId },
             include: {
-              servers: true
+              servers: true,
+              location: true
             }
           });
 
@@ -345,7 +371,9 @@ const adminModule: Module = {
             where: { id: 1 },
           });
 
-          res.render('admin/nodes/edit', { node, user, req, settings });
+          const locations = await prisma.location.findMany();
+
+          res.render('admin/nodes/edit', { node, user, req, settings, locations });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -373,6 +401,7 @@ const adminModule: Module = {
           const address = req.body.address;
           const port = parseInt(req.body.port);
           const allocatedPorts = req.body.allocatedPorts || '[]';
+          const locationId = req.body.locationId ? parseInt(req.body.locationId) : null;
 
           if (
             !name ||
@@ -419,6 +448,7 @@ const adminModule: Module = {
               address,
               port,
               allocatedPorts,
+              locationId,
             },
           });
 

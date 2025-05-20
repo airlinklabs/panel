@@ -1,0 +1,133 @@
+<%- include('../../components/header', { title: 'Edit Location' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <%- include('../../components/pageTitle', {
+          title: 'Edit Location',
+          description: 'Modify location details'
+        }) %>
+      </div>
+
+      <div class="m-8">
+        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+          <form id="editLocationForm" class="space-y-6">
+            <div>
+              <label for="name" class="block text-sm font-medium text-neutral-800 dark:text-white">Location Name</label>
+              <div class="mt-1">
+                <input type="text" name="name" id="name" required value="<%= location.name %>" class="block w-full rounded-md border border-neutral-800/20 bg-white/5 py-2 px-3 text-neutral-800 dark:text-white shadow-sm focus:border-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-500">
+              </div>
+              <p class="mt-1 text-xs text-neutral-500">A descriptive name for this location (e.g. US East, London, Singapore)</p>
+            </div>
+
+            <div>
+              <label for="shortCode" class="block text-sm font-medium text-neutral-800 dark:text-white">Short Code</label>
+              <div class="mt-1">
+                <input type="text" name="shortCode" id="shortCode" value="<%= location.shortCode || '' %>" class="block w-full rounded-md border border-neutral-800/20 bg-white/5 py-2 px-3 text-neutral-800 dark:text-white shadow-sm focus:border-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-500">
+              </div>
+              <p class="mt-1 text-xs text-neutral-500">A short identifier for this location (e.g. us-east, lon, sgp)</p>
+            </div>
+
+            <div>
+              <label for="description" class="block text-sm font-medium text-neutral-800 dark:text-white">Description</label>
+              <div class="mt-1">
+                <textarea name="description" id="description" rows="3" class="block w-full rounded-md border border-neutral-800/20 bg-white/5 py-2 px-3 text-neutral-800 dark:text-white shadow-sm focus:border-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-500"><%= location.description || '' %></textarea>
+              </div>
+              <p class="mt-1 text-xs text-neutral-500">A brief description of this location (optional)</p>
+            </div>
+
+            <div class="flex justify-end gap-3">
+              <a href="/admin/locations" class="inline-flex justify-center rounded-xl border border-neutral-800/20 bg-white px-4 py-2 text-sm font-medium text-neutral-800 shadow-lg hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2">
+                Cancel
+              </a>
+              <button type="submit" class="inline-flex justify-center rounded-xl border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Update Location
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Associated Nodes -->
+      <div class="m-8">
+        <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-4">Associated Nodes</h2>
+        <div class="overflow-hidden shadow rounded-lg border border-neutral-800/20">
+          <table class="min-w-full divide-y divide-white/10">
+            <thead class="bg-white/5">
+              <tr>
+                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6">Name</th>
+                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6">Address</th>
+                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6">Resources</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5 bg-white/5">
+              <% if (location.nodes && location.nodes.length > 0) { %>
+                <% location.nodes.forEach(function(node) { %>
+                  <tr class="hover:bg-white/[0.05] transition-colors">
+                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                      <div class="font-medium text-neutral-800 dark:text-white"><%= node.name %></div>
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= node.address %>:<%= node.port %></td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400">
+                      RAM: <%= node.ram %> MB | CPU: <%= node.cpu %>% | Disk: <%= node.disk %> MB
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="3" class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-center text-neutral-400 sm:pl-6">
+                    No nodes are associated with this location.
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast') %>
+
+<script>
+  document.getElementById('editLocationForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = {
+      name: document.getElementById('name').value,
+      shortCode: document.getElementById('shortCode').value,
+      description: document.getElementById('description').value
+    };
+    
+    try {
+      const response = await fetch('/admin/location/<%= location.id %>', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        showToast('Location updated successfully', 'success');
+        setTimeout(() => {
+          window.location.href = '/admin/locations?err=none';
+        }, 1000);
+      } else {
+        showToast(result.message || 'Failed to update location', 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('An error occurred while updating the location', 'error');
+    }
+  });
+</script>

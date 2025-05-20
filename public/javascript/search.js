@@ -180,3 +180,85 @@ searchInput.addEventListener('keypress', function (event) {
     }
   }
 });
+
+// Simple toast notification system
+window.showToast = function(message, type = 'info') {
+  // Create toast container if it doesn't exist
+  let toastContainer = document.getElementById('toast-container');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'toast-container';
+    toastContainer.className = 'fixed top-4 right-4 z-50 flex flex-col gap-2';
+    document.body.appendChild(toastContainer);
+  }
+  
+  // Create toast element
+  const toast = document.createElement('div');
+  toast.className = 'flex items-center p-4 mb-4 rounded-lg shadow transition-opacity duration-300';
+  
+  // Set background color based on type
+  switch (type) {
+    case 'success':
+      toast.classList.add('bg-green-50', 'dark:bg-green-800/30', 'border', 'border-green-200', 'dark:border-green-800/30');
+      break;
+    case 'error':
+      toast.classList.add('bg-red-50', 'dark:bg-red-800/30', 'border', 'border-red-200', 'dark:border-red-800/30');
+      break;
+    case 'warning':
+      toast.classList.add('bg-yellow-50', 'dark:bg-yellow-800/30', 'border', 'border-yellow-200', 'dark:border-yellow-800/30');
+      break;
+    default:
+      toast.classList.add('bg-blue-50', 'dark:bg-blue-800/30', 'border', 'border-blue-200', 'dark:border-blue-800/30');
+  }
+  
+  // Set icon based on type
+  let iconSvg;
+  switch (type) {
+    case 'success':
+      iconSvg = `<svg class="w-5 h-5 text-green-500 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>`;
+      break;
+    case 'error':
+      iconSvg = `<svg class="w-5 h-5 text-red-500 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>`;
+      break;
+    case 'warning':
+      iconSvg = `<svg class="w-5 h-5 text-yellow-500 dark:text-yellow-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>`;
+      break;
+    default:
+      iconSvg = `<svg class="w-5 h-5 text-blue-500 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>`;
+  }
+  
+  // Create toast content
+  toast.innerHTML = `
+    <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 mr-3">
+      ${iconSvg}
+    </div>
+    <div class="text-sm font-normal text-neutral-800 dark:text-neutral-200">${message}</div>
+    <button type="button" class="ml-auto -mx-1.5 -my-1.5 rounded-lg p-1.5 inline-flex items-center justify-center h-8 w-8 text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-white">
+      <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+      </svg>
+    </button>
+  `;
+  
+  // Add close button functionality
+  const closeButton = toast.querySelector('button');
+  closeButton.addEventListener('click', () => {
+    toast.classList.add('opacity-0');
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  });
+  
+  // Add to container
+  toastContainer.appendChild(toast);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    toast.classList.add('opacity-0');
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 5000);
+  
+  return toast;
+};
