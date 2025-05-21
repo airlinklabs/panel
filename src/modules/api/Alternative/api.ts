@@ -339,6 +339,117 @@ const coreModule: Module = {
       },
     );
 
+    router.get(
+      '/api/application/nodes',
+      validator,
+      async (req: Request, res: Response) => {
+        try {
+          const nodes = await prisma.node.findMany({
+            include: {
+              _count: {
+                select: {
+                  servers: true,
+                },
+              },
+            },
+          });
+
+          const formattedNodes = nodes.map(node => ({
+            object: 'node',
+            attributes: {
+              id: node.id,
+              uuid: node.id.toString(),
+              public: true,
+              name: node.name,
+              description: node.name,
+              fqdn: node.address,
+              scheme: 'http',
+              memory: node.ram,
+              disk: node.disk,
+              daemon_listen: node.port,
+              created_at: node.createdAt.toISOString(),
+              updated_at: node.createdAt.toISOString(),
+            }
+          }));
+
+          res.json({
+            object: 'list',
+            data: formattedNodes,
+            meta: {
+              pagination: {
+                total: nodes.length,
+                count: nodes.length,
+                per_page: 50,
+                current_page: 1,
+                total_pages: 1,
+                links: {}
+              }
+            }
+          });
+        } catch (error) {
+          logger.error('Error fetching nodes:', error);
+          res.status(500).json({ error: 'Internal Server Error' });
+        }
+      }
+    );
+
+    router.get(
+      '/api/application/nodes/:id',
+      validator,
+      async (req: Request, res: Response) => {
+        try {
+          const nodeId = parseInt(req.params.id);
+
+          const node = await prisma.node.findUnique({
+            where: { id: nodeId },
+            include: {
+              servers: {
+                select: {
+                  id: true,
+                  UUID: true,
+                  name: true,
+                  Memory: true,
+                  Cpu: true,
+                  Storage: true,
+                },
+              },
+            },
+          });
+
+          if (!node) {
+            res.status(404).json({ error: 'Node not found' });
+            return;
+          }
+
+          const formattedNode = {
+            object: 'node',
+            attributes: {
+              id: node.id,
+              uuid: node.id.toString(),
+              public: true,
+              name: node.name,
+              description: node.name,
+              fqdn: node.address,
+              scheme: 'http',
+              memory: node.ram,
+              disk: node.disk,
+              daemon_listen: node.port,
+              created_at: node.createdAt.toISOString(),
+              updated_at: node.createdAt.toISOString(),
+            }
+          };
+
+          res.json({
+            object: 'node',
+            data: [formattedNode],
+          });
+        } catch (error) {
+          logger.error('Error fetching node:', error);
+          res.status(500).json({ error: 'Internal Server Error' });
+        }
+      }
+    );
+
     router.post(
       '/api/application/servers',
       validator,
