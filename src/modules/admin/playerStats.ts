@@ -170,7 +170,8 @@ const adminModule: Module = {
             historicalData
           });
         } catch (error) {
-          logger.error('Error fetching player stats:', error);
+          // Silently handle errors during player stats fetching
+          // This prevents console errors when nodes are offline
           res.status(500).json({ error: 'Failed to fetch player statistics' });
         }
       }
@@ -186,7 +187,8 @@ const adminModule: Module = {
           await collectPlayerStats();
           res.json({ success: true, message: 'Player statistics collected successfully' });
         } catch (error) {
-          logger.error('Error collecting player stats:', error);
+          // Silently handle errors during player stats collection
+          // This prevents console errors when nodes are offline
           res.status(500).json({ error: 'Failed to collect player statistics' });
         }
       }

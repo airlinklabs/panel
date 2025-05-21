@@ -119,7 +119,9 @@ export async function collectPlayerStats(): Promise<void> {
 
     logger.debug(`Collected player stats: ${totalPlayers} players, ${onlineServers}/${totalServers} servers online`);
   } catch (error) {
-    logger.error('Error collecting player stats:', error);
+    // Silently handle errors during player stats collection
+    // This prevents console errors when nodes are offline
+    logger.debug('Player stats collection skipped due to error');
   }
 }
 

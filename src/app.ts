@@ -29,6 +29,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
 import fs from 'fs';
+import csrfProtection, { handleCsrfError, addCsrfTokenToLocals } from './handlers/utils/security/csrfProtection';
 
 loadEnv();
 
@@ -142,6 +143,21 @@ app.use(cookieParser());
 
 // Load translation
 app.use(translationMiddleware);
+
+// Apply CSRF protection to all routes except for API routes and WebSocket routes
+app.use((req, res, next) => {
+  // Skip CSRF protection for WebSocket routes and API routes
+  if (req.path.startsWith('/ws') || req.path.startsWith('/api/')) {
+    return next();
+  }
+  csrfProtection(req, res, next);
+});
+
+// Handle CSRF errors
+app.use(handleCsrfError);
+
+// Add CSRF token to response locals for templates
+app.use(addCsrfTokenToLocals);
 
 interface SidebarItem {
   id: string;

@@ -75,7 +75,8 @@ const dashboardModule: Module = {
               });
               nodeStatuses[server.node.id] = { online: true };
             } catch (error) {
-              logger.error(`Node ${server.node.id} (${server.node.address}:${server.node.port}) is offline:`, error);
+              // Silently handle node offline errors - don't log to console
+              // Just mark the node as offline in our status tracking
               nodeStatuses[server.node.id] = { online: false };
               anyNodeOffline = true;
             }

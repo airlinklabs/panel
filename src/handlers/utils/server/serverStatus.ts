@@ -142,7 +142,8 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
 
     return status;
   } catch (error: any) {
-    logger.error('Error getting server status:', error);
+    // Silently handle connection errors - don't log to console
+    // Just return an offline status
 
     // Default error status
     const errorStatus: ServerStatus = {
