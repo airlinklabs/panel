@@ -449,6 +449,10 @@ async function fetchPlayerData() {
       labels.push(new Date().toISOString());
       playerCounts.push(data.totalPlayers);
 
+      // Clear previous data to prevent memory leaks
+      playerChart.data.labels = [];
+      playerChart.data.datasets[0].data = [];
+
       // Update chart
       playerChart.data.labels = labels;
       playerChart.data.datasets[0].data = playerCounts;
@@ -456,6 +460,10 @@ async function fetchPlayerData() {
     } else if (playerChart) {
       // If no historical data, just add the current point
       const now = new Date().toISOString();
+
+      // Clear previous data to prevent memory leaks
+      playerChart.data.labels = [];
+      playerChart.data.datasets[0].data = [];
 
       // Update chart
       playerChart.data.labels = [now];

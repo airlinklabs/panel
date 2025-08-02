@@ -133,17 +133,10 @@
                 </div>
               </div>
 
-              <div class="rounded-xl bg-neutral-700/10 dark:bg-neutral-900 p-6">
-                <div class="sm:flex sm:items-center">
-                  <div class="sm:flex-auto">
-                    <h1 class="text-base font-semibold leading-6 text-neutral-800 dark:text-white">API Keys</h1>
-                    <p class="mt-2 text-sm text-neutral-500">A list of all API keys in your panel.</p>
-                  </div>
-                </div>
-                <div class="mt-8 flow-root">
-                  <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                    <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                      <table class="min-w-full divide-y divide-neutral-700/10 dark:divide-neutral-800">
+              <div class="mt-8 flow-root">
+                <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                  <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                    <table class="min-w-full divide-y divide-neutral-700/10 dark:divide-neutral-800">
                         <thead>
                           <tr>
                             <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-neutral-800 dark:text-white sm:pl-0">Name</th>
@@ -651,41 +644,49 @@
           });
       }
 
-      // Load permissions into create modal
-      function loadPermissionsIntoCreateModal(allPermissions) {
+      // Reusable function to generate permission HTML
+      function generatePermissionHTML(permissions, prefix = '', isCollapsible = true) {
           const categories = ['servers', 'users', 'nodes', 'settings'];
-          let permissionsHTML = '';
+          let html = '';
           
           categories.forEach(category => {
-              const categoryPermissions = allPermissions.filter(p => p.value.includes(category));
-              if (categoryPermissions.length > 0) {
-                  permissionsHTML += `
-                      <div class="permission-category border rounded-lg border-neutral-200 dark:border-neutral-700">
-                          <button type="button" class="w-full flex justify-between items-center px-4 py-3 text-left text-sm font-medium text-neutral-700 dark:text-white bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition" onclick="this.nextElementSibling.classList.toggle('hidden')">
-                              <div class="flex items-center">
-                                  <span class="capitalize">${category}</span>
-                              </div>
-                              <span class="text-xs bg-neutral-200 dark:bg-neutral-700 px-2 py-1 rounded-lg">Toggle</span>
-                          </button>
-                          <div class="space-y-2 hidden p-3 border-t border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">
-                  `;
-                  
-                  categoryPermissions.forEach(permission => {
-                      permissionsHTML += `
-                          <div class="flex items-center">
-                              <input id="permission-${permission.value}" name="permissions" value="${permission.value}" type="checkbox" class="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 focus:ring-neutral-500 permission-checkbox" data-category="${category}">
-                              <label for="permission-${permission.value}" class="ml-2 text-sm text-neutral-900 dark:text-white">${permission.name}</label>
-                          </div>
-                      `;
-                  });
-                  
-                  permissionsHTML += `
-                          </div>
+              const categoryPerms = permissions.filter(p => p.value.includes(category));
+              if (categoryPerms.length === 0) return;
+              
+              html += `<div class="permission-category border rounded-lg border-neutral-200 dark:border-neutral-700">`;
+              
+              if (isCollapsible) {
+                  html += `
+                      <button type="button" class="w-full flex justify-between items-center px-4 py-3 text-left text-sm font-medium text-neutral-700 dark:text-white bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                          <span class="capitalize">${category}</span>
+                          <span class="text-xs bg-neutral-200 dark:bg-neutral-700 px-2 py-1 rounded-lg">Toggle</span>
+                      </button>
+                      <div class="space-y-2 hidden p-3 border-t border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">`;
+              } else {
+                  html += `
+                      <div class="px-4 py-3 bg-neutral-100 dark:bg-neutral-800 rounded-t-lg">
+                          <h5 class="text-sm font-medium text-neutral-700 dark:text-neutral-300 capitalize">${category}</h5>
                       </div>
-                  `;
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3">`;
               }
+              
+              categoryPerms.forEach(perm => {
+                  html += `
+                      <div class="flex items-center">
+                          <input id="${prefix}permission-${perm.value}" name="permissions" value="${perm.value}" type="checkbox" class="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 ${prefix}permission-checkbox">
+                          <label for="${prefix}permission-${perm.value}" class="ml-2 text-sm text-neutral-900 dark:text-white">${perm.name}</label>
+                      </div>`;
+              });
+              
+              html += `</div></div>`;
           });
           
+          return html;
+      }
+
+      // Load permissions into create modal
+      function loadPermissionsIntoCreateModal(allPermissions) {
+          const permissionsHTML = generatePermissionHTML(allPermissions, '', true);
           document.getElementById('permissionsContainer').innerHTML = permissionsHTML;
 
           // Setup permission selection buttons
@@ -713,38 +714,7 @@
 
       // Load permissions into edit modal
       function loadPermissionsIntoEditModal(allPermissions) {
-          const categories = ['servers', 'users', 'nodes', 'settings'];
-          let editPermissionsHTML = '';
-          
-          categories.forEach(category => {
-              const categoryPermissions = allPermissions.filter(p => p.value.includes(category));
-              if (categoryPermissions.length > 0) {
-                  editPermissionsHTML += `
-                      <div class="permission-category border rounded-lg border-neutral-200 dark:border-neutral-700">
-                          <div class="flex items-center justify-between px-4 py-3 bg-neutral-100 dark:bg-neutral-800 rounded-t-lg">
-                              <div class="flex items-center">
-                                  <h5 class="text-sm font-medium text-neutral-700 dark:text-neutral-300 capitalize">${category}</h5>
-                              </div>
-                          </div>
-                          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3">
-                  `;
-                  
-                  categoryPermissions.forEach(permission => {
-                      editPermissionsHTML += `
-                          <div class="flex items-center">
-                              <input id="edit-permission-${permission.value}" name="permissions" value="${permission.value}" type="checkbox" class="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 focus:ring-neutral-600 dark:focus:ring-neutral-400 edit-permission-checkbox" data-category="${category}">
-                              <label for="edit-permission-${permission.value}" class="ml-2 block text-sm text-neutral-900 dark:text-white">${permission.name}</label>
-                          </div>
-                      `;
-                  });
-                  
-                  editPermissionsHTML += `
-                          </div>
-                      </div>
-                  `;
-              }
-          });
-          
+          const editPermissionsHTML = generatePermissionHTML(allPermissions, 'edit-', false);
           document.getElementById('editPermissionsContainer').innerHTML = editPermissionsHTML;
       }
 
