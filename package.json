@@ -15,7 +15,7 @@
     "serve": "node dist/app.js",
     "start": "npm run serve",
     "build:css": "tailwindcss -i ./public/tw.conf -o ./public/styles.css --watch",
-    "start:dev": "nodemon",
+    "dev": "npx prisma migrate dev --name init && npx prisma generate && nodemon",
     "format": "prettier --write src/",
     "migrate:dev": "npx prisma migrate dev --name init && npx prisma generate",
     "migrate:deploy": "npx prisma migrate deploy && npx prisma generate",
