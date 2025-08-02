@@ -252,7 +252,9 @@
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js" 
+        integrity="sha384-wcVzPe7I7UMNVhKvdDQvhqcHiGhQf0hTJHCXtOGU7VuXKjdKYqRyK7tciDx7E2Lb" 
+        crossorigin="anonymous"></script>
 
 <script>
 // Initialize chart with empty data
@@ -378,7 +380,7 @@ function switchTab(tabName) {
 // Function to fetch player data (copied from existing player stats page)
 async function fetchPlayerData() {
   try {
-    const response = await fetch('/api/admin/playerstats');
+    const response = await fetch('/admin/playerstats/data');
     const data = await response.json();
 
     if (data.error) {

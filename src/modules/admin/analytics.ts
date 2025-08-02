@@ -104,7 +104,8 @@ const analyticsModule: Module = {
                     error: 'No primary port found'
                   };
                 }
-
+                const DAEMON_REQUEST_TIMEOUT = process.env.DAEMON_TIMEOUT || 5000;
+              
                 // Fetch player data from the daemon
                 const response = await axios({
                   method: 'GET',
@@ -118,7 +119,7 @@ const analyticsModule: Module = {
                     username: 'Airlink',
                     password: server.node.key,
                   },
-                  timeout: 5000
+                  timeout: DAEMON_REQUEST_TIMEOUT
                 });
 
                 return {
