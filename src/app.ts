@@ -30,6 +30,7 @@ import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
 import fs from 'fs';
 import csrfProtection, { handleCsrfError, addCsrfTokenToLocals } from './handlers/utils/security/csrfProtection';
+import { spaMiddleware, handleSPAPageRequest, setupSPARoutes } from './handlers/spaHandler';
 
 loadEnv();
 
@@ -144,6 +145,9 @@ app.use(cookieParser());
 // Load translation
 app.use(translationMiddleware);
 
+// SPA middleware for detecting AJAX requests
+app.use(spaMiddleware);
+
 // Apply CSRF protection to all routes except for API routes and WebSocket routes
 app.use((req, res, next) => {
   // Skip CSRF protection for WebSocket routes and API routes
@@ -185,6 +189,11 @@ app.use((_req, res, next) => {
 
   res.locals.adminMenuItems = uiComponentStore.getSidebarItems(undefined, true);
   res.locals.regularMenuItems = uiComponentStore.getSidebarItems(undefined, false);
+
+  // Override res.render for SPA support
+  const originalRender = res.render;
+  res.render = handleSPAPageRequest(originalRender);
+
   next();
 });
 
@@ -212,6 +221,9 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
     initializeDefaultUIComponents();
     await loadModules(app, airlinkVersion, Number(port));
     await loadAddons(app);
+
+    // Setup SPA routes
+    setupSPARoutes(app);
 
     const server = app.listen(port, () => {
       // Create PlayerStats table and start collection

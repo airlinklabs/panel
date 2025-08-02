@@ -12,6 +12,84 @@ interface ErrorMessage {
   message?: string;
 }
 
+async function getDashboardContent(req: Request, res: Response): Promise<string> {
+  const ejs = require('ejs');
+  const path = require('path');
+
+  try {
+    const userId = req.session?.user?.id;
+    const user = await prisma.users.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const servers = await prisma.server.findMany({
+      where: { ownerId: user.id },
+      include: { node: true, owner: true },
+    });
+    const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+
+    let page: number = 1;
+    if (typeof req.query.page === 'string') {
+      page = parseInt(req.query.page, 10);
+    }
+    if (isNaN(page)) {
+      page = 1;
+    }
+
+    const perPage = 8;
+    const startIndex = (page - 1) * perPage;
+    const endIndex = page * perPage;
+
+    // Check node statuses and get server stats (simplified for initial load)
+    const serversWithStats = await Promise.all(
+      servers.map(async (server) => {
+        try {
+          // For initial load, we'll use cached/default values
+          return {
+            ...server,
+            status: 'unknown',
+            ramUsage: '0',
+            cpuUsage: '0',
+            ramLimit: '1GB',
+            nodeOffline: false
+          };
+        } catch (error) {
+          return {
+            ...server,
+            status: 'unknown',
+            ramUsage: '0',
+            cpuUsage: '0',
+            ramLimit: '1GB',
+            nodeOffline: true
+          };
+        }
+      })
+    );
+
+    const paginatedServers = serversWithStats.slice(startIndex, endIndex);
+
+    const templatePath = path.resolve(process.cwd(), 'views/user/dashboard-spa.ejs');
+    return await new Promise((resolve, reject) => {
+      ejs.renderFile(templatePath, {
+        user,
+        req,
+        settings,
+        servers: paginatedServers,
+        currentPage: page,
+        totalPages: Math.ceil(servers.length / perPage),
+        errorMessage: {}
+      }, (err: any, html: string) => {
+        if (err) reject(err);
+        else resolve(html);
+      });
+    });
+  } catch (error) {
+    logger.error('Error getting dashboard content:', error);
+    return '<div class="text-center mt-8"><p class="text-red-500">Error loading dashboard content</p></div>';
+  }
+}
+
 const dashboardModule: Module = {
   info: {
     name: 'Dashboard Module',
@@ -24,6 +102,33 @@ const dashboardModule: Module = {
 
   router: () => {
     const router = Router();
+
+    // SPA entry point route
+    router.get('/spa', isAuthenticated(), async (req: Request, res: Response) => {
+      try {
+        const userId = req.session?.user?.id;
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+          return res.redirect('/login');
+        }
+
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+
+        // Render the initial SPA layout with dashboard content
+        const dashboardContent = await getDashboardContent(req, res);
+
+        res.render('spa-app', {
+          user,
+          req,
+          settings,
+          title: 'Servers',
+          content: dashboardContent
+        });
+      } catch (error) {
+        logger.error('Error loading SPA:', error);
+        res.redirect('/');
+      }
+    });
 
     router.get('/', isAuthenticated(), async (req: Request, res: Response) => {
       const errorMessage: ErrorMessage = {};
@@ -179,14 +284,18 @@ const dashboardModule: Module = {
 
         const paginatedServers = serversWithStats.slice(startIndex, endIndex);
 
-        res.render('user/dashboard', {
+        // For initial page load, use SPA layout; for AJAX requests, use SPA content template
+        const template = res.locals.isSPA ? 'user/dashboard' : 'user/dashboard';
+
+        res.render(template, {
           errorMessage,
           user,
           req,
           settings,
           servers: paginatedServers,
           currentPage: page,
-          totalPages: Math.ceil(servers.length / perPage)
+          totalPages: Math.ceil(servers.length / perPage),
+          title: 'Servers'
         });
       } catch (error) {
         logger.error('Error fetching user:', error);

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html class="h-full" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <% if (typeof csrfToken !== 'undefined') { %>
+    <meta name="csrf-token" content="<%= csrfToken %>">
+    <% } %>
+    <title><%= settings.title %> - <%= title %></title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" href="<%= settings.favicon %>" type="image/x-icon">
+    <link rel="shortcut icon" href="<%= settings.favicon %>" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.fontshare.com">
+    <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,300,600,400,700&display=swap" rel="stylesheet">
+    <script src="/js/csrf.js"></script>
+</head>
+<body style="font-family: 'General Sans'" class="bg-white dark:bg-[#141414] h-full text-neutral-800 dark:text-white">
+
+<!-- Theme Toggle Button -->
+<button id="theme-toggle" class="absolute right-4 top-4 w-14 h-8 flex items-center bg-gray-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500 z-50">
+    <span class="dot bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
+</button>
+
+<!-- Loading Indicator -->
+<div id="spa-loading" class="fixed top-0 left-0 w-full h-1 bg-blue-500 z-50 hidden">
+    <div class="h-full bg-blue-600 animate-pulse"></div>
+</div>
+
+<!-- Advanced Loading Overlay -->
+<div id="spa-loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden" style="display: none;">
+    <div class="bg-white dark:bg-neutral-800 rounded-lg p-6 shadow-xl">
+        <div class="flex items-center space-x-3">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+            <span class="text-neutral-700 dark:text-neutral-300">Loading page...</span>
+        </div>
+    </div>
+</div>
+
+<!-- Error Display -->
+<div id="spa-error" class="fixed top-4 right-4 z-50 hidden">
+    <div class="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-500/30 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg shadow-lg max-w-md">
+        <div class="flex items-start">
+            <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+            </svg>
+            <div class="flex-1">
+                <h4 class="font-medium">Navigation Error</h4>
+                <p id="spa-error-message" class="text-sm mt-1"></p>
+                <div class="mt-2 flex space-x-2">
+                    <button id="spa-error-retry" class="text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded">
+                        Retry
+                    </button>
+                    <button id="spa-error-dismiss" class="text-xs bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 rounded">
+                        Dismiss
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Container -->
+<div id="spa-error" class="hidden"></div>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar (Static Component) -->
+    <div id="sidebar" class="w-60 h-full">
+      <%- include('./template') %>
+    </div>
+
+    <!-- Main Content Area (Dynamic) -->
+    <div class="flex-1 overflow-y-auto">
+      <!-- Top Bar (Static Component) -->
+      <div id="topbar" class="backdrop-blur bg-opacity-50 absolute inset-0 z-30 h-16"></div>
+      <div class="sticky backdrop-blur top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-transparent px-4 sm:gap-x-6 sm:px-4 lg:px-4">
+         <div class="hidden lg:block">
+         <button type="button" id="sidebar-toggle" class="hidden lg:block w-fit p-2 mt-1 rounded-xl text-neutral-700 dark:text-white border border-neutral-300 dark:border-white/5 hover:scale-110 active:scale-100 duration-200 hover:text-neutral-900 dark:hover:text-white">
+            <span class="sr-only">Open sidebar</span>
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+         </div>
+         
+         <!-- Search Button -->
+         <button type="button" onclick="showSearchResults()" class="w-fit p-2 mt-1 rounded-xl text-neutral-700 dark:text-white border border-neutral-300 dark:border-white/5 hover:scale-110 active:scale-100 duration-200 hover:text-neutral-900 dark:hover:text-white">
+           <span class="sr-only">Search</span>
+           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+             <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+           </svg>
+         </button>
+
+         <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+           <div class="relative flex flex-1"></div>
+           <div class="flex items-center gap-x-4 lg:gap-x-6">
+             <!-- User menu -->
+             <div class="relative">
+               <button type="button" class="-m-1.5 flex items-center p-1.5" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                 <span class="sr-only">Open user menu</span>
+                 <img class="h-8 w-8 rounded-full bg-gray-50" src="https://ui-avatars.com/api/?name=<%= user.username %>&background=0d8abc&color=fff" alt="">
+                 <span class="hidden lg:flex lg:items-center">
+                   <span class="ml-4 text-sm font-semibold leading-6 text-gray-900 dark:text-white" aria-hidden="true"><%= user.username %></span>
+                   <svg class="ml-2 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                   </svg>
+                 </span>
+               </button>
+             </div>
+           </div>
+         </div>
+      </div>
+
+      <!-- Dynamic Content Container -->
+      <div id="spa-content" class="p-6 pt-16">
+        <!-- Initial page content will be loaded here -->
+        <%- content %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer (Static Component) -->
+<div id="footer" class="hidden">
+  <!-- Footer content if needed -->
+</div>
+
+<!-- Scripts -->
+<script>
+function initializeTheme() {
+    const userPreference = localStorage.getItem('theme');
+    const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (userPreference === 'dark' || (!userPreference && systemPreference)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    updateSwitchPosition();
+  }
+
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    updateSwitchPosition();
+    if (typeof setTerminalTheme === 'function') {
+    setTerminalTheme();
+  }
+  }
+
+  function updateSwitchPosition() {
+    const isDark = document.documentElement.classList.contains('dark');
+    const dot = document.querySelector('#theme-toggle .dot');
+    if (isDark) {
+      dot.classList.add('translate-x-6');
+    } else {
+      dot.classList.remove('translate-x-6');
+    }
+  }
+
+  document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+  initializeTheme();
+</script>
+
+<script src="/javascript/search.js"></script>
+<script src="/javascript/component-persistence.js"></script>
+<script src="/javascript/spa-router.js"></script>
+<script src="/javascript/preloader.js"></script>
+
+</body>
+</html>

@@ -12,7 +12,7 @@ async function createApiKey() {
         name: 'Test API Key',
         key: key,
         description: 'Created for testing the nodes endpoint',
-        permissions: JSON.stringify(['*']), // All permissions
+        permissions: JSON.stringify(['*']),
         active: true,
       },
     });
