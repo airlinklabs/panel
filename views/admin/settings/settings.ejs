@@ -17,9 +17,11 @@
        </div>
        <div class="px-8 mt-5">
 
-        <%- include('../../components/settingsTemplate') %>
+        <%- include('../../components/settingsTemplate', { activeTab: 'general' }) %>
 
-        <div class="flex flex-col bg-white/5 pt-0 py-5 rounded-xl">
+        <!-- General Settings Tab -->
+        <div id="content-general" class="tab-content">
+          <div class="flex flex-col bg-white/5 pt-0 py-5 rounded-xl">
             <h1 class="text-white text-[18px] px-5 py-4 mb-1 w-full bg-white/5 rounded-t-xl font-medium"><%= req.translations.general || 'General Settings' %></h1>
 
             <form id="settingsForm" class="space-y-6" enctype="multipart/form-data">
@@ -108,6 +110,133 @@
                 </button>
             </div>
             </form>
+          </div>
+        </div>
+
+        <!-- API Keys Tab -->
+        <div id="content-apikeys" class="tab-content hidden">
+          <div class="flex flex-col bg-white/5 pt-0 py-5 rounded-xl">
+            <h1 class="text-white text-[18px] px-5 py-4 mb-1 w-full bg-white/5 rounded-t-xl font-medium">API Keys Management</h1>
+            
+            <div class="px-5 mt-5">
+              <div class="flex justify-between items-center mb-6">
+                <div>
+                  <p class="text-sm text-neutral-400">Create and manage API keys with specific permissions</p>
+                </div>
+                <div class="flex gap-2">
+                  <button id="createApiKeyBtn" type="button" class="rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+                    Create API Key
+                  </button>
+                  <a href="/admin/api/docs" class="rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 px-3 py-2 text-sm font-medium shadow-sm transition focus:outline focus:outline-2 focus:outline-offset-2">
+                    API Documentation
+                  </a>
+                </div>
+              </div>
+
+              <div class="mt-8 flow-root">
+                <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                  <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                    <table class="min-w-full divide-y divide-neutral-700/10 dark:divide-neutral-800">
+                        <thead>
+                          <tr>
+                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-neutral-800 dark:text-white sm:pl-0">Name</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white">Key</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white">Created By</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white">Status</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white">Created</th>
+                            <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                              <span class="sr-only">Actions</span>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody class="divide-y divide-neutral-700/10 dark:divide-neutral-800">
+                          <% if (typeof apiKeys !== 'undefined' && apiKeys.length === 0) { %>
+                            <tr>
+                              <td colspan="6" class="py-4 pl-4 pr-3 text-sm text-center text-neutral-500 sm:pl-0">No API keys found</td>
+                            </tr>
+                          <% } else if (typeof apiKeys !== 'undefined') { %>
+                            <% apiKeys.forEach(apiKey => { %>
+                              <tr>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-neutral-800 dark:text-white sm:pl-0">
+                                  <%= apiKey.name %>
+                                  <% if (apiKey.description) { %>
+                                    <p class="text-xs text-neutral-500"><%= apiKey.description %></p>
+                                  <% } %>
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-500">
+                                  <div class="flex items-center">
+                                    <span class="font-mono truncate max-w-[150px]"><%= apiKey.key.substring(0, 8) %>...</span>
+                                    <button
+                                      class="ml-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+                                      onclick="copyToClipboard('<%= apiKey.key %>')"
+                                      title="Copy API key"
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-500">
+                                  <%= apiKey.user ? apiKey.user.username : 'System' %>
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                                  <% if (apiKey.active) { %>
+                                    <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30">Active</span>
+                                  <% } else { %>
+                                    <span class="inline-flex items-center rounded-md bg-red-50 dark:bg-red-900/20 px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-600/20 dark:ring-red-500/30">Inactive</span>
+                                  <% } %>
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-500">
+                                  <%= new Date(apiKey.createdAt).toLocaleDateString() %>
+                                </td>
+                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                                  <div class="flex gap-2 justify-end">
+                                    <button
+                                      onclick="showEditModal('<%= apiKey.id %>', '<%= apiKey.name %>', '<%= apiKey.description || '' %>', <%= JSON.stringify(apiKey.permissions) %>)"
+                                      class="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21h-9.5A2.25 2.25 0 014 18.75V8.25A2.25 2.25 0 016.25 6H11" />
+                                      </svg>
+                                    </button>
+                                    <form action="/admin/apikeys/toggle/<%= apiKey.id %>" method="POST" class="inline">
+                                      <button type="submit" class="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200">
+                                        <% if (apiKey.active) { %>
+                                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                          </svg>
+                                        <% } else { %>
+                                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                          </svg>
+                                        <% } %>
+                                      </button>
+                                    </form>
+                                    <form action="/admin/apikeys/delete/<%= apiKey.id %>" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this API key?')">
+                                      <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                        </svg>
+                                      </button>
+                                    </form>
+                                  </div>
+                                </td>
+                              </tr>
+                            <% }); %>
+                          <% } else { %>
+                            <tr>
+                              <td colspan="6" class="py-4 pl-4 pr-3 text-sm text-center text-neutral-500 sm:pl-0">Loading API keys...</td>
+                            </tr>
+                          <% } %>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -115,6 +244,107 @@
 </main>
 
 <%- include('../../components/toast')%>
+
+<!-- API Keys Modals -->
+<div id="createApiKeyModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+  <div class="flex min-h-full items-center justify-center p-4 text-center">
+    <div class="relative transform overflow-hidden rounded-xl bg-white dark:bg-neutral-800 px-5 py-5 text-left shadow-2xl transition-all w-full max-w-3xl border border-neutral-200 dark:border-neutral-700 animate-fadeIn">
+      <div class="flex justify-between items-center border-b border-neutral-200 dark:border-neutral-700 pb-3 mb-3">
+        <h3 class="text-lg font-semibold text-neutral-900 dark:text-white">Create New API Key</h3>
+        <button type="button" onclick="hideCreateModal()" class="text-neutral-400 hover:text-neutral-500 focus:outline-none">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form action="/admin/apikeys/create" method="POST" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="name" class="block text-sm font-medium text-neutral-900 dark:text-white">Name</label>
+            <input type="text" name="name" id="name" required class="mt-1 block w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm" placeholder="My API Key">
+          </div>
+          <div>
+            <label for="description" class="block text-sm font-medium text-neutral-900 dark:text-white">Description</label>
+            <textarea name="description" id="description" rows="1" class="mt-1 block w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm" placeholder="Used for server management"></textarea>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <button type="button" id="selectAllBtn" class="px-3 py-1 text-sm rounded-lg bg-neutral-100 dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition">Select All</button>
+          <button type="button" id="selectNoneBtn" class="px-3 py-1 text-sm rounded-lg bg-neutral-100 dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition">Clear All</button>
+          <button type="button" id="selectReadOnlyBtn" class="px-3 py-1 text-sm rounded-lg bg-neutral-100 dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition">Read-Only Access</button>
+        </div>
+
+        <div class="bg-neutral-50 dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700">
+          <h4 class="text-sm font-semibold text-neutral-900 dark:text-white mb-3">Permissions</h4>
+          <div id="permissionsContainer" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+            <!-- Permissions will be loaded dynamically -->
+          </div>
+        </div>
+
+        <div class="pt-4 flex justify-end space-x-3 border-t border-neutral-200 dark:border-neutral-700">
+          <button type="button" onclick="hideCreateModal()" class="rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700">Cancel</button>
+          <button type="submit" class="rounded-xl bg-neutral-950 dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="editApiKeyModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+  <div class="flex min-h-full items-center justify-center p-4 text-center">
+    <div class="relative transform overflow-hidden rounded-xl bg-white dark:bg-neutral-800 px-5 py-5 text-left shadow-2xl transition-all w-full max-w-3xl border border-neutral-200 dark:border-neutral-700 animate-fadeIn">
+      <div class="flex justify-between items-center border-b border-neutral-200 dark:border-neutral-700 pb-3 mb-4">
+        <h3 class="text-lg font-medium leading-6 text-neutral-900 dark:text-white">Edit API Key</h3>
+        <button type="button" onclick="hideEditModal()" class="text-neutral-400 hover:text-neutral-500 focus:outline-none">
+          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <form id="editApiKeyForm" action="/admin/apikeys/edit/0" method="POST">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="edit-name" class="block text-sm font-medium text-neutral-900 dark:text-white">Name</label>
+            <input type="text" name="name" id="edit-name" required class="mt-1 block w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm" placeholder="My API Key">
+          </div>
+          <div>
+            <label for="edit-description" class="block text-sm font-medium text-neutral-900 dark:text-white">Description</label>
+            <textarea name="description" id="edit-description" rows="1" class="mt-1 block w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm" placeholder="Used for server management"></textarea>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <div class="bg-neutral-50 dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700">
+            <h4 class="text-sm font-medium text-neutral-900 dark:text-white mb-3">Permissions</h4>
+            <div id="editPermissionsContainer" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+              <!-- Permissions will be loaded dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-end space-x-3 border-t border-neutral-200 dark:border-neutral-700 pt-4">
+          <button type="button" onclick="hideEditModal()" class="rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700">Cancel</button>
+          <button type="submit" class="rounded-xl bg-neutral-950 dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="modal-backdrop" class="fixed inset-0 bg-neutral-900 bg-opacity-80 backdrop-blur-sm transition-opacity hidden"></div>
+
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.2s ease-out;
+  }
+</style>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -294,7 +524,469 @@
               }
           }
       });
+
+      // Tab switching functionality
+      window.switchSettingsTab = function(tabName) {
+          // Hide all tab contents
+          document.querySelectorAll('.tab-content').forEach(content => {
+              content.classList.add('hidden');
+          });
+          
+          // Remove active state from all tabs
+          document.querySelectorAll('.tab-button').forEach(tab => {
+              tab.classList.remove('bg-white/20', 'text-white');
+              tab.classList.add('text-neutral-400');
+          });
+          
+          // Show selected tab content
+          document.getElementById(`content-${tabName}`).classList.remove('hidden');
+          
+          // Add active state to selected tab
+          const activeTab = document.getElementById(`tab-${tabName}`);
+          if (activeTab) {
+              activeTab.classList.remove('text-neutral-400');
+              activeTab.classList.add('bg-white/20', 'text-white');
+          }
+          
+          // Load content based on tab
+          if (tabName === 'apikeys') {
+              loadApiKeysData();
+          }
+      };
+
+      // Load API Keys data and setup functionality
+      async function loadApiKeysData() {
+          try {
+              const response = await fetch('/admin/apikeys/data');
+              const data = await response.json();
+              
+              if (data.success) {
+                  // Store permissions globally for modal use
+                  window.allPermissions = data.allPermissions;
+                  setupApiKeysModals(data.allPermissions);
+              }
+          } catch (error) {
+              console.error('Error loading API keys data:', error);
+          }
+      }
+
+      // Setup API Keys modals and functionality
+      function setupApiKeysModals(allPermissions) {
+          const createApiKeyBtn = document.getElementById('createApiKeyBtn');
+          const createApiKeyModal = document.getElementById('createApiKeyModal');
+          const editApiKeyModal = document.getElementById('editApiKeyModal');
+          const modalBackdrop = document.getElementById('modal-backdrop');
+
+          // Create API Key Modal
+          createApiKeyBtn.addEventListener('click', () => {
+              loadPermissionsIntoCreateModal(allPermissions);
+              createApiKeyModal.classList.remove('hidden');
+              modalBackdrop.classList.remove('hidden');
+          });
+
+          // Modal functions
+          window.hideCreateModal = function() {
+              createApiKeyModal.classList.add('hidden');
+              modalBackdrop.classList.add('hidden');
+          };
+
+          window.hideEditModal = function() {
+              editApiKeyModal.classList.add('hidden');
+              modalBackdrop.classList.add('hidden');
+          };
+
+          window.showEditModal = function(id, name, description, permissions) {
+              const editApiKeyForm = document.getElementById('editApiKeyForm');
+              const editNameInput = document.getElementById('edit-name');
+              const editDescriptionInput = document.getElementById('edit-description');
+
+              editApiKeyForm.action = `/admin/apikeys/edit/${id}`;
+              editNameInput.value = name;
+              editDescriptionInput.value = description;
+
+              loadPermissionsIntoEditModal(allPermissions);
+
+              // Clear all checkboxes
+              document.querySelectorAll('[id^="edit-permission-"]').forEach(checkbox => {
+                  checkbox.checked = false;
+              });
+
+              // Set permissions
+              try {
+                  const permissionsArray = typeof permissions === 'string' ? JSON.parse(permissions) : permissions;
+                  permissionsArray.forEach(permission => {
+                      const checkbox = document.getElementById(`edit-permission-${permission}`);
+                      if (checkbox) {
+                          checkbox.checked = true;
+                      }
+                  });
+              } catch (e) {
+                  console.error('Error parsing permissions:', e);
+              }
+
+              editApiKeyModal.classList.remove('hidden');
+              modalBackdrop.classList.remove('hidden');
+          };
+
+          window.copyToClipboard = function(text) {
+              navigator.clipboard.writeText(text).then(() => {
+                  showToast('API key copied to clipboard');
+              }).catch(err => {
+                  console.error('Could not copy text: ', err);
+                  showToast('Failed to copy to clipboard', 'error');
+              });
+          };
+
+          // Close modals on backdrop click
+          modalBackdrop.addEventListener('click', () => {
+              hideCreateModal();
+              hideEditModal();
+          });
+      }
+
+      // Reusable function to generate permission HTML
+      function generatePermissionHTML(permissions, prefix = '', isCollapsible = true) {
+          const categories = ['servers', 'users', 'nodes', 'settings'];
+          let html = '';
+          
+          categories.forEach(category => {
+              const categoryPerms = permissions.filter(p => p.value.includes(category));
+              if (categoryPerms.length === 0) return;
+              
+              html += `<div class="permission-category border rounded-lg border-neutral-200 dark:border-neutral-700">`;
+              
+              if (isCollapsible) {
+                  html += `
+                      <button type="button" class="w-full flex justify-between items-center px-4 py-3 text-left text-sm font-medium text-neutral-700 dark:text-white bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                          <span class="capitalize">${category}</span>
+                          <span class="text-xs bg-neutral-200 dark:bg-neutral-700 px-2 py-1 rounded-lg">Toggle</span>
+                      </button>
+                      <div class="space-y-2 hidden p-3 border-t border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">`;
+              } else {
+                  html += `
+                      <div class="px-4 py-3 bg-neutral-100 dark:bg-neutral-800 rounded-t-lg">
+                          <h5 class="text-sm font-medium text-neutral-700 dark:text-neutral-300 capitalize">${category}</h5>
+                      </div>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3">`;
+              }
+              
+              categoryPerms.forEach(perm => {
+                  html += `
+                      <div class="flex items-center">
+                          <input id="${prefix}permission-${perm.value}" name="permissions" value="${perm.value}" type="checkbox" class="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 ${prefix}permission-checkbox">
+                          <label for="${prefix}permission-${perm.value}" class="ml-2 text-sm text-neutral-900 dark:text-white">${perm.name}</label>
+                      </div>`;
+              });
+              
+              html += `</div></div>`;
+          });
+          
+          return html;
+      }
+
+      // Load permissions into create modal
+      function loadPermissionsIntoCreateModal(allPermissions) {
+          const permissionsHTML = generatePermissionHTML(allPermissions, '', true);
+          document.getElementById('permissionsContainer').innerHTML = permissionsHTML;
+
+          // Setup permission selection buttons
+          document.getElementById('selectAllBtn').addEventListener('click', function() {
+              document.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+                  checkbox.checked = true;
+              });
+              showToast('All permissions selected');
+          });
+
+          document.getElementById('selectNoneBtn').addEventListener('click', function() {
+              document.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+                  checkbox.checked = false;
+              });
+              showToast('All permissions cleared');
+          });
+
+          document.getElementById('selectReadOnlyBtn').addEventListener('click', function() {
+              document.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+                  checkbox.checked = checkbox.value.includes('.read');
+              });
+              showToast('Read-only permissions selected');
+          });
+      }
+
+      // Load permissions into edit modal
+      function loadPermissionsIntoEditModal(allPermissions) {
+          const editPermissionsHTML = generatePermissionHTML(allPermissions, 'edit-', false);
+          document.getElementById('editPermissionsContainer').innerHTML = editPermissionsHTML;
+      }
+
+      // Render API Keys Table
+      function renderApiKeysTable(apiKeys, allPermissions) {
+          const container = document.getElementById('apiKeysTableContainer');
+          
+          if (apiKeys.length === 0) {
+              container.innerHTML = `
+                  <div class="text-center py-8">
+                      <svg class="mx-auto h-12 w-12 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
+                      </svg>
+                      <p class="mt-2 text-sm text-neutral-500">No API keys found</p>
+                  </div>
+              `;
+              return;
+          }
+
+          let tableHTML = `
+              <table class="min-w-full divide-y divide-neutral-700/10 dark:divide-neutral-800">
+                  <thead>
+                      <tr>
+                          <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-neutral-800 dark:text-white sm:pl-0">Name</th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white">Key</th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white">Created By</th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white">Status</th>
+                          <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white">Created</th>
+                          <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
+                              <span class="sr-only">Actions</span>
+                          </th>
+                      </tr>
+                  </thead>
+                  <tbody class="divide-y divide-neutral-700/10 dark:divide-neutral-800">
+          `;
+
+          apiKeys.forEach(apiKey => {
+              tableHTML += `
+                  <tr>
+                      <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-neutral-800 dark:text-white sm:pl-0">
+                          ${apiKey.name}
+                          ${apiKey.description ? `<p class="text-xs text-neutral-500">${apiKey.description}</p>` : ''}
+                      </td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-500">
+                          <div class="flex items-center">
+                              <span class="font-mono truncate max-w-[150px]">${apiKey.key.substring(0, 8)}...</span>
+                              <button
+                                  class="ml-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+                                  onclick="copyToClipboard('${apiKey.key}')"
+                                  title="Copy API key"
+                              >
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+                                  </svg>
+                              </button>
+                          </div>
+                      </td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-500">
+                          ${apiKey.user ? apiKey.user.username : 'System'}
+                      </td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm">
+                          ${apiKey.active ? 
+                              '<span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30">Active</span>' :
+                              '<span class="inline-flex items-center rounded-md bg-red-50 dark:bg-red-900/20 px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-600/20 dark:ring-red-500/30">Inactive</span>'
+                          }
+                      </td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-500">
+                          ${new Date(apiKey.createdAt).toLocaleDateString()}
+                      </td>
+                      <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                          <div class="flex gap-2 justify-end">
+                              <button
+                                  onclick="showEditModal('${apiKey.id}', '${apiKey.name}', '${apiKey.description || ''}', ${JSON.stringify(apiKey.permissions).replace(/"/g, '&quot;')})"
+                                  class="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
+                              >
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21h-9.5A2.25 2.25 0 014 18.75V8.25A2.25 2.25 0 016.25 6H11" />
+                                  </svg>
+                              </button>
+                              <form action="/admin/apikeys/toggle/${apiKey.id}" method="POST" class="inline">
+                                  <button type="submit" class="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200">
+                                      ${apiKey.active ? 
+                                          '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>' :
+                                          '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                                      }
+                                  </button>
+                              </form>
+                              <form action="/admin/apikeys/delete/${apiKey.id}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this API key?')">
+                                  <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                      </svg>
+                                  </button>
+                              </form>
+                          </div>
+                      </td>
+                  </tr>
+              `;
+          });
+
+          tableHTML += `
+                  </tbody>
+              </table>
+          `;
+
+          container.innerHTML = tableHTML;
+          
+          // Store permissions for modal use
+          window.allPermissions = allPermissions;
+          loadPermissionsIntoModals(allPermissions);
+      }
+
+      // Load permissions into modals
+      function loadPermissionsIntoModals(allPermissions) {
+          const categories = ['servers', 'users', 'nodes', 'settings'];
+          
+          // Create permissions HTML for create modal
+          let createPermissionsHTML = '';
+          categories.forEach(category => {
+              const categoryPermissions = allPermissions.filter(p => p.value.includes(category));
+              if (categoryPermissions.length > 0) {
+                  createPermissionsHTML += `
+                      <div class="permission-category border rounded-lg border-neutral-200 dark:border-neutral-700">
+                          <button type="button" class="w-full flex justify-between items-center px-4 py-3 text-left text-sm font-medium text-neutral-700 dark:text-white bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                              <div class="flex items-center">
+                                  <span class="capitalize">${category}</span>
+                              </div>
+                              <span class="text-xs bg-neutral-200 dark:bg-neutral-700 px-2 py-1 rounded-lg">Toggle</span>
+                          </button>
+                          <div class="space-y-2 hidden p-3 border-t border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+                  `;
+                  
+                  categoryPermissions.forEach(permission => {
+                      createPermissionsHTML += `
+                          <div class="flex items-center">
+                              <input id="permission-${permission.value}" name="permissions" value="${permission.value}" type="checkbox" class="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 focus:ring-neutral-500 permission-checkbox" data-category="${category}">
+                              <label for="permission-${permission.value}" class="ml-2 text-sm text-neutral-900 dark:text-white">${permission.name}</label>
+                          </div>
+                      `;
+                  });
+                  
+                  createPermissionsHTML += `
+                          </div>
+                      </div>
+                  `;
+              }
+          });
+          
+          document.getElementById('permissionsContainer').innerHTML = createPermissionsHTML;
+          
+          // Create permissions HTML for edit modal
+          let editPermissionsHTML = '';
+          categories.forEach(category => {
+              const categoryPermissions = allPermissions.filter(p => p.value.includes(category));
+              if (categoryPermissions.length > 0) {
+                  editPermissionsHTML += `
+                      <div class="permission-category border rounded-lg border-neutral-200 dark:border-neutral-700">
+                          <div class="flex items-center justify-between px-4 py-3 bg-neutral-100 dark:bg-neutral-800 rounded-t-lg">
+                              <div class="flex items-center">
+                                  <h5 class="text-sm font-medium text-neutral-700 dark:text-neutral-300 capitalize">${category}</h5>
+                              </div>
+                          </div>
+                          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3">
+                  `;
+                  
+                  categoryPermissions.forEach(permission => {
+                      editPermissionsHTML += `
+                          <div class="flex items-center">
+                              <input id="edit-permission-${permission.value}" name="permissions" value="${permission.value}" type="checkbox" class="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 focus:ring-neutral-600 dark:focus:ring-neutral-400 edit-permission-checkbox" data-category="${category}">
+                              <label for="edit-permission-${permission.value}" class="ml-2 block text-sm text-neutral-900 dark:text-white">${permission.name}</label>
+                          </div>
+                      `;
+                  });
+                  
+                  editPermissionsHTML += `
+                          </div>
+                      </div>
+                  `;
+              }
+          });
+          
+          document.getElementById('editPermissionsContainer').innerHTML = editPermissionsHTML;
+      }
+
+      // API Keys Modal Functions
+      const createApiKeyBtn = document.getElementById('createApiKeyBtn');
+      const createApiKeyModal = document.getElementById('createApiKeyModal');
+      const editApiKeyModal = document.getElementById('editApiKeyModal');
+      const modalBackdrop = document.getElementById('modal-backdrop');
+
+      createApiKeyBtn.addEventListener('click', () => {
+          createApiKeyModal.classList.remove('hidden');
+          modalBackdrop.classList.remove('hidden');
+      });
+
+      window.hideCreateModal = function() {
+          createApiKeyModal.classList.add('hidden');
+          modalBackdrop.classList.add('hidden');
+      };
+
+      window.hideEditModal = function() {
+          editApiKeyModal.classList.add('hidden');
+          modalBackdrop.classList.add('hidden');
+      };
+
+      window.showEditModal = function(id, name, description, permissions) {
+          const editApiKeyForm = document.getElementById('editApiKeyForm');
+          const editNameInput = document.getElementById('edit-name');
+          const editDescriptionInput = document.getElementById('edit-description');
+
+          editApiKeyForm.action = `/admin/apikeys/edit/${id}`;
+          editNameInput.value = name;
+          editDescriptionInput.value = description;
+
+          // Clear all checkboxes
+          document.querySelectorAll('[id^="edit-permission-"]').forEach(checkbox => {
+              checkbox.checked = false;
+          });
+
+          // Set permissions
+          try {
+              const permissionsArray = typeof permissions === 'string' ? JSON.parse(permissions) : permissions;
+              permissionsArray.forEach(permission => {
+                  const checkbox = document.getElementById(`edit-permission-${permission}`);
+                  if (checkbox) {
+                      checkbox.checked = true;
+                  }
+              });
+          } catch (e) {
+              console.error('Error parsing permissions:', e);
+          }
+
+          editApiKeyModal.classList.remove('hidden');
+          modalBackdrop.classList.remove('hidden');
+      };
+
+      window.copyToClipboard = function(text) {
+          navigator.clipboard.writeText(text).then(() => {
+              showToast('API key copied to clipboard');
+          }).catch(err => {
+              console.error('Could not copy text: ', err);
+              showToast('Failed to copy to clipboard', 'error');
+          });
+      };
+
+      // Permission selection buttons
+      document.addEventListener('click', function(e) {
+          if (e.target.id === 'selectAllBtn') {
+              document.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+                  checkbox.checked = true;
+              });
+              showToast('All permissions selected');
+          }
+          
+          if (e.target.id === 'selectNoneBtn') {
+              document.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+                  checkbox.checked = false;
+              });
+              showToast('All permissions cleared');
+          }
+          
+          if (e.target.id === 'selectReadOnlyBtn') {
+              document.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+                  checkbox.checked = checkbox.value.includes('.read');
+              });
+              showToast('Read-only permissions selected');
+          }
+      });
+
+      modalBackdrop.addEventListener('click', () => {
+          hideCreateModal();
+          hideEditModal();
+      });
   });
 </script>
-
-<%- include('../../components/footer') %>
