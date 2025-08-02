@@ -140,30 +140,16 @@
             <div class="h-60">
               <canvas id="playerChart" class="w-full h-full"></canvas>
             </div>
-            <div class="mt-2 text-xs text-neutral-400 text-center">
-              <p>Double-click the Refresh button to manually trigger data collection</p>
-            </div>
-          </div>
-
-          <!-- Server Table -->
-          <div class="bg-gradient-to-br from-neutral-800/20 to-neutral-900/10 border border-neutral-700/20 rounded-xl shadow-md p-6">
-            <h2 class="text-lg font-semibold text-white mb-4">Server Player Counts</h2>
-            <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-neutral-700/20">
-                <thead>
-                  <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">Server</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">Players</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">Version</th>
-                  </tr>
-                </thead>
-                <tbody id="serverTableBody" class="divide-y divide-neutral-700/20">
-                  <tr>
-                    <td colspan="4" class="px-6 py-4 text-center text-neutral-400">Loading server data...</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="mt-4 flex justify-between items-center">
+              <div class="text-xs text-neutral-400">
+                <p>Double-click the Refresh button to manually trigger data collection</p>
+              </div>
+              <button id="viewServerDetailsBtn" class="border border-neutral-800/20 rounded-xl bg-white/5 hover:bg-white/10 text-white px-4 py-2 text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                View Server Details
+              </button>
             </div>
           </div>
         </div>
@@ -250,7 +236,47 @@
   </div>
 </main>
 
+<!-- Server Details Dialog -->
+<div id="serverDetailsModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+  <div class="flex min-h-full items-center justify-center p-4 text-center">
+    <div class="relative transform overflow-hidden rounded-xl bg-white dark:bg-neutral-800 px-6 py-6 text-left shadow-2xl transition-all w-full max-w-4xl border border-neutral-200 dark:border-neutral-700">
+      <div class="flex justify-between items-center border-b border-neutral-200 dark:border-neutral-700 pb-4 mb-4">
+        <h3 class="text-lg font-semibold text-neutral-900 dark:text-white">Server Player Counts</h3>
+        <button type="button" id="closeServerDetailsModal" class="text-neutral-400 hover:text-neutral-500 focus:outline-none">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
 
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-neutral-700/20">
+          <thead>
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">Server</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">Players</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-400 uppercase tracking-wider">Version</th>
+            </tr>
+          </thead>
+          <tbody id="serverTableBody" class="divide-y divide-neutral-700/20">
+            <tr>
+              <td colspan="4" class="px-6 py-4 text-center text-neutral-400">Loading server data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button type="button" id="closeServerDetailsModalBtn" class="rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="serverDetailsBackdrop" class="fixed inset-0 bg-neutral-900 bg-opacity-80 backdrop-blur-sm transition-opacity hidden z-40"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js" 
         integrity="sha384-wcVzPe7I7UMNVhKvdDQvhqcHiGhQf0hTJHCXtOGU7VuXKjdKYqRyK7tciDx7E2Lb" 
@@ -523,6 +549,39 @@ async function triggerDataCollection() {
   }
 }
 
+// Server Details Modal Functions
+function showServerDetailsModal() {
+    console.log('showServerDetailsModal called');
+    const modal = document.getElementById('serverDetailsModal');
+    const backdrop = document.getElementById('serverDetailsBackdrop');
+    
+    console.log('Modal element:', modal);
+    console.log('Backdrop element:', backdrop);
+    
+    if (modal && backdrop) {
+        modal.classList.remove('hidden');
+        backdrop.classList.remove('hidden');
+        console.log('Modal should now be visible');
+        
+        // Fetch fresh data when modal opens
+        fetchPlayerData();
+    } else {
+        console.error('Modal or backdrop element not found!');
+    }
+}
+
+function hideServerDetailsModal() {
+    console.log('hideServerDetailsModal called');
+    const modal = document.getElementById('serverDetailsModal');
+    const backdrop = document.getElementById('serverDetailsBackdrop');
+    
+    if (modal && backdrop) {
+        modal.classList.add('hidden');
+        backdrop.classList.add('hidden');
+        console.log('Modal hidden');
+    }
+}
+
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     initializeChart();
@@ -550,6 +609,70 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('refreshBtn').addEventListener('dblclick', (e) => {
         e.preventDefault();
         triggerDataCollection();
+    });
+
+    // Server Details Modal Event Listeners - with retry mechanism
+    function setupServerDetailsButton() {
+        const viewServerDetailsBtn = document.getElementById('viewServerDetailsBtn');
+        console.log('Looking for button:', viewServerDetailsBtn);
+        
+        if (viewServerDetailsBtn) {
+            // Test if button is clickable
+            viewServerDetailsBtn.style.border = '2px solid red';
+            console.log('Button found! Adding click listener...');
+            
+            viewServerDetailsBtn.addEventListener('click', function(e) {
+                console.log('🎉 View Server Details button clicked - opening modal');
+                e.preventDefault();
+                e.stopPropagation();
+                showServerDetailsModal();
+            });
+            
+            // Remove test border after 2 seconds
+            setTimeout(() => {
+                viewServerDetailsBtn.style.border = '';
+            }, 2000);
+            
+            console.log('✅ Server Details button event listener attached successfully');
+            
+            // Test modal visibility after 3 seconds
+            setTimeout(() => {
+                console.log('🧪 Testing modal visibility...');
+                showServerDetailsModal();
+                setTimeout(() => {
+                    console.log('🧪 Hiding test modal...');
+                    hideServerDetailsModal();
+                }, 2000);
+            }, 3000);
+        } else {
+            console.error('❌ viewServerDetailsBtn not found, retrying in 100ms...');
+            setTimeout(setupServerDetailsButton, 100);
+        }
+    }
+    
+    // Wait a bit for the DOM to be fully ready
+    setTimeout(setupServerDetailsButton, 100);
+
+    const closeServerDetailsModal = document.getElementById('closeServerDetailsModal');
+    if (closeServerDetailsModal) {
+        closeServerDetailsModal.addEventListener('click', hideServerDetailsModal);
+    }
+
+    const closeServerDetailsModalBtn = document.getElementById('closeServerDetailsModalBtn');
+    if (closeServerDetailsModalBtn) {
+        closeServerDetailsModalBtn.addEventListener('click', hideServerDetailsModal);
+    }
+
+    const serverDetailsBackdrop = document.getElementById('serverDetailsBackdrop');
+    if (serverDetailsBackdrop) {
+        serverDetailsBackdrop.addEventListener('click', hideServerDetailsModal);
+    }
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            hideServerDetailsModal();
+        }
     });
 
     // Clean up on page unload
