@@ -5,12 +5,14 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { checkForUpdates, performUpdate } from '../../handlers/updater';
 import { registerPermission } from '../../handlers/permisions';
+import os from 'os';
 
 const prisma = new PrismaClient();
 
 registerPermission('airlink.admin.overview.main');
 registerPermission('airlink.admin.overview.checkForUpdates');
 registerPermission('airlink.admin.overview.performUpdate');
+registerPermission('airlink.admin.overview.systemInfo');
 
 interface ErrorMessage {
   message?: string;
@@ -95,6 +97,72 @@ const adminModule: Module = {
         } catch (error) {
           logger.error('Error performing update:', error);
           res.status(500).json({ error: 'Error performing update' });
+        }
+      },
+    );
+
+    router.get(
+      '/admin/system-info',
+      isAuthenticated(true, 'airlink.admin.overview.systemInfo'),
+      async (req: Request, res: Response) => {
+        try {
+          // Get system information
+          const platform = os.platform();
+          const arch = os.arch();
+          const nodeVersion = process.version;
+          const uptime = process.uptime();
+          const cpuCores = os.cpus().length;
+          
+          // Get memory usage
+          const memoryUsage = process.memoryUsage();
+          const totalMemory = os.totalmem();
+          const freeMemory = os.freemem();
+          const usedMemory = totalMemory - freeMemory;
+          
+          // Format platform name for better display
+          const formatPlatform = (platform: string): string => {
+            switch (platform) {
+            case 'win32': return 'Windows';
+            case 'darwin': return 'macOS';
+            case 'linux': return 'Linux';
+            case 'freebsd': return 'FreeBSD';
+            case 'openbsd': return 'OpenBSD';
+            case 'sunos': return 'SunOS';
+            default: return platform;
+            }
+          };
+
+          // Format architecture for better display
+          const formatArch = (arch: string): string => {
+            switch (arch) {
+            case 'x64': return 'x86_64';
+            case 'arm64': return 'ARM64';
+            case 'arm': return 'ARM';
+            case 'ia32': return 'x86';
+            default: return arch;
+            }
+          };
+
+          const systemInfo = {
+            platform: formatPlatform(platform),
+            arch: formatArch(arch),
+            nodeVersion: nodeVersion,
+            uptime: Math.floor(uptime),
+            cpuCores: cpuCores,
+            memoryUsage: usedMemory, // System memory usage
+            processMemory: memoryUsage.rss, // Process memory usage
+            totalMemory: totalMemory,
+            freeMemory: freeMemory,
+            loadAverage: os.loadavg(),
+            hostname: os.hostname(),
+            osRelease: os.release(),
+            osType: os.type(),
+          };
+
+          res.json(systemInfo);
+        } catch (error) {
+          logger.error('Error fetching system info:', error);
+          res.status(500).json({ error: 'Error fetching system information' });
         }
       },
     );
