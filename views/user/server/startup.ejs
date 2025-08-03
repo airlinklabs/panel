@@ -294,13 +294,24 @@
       submitButton.textContent = 'Saving...';
       submitButton.disabled = true;
 
-      // Prepare form data
+      // Prepare form data as URL-encoded
       const formData = new FormData(variablesForm);
+      const urlEncodedData = new URLSearchParams();
+
+      // Convert FormData to URLSearchParams
+      for (let [key, value] of formData.entries()) {
+        urlEncodedData.append(key, value);
+      }
 
       // Submit via fetch (CSRF token will be added automatically by csrf.js)
+
       fetch(variablesForm.action, {
         method: 'POST',
-        body: formData
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: urlEncodedData
       })
       .then(response => {
         if (response.ok) {

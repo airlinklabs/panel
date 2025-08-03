@@ -1661,6 +1661,8 @@ const dashboardModule: Module = {
             } catch (error) {
               logger.error('Error parsing server variables:', error);
             }
+          } else {
+            logger.info(`No variables found for server ${serverId}`);
           }
 
           // Get server status including uptime
@@ -2120,6 +2122,7 @@ const dashboardModule: Module = {
 
           const server = await prisma.server.findUnique({
             where: { UUID: serverId },
+            include: { image: true },
           });
 
           if (!server) {
@@ -2129,6 +2132,8 @@ const dashboardModule: Module = {
           }
 
           let serverVariables = [];
+          let imageVariables = [];
+
           try {
             if (server.Variables) {
               serverVariables = JSON.parse(server.Variables);
@@ -2138,14 +2143,41 @@ const dashboardModule: Module = {
             serverVariables = [];
           }
 
+          // Get original default values from the server image
+          try {
+            if (server.image && server.image.variables) {
+              imageVariables = JSON.parse(server.image.variables);
+              logger.info(`Image variables for server ${serverId}: ${JSON.stringify(imageVariables)}`);
+            }
+          } catch (error) {
+            logger.error('Error parsing image variables:', error);
+            imageVariables = [];
+          }
+
           variables = serverVariables.map((variable: ServerVariable) => {
             const formKey = `var_${variable.env}`;
             let value = req.body[formKey];
 
+            // If the form value is empty or undefined, keep the current value or use default
             if (variable.type === 'boolean') {
               value = value ? 1 : 0;
             } else if (variable.type === 'number') {
-              value = parseInt(value);
+              const numValue = parseInt(value);
+              // If parsing fails or value is empty, keep current value or use default
+              if (isNaN(numValue) || value === '' || value === undefined) {
+                value = variable.value !== undefined && variable.value !== null && variable.value !== ''
+                  ? variable.value
+                  : (variable.default || 0);
+              } else {
+                value = numValue;
+              }
+            } else if (variable.type === 'text') {
+              // For text fields, if empty, keep current value or use default
+              if (value === '' || value === undefined) {
+                value = variable.value !== undefined && variable.value !== null && variable.value !== ''
+                  ? variable.value
+                  : (variable.default || '');
+              }
             }
 
             return {
@@ -2410,6 +2442,7 @@ const dashboardModule: Module = {
 
           const server = await prisma.server.findUnique({
             where: { UUID: serverId },
+            include: { image: true },
           });
 
           if (!server) {
@@ -2635,9 +2668,11 @@ const dashboardModule: Module = {
 
 
               let ServerEnv: ServerVariable[] = [];
+              logger.info(`Raw Variables from database for server ${serverId}: ${serverToReinstall.Variables}`);
               if (serverToReinstall.Variables) {
                 try {
                   ServerEnv = JSON.parse(serverToReinstall.Variables) as ServerVariable[];
+                  logger.info(`Parsed ServerEnv: ${JSON.stringify(ServerEnv)}`);
 
                   const ports = JSON.parse(serverToReinstall.Ports);
                   const primaryPort = ports.find((p: any) => p.primary);
@@ -2658,8 +2693,26 @@ const dashboardModule: Module = {
 
               const env = ServerEnv.reduce(
                 (acc: { [key: string]: any }, curr: ServerVariable) => {
-                  if (curr.env && curr.value !== undefined) {
-                    acc[curr.env] = curr.value;
+                  logger.info(`Processing variable: ${curr.env} = ${curr.value} (type: ${curr.type})`);
+                  if (curr.env && curr.value !== undefined && curr.value !== null) {
+                    // Process the value based on its type
+                    let processedValue: string | number | boolean;
+                    switch (curr.type) {
+                      case 'boolean':
+                        processedValue = curr.value === 1 || curr.value === '1' || curr.value === true ? 'true' : 'false';
+                        break;
+                      case 'number':
+                        processedValue = Number(curr.value);
+                        break;
+                      case 'text':
+                      default:
+                        processedValue = String(curr.value);
+                        break;
+                    }
+                    acc[curr.env] = processedValue;
+                    logger.info(`Added to env: ${curr.env} = ${processedValue}`);
+                  } else {
+                    logger.info(`Skipped variable ${curr.env}: value is ${curr.value}`);
                   }
                   return acc;
                 },
@@ -2672,6 +2725,9 @@ const dashboardModule: Module = {
                 try {
                   scripts = JSON.parse(serverToReinstall.image.scripts);
 
+
+
+                  logger.info(`Reinstalling server ${serverToReinstall.UUID} with environment variables: ${JSON.stringify(env)}`);
 
                   const installRequestData = {
                     method: 'POST',
@@ -2703,16 +2759,20 @@ const dashboardModule: Module = {
                   };
 
 
-                  await axios(installRequestData);
-                  logger.info(`Installation scripts sent for server ${serverId}`);
+                  const installResponse = await axios(installRequestData);
+                  logger.info(`Installation scripts sent for server ${serverId}. Response status: ${installResponse.status}`);
 
 
                   await prisma.server.update({
                     where: { UUID: serverId },
                     data: { Queued: false },
                   });
-                } catch (error) {
+                } catch (error: any) {
                   logger.error(`Error during reinstallation of server ${serverId}:`, error);
+                  if (error.response) {
+                    logger.error(`Response status: ${error.response.status}`);
+                    logger.error(`Response data:`, error.response.data);
+                  }
                   await prisma.server.update({
                     where: { UUID: serverId },
                     data: { Queued: false },
