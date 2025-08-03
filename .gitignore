@@ -24,3 +24,5 @@ coverage/
 # .env
 .env
 *.env.*
+
+bun.lock
