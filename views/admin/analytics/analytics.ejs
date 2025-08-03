@@ -1,0 +1,898 @@
+<%- include('../../components/header', { title: 'Analytics' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <!-- Page Header -->
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <%- include('../../components/pageTitle', {
+          title: 'Analytics',
+          description: 'Monitor and analyze your server performance and player activity'
+        }) %>
+        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <button id="refreshBtn" class="border border-neutral-800/20 block rounded-xl bg-white/5 hover:bg-white/10 text-white px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh Data
+          </button>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <% if (errorMessage && errorMessage.message) { %>
+      <div class="rounded-xl bg-red-800/10 border border-red-500/20 px-6 py-4 mt-8 mx-8">
+        <div class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 mr-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div>
+            <h3 class="text-sm font-medium text-red-400">Error Loading Analytics</h3>
+            <p class="text-sm text-red-400/70 mt-1">
+              <%= errorMessage.message %>
+            </p>
+          </div>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Tab Navigation -->
+      <div class="px-8 mt-6">
+        <%- include('../../components/tabComponent', {
+          tabs: [
+            {
+              id: 'playerstats',
+              label: 'Player Stats',
+              icon: 'M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z'
+            },
+            {
+              id: 'performance',
+              label: 'Performance',
+              icon: 'M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0-1-3m1 3-1-3m-9-3h9v-9a1.5 1.5 0 0 0-1.5-1.5H6a1.5 1.5 0 0 0-1.5 1.5v9Z'
+            },
+            {
+              id: 'usage',
+              label: 'Usage Analytics',
+              icon: 'M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6ZM13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z'
+            }
+          ],
+          activeTab: 'playerstats'
+        }) %>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="px-8 mt-6">
+        <!-- Player Stats Tab -->
+        <div id="content-playerstats" class="tab-content">
+          <!-- Stats Cards -->
+          <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+            <!-- Total Players Card -->
+            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
+              <div class="flex items-center justify-between">
+                <dt class="truncate text-sm font-medium text-neutral-300">Total Players</dt>
+                <div class="rounded-lg bg-neutral-700/30 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                </div>
+              </div>
+              <dd id="totalPlayers" class="mt-3 text-3xl font-semibold tracking-tight text-white">0</dd>
+              <p class="mt-1 text-sm text-neutral-400">Players across all servers</p>
+            </div>
+
+            <!-- Max Capacity Card -->
+            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
+              <div class="flex items-center justify-between">
+                <dt class="truncate text-sm font-medium text-neutral-300">Max Capacity</dt>
+                <div class="rounded-lg bg-neutral-700/30 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                </div>
+              </div>
+              <dd id="maxCapacity" class="mt-3 text-3xl font-semibold tracking-tight text-white">0</dd>
+              <p class="mt-1 text-sm text-neutral-400">Total player capacity</p>
+            </div>
+
+            <!-- Online Servers Card -->
+            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
+              <div class="flex items-center justify-between">
+                <dt class="truncate text-sm font-medium text-neutral-300">Online Servers</dt>
+                <div class="rounded-lg bg-neutral-700/30 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                    <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                    <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                    <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                  </svg>
+                </div>
+              </div>
+              <dd id="onlineServers" class="mt-3 text-3xl font-semibold tracking-tight text-white">0</dd>
+              <p class="mt-1 text-sm text-neutral-400">Servers currently online</p>
+            </div>
+
+            <!-- Utilization Card -->
+            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
+              <div class="flex items-center justify-between">
+                <dt class="truncate text-sm font-medium text-neutral-300">Utilization</dt>
+                <div class="rounded-lg bg-neutral-700/30 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                  </svg>
+                </div>
+              </div>
+              <dd id="utilization" class="mt-3 text-3xl font-semibold tracking-tight text-white">0%</dd>
+              <p class="mt-1 text-sm text-neutral-400">Player capacity utilization</p>
+            </div>
+          </dl>
+
+          <!-- Player Graph -->
+          <div class="bg-gradient-to-br from-neutral-800/20 to-neutral-900/10 border border-neutral-700/20 rounded-xl mb-8 shadow-md p-6">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+              <h2 class="text-lg font-semibold text-white">Player Count History</h2>
+              <div class="text-xs text-neutral-400">Last 48 hours • Updated every 5 minutes</div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="chartLoading" class="h-60 flex items-center justify-center hidden">
+              <div class="text-center">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                <p class="text-sm text-neutral-400">Loading chart data...</p>
+              </div>
+            </div>
+
+            <!-- Chart Container -->
+            <div id="chartContainer" class="h-60">
+              <canvas id="playerChart" class="w-full h-full"></canvas>
+            </div>
+
+            <div class="mt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+              <div class="text-xs text-neutral-400">
+                <p>💡 Double-click the Refresh button to manually trigger data collection</p>
+              </div>
+              <button id="serverDetailsBtn" class="border border-neutral-800/20 rounded-xl bg-white/5 hover:bg-white/10 text-white px-4 py-2 text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                View Server Details
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Tab -->
+        <div id="content-performance" class="tab-content hidden">
+          <!-- Coming Soon Notice -->
+          <div class="text-center py-12">
+            <div class="mx-auto h-12 w-12 text-neutral-400 mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-white mb-2">Performance Metrics Coming Soon</h3>
+            <p class="text-neutral-400 max-w-md mx-auto">
+              Detailed server performance monitoring including CPU, memory, disk usage, and network statistics will be available in a future update.
+            </p>
+          </div>
+
+          <!-- Placeholder Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-50">
+            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md">
+              <h3 class="text-lg font-medium text-white mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+                Server Load
+              </h3>
+              <div class="space-y-3">
+                <div class="flex justify-between">
+                  <span class="text-sm text-neutral-400">CPU Usage</span>
+                  <span class="text-sm font-medium text-neutral-500">--</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-neutral-400">Memory Usage</span>
+                  <span class="text-sm font-medium text-neutral-500">--</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-neutral-400">Disk Usage</span>
+                  <span class="text-sm font-medium text-neutral-500">--</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md">
+              <h3 class="text-lg font-medium text-white mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+                </svg>
+                Network
+              </h3>
+              <div class="space-y-3">
+                <div class="flex justify-between">
+                  <span class="text-sm text-neutral-400">Bandwidth In</span>
+                  <span class="text-sm font-medium text-neutral-500">--</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-neutral-400">Bandwidth Out</span>
+                  <span class="text-sm font-medium text-neutral-500">--</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-neutral-400">Latency</span>
+                  <span class="text-sm font-medium text-neutral-500">--</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md">
+              <h3 class="text-lg font-medium text-white mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Uptime
+              </h3>
+              <div class="space-y-3">
+                <div class="flex justify-between">
+                  <span class="text-sm text-neutral-400">Current Uptime</span>
+                  <span class="text-sm font-medium text-neutral-500">--</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-neutral-400">30-day Average</span>
+                  <span class="text-sm font-medium text-neutral-500">--</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Usage Analytics Tab -->
+        <div id="content-usage" class="tab-content hidden">
+          <!-- Coming Soon Notice -->
+          <div class="text-center py-12 mb-8">
+            <div class="mx-auto h-12 w-12 text-neutral-400 mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-white mb-2">Usage Analytics Coming Soon</h3>
+            <p class="text-neutral-400 max-w-md mx-auto">
+              Comprehensive usage analytics including API calls, storage metrics, and user activity tracking will be available in a future update.
+            </p>
+          </div>
+
+          <!-- Placeholder Cards -->
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 opacity-50">
+            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md text-center">
+              <div class="mx-auto h-8 w-8 text-neutral-400 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3V6a3 3 0 013-3h13.5a3 3 0 013 3v5.25a3 3 0 01-3 3m-16.5 0a3 3 0 013 3v5.25a3 3 0 013-3h13.5a3 3 0 013 3v5.25a3 3 0 01-3 3H6a3 3 0 01-3-3v-5.25z" />
+                </svg>
+              </div>
+              <div class="text-3xl font-bold text-neutral-500" id="totalServersCount">--</div>
+              <div class="text-sm text-neutral-400 mt-2">Total Servers</div>
+            </div>
+
+            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md text-center">
+              <div class="mx-auto h-8 w-8 text-neutral-400 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                </svg>
+              </div>
+              <div class="text-3xl font-bold text-neutral-500" id="activeUsersCount">--</div>
+              <div class="text-sm text-neutral-400 mt-2">Active Users</div>
+            </div>
+
+            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md text-center">
+              <div class="mx-auto h-8 w-8 text-neutral-400 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0-1-3m1 3-1-3m-9-3h9v-9a1.5 1.5 0 00-1.5-1.5H6a1.5 1.5 0 00-1.5 1.5v9z" />
+                </svg>
+              </div>
+              <div class="text-3xl font-bold text-neutral-500" id="apiCallsCount">--</div>
+              <div class="text-sm text-neutral-400 mt-2">API Calls</div>
+            </div>
+
+            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md text-center">
+              <div class="mx-auto h-8 w-8 text-neutral-400 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+                </svg>
+              </div>
+              <div class="text-3xl font-bold text-neutral-500" id="storageUsedCount">--</div>
+              <div class="text-sm text-neutral-400 mt-2">Storage Used</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast') %>
+
+<!-- Server Details Modal -->
+<div id="serverDetailsModal" class="fixed inset-0 z-50 hidden bg-neutral-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-300">
+  <div class="relative transform overflow-hidden rounded-xl bg-neutral-800 px-6 py-6 text-left shadow-2xl transition-all w-full max-w-4xl border border-neutral-700 max-h-[80vh] flex flex-col">
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between border-b border-neutral-700 pb-4 mb-4">
+      <div class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-neutral-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        <h3 class="text-lg font-semibold text-white">Server Details</h3>
+      </div>
+      <button type="button" id="closeServerDetailsModalBtn" class="rounded-lg p-2 text-neutral-400 hover:text-white hover:bg-neutral-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-500">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        <span class="sr-only">Close modal</span>
+      </button>
+    </div>
+
+    <!-- Modal Content -->
+    <div class="flex-1 overflow-y-auto">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-neutral-700/20">
+          <thead class="bg-neutral-700/20">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Server</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Players</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Version</th>
+            </tr>
+          </thead>
+          <tbody id="serverTableBody" class="divide-y divide-neutral-700/20">
+            <tr>
+              <td colspan="4" class="px-6 py-8 text-center">
+                <div class="flex flex-col items-center">
+                  <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-3"></div>
+                  <p class="text-neutral-400">Loading server data...</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="mt-6 flex justify-between items-center border-t border-neutral-700 pt-4">
+      <p class="text-xs text-neutral-400">
+        Real-time server status and player counts
+      </p>
+      <div class="flex gap-3">
+        <button type="button" id="refreshServerDataBtn" class="rounded-xl border border-neutral-600 bg-neutral-700 hover:bg-neutral-600 text-white px-4 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Refresh
+        </button>
+        <button type="button" id="closeServerDetailsModalBtn2" class="rounded-xl border border-neutral-600 bg-neutral-800 hover:bg-neutral-700 text-white px-4 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-500">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"
+        integrity="sha384-FcQlsUOd0TJjROrBxhJdUhXTUgNJQxTMcxZe6nHbaEfFL1zjQ+bq/uRoBQxb0KMo"
+        crossorigin="anonymous"></script>
+
+<script>
+// Global variables
+let playerChart;
+let refreshInterval;
+
+// Chart initialization with error handling
+function initializeChart() {
+  // Check if Chart.js is loaded
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js library not loaded');
+    showToast('Chart library failed to load. Please refresh the page.', 'error');
+    return;
+  }
+
+  const chartCanvas = document.getElementById('playerChart');
+  if (!chartCanvas) {
+    console.error('Chart canvas element not found');
+    return;
+  }
+
+  const ctx = chartCanvas.getContext('2d');
+
+  try {
+    playerChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Total Players',
+        data: [],
+        backgroundColor: 'rgba(163, 163, 163, 0.15)',
+        borderColor: 'rgba(163, 163, 163, 1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: 'rgba(163, 163, 163, 1)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(163, 163, 163, 1)',
+        pointHoverBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        intersect: false,
+        mode: 'index'
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          titleColor: '#fff',
+          bodyColor: '#fff',
+          borderColor: 'rgba(163, 163, 163, 1)',
+          borderWidth: 1,
+          callbacks: {
+            title: function(tooltipItems) {
+              return new Date(tooltipItems[0].label).toLocaleString();
+            },
+            label: function(context) {
+              return `Players: ${context.parsed.y}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: 'rgba(255, 255, 255, 0.7)',
+            maxRotation: 45,
+            minRotation: 45,
+            callback: function(value, index, values) {
+              if (index % Math.ceil(values.length / 6) === 0) {
+                const date = new Date(this.getLabelForValue(value));
+                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              }
+              return '';
+            }
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)',
+            drawBorder: false
+          }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: 'rgba(255, 255, 255, 0.7)',
+            padding: 10,
+            font: {
+              weight: '500'
+            }
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)',
+            drawBorder: false
+          },
+          title: {
+            display: true,
+            text: 'Players Online',
+            color: 'rgba(255, 255, 255, 0.8)',
+            font: {
+              size: 12,
+              weight: '500'
+            }
+          }
+        }
+      }
+    }
+  });
+
+  } catch (error) {
+    console.error('Error initializing chart:', error);
+    showToast('Failed to initialize chart. Please refresh the page.', 'error');
+  }
+}
+
+// Tab switching functionality
+function switchTab(tabName) {
+    // Clear existing refresh interval
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+    }
+
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+
+    // Remove active state from all tabs
+    document.querySelectorAll('.tab-button').forEach(tab => {
+        tab.classList.remove('bg-white/20', 'text-white');
+        tab.classList.add('text-neutral-400');
+    });
+
+    // Show selected tab content
+    const targetContent = document.getElementById(`content-${tabName}`);
+    if (targetContent) {
+        targetContent.classList.remove('hidden');
+    }
+
+    // Add active state to selected tab
+    const activeTab = document.getElementById(`tab-${tabName}`);
+    if (activeTab) {
+        activeTab.classList.remove('text-neutral-400');
+        activeTab.classList.add('bg-white/20', 'text-white');
+    }
+
+    // Load content based on tab
+    switch (tabName) {
+        case 'playerstats':
+            fetchPlayerData();
+            // Set up auto-refresh every 5 minutes for player stats only
+            refreshInterval = setInterval(fetchPlayerData, 300000);
+            break;
+        case 'performance':
+            loadPerformanceData();
+            break;
+        case 'usage':
+            loadUsageData();
+            break;
+        default:
+            console.warn(`Unknown tab: ${tabName}`);
+    }
+}
+
+// Player data fetching with improved error handling
+async function fetchPlayerData() {
+  try {
+    // Show loading state
+    showChartLoading(true);
+
+    const response = await fetch('/admin/playerstats/data');
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    // Update stats cards with animation
+    updateStatsCard('totalPlayers', data.totalPlayers || 0);
+    updateStatsCard('maxCapacity', data.totalMaxPlayers || 0);
+    updateStatsCard('onlineServers', data.onlineServers || 0);
+
+    const utilizationPercent = data.totalMaxPlayers > 0
+      ? Math.round((data.totalPlayers / data.totalMaxPlayers) * 100)
+      : 0;
+    updateStatsCard('utilization', `${utilizationPercent}%`);
+
+    // Update server table
+    updateServerTable(data.servers || []);
+
+    // Update chart
+    updatePlayerChart(data);
+
+    // Hide loading state
+    showChartLoading(false);
+
+  } catch (error) {
+    console.error('Error fetching player data:', error);
+    showToast(`Failed to load player statistics: ${error.message}`, 'error');
+    showChartLoading(false);
+  }
+}
+
+// Helper function to update stats cards with animation
+function updateStatsCard(elementId, value) {
+  const element = document.getElementById(elementId);
+  if (element && element.textContent !== value.toString()) {
+    element.style.transform = 'scale(1.05)';
+    element.textContent = value;
+    setTimeout(() => {
+      element.style.transform = 'scale(1)';
+    }, 150);
+  }
+}
+
+// Helper function to update server table
+function updateServerTable(servers) {
+  const tableBody = document.getElementById('serverTableBody');
+  if (!tableBody) return;
+
+  tableBody.innerHTML = '';
+
+  if (servers.length === 0) {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td colspan="4" class="px-6 py-8 text-center">
+        <div class="flex flex-col items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-neutral-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <p class="text-neutral-400">No servers found</p>
+        </div>
+      </td>
+    `;
+    tableBody.appendChild(row);
+    return;
+  }
+
+  servers.forEach(server => {
+    const row = document.createElement('tr');
+    row.className = 'hover:bg-white/5 transition-colors duration-200';
+
+    const statusClass = server.online
+      ? 'text-emerald-200 bg-emerald-500/20 border border-emerald-500/30'
+      : 'text-red-200 bg-red-500/20 border border-red-500/30';
+    const statusText = server.online ? 'Online' : 'Offline';
+    const statusIcon = server.online
+      ? '<div class="w-2 h-2 bg-emerald-400 rounded-full mr-2"></div>'
+      : '<div class="w-2 h-2 bg-red-400 rounded-full mr-2"></div>';
+
+    row.innerHTML = `
+      <td class="px-6 py-4 whitespace-nowrap">
+        <div class="flex items-center">
+          <div>
+            <div class="text-sm font-medium text-white">${escapeHtml(server.serverName || 'Unknown')}</div>
+            <div class="text-sm text-neutral-400">${escapeHtml(server.serverId || 'N/A')}</div>
+          </div>
+        </div>
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap">
+        <span class="px-2 py-1 inline-flex items-center text-xs leading-5 font-medium rounded-full ${statusClass}">
+          ${statusIcon}${statusText}
+        </span>
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+        ${server.playerCount || 0} / ${server.maxPlayers || 0}
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-400">
+        ${escapeHtml(server.version || 'Unknown')}
+      </td>
+    `;
+
+    tableBody.appendChild(row);
+  });
+}
+
+// Helper function to update player chart
+function updatePlayerChart(data) {
+  if (!playerChart) return;
+
+  try {
+    if (data.historicalData && data.historicalData.length > 0) {
+      const labels = data.historicalData.map(entry => new Date(entry.timestamp).toISOString());
+      const playerCounts = data.historicalData.map(entry => entry.totalPlayers || 0);
+
+      // Add current data point
+      labels.push(new Date().toISOString());
+      playerCounts.push(data.totalPlayers || 0);
+
+      // Update chart data
+      playerChart.data.labels = labels;
+      playerChart.data.datasets[0].data = playerCounts;
+    } else {
+      // If no historical data, show current point only
+      const now = new Date().toISOString();
+      playerChart.data.labels = [now];
+      playerChart.data.datasets[0].data = [data.totalPlayers || 0];
+    }
+
+    playerChart.update('none'); // Use 'none' for better performance
+  } catch (error) {
+    console.error('Error updating chart:', error);
+  }
+}
+
+// Helper function to show/hide chart loading state
+function showChartLoading(show) {
+  const loadingEl = document.getElementById('chartLoading');
+  const containerEl = document.getElementById('chartContainer');
+
+  if (loadingEl && containerEl) {
+    if (show) {
+      loadingEl.classList.remove('hidden');
+      containerEl.classList.add('hidden');
+    } else {
+      loadingEl.classList.add('hidden');
+      containerEl.classList.remove('hidden');
+    }
+  }
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Performance data loading (placeholder)
+function loadPerformanceData() {
+  console.log('Performance tab loaded - feature coming soon');
+  // Future implementation for performance metrics
+}
+
+// Usage data loading (placeholder)
+function loadUsageData() {
+  console.log('Usage analytics tab loaded - feature coming soon');
+  // Future implementation for usage analytics
+}
+
+// Manual data collection trigger
+async function triggerDataCollection() {
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+    showToast('Triggering data collection...', 'info');
+
+    const response = await fetch('/api/admin/playerstats/collect', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'CSRF-Token': csrfToken
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success) {
+      showToast('Player statistics collected successfully', 'success');
+      // Refresh data after a short delay
+      setTimeout(fetchPlayerData, 1500);
+    } else {
+      throw new Error(data.error || 'Unknown error occurred');
+    }
+  } catch (error) {
+    console.error('Error triggering data collection:', error);
+    showToast(`Failed to collect data: ${error.message}`, 'error');
+  }
+}
+
+// Modal management functions
+function showServerDetailsModal() {
+  const modal = document.getElementById('serverDetailsModal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    // Refresh server data when modal opens
+    fetchPlayerData();
+  }
+}
+
+function hideServerDetailsModal() {
+  const modal = document.getElementById('serverDetailsModal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+}
+
+// DOM Content Loaded - Initialize everything
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize chart and default tab with a small delay to ensure Chart.js is loaded
+    setTimeout(() => {
+        initializeChart();
+        switchTab('playerstats');
+    }, 100);
+
+    // Refresh button event listener
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        // Single click - refresh current tab
+        refreshBtn.addEventListener('click', () => {
+            const activeTab = document.querySelector('.tab-button.bg-white\\/20');
+            if (activeTab) {
+                const tabId = activeTab.id.replace('tab-', '');
+                switch (tabId) {
+                    case 'playerstats':
+                        fetchPlayerData();
+                        break;
+                    case 'performance':
+                        loadPerformanceData();
+                        break;
+                    case 'usage':
+                        loadUsageData();
+                        break;
+                }
+            }
+        });
+
+        // Double click - trigger data collection (player stats only)
+        refreshBtn.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+            const activeTab = document.querySelector('.tab-button.bg-white\\/20');
+            if (activeTab && activeTab.id === 'tab-playerstats') {
+                triggerDataCollection();
+            }
+        });
+    }
+
+    // Server details button
+    const serverDetailsBtn = document.getElementById('serverDetailsBtn');
+    if (serverDetailsBtn) {
+        serverDetailsBtn.addEventListener('click', showServerDetailsModal);
+    }
+
+    // Modal close buttons
+    const closeBtn1 = document.getElementById('closeServerDetailsModalBtn');
+    const closeBtn2 = document.getElementById('closeServerDetailsModalBtn2');
+    const refreshServerBtn = document.getElementById('refreshServerDataBtn');
+
+    if (closeBtn1) {
+        closeBtn1.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            hideServerDetailsModal();
+        });
+    }
+
+    if (closeBtn2) {
+        closeBtn2.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            hideServerDetailsModal();
+        });
+    }
+
+    if (refreshServerBtn) {
+        refreshServerBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            fetchPlayerData();
+        });
+    }
+
+    // Modal backdrop click to close
+    const modal = document.getElementById('serverDetailsModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === e.currentTarget) {
+                hideServerDetailsModal();
+            }
+        });
+    }
+
+    // Escape key to close modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            hideServerDetailsModal();
+        }
+    });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (refreshInterval) {
+            clearInterval(refreshInterval);
+        }
+    });
+});
+</script>
+
+<%- include('../../components/footer') %>
