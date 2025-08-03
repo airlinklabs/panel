@@ -1,156 +1,213 @@
 <%- include('../../components/header', { title: 'Overview' }) %>
 
-<main class="h-screen m-auto">
-  <div class="flex h-screen">
-    <!-- Sidebar -->
-    <div class="w-60 h-full">
-      <%- include('../../components/template') %>
-    </div>
-    <!-- Content -->
-    <div class="flex-1 p-6 overflow-y-auto pt-16">
-      <div class="sm:flex sm:items-center px-8 pt-4">
-        <%- include('../../components/pageTitle', {
-          title: req.translations.adminOverviewTitle,
-          description: req.translations.adminOverviewText
-        }) %>
-       </div>
-       <div class="px-8 mt-6">
-        <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+  <main class="min-h-screen m-auto">
+    <div class="flex min-h-screen">
+      <!-- Sidebar -->
+      <div class="w-60 h-full">
+        <%- include('../../components/template') %>
+      </div>
+      <!-- Content -->
+      <div class="flex-1 p-6 pt-16">
+        <!-- Page Header -->
+        <div class="px-8 pt-4 mb-8">
+          <%- include('../../components/pageTitle', { title: req.translations.adminOverviewTitle, description:
+            req.translations.adminOverviewText }) %>
+        </div>
+
+        <div class="px-8 space-y-8">
+          <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <!-- Users Card -->
-            <div class="overflow-hidden rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
-               <div class="flex items-center justify-between">
-                 <dt class="truncate text-sm font-medium text-blue-400"><%= req.translations.users %></dt>
-                 <div class="rounded-lg bg-blue-500/20 p-2">
-                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                     <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                   </svg>
-                 </div>
-               </div>
-               <dd class="mt-3 text-3xl font-semibold tracking-tight text-white">
-                <%= userCount %>
-               </dd>
-               <p class="mt-1 text-sm text-blue-400/70"><%= req.translations.totalRegisteredUsers || 'Total registered users' %></p>
-            </div>
-
-            <!-- Instances Card -->
-            <div class="overflow-hidden rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
-               <div class="flex items-center justify-between">
-                 <dt class="truncate text-sm font-medium text-emerald-400"><%= req.translations.instances %></dt>
-                 <div class="rounded-lg bg-emerald-500/20 p-2">
-                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
-                     <path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
-                   </svg>
-                 </div>
-               </div>
-               <dd class="mt-3 text-3xl font-semibold tracking-tight text-white">
-                <%= instanceCount %>
-               </dd>
-               <p class="mt-1 text-sm text-emerald-400/70">Active server instances</p>
-            </div>
-
-            <!-- Nodes Card -->
-            <div class="overflow-hidden rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
-               <div class="flex items-center justify-between">
-                 <dt class="truncate text-sm font-medium text-amber-400"><%= req.translations.nodes %></dt>
-                 <div class="rounded-lg bg-amber-500/20 p-2">
-                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
-                     <path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clip-rule="evenodd" />
-                   </svg>
-                 </div>
-               </div>
-               <dd class="mt-3 text-3xl font-semibold tracking-tight text-white">
-                <%= nodeCount %>
-               </dd>
-               <p class="mt-1 text-sm text-amber-400/70">Connected server nodes</p>
-            </div>
-
-            <!-- Images Card -->
-            <div class="overflow-hidden rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
-               <div class="flex items-center justify-between">
-                 <dt class="truncate text-sm font-medium text-purple-400"><%= req.translations.images %></dt>
-                 <div class="rounded-lg bg-purple-500/20 p-2">
-                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
-                     <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
-                   </svg>
-                 </div>
-               </div>
-               <dd class="mt-3 text-3xl font-semibold tracking-tight text-white">
-                <%= imageCount %>
-               </dd>
-               <p class="mt-1 text-sm text-purple-400/70">Available server images</p>
-            </div>
-         </dl>
-         <div class="bg-gradient-to-br from-neutral-800/20 to-neutral-900/10 border border-neutral-700/20 rounded-xl mt-8 shadow-md sm:p-8 p-6">
-          <div class="flex flex-col sm:flex-row items-start gap-8">
-            <!-- System Information -->
-            <div class="flex-shrink-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 border border-blue-500/10 rounded-xl p-6 shadow-sm">
-              <div class="flex items-center gap-4">
-                <img src="/assets/airlink_logo.png" class="h-16 w-16 rounded-lg">
-                <div>
-                  <h3 class="text-lg font-semibold text-white">Airlink Panel</h3>
-                  <div class="flex items-center mt-1">
-                    <div class="px-2.5 py-1 bg-blue-500/10 border border-blue-500/20 rounded-md">
-                      <span class="text-sm font-medium text-blue-400">v<span id="currentVersion"></span></span>
-                    </div>
-                    <span class="ml-2 text-xs text-neutral-400">(<%= process.env.NODE_ENV %>)</span>
-                  </div>
+            <div
+              class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
+              <div class="flex items-center justify-between">
+                <dt class="truncate text-sm font-medium text-neutral-300">
+                  <%= req.translations.users %>
+                </dt>
+                <div class="rounded-lg bg-neutral-700/30 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 20 20"
+                    fill="currentColor">
+                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                  </svg>
                 </div>
               </div>
-              <p class="text-sm mt-4 font-normal text-neutral-300">
-                <%= req.translations.sysInfoText %> <span class="text-blue-400 font-medium"><span id="currentVersion"></span></span>
+              <dd class="mt-3 text-3xl font-semibold tracking-tight text-white">
+                <%= userCount %>
+              </dd>
+              <p class="mt-1 text-sm text-neutral-400">
+                <%= req.translations.totalRegisteredUsers || 'Total registered users' %>
               </p>
             </div>
 
-            <!-- Update Section -->
-            <div class="flex-grow bg-gradient-to-br from-neutral-700/5 to-neutral-800/5 border border-neutral-700/10 rounded-xl p-6 shadow-sm">
-              <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold text-white"><%= req.translations.updates || 'Updates' %></h3>
+            <!-- Instances Card -->
+            <div
+              class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
+              <div class="flex items-center justify-between">
+                <dt class="truncate text-sm font-medium text-neutral-300">
+                  <%= req.translations.instances %>
+                </dt>
+                <div class="rounded-lg bg-neutral-700/30 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 20 20"
+                    fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z"
+                      clip-rule="evenodd" />
+                  </svg>
+                </div>
               </div>
+              <dd class="mt-3 text-3xl font-semibold tracking-tight text-white">
+                <%= instanceCount %>
+              </dd>
+              <p class="mt-1 text-sm text-neutral-400">Active server instances</p>
+            </div>
 
-              <!-- Panel Update Section -->
-              <div>
-                <div class="flex items-center justify-between mb-3">
-                  <h4 class="text-base font-medium text-white">Panel System</h4>
-                  <div class="flex gap-2">
-                    <button id="checkUpdateBtn" class="rounded-xl bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 text-xs font-medium shadow-md transition-all duration-300 focus:outline focus:outline-2 focus:outline-offset-2 flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-                      </svg>
-                      Check
-                    </button>
-                    <button id="performUpdateBtn" class="hidden rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 text-xs font-medium shadow-md transition-all duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-                      </svg>
-                      <%= req.translations.update || 'Update' %>
-                    </button>
+            <!-- Nodes Card -->
+            <div
+              class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
+              <div class="flex items-center justify-between">
+                <dt class="truncate text-sm font-medium text-neutral-300">
+                  <%= req.translations.nodes %>
+                </dt>
+                <div class="rounded-lg bg-neutral-700/30 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 20 20"
+                    fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z"
+                      clip-rule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+              <dd class="mt-3 text-3xl font-semibold tracking-tight text-white">
+                <%= nodeCount %>
+              </dd>
+              <p class="mt-1 text-sm text-neutral-400">Connected server nodes</p>
+            </div>
+
+            <!-- Images Card -->
+            <div
+              class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 sm:p-6">
+              <div class="flex items-center justify-between">
+                <dt class="truncate text-sm font-medium text-neutral-300">
+                  <%= req.translations.images %>
+                </dt>
+                <div class="rounded-lg bg-neutral-700/30 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 20 20"
+                    fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                      clip-rule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+              <dd class="mt-3 text-3xl font-semibold tracking-tight text-white">
+                <%= imageCount %>
+              </dd>
+              <p class="mt-1 text-sm text-neutral-400">Available server images</p>
+            </div>
+          </dl>
+          <!-- System Information & Performance Section -->
+          <div class="bg-white/5 border border-neutral-800/20 rounded-xl shadow-md p-8">
+            <!-- Header Section -->
+            <div class="flex items-center justify-between mb-8">
+              <div class="flex items-center gap-4">
+                <img src="/assets/airlink_logo.png" class="h-16 w-16 rounded-lg">
+                <div>
+                  <h2 class="text-2xl font-semibold text-white">Airlink Panel</h2>
+                  <div class="flex items-center mt-2 gap-3">
+                    <div class="px-3 py-1.5 bg-neutral-700/30 border border-neutral-600/30 rounded-lg">
+                      <span class="text-sm font-medium text-neutral-300">v<span class="current-version"></span></span>
+                    </div>
+                    <span class="text-sm text-neutral-400">(<%= process.env.NODE_ENV %>)</span>
                   </div>
                 </div>
-                <div id="updateStatus" class="mt-3 p-3 rounded-lg bg-neutral-800/30 border border-neutral-700/20 text-sm hidden"></div>
-                <div id="updateInfo" class="mt-3 hidden"></div>
               </div>
 
+              <!-- Update Actions -->
+              <div class="flex gap-3">
+                <button id="checkUpdateBtn"
+                  class="rounded-xl bg-neutral-700 hover:bg-neutral-600 text-white px-4 py-2.5 text-sm font-medium shadow-md transition-all duration-300 focus:outline focus:outline-2 focus:outline-offset-2 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                      clip-rule="evenodd" />
+                  </svg>
+                  Check Updates
+                </button>
+                <button id="performUpdateBtn"
+                  class="hidden rounded-xl bg-neutral-600 hover:bg-neutral-500 text-white px-4 py-2.5 text-sm font-medium shadow-md transition-all duration-300 focus:outline focus:outline-2 focus:outline-offset-2 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                      clip-rule="evenodd" />
+                  </svg>
+                  <%= req.translations.update || 'Update' %>
+                </button>
+              </div>
+            </div>
 
+            <!-- Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <!-- Left Column: Performance & System Info -->
+              <div class="space-y-6">
+                <!-- API Performance -->
+                <div class="bg-neutral-800/20 border border-neutral-700/20 rounded-xl p-6">
+                  <h3 class="text-lg font-semibold text-white mb-4">Performance Metrics</h3>
+                  <div class="space-y-4">
+                    <div>
+                      <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-neutral-300">API Response Time</span>
+                        <span id="apiLatency"
+                          class="text-sm font-mono text-neutral-200 bg-neutral-700/30 px-2 py-1 rounded">-- ms</span>
+                      </div>
+                      <div class="w-full bg-neutral-700/30 rounded-full h-2.5">
+                        <div id="latencyBar" class="bg-neutral-500 h-2.5 rounded-full transition-all duration-300"
+                          style="width: 0%"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+              </div>
+
+              <!-- Right Column: Update Status & Info -->
+              <div class="space-y-6">
+                <!-- Update Status -->
+                <div class="bg-neutral-800/20 border border-neutral-700/20 rounded-xl p-6">
+                  <h3 class="text-lg font-semibold text-white mb-4">Update Status</h3>
+                  <div class="text-sm text-neutral-400 mb-4">
+                    <%= req.translations.sysInfoText %> <span class="text-neutral-200 font-medium"><span
+                          id="current-version"></span></span>
+                  </div>
+                  <div id="updateStatus"
+                    class="p-4 rounded-lg bg-neutral-900/30 border border-neutral-700/30 text-sm hidden"></div>
+                  <div id="updateInfo" class="mt-4 hidden"></div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <%- include('../../components/toast') %>
+          <%- include('../../components/toast') %>
 
-        <script>
-          // Set current version
-          const currentVersion = '<%= airlinkVersion %>';
-          // Update all instances of currentVersion elements
-          document.querySelectorAll('#currentVersion').forEach(el => {
-            el.textContent = currentVersion;
-          });
+            <script>
+              // Set current version
+              const currentVersion = '<%= airlinkVersion %>';
+              // Update all instances of currentVersion elements
+              document.querySelectorAll('.current-version').forEach(el => {
+                el.textContent = currentVersion;
+              });
+              // Also update the ID-based version element
+              const versionById = document.getElementById('current-version');
+              if (versionById) {
+                versionById.textContent = currentVersion;
+              }
 
-          // Check for updates
-          document.getElementById('checkUpdateBtn').addEventListener('click', async () => {
-            try {
-              // Show loading state
-              const statusDiv = document.getElementById('updateStatus');
-              statusDiv.innerHTML = `
+
+              // Check for updates
+              document.getElementById('checkUpdateBtn').addEventListener('click', async () => {
+                try {
+                  // Show loading state
+                  const statusDiv = document.getElementById('updateStatus');
+                  statusDiv.innerHTML = `
                 <div class="flex items-center">
                   <svg class="animate-spin h-4 w-4 text-blue-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -159,18 +216,18 @@
                   <span>Checking for updates...</span>
                 </div>
               `;
-              statusDiv.classList.remove('hidden');
-              statusDiv.classList.add('text-blue-400');
+                  statusDiv.classList.remove('hidden');
+                  statusDiv.classList.add('text-blue-400');
 
-              // Fetch update data
-              const response = await fetch('/admin/check-update');
-              const data = await response.json();
-              const updateBtn = document.getElementById('performUpdateBtn');
-              const updateInfo = document.getElementById('updateInfo');
+                  // Fetch update data
+                  const response = await fetch('/admin/check-update');
+                  const data = await response.json();
+                  const updateBtn = document.getElementById('performUpdateBtn');
+                  const updateInfo = document.getElementById('updateInfo');
 
-              if (data.hasUpdate) {
-                // Update available
-                statusDiv.innerHTML = `
+                  if (data.hasUpdate) {
+                    // Update available
+                    statusDiv.innerHTML = `
                   <div class="flex items-start">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-400 mr-2 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
@@ -181,26 +238,26 @@
                     </div>
                   </div>
                 `;
-                statusDiv.classList.remove('text-blue-400');
-                statusDiv.classList.add('text-amber-400');
+                    statusDiv.classList.remove('text-blue-400');
+                    statusDiv.classList.add('text-amber-400');
 
-                // Show update button with flex display
-                updateBtn.classList.remove('hidden');
-                updateBtn.classList.add('inline-flex', 'items-center');
+                    // Show update button with flex display
+                    updateBtn.classList.remove('hidden');
+                    updateBtn.classList.add('inline-flex', 'items-center');
 
-                // Show update info if available
-                if (data.updateInfo) {
-                  updateInfo.innerHTML = `
+                    // Show update info if available
+                    if (data.updateInfo) {
+                      updateInfo.innerHTML = `
                     <div class="p-4 rounded-lg bg-neutral-800/30 border border-neutral-700/20">
                       <h4 class="text-sm font-medium text-white mb-2">Update Information</h4>
                       <p class="text-sm text-neutral-300">${data.updateInfo}</p>
                     </div>
                   `;
-                  updateInfo.classList.remove('hidden');
-                }
-              } else {
-                // No update available
-                statusDiv.innerHTML = `
+                      updateInfo.classList.remove('hidden');
+                    }
+                  } else {
+                    // No update available
+                    statusDiv.innerHTML = `
                   <div class="flex items-start">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -211,20 +268,20 @@
                     </div>
                   </div>
                 `;
-                statusDiv.classList.remove('text-blue-400');
-                statusDiv.classList.add('text-emerald-400');
+                    statusDiv.classList.remove('text-blue-400');
+                    statusDiv.classList.add('text-emerald-400');
 
-                // Hide update button and info
-                updateBtn.classList.add('hidden');
-                updateBtn.classList.remove('inline-flex', 'items-center');
-                updateInfo.classList.add('hidden');
-              }
-            } catch (error) {
-              console.error('Error:', error);
+                    // Hide update button and info
+                    updateBtn.classList.add('hidden');
+                    updateBtn.classList.remove('inline-flex', 'items-center');
+                    updateInfo.classList.add('hidden');
+                  }
+                } catch (error) {
+                  console.error('Error:', error);
 
-              // Show error message
-              const statusDiv = document.getElementById('updateStatus');
-              statusDiv.innerHTML = `
+                  // Show error message
+                  const statusDiv = document.getElementById('updateStatus');
+                  statusDiv.innerHTML = `
                 <div class="flex items-start">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-500 mr-2 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
@@ -235,18 +292,18 @@
                   </div>
                 </div>
               `;
-              statusDiv.classList.remove('hidden', 'text-blue-400');
-              statusDiv.classList.add('text-rose-500');
-            }
-          });
+                  statusDiv.classList.remove('hidden', 'text-blue-400');
+                  statusDiv.classList.add('text-rose-500');
+                }
+              });
 
-          // Install update
-          document.getElementById('performUpdateBtn').addEventListener('click', async () => {
-            if (confirm('Do you want to perform the update? The server will restart automatically.')) {
-              try {
-                // Show loading state
-                const statusDiv = document.getElementById('updateStatus');
-                statusDiv.innerHTML = `
+              // Install update
+              document.getElementById('performUpdateBtn').addEventListener('click', async () => {
+                if (confirm('Do you want to perform the update? The server will restart automatically.')) {
+                  try {
+                    // Show loading state
+                    const statusDiv = document.getElementById('updateStatus');
+                    statusDiv.innerHTML = `
                   <div class="flex items-center">
                     <svg class="animate-spin h-4 w-4 text-blue-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -255,18 +312,18 @@
                     <span>Installing update...</span>
                   </div>
                 `;
-                statusDiv.classList.remove('hidden', 'text-amber-400', 'text-emerald-400', 'text-rose-500');
-                statusDiv.classList.add('text-blue-400');
+                    statusDiv.classList.remove('hidden', 'text-amber-400', 'text-emerald-400', 'text-rose-500');
+                    statusDiv.classList.add('text-blue-400');
 
-                // Perform update
-                const response = await fetch('/admin/perform-update', { method: 'POST' });
-                const data = await response.json();
+                    // Perform update
+                    const response = await fetch('/admin/perform-update', { method: 'POST' });
+                    const data = await response.json();
 
-                // Show success message
-                showToast(data.message || 'Update completed. Server will restart.', 'success');
+                    // Show success message
+                    showToast(data.message || 'Update completed. Server will restart.', 'success');
 
-                // Update status
-                statusDiv.innerHTML = `
+                    // Update status
+                    statusDiv.innerHTML = `
                   <div class="flex items-start">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -277,17 +334,17 @@
                     </div>
                   </div>
                 `;
-                statusDiv.classList.remove('text-blue-400');
-                statusDiv.classList.add('text-emerald-400');
+                    statusDiv.classList.remove('text-blue-400');
+                    statusDiv.classList.add('text-emerald-400');
 
-                // Reload page after delay
-                setTimeout(() => window.location.reload(), 5000);
-              } catch (error) {
-                console.error('Error:', error);
+                    // Reload page after delay
+                    setTimeout(() => window.location.reload(), 5000);
+                  } catch (error) {
+                    console.error('Error:', error);
 
-                // Show error message
-                const statusDiv = document.getElementById('updateStatus');
-                statusDiv.innerHTML = `
+                    // Show error message
+                    const statusDiv = document.getElementById('updateStatus');
+                    statusDiv.innerHTML = `
                   <div class="flex items-start">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-500 mr-2 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
@@ -298,98 +355,125 @@
                     </div>
                   </div>
                 `;
-                statusDiv.classList.remove('hidden', 'text-blue-400');
-                statusDiv.classList.add('text-rose-500');
+                    statusDiv.classList.remove('hidden', 'text-blue-400');
+                    statusDiv.classList.add('text-rose-500');
 
-                showToast('Error performing update', 'error');
-              }
-            }
-          });
+                    showToast('Error performing update', 'error');
+                  }
+                }
+              });
 
-          // Check All Updates button functionality removed
-        </script>
-          <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <h3 class="text-lg font-semibold text-white col-span-full mb-2">Resources & Community</h3>
+            </script>
 
-            <!-- Discord Card -->
-            <a href="https://discord.gg/BybfXms7JZ" class="group flex flex-col justify-between bg-gradient-to-br from-indigo-500/10 to-purple-600/5 border border-indigo-500/20 rounded-xl p-5 shadow-md hover:shadow-lg transition-all duration-300">
-                <div class="flex items-center mb-3">
-                    <div class="p-2 rounded-lg bg-indigo-500/20 mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-400" viewBox="0 0 127.14 96.36" fill="currentColor">
-                            <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
-                        </svg>
+          <!-- Resources & Community Section -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Discord Card -->
+                <a href="https://discord.gg/BybfXms7JZ"
+                  class="group flex flex-col justify-between bg-white/5 border border-neutral-800/20 rounded-xl p-5 shadow-md hover:shadow-lg transition-all duration-300">
+                  <div class="flex items-center mb-3">
+                    <div class="p-2 rounded-lg bg-neutral-700/30 mr-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-neutral-400"
+                        viewBox="0 0 127.14 96.36" fill="currentColor">
+                        <path
+                          d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
+                      </svg>
                     </div>
-                    <h4 class="text-indigo-400 font-medium">Discord</h4>
-                </div>
-                <p class="text-sm text-neutral-400 mb-3">Join our community for support and discussions</p>
-                <div class="flex items-center text-indigo-400 text-sm font-medium group-hover:text-indigo-300 transition-colors">
+                    <h4 class="text-neutral-300 font-medium">Discord</h4>
+                  </div>
+                  <p class="text-sm text-neutral-400 mb-3">Join our community for support and discussions</p>
+                  <div
+                    class="flex items-center text-neutral-300 text-sm font-medium group-hover:text-neutral-200 transition-colors">
                     Join Server
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20"
+                      fill="currentColor">
+                      <path fill-rule="evenodd"
+                        d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                        clip-rule="evenodd" />
                     </svg>
-                </div>
-            </a>
+                  </div>
+                </a>
 
-            <!-- Documentation Card -->
-            <a href="// comming soon" class="group flex flex-col justify-between bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl p-5 shadow-md hover:shadow-lg transition-all duration-300">
-                <div class="flex items-center mb-3">
-                    <div class="p-2 rounded-lg bg-blue-500/20 mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
-                        </svg>
+                <!-- Documentation Card -->
+                <a href="#" onclick="return false;"
+                  class="group flex flex-col justify-between bg-white/5 border border-neutral-800/20 rounded-xl p-5 shadow-md hover:shadow-lg transition-all duration-300 opacity-75 cursor-not-allowed">
+                  <div class="flex items-center mb-3">
+                    <div class="p-2 rounded-lg bg-neutral-700/30 mr-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-neutral-400" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path
+                          d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+                      </svg>
                     </div>
-                    <h4 class="text-blue-400 font-medium">Documentation</h4>
-                </div>
-                <p class="text-sm text-neutral-400 mb-3">Learn how to use and configure Airlink</p>
-                <div class="flex items-center text-blue-400 text-sm font-medium group-hover:text-blue-300 transition-colors">
-                    Read Docs
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                </div>
-            </a>
+                    <h4 class="text-neutral-300 font-medium">Documentation</h4>
+                  </div>
+                  <p class="text-sm text-neutral-400 mb-3">Learn how to use and configure Airlink</p>
+                  <div
+                    class="flex items-center text-neutral-400 text-sm font-medium">
+                    Coming Soon
 
-            <!-- GitHub Card -->
-            <a href="https://github.com/airlinklabs" class="group flex flex-col justify-between bg-gradient-to-br from-neutral-500/10 to-neutral-600/5 border border-neutral-500/20 rounded-xl p-5 shadow-md hover:shadow-lg transition-all duration-300">
-                <div class="flex items-center mb-3">
-                    <div class="p-2 rounded-lg bg-neutral-500/20 mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-neutral-400" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                        </svg>
+                  </div>
+                </a>
+
+                <!-- GitHub Card -->
+                <a href="https://github.com/airlinklabs"
+                  class="group flex flex-col justify-between bg-white/5 border border-neutral-800/20 rounded-xl p-5 shadow-md hover:shadow-lg transition-all duration-300">
+                  <div class="flex items-center mb-3">
+                    <div class="p-2 rounded-lg bg-neutral-700/30 mr-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-neutral-400" viewBox="0 0 24 24"
+                        fill="currentColor">
+                        <path
+                          d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                      </svg>
                     </div>
-                    <h4 class="text-neutral-400 font-medium">GitHub</h4>
-                </div>
-                <p class="text-sm text-neutral-400 mb-3">View source code and contribute to the project</p>
-                <div class="flex items-center text-neutral-400 text-sm font-medium group-hover:text-neutral-300 transition-colors">
+                    <h4 class="text-neutral-300 font-medium">GitHub</h4>
+                  </div>
+                  <p class="text-sm text-neutral-400 mb-3">View source code and contribute to the project</p>
+                  <div
+                    class="flex items-center text-neutral-300 text-sm font-medium group-hover:text-neutral-200 transition-colors">
                     View Repository
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20"
+                      fill="currentColor">
+                      <path fill-rule="evenodd"
+                        d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                        clip-rule="evenodd" />
                     </svg>
-                </div>
-            </a>
+                  </div>
+                </a>
 
-            <!-- Support Card -->
-            <a href="https://ko-fi.com/airlinklabs#checkoutModal" class="group flex flex-col justify-between bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 rounded-xl p-5 shadow-md hover:shadow-lg transition-all duration-300">
-                <div class="flex items-center mb-3">
-                    <div class="p-2 rounded-lg bg-emerald-500/20 mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                            <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
-                        </svg>
+                <!-- Support Card -->
+                <a href="https://ko-fi.com/airlinklabs#checkoutModal"
+                  class="group flex flex-col justify-between bg-white/5 border border-neutral-800/20 rounded-xl p-5 shadow-md hover:shadow-lg transition-all duration-300">
+                  <div class="flex items-center mb-3">
+                    <div class="p-2 rounded-lg bg-neutral-700/30 mr-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-neutral-400" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                        <path fill-rule="evenodd"
+                          d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"
+                          clip-rule="evenodd" />
+                      </svg>
                     </div>
-                    <h4 class="text-emerald-400 font-medium">Support</h4>
-                </div>
-                <p class="text-sm text-neutral-400 mb-3">Help fund the development of Airlink</p>
-                <div class="flex items-center text-emerald-400 text-sm font-medium group-hover:text-emerald-300 transition-colors">
+                    <h4 class="text-neutral-300 font-medium">Support</h4>
+                  </div>
+                  <p class="text-sm text-neutral-400 mb-3">Help fund the development of Airlink</p>
+                  <div
+                    class="flex items-center text-neutral-300 text-sm font-medium group-hover:text-neutral-200 transition-colors">
                     Donate
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20"
+                      fill="currentColor">
+                      <path fill-rule="evenodd"
+                        d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                        clip-rule="evenodd" />
                     </svg>
-                </div>
-            </a>
-         </div>
-       </div>
+                  </div>
+                </a>
+            </div>
+
+        </div>
+      </div>
     </div>
-  </div>
-</main>
-<%- include('../../components/footer') %>
+  </main>
+  <%- include('../../components/footer') %>

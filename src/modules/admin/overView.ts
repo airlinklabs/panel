@@ -59,6 +59,7 @@ const adminModule: Module = {
             imageCount,
             req,
             settings,
+            airlinkVersion: res.locals.airlinkVersion,
           });
         } catch (error) {
           logger.error('Error fetching user:', error);
@@ -67,10 +68,12 @@ const adminModule: Module = {
       },
     );
 
+
+
     router.get(
       '/admin/check-update',
       isAuthenticated(true, 'airlink.admin.overview.checkForUpdates'),
-      async (req: Request, res: Response) => {
+      async (_req: Request, res: Response) => {
         try {
           const updateInfo = await checkForUpdates();
           res.json(updateInfo);
@@ -84,7 +87,7 @@ const adminModule: Module = {
     router.post(
       '/admin/perform-update',
       isAuthenticated(true, 'airlink.admin.overview.performUpdate'),
-      async (req: Request, res: Response) => {
+      async (_req: Request, res: Response) => {
         try {
           const success = await performUpdate();
           if (success) {
