@@ -23,11 +23,11 @@ export const handleCsrfError = (err: any, req: Request, res: Response, next: Nex
     // For AJAX requests, return a JSON error
     res.status(403).json({ error: 'CSRF token validation failed' });
   } else {
-    // For regular form submissions, redirect to an error page or back to the form
-    res.status(403).render('error', {
-      message: 'Invalid form submission. Please try again.',
-      error: { status: 403, stack: '' },
-      req,
+    // For regular form submissions, return a JSON error instead of trying to render a view
+    res.status(403).json({
+      error: 'Invalid form submission. Please try again.',
+      message: 'CSRF token validation failed',
+      status: 403
     });
   }
 };

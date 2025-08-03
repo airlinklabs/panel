@@ -60,6 +60,7 @@
             </div>
 
             <form id="startupForm" action="/server/<%= server.UUID %>/startup/command" method="POST" enctype="application/x-www-form-urlencoded">
+              <%- include('../../components/csrf') %>
               <div class="p-5">
                 <div class="mb-4">
                   <label for="startCommand" class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2">Startup Command</label>
@@ -96,6 +97,7 @@
             </div>
 
             <form id="dockerImageForm" action="/server/<%= server.UUID %>/startup/docker-image" method="POST" enctype="application/x-www-form-urlencoded">
+              <%- include('../../components/csrf') %>
               <div class="p-5">
                 <div class="mb-4">
                   <label for="dockerImage" class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2">Docker Image</label>
@@ -156,6 +158,7 @@
           <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4">Configure environment variables for your server.</p>
 
           <form id="variablesForm" action="/server/<%= server.UUID %>/startup/variables" method="POST" enctype="application/x-www-form-urlencoded">
+            <%- include('../../components/csrf') %>
             <div id="variablesContainer" class="space-y-4">
               <% if (serverVariables && serverVariables.length > 0) { %>
                 <% serverVariables.forEach((variable, index) => { %>
@@ -243,27 +246,85 @@
     const variablesForm = document.getElementById('variablesForm');
 
     startupForm.addEventListener('submit', function(e) {
+      e.preventDefault();
 
       const submitButton = startupForm.querySelector('button[type="submit"]');
       const originalButtonText = submitButton.textContent;
       submitButton.textContent = 'Saving...';
       submitButton.disabled = true;
 
-      setTimeout(() => {
+      // Prepare form data
+      const formData = new FormData(startupForm);
+
+      // Submit via fetch (CSRF token will be added automatically by csrf.js)
+      fetch(startupForm.action, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json().catch(() => ({ success: true }));
+        } else {
+          return response.json().then(data => Promise.reject(data));
+        }
+      })
+      .then(data => {
         submitButton.textContent = originalButtonText;
         submitButton.disabled = false;
-      }, 5000);
+
+        if (data.success !== false) {
+          showMessage('Startup command saved successfully!', 'success');
+          setTimeout(() => window.location.reload(), 1500);
+        } else {
+          showMessage(data.error || 'Failed to save startup command', 'error');
+        }
+      })
+      .catch(error => {
+        submitButton.textContent = originalButtonText;
+        submitButton.disabled = false;
+        showMessage(error.message || error.error || 'Failed to save startup command', 'error');
+      });
     });
 
     variablesForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+
       const submitButton = variablesForm.querySelector('button[type="submit"]');
       const originalButtonText = submitButton.textContent;
       submitButton.textContent = 'Saving...';
       submitButton.disabled = true;
-      setTimeout(() => {
+
+      // Prepare form data
+      const formData = new FormData(variablesForm);
+
+      // Submit via fetch (CSRF token will be added automatically by csrf.js)
+      fetch(variablesForm.action, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json().catch(() => ({ success: true }));
+        } else {
+          return response.json().then(data => Promise.reject(data));
+        }
+      })
+      .then(data => {
         submitButton.textContent = originalButtonText;
         submitButton.disabled = false;
-      }, 5000);
+
+        if (data.success !== false) {
+          showMessage('Variables saved successfully!', 'success');
+          setTimeout(() => window.location.reload(), 1500);
+        } else {
+          showMessage(data.error || 'Failed to save variables', 'error');
+        }
+      })
+      .catch(error => {
+        submitButton.textContent = originalButtonText;
+        submitButton.disabled = false;
+        showMessage(error.message || error.error || 'Failed to save variables', 'error');
+      });
     });
   });
 </script>
