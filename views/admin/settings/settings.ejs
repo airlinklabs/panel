@@ -30,7 +30,7 @@
                           type="text"
                           name="title"
                           placeholder="<%= settings.title %>"
-                          class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5 transition-all"
+                          class="rounded-xl border border-neutral-600/30 focus:border-white/70 focus:ring-1 focus:ring-white/50 focus:outline-none text-sm mt-1 mb-0 w-full transition-colors duration-200 ease-in-out hover:bg-white/5 px-4 py-2 bg-neutral-700/20 placeholder-neutral-400"
                       >
                   </div>
 
@@ -40,7 +40,7 @@
                       <input
                           type="file"
                           name="logo"
-                          class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 transition-all"
+                          class="rounded-xl border border-neutral-600/30 focus:border-white/70 focus:ring-1 focus:ring-white/50 focus:outline-none text-sm mt-1 mb-0 w-full transition-colors duration-200 ease-in-out hover:bg-white/5 px-4 py-2 bg-neutral-700/20 placeholder-neutral-400"
                       >
                       <% if (settings.logo) { %>
                       <div class="mt-2">
@@ -57,7 +57,7 @@
                           type="file"
                           name="favicon"
                           accept=".ico,.png,.jpg,.jpeg"
-                          class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 transition-all"
+                          class="rounded-xl border border-neutral-600/30 focus:border-white/70 focus:ring-1 focus:ring-white/50 focus:outline-none text-sm mt-1 mb-0 w-full transition-colors duration-200 ease-in-out hover:bg-white/5 px-4 py-2 bg-neutral-700/20 placeholder-neutral-400"
                       >
                       <% if (settings.favicon) { %>
                       <div class="mt-2">
@@ -72,11 +72,11 @@
                       <label class="block text-white text-sm font-medium mb-2"><%= req.translations.theme || 'Theme' %></label>
                       <select
                           name="theme"
-                          class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5 transition-all"
+                          class="rounded-xl border border-neutral-600/30 focus:border-white/70 focus:ring-1 focus:ring-white/50 focus:outline-none text-sm mt-1 mb-0 w-full transition-colors duration-200 ease-in-out hover:bg-white/5 px-4 py-2 bg-neutral-700/20 text-white"
                       >
-                          <option class="text-white" value="default" <%= settings.theme === 'default' ? 'selected' : '' %>>Default</option>
-                          <option class="text-white" value="dark" <%= settings.theme === 'dark' ? 'selected' : '' %> disabled>Dark</option>
-                          <option class="text-white" value="light" <%= settings.theme === 'light' ? 'selected' : '' %> disabled>Light</option>
+                          <option class="text-black" value="default" <%= settings.theme === 'default' ? 'selected' : '' %>>Default</option>
+                          <option class="text-black" value="dark" <%= settings.theme === 'dark' ? 'selected' : '' %> disabled>Dark</option>
+                          <option class="text-black" value="light" <%= settings.theme === 'light' ? 'selected' : '' %> disabled>Light</option>
                       </select>
                   </div>
 
@@ -84,10 +84,10 @@
                       <label class="block text-white text-sm font-medium mb-2"><%= req.translations.defaultLanguage || 'Default Language' %></label>
                       <select
                           name="language"
-                          class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5 transition-all"
+                          class="rounded-xl border border-neutral-600/30 focus:border-white/70 focus:ring-1 focus:ring-white/50 focus:outline-none text-sm mt-1 mb-0 w-full transition-colors duration-200 ease-in-out hover:bg-white/5 px-4 py-2 bg-neutral-700/20 text-white"
                       >
-                          <option class="text-white" value="en" <%= settings.language === 'en' ? 'selected' : '' %>>English</option>
-                          <option class="text-white" value="fr" <%= settings.language === 'fr' ? 'selected' : '' %>>Français</option>
+                          <option class="text-black" value="en" <%= settings.language === 'en' ? 'selected' : '' %>>English</option>
+                          <option class="text-black" value="fr" <%= settings.language === 'fr' ? 'selected' : '' %>>Français</option>
                       </select>
                   </div>
               </div>
