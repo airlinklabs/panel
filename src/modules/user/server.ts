@@ -490,6 +490,9 @@ const dashboardModule: Module = {
           let files = (await axios(filesRequest)).data as any[];
           files = typeof files === 'string' ? JSON.parse(files) : files;
 
+          // Filter out the airlink folder
+          files = files.filter((file: any) => file.name !== 'airlink');
+
           files = files.sort((a: any, b: any) => {
             if (a.type === 'directory' && b.type === 'file') {
               return -1;

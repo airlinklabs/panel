@@ -363,6 +363,48 @@
                 }
               });
 
+              // API Performance Monitoring
+              async function measureApiLatency() {
+                try {
+                  const startTime = performance.now();
+                  const response = await fetch('/api/v1/ping');
+                  const endTime = performance.now();
+
+                  if (response.ok) {
+                    const latency = Math.round(endTime - startTime);
+                    updateApiLatency(latency);
+                  }
+                } catch (error) {
+                  console.error('Error measuring API latency:', error);
+                  document.getElementById('apiLatency').textContent = 'Error';
+                }
+              }
+
+              function updateApiLatency(latency) {
+                const latencyElement = document.getElementById('apiLatency');
+                const latencyBar = document.getElementById('latencyBar');
+
+                latencyElement.textContent = `${latency} ms`;
+
+                // Update progress bar (scale: 0-500ms = 0-100%)
+                const percentage = Math.min((latency / 500) * 100, 100);
+                latencyBar.style.width = `${percentage}%`;
+
+                // Color coding based on latency
+                latencyBar.classList.remove('bg-emerald-500', 'bg-amber-500', 'bg-red-500', 'bg-neutral-500');
+                if (latency < 100) {
+                  latencyBar.classList.add('bg-emerald-500'); // Good
+                } else if (latency < 300) {
+                  latencyBar.classList.add('bg-amber-500'); // Fair
+                } else {
+                  latencyBar.classList.add('bg-red-500'); // Poor
+                }
+              }
+
+              // Initial measurement and periodic updates
+              measureApiLatency();
+              setInterval(measureApiLatency, 30000); // Update every 30 seconds
+
             </script>
 
           <!-- Resources & Community Section -->

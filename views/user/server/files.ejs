@@ -542,6 +542,29 @@ function initializeSelectedFiles() {
   updateSelectedFiles();
 }
 
+// Select All functionality
+selectAllCheckbox.addEventListener('change', event => {
+    const isChecked = event.target.checked;
+
+    // Get all file checkboxes (excluding the select all checkbox itself)
+    const fileCheckboxes = document.querySelectorAll('.file-checkbox:not(#selectAll)');
+
+    fileCheckboxes.forEach(checkbox => {
+        checkbox.checked = isChecked;
+        const fileName = checkbox.dataset.filename;
+
+        if (isChecked) {
+            if (!selectedFiles.includes(fileName)) {
+                selectedFiles.push(fileName);
+            }
+        } else {
+            selectedFiles = selectedFiles.filter(name => name !== fileName);
+        }
+    });
+
+    updateSelectedFiles();
+});
+
 document.querySelectorAll('.file-checkbox').forEach(checkbox => {
     checkbox.addEventListener('change', event => {
         const fileName = event.target.dataset.filename;
@@ -551,6 +574,12 @@ document.querySelectorAll('.file-checkbox').forEach(checkbox => {
         } else {
             selectedFiles = selectedFiles.filter(name => name !== fileName);
         }
+
+        // Update select all checkbox state
+        const fileCheckboxes = document.querySelectorAll('.file-checkbox:not(#selectAll)');
+        const checkedCount = document.querySelectorAll('.file-checkbox:not(#selectAll):checked').length;
+        selectAllCheckbox.checked = checkedCount === fileCheckboxes.length;
+        selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < fileCheckboxes.length;
 
         updateSelectedFiles();
     });

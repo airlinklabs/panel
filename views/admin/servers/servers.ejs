@@ -100,6 +100,14 @@
                     </div></td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                   <div class="flex gap-3">
+                    <a href="/server/<%= server.UUID %>" class="group relative" onclick="event.stopPropagation()">
+                      <button type="button" class="rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/30 px-3 py-2 text-center text-sm font-medium shadow-lg hover:bg-neutral-800 dark:hover:bg-neutral-700 transition-all duration-200" aria-label="Jump to Server">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-300">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                      </button>
+                      <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-auto px-2.5 py-1 bg-black/80 text-white text-xs rounded pointer-events-none opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity duration-300 z-50 after:content-[''] after:absolute after:top-full after:left-1/2 after:-ml-1 after:border-4 after:border-transparent after:border-t-black/80">Jump to Server</span>
+                    </a>
                     <a href="/admin/servers/edit/<%= server.id %>" class="group relative" onclick="event.stopPropagation()">
                       <button type="button" class="rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/30 px-3 py-2 text-center text-sm font-medium shadow-lg hover:bg-neutral-800 dark:hover:bg-neutral-700 transition-all duration-200" aria-label="Edit Server">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-300">

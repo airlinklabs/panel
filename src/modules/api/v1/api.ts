@@ -19,6 +19,23 @@ const coreModule: Module = {
   router: () => {
     const router = Router();
 
+    // Ping endpoint for health checks and latency measurement
+    router.get('/api/v1/ping', async (_req: Request, res: Response) => {
+      try {
+        res.json({
+          status: 'ok',
+          timestamp: new Date().toISOString(),
+          uptime: process.uptime(),
+          version: '1.0.0'
+        });
+      } catch (error) {
+        logger.error('Error in ping endpoint:', error);
+        res.status(500).json({
+          status: 'error',
+          message: 'Internal Server Error'
+        });
+      }
+    });
 
     router.get('/api', async (req: Request, res: Response) => {
       try {
