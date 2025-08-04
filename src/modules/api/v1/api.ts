@@ -19,6 +19,11 @@ const coreModule: Module = {
   router: () => {
     const router = Router();
 
+    // Lightweight ping endpoint for performance monitoring
+    router.get('/api/v1/ping', (req: Request, res: Response) => {
+      res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+    });
+
 
     router.get('/api', async (req: Request, res: Response) => {
       try {
