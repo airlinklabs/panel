@@ -2803,6 +2803,336 @@ const dashboardModule: Module = {
       },
     );
 
+    // Backup endpoints
+    router.get(
+      '/server/:id/backups',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true, image: true },
+          });
+
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+
+          const backups = await prisma.backup.findMany({
+            where: { serverId: serverId },
+            orderBy: { createdAt: 'desc' },
+          });
+
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+
+          res.render('user/server/backups', {
+            user,
+            req,
+            server,
+            backups,
+            settings,
+            features: JSON.parse(server.image.info || '{}').features || [],
+            installed: await checkForServerInstallation(serverId),
+          });
+        } catch (error) {
+          logger.error('Error fetching backups:', error);
+          res.status(500).json({ error: 'Failed to fetch backups' });
+        }
+      },
+    );
+
+    router.post(
+      '/server/:id/backups/create',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+        const { name } = req.body;
+
+        if (!name || name.trim() === '') {
+          res.status(400).json({ error: 'Backup name is required' });
+          return;
+        }
+
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true },
+          });
+
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+
+          const response = await axios.post(
+            `http://${server.node.address}:${server.node.port}/container/backup`,
+            {
+              id: serverId,
+              name: name.trim(),
+            },
+            {
+              auth: {
+                username: 'Airlink',
+                password: server.node.key,
+              },
+              timeout: 300000,
+            }
+          );
+
+          if (response.data.success) {
+            const backup = await prisma.backup.create({
+              data: {
+                UUID: response.data.backup.uuid,
+                name: name.trim(),
+                serverId: serverId,
+                filePath: response.data.backup.filePath,
+                size: BigInt(response.data.backup.size),
+              },
+            });
+
+            res.json({
+              success: true,
+              message: 'Backup created successfully',
+              backup: {
+                ...backup,
+                size: backup.size ? backup.size.toString() : '0',
+              },
+            });
+          } else {
+            res.status(500).json({ error: 'Failed to create backup on daemon' });
+          }
+        } catch (error) {
+          logger.error('Error creating backup:', error);
+          if (axios.isAxiosError(error)) {
+            res.status(500).json({
+              error: `Failed to create backup: ${error.response?.data?.error || error.message}`
+            });
+          } else {
+            res.status(500).json({ error: 'Failed to create backup' });
+          }
+        }
+      },
+    );
+
+    router.post(
+      '/server/:id/backups/:backupId/restore',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+        const backupId = req.params?.backupId;
+
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true },
+          });
+
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+
+          const backup = await prisma.backup.findUnique({
+            where: { UUID: backupId, serverId: serverId },
+          });
+
+          if (!backup) {
+            res.status(404).json({ error: 'Backup not found' });
+            return;
+          }
+
+          const response = await axios.post(
+            `http://${server.node.address}:${server.node.port}/container/restore`,
+            {
+              id: serverId,
+              backupPath: backup.filePath,
+            },
+            {
+              auth: {
+                username: 'Airlink',
+                password: server.node.key,
+              },
+              timeout: 300000,
+            }
+          );
+
+          if (response.data.success) {
+            res.json({
+              success: true,
+              message: 'Backup restored successfully',
+            });
+          } else {
+            res.status(500).json({ error: 'Failed to restore backup on daemon' });
+          }
+        } catch (error) {
+          logger.error('Error restoring backup:', error);
+          if (axios.isAxiosError(error)) {
+            res.status(500).json({
+              error: `Failed to restore backup: ${error.response?.data?.error || error.message}`
+            });
+          } else {
+            res.status(500).json({ error: 'Failed to restore backup' });
+          }
+        }
+      },
+    );
+
+    router.get(
+      '/server/:id/backups/:backupId/download',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+        const backupId = req.params?.backupId;
+
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true },
+          });
+
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+
+          const backup = await prisma.backup.findUnique({
+            where: { UUID: backupId, serverId: serverId },
+          });
+
+          if (!backup) {
+            res.status(404).json({ error: 'Backup not found' });
+            return;
+          }
+
+          const downloadUrl = `http://${server.node.address}:${server.node.port}/container/backup/download`;
+          const response = await axios({
+            method: 'GET',
+            url: downloadUrl,
+            params: {
+              backupPath: backup.filePath,
+            },
+            auth: {
+              username: 'Airlink',
+              password: server.node.key,
+            },
+            responseType: 'stream',
+          });
+
+          const fileName = `${backup.name}_${backup.createdAt.toISOString().split('T')[0]}.tar.gz`;
+          res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+          res.setHeader('Content-Type', 'application/gzip');
+
+          response.data.pipe(res);
+        } catch (error) {
+          logger.error('Error downloading backup:', error);
+          if (axios.isAxiosError(error)) {
+            res.status(500).json({
+              error: `Failed to download backup: ${error.response?.data?.error || error.message}`
+            });
+          } else {
+            res.status(500).json({ error: 'Failed to download backup' });
+          }
+        }
+      },
+    );
+
+    router.delete(
+      '/server/:id/backups/:backupId',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+        const backupId = req.params?.backupId;
+
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true },
+          });
+
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+
+          const backup = await prisma.backup.findUnique({
+            where: { UUID: backupId, serverId: serverId },
+          });
+
+          if (!backup) {
+            res.status(404).json({ error: 'Backup not found' });
+            return;
+          }
+
+          try {
+            await axios.delete(
+              `http://${server.node.address}:${server.node.port}/container/backup`,
+              {
+                data: {
+                  backupPath: backup.filePath,
+                },
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+              }
+            );
+          } catch (daemonError) {
+            logger.warn('Failed to delete backup file from daemon');
+          }
+
+          await prisma.backup.delete({
+            where: { UUID: backupId },
+          });
+
+          res.json({
+            success: true,
+            message: 'Backup deleted successfully',
+          });
+        } catch (error) {
+          logger.error('Error deleting backup:', error);
+          res.status(500).json({ error: 'Failed to delete backup' });
+        }
+      },
+    );
+
     return router;
   },
 };
