@@ -13,6 +13,7 @@ prisma/*
 /package-lock.json
 /pnpm-lock.yaml
 /bun.lockb
+/bun.lock
 
 # Logs
 /logs
