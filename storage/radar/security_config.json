@@ -1,0 +1,47 @@
+{
+  "security": {
+    "version": "2.0.0",
+    "scan_settings": {
+      "max_threads": 8,
+      "max_file_size_mb": 100,
+      "scan_timeout_seconds": 300,
+      "cpu_threshold": 80,
+      "memory_threshold_mb": 4096,
+      "rate_limit": {
+        "requests_per_minute": 1000,
+        "burst_limit": 100
+      }
+    },
+    "threat_intelligence": {
+      "update_frequency_hours": 1,
+      "sources": [
+        "https://feodotracker.abuse.ch/downloads/ipblocklist.txt",
+        "https://rules.emergingthreats.net/blockrules/compromised-ips.txt",
+        "https://www.binarydefense.com/banlist.txt"
+      ]
+    },
+    "logging": {
+      "level": "warn",
+      "retention_days": 30,
+      "max_size_mb": 100
+    },
+    "auto_mitigation": {
+      "quarantine_malicious": true,
+      "block_ips": true,
+      "alert_admins": true
+    },
+    "exclusions": {
+      "paths": [
+        "/proc/**",
+        "/sys/**",
+        "/dev/**",
+        "/run/**"
+      ],
+      "extensions": [
+        ".log",
+        ".tmp",
+        ".cache"
+      ]
+    }
+  }
+}

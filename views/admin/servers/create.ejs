@@ -21,39 +21,116 @@
             <!-- General Category -->
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">General</h2>
             <div class="grid grid-cols-2 gap-4 mb-6">
-              <div>
-                <label for="serverName" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.name %>:</label>
-                <div class="flex items-center space-x-2">
-                    <input id="serverName" name="name" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server">
-                    <div class="flex-shrink-0 p-2 mb-1 -ml-5" onclick="generateRandomName()">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-neutral-300">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
-                        </svg>
-                    </div>
+              <div class="relative">
+                <div class="flex items-center justify-between">
+                  <label for="serverName" class="text-neutral-700 dark:text-neutral-400 text-sm font-medium tracking-tight mb-2">
+                    <%= req.translations.name %> <span class="text-red-500">*</span>
+                  </label>
                 </div>
-            </div>
-
-              <div>
-                <label for="serverDescription" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.description %>:</label>
-                <input id="serverDescription" name="description" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server description">
+                <div class="relative">
+                  <div class="flex items-center space-x-2">
+                    <input 
+                      id="serverName" 
+                      name="name" 
+                      class="block w-full rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5 hover:border-neutral-800/20 dark:hover:border-white/10 focus:outline-none transition-colors" 
+                      placeholder="<%= user.username %>'s server"
+                      required
+                    >
+                    <div class="flex-shrink-0 p-2 cursor-pointer hover:bg-neutral-200/10 dark:hover:bg-white/5 rounded-lg transition-colors" onclick="generateRandomName()">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-neutral-400 hover:text-blue-500 transition-colors">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="absolute inset-y-0 right-10 flex items-center pr-3 pointer-events-none">
+                    <svg class="h-5 w-5 text-blue-500 hidden" id="nameCheck" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+                <p class="mt-1 text-xs text-neutral-500">A unique name to identify your server.</p>
               </div>
 
-              <div>
-                <label for="serverUser" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.user %>:</label>
-                <select id="serverUser" name="ownerId" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
-                  <% users.forEach(user => { %>
-                    <option value="<%= user.id %>"><%= user.username %></option>
-                  <% }); %>
-                </select>
+              <div class="relative">
+                <div class="flex items-center justify-between">
+                  <label for="serverDescription" class="text-neutral-700 dark:text-neutral-400 text-sm font-medium tracking-tight mb-2">
+                    <%= req.translations.description %> <span class="text-red-500">*</span>
+                  </label>
+                  <span id="descriptionCounter" class="text-xs text-neutral-500">0/500</span>
+                </div>
+                <div class="relative mt-2">
+                  <textarea 
+                    id="serverDescription" 
+                    name="description" 
+                    rows="3"
+                    maxlength="500"
+                    class="block w-full rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5 hover:border-neutral-800/20 dark:hover:border-white/10 focus:outline-none transition-colors" 
+                    placeholder="Describe your server's purpose, rules, or any important information for users..."
+                    required
+                  ></textarea>
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="h-5 w-5 text-blue-500 hidden" id="descriptionCheck" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+                <p class="mt-1 text-xs text-neutral-500">A clear description helps users understand your server's purpose and rules.</p>
+              </div>
+              <script>
+                document.getElementById('serverDescription').addEventListener('input', function() {
+                  const counter = document.getElementById('descriptionCounter');
+                  const check = document.getElementById('descriptionCheck');
+                  const length = this.value.length;
+                  counter.textContent = `${length}/500`;
+                  
+                  // Change color based on length
+                  if (length > 0) {
+                    check.classList.remove('hidden');
+                    counter.classList.remove('text-red-500');
+                    counter.classList.add('text-green-500');
+                  } else {
+                    check.classList.add('hidden');
+                    counter.classList.remove('text-green-500');
+                    counter.classList.add('text-red-500');
+                  }
+                });
+              </script>
+
+              <div class="relative">
+                <div class="flex items-center justify-between">
+                  <label for="serverUser" class="text-neutral-700 dark:text-neutral-400 text-sm font-medium tracking-tight mb-2">
+                    <%= req.translations.user %> <span class="text-red-500">*</span>
+                  </label>
+                </div>
+                <div class="relative">
+                  <select 
+                    id="serverUser" 
+                    name="userId" 
+                    class="block w-full rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 hover:border-neutral-800/20 dark:hover:border-white/10 focus:outline-none transition-colors"
+                    required
+                  >
+                    <% users.forEach(user => { %>
+                      <option value="<%= user.id %>"><%= user.username %></option>
+                    <% }); %>
+                  </select>
+                </div>
+                <p class="mt-1 text-xs text-neutral-500">Select the user who will own this server.</p>
               </div>
 
-              <div>
-                <label for="serverNode" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <%= req.translations.Node %>:
-                </label>
-                <div class="relative mt-2 mb-4">
-                  <select id="serverNode" name="nodeId"
-                          class="block w-full rounded-xl bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 text-neutral-800 dark:text-white text-sm px-4 py-2 focus:outline-none focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 hover:bg-white/5 dark:hover:bg-neutral-700/30">
+              <div class="relative">
+                <div class="flex items-center justify-between">
+                  <label for="serverNode" class="text-neutral-700 dark:text-neutral-400 text-sm font-medium tracking-tight mb-2">
+                    <%= req.translations.Node %> <span class="text-red-500">*</span>
+                  </label>
+                </div>
+                <div class="relative">
+                  <select 
+                    id="serverNode" 
+                    name="nodeId"
+                    class="block w-full rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 hover:border-neutral-800/20 dark:hover:border-white/10 focus:outline-none transition-colors"
+                    required
+                    <% if (nodes.length === 0) { %>disabled<% } %>
+                  >
                     <% if (nodes.length > 0) { %>
                       <% nodes.forEach(node => { %>
                         <option value="<%= node.id %>"><%= node.name %></option>
@@ -63,57 +140,162 @@
                     <% } %>
                   </select>
                 </div>
+                <p class="mt-1 text-xs text-neutral-500">Select the node where this server will be hosted.</p>
+                <% if (nodes.length === 0) { %>
+                  <p class="mt-1 text-xs text-red-500">No nodes available. Please add a node first.</p>
+                <% } %>
               </div>
             </div>
 
             <!-- Resources Category -->
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Resources</h2>
             <div class="grid grid-cols-3 gap-4">
-              <div>
-                <label for="serverCPU" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">CPU (Cores):</label>
-                <input id="serverCPU" name="Cpu" type="number" min="1" max="128" value="2" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+              <div class="relative">
+                <div class="flex items-center justify-between">
+                  <label for="serverCPU" class="text-neutral-700 dark:text-neutral-400 text-sm font-medium tracking-tight mb-2">
+                    CPU (Cores) <span class="text-red-500">*</span>
+                  </label>
+                </div>
+                <div class="relative">
+                  <input 
+                    id="serverCPU" 
+                    name="Cpu" 
+                    type="number" 
+                    min="1" 
+                    max="128" 
+                    value="2" 
+                    class="block w-full rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 hover:border-neutral-800/20 dark:hover:border-white/10 focus:outline-none transition-colors"
+                    required
+                  >
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span class="text-sm text-neutral-500">Cores</span>
+                  </div>
+                </div>
+                <p class="mt-1 text-xs text-neutral-500">Number of CPU cores allocated to this server.</p>
               </div>
 
-              <div>
-                <label for="serverMemory" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Memory (GB):</label>
-                <input id="serverMemory" name="Memory" type="number" min="1" max="128" value="4" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+              <div class="relative">
+                <div class="flex items-center justify-between">
+                  <label for="serverMemory" class="text-neutral-700 dark:text-neutral-400 text-sm font-medium tracking-tight mb-2">
+                    Memory (GB) <span class="text-red-500">*</span>
+                  </label>
+                </div>
+                <div class="relative">
+                  <input 
+                    id="serverMemory" 
+                    name="Memory" 
+                    type="number" 
+                    min="1" 
+                    max="128" 
+                    value="4" 
+                    class="block w-full rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 hover:border-neutral-800/20 dark:hover:border-white/10 focus:outline-none transition-colors"
+                    required
+                  >
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span class="text-sm text-neutral-500">GB</span>
+                  </div>
+                </div>
+                <p class="mt-1 text-xs text-neutral-500">Amount of RAM allocated to this server.</p>
               </div>
 
-              <div>
-                <label for="serverStorage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Storage (GB):</label>
-                <input id="serverStorage" name="Storage" type="number" min="1" max="1000" value="20" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+              <div class="relative">
+                <div class="flex items-center justify-between">
+                  <label for="serverStorage" class="text-neutral-700 dark:text-neutral-400 text-sm font-medium tracking-tight mb-2">
+                    Storage (GB) <span class="text-red-500">*</span>
+                  </label>
+                </div>
+                <div class="relative">
+                  <input 
+                    id="serverStorage" 
+                    name="Storage" 
+                    type="number" 
+                    min="1" 
+                    max="1000" 
+                    value="20" 
+                    class="block w-full rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 hover:border-neutral-800/20 dark:hover:border-white/10 focus:outline-none transition-colors"
+                    required
+                  >
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span class="text-sm text-neutral-500">GB</span>
+                  </div>
+                </div>
+                <p class="mt-1 text-xs text-neutral-500">Amount of disk space allocated to this server.</p>
               </div>
             </div>
 
             <!-- Startup Category -->
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Startup</h2>
             <div class="grid grid-cols-2 gap-4 mb-6">
-              <div>
-                <label for="serverImage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.Image %>:</label>
-                <select id="serverImage" name="imageId"
-                        class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
-                  <% images.forEach(image => { %>
-                    <option value="<%= image.id %>" data-docker-images='<%= image.dockerImages %>' data-variables='<%= image.variables %>'>
-                      <%= image.name %>
-                    </option>
-                  <% }); %>
-                </select>
+              <div class="relative">
+                <div class="flex items-center justify-between">
+                  <label for="serverImage" class="text-neutral-700 dark:text-neutral-400 text-sm font-medium tracking-tight mb-2">
+                    <%= req.translations.Image %> <span class="text-red-500">*</span>
+                  </label>
+                </div>
+                <div class="relative">
+                  <select 
+                    id="serverImage" 
+                    name="imageId"
+                    class="block w-full rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 hover:border-neutral-800/20 dark:hover:border-white/10 focus:outline-none transition-colors"
+                    required
+                    <% if (images.length === 0) { %>disabled<% } %>
+                  >
+                    <% if (images.length > 0) { %>
+                      <% images.forEach(image => { %>
+                        <option value="<%= image.id %>" data-docker-images='<%= image.dockerImages %>' data-variables='<%= image.variables %>'>
+                          <%= image.name %>
+                        </option>
+                      <% }); %>
+                    <% } else { %>
+                      <option value="" disabled selected>No images available</option>
+                    <% } %>
+                  </select>
+                </div>
+                <p class="mt-1 text-xs text-neutral-500">Select the base image for your server.</p>
+                <% if (images.length === 0) { %>
+                  <p class="mt-1 text-xs text-red-500">No images available. Please add an image first.</p>
+                <% } %>
               </div>
 
-              <div>
-                <label for="dockerImage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.DockerImage %>:</label>
-                <select id="dockerImage" name="dockerImage"
-                        class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
-                  <option value="" disabled selected>Select a Docker image</option>
-                </select>
+              <div class="relative">
+                <div class="flex items-center justify-between">
+                  <label for="dockerImage" class="text-neutral-700 dark:text-neutral-400 text-sm font-medium tracking-tight mb-2">
+                    <%= req.translations.DockerImage %> <span class="text-red-500">*</span>
+                  </label>
+                </div>
+                <div class="relative">
+                  <select 
+                    id="dockerImage" 
+                    name="dockerImage"
+                    class="block w-full rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 hover:border-neutral-800/20 dark:hover:border-white/10 focus:outline-none transition-colors"
+                    required
+                    disabled
+                  >
+                    <option value="" disabled selected>Select a Docker image</option>
+                  </select>
+                </div>
+                <p class="mt-1 text-xs text-neutral-500">Select the Docker image version for your server.</p>
               </div>
 
-              <div>
-                <label for="serverPorts" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.Ports %>:</label>
-                <select id="serverPorts" name="Ports" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
-                  <option value="" disabled selected>Select a port</option>
-                  <!-- Port options will be populated based on selected node -->
-                </select>
+              <div class="relative">
+                <div class="flex items-center justify-between">
+                  <label for="serverPorts" class="text-neutral-700 dark:text-neutral-400 text-sm font-medium tracking-tight mb-2">
+                    <%= req.translations.Ports %> <span class="text-red-500">*</span>
+                  </label>
+                </div>
+                <div class="relative">
+                  <select 
+                    id="serverPorts" 
+                    name="Ports" 
+                    class="block w-full rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 hover:border-neutral-800/20 dark:hover:border-white/10 focus:outline-none transition-colors"
+                    required
+                    disabled
+                  >
+                    <option value="" disabled selected>Select a port</option>
+                    <!-- Port options will be populated based on selected node -->
+                  </select>
+                </div>
+                <p class="mt-1 text-xs text-neutral-500">Select an available port for your server.</p>
               </div>
 
               <div class="bg-neutral-100 dark:bg-neutral-700/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
@@ -147,11 +329,27 @@
             </div>
 
             <!-- Submit Button -->
-            <div class="col-span-2">
-                <button type="submit" class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
-                    <%= req.translations.create %>
-                  </button>
+            <div class="col-span-2 mt-8">
+              <div class="flex justify-end space-x-3">
+                <button 
+                  type="button" 
+                  onclick="window.history.back()"
+                  class="px-4 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-200 dark:bg-neutral-700 rounded-xl hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 dark:focus:ring-neutral-500"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  id="submitButton"
+                  class="px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                >
+                  <svg id="submitIcon" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  <span><%= req.translations.create %></span>
+                </button>
               </div>
+            </div>
           </form>
         </div>
       </div>
@@ -163,7 +361,63 @@
 <%- include('../../components/loadingPopup') %>
 
 <script>
+  // Form validation and submission handling
   document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('createServerForm');
+    const submitButton = document.getElementById('submitButton');
+    const submitIcon = document.getElementById('submitIcon');
+    const requiredFields = form.querySelectorAll('[required]');
+    
+    // Function to validate the form
+    function validateForm() {
+      let isValid = true;
+      
+      // Check required fields
+      requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+          isValid = false;
+        }
+      });
+      
+      // Additional validation for dependent fields
+      const dockerImage = document.getElementById('dockerImage');
+      const serverPorts = document.getElementById('serverPorts');
+      
+      if (dockerImage && dockerImage.required && !dockerImage.disabled && !dockerImage.value) {
+        isValid = false;
+      }
+      
+      if (serverPorts && serverPorts.required && !serverPorts.disabled && !serverPorts.value) {
+        isValid = false;
+      }
+      
+      // Update submit button state
+      submitButton.disabled = !isValid;
+      return isValid;
+    }
+    
+    // Add input event listeners to all form fields
+    form.addEventListener('input', validateForm);
+    
+    // Initial validation
+    validateForm();
+    
+    // Handle form submission
+    form.addEventListener('submit', function(e) {
+      if (!validateForm()) {
+        e.preventDefault();
+        return false;
+      }
+      
+      // Show loading state
+      submitButton.disabled = true;
+      submitButton.classList.add('opacity-75');
+      submitIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />';
+      
+      return true;
+    });
+    
+    // Rest of your existing code
     const serverImageSelect = document.getElementById('serverImage');
     const dockerImageSelect = document.getElementById('dockerImage');
     const serverNodeSelect = document.getElementById('serverNode');
