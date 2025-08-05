@@ -732,32 +732,36 @@
     serverNodeSelect.addEventListener('change', () => {
       updatePortsForSelectedNode();
     });
-  });
-</script>
-<script>
-const listA = [
-    "Charged", "Fiery", "Mystical", "Dark", "Angry", "Enchanted",
-    "Blazing", "Cursed", "Frozen", "Swift", "Ancient", "Wicked",
-    "Luminous", "Vengeful", "Radiant", "Thunderous", "Shadow",
-    "Frost", "Vibrant", "Spectral", "Nether", "Ender", "Caving",
-    "Toxic", "Haunted", "Radiant", "Ghostly"
-];
 
-const listB = [
-    "Creeper", "Dragon", "Zombie", "Ghoul", "Enderman", "Skeleton",
-    "Wither", "Magma Cube", "Blaze", "Witch", "Slime", "Spider",
-    "Phantom", "Villager", "Pillager", "Vindicator", "Drowned",
-    "Illager", "Ender Dragon", "Husk", "Stray", "Ravager", "Piglin",
-    "Hoglin", "Shulker", "Warden"
-];
+    // Random name generation
+    const listA = [
+      "Charged", "Fiery", "Mystical", "Dark", "Angry", "Enchanted",
+      "Blazing", "Cursed", "Frozen", "Swift", "Ancient", "Wicked",
+      "Luminous", "Vengeful", "Radiant", "Thunderous", "Shadow",
+      "Frost", "Vibrant", "Spectral", "Nether", "Ender", "Caving",
+      "Toxic", "Haunted", "Radiant", "Ghostly"
+    ];
 
-  function generateRandomName() {
+    const listB = [
+      "Creeper", "Dragon", "Zombie", "Ghoul", "Enderman", "Skeleton",
+      "Wither", "Magma Cube", "Blaze", "Witch", "Slime", "Spider",
+      "Phantom", "Villager", "Pillager", "Vindicator", "Drowned",
+      "Illager", "Ender Dragon", "Husk", "Stray", "Ravager", "Piglin",
+      "Hoglin", "Shulker", "Warden"
+    ];
+
+    window.generateRandomName = function() {
       let randomA, randomB;
       do {
-          randomA = listA[Math.floor(Math.random() * listA.length)];
-          randomB = listB[Math.floor(Math.random() * listB.length)];
+        randomA = listA[Math.floor(Math.random() * listA.length)];
+        randomB = listB[Math.floor(Math.random() * listB.length)];
       } while (randomA === randomB);
       const randomName = randomA + " " + randomB;
       document.getElementById("serverName").value = randomName;
-  }
-  </script>
+      
+      // Trigger input event to update validation
+      const event = new Event('input', { bubbles: true });
+      document.getElementById("serverName").dispatchEvent(event);
+    };
+  });
+</script>
