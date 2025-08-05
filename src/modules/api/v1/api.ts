@@ -37,7 +37,6 @@ const coreModule: Module = {
       }
     });
 
-
     router.get('/api', async (req: Request, res: Response) => {
       try {
         const settings = await prisma.settings.findFirst();

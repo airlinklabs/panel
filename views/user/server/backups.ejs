@@ -1,0 +1,392 @@
+<%- include('../../components/header', { title: 'Backups' }) %>
+
+<main class="h-screen m-auto text-neutral-800 dark:text-white">
+  <!-- Success/Error Messages -->
+  <div id="message-container" class="fixed top-4 right-4 z-50 max-w-md"></div>
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </aside>
+
+    <!-- Main Content -->
+    <section class="flex-1 p-6 overflow-y-auto pt-16">
+      <!-- Page Header -->
+      <header class="sm:flex sm:items-center px-8 pt-4">
+        <%- include('../../components/serverHeader') %>
+        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex gap-2.5">
+          <button id="createBackup" onclick="openCreateBackupModal()" type="button"
+              class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 inline-flex mr-1 text-neutral-800 mb-0.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Create Backup
+          </button>
+        </div>
+      </header>
+
+      <%- include('../../components/installHeader') %>
+
+      <!-- Server Template -->
+      <%- include('../../components/serverTemplate') %>
+
+      <!-- Backups Management -->
+      <div class="px-8 mt-8">
+        <!-- Backups List -->
+        <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-300 dark:border-neutral-800/20">
+          <div class="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 overflow-hidden">
+            <div class="p-5 border-b border-neutral-200 dark:border-neutral-700">
+              <div>
+                <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Server Backups</h2>
+                <p class="text-sm text-neutral-600 dark:text-neutral-400">Manage your server backups.</p>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <% if (backups && backups.length > 0) { %>
+                <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
+                  <thead class="bg-neutral-50 dark:bg-neutral-800/50">
+                    <tr>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                        Size
+                      </th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                        Created
+                      </th>
+                      <th class="px-6 py-3 text-right text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="backups-table-body" class="bg-white dark:bg-neutral-800 divide-y divide-neutral-200 dark:divide-neutral-700">
+                    <% backups.forEach(backup => { %>
+                      <tr data-backup-id="<%= backup.UUID %>">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="text-sm font-medium text-neutral-900 dark:text-white">
+                            <%= backup.name %>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="text-sm text-neutral-500 dark:text-neutral-400">
+                            <%= backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : 'Unknown' %>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="text-sm text-neutral-500 dark:text-neutral-400">
+                            <%= new Date(backup.createdAt).toLocaleDateString() %> <%= new Date(backup.createdAt).toLocaleTimeString() %>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <div class="flex justify-end space-x-2">
+                            <button
+                              onclick="downloadBackup('<%= backup.UUID %>')"
+                              class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/20 hover:bg-blue-200 dark:hover:bg-blue-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                              <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                              </svg>
+                              Download
+                            </button>
+                            <button
+                              onclick="restoreBackup('<%= backup.UUID %>', '<%= backup.name %>')"
+                              class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/20 hover:bg-green-200 dark:hover:bg-green-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            >
+                              <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                              </svg>
+                              Restore
+                            </button>
+                            <button
+                              onclick="deleteBackup('<%= backup.UUID %>', '<%= backup.name %>')"
+                              class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/20 hover:bg-red-200 dark:hover:bg-red-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                            >
+                              <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                              </svg>
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              <% } else { %>
+                <div class="p-8 text-center">
+                  <svg class="mx-auto h-12 w-12 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"></path>
+                  </svg>
+                  <h3 class="mt-2 text-sm font-medium text-neutral-900 dark:text-white">No backups</h3>
+                  <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Get started by creating your first backup.</p>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Loading Modal -->
+<div id="loading-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+  <div class="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-sm mx-4">
+    <div class="flex items-center">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+      <div>
+        <h3 class="text-lg font-medium text-neutral-900 dark:text-white" id="loading-title">Creating backup...</h3>
+        <p class="text-sm text-neutral-500 dark:text-neutral-400" id="loading-message">Please wait while we create your backup.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+  <div class="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-md mx-4">
+    <div class="flex items-center mb-4">
+      <div class="flex-shrink-0">
+        <svg id="confirmation-icon" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+      </div>
+      <div class="ml-3">
+        <h3 class="text-lg font-medium text-neutral-900 dark:text-white" id="confirmation-title">Confirm Action</h3>
+        <p class="text-sm text-neutral-500 dark:text-neutral-400" id="confirmation-message">Are you sure you want to proceed?</p>
+      </div>
+    </div>
+    <div class="flex justify-end space-x-3">
+      <button
+        id="confirmation-cancel"
+        class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md hover:bg-neutral-50 dark:hover:bg-neutral-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        Cancel
+      </button>
+      <button
+        id="confirmation-confirm"
+        class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+      >
+        Confirm
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Backup Modal -->
+<div id="createBackupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+  <div class="bg-white dark:bg-neutral-800 rounded-xl p-8 max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
+    <h2 class="text-2xl font-medium mb-1 text-neutral-800 dark:text-white">Create Backup</h2>
+    <p class="mb-6 text-neutral-600 dark:text-neutral-400">Please choose a name for this backup.</p>
+    <input type="text"
+      id="backupName"
+      class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition mb-4 text-neutral-800 dark:text-white bg-white dark:bg-neutral-700"
+      placeholder="Enter backup name"
+      onkeydown="handleBackupNameKeyPress(event)">
+    <div class="flex justify-end space-x-4">
+      <button onclick="closeCreateBackupModal()" class="px-5 py-2 bg-neutral-200 dark:bg-neutral-600 text-neutral-800 dark:text-white rounded-xl hover:bg-neutral-300 dark:hover:bg-neutral-500 transition">Cancel</button>
+      <button onclick="confirmCreateBackup()" class="w-full md:w-auto rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Create</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const serverUUID = '<%= server.UUID %>';
+
+// Show/hide loading modal
+function showLoading(title, message) {
+  document.getElementById('loading-title').textContent = title;
+  document.getElementById('loading-message').textContent = message;
+  document.getElementById('loading-modal').classList.remove('hidden');
+  document.getElementById('loading-modal').classList.add('flex');
+}
+
+function hideLoading() {
+  document.getElementById('loading-modal').classList.add('hidden');
+  document.getElementById('loading-modal').classList.remove('flex');
+}
+
+// Show/hide confirmation modal
+function showConfirmation(title, message, onConfirm) {
+  document.getElementById('confirmation-title').textContent = title;
+  document.getElementById('confirmation-message').textContent = message;
+  document.getElementById('confirmation-modal').classList.remove('hidden');
+  document.getElementById('confirmation-modal').classList.add('flex');
+  
+  document.getElementById('confirmation-confirm').onclick = () => {
+    hideConfirmation();
+    onConfirm();
+  };
+}
+
+function hideConfirmation() {
+  document.getElementById('confirmation-modal').classList.add('hidden');
+  document.getElementById('confirmation-modal').classList.remove('flex');
+}
+
+document.getElementById('confirmation-cancel').onclick = hideConfirmation;
+
+// Show message
+function showMessage(message, type = 'success') {
+  const container = document.getElementById('message-container');
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `mb-4 p-4 rounded-lg ${type === 'success' ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'}`;
+  messageDiv.textContent = message;
+
+  container.appendChild(messageDiv);
+
+  setTimeout(() => {
+    messageDiv.remove();
+  }, 5000);
+}
+
+// Modal functions
+function openCreateBackupModal() {
+  const modal = document.getElementById('createBackupModal');
+  const input = document.getElementById('backupName');
+
+  modal.classList.remove('opacity-0', 'pointer-events-none');
+  modal.querySelector('div').classList.remove('scale-95');
+  modal.querySelector('div').classList.add('scale-100');
+
+  input.focus();
+}
+
+function closeCreateBackupModal() {
+  const modal = document.getElementById('createBackupModal');
+  modal.classList.add('opacity-0', 'pointer-events-none');
+  modal.querySelector('div').classList.remove('scale-100');
+  modal.querySelector('div').classList.add('scale-95');
+
+  // Clear input
+  document.getElementById('backupName').value = '';
+}
+
+function handleBackupNameKeyPress(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    confirmCreateBackup();
+  }
+}
+
+// Create backup
+async function confirmCreateBackup() {
+  const name = document.getElementById('backupName').value.trim();
+
+  if (!name) {
+    showMessage('Please enter a backup name.', 'error');
+    return;
+  }
+
+  closeCreateBackupModal();
+  showLoading('Creating backup...', 'Please wait while we create your backup. This may take a few minutes.');
+
+  try {
+    const response = await fetch(`/server/${serverUUID}/backups/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showMessage('Backup created successfully!');
+      // Reload the page to show the new backup
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } else {
+      showMessage(data.error || 'Failed to create backup', 'error');
+    }
+  } catch (error) {
+    showMessage('Failed to create backup: ' + error.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+// Download backup
+function downloadBackup(backupId) {
+  window.location.href = `/server/${serverUUID}/backups/${backupId}/download`;
+}
+
+// Restore backup
+function restoreBackup(backupId, backupName) {
+  showConfirmation(
+    'Restore Backup',
+    `Are you sure you want to restore the backup "${backupName}"? This will replace all current server files and cannot be undone.`,
+    async () => {
+      showLoading('Restoring backup...', 'Please wait while we restore your backup. This may take a few minutes.');
+
+      try {
+        const response = await fetch(`/server/${serverUUID}/backups/${backupId}/restore`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showMessage('Backup restored successfully!');
+        } else {
+          showMessage(data.error || 'Failed to restore backup', 'error');
+        }
+      } catch (error) {
+        showMessage('Failed to restore backup: ' + error.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+  );
+}
+
+// Delete backup
+function deleteBackup(backupId, backupName) {
+  showConfirmation(
+    'Delete Backup',
+    `Are you sure you want to delete the backup "${backupName}"? This action cannot be undone.`,
+    async () => {
+      try {
+        const response = await fetch(`/server/${serverUUID}/backups/${backupId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showMessage('Backup deleted successfully!');
+          // Remove the row from the table
+          const row = document.querySelector(`tr[data-backup-id="${backupId}"]`);
+          if (row) {
+            row.remove();
+          }
+
+          // Check if table is now empty
+          const tbody = document.getElementById('backups-table-body');
+          if (tbody && tbody.children.length === 0) {
+            // Reload to show empty state
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          }
+        } else {
+          showMessage(data.error || 'Failed to delete backup', 'error');
+        }
+      } catch (error) {
+        showMessage('Failed to delete backup: ' + error.message, 'error');
+      }
+    }
+  );
+}
+</script>
+
+<%- include('../../components/footer') %>

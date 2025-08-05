@@ -119,6 +119,7 @@
                                 </svg>
                               </button>
                               <form action="/admin/apikeys/toggle/<%= apiKey.id %>" method="POST" class="inline">
+                                <%- include('../../components/csrf') %>
                                 <button type="submit" class="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200">
                                   <% if (apiKey.active) { %>
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -170,6 +171,7 @@
       </div>
 
       <form action="/admin/apikeys/create" method="POST" class="space-y-4">
+         <%- include('../../components/csrf') %>
 
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -277,6 +279,7 @@
       </div>
       <p class="text-sm text-neutral-500 mb-4">Update API key details and permissions.</p>
       <form id="editApiKeyForm" action="/admin/apikeys/edit/0" method="POST">
+         <%- include('../../components/csrf') %>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           <div class="md:col-span-1 space-y-4">

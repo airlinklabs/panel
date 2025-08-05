@@ -52,6 +52,7 @@
     node      Node     @relation(fields: [nodeId], references: [id])
     owner     Users    @relation(fields: [ownerId], references: [id])
     image     Images   @relation(fields: [imageId], references: [id])
+    backups   Backup[]
   }
 
 model Images {
@@ -142,4 +143,18 @@ model Addon {
   mainFile    String   @default("index.ts")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Backup {
+  id          Int      @id @default(autoincrement())
+  UUID        String   @unique @default(uuid())
+  name        String
+  serverId    String
+  filePath    String
+  size        BigInt?
+  createdAt   DateTime @default(now())
+  server      Server   @relation(fields: [serverId], references: [UUID])
+
+  @@index([serverId])
+  @@index([createdAt])
 }
