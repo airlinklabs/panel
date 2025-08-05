@@ -183,7 +183,10 @@
           const hasError = <%= errorMessage && errorMessage.message ? 'true' : 'false' %>;
           const refreshInterval = hasError ? 60000 : 30000; // 1 minute if error, 30 seconds otherwise
 
-          console.log(`Player list will refresh in ${refreshInterval/1000} seconds`);
+          // Only log in development mode
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log(`Player list will refresh in ${refreshInterval/1000} seconds`);
+          }
 
           setTimeout(() => {
             window.location.reload();

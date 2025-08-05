@@ -864,21 +864,30 @@ connectWebSocket();
                 if (isValidJson(event.data)) {
                     const stats = JSON.parse(event.data);
                     if (stats.error) {
-                        console.error('Error fetching stats:', stats.error);
+                        // Only log in development mode to reduce console spam
+                        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                            console.error('Error fetching stats:', stats.error);
+                        }
                         setAllStatsOffline();
                         return;
                     }
 
                     // Check if server is offline based on the event data
                     if (stats.event === 'status' && stats.data && stats.data.running === false) {
-                        console.log('Server is offline, updating all stats');
+                        // Only log in development mode
+                        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                            console.log('Server is offline, updating all stats');
+                        }
                         setAllStatsOffline();
                         return;
                     }
 
                     // Check if memory usage is NaN, which indicates server is offline
                     if (stats.data && stats.data.memory && stats.data.memory.percentage === "NaN") {
-                        console.log('Server appears to be offline (NaN memory usage), updating all stats');
+                        // Only log in development mode
+                        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                            console.log('Server appears to be offline (NaN memory usage), updating all stats');
+                        }
                         setAllStatsOffline();
                         return;
                     }

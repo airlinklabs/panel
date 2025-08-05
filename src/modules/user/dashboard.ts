@@ -256,7 +256,14 @@ const dashboardModule: Module = {
                     ramLimit = `${memLimitGB}GB`;
                   }
                 } catch (statsError) {
-                  logger.error(`Error fetching stats for server ${server.UUID}:`, statsError);
+                  // Only log error if it's not a connection error (daemon offline)
+                  if (axios.isAxiosError(statsError)) {
+                    if (statsError.code !== 'ECONNREFUSED' && statsError.code !== 'ETIMEDOUT' && statsError.code !== 'ENOTFOUND') {
+                      logger.error(`Error fetching stats for server ${server.UUID}:`, statsError);
+                    }
+                  } else {
+                    logger.error(`Error fetching stats for server ${server.UUID}:`, statsError);
+                  }
                 }
               }
 

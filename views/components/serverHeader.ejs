@@ -82,6 +82,11 @@ function formatUptime(seconds) {
 <% if (typeof server !== 'undefined' && server.UUID) { %>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Helper function to check if we should log (only in development and when daemon is online)
+    const isDaemonOffline = <%= typeof serverStatus !== 'undefined' && serverStatus.daemonOffline ? 'true' : 'false' %>;
+    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const shouldLog = isDevelopment && !isDaemonOffline;
+
     // Simple function to format uptime
     function formatUptime(seconds) {
       const days = Math.floor(seconds / 86400);
@@ -106,7 +111,9 @@ function formatUptime(seconds) {
 
     if (startedAtElement && startedAtElement.textContent) {
       startTime = new Date(startedAtElement.textContent).getTime();
-      console.log('Server start time:', new Date(startTime).toLocaleString());
+      if (shouldLog) {
+        console.log('Server start time:', new Date(startTime).toLocaleString());
+      }
     }
 
     // Variables for uptime tracking
@@ -117,18 +124,27 @@ function formatUptime(seconds) {
 
     // Function to update the uptime display
     function updateUptime(uptimeValue) {
-      console.log('Updating uptime display with value:', uptimeValue);
+      // Only log in development mode to reduce console spam
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('Updating uptime display with value:', uptimeValue);
+      }
 
       const uptimeDisplay = document.getElementById('uptime-display');
       if (!uptimeDisplay) {
-        console.error('Uptime display element not found!');
+        // Only log error in development mode
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          console.error('Uptime display element not found!');
+        }
         return;
       }
 
       // If we have a specific uptime value, use it
       if (typeof uptimeValue === 'number') {
         const formattedUptime = formatUptime(uptimeValue);
-        console.log('Setting uptime display to:', formattedUptime);
+        // Only log in development mode
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          console.log('Setting uptime display to:', formattedUptime);
+        }
         uptimeDisplay.textContent = formattedUptime;
         // Store the last known uptime value
         localUptimeSeconds = uptimeValue;
@@ -138,17 +154,28 @@ function formatUptime(seconds) {
         const now = Date.now();
         localUptimeSeconds = Math.floor((now - startTime) / 1000);
         const formattedUptime = formatUptime(localUptimeSeconds);
-        console.log('Setting calculated uptime display to:', formattedUptime);
+        // Only log in development mode
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          console.log('Setting calculated uptime display to:', formattedUptime);
+        }
         uptimeDisplay.textContent = formattedUptime;
       } else {
-        console.warn('No uptime value or start time available');
+        // Only warn in development mode
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          console.warn('No uptime value or start time available');
+        }
       }
     }
 
     // Function to fetch uptime from the backend (every 5 seconds)
     function fetchUptimeFromBackend() {
-      // Always fetch, even if we don't have a start time yet
-      console.log('Fetching uptime from backend...');
+      // Check if daemon is offline to avoid spamming console
+      const isDaemonOffline = <%= typeof serverStatus !== 'undefined' && serverStatus.daemonOffline ? 'true' : 'false' %>;
+
+      // Only log in development mode and when daemon is not offline
+      if (!isDaemonOffline && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        console.log('Fetching uptime from backend...');
+      }
 
       fetch(`/server/<%= server.UUID %>/status`, {
         method: 'GET',
@@ -163,12 +190,18 @@ function formatUptime(seconds) {
         return response.json();
       })
       .then(data => {
-        console.log('Backend uptime fetch response:', data);
+        // Only log in development mode and when daemon is not offline
+        if (!isDaemonOffline && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+          console.log('Backend uptime fetch response:', data);
+        }
         lastBackendFetch = Date.now();
 
         // Check for starting state
         if (data.starting) {
-          console.log('Server is starting (from backend), updating header');
+          // Only log in development mode
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('Server is starting (from backend), updating header');
+          }
 
           // Update status container
           const statusContainer = document.querySelector('[data-server-status-container]');
@@ -198,11 +231,17 @@ function formatUptime(seconds) {
         }
         // Check for online state
         else if (data.online) {
-          console.log('Server is online (from backend), updating header');
+          // Only log in development mode
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('Server is online (from backend), updating header');
+          }
 
           // If we have uptime from the backend, use it directly
           if (typeof data.uptime === 'number') {
-            console.log('Using uptime directly from backend:', data.uptime);
+            // Only log in development mode
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+              console.log('Using uptime directly from backend:', data.uptime);
+            }
 
             // Force update the status container to ensure it shows the uptime
             const statusContainer = document.querySelector('[data-server-status-container]');
@@ -230,7 +269,10 @@ function formatUptime(seconds) {
           // If we have a start time, update it
           if (data.startedAt) {
             startTime = new Date(data.startedAt).getTime();
-            console.log('Updated start time from backend:', new Date(startTime).toLocaleString());
+            // Only log in development mode
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+              console.log('Updated start time from backend:', new Date(startTime).toLocaleString());
+            }
 
             // Update the started time display
             const startedTimeElement = document.querySelector('[data-server-started-time]');
@@ -274,13 +316,19 @@ function formatUptime(seconds) {
         }
       })
       .catch(error => {
-        console.error('Error fetching uptime from backend:', error);
+        // Only log errors in development mode or when it's not a daemon offline error
+        if (shouldLog || !error.message.includes('Failed to fetch')) {
+          console.error('Error fetching uptime from backend:', error);
+        }
       });
     }
 
     // Function to start the uptime counter
     function startUptimeCounter() {
-      console.log('Starting uptime counter...');
+      // Only log in development mode
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('Starting uptime counter...');
+      }
 
       // Clear any existing intervals first
       stopUptimeCounter();
@@ -306,7 +354,10 @@ function formatUptime(seconds) {
         }
       }, 1000);
 
-      console.log('Started uptime counter with backend sync (fetch every 5s, display update every 1s)');
+      // Only log in development mode
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('Started uptime counter with backend sync (fetch every 5s, display update every 1s)');
+      }
     }
 
     // Function to stop the uptime counter
@@ -337,7 +388,9 @@ function formatUptime(seconds) {
       window.serverStatusWebSocket = new WebSocket(wsUrl);
 
       window.serverStatusWebSocket.onopen = function() {
-        console.log('Global server status WebSocket connection established (from header)');
+        if (shouldLog) {
+          console.log('Global server status WebSocket connection established (from header)');
+        }
 
         // Dispatch a custom event that other components can listen for
         window.dispatchEvent(new CustomEvent('serverStatusWebSocketOpen'));
@@ -347,7 +400,9 @@ function formatUptime(seconds) {
       };
 
       window.serverStatusWebSocket.onclose = function() {
-        console.log('Global server status WebSocket connection closed (from header)');
+        if (shouldLog) {
+          console.log('Global server status WebSocket connection closed (from header)');
+        }
 
         // Dispatch a custom event that other components can listen for
         window.dispatchEvent(new CustomEvent('serverStatusWebSocketClose'));
@@ -357,7 +412,9 @@ function formatUptime(seconds) {
       };
 
       window.serverStatusWebSocket.onerror = function(error) {
-        console.error('Global server status WebSocket error (from header):', error);
+        if (shouldLog) {
+          console.error('Global server status WebSocket error (from header):', error);
+        }
 
         // Dispatch a custom event that other components can listen for
         window.dispatchEvent(new CustomEvent('serverStatusWebSocketError', { detail: error }));
@@ -373,7 +430,9 @@ function formatUptime(seconds) {
     function handleServerHeaderWebSocketMessage(event) {
       try {
         const data = JSON.parse(event.data);
-        console.log('Server header status update received:', data);
+        if (shouldLog) {
+          console.log('Server header status update received:', data);
+        }
 
         // Extract the actual status data, handling different message formats
         let statusData = data;
@@ -381,7 +440,9 @@ function formatUptime(seconds) {
           statusData = data.data;
         }
 
-        console.log('Processed status data:', statusData);
+        if (shouldLog) {
+          console.log('Processed status data:', statusData);
+        }
 
         // Check for any indication that the server is running or starting
         const isRunning = statusData.running === true ||

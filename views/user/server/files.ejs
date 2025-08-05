@@ -55,6 +55,7 @@ function isImageFile(filename) {
       <!-- Page Header -->
       <div class="sm:flex sm:items-center px-8 pt-4">
         <%- include('../../components/serverHeader') %>
+        <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex gap-2.5">
           <button id="createFile" onclick="openCreateFileModal()" type="button"
               class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2 mr-2">
@@ -73,6 +74,7 @@ function isImageFile(filename) {
               Upload File
           </button>
       </div>
+        <% } %>
       </div>
 
       <%- include('../../components/installHeader') %>
@@ -81,6 +83,24 @@ function isImageFile(filename) {
 
       <!-- Server Template -->
       <%- include('../../components/serverTemplate') %>
+
+      <!-- Daemon Offline Warning -->
+      <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
+      <div class="mx-8 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center">
+        <div class="flex-shrink-0 mr-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-sm font-medium text-red-500">Connection Error</h3>
+          <p class="text-xs text-red-400"><%= errorMessage.message %></p>
+          <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors">
+            Retry Connection
+          </button>
+        </div>
+      </div>
+      <% } %>
 
       <div class="flex-grow px-8 mt-8 -mb-4">
         <h1 class="text-white text-sm">
@@ -109,10 +129,34 @@ function isImageFile(filename) {
         </h1>
        </div>
 
-      <!-- File Table -->
-      <div class="px-8 mt-8">
-        <div class="overflow-hidden rounded-lg shadow-md border border-neutral-700/10 dark:bg-neutral-400/20">
-          <table class="min-w-full bg-white dark:bg-neutral-800">
+      <!-- File Table or Daemon Offline Message -->
+      <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
+        <!-- Daemon Offline Message -->
+        <div class="px-8 mt-8">
+          <div class="bg-neutral-800/30 rounded-xl p-8 text-center">
+            <div class="flex justify-center mb-6">
+              <div class="w-16 h-16 rounded-full bg-neutral-700/50 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m3 3 8.735 8.735m0 0a.374.374 0 1 1 .53.53m-.53-.53.53.53m0 0L21 21M14.652 9.348a3.75 3.75 0 0 1 0 5.304m2.121-7.425a6.75 6.75 0 0 1 0 9.546m2.121-11.667c3.808 3.807 3.808 9.98 0 13.788m-9.546-4.242a3.733 3.733 0 0 1-1.06-2.122m-1.061 4.243a6.75 6.75 0 0 1-1.625-6.929m-.496 9.05c-3.068-3.067-3.664-7.67-1.79-11.334M12 12h.008v.008H12V12Z" />
+              </svg>
+              </div>
+            </div>
+            <h2 class="text-xl font-semibold text-neutral-300">Daemon Offline</h2>
+            <p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
+              The daemon appears to be offline. File management is unavailable until the connection is restored.
+            </p>
+            <div class="mt-6">
+              <button onclick="window.location.reload()" class="px-4 py-2 bg-neutral-600 hover:bg-neutral-700 text-white text-sm rounded-lg transition-colors">
+                Retry Connection
+              </button>
+            </div>
+          </div>
+        </div>
+      <% } else { %>
+        <!-- File Table -->
+        <div class="px-8 mt-8">
+          <div class="overflow-hidden rounded-lg shadow-md border border-neutral-700/10 dark:bg-neutral-400/20">
+            <table class="min-w-full bg-white dark:bg-neutral-800">
             <thead class="text-neutral-800 dark:text-neutral-100">
               <tr>
                 <th class="px-6 py-3 text-left">
@@ -222,11 +266,13 @@ function isImageFile(filename) {
           </table>
         </div>
       </div>
+      <% } %>
     </div>
 
     <!-- Modals and stuff -->
 
-   <!-- Floating Action Bar -->
+   <!-- Floating Action Bar (only show when daemon is online) -->
+   <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
    <div id="floatingActionBar" class="fixed bottom-0 w-full bg-neutral-800 z-50 backdrop-blur text-white py-4 px-6 transform transition-transform duration-300 ease-in-out flex justify-between items-center">
     <span id="selectedFilesCount">0 files selected</span>
     <div class="flex gap-4">
@@ -238,6 +284,7 @@ function isImageFile(filename) {
         </button>
     </div>
 </div>
+   <% } %>
  <!-- Mass Delete Confirmation Modal -->
  <div id="massDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
     <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">

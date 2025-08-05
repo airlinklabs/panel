@@ -549,18 +549,82 @@ const dashboardModule: Module = {
             settings,
           });
         } catch (error) {
-          logger.error('Error fetching user:', error);
-          errorMessage.message = 'Error fetching user data.';
+          // Only log error if it's not a connection error (daemon offline)
+          if (axios.isAxiosError(error)) {
+            if (error.code !== 'ECONNREFUSED' && error.code !== 'ETIMEDOUT' && error.code !== 'ENOTFOUND') {
+              logger.error('Error fetching files:', error);
+            }
+          } else {
+            logger.error('Error fetching files:', error);
+          }
+
+          // Still need to get server data for the template
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: {
+              node: true,
+              owner: true,
+              image: true,
+            },
+          });
+
+          if (!server) {
+            return res.status(404).json({ error: 'Server not found' });
+          }
+
+          // Extract features from server image
+          let features: string[] = [];
+          if (server.image && typeof server.image.info === 'string') {
+            try {
+              const parsedInfo = JSON.parse(server.image.info) as ServerImageInfo;
+              if (Array.isArray(parsedInfo.features)) {
+                features = parsedInfo.features;
+              }
+            } catch (error) {
+              console.error('Failed to parse server.image.info:', error);
+            }
+          } else if (
+            server.image &&
+            typeof server.image.info === 'object' &&
+            server.image.info !== null
+          ) {
+            const info = server.image.info as ServerImageInfo;
+            if (Array.isArray(info.features)) {
+              features = info.features;
+            }
+          }
+
+          // Get server status to determine if daemon is offline
+          const serverInfos = {
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            serverUUID: server.UUID,
+            nodeKey: server.node.key,
+          };
+          const serverStatus = await getServerStatus(serverInfos);
+
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
 
+          // Set appropriate error message based on daemon status
+          if (serverStatus.daemonOffline) {
+            errorMessage.message = 'Unable to access files. The daemon appears to be offline.';
+          } else {
+            errorMessage.message = 'Error fetching files data.';
+          }
+
           return res.render('user/server/files', {
             errorMessage,
-            features: [],
+            features,
             user: req.session?.user,
+            files: [],
+            currentPath: path || '/',
             req,
+            server,
+            serverStatus,
             settings,
+            installed: false,
           });
         }
       },
@@ -661,8 +725,78 @@ const dashboardModule: Module = {
           });
         } catch (error) {
           logger.error('Error fetching file:', error);
-          res.status(500).json({ error: 'Failed to fetch file' });
-          return;
+
+          // Still need to get server data for the template
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: {
+              node: true,
+              owner: true,
+              image: true,
+            },
+          });
+
+          if (!server) {
+            return res.status(404).json({ error: 'Server not found' });
+          }
+
+          // Extract features from server image
+          let features: string[] = [];
+          if (server.image && typeof server.image.info === 'string') {
+            try {
+              const parsedInfo = JSON.parse(server.image.info) as ServerImageInfo;
+              if (Array.isArray(parsedInfo.features)) {
+                features = parsedInfo.features;
+              }
+            } catch (error) {
+              console.error('Failed to parse server.image.info:', error);
+            }
+          } else if (
+            server.image &&
+            typeof server.image.info === 'object' &&
+            server.image.info !== null
+          ) {
+            const info = server.image.info as ServerImageInfo;
+            if (Array.isArray(info.features)) {
+              features = info.features;
+            }
+          }
+
+          // Get server status to determine if daemon is offline
+          const serverInfos = {
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            serverUUID: server.UUID,
+            nodeKey: server.node.key,
+          };
+          const serverStatus = await getServerStatus(serverInfos);
+
+          const settings = await prisma.settings.findUnique({
+            where: { id: 1 },
+          });
+
+          // Set appropriate error message based on daemon status
+          let errorMessage = 'Error fetching file data.';
+          if (serverStatus.daemonOffline) {
+            errorMessage = 'Unable to access file. The daemon appears to be offline.';
+          }
+
+          return res.render('user/server/file', {
+            errorMessage: { message: errorMessage },
+            user: req.session?.user,
+            features,
+            installed: false,
+            file: {
+              name: filePath.split('/').pop() || 'Unknown',
+              path: filePath,
+              content: '// Unable to load file content\n// The daemon appears to be offline',
+              extension: filePath.split('.').pop() || 'txt',
+            },
+            server,
+            serverStatus,
+            req,
+            settings,
+          });
         }
       },
     );
@@ -1181,7 +1315,14 @@ const dashboardModule: Module = {
               hadFetchError = true;
             }
           } catch (error) {
-            logger.error(`Error fetching players from daemon for server ${serverId}:`, error);
+            // Only log error if it's not a connection error (daemon offline)
+            if (axios.isAxiosError(error)) {
+              if (error.code !== 'ECONNREFUSED' && error.code !== 'ETIMEDOUT' && error.code !== 'ENOTFOUND') {
+                logger.error(`Error fetching players from daemon for server ${serverId}:`, error);
+              }
+            } else {
+              logger.error(`Error fetching players from daemon for server ${serverId}:`, error);
+            }
             hadFetchError = true;
           }
 
@@ -1321,7 +1462,14 @@ const dashboardModule: Module = {
               settings,
             });
           } catch (fileRequestError) {
-            logger.error('Error fetching files:', fileRequestError);
+            // Only log error if it's not a connection error (daemon offline)
+            if (axios.isAxiosError(fileRequestError)) {
+              if (fileRequestError.code !== 'ECONNREFUSED' && fileRequestError.code !== 'ETIMEDOUT' && fileRequestError.code !== 'ENOTFOUND') {
+                logger.error('Error fetching files:', fileRequestError);
+              }
+            } else {
+              logger.error('Error fetching files:', fileRequestError);
+            }
 
             // Render the worlds page with an error message instead of returning JSON
             const settings = await prisma.settings.findUnique({

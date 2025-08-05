@@ -158,7 +158,14 @@ export const isWorld = async (
 
     return isValidWorld;
   } catch (error) {
-    logger.error(`Error checking world folder content for ${folderName}:`, error);
+    // Only log error if it's not a connection error (daemon offline)
+    if (axios.isAxiosError(error)) {
+      if (error.code !== 'ECONNREFUSED' && error.code !== 'ETIMEDOUT' && error.code !== 'ENOTFOUND') {
+        logger.error(`Error checking world folder content for ${folderName}:`, error);
+      }
+    } else {
+      logger.error(`Error checking world folder content for ${folderName}:`, error);
+    }
     return false;
   }
 };
