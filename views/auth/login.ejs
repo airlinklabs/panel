@@ -14,6 +14,52 @@
         <div class="mt-6">
           <form id="login-form" class="space-y-6" action="/login" method="POST">
             <%- include('../components/csrf') %>
+            
+            <!-- Error Messages Section -->
+            <% if (req.query.err) { %>
+              <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+                      <% if (req.query.err === 'missing_credentials') { %>
+                        Missing Information
+                      <% } else if (req.query.err === 'invalid_credentials') { %>
+                        Invalid Credentials
+                      <% } else if (req.query.err === 'user_not_found') { %>
+                        User Not Found
+                      <% } else if (req.query.err === 'incorrect_password') { %>
+                        Incorrect Password
+                      <% } else if (req.query.err === 'database_error') { %>
+                        Server Error
+                      <% } else { %>
+                        Login Error
+                      <% } %>
+                    </h3>
+                    <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+                      <% if (req.query.err === 'missing_credentials') { %>
+                        Please enter both your username/email and password.
+                      <% } else if (req.query.err === 'invalid_credentials') { %>
+                        The username/email or password you entered is incorrect. Please check your credentials and try again.
+                      <% } else if (req.query.err === 'user_not_found') { %>
+                        No account found with that username or email address. Please check your input or create a new account.
+                      <% } else if (req.query.err === 'incorrect_password') { %>
+                        The password you entered is incorrect. Please try again or use the "Forgot Password" option.
+                      <% } else if (req.query.err === 'database_error') { %>
+                        We're experiencing technical difficulties. Please try again in a few moments.
+                      <% } else { %>
+                        An unexpected error occurred. Please try again.
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+
             <div>
               <label for="email" class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"> Username or Email </label>
               <div class="mt-2">
@@ -47,26 +93,6 @@
             <div class="mt-6 text-sm text-neutral-500 py-[-50px]">
               Need an account? <a href="/register" class="font-normal text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition">Register</a>
             </div>
-            <% } %>
-
-            <% if (req.query.err && req.query.err == "missing_credentials") { %>
-              <div class="mt-2"></div>
-              <span class="text-amber-600 pt-4 font-normal text-sm">Missing credentials. Please try again.</span>
-            <% } %>
-
-            <% if (req.query.err && req.query.err == "user_not_found") { %>
-                <div class="mt-2"></div>
-                <span class="text-amber-600 pt-4 font-normal text-sm">User not found. Please try again.</span>
-            <% } %>
-
-            <% if (req.query.err && req.query.err == "incorrect_password") { %>
-                <div class="mt-2"></div>
-                <span class="text-amber-600 pt-4 font-normal text-sm">Incorrect password. Please try again.</span>
-            <% } %>
-
-            <% if (req.query.err && req.query.err == "database_error") { %>
-                <div class="mt-2"></div>
-                <span class="text-amber-600 pt-4 font-normal text-sm">Database error. Please try again.</span>
             <% } %>
 
           </form>
