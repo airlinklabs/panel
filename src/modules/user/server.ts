@@ -454,7 +454,8 @@ const dashboardModule: Module = {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             errorMessage.message = 'User not found.';
-            return res.render('user/account', { errorMessage, user, req });
+            res.render('user/account', { errorMessage, user, req });
+            return;
           }
 
           const server = await prisma.server.findUnique({
@@ -467,12 +468,13 @@ const dashboardModule: Module = {
 
           if (!server) {
             errorMessage.message = 'Server not found.';
-            return res.render('user/server/files', {
+            res.render('user/server/files', {
               errorMessage,
               user,
               req,
               settings,
             });
+            return;
           }
 
           const filesRequest = {
@@ -536,7 +538,7 @@ const dashboardModule: Module = {
           };
           const serverStatus = await getServerStatus(serverInfos);
 
-          return res.render('user/server/files', {
+          res.render('user/server/files', {
             errorMessage,
             user,
             features,
@@ -569,7 +571,8 @@ const dashboardModule: Module = {
           });
 
           if (!server) {
-            return res.status(404).json({ error: 'Server not found' });
+            res.status(404).json({ error: 'Server not found' });
+            return;
           }
 
           // Extract features from server image
@@ -614,7 +617,7 @@ const dashboardModule: Module = {
             errorMessage.message = 'Error fetching files data.';
           }
 
-          return res.render('user/server/files', {
+          res.render('user/server/files', {
             errorMessage,
             features,
             user: req.session?.user,
@@ -707,7 +710,7 @@ const dashboardModule: Module = {
           };
           const serverStatus = await getServerStatus(serverInfos);
 
-          return res.render('user/server/file', {
+          res.render('user/server/file', {
             errorMessage: {},
             user,
             features,
@@ -737,7 +740,8 @@ const dashboardModule: Module = {
           });
 
           if (!server) {
-            return res.status(404).json({ error: 'Server not found' });
+            res.status(404).json({ error: 'Server not found' });
+            return;
           }
 
           // Extract features from server image
@@ -781,7 +785,7 @@ const dashboardModule: Module = {
             errorMessage = 'Unable to access file. The daemon appears to be offline.';
           }
 
-          return res.render('user/server/file', {
+          res.render('user/server/file', {
             errorMessage: { message: errorMessage },
             user: req.session?.user,
             features,
