@@ -254,6 +254,18 @@ const coreModule: Module = {
             return;
           }
 
+          // Check if registration is allowed
+          const userCount = await prisma.users.count();
+          const isFirstUser = userCount === 0;
+
+          if (!isFirstUser) {
+            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            if (!settings || !(settings as any).allowRegistration) {
+              res.status(403).json({ error: 'Registration is disabled' });
+              return;
+            }
+          }
+
           const existingUser = await prisma.users.findUnique({
             where: { email },
           });

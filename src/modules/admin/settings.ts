@@ -61,6 +61,7 @@ interface SettingsData {
   favicon?: string;
   theme?: string;
   language?: string;
+  allowRegistration?: boolean;
 }
 
 const adminModule: Module = {
@@ -114,6 +115,7 @@ const adminModule: Module = {
             title: typeof rawData.title === 'string' ? rawData.title : undefined,
             theme: typeof rawData.theme === 'string' ? rawData.theme : undefined,
             language: typeof rawData.language === 'string' ? rawData.language : undefined,
+            allowRegistration: rawData.allowRegistration === 'true' || rawData.allowRegistration === true,
           };
 
           if (files.logo && files.logo[0]) {
@@ -162,6 +164,7 @@ const adminModule: Module = {
               favicon: '../assets/favicon.ico',
               theme: 'default',
               language: 'en',
+              allowRegistration: false,
             },
           });
 

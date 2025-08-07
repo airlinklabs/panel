@@ -34,6 +34,15 @@ const authModule: Module = {
 
     router.get('/register', async (req: Request, res: Response) => {
       const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+      const userCount = await prisma.users.count();
+      const isFirstUser = userCount === 0;
+
+      // Check if registration is allowed
+      if (!isFirstUser && settings && !(settings as any).allowRegistration) {
+        res.redirect('/login?err=registration_disabled');
+        return;
+      }
+
       res.render('auth/register', { req, settings });
     });
 

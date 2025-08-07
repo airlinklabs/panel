@@ -36,6 +36,8 @@
                         Incorrect Password
                       <% } else if (req.query.err === 'database_error') { %>
                         Server Error
+                      <% } else if (req.query.err === 'registration_disabled') { %>
+                        Registration Disabled
                       <% } else { %>
                         Login Error
                       <% } %>
@@ -51,6 +53,8 @@
                         The password you entered is incorrect. Please try again or use the "Forgot Password" option.
                       <% } else if (req.query.err === 'database_error') { %>
                         We're experiencing technical difficulties. Please try again in a few moments.
+                      <% } else if (req.query.err === 'registration_disabled') { %>
+                        Registration is currently disabled. Please contact an administrator if you need an account.
                       <% } else { %>
                         An unexpected error occurred. Please try again.
                       <% } %>

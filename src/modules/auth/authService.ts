@@ -125,6 +125,15 @@ const authServiceModule: Module = {
         const userCount = await prisma.users.count();
         const isFirstUser = userCount === 0;
 
+        // Check if registration is allowed
+        if (!isFirstUser) {
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          if (!settings || !(settings as any).allowRegistration) {
+            res.redirect('/login?err=registration_disabled');
+            return;
+          }
+        }
+
         await prisma.users.create({
           data: {
             email,

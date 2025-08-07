@@ -38,6 +38,7 @@ export const settingsLoader = async () => {
           logo: '../assets/logo.png',
           theme: 'default',
           language: 'en',
+          allowRegistration: false,
         },
       });
       logger.info('Settings created');

@@ -95,6 +95,7 @@ model settings {
   favicon   String @default("../assets/favicon.ico")
   theme     String @default("default")
   language  String @default("en")
+  allowRegistration Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

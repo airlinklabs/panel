@@ -90,6 +90,28 @@
                           <option class="text-black" value="fr" <%= settings.language === 'fr' ? 'selected' : '' %>>Français</option>
                       </select>
                   </div>
+
+                  <div>
+                      <label class="block text-white text-sm font-medium mb-2"><%= req.translations.allowRegistration || 'Allow Registration' %></label>
+                      <div class="flex items-center">
+                          <label class="relative inline-flex items-center cursor-pointer">
+                              <input
+                                  type="checkbox"
+                                  name="allowRegistration"
+                                  value="true"
+                                  class="sr-only peer"
+                                  <%= settings.allowRegistration ? 'checked' : '' %>
+                              >
+                              <div class="w-11 h-6 bg-neutral-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-neutral-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-neutral-600 peer-checked:bg-blue-600"></div>
+                              <span class="ml-3 text-sm font-medium text-neutral-400">
+                                  <%= req.translations.allowRegistrationDescription || 'Enable new user registration' %>
+                              </span>
+                          </label>
+                      </div>
+                      <p class="mt-1 text-xs text-neutral-500">
+                          <%= req.translations.allowRegistrationHelp || 'When disabled, only the first user can register. Existing users can still log in.' %>
+                      </p>
+                  </div>
               </div>
 
               <div class="flex justify-end items-center mt-8 space-x-4 px-5">
@@ -174,6 +196,7 @@
               const titleInput = form.querySelector('input[name="title"]');
               const themeSelect = form.querySelector('select[name="theme"]');
               const languageSelect = form.querySelector('select[name="language"]');
+              const allowRegistrationInput = form.querySelector('input[name="allowRegistration"]');
 
               if (titleInput) titleInput.value = '<%= settings.title %>';
 
@@ -185,6 +208,10 @@
               if (languageSelect) {
                   const langOption = languageSelect.querySelector(`option[value="<%= settings.language %>"]`);
                   if (langOption) langOption.selected = true;
+              }
+
+              if (allowRegistrationInput) {
+                  allowRegistrationInput.checked = <%= settings.allowRegistration ? 'true' : 'false' %>;
               }
           } catch (error) {
               console.error('Error setting form values:', error);
