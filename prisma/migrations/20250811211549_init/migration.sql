@@ -5,7 +5,8 @@ CREATE TABLE "Users" (
     "username" TEXT,
     "password" TEXT NOT NULL,
     "isAdmin" BOOLEAN NOT NULL DEFAULT false,
-    "description" TEXT DEFAULT 'No About Me'
+    "description" TEXT DEFAULT 'No About Me',
+    "permissions" TEXT
 );
 
 -- CreateTable
@@ -32,6 +33,7 @@ CREATE TABLE "Server" (
     "Variables" TEXT,
     "StartCommand" TEXT,
     "dockerImage" TEXT,
+    "allowStartupEdit" BOOLEAN NOT NULL DEFAULT false,
     "Installing" BOOLEAN NOT NULL DEFAULT true,
     "Queued" BOOLEAN NOT NULL DEFAULT true,
     "Suspended" BOOLEAN NOT NULL DEFAULT false,
@@ -70,7 +72,8 @@ CREATE TABLE "Node" (
     "address" TEXT NOT NULL DEFAULT '127.0.0.1',
     "port" INTEGER NOT NULL DEFAULT 3001,
     "key" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "allocatedPorts" TEXT DEFAULT '[]'
 );
 
 -- CreateTable
@@ -79,8 +82,10 @@ CREATE TABLE "settings" (
     "title" TEXT NOT NULL DEFAULT 'Airlink',
     "description" TEXT NOT NULL DEFAULT 'AirLink is a free and open source project by AirlinkLabs',
     "logo" TEXT NOT NULL DEFAULT '../assets/logo.png',
+    "favicon" TEXT NOT NULL DEFAULT '../assets/favicon.ico',
     "theme" TEXT NOT NULL DEFAULT 'default',
     "language" TEXT NOT NULL DEFAULT 'en',
+    "allowRegistration" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
@@ -88,9 +93,61 @@ CREATE TABLE "settings" (
 -- CreateTable
 CREATE TABLE "ApiKey" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "name" TEXT NOT NULL,
     "key" TEXT NOT NULL,
+    "description" TEXT,
+    "permissions" TEXT NOT NULL DEFAULT '[]',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "active" BOOLEAN NOT NULL DEFAULT true
+    "updatedAt" DATETIME NOT NULL,
+    "active" BOOLEAN NOT NULL DEFAULT true,
+    "userId" INTEGER,
+    CONSTRAINT "ApiKey_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "LoginHistory" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "userId" INTEGER NOT NULL,
+    "ipAddress" TEXT,
+    "userAgent" TEXT,
+    "timestamp" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "LoginHistory_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "PlayerStats" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "timestamp" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "totalPlayers" INTEGER NOT NULL DEFAULT 0,
+    "maxPlayers" INTEGER NOT NULL DEFAULT 0,
+    "onlineServers" INTEGER NOT NULL DEFAULT 0,
+    "totalServers" INTEGER NOT NULL DEFAULT 0
+);
+
+-- CreateTable
+CREATE TABLE "Addon" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "name" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
+    "description" TEXT,
+    "version" TEXT NOT NULL,
+    "author" TEXT,
+    "enabled" BOOLEAN NOT NULL DEFAULT true,
+    "mainFile" TEXT NOT NULL DEFAULT 'index.ts',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "Backup" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "UUID" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "serverId" TEXT NOT NULL,
+    "filePath" TEXT NOT NULL,
+    "size" BIGINT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Backup_serverId_fkey" FOREIGN KEY ("serverId") REFERENCES "Server" ("UUID") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateIndex
@@ -110,3 +167,18 @@ CREATE UNIQUE INDEX "Images_UUID_key" ON "Images"("UUID");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ApiKey_key_key" ON "ApiKey"("key");
+
+-- CreateIndex
+CREATE INDEX "PlayerStats_timestamp_idx" ON "PlayerStats"("timestamp");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Addon_slug_key" ON "Addon"("slug");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Backup_UUID_key" ON "Backup"("UUID");
+
+-- CreateIndex
+CREATE INDEX "Backup_serverId_idx" ON "Backup"("serverId");
+
+-- CreateIndex
+CREATE INDEX "Backup_createdAt_idx" ON "Backup"("createdAt");
