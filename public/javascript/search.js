@@ -5,6 +5,13 @@ const searchInput = document.getElementById('searchInput');
 const searchResults = document.getElementById('searchResults');
 const navLinks = document.querySelectorAll('.nav-link');
 
+/**
+ * Filters navigation links based on the provided search term and updates the search results display.
+ *
+ * Splits the search term into a main term and optional subterm, then filters navigation links whose text content or custom attributes match these terms. Clears previous results and displays either the filtered links with updated styling, icons, and breadcrumb badges, or a "No results found" message if no matches are found.
+ *
+ * @param {string} searchTerm - The user input used to filter navigation links. Supports an optional subterm separated by `:/`.
+ */
 function filterLinks(searchTerm) {
   const [mainTerm, subTerm] = searchTerm.split(':/');
   const mainTermFiltered = mainTerm ? mainTerm.toLowerCase() : '';
@@ -39,13 +46,12 @@ function filterLinks(searchTerm) {
       resultLink.onclick = () => {
         location.href = link.href;
       };
+      // Remove any existing classes that might cause conflicts
+      resultLink.className = '';
+      
+      // Add base classes for all result links
       resultLink.classList.add(
-        'nav-link',
         'transition',
-        'text-gray-600',
-        'hover:bg-gray-100',
-        'backdrop-blur',
-        'hover:text-gray-800',
         'group',
         'flex',
         'items-center',
@@ -57,24 +63,32 @@ function filterLinks(searchTerm) {
         'rounded-xl',
         'border',
         'border-transparent',
-        'hover:border-neutral-800/20'
+        'text-neutral-700',
+        'dark:text-neutral-200',
+        'hover:bg-neutral-100/60',
+        'dark:hover:bg-neutral-800/30',
+        'hover:border-neutral-200/50',
+        'dark:hover:border-neutral-700/50',
+        'dark:hover:text-neutral-200'
       );
 
       if (window.location.href === resultLink.href) {
         selected = resultLink.href;
         if (index === 0) {
-          resultLink.classList.add(
-            'mt-2',
-          );
+          resultLink.classList.add('mt-2');
         }
 
+        // Update active state classes
         resultLink.classList.add(
-          'bg-gray-200',
-          'text-gray-900',
+          'bg-neutral-100',
+          'dark:bg-neutral-800/50',
+          'text-neutral-900',
+          'dark:text-white',
           'font-semibold',
           'searchLinkActive',
           'border',
-          'border-neutral-800/20'
+          'border-neutral-200',
+          'dark:border-neutral-700'
         );
       }
 
@@ -91,8 +105,10 @@ function filterLinks(searchTerm) {
       const breadcrumbBadge = document.createElement('span');
       breadcrumbBadge.classList.add(
         'breadcrumb',
-        'bg-gray-200',
-        'text-gray-600',
+        'bg-gray-50/30',
+        'dark:bg-blue-900/20',
+        'text-gray-700',
+        'dark:text-white',
         'rounded-md',
         'ml-2',
         'text-xs',
