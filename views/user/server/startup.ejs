@@ -243,6 +243,7 @@
       }, 5000);
     }
     const startupForm = document.getElementById('startupForm');
+    const dockerImageForm = document.getElementById('dockerImageForm');
     const variablesForm = document.getElementById('variablesForm');
 
     startupForm.addEventListener('submit', function(e) {
@@ -259,6 +260,9 @@
       // Submit via fetch (CSRF token will be added automatically by csrf.js)
       fetch(startupForm.action, {
         method: 'POST',
+        headers: {
+          'Accept': 'application/json'
+        },
         body: formData
       })
       .then(response => {
@@ -286,6 +290,50 @@
       });
     });
 
+    dockerImageForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const submitButton = dockerImageForm.querySelector('button[type="submit"]');
+      const originalButtonText = submitButton.textContent;
+      submitButton.textContent = 'Updating...';
+      submitButton.disabled = true;
+
+      // Prepare form data
+      const formData = new FormData(dockerImageForm);
+
+      // Submit via fetch (CSRF token will be added automatically by csrf.js)
+      fetch(dockerImageForm.action, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json'
+        },
+        body: formData
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json().catch(() => ({ success: true }));
+        } else {
+          return response.json().then(data => Promise.reject(data));
+        }
+      })
+      .then(data => {
+        submitButton.textContent = originalButtonText;
+        submitButton.disabled = false;
+
+        if (data.success !== false) {
+          showMessage('Docker image updated successfully! Server will be restarted if it was running.', 'success');
+          setTimeout(() => window.location.reload(), 2000);
+        } else {
+          showMessage(data.error || 'Failed to update Docker image', 'error');
+        }
+      })
+      .catch(error => {
+        submitButton.textContent = originalButtonText;
+        submitButton.disabled = false;
+        showMessage(error.message || error.error || 'Failed to update Docker image', 'error');
+      });
+    });
+
     variablesForm.addEventListener('submit', function(e) {
       e.preventDefault();
 
@@ -304,7 +352,6 @@
       }
 
       // Submit via fetch (CSRF token will be added automatically by csrf.js)
-
       fetch(variablesForm.action, {
         method: 'POST',
         headers: {

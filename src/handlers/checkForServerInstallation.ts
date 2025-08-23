@@ -49,7 +49,7 @@ export async function checkForServerInstallation(
       method: 'GET',
       url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
       responseType: 'text',
-      params: { id: server.UUID, path: '/airlink/installed.txt' },
+      params: { id: server.UUID, path: 'airlink/installed.txt' },
       auth: {
         username: 'Airlink',
         password: server.node.key,
