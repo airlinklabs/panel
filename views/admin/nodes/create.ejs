@@ -3,9 +3,16 @@
 <main class="h-screen m-auto">
   <div class="flex h-screen">
     <!-- Sidebar -->
-    <div class="w-60 h-full">
-      <%- include('../../components/template') %>
+<div class="hidden sm:block w-60 h-full">
+  <%- include('../../components/template') %>
+</div>
+
+<!-- Mobile button -->
+    <div class="block lg:hidden">
+    <%- include('../../components/mobile') %>
     </div>
+
+
     <!-- Content -->
     <div class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">

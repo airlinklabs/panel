@@ -1,5 +1,5 @@
 <!-- Sidebar -->
-<div id="pc-sidebar" class="sidebar transition hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-56 lg:flex-col left-0">
+<div id="pc-sidebar" class="sidebar fixed inset-y-0 z-50 w-56 flex-col left-0 transform -translate-x-full lg:translate-x-0 lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-56 lg:flex-col transition-transform duration-300 ease-in-out">
   <div id="pc-sidebar2" class="flex grow flex-col overflow-hidden bg-white dark:bg-transparent border border-neutral-800/10 dark:border-white/5">
       <nav class="flex flex-1 flex-col">
           <!-- Logo section -->
@@ -166,6 +166,9 @@
   </div>
 </div>
 
+<!-- Mobile backdrop overlay -->
+<div id="sidebar-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const navLinks = document.querySelectorAll('.nav-link');
@@ -234,25 +237,78 @@ document.addEventListener('DOMContentLoaded', () => {
   const ws = new WebSocket(`${wsProtocol}//${window.location.host}/online-check`);
   ws.addEventListener('open', () => console.log('WebSocket connected'));
   ws.addEventListener('error', console.error);
+
+  // Mobile sidebar toggle functionality
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const sidebar = document.getElementById('pc-sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+
+  const closeSidebar = () => {
+    sidebar.classList.add('-translate-x-full');
+    sidebar.classList.remove('flex');
+    sidebar.classList.add('hidden');
+    if (backdrop) backdrop.classList.add('hidden');
+  };
+
+  const openSidebar = () => {
+    sidebar.classList.remove('-translate-x-full', 'hidden');
+    sidebar.classList.add('flex');
+    if (backdrop && window.innerWidth < 1024) backdrop.classList.remove('hidden');
+  };
+
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', () => {
+      const isOpen = !sidebar.classList.contains('-translate-x-full');
+
+      if (isOpen) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    });
+
+    // Close sidebar when clicking backdrop
+    if (backdrop) {
+      backdrop.addEventListener('click', closeSidebar);
+    }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth < 1024) { // Only on mobile/tablet
+        const isClickInsideSidebar = sidebar.contains(e.target);
+        const isClickOnToggle = sidebarToggle.contains(e.target);
+        const isSidebarOpen = !sidebar.classList.contains('-translate-x-full');
+
+        if (!isClickInsideSidebar && !isClickOnToggle && isSidebarOpen) {
+          closeSidebar();
+        }
+      }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1024) {
+        // Desktop view - ensure sidebar is visible and backdrop is hidden
+        sidebar.classList.remove('-translate-x-full', 'hidden');
+        sidebar.classList.add('flex');
+        if (backdrop) backdrop.classList.add('hidden');
+      } else {
+        // Mobile view - ensure sidebar is hidden by default
+        closeSidebar();
+      }
+    });
+  }
 });
 
 </script>
-<div id="colcont" class="lg:pl-56">
+<div id="colcont" class="lg:pl-56 transition-all duration-300">
   <div class="backdrop-blur bg-opacity-50 absolute inset-0 z-30 h-16"></div>
-    <div class="sticky backdrop-blur top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-transparent px-4 sm:gap-x-6 sm:px-4 lg:px-4">
-       <div class="hidden lg:block">
-       <button type="button" id="sidebar-toggle" class="hidden lg:block w-fit p-2 mt-1 rounded-xl text-neutral-700 dark:text-white border border-neutral-300 dark:border-white/5 hover:scale-110 active:scale-100 duration-200 hover:text-neutral-900 dark:hover:text-white">
-          <span class="sr-only">Open sidebar</span>
-          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-          </svg>
-       </button>
-    </div>
+    <div class="sticky backdrop-blur top-0 z-50 flex h-16 shrink-0 items-center gap-x-4 bg-transparent px-4 sm:gap-x-6 sm:px-4 lg:px-4">
 
     <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-      <div class="relative flex flex-1 flex-col">
-
-        <div class="ml-14 lg:-ml-2 flex items-center w-fit mt-3.5 px-4 py-2 h-10 rounded-xl border border-neutral-300 dark:border-white/5 active:scale-100 duration-200 hover:border-neutral-400 dark:hover:border-neutral-300/10 bg-transparent text-neutral-800 dark:text-white">
+      <!-- Search Bar - Hidden on mobile, visible on desktop -->
+      <div class="relative flex-1 flex-col hidden lg:flex">
+        <div class="lg:-ml-2 flex items-center w-fit mt-3.5 px-4 py-2 h-10 rounded-xl border border-neutral-300 dark:border-white/5 active:scale-100 duration-200 hover:border-neutral-400 dark:hover:border-neutral-300/10 bg-transparent text-neutral-800 dark:text-white">
            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-neutral-400">
                <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
            </svg>

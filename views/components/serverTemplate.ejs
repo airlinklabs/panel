@@ -1,8 +1,9 @@
 <div class="mt-6 ml-8 mb-8">
     <div>
+      
        <div class="hidden relative sm:block">
-          <nav class="flex relative">
-             <ul role="list" class="flex min-w-full mt-1.5 flex-none gap-x-2 text-sm font-normal leading-6 text-neutral-600 dark:text-neutral-400">
+  <nav class="flex relative">
+    <ul role="list" class="flex min-w-full mt-1.5 flex-none gap-x-2 text-sm font-normal leading-6 text-neutral-600 dark:text-neutral-400">
                 <%
                 const menuItems = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
                 if (!menuItems || menuItems.length === 0) {

@@ -22,8 +22,14 @@
 <main class="h-screen m-auto">
   <div class="flex h-screen">
 
-    <div class="w-60 h-full">
-      <%- include('../../components/template') %>
+     <!-- Sidebar -->
+<div class="hidden sm:block w-60 h-full">
+  <%- include('../../components/template') %>
+</div>
+
+<!-- Mobile button -->
+    <div class="block lg:hidden">
+    <%- include('../../components/mobile') %>
     </div>
 
     <div class="flex-1 p-6 overflow-y-auto pt-16">
