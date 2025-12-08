@@ -2478,6 +2478,16 @@
       }
     }
   }
+  .group-hover\:bg-neutral-600\/30 {
+    &:is(:where(.group):hover *) {
+      @media (hover: hover) {
+        background-color: color-mix(in srgb, oklch(43.9% 0 0) 30%, transparent);
+        @supports (color: color-mix(in lab, red, red)) {
+          background-color: color-mix(in oklab, var(--color-neutral-600) 30%, transparent);
+        }
+      }
+    }
+  }
   .group-hover\:bg-neutral-600\/50 {
     &:is(:where(.group):hover *) {
       @media (hover: hover) {
@@ -2797,6 +2807,16 @@
         border-color: color-mix(in srgb, oklch(37.1% 0 0) 30%, transparent);
         @supports (color: color-mix(in lab, red, red)) {
           border-color: color-mix(in oklab, var(--color-neutral-700) 30%, transparent);
+        }
+      }
+    }
+  }
+  .hover\:border-neutral-700\/50 {
+    &:hover {
+      @media (hover: hover) {
+        border-color: color-mix(in srgb, oklch(37.1% 0 0) 50%, transparent);
+        @supports (color: color-mix(in lab, red, red)) {
+          border-color: color-mix(in oklab, var(--color-neutral-700) 50%, transparent);
         }
       }
     }
