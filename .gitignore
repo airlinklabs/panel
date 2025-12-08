@@ -13,6 +13,8 @@ prisma/*
 /package-lock.json
 /pnpm-lock.yaml
 /bun.lockb
+bun.lock
+.DS_Store
 
 # Logs
 /logs
@@ -25,4 +27,3 @@ coverage/
 .env
 *.env.*
 
-bun.lock
