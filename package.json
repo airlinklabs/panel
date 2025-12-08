@@ -10,7 +10,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node dist/app.js",
-    "start:dev": "concurrently \"npm run dev\" \"npm run build:css\"",
+    "start:dev": "concurrently \"npm run dev\"",
     "dev": "npx prisma migrate dev --name init && npx prisma generate && nodemon",
     "build": "tsc",
     "build:css": "npx @tailwindcss/cli -i ./public/tw.conf -o ./public/styles.css --watch",
@@ -57,6 +57,7 @@
     "@types/multer": "^2.0.0",
     "@types/node": "^22.8.6",
     "@types/ws": "^8.5.14",
+    "concurrently": "^9.2.1",
     "eslint": "^9.15.0",
     "fs-extra": "^11.2.0",
     "nodemon": "^3.1.9",
