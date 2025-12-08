@@ -3,7 +3,7 @@
  *      AirLink - Open Source Project by AirlinkLabs
  *      Repository: https://github.com/airlinklabs/panel
  *
- *     © 2024 AirlinkLabs. Licensed under the MIT License
+ *     © 2025 AirlinkLabs. Licensed under the MIT License
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
  */
 
@@ -188,7 +188,7 @@ const logger = {
   log(message: any, ...args: any[]): void {
     // Add box formatting for important messages
     if (typeof message === 'string' &&
-       (message.toLowerCase().includes('started') ||
+      (message.toLowerCase().includes('started') ||
         message.toLowerCase().includes('ready') ||
         message.toLowerCase().includes('listening'))) {
       this.box({
