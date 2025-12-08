@@ -3,7 +3,7 @@
  *      AirLink - Open Source Project by AirlinkLabs
  *      Repository: https://github.com/airlinklabs/panel
  *
- *     © 2024 AirlinkLabs. Licensed under the MIT License
+ *     © 2025 AirlinkLabs. Licensed under the MIT License
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
  */
 
@@ -45,7 +45,7 @@ const getTimestamp = (): string => {
 
 // Animated loading indicator that doesn't take up space
 const startLoadingAnimation = (message: string): { stop: () => void } => {
-  if (!isDebugMode) return { stop: () => {} };
+  if (!isDebugMode) return { stop: () => { } };
 
   const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
   let i = 0;
@@ -79,48 +79,48 @@ export const loadModules = async (
 
   const files = getFilesRecursively(modulesDir);
 
-// ASCII
+  // ASCII
 
-const ascii = [
-  '                                              ',
-  '  /$$$$$$ /$$         /$$/$$         /$$      ',
-  ' /$$__  $|__/        | $|__/        | $$      ',
-  '| $$  \\ $$/$$ /$$$$$$| $$/$$/$$$$$$$| $$   /$$',
-  '| $$$$$$$| $$/$$__  $| $| $| $$__  $| $$  /$$/',
-  '| $$__  $| $| $$  \\__| $| $| $$  \\ $| $$$$$$/ ',
-  '| $$  | $| $| $$     | $| $| $$  | $| $$_  $$ ',
-  '| $$  | $| $| $$     | $| $| $$  | $| $$ \\  $$',
-  '|__/  |__|__|__/     |__|__|__/  |__|__/  \\__/',
-  '                                              ',
-];
+  const ascii = [
+    '                                              ',
+    '  /$$$$$$ /$$         /$$/$$         /$$      ',
+    ' /$$__  $|__/        | $|__/        | $$      ',
+    '| $$  \\ $$/$$ /$$$$$$| $$/$$/$$$$$$$| $$   /$$',
+    '| $$$$$$$| $$/$$__  $| $| $| $$__  $| $$  /$$/',
+    '| $$__  $| $| $$  \\__| $| $| $$  \\ $| $$$$$$/ ',
+    '| $$  | $| $| $$     | $| $| $$  | $| $$_  $$ ',
+    '| $$  | $| $| $$     | $| $| $$  | $| $$ \\  $$',
+    '|__/  |__|__|__/     |__|__|__/  |__|__/  \\__/',
+    '                                              ',
+  ];
 
-const gradientSteps = ascii.length;
-const getGradientColor = (index: number) => {
-  const step = index / (gradientSteps - 5.2);
-  const channel = Math.floor(255 - step * (255 - 204));
-  const hex = `#${channel.toString(16).padStart(2, '0').repeat(3)}`;
-  return hex;
-};
+  const gradientSteps = ascii.length;
+  const getGradientColor = (index: number) => {
+    const step = index / (gradientSteps - 5.2);
+    const channel = Math.floor(255 - step * (255 - 204));
+    const hex = `#${channel.toString(16).padStart(2, '0').repeat(3)}`;
+    return hex;
+  };
 
-ascii.forEach((line, i) => {
-  const color = getGradientColor(i);
-  console.log(chalk.hex(color)(line));
-});
+  ascii.forEach((line, i) => {
+    const color = getGradientColor(i);
+    console.log(chalk.hex(color)(line));
+  });
 
-// Boxed message
-const boxWidth = 55;
-const border = chalk.gray('+' + '-'.repeat(boxWidth) + '+');
+  // Boxed message
+  const boxWidth = 55;
+  const border = chalk.gray('+' + '-'.repeat(boxWidth) + '+');
 
-// Helper function to pad content to fixed width
-const padContent = (text: string): string => {
-  const padding = ' '.repeat(Math.max(0, boxWidth - text.length));
-  return chalk.greenBright('|') + chalk.whiteBright(text) + chalk.whiteBright(padding) + chalk.greenBright('|');
-};
+  // Helper function to pad content to fixed width
+  const padContent = (text: string): string => {
+    const padding = ' '.repeat(Math.max(0, boxWidth - text.length));
+    return chalk.greenBright('|') + chalk.whiteBright(text) + chalk.whiteBright(padding) + chalk.greenBright('|');
+  };
 
-const content = padContent("Initializing - Loading core modules and components.");
+  const content = padContent("Initializing - Loading core modules and components.");
 
-console.log(border);
-console.log(content);
+  console.log(border);
+  console.log(content);
 
 
   const modulePromises: Promise<ModuleResult>[] = files.map((file) =>

@@ -3,7 +3,7 @@
  *      AirLink - Open Source Project by AirlinkLabs
  *      Repository: https://github.com/airlinklabs/panel
  *
- *     © 2024 AirlinkLabs. Licensed under the MIT License
+ *     © 2025 AirlinkLabs. Licensed under the MIT License
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
  */
 
@@ -56,7 +56,7 @@ app.set('view engine', 'ejs');
 const ejs = require('ejs');
 const originalRenderFile = ejs.renderFile;
 
-ejs.renderFile = function(file: string, data: any, options: any, callback: any) {
+ejs.renderFile = function (file: string, data: any, options: any, callback: any) {
   try {
     if (fs.existsSync(file)) {
       return originalRenderFile(file, data, options, callback);
