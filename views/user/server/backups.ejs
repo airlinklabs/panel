@@ -31,10 +31,9 @@
       <%- include('../../components/serverTemplate') %>
 
       <!-- Backups Management -->
-      <div class="px-8 mt-8">
+      <div class="px-6">
         <!-- Backups List -->
-        <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-300 dark:border-neutral-800/20">
-          <div class="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 overflow-hidden">
+          <div class="bg-white/5 rounded-xl shadow-sm overflow-hidden">
             <div class="p-5 border-b border-neutral-200 dark:border-neutral-700">
               <div>
                 <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Server Backups</h2>
@@ -125,10 +124,11 @@
             </div>
           </div>
         </div>
-      </div>
     </section>
   </div>
 </main>
+
+<%- include('../../components/toast') %>
 
 <!-- Loading Modal -->
 <div id="loading-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
@@ -145,28 +145,28 @@
 
 <!-- Confirmation Modal -->
 <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-  <div class="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-md mx-4">
+  <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
     <div class="flex items-center mb-4">
       <div class="flex-shrink-0">
         <svg id="confirmation-icon" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
         </svg>
       </div>
-      <div class="ml-3">
-        <h3 class="text-lg font-medium text-neutral-900 dark:text-white" id="confirmation-title">Confirm Action</h3>
-        <p class="text-sm text-neutral-500 dark:text-neutral-400" id="confirmation-message">Are you sure you want to proceed?</p>
+      <div>
+        <h2 class="text-2xl font-medium mb-1 text-neutral-800" id="confirmation-title">Confirm Action</h2>
+        <p class="mb-6 text-neutral-600" id="confirmation-message">Are you sure you want to proceed?</p>
       </div>
     </div>
     <div class="flex justify-end space-x-3">
       <button
         id="confirmation-cancel"
-        class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-md hover:bg-neutral-50 dark:hover:bg-neutral-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition"
       >
         Cancel
       </button>
       <button
         id="confirmation-confirm"
-        class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+        class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2""
       >
         Confirm
       </button>
@@ -176,16 +176,16 @@
 
 <!-- Create Backup Modal -->
 <div id="createBackupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-  <div class="bg-white dark:bg-neutral-800 rounded-xl p-8 max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
-    <h2 class="text-2xl font-medium mb-1 text-neutral-800 dark:text-white">Create Backup</h2>
-    <p class="mb-6 text-neutral-600 dark:text-neutral-400">Please choose a name for this backup.</p>
+  <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
+    <h2 class="text-2xl font-medium mb-1 text-neutral-800">Create Backup</h2>
+    <p class="mb-6 text-neutral-600">Please choose a name for this backup.</p>
     <input type="text"
       id="backupName"
-      class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition mb-4 text-neutral-800 dark:text-white bg-white dark:bg-neutral-700"
+      class="w-full px-3 py-2 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition mb-4 text-neutral-800 bg-white"
       placeholder="Enter backup name"
       onkeydown="handleBackupNameKeyPress(event)">
     <div class="flex justify-end space-x-4">
-      <button onclick="closeCreateBackupModal()" class="px-5 py-2 bg-neutral-200 dark:bg-neutral-600 text-neutral-800 dark:text-white rounded-xl hover:bg-neutral-300 dark:hover:bg-neutral-500 transition">Cancel</button>
+      <button onclick="closeCreateBackupModal()" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
       <button onclick="confirmCreateBackup()" class="w-full md:w-auto rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Create</button>
     </div>
   </div>
@@ -227,20 +227,6 @@ function hideConfirmation() {
 
 document.getElementById('confirmation-cancel').onclick = hideConfirmation;
 
-// Show message
-function showMessage(message, type = 'success') {
-  const container = document.getElementById('message-container');
-  const messageDiv = document.createElement('div');
-  messageDiv.className = `mb-4 p-4 rounded-lg ${type === 'success' ? 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400'}`;
-  messageDiv.textContent = message;
-
-  container.appendChild(messageDiv);
-
-  setTimeout(() => {
-    messageDiv.remove();
-  }, 5000);
-}
-
 // Modal functions
 function openCreateBackupModal() {
   const modal = document.getElementById('createBackupModal');
@@ -275,38 +261,48 @@ async function confirmCreateBackup() {
   const name = document.getElementById('backupName').value.trim();
 
   if (!name) {
-    showMessage('Please enter a backup name.', 'error');
+    showToast('Please enter a backup name.', 'error')
     return;
   }
 
   closeCreateBackupModal();
-  showLoading('Creating backup...', 'Please wait while we create your backup. This may take a few minutes.');
+// Show loading toast with progress
+const loading = showLoadingToast('Creating backup...');
+let progress = 0;
 
-  try {
-    const response = await fetch(`/server/${serverUUID}/backups/create`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name }),
-    });
+// Simulate progress until request finishes
+const progressInterval = setInterval(() => {
+  progress += 10;
+  loading.updateProgress(progress);
+  if (progress >= 90) clearInterval(progressInterval); // cap at 90% until response
+});
 
-    const data = await response.json();
+try {
+  const response = await fetch(`/server/${serverUUID}/backups/create`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name }),
+  });
 
-    if (data.success) {
-      showMessage('Backup created successfully!');
-      // Reload the page to show the new backup
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } else {
-      showMessage(data.error || 'Failed to create backup', 'error');
-    }
-  } catch (error) {
-    showMessage('Failed to create backup: ' + error.message, 'error');
-  } finally {
-    hideLoading();
+  const data = await response.json();
+
+  if (data.success) {
+    // Complete the progress bar
+    loading.updateProgress(100);
+    showToast('Backup created successfully!', 'success');
+
+    // Reload page to show new backup
+    addBackupRow(data.backup);
+  } else {
+    loading.close();
+    showToast(data.error || 'Failed to create backup', 'error');
   }
+} catch (error) {
+  loading.close();
+  showToast('Failed to create backup: ' + error.message, 'error');
+}
 }
 
 // Download backup
@@ -333,17 +329,60 @@ function restoreBackup(backupId, backupName) {
         const data = await response.json();
 
         if (data.success) {
-          showMessage('Backup restored successfully!');
+          showToast('Backup restored successfully!', 'success');
         } else {
-          showMessage(data.error || 'Failed to restore backup', 'error');
+          showToast(data.error || 'Failed to restore backup', 'error');
         }
       } catch (error) {
-        showMessage('Failed to restore backup: ' + error.message, 'error');
+        showToast('Failed to restore backup: ' + error.message, 'error');
       } finally {
         hideLoading();
       }
     }
   );
+}
+
+function addBackupRow(backup) {
+  const tbody = document.getElementById('backups-table-body');
+  if (!tbody) return;
+
+  const tr = document.createElement('tr');
+  tr.dataset.backupId = backup.UUID;
+
+  const nameTd = document.createElement('td');
+  nameTd.className = 'px-6 py-4 whitespace-nowrap';
+  nameTd.innerHTML = `<div class="text-sm font-medium text-neutral-900 dark:text-white">${backup.name}</div>`;
+  tr.appendChild(nameTd);
+
+  const sizeTd = document.createElement('td');
+  sizeTd.className = 'px-6 py-4 whitespace-nowrap';
+  const sizeText = backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : 'Unknown';
+  sizeTd.innerHTML = `<div class="text-sm text-neutral-500 dark:text-neutral-400">${sizeText}</div>`;
+  tr.appendChild(sizeTd);
+
+  const createdTd = document.createElement('td');
+  createdTd.className = 'px-6 py-4 whitespace-nowrap';
+  createdTd.innerHTML = `<div class="text-sm text-neutral-500 dark:text-neutral-400">Now</div>`;
+  tr.appendChild(createdTd);
+
+  const actionsTd = document.createElement('td');
+  actionsTd.className = 'px-6 py-4 whitespace-nowrap text-right text-sm font-medium';
+  actionsTd.innerHTML = `
+    <div class="flex justify-end space-x-2">
+      <button onclick="downloadBackup('${backup.UUID}')" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/20 hover:bg-blue-200 dark:hover:bg-blue-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        Download
+      </button>
+      <button onclick="restoreBackup('${backup.UUID}', '${backup.name}')" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/20 hover:bg-green-200 dark:hover:bg-green-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+        Restore
+      </button>
+      <button onclick="deleteBackup('${backup.UUID}', '${backup.name}')" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/20 hover:bg-red-200 dark:hover:bg-red-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+        Delete
+      </button>
+    </div>
+  `;
+  tr.appendChild(actionsTd);
+
+  tbody.prepend(tr);
 }
 
 // Delete backup
@@ -363,7 +402,7 @@ function deleteBackup(backupId, backupName) {
         const data = await response.json();
 
         if (data.success) {
-          showMessage('Backup deleted successfully!');
+          showToast('Backup deleted successfully!', 'success');
           // Remove the row from the table
           const row = document.querySelector(`tr[data-backup-id="${backupId}"]`);
           if (row) {
@@ -379,10 +418,10 @@ function deleteBackup(backupId, backupName) {
             }, 1000);
           }
         } else {
-          showMessage(data.error || 'Failed to delete backup', 'error');
+          showToast(data.error || 'Failed to delete backup', 'error');
         }
       } catch (error) {
-        showMessage('Failed to delete backup: ' + error.message, 'error');
+        showToast('Failed to delete backup: ' + error.message, 'error');
       }
     }
   );
