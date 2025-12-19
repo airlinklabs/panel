@@ -22,15 +22,25 @@ import { translationMiddleware } from './handlers/utils/core/translation';
 import PrismaSessionStore from './handlers/sessionStore';
 import { settingsLoader } from './handlers/settingsLoader';
 import { loadAddons } from './handlers/addonHandler';
-import { initializeDefaultUIComponents, uiComponentStore } from './handlers/uiComponentHandler';
+import {
+  initializeDefaultUIComponents,
+  uiComponentStore,
+} from './handlers/uiComponentHandler';
 import { startPlayerStatsCollection } from './handlers/playerStatsCollector';
 import { createPlayerStatsTable } from './handlers/createPlayerStatsTable';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
 import fs from 'fs';
-import csrfProtection, { handleCsrfError, addCsrfTokenToLocals } from './handlers/utils/security/csrfProtection';
-import { spaMiddleware, handleSPAPageRequest, setupSPARoutes } from './handlers/spaHandler';
+import csrfProtection, {
+  handleCsrfError,
+  addCsrfTokenToLocals,
+} from './handlers/utils/security/csrfProtection';
+import {
+  spaMiddleware,
+  handleSPAPageRequest,
+  setupSPARoutes,
+} from './handlers/spaHandler';
 
 loadEnv();
 
@@ -48,6 +58,11 @@ expressWs(app);
 // Load static files
 app.use(express.static(path.join(__dirname, '../public')));
 
+app.use(
+  '/monaco',
+  express.static(path.join(__dirname, '../node_modules', 'monaco-editor/min')),
+);
+
 // Load views
 const viewsPath = path.join(__dirname, '../views');
 app.set('views', viewsPath);
@@ -56,7 +71,12 @@ app.set('view engine', 'ejs');
 const ejs = require('ejs');
 const originalRenderFile = ejs.renderFile;
 
-ejs.renderFile = function (file: string, data: any, options: any, callback: any) {
+ejs.renderFile = function (
+  file: string,
+  data: any,
+  options: any,
+  callback: any,
+) {
   try {
     if (fs.existsSync(file)) {
       return originalRenderFile(file, data, options, callback);
@@ -66,12 +86,18 @@ ejs.renderFile = function (file: string, data: any, options: any, callback: any)
     const addonViewsDir = path.join(__dirname, '../../storage/addons');
 
     if (fs.existsSync(addonViewsDir)) {
-      const addonDirs = fs.readdirSync(addonViewsDir, { withFileTypes: true })
-        .filter(dirent => dirent.isDirectory())
-        .map(dirent => dirent.name);
+      const addonDirs = fs
+        .readdirSync(addonViewsDir, { withFileTypes: true })
+        .filter((dirent) => dirent.isDirectory())
+        .map((dirent) => dirent.name);
 
       for (const addonDir of addonDirs) {
-        const addonViewPath = path.join(addonViewsDir, addonDir, 'views', viewName);
+        const addonViewPath = path.join(
+          addonViewsDir,
+          addonDir,
+          'views',
+          viewName,
+        );
         if (fs.existsSync(addonViewPath)) {
           return originalRenderFile(addonViewPath, data, options, callback);
         }
@@ -93,20 +119,26 @@ ejs.renderFile = function (file: string, data: any, options: any, callback: any)
 app.use(compression());
 
 // Security middleware
-app.use(helmet({
-  noSniff: true,
-  frameguard: { action: 'deny' },
-  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false
-}));
+app.use(
+  helmet({
+    noSniff: true,
+    frameguard: { action: 'deny' },
+    contentSecurityPolicy:
+      process.env.NODE_ENV === 'production' ? undefined : false,
+  }),
+);
 app.use(hpp());
-app.use(rateLimit({
-  windowMs: 1 * 60 * 1000,
-  max: 100,
-}));
+app.use(
+  rateLimit({
+    windowMs: 1 * 60 * 1000,
+    max: 100,
+  }),
+);
 
 // Load session with Prisma store
 const isProduction = process.env.NODE_ENV === 'production';
-const useSecureCookie = isProduction || (process.env.URL?.startsWith('https://') ?? false);
+const useSecureCookie =
+  isProduction || (process.env.URL?.startsWith('https://') ?? false);
 
 app.use(
   session({
@@ -124,20 +156,28 @@ app.use(
   }),
 );
 
-app.use(express.json({
-  limit: '100mb'
-}));
-app.use(express.urlencoded({
-  extended: true,
-  limit: '100mb',
-  parameterLimit: 100000
-}));
-app.use(express.raw({
-  limit: '100mb'
-}));
-app.use(express.text({
-  limit: '100mb'
-}));
+app.use(
+  express.json({
+    limit: '100mb',
+  }),
+);
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: '100mb',
+    parameterLimit: 100000,
+  }),
+);
+app.use(
+  express.raw({
+    limit: '100mb',
+  }),
+);
+app.use(
+  express.text({
+    limit: '100mb',
+  }),
+);
 
 // Load cookies
 app.use(cookieParser());
@@ -179,7 +219,6 @@ interface GlobalWithCustomProperties extends NodeJS.Global {
 
 declare const global: GlobalWithCustomProperties;
 
-
 app.use((_req, res, next) => {
   res.locals.name = name;
   res.locals.airlinkVersion = airlinkVersion;
@@ -188,7 +227,10 @@ app.use((_req, res, next) => {
   global.airlinkVersion = airlinkVersion;
 
   res.locals.adminMenuItems = uiComponentStore.getSidebarItems(undefined, true);
-  res.locals.regularMenuItems = uiComponentStore.getSidebarItems(undefined, false);
+  res.locals.regularMenuItems = uiComponentStore.getSidebarItems(
+    undefined,
+    false,
+  );
 
   // Override res.render for SPA support
   const originalRender = res.render;
@@ -205,7 +247,7 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
     const errorMessage = isProduction ? 'Internal server error' : err.message;
 
     res.status(500).json({
-      error: errorMessage
+      error: errorMessage,
     });
   }
 
