@@ -3312,6 +3312,9 @@ const dashboardModule: Module = {
               backup: {
                 ...backup,
                 size: backup.size ? backup.size.toString() : '0',
+                UUID: response.data.backup.uuid,
+                name: name.trim(),
+                createdAt: 0,
               },
             });
           } else {
