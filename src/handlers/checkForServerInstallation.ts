@@ -6,6 +6,8 @@ const prisma = new PrismaClient();
 
 type CheckInstallationResult = {
   installed: boolean;
+  state?: string;
+  failed?: boolean;
   error?: string;
 };
 
@@ -18,7 +20,7 @@ interface Server {
   };
 }
 
-const cache: Map<string, { data: boolean; timestamp: number }> = new Map();
+const cache: Map<string, { data: string; timestamp: number }> = new Map();
 
 export async function checkForServerInstallation(
   serverId: string,
@@ -30,46 +32,57 @@ export async function checkForServerInstallation(
     })) as Server | null;
 
     if (!server) {
-      return { installed: false };
+      return { installed: false, error: 'Server not found.' };
     }
 
     const isNodeOnline = (await checkNodeStatus(server.node)).status;
-
     if (isNodeOnline === 'Offline') {
-      return { installed: false };
+      return { installed: false, state: 'offline' };
     }
 
     const cacheEntry = cache.get(serverId);
     const now = Date.now();
     if (cacheEntry && now - cacheEntry.timestamp < 10000) {
-      return { installed: cacheEntry.data };
+      const isInstalled = cacheEntry.data === 'installed';
+      return {
+        installed: isInstalled,
+        state: cacheEntry.data,
+        failed: cacheEntry.data === 'failed',
+      };
     }
 
-    const response = await axios({
-      method: 'GET',
-      url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
-      responseType: 'text',
-      params: { id: server.UUID, path: 'airlink/installed.txt' },
-      auth: {
-        username: 'Airlink',
-        password: server.node.key,
+    const response = await axios.get(
+      `http://${server.node.address}:${server.node.port}/container/status/${server.UUID}`,
+      {
+        auth: {
+          username: 'Airlink',
+          password: server.node.key,
+        },
+        timeout: 5000,
       },
-    });
+    );
 
-    const isInstalled = (response.data as string).includes('Installed: true');
+    const state = response.data.state as string;
+    const isInstalled = state === 'installed';
 
-    cache.set(serverId, { data: isInstalled, timestamp: now });
+    cache.set(serverId, { data: state, timestamp: now });
 
     await prisma.server.update({
       where: { UUID: serverId },
       data: { Installing: !isInstalled },
     });
 
-    return { installed: isInstalled };
+    return {
+      installed: isInstalled,
+      state,
+      failed: state === 'failed',
+    };
   } catch (error: any) {
     if (error.response && error.response.status === 404) {
-      return { installed: false };
+      return { installed: false, state: 'not_found' };
     }
+
+    console.error('Error checking server installation:', error);
     return {
       installed: false,
       error: 'An error occurred while checking the installation status.',
