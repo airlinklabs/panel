@@ -16,47 +16,34 @@
 
       <%- include('../../components/installHeader') %>
 
-      <!-- Daemon down message removed as requested -->
+            <!-- Error Message -->
+      <% if (errorMessage && errorMessage.message) { %>
+          <div class="bg-neutral-500/20 p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start space-x-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-6 mt-2 ml-1 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg> 
+      <div>
+        <p class="text-white">Error</p>
+        <p class="text-sm text-neutral-400"><%= errorMessage.message %></p>
+      </div>
+    </div>
+      <% } %>
+
+              <!-- No worlds message -->
+                            <div id="noWorldsMessage" class="bg-neutral-500/20 p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start space-x-4 <%= worlds.length > 0 ? 'hidden' : '' %>"">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-6 mt-2 ml-1 text-blue-400" viewBox="0 0 24 24" fill="currentColor">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+          </svg> 
+      <div>
+        <p class="text-white">No worlds found</p>
+        <p class="text-sm text-neutral-400">No Minecraft worlds were detected on this server. Worlds will appear here once they are created.</p>
+      </div>
+    </div>
 
       <!-- Server Template -->
       <%- include('../../components/serverTemplate', { features: ['players', 'worlds'] }) %>
 
       <div class="p-6">
-        <!-- Error message -->
-        <% if (errorMessage && errorMessage.message) { %>
-          <div class="rounded-xl bg-red-800/10 px-6 py-4 mt-4 mx-8 mb-4">
-            <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-              </div>
-              <div class="ml-3">
-                <h3 class="text-sm font-medium text-red-400">Error</h3>
-                <p class="text-sm text-red-400/80 mt-1">
-                  <%= errorMessage.message %>
-                </p>
-              </div>
-            </div>
-          </div>
-        <% } %>
-
-        <!-- No worlds message -->
-        <div id="noWorldsMessage" class="<%= worlds.length > 0 ? 'hidden' : '' %> rounded-xl bg-blue-800/10 px-6 py-4 mt-8 mx-8">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-              </svg>
-            </div>
-            <div class="ml-3">
-              <h3 class="text-sm font-medium text-blue-400">No worlds found</h3>
-              <p class="text-sm text-blue-400/80 mt-1">
-                No Minecraft worlds were detected on this server. Worlds will appear here once they are created.
-              </p>
-            </div>
-          </div>
-        </div>
 
         <!-- Table of worlds -->
         <div class="overflow-hidden shadow rounded-lg m-8 border border-neutral-800/20 bg-white dark:bg-neutral-800 <%= worlds.length === 0 ? 'hidden' : '' %>" id="serverTable">

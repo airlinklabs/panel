@@ -5,18 +5,18 @@ import { checkNodeStatus } from './utils/node/nodeStatus';
 const prisma = new PrismaClient();
 
 type CheckInstallationResult = {
-    installed: boolean;
-    error?: string;
+  installed: boolean;
+  error?: string;
 };
 
 interface Server {
-    UUID: string;
-    node: {
-      address: string;
-      port: number;
-      key: string;
-    };
-  }
+  UUID: string;
+  node: {
+    address: string;
+    port: number;
+    key: string;
+  };
+}
 
 const cache: Map<string, { data: boolean; timestamp: number }> = new Map();
 
