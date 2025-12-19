@@ -1487,12 +1487,8 @@ const dashboardModule: Module = {
                 (await isWorld(folder.name, serverInfos))
               ) {
                 worlds.push({ name: folder.name });
-              } else {
-                console.log(folder.name);
               }
             }
-
-            console.log(worlds);
 
             const settings = await prisma.settings.findUnique({
               where: { id: 1 },
