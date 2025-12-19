@@ -56,9 +56,7 @@ export async function checkEulaStatus(
       },
     });
 
-    const eulaAccepted = (eulaResponse.data as string).includes(
-      'eula=true',
-    );
+    const eulaAccepted = (eulaResponse.data as string).includes('eula=true');
     return { accepted: eulaAccepted };
   } catch (error: any) {
     if (error.response && error.response.status === 404) {
@@ -129,7 +127,7 @@ export const isWorld = async (
     const content = response.data;
 
     // Files that must be present in a Minecraft world
-    const requiredFiles = ['level.dat'];
+    const requiredFiles = ['uid.dat', 'level.dat'];
 
     // Files that are commonly found in Minecraft worlds
     const commonWorldFiles = [
@@ -144,8 +142,8 @@ export const isWorld = async (
     ];
 
     // Check if all required files are present
-    const hasRequiredFiles = requiredFiles.every((file) =>
-      content.some((item: any) => item.name === file),
+    const hasRequiredFiles = content.some((item: any) =>
+      requiredFiles.includes(item.name),
     );
 
     // Check if at least one common world file/folder is present
@@ -154,17 +152,28 @@ export const isWorld = async (
     );
 
     // A valid world must have all required files and at least one common world file/folder
-    const isValidWorld = hasRequiredFiles && (content.length > 1 || hasCommonWorldFiles);
+    const isValidWorld =
+      hasRequiredFiles && (content.length > 1 || hasCommonWorldFiles);
 
     return isValidWorld;
   } catch (error) {
     // Only log error if it's not a connection error (daemon offline)
     if (axios.isAxiosError(error)) {
-      if (error.code !== 'ECONNREFUSED' && error.code !== 'ETIMEDOUT' && error.code !== 'ENOTFOUND') {
-        logger.error(`Error checking world folder content for ${folderName}:`, error);
+      if (
+        error.code !== 'ECONNREFUSED' &&
+        error.code !== 'ETIMEDOUT' &&
+        error.code !== 'ENOTFOUND'
+      ) {
+        logger.error(
+          `Error checking world folder content for ${folderName}:`,
+          error,
+        );
       }
     } else {
-      logger.error(`Error checking world folder content for ${folderName}:`, error);
+      logger.error(
+        `Error checking world folder content for ${folderName}:`,
+        error,
+      );
     }
     return false;
   }

@@ -102,33 +102,6 @@ function isImageFile(filename) {
       </div>
       <% } %>
 
-      <div class="flex-grow px-8 mt-8 -mb-4 overflow-hidden">
-        <h1 class="text-white text-sm">
-          <a class="text-neutral-300 hover:text-neutral-200 transition" href="./files">/app/data/</a>
-          <%
-              if (req.query.path) {
-                  const parts = req.query.path.split('/');
-                  let currentPath = '';
-
-                  parts.forEach((part, index) => {
-                      currentPath += part;
-
-                      if (index < parts.length - 1) {
-                          %>
-                          <a href="./files?path=<%= currentPath %>" class="text-neutral-300 hover:text-neutral-200 transition"><%= part %></a>/
-                          <%
-                          currentPath += '/';
-                      } else {
-                          %>
-                          <span class="text-neutral-100"><%= part %></span>
-                          <%
-                      }
-                  });
-              }
-          %>
-        </h1>
-       </div>
-
       <!-- File Table or Daemon Offline Message -->
       <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
         <!-- Daemon Offline Message -->
@@ -157,6 +130,33 @@ function isImageFile(filename) {
         <div class="px-8 mt-8">
           <div class="overflow-hidden rounded-lg shadow-md border border-neutral-700/10 dark:bg-neutral-400/20">
             <table class="min-w-full bg-white dark:bg-neutral-800">
+
+                    <div class="p-2 overflow-hidden">
+        <h1 class="text-white text-sm">
+          <a class="text-neutral-300 hover:text-neutral-200 transition" href="./files">/app/data/</a>
+          <%
+              if (req.query.path) {
+                  const parts = req.query.path.split('/');
+                  let currentPath = '';
+
+                  parts.forEach((part, index) => {
+                      currentPath += part;
+
+                      if (index < parts.length - 1) {
+                          %>
+                          <a href="./files?path=<%= currentPath %>" class="text-neutral-300 hover:text-neutral-200 transition -ml-1"><%= part %></a>/
+                          <%
+                          currentPath += '/';
+                      } else {
+                          %>
+                          <span class="text-neutral-100 -ml-1"><%= part %></span>
+                          <%
+                      }
+                  });
+              }
+          %>
+        </h1>
+       </div>
             <thead class="text-neutral-800 dark:text-neutral-100">
               <tr>
                 <th class="px-6 py-3 text-left">

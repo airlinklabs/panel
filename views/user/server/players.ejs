@@ -15,31 +15,26 @@
       </header>
 
       <%- include('../../components/installHeader') %>
+            <!-- Error Message -->
+      <% if (errorMessage && errorMessage.message) { %>
+          <div class="bg-neutral-500/20 p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start space-x-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-6 mt-2 ml-1 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg> 
+      <div>
+        <p class="text-white">Error</p>
+        <p class="text-sm text-neutral-400"><%= errorMessage.message %></p>
+      </div>
+    </div>
+      <% } %>
 
       <!-- Daemon down message removed as requested -->
 
       <!-- Server Template -->
       <%- include('../../components/serverTemplate', { features: ['players', 'worlds'] }) %>
 
-      <!-- Error Message -->
-      <% if (errorMessage && errorMessage.message) { %>
-      <div class="rounded-xl bg-red-800/10 px-6 py-4 mt-4 mx-8 mb-4">
-        <div class="flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <div>
-            <h3 class="text-sm font-medium text-red-400">Error</h3>
-            <p class="text-sm text-red-400/50">
-              <%= errorMessage.message %>
-            </p>
-          </div>
-        </div>
-      </div>
-      <% } %>
-
       <!-- Players Section -->
-      <div class="p-6">
+      <div class="px-6">
         <!-- Server Info Card -->
         <div class="bg-neutral-800/50 rounded-xl p-6 mb-6 shadow-lg">
           <div class="flex flex-col md:flex-row justify-between items-center mb-4">
@@ -55,19 +50,6 @@
                   Manage your server's player list
                 <% } %>
               </p>
-            </div>
-            <div class="mt-4 md:mt-0">
-              <a
-                href="/invite/<%= req.params.id %>"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-all duration-200 inline-flex items-center"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Invite Players
-              </a>
             </div>
           </div>
 
