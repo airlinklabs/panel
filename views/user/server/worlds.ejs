@@ -43,10 +43,10 @@
       <!-- Server Template -->
       <%- include('../../components/serverTemplate', { features: ['players', 'worlds'] }) %>
 
-      <div class="p-6">
+      <div class="px-6">
 
         <!-- Table of worlds -->
-        <div class="overflow-hidden shadow rounded-lg m-8 border border-neutral-800/20 bg-white dark:bg-neutral-800 <%= worlds.length === 0 ? 'hidden' : '' %>" id="serverTable">
+        <div class="overflow-hidden shadow rounded-lg border border-neutral-800/20 bg-white dark:bg-neutral-800 <%= worlds.length === 0 ? 'hidden' : '' %>" id="serverTable">
           <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
             <thead class="bg-neutral-50 dark:bg-neutral-800">
               <tr>
