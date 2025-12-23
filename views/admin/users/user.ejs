@@ -44,7 +44,7 @@
                    <p class="mt-1">
                      <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
                        <%= dataUser.isAdmin ? 'bg-emerald-600/10 text-emerald-400 ring-emerald-600/20' : 'bg-amber-600/10 text-amber-400 ring-red-600/20' %> ring-1 ring-inset">
-                       <%= dataUser.isAdmin ? 'Admin' : 'User' %>
+                       <%= dataUser.isAdmin ? req.translations.admin : 'User' %>
                      </span>
                    </p>
                  </div>
