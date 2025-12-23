@@ -1,0 +1,237 @@
+{
+  "_commentary": "Kategorieabschnitt Titel und Beschreibung",
+  "_commentary_admin": "Kategorieabschnitt Admin",
+
+  "adminOverviewTitle": "Übersicht",
+  "adminOverviewText": "Eine einfache Übersicht über dein Panel.",
+
+  "adminImagesTitle": "Bilder verwalten",
+  "adminImagesText": "Lade Bilder einfach hoch oder erstelle sie manuell für deine Instanzen.",
+
+  "adminSettingsTitle": "Einstellungen",
+  "adminSettingsText": "Eine Liste aller Einstellungen im Airlink-Panel.",
+
+  "adminEditNodeTitle": "Node bearbeiten",
+  "adminEditNodeText": "Einen einzelnen Node bearbeiten.",
+
+  "adminNodesTitle": "Nodes",
+  "adminNodesText": "Eine Liste aller im Airlink-Panel eingerichteten Nodes.",
+
+  "adminCreateNodeTitle": "Node erstellen",
+  "adminCreateNodeText": "Erstelle einen neuen Node in Airlink.",
+
+  "adminCreateServerTitle": "Server erstellen",
+  "adminCreateServerText": "Erstelle einen neuen Server in Airlink.",
+
+  "adminServersTitle": "Server",
+  "adminServersText": "Eine Liste aller im Airlink-Panel eingerichteten Server.",
+
+  "adminCreateUserTitle": "Benutzer erstellen",
+  "adminCreateUserText": "Erstelle einen neuen Benutzer in Airlink.",
+
+  "adminUsersTitle": "Benutzer",
+  "adminUsersText": "Eine Liste aller Benutzer im Airlink-Panel.",
+
+  "adminUserTitle": "Benutzer",
+  "adminUserText": "Einen einzelnen Benutzer verwalten.",
+
+  "_commentary_user": "Kategorieabschnitt Benutzer",
+
+  "userDashboardTitle": "Dashboard",
+  "userDashboardText": "Sieh dir deine Server an und verwalte sie.",
+
+  "userAccountTitle": "Konto",
+  "userAccountText": "Verwalte deine Kontoeinstellungen.",
+
+  "_commentary_other": "Kategorieabschnitt Sonstiges",
+
+  "createNewNode": "Neuen Node erstellen",
+  "configure": "Konfigurieren",
+  "ram": "RAM",
+  "disk": "Speicher",
+  "cpu": "CPU",
+  "addressIP": "IP-Adresse",
+  "daemonPort": "Daemon-Port",
+
+  "noNodesAvailable": "Keine Nodes verfügbar",
+  "noInstancesAvailable": "Keine Instanzen verfügbar",
+
+  "averageInstanceDensity": "Durchschnittliche Instanzdichte",
+  "onlineNodes": "Online-Nodes",
+  "totalNodes": "Gesamtanzahl Nodes",
+
+  "success": "Erfolg",
+  "actionCompleted": "Die Aktion wurde erfolgreich abgeschlossen.",
+
+  "name": "Name",
+  "connection": "Verbindung",
+  "instances": "Instanzen",
+  "actions": "Aktionen",
+
+  "addNewNode": "Neuen Node hinzufügen",
+  "create": "Erstellen",
+
+  "user": "Benutzer",
+  "users": "Benutzer",
+  "images": "Bilder",
+
+  "runningLatestVersion": "Du verwendest die neueste Version!",
+  "here": "hier",
+
+  "newReleaseAirlink1": "Eine neue Version, Airlink",
+  "newReleaseAirlink2": "ist verfügbar. Bitte klicke",
+  "newReleaseAirlink3": "um sie herunterzuladen!",
+
+  "sysInfoText": "Du verwendest die Airlink-Panel-Version",
+
+  "updateAccount": "Konto aktualisieren",
+  "username": "Benutzername",
+  "checking": "Überprüfung...",
+  "updateUsername": "Benutzernamen aktualisieren",
+
+  "password": "Passwort",
+  "admin": "Admin",
+
+  "currentPassword": "Aktuelles Passwort",
+  "newPassword": "Neues Passwort",
+  "update_password": "Passwort aktualisieren",
+
+  "enabled2FA": "2FA aktivieren",
+  "disable2FA": "2FA deaktivieren",
+
+  "email": "E-Mail",
+
+  "correctPassword": "✅ Richtig!",
+  "incorrectPassword": "❌ Falsches Passwort",
+
+  "usernameTaken": "❌ Vergeben",
+  "usernameIsNotTaken": "✅ Verfügbar",
+
+  "validatingPasswordError": "Fehler beim Überprüfen des Passworts",
+  "updatingUsernameError": "Fehler beim Aktualisieren des Benutzernamens. Bitte versuche es später erneut.",
+  "usernameUpdatedSuccess": "Benutzername erfolgreich aktualisiert!",
+
+  "currentPasswordHide": "********",
+  "newPasswordHide": "********",
+
+  "createNewUser": "Neuen Benutzer erstellen",
+
+  "totalUsers": "Gesamtanzahl Benutzer",
+  "onlineUsers": "Online-Benutzer",
+  "onlineUsersCount": "Online-Benutzer",
+  "onlineUsersStatus": "Online-Benutzer",
+
+  "userNotFound": "Benutzer nicht gefunden",
+  "userUpdatedSuccess": "Benutzer erfolgreich aktualisiert!",
+  "userDeletedSuccess": "Benutzer erfolgreich gelöscht!",
+  "userCreatedSuccess": "Benutzer erfolgreich erstellt!",
+
+  "addNewUser": "Neuen Benutzer hinzufügen",
+
+  "update": "Aktualisieren",
+  "updateBtn": "Aktualisieren",
+  "updateAction": "Aktualisieren",
+  "delete": "Löschen",
+  "cancel": "Abbrechen",
+
+  "createUser": "Benutzer erstellen",
+
+  "usernameTakenError": "Benutzername ist bereits vergeben",
+  "usernameRequired": "Benutzername ist erforderlich",
+  "passwordRequired": "Passwort ist erforderlich",
+  "emailRequired": "E-Mail ist erforderlich",
+  "emailInvalid": "E-Mail ist ungültig",
+  "emailTaken": "E-Mail ist bereits vergeben",
+  "passwordNotMatch": "Passwörter stimmen nicht überein",
+  "passwordUpdated": "Passwort erfolgreich aktualisiert!",
+
+  "role": "Rolle",
+
+  "createNewServer": "Neuen Server erstellen",
+
+  "UUID": "UUID",
+  "Owner": "Besitzer",
+  "Node": "Node",
+  "Status": "Status",
+
+  "averageUserDensity": "Durchschnittliche Benutzerdichte",
+
+  "noUsersAvailable": "Keine Benutzer verfügbar",
+  "offlineUsers": "Offline-Benutzer",
+  "activeUsers": "Aktive Benutzer",
+
+  "description": "Beschreibung",
+  "Ports": "Ports",
+  "Image": "Image",
+  "identifier": "Kennung",
+
+  "SendACommand": "Befehl senden",
+
+  "ramUsage": "RAM-Auslastung",
+  "cpuUsage": "CPU-Auslastung",
+  "diskUsage": "Speicherauslastung",
+
+  "start": "Starten",
+  "stop": "Stoppen",
+  "restart": "Neustarten",
+  "kill": "Beenden erzwingen",
+
+  "updateDescription": "Beschreibung aktualisieren",
+
+  "usernameDescriptionSuccess": "Beschreibung erfolgreich aktualisiert!",
+  "usernameDescriptionError": "Fehler beim Aktualisieren der Beschreibung. Bitte versuche es später erneut.",
+
+  "nodes": "Nodes",
+  "daemonKey": "Daemon-Schlüssel",
+  "DockerImage": "Docker-Image",
+
+  "adminSettingsSave": "Speichern",
+
+  "general": "Allgemein",
+  "language": "Sprache",
+  "languagePreference": "Spracheinstellungen",
+  "saveLanguagePreference": "Spracheinstellungen speichern",
+
+  "loginHistory": "Anmeldeverlauf",
+  "dateTime": "Datum & Uhrzeit",
+  "ipAddress": "IP-Adresse",
+  "browserDevice": "Browser/Gerät",
+  "unknown": "Unbekannt",
+  "noLoginHistory": "Kein Anmeldeverlauf verfügbar",
+
+  "siteTitle": "Seitentitel",
+  "uploadLogo": "Logo hochladen",
+  "currentLogo": "Aktuelles Logo",
+  "uploadFavicon": "Favicon hochladen",
+  "currentFavicon": "Aktuelles Favicon",
+
+  "faviconUploadHelp": "Du kannst .ico-, .png- oder .jpg-Dateien hochladen. Bilder werden automatisch in das 32x32-.ico-Format konvertiert.",
+
+  "theme": "Design",
+  "defaultLanguage": "Standardsprache",
+
+  "resetToDefault": "Auf Standard zurücksetzen",
+  "saveSettings": "Einstellungen speichern",
+
+  "settingsSaved": "Einstellungen erfolgreich gespeichert!",
+  "failedToSaveSettings": "Einstellungen konnten nicht gespeichert werden",
+
+  "resetSettingsConfirm": "Alle Einstellungen auf Standard zurücksetzen?",
+  "settingsReset": "Einstellungen auf Standard zurückgesetzt!",
+  "failedToResetSettings": "Zurücksetzen der Einstellungen fehlgeschlagen",
+
+  "imageConvertedToFavicon": "Bild wurde in das Favicon-Format konvertiert",
+  "failedToConvertImage": "Konvertierung des Bildes fehlgeschlagen",
+
+  "updates": "Updates",
+  "totalRegisteredUsers": "Gesamtanzahl registrierter Benutzer",
+  "serverCount": "Serveranzahl",
+  "totalServers": "Gesamtanzahl Server",
+  "admins": "Administratoren",
+
+  "noUsersOnline": "Keine Benutzer online",
+
+  "errorCheckingUsername": "Fehler beim Überprüfen des Benutzernamens",
+  "areYouSureDeleteUser": "Möchtest du diesen Benutzer wirklich löschen?",
+  "failedToDeleteUser": "Benutzer konnte nicht gelöscht werden."
+}
