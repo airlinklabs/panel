@@ -6,6 +6,7 @@ import axios from 'axios';
 import QueueHandler from '../../../handlers/utils/core/queueer';
 import bcrypt from 'bcrypt';
 import { Buffer } from 'buffer';
+import { getParamAsString, getParamAsNumber } from "../../../utils/typeHelpers";
 
 const queueer = new QueueHandler();
 
@@ -146,7 +147,7 @@ const coreModule: Module = {
 
           if (userId) {
             user = await prisma.users.findUnique({
-              where: { id: parseInt(userId) },
+              where: { id: getParamAsNumber(userId) },
             });
           } else if (filter?.email) {
             user = await prisma.users.findUnique({
@@ -304,7 +305,7 @@ const coreModule: Module = {
       validator,
       async (req: Request, res: Response) => {
         try {
-          const userId = parseInt(req.params.id);
+          const userId = getParamAsNumber(req.params.id);
           const { username, email, first_name, last_name, password } = req.body;
 
           if (!username && !email && !first_name && !last_name && !password) {
@@ -410,7 +411,7 @@ const coreModule: Module = {
       validator,
       async (req: Request, res: Response) => {
         try {
-          const nodeId = parseInt(req.params.id);
+          const nodeId = getParamAsNumber(req.params.id);
 
           const node = await prisma.node.findUnique({
             where: { id: nodeId },

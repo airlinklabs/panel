@@ -5,6 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { onlineUsers } from '../user/wsUsers';
 import logger from '../../handlers/logger';
 import bcrypt from 'bcrypt';
+import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 
 const prisma = new PrismaClient();
 
@@ -156,7 +157,7 @@ const adminModule: Module = {
           }
 
           const dataUser = await prisma.users.findUnique({
-            where: { id: parseInt(req.params.id, 10) },
+            where: { id: getParamAsNumber(req.params.id) },
             include: {
               servers: true
             }
@@ -188,7 +189,7 @@ const adminModule: Module = {
           }
 
           const dataUser = await prisma.users.findUnique({
-            where: { id: parseInt(req.params.id, 10) },
+            where: { id: getParamAsNumber(req.params.id) },
             include: {
               servers: true
             }
@@ -221,14 +222,14 @@ const adminModule: Module = {
           }
 
           const dataUser = await prisma.users.findUnique({
-            where: { id: parseInt(req.params.id, 10) },
+            where: { id: getParamAsNumber(req.params.id) },
           });
           if (!dataUser) {
             return res.redirect('/admin/users');
           }
 
           await prisma.users.delete({
-            where: { id: parseInt(req.params.id, 10) },
+            where: { id: getParamAsNumber(req.params.id) },
           });
 
           res.status(200).json({ message: 'User deleted successfully.' });
@@ -251,7 +252,7 @@ const adminModule: Module = {
             return;
           }
 
-          const targetUserId = parseInt(req.params.id, 10);
+          const targetUserId = getParamAsNumber(req.params.id);
           const targetUser = await prisma.users.findUnique({
             where: { id: targetUserId },
           });
