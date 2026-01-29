@@ -14,6 +14,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { getAllAddons, toggleAddonStatus, reloadAddons } from '../../handlers/addonHandler';
 import { registerPermission } from '../../handlers/permisions';
+import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 
 const prisma = new PrismaClient();
 
@@ -82,7 +83,7 @@ const addonsModule: Module = {
 
           const enabledBool = enabled === 'true' || enabled === true;
           logger.info(`Toggling addon ${slug} to ${enabledBool ? 'enabled' : 'disabled'}`);
-          const result = await toggleAddonStatus(slug, enabledBool);
+          const result = await toggleAddonStatus(getParamAsString(slug), enabledBool);
 
           if (result.success) {
             const reloadResult = await reloadAddons(req.app);

@@ -4,6 +4,7 @@ import { WebSocket } from 'ws';
 import bcrypt from 'bcrypt';
 
 import logger from '../../logger';
+import { getParamAsString, getParamAsNumber } from "../../../utils/typeHelpers";
 
 /**
  * Middleware to check if the user is authenticated and either admin or owner of the server.
@@ -41,7 +42,7 @@ export const isAuthenticatedForServer =
         const serverId = req.params[serverIdParam];
 
         const server = await prisma.server.findUnique({
-          where: { UUID: serverId },
+          where: { UUID: getParamAsString(serverId) },
           include: { owner: true },
         });
 
@@ -84,7 +85,7 @@ export const isAuthenticatedForServerWS =
 
         const serverId = req.params[serverIdParam];
         const server = await prisma.server.findUnique({
-          where: { UUID: serverId },
+          where: { UUID: getParamAsString(serverId) },
           include: { owner: true },
         });
 

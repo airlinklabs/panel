@@ -8,6 +8,7 @@ import { checkEulaStatus, isWorld } from '../../handlers/features';
 import { checkForServerInstallation } from '../../handlers/checkForServerInstallation';
 import { queueer } from '../../handlers/queueer';
 import { getServerStatus } from '../../handlers/utils/server/serverStatus';
+import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 
 // Declare global serverStoppingStates
 declare global {
@@ -166,7 +167,7 @@ const dashboardModule: Module = {
           return res.render('user/server/manage', {
             errorMessage,
             features: features || [],
-            installed: await checkForServerInstallation(serverId),
+            installed: await checkForServerInstallation(getParamAsString(serverId)),
             user,
             alshID,
             alshPASSWORD,
@@ -565,7 +566,7 @@ const dashboardModule: Module = {
             errorMessage,
             user,
             features,
-            installed: await checkForServerInstallation(serverId),
+            installed: await checkForServerInstallation(getParamAsString(serverId)),
             files,
             currentPath: path,
             req,
@@ -590,7 +591,7 @@ const dashboardModule: Module = {
 
           // Still need to get server data for the template
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: {
               node: true,
               owner: true,
@@ -658,7 +659,7 @@ const dashboardModule: Module = {
             server,
             serverStatus,
             settings,
-            installed: await checkForServerInstallation(serverId),
+            installed: await checkForServerInstallation(getParamAsString(serverId)),
           });
         }
       },
@@ -683,7 +684,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true, image: true },
           });
 
@@ -703,7 +704,7 @@ const dashboardModule: Module = {
             },
           });
 
-          const extension = filePath.split('.').pop()?.toLowerCase() || '';
+          const extension = getParamAsString(filePath).split('.').pop()?.toLowerCase() || '';
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
           });
@@ -745,9 +746,9 @@ const dashboardModule: Module = {
             errorMessage: {},
             user,
             features,
-            installed: await checkForServerInstallation(serverId),
+            installed: await checkForServerInstallation(getParamAsString(serverId)),
             file: {
-              name: filePath.split('/').pop(),
+              name: getParamAsString(filePath).split('/').pop(),
               path: filePath,
               content: response.data,
               extension,
@@ -762,7 +763,7 @@ const dashboardModule: Module = {
 
           // Still need to get server data for the template
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: {
               node: true,
               owner: true,
@@ -825,11 +826,11 @@ const dashboardModule: Module = {
             features,
             installed: false,
             file: {
-              name: filePath.split('/').pop() || 'Unknown',
+              name: getParamAsString(filePath).split('/').pop() || 'Unknown',
               path: filePath,
               content:
                 '// Unable to load file content\n// The daemon appears to be offline',
-              extension: filePath.split('.').pop() || 'txt',
+              extension: getParamAsString(filePath).split('.').pop() || 'txt',
             },
             server,
             serverStatus,
@@ -850,7 +851,7 @@ const dashboardModule: Module = {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
         let filePath = req.params?.path;
-        if (filePath.endsWith('/save')) {
+        if (getParamAsString(filePath).endsWith('/save')) {
           filePath = filePath.slice(0, -5);
         }
         const { content } = req.body;
@@ -863,7 +864,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true },
           });
 
@@ -921,7 +922,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true },
           });
 
@@ -932,7 +933,7 @@ const dashboardModule: Module = {
           }
 
           // Check if the server is a Minecraft world
-          const isMinecraftWorld = await isWorld(filePath, {
+          const isMinecraftWorld = await isWorld(getParamAsString(filePath), {
             nodeAddress: server.node.address,
             nodePort: server.node.port,
             serverUUID: server.UUID,
@@ -1007,7 +1008,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true },
           });
 
@@ -1063,7 +1064,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true },
           });
 
@@ -1130,7 +1131,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true },
           });
 
@@ -1214,7 +1215,7 @@ const dashboardModule: Module = {
         }
 
         const server = await prisma.server.findUnique({
-          where: { UUID: serverId },
+          where: { UUID: getParamAsString(serverId) },
           include: { node: true },
         });
 
@@ -1263,7 +1264,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true, image: true },
           });
 
@@ -1308,7 +1309,7 @@ const dashboardModule: Module = {
               errorMessage: { message: 'No primary port found' },
               user,
               features,
-              installed: await checkForServerInstallation(serverId),
+              installed: await checkForServerInstallation(getParamAsString(serverId)),
               players: [],
               server,
               req,
@@ -1420,7 +1421,7 @@ const dashboardModule: Module = {
             players,
             serverInfo,
             features,
-            installed: await checkForServerInstallation(serverId),
+            installed: await checkForServerInstallation(getParamAsString(serverId)),
             server,
             serverStatus,
             req,
@@ -1448,7 +1449,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true, image: true },
           });
 
@@ -1526,7 +1527,7 @@ const dashboardModule: Module = {
               user,
               worlds,
               features,
-              installed: await checkForServerInstallation(serverId),
+              installed: await checkForServerInstallation(getParamAsString(serverId)),
               server,
               serverStatus,
               req,
@@ -1568,7 +1569,7 @@ const dashboardModule: Module = {
               user,
               worlds: [],
               features: [],
-              installed: await checkForServerInstallation(serverId),
+              installed: await checkForServerInstallation(getParamAsString(serverId)),
               server,
               serverStatus,
               req,
@@ -1616,7 +1617,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true, image: true },
           });
 
@@ -1700,7 +1701,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true, image: true },
           });
 
@@ -1947,7 +1948,7 @@ const dashboardModule: Module = {
           return res.render('user/server/startup', {
             errorMessage,
             features,
-            installed: await checkForServerInstallation(serverId),
+            installed: await checkForServerInstallation(getParamAsString(serverId)),
             user,
             req,
             server,
@@ -2002,7 +2003,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true },
           });
 
@@ -2041,7 +2042,7 @@ const dashboardModule: Module = {
           }
 
           await prisma.server.update({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             data: { StartCommand: startCommand },
           });
           logger.info(
@@ -2220,7 +2221,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true, image: true },
           });
 
@@ -2291,7 +2292,7 @@ const dashboardModule: Module = {
 
           // Update the server with the new Docker image
           await prisma.server.update({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             data: { dockerImage: JSON.stringify(dockerImageObj) },
           });
 
@@ -2462,7 +2463,7 @@ const dashboardModule: Module = {
           logger.info(`Processing form data: ${JSON.stringify(req.body)}`);
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { image: true },
           });
 
@@ -2549,7 +2550,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true },
           });
 
@@ -2560,7 +2561,7 @@ const dashboardModule: Module = {
           }
 
           await prisma.server.update({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             data: { Variables: JSON.stringify(variables) },
           });
           logger.info(`Variables updated in database for server ${serverId}`);
@@ -2776,7 +2777,7 @@ const dashboardModule: Module = {
           return res.render('user/server/settings', {
             errorMessage,
             features,
-            installed: await checkForServerInstallation(serverId),
+            installed: await checkForServerInstallation(getParamAsString(serverId)),
             user,
             req,
             server,
@@ -2814,7 +2815,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { image: true },
           });
 
@@ -2824,7 +2825,7 @@ const dashboardModule: Module = {
           }
 
           await prisma.server.update({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             data: {
               name: name,
               description: description,
@@ -2854,7 +2855,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true },
           });
 
@@ -2983,7 +2984,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true, image: true },
           });
 
@@ -2993,7 +2994,7 @@ const dashboardModule: Module = {
           }
 
           await prisma.server.update({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             data: {
               Installing: true,
               Queued: true,
@@ -3023,7 +3024,7 @@ const dashboardModule: Module = {
           queueer.addTask(async () => {
             try {
               const serverToReinstall = await prisma.server.findUnique({
-                where: { UUID: serverId },
+                where: { UUID: getParamAsString(serverId) },
                 include: { image: true, node: true },
               });
 
@@ -3149,7 +3150,7 @@ const dashboardModule: Module = {
                   );
 
                   await prisma.server.update({
-                    where: { UUID: serverId },
+                    where: { UUID: getParamAsString(serverId) },
                     data: { Queued: false },
                   });
                 } catch (error: any) {
@@ -3162,13 +3163,13 @@ const dashboardModule: Module = {
                     logger.error(`Response data:`, error.response.data);
                   }
                   await prisma.server.update({
-                    where: { UUID: serverId },
+                    where: { UUID: getParamAsString(serverId) },
                     data: { Queued: false },
                   });
                 }
               } else {
                 await prisma.server.update({
-                  where: { UUID: serverId },
+                  where: { UUID: getParamAsString(serverId) },
                   data: { Queued: false },
                 });
               }
@@ -3180,7 +3181,7 @@ const dashboardModule: Module = {
 
               await prisma.server
                 .update({
-                  where: { UUID: serverId },
+                  where: { UUID: getParamAsString(serverId) },
                   data: { Queued: false },
                 })
                 .catch((e) =>
@@ -3216,7 +3217,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true, image: true },
           });
 
@@ -3226,7 +3227,7 @@ const dashboardModule: Module = {
           }
 
           const backups = await prisma.backup.findMany({
-            where: { serverId: serverId },
+            where: { serverId: getParamAsString(serverId) },
             orderBy: { createdAt: 'desc' },
           });
 
@@ -3241,7 +3242,7 @@ const dashboardModule: Module = {
             backups,
             settings,
             features: JSON.parse(server.image.info || '{}').features || [],
-            installed: await checkForServerInstallation(serverId),
+            installed: await checkForServerInstallation(getParamAsString(serverId)),
           });
         } catch (error) {
           logger.error('Error fetching backups:', error);
@@ -3271,7 +3272,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true },
           });
 
@@ -3300,7 +3301,7 @@ const dashboardModule: Module = {
               data: {
                 UUID: response.data.backup.uuid,
                 name: name.trim(),
-                serverId: serverId,
+                serverId: getParamAsString(serverId),
                 filePath: response.data.backup.filePath,
                 size: BigInt(response.data.backup.size),
               },
@@ -3351,7 +3352,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true },
           });
 
@@ -3361,7 +3362,7 @@ const dashboardModule: Module = {
           }
 
           const backup = await prisma.backup.findUnique({
-            where: { UUID: backupId, serverId: serverId },
+            where: { UUID: getParamAsString(backupId), serverId: getParamAsString(serverId) },
           });
 
           if (!backup) {
@@ -3423,7 +3424,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true },
           });
 
@@ -3433,7 +3434,7 @@ const dashboardModule: Module = {
           }
 
           const backup = await prisma.backup.findUnique({
-            where: { UUID: backupId, serverId: serverId },
+            where: { UUID: getParamAsString(backupId), serverId: getParamAsString(serverId) },
           });
 
           if (!backup) {
@@ -3492,7 +3493,7 @@ const dashboardModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true },
           });
 
@@ -3502,7 +3503,7 @@ const dashboardModule: Module = {
           }
 
           const backup = await prisma.backup.findUnique({
-            where: { UUID: backupId, serverId: serverId },
+            where: { UUID: getParamAsString(backupId), serverId: getParamAsString(serverId) },
           });
 
           if (!backup) {
@@ -3528,7 +3529,7 @@ const dashboardModule: Module = {
           }
 
           await prisma.backup.delete({
-            where: { UUID: backupId },
+            where: { UUID: getParamAsString(backupId) },
           });
 
           res.json({

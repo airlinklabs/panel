@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { WebSocket } from 'ws';
 import { isAuthenticatedForServerWS } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
+import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 
 const prisma = new PrismaClient();
 
@@ -49,7 +50,7 @@ const wsServerConsoleModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true },
           });
           if (!server) {
@@ -123,7 +124,7 @@ const wsServerConsoleModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true },
           });
           if (!server) {
@@ -196,7 +197,7 @@ const wsServerConsoleModule: Module = {
           }
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: { node: true },
           });
           if (!server) {
