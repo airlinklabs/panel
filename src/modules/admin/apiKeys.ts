@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { registerPermission } from '../../handlers/permisions';
+import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 
 const prisma = new PrismaClient();
 
@@ -378,7 +379,7 @@ const coreModule: Module = {
       isAuthenticated(true, 'airlink.admin.apikeys.delete'),
       async (req: Request, res: Response) => {
         try {
-          const id = parseInt(req.params.id);
+          const id = getParamAsNumber(req.params.id);
 
           await prisma.apiKey.delete({
             where: { id },
@@ -398,7 +399,7 @@ const coreModule: Module = {
       isAuthenticated(true, 'airlink.admin.apikeys.edit'),
       async (req: Request, res: Response) => {
         try {
-          const id = parseInt(req.params.id);
+          const id = getParamAsNumber(req.params.id);
 
           const apiKey = await prisma.apiKey.findUnique({
             where: { id },
@@ -431,7 +432,7 @@ const coreModule: Module = {
       isAuthenticated(true, 'airlink.admin.apikeys.edit'),
       async (req: Request, res: Response) => {
         try {
-          const id = parseInt(req.params.id);
+          const id = getParamAsNumber(req.params.id);
           const { name, description, permissions } = req.body;
 
           if (!name) {
