@@ -6,6 +6,7 @@ import logger from '../../handlers/logger';
 import axios from 'axios';
 import QueueHandler from '../../handlers/utils/core/queueer';
 import { Buffer } from 'buffer';
+import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 
 const queueer = new QueueHandler();
 
@@ -65,7 +66,7 @@ const adminModule: Module = {
             return;
           }
 
-          const serverId = parseInt(req.params.id);
+          const serverId = getParamAsNumber(req.params.id);
           if (isNaN(serverId)) {
             res.status(400).send('Invalid server ID');
             return;
@@ -121,7 +122,7 @@ const adminModule: Module = {
             return;
           }
 
-          const serverId = parseInt(req.params.id);
+          const serverId = getParamAsNumber(req.params.id);
           if (isNaN(serverId)) {
             res.status(400).json({ error: 'Invalid server ID' });
             return;
@@ -591,7 +592,7 @@ const adminModule: Module = {
             return;
           }
 
-          const serverId = parseInt(id);
+          const serverId = getParamAsNumber(id);
           if (isNaN(serverId)) {
             res.status(400).send('Invalid server ID');
             return;

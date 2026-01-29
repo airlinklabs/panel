@@ -6,6 +6,7 @@ import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
 import logger from '../../handlers/logger';
 import axios from 'axios';
 import { Buffer } from 'buffer';
+import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 
 const prisma = new PrismaClient();
 
@@ -251,7 +252,7 @@ const adminModule: Module = {
             return res.redirect('/login');
           }
 
-          const nodeId = parseInt(req.params.id);
+          const nodeId = getParamAsNumber(req.params.id);
           const deleteInstances = req.query.deleteInstance === 'true';
 
           try {
@@ -290,7 +291,7 @@ const adminModule: Module = {
             return res.redirect('/login');
           }
 
-          const nodeId = parseInt(req.params.id);
+          const nodeId = getParamAsNumber(req.params.id);
 
           const node = await prisma.node.findUnique({ where: { id: nodeId } });
           if (!node) {
@@ -326,7 +327,7 @@ const adminModule: Module = {
             return res.redirect('/login');
           }
 
-          const nodeId = parseInt(req.params.id);
+          const nodeId = getParamAsNumber(req.params.id);
 
           // Get node with its servers for port allocation UI
           const node = await prisma.node.findUnique({
@@ -364,7 +365,7 @@ const adminModule: Module = {
             return res.redirect('/login');
           }
 
-          const nodeId = parseInt(req.params.id);
+          const nodeId = getParamAsNumber(req.params.id);
 
           const name = req.body.name;
           const ram = parseInt(req.body.ram);
@@ -442,7 +443,7 @@ const adminModule: Module = {
           return res.redirect('/login');
         }
 
-        const nodeId = parseInt(req.params.id);
+        const nodeId = getParamAsNumber(req.params.id);
 
         const node = await prisma.node.findUnique({ where: { id: nodeId } });
         if (!node) {

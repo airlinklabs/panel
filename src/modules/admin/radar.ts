@@ -6,6 +6,7 @@ import logger from '../../handlers/logger';
 import fs from 'fs/promises';
 import path from 'path';
 import axios from 'axios';
+import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 
 const prisma = new PrismaClient();
 
@@ -91,7 +92,7 @@ const radarModule: Module = {
 
           // Get server information
           const server = await prisma.server.findUnique({
-            where: { id: parseInt(serverId) },
+            where: { id: getParamAsNumber(serverId) },
             include: { node: true }
           });
 

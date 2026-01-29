@@ -3,6 +3,7 @@ import { Module } from '../../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
 import logger from '../../../handlers/logger';
 import { apiValidator } from '../../../handlers/utils/api/apiValidator';
+import { getParamAsString, getParamAsNumber } from "../../../utils/typeHelpers";
 
 const prisma = new PrismaClient();
 
@@ -84,7 +85,7 @@ const coreModule: Module = {
       apiValidator('airlink.api.users.read'),
       async (req: Request, res: Response) => {
         try {
-          const userId = parseInt(req.params.id);
+          const userId = getParamAsNumber(req.params.id);
 
           const user = await prisma.users.findUnique({
             where: { id: userId },
@@ -153,7 +154,7 @@ const coreModule: Module = {
           const serverId = req.params.id;
 
           const server = await prisma.server.findUnique({
-            where: { UUID: serverId },
+            where: { UUID: getParamAsString(serverId) },
             include: {
               owner: {
                 select: {
@@ -224,7 +225,7 @@ const coreModule: Module = {
       apiValidator('airlink.api.nodes.read'),
       async (req: Request, res: Response) => {
         try {
-          const nodeId = parseInt(req.params.id);
+          const nodeId = getParamAsNumber(req.params.id);
 
           const node = await prisma.node.findUnique({
             where: { id: nodeId },
