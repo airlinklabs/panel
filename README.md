@@ -34,7 +34,7 @@ bash <(curl -s https://raw.githubusercontent.com/airlinklabs/panel/refs/heads/ma
 the airlink panel and daemon can be started and stopped using systemd
 ```bash
 systemctl start airlink-panel # Starting the panel
-systemctl stop airlink-daemon # Stopping the panel
+systemctl stop airlink-panel # Stopping the panel
 ```
 
 
