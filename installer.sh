@@ -399,7 +399,7 @@ create_admin_user() {
                     info "Registration completed (status: $ERROR_TYPE)"
                     ;;
             esac
-            return 1
+            ok "moving forward"
         else
             ok "Admin user created successfully!"
             info "Login credentials:"
