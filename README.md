@@ -24,6 +24,21 @@ Airlink Panel is an advanced, open-source game server management platform design
 
 ## 💾 Installation
 
+### Method 1:
+
+Run the installer as root:
+
+```bash
+bash <(curl -s https://raw.githubusercontent.com/airlinklabs/panel/refs/heads/main/installer.sh)
+```
+the airlink panel and daemon can be started and stopped using systemd
+```bash
+systemctl start airlink-panel # Starting the panel
+systemctl stop airlink-daemon # Stopping the panel
+```
+
+
+### Method 2:
 1. Clone the repository:
    ```bash
    cd /var/www/
