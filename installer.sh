@@ -493,9 +493,10 @@ EOF
 
     # Enable registration temporarily
     info "Enabling registration for first admin user..."
-    node -e "
-const { PrismaClient } = require('@prisma/client');
+PANEL_NAME="${PANEL_NAME}" node -e '
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const panelName = process.env.PANEL_NAME || "Airlink";
 
 async function enableRegistration() {
     try {
@@ -505,7 +506,7 @@ async function enableRegistration() {
             await prisma.settings.create({
                 data: {
                     allowRegistration: true,
-                    title: '${PANEL_NAME}',
+                    title: panelName,
                     description: 'AirLink is a free and open source project by AirlinkLabs',
                     logo: '../assets/logo.png',
                     favicon: '../assets/favicon.ico',
@@ -526,7 +527,7 @@ async function enableRegistration() {
 }
 
 enableRegistration();
-" &>/dev/null
+' &>/dev/null
 
     # Install and start PM2 temporarily for user creation
     info "Installing PM2..."
