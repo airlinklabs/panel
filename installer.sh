@@ -127,7 +127,7 @@ detect_os
 
 # Install dependencies
 info "Checking dependencies..."
-deps=(curl wget dialog git jq)
+deps=(curl wget dialog git jq openssl)
 missing=()
 for d in "${deps[@]}"; do command -v "$d" &>/dev/null || missing+=("$d"); done
 if [[ ${#missing[@]} -gt 0 ]]; then
@@ -326,7 +326,7 @@ create_admin_user() {
     
     # Get CSRF token first
     info "Getting CSRF token..."
-    CSRF_TOKEN=$(curl -s -c /tmp/cookies.txt "http://localhost:${PANEL_PORT}/register" | grep -oP 'name="_csrf" value="\K[^"]+' || echo "")
+    CSRF_TOKEN=$(curl -s -c /tmp/cookies.txt "http://localhost:${PANEL_PORT}/register" | sed -n 's/.*name="_csrf" value="\([^"]*\)".*/\1/p' | head -n1)
     
     if [ -z "$CSRF_TOKEN" ]; then
         warn "Could not get CSRF token, trying without it..."
@@ -351,7 +351,7 @@ create_admin_user() {
     if [[ "$HTTP_CODE" == "302" ]] || [[ "$HTTP_CODE" == "200" ]]; then
         # Check if redirected to error
         if echo "$BODY" | grep -q "err="; then
-            ERROR_TYPE=$(echo "$BODY" | grep -oP 'err=\K[^&"]+' | head -1)
+            ERROR_TYPE=$(echo "$BODY" | sed -n 's/.*err=\([^&"]*\).*/\1/p' | head -n1)
             case "$ERROR_TYPE" in
                 "user_already_exists")
                     warn "User already exists with this email/username"
@@ -660,8 +660,8 @@ install_daemon() {
     # Create .env
     info "Creating .env file..."
     cat > .env << EOF
-remote="127.0.0.1"
-key=key
+remote="${PANEL_ADDRESS}"
+key="${DAEMON_KEY}"
 port=${DAEMON_PORT}
 DEBUG=false
 version=1.0.0
