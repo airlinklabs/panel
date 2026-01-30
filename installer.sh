@@ -641,7 +641,7 @@ After=network.target
 
 [Service]
 Type=simple
-User=www-data
+User=root
 WorkingDirectory=/var/www/panel
 ExecStart=/usr/bin/npm run start
 Restart=always
