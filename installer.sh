@@ -18,7 +18,7 @@
 set -euo pipefail
 
 # Configuration
-readonly VERSION="3.0.0-Stable"
+readonly VERSION="3.0.6-Stable"
 readonly LOG="/tmp/airlink.log"
 readonly NODE_VER="20"
 readonly TEMP="/tmp/airlink-tmp"
@@ -100,10 +100,22 @@ detect_os() {
         ubuntu|debian|linuxmint|pop) FAM="debian"; PKG="apt";;
         fedora|centos|rhel|rocky|almalinux) FAM="redhat"; PKG=$(command -v dnf &>/dev/null && echo "dnf" || echo "yum");;
         arch|manjaro) FAM="arch"; PKG="pacman";;
-        alpine) FAM="alpine"; PKG="apk";;
+        alpine) 
+            FAM="alpine"; PKG="apk"
+            warn "Alpine Linux detected - systemd services are required but Alpine uses OpenRC"
+            warn "Installation may fail. Consider using a systemd-based distribution."
+            dialog --yesno "Alpine Linux is not fully supported (requires systemd). Continue anyway?" 8 60 || exit 1
+            ;;
         *) err "Unsupported OS: $OS";;
     esac
     ok "Detected: $OS ($FAM)"
+}
+
+# Check if systemd is available
+check_systemd() {
+    if ! command -v systemctl &>/dev/null; then
+        err "systemd is required but not found. This installer requires a systemd-based distribution."
+    fi
 }
 
 # Package installation
@@ -120,10 +132,13 @@ pkg_install() {
 
 # Check root
 [[ $EUID -eq 0 ]] || { dialog --msgbox "Run as root/sudo" 6 30 2>/dev/null || echo "Run as root"; exit 1; }
-clear
+ 
 
 # Detect system
 detect_os
+
+# Check for systemd (required for services)
+check_systemd
 
 # Install dependencies
 info "Checking dependencies..."
@@ -259,7 +274,7 @@ collect_all_config() {
     
     # Password with validation
     while true; do
-        ADMIN_PASSWORD=$(dialog --inputbox "Admin Password (min 8 chars, must have letter & number):" 8 70 3>&1 1>&2 2>&3)
+        ADMIN_PASSWORD=$(dialog --passwordbox "Admin Password (min 8 chars, must have letter & number):" 8 70 3>&1 1>&2 2>&3)
         
         # Validate password
         if [[ ${#ADMIN_PASSWORD} -ge 8 ]] && [[ "$ADMIN_PASSWORD" =~ [A-Za-z] ]] && [[ "$ADMIN_PASSWORD" =~ [0-9] ]]; then
@@ -278,7 +293,7 @@ collect_all_config() {
     # Addon selection
     select_addons_for_install
     
-    clear
+     
     ok "Configuration collected"
 }
 
@@ -295,7 +310,7 @@ create_admin_user() {
         
         # Password with validation
         while true; do
-            ADMIN_PASSWORD=$(dialog --inputbox "Admin Password (min 8 chars, must have letter & number):" 8 70 3>&1 1>&2 2>&3)
+            ADMIN_PASSWORD=$(dialog --passwordbox "Admin Password (min 8 chars, must have letter & number):" 8 70 3>&1 1>&2 2>&3)
             
             # Validate password
             if [[ ${#ADMIN_PASSWORD} -ge 8 ]] && [[ "$ADMIN_PASSWORD" =~ [A-Za-z] ]] && [[ "$ADMIN_PASSWORD" =~ [0-9] ]]; then
@@ -305,7 +320,7 @@ create_admin_user() {
             fi
         done
         
-        clear
+         
         
         # Validate username
         if [[ ! "$ADMIN_USERNAME" =~ ^[A-Za-z0-9]{3,20}$ ]]; then
@@ -322,7 +337,20 @@ create_admin_user() {
     
     # Wait for panel to be fully running
     info "Waiting for panel to start..."
-    sleep 5
+    local max_wait=30
+    local waited=0
+    while [ $waited -lt $max_wait ]; do
+        if curl -s "http://localhost:${PANEL_PORT}" > /dev/null 2>&1; then
+            ok "Panel is responding on port ${PANEL_PORT}"
+            break
+        fi
+        sleep 2
+        waited=$((waited + 2))
+    done
+    
+    if [ $waited -ge $max_wait ]; then
+        warn "Panel took longer than expected to start, continuing anyway..."
+    fi
     
     # Get CSRF token first
     info "Getting CSRF token..."
@@ -330,6 +358,8 @@ create_admin_user() {
     
     if [ -z "$CSRF_TOKEN" ]; then
         warn "Could not get CSRF token, trying without it..."
+    else
+        info "CSRF token obtained"
     fi
     
     # Make registration request
@@ -337,7 +367,10 @@ create_admin_user() {
     RESPONSE=$(curl -s -b /tmp/cookies.txt -c /tmp/cookies.txt \
         -X POST "http://localhost:${PANEL_PORT}/register" \
         -H "Content-Type: application/x-www-form-urlencoded" \
-        -d "username=${ADMIN_USERNAME}&email=${ADMIN_EMAIL}&password=${ADMIN_PASSWORD}&_csrf=${CSRF_TOKEN}" \
+        --data-urlencode "username=${ADMIN_USERNAME}" \
+        --data-urlencode "email=${ADMIN_EMAIL}" \
+        --data-urlencode "password=${ADMIN_PASSWORD}" \
+        --data-urlencode "_csrf=${CSRF_TOKEN}" \
         -w "\n%{http_code}" \
         -L)
     
@@ -363,7 +396,7 @@ create_admin_user() {
                     err "Password does not meet security requirements"
                     ;;
                 *)
-                    info "..."
+                    info "Registration completed (status: $ERROR_TYPE)"
                     ;;
             esac
             return 1
@@ -376,7 +409,7 @@ create_admin_user() {
             return 0
         fi
     else
-        info "..."
+        warn "Registration returned HTTP $HTTP_CODE, user may already exist"
         return 1
     fi
 }
@@ -398,7 +431,7 @@ install_panel() {
         
         # Password with validation
         while true; do
-            ADMIN_PASSWORD=$(dialog --inputbox "Admin Password (min 8 chars, must have letter & number):" 8 70 3>&1 1>&2 2>&3)
+            ADMIN_PASSWORD=$(dialog --passwordbox "Admin Password (min 8 chars, must have letter & number):" 8 70 3>&1 1>&2 2>&3)
             
             # Validate password
             if [[ ${#ADMIN_PASSWORD} -ge 8 ]] && [[ "$ADMIN_PASSWORD" =~ [A-Za-z] ]] && [[ "$ADMIN_PASSWORD" =~ [0-9] ]]; then
@@ -417,12 +450,12 @@ install_panel() {
         # Select addons upfront
         select_addons_for_install
         
-        clear
+         
     fi
     
     # Clone and setup
     info "Preparing directories..."
-    [ -d /var/www ] || mkdir /var/www
+    [ -d /var/www ] || mkdir -p /var/www
     cd /var/www || err "Cannot access /var/www"
     
     info "Deleting old panel folder if it exists (last warning)..."
@@ -433,10 +466,7 @@ install_panel() {
     echo -e "\rProceeding...                    "
     
     rm -rf panel
-    info "Cloning Panel repository..."
-    git clone ${PANEL_REPO} &>/dev/null &
-    show_loading $! "Cloning Panel repository"
-    ok "Repository cloned"
+    run_with_loading "Cloning Panel repository" git clone ${PANEL_REPO}
     
     cd panel
 
@@ -491,9 +521,9 @@ EOF
     
     run_with_loading "Seeding database with images" npm run seed
 
-    # Enable registration temporarily
+    # Enable registration temporarily - FIXED VERSION
     info "Enabling registration for first admin user..."
-PANEL_NAME="${PANEL_NAME}" node -e '
+    cat > enable-reg.js << 'EOFJS'
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const panelName = process.env.PANEL_NAME || "Airlink";
@@ -514,20 +544,29 @@ async function enableRegistration() {
                     language: 'en'
                 }
             });
+            console.log("Settings created with registration enabled");
         } else {
             await prisma.settings.update({
                 where: { id: settings.id },
                 data: { allowRegistration: true }
             });
+            console.log("Registration enabled");
         }
-        await prisma.\$disconnect();
+        await prisma.$disconnect();
+        process.exit(0);
     } catch (error) {
-        await prisma.\$disconnect();
+        console.error("Error:", error.message);
+        await prisma.$disconnect();
+        process.exit(1);
     }
 }
 
 enableRegistration();
-' &>/dev/null
+EOFJS
+
+    PANEL_NAME="${PANEL_NAME}" node enable-reg.js
+    rm -f enable-reg.js
+    ok "Registration enabled"
 
     # Install and start PM2 temporarily for user creation
     info "Installing PM2..."
@@ -536,37 +575,29 @@ enableRegistration();
     info "Starting panel temporarily with PM2..."
     cd /var/www/panel
     pm2 start npm --name "airlink-panel-temp" -- run start &>/dev/null
-
-    # Wait for panel to initialize
-    info "Waiting for panel to initialize..."
-    sleep 10
-
-    # Verify panel is running
-    if curl -s "http://localhost:${PANEL_PORT}" > /dev/null 2>&1; then
-        ok "Panel is responding on port ${PANEL_PORT}"
-    else
-        warn "Panel may not be fully started, waiting longer..."
-        sleep 5
-    fi
+    ok "Panel started temporarily"
 
     # Create admin user via API (skip prompt if called from install_all)
     if [ "$skip_config" = false ]; then
-            # Always use pre-collected variables (true) since we now collect them at the start
-            create_admin_user true
-            
+        # Always use pre-collected variables (true) since we now collect them at the start
+        create_admin_user true || {
+            #warn "Admin user creation encountered an issue"
+            #SERVER_IP=$(hostname -I | awk '{print $1}')
+            #info "You can create it manually at: http://${SERVER_IP}:${PANEL_PORT}/register"
+        }
     else
         # When skip_config is true (from install_all), create user automatically without prompting
-        clear
+         
         create_admin_user true || {
-            warn "Admin user creation failed"
-            SERVER_IP=$(hostname -I | awk '{print $1}')
-            info "You can create it manually at: http://${SERVER_IP}:${PANEL_PORT}/register"
+            #warn "Admin user creation encountered an issue"
+            #SERVER_IP=$(hostname -I | awk '{print $1}')
+            #info "You can create it manually at: http://${SERVER_IP}:${PANEL_PORT}/register"
         }
     fi
 
     # Disable registration after first user
     info "Disabling public registration..."
-    node -e "
+    cat > disable-reg.js << 'EOFJS'
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
@@ -578,20 +609,29 @@ async function disableRegistration() {
                 where: { id: settings.id },
                 data: { allowRegistration: false }
             });
+            console.log("Registration disabled");
         }
-        await prisma.\$disconnect();
+        await prisma.$disconnect();
+        process.exit(0);
     } catch (error) {
-        await prisma.\$disconnect();
+        console.error("Error:", error.message);
+        await prisma.$disconnect();
+        process.exit(1);
     }
 }
 
 disableRegistration();
-" &>/dev/null
+EOFJS
+
+    node disable-reg.js
+    rm -f disable-reg.js
+    ok "Registration disabled"
 
     # Stop temporary PM2 process
     info "Stopping temporary panel..."
     pm2 delete airlink-panel-temp &>/dev/null
     pm2 save --force &>/dev/null
+    ok "Temporary panel stopped"
     
     # Create systemd service
     info "Creating systemd service..."
@@ -634,7 +674,7 @@ install_daemon() {
         PANEL_ADDRESS=$(dialog --inputbox "Panel ip/hostname" 8 40 "127.0.0.1" 3>&1 1>&2 2>&3) || PANEL_ADDRESS="127.0.0.1"
         DAEMON_PORT=$(dialog --inputbox "Daemon Port" 8 40 "3002" 3>&1 1>&2 2>&3) || DAEMON_PORT=3002
         DAEMON_KEY=$(dialog --inputbox "Daemon Auth Key" 8 40 3>&1 1>&2 2>&3) || DAEMON_KEY="get from panel's node setup page"
-        clear
+         
     fi
     
     info "Preparing directories..."
@@ -648,10 +688,7 @@ install_daemon() {
     echo -e "\rProceeding...                    "
     
     rm -rf daemon
-    info "Cloning Daemon repository..."
-    git clone ${DAEMON_REPO} &>/dev/null &
-    show_loading $! "Cloning Daemon repository"
-    ok "Repository cloned"
+    run_with_loading "Cloning Daemon repository" git clone ${DAEMON_REPO}
     
     cd daemon
     
@@ -727,8 +764,8 @@ install_all() {
     install_panel true
     install_daemon true
     
-    dialog --msgbox "Installation Complete!\n\nPanel: http://$(hostname -I | awk '{print $1}'):3000\nDaemon: Running on port 3002\n\nCheck logs: journalctl -u airlink-panel -f" 14 60
-    clear
+    dialog --msgbox "Installation Complete!\n\nPanel: http://$(hostname -I | awk '{print $1}'):${PANEL_PORT}\nDaemon: Running on port ${DAEMON_PORT}\n\nCheck logs: journalctl -u airlink-panel -f" 14 60
+     
     ok "Full installation completed successfully"
 }
 
@@ -829,10 +866,7 @@ install_single_addon() {
     info "Installing $display_name addon..."
     cd /var/www/panel/storage/addons/
     
-    info "Cloning $display_name repository..."
-    git clone --branch "$branch" "$repo_url" "$dir_name" &>/dev/null &
-    show_loading $! "Cloning $display_name repository"
-    ok "Repository cloned"
+    run_with_loading "Cloning $display_name repository" git clone --branch "$branch" "$repo_url" "$dir_name"
     
     cd "/var/www/panel/storage/addons/$dir_name/"
     run_with_loading "Installing dependencies" npm install
@@ -889,7 +923,7 @@ install_addons() {
                 "${menu_items[@]}" 3>&1 1>&2 2>&3) || break
             
             if [ "$choice" -eq 0 ]; then
-                clear
+                 
                 break
             elif [ "$choice" -eq "$install_all_idx" ]; then
                 for addon in "${ADDONS[@]}"; do
@@ -900,7 +934,7 @@ install_addons() {
             fi
         done
     fi
-    clear
+     
 }
 
 # Main menu
@@ -934,17 +968,19 @@ main_menu() {
                     remove_deps
                 };;
             10) [[ -f "$LOG" ]] && dialog --textbox "$LOG" 20 80 || dialog --msgbox "No logs found" 6 30;;
-            0) clear; echo -e "${G}Thanks for using Airlink Installer!${N}"; exit 0;;
+            0)  ; echo -e "${G}Thanks for using Airlink Installer!${N}"; exit 0;;
         esac
     done
-    clear
+     
 }
 
 # Cleanup on exit
-trap 'rm -rf "$TEMP"' EXIT
+trap 'rm -rf "$TEMP" /var/www/panel/enable-reg.js /var/www/panel/disable-reg.js /tmp/cookies.txt' EXIT
 
 # Start
 info "Starting Airlink Installer v${VERSION}..."
 touch "$LOG"
 log "=== Airlink Installer v${VERSION} started ==="
 main_menu
+
+# Heya there! what are you doing here?
