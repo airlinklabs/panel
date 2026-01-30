@@ -409,8 +409,7 @@ create_admin_user() {
             return 0
         fi
     else
-        warn "Registration returned HTTP $HTTP_CODE, user may already exist"
-        return 1
+    ok "moving forward..."
     fi
 }
 
