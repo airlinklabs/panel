@@ -27,3 +27,6 @@ coverage/
 .env
 *.env.*
 
+# Installer
+installer.sh
+
