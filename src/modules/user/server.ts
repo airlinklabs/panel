@@ -121,7 +121,7 @@ const dashboardModule: Module = {
             }
           }
 
-          let alshID = '';
+         /* let alshID = '';
           let alshPASSWORD = '';
 
           if (features.includes('alsh')) {
@@ -135,7 +135,7 @@ const dashboardModule: Module = {
                   username: 'Airlink',
                   password: server.node.key,
                 },
-              });
+              });*/
 
               const passresponse = await axios({
                 method: 'GET',
