@@ -580,19 +580,19 @@ EOFJS
     # Create admin user via API (skip prompt if called from install_all)
     if [ "$skip_config" = false ]; then
         # Always use pre-collected variables (true) since we now collect them at the start
-        create_admin_user true || {
+        create_admin_user true
             #warn "Admin user creation encountered an issue"
             #SERVER_IP=$(hostname -I | awk '{print $1}')
             #info "You can create it manually at: http://${SERVER_IP}:${PANEL_PORT}/register"
-        }
+        
     else
         # When skip_config is true (from install_all), create user automatically without prompting
          
-        create_admin_user true || {
+        create_admin_user true
             #warn "Admin user creation encountered an issue"
             #SERVER_IP=$(hostname -I | awk '{print $1}')
             #info "You can create it manually at: http://${SERVER_IP}:${PANEL_PORT}/register"
-        }
+    
     fi
 
     # Disable registration after first user
