@@ -968,7 +968,7 @@ main_menu() {
                     remove_deps
                 };;
             10) [[ -f "$LOG" ]] && dialog --textbox "$LOG" 20 80 || dialog --msgbox "No logs found" 6 30;;
-            0)  ; echo -e "${G}Thanks for using Airlink Installer!${N}"; exit 0;;
+            0)  echo -e "${G}Thanks for using Airlink Installer!${N}"; exit 0;;
         esac
     done
      
