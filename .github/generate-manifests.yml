@@ -1,0 +1,120 @@
+name: Generate Image Manifests & Pre-cache GitHub API
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  generate-manifests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate image manifests
+        run: |
+          python3 << 'PYEOF'
+          import os, json
+
+          IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+
+          def generate_manifest(directory):
+              if not os.path.isdir(directory):
+                  return
+              images = sorted([
+                  f for f in os.listdir(directory)
+                  if os.path.splitext(f)[1].lower() in IMAGE_EXTENSIONS
+              ])
+              manifest_path = os.path.join(directory, "manifest.json")
+              with open(manifest_path, "w") as fh:
+                  json.dump({"images": images}, fh, indent=2)
+              print(f"Generated {manifest_path} — {len(images)} image(s)")
+
+          for root_dir in ["public/assets/features", "public/assets/addons"]:
+              if os.path.isdir(root_dir):
+                  for entry in os.listdir(root_dir):
+                      path = os.path.join(root_dir, entry)
+                      if os.path.isdir(path):
+                          generate_manifest(path)
+          PYEOF
+
+      - name: Pre-fetch GitHub API data
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p public/api-cache
+
+          fetch_api() {
+            curl -sSf \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "$1"
+          }
+
+          PANEL_REPO=$(python3 -c "import json; d=json.load(open('config.json')); print(d['site']['githubPanel'])")
+          DAEMON_REPO=$(python3 -c "import json; d=json.load(open('config.json')); print(d['site']['githubDaemon'])")
+
+          fetch_api "https://api.github.com/repos/${PANEL_REPO}/contributors?per_page=100" > public/api-cache/contributors-panel.json
+          fetch_api "https://api.github.com/repos/${DAEMON_REPO}/contributors?per_page=100" > public/api-cache/contributors-daemon.json
+          fetch_api "https://api.github.com/repos/${PANEL_REPO}/commits?per_page=15" > public/api-cache/commits-panel-p1.json
+          fetch_api "https://api.github.com/repos/${DAEMON_REPO}/commits?per_page=15" > public/api-cache/commits-daemon-p1.json
+          fetch_api "https://api.github.com/repos/${PANEL_REPO}" > public/api-cache/repo-panel.json
+          fetch_api "https://api.github.com/repos/${DAEMON_REPO}" > public/api-cache/repo-daemon.json
+
+      - name: Cache contributor profiles
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 << 'PYEOF'
+          import json, subprocess, os
+
+          def fetch(url):
+              token = os.environ.get("GH_TOKEN", "")
+              r = subprocess.run([
+                  "curl", "-sSf",
+                  "-H", "Accept: application/vnd.github+json",
+                  "-H", f"Authorization: Bearer {token}",
+                  "-H", "X-GitHub-Api-Version: 2022-11-28",
+                  url
+              ], capture_output=True, text=True)
+              return json.loads(r.stdout) if r.returncode == 0 else None
+
+          seen = set()
+          for fname in ["public/api-cache/contributors-panel.json", "public/api-cache/contributors-daemon.json"]:
+              if not os.path.exists(fname):
+                  continue
+              try:
+                  contributors = json.load(open(fname))
+              except:
+                  continue
+              if not isinstance(contributors, list):
+                  continue
+              for c in contributors:
+                  login = c.get("login")
+                  if not login or login in seen:
+                      continue
+                  seen.add(login)
+                  data = fetch(f"https://api.github.com/users/{login}")
+                  if data:
+                      json.dump(data, open(f"public/api-cache/user-{login}.json", "w"))
+          print(f"Cached {len(seen)} profiles")
+          PYEOF
+
+      - name: Write cache timestamp
+        run: |
+          python3 -c "import json, time; json.dump({'generated_at': int(time.time())}, open('public/api-cache/meta.json','w'))"
+
+      - name: Commit generated files
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/assets/*/manifest.json public/assets/addons/*/manifest.json public/api-cache/ || true
+          git diff --cached --quiet && echo "No changes" || git commit -m "chore: regenerate manifests and api cache [skip ci]"
+          git push || echo "Nothing to push"
