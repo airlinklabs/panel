@@ -2,7 +2,7 @@ name: Generate Image Manifests & Pre-cache GitHub API
 
 on:
   push:
-    branches: [main]
+    branches: [website]
   schedule:
     - cron: "0 */6 * * *"
   workflow_dispatch:
