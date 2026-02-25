@@ -54,7 +54,10 @@ const sftpModule: Module = {
             timeout: 15000,
           });
 
-          res.json(response.data);
+          res.json({
+            ...response.data,
+            port: (server.node as any).sftpPort ?? 22,
+          });
         } catch (error) {
           if (axios.isAxiosError(error)) {
             const status = error.response?.status || 500;
