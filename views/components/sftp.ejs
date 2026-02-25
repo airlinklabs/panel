@@ -1,0 +1,342 @@
+<%
+/*
+  SFTP Component
+  Include with: <%- include('../../components/sftp', { server: server }) %>
+  Requires: server.UUID to be available in scope
+  Depends on: showToast (from toast component)
+*/
+%>
+
+<!-- SFTP trigger button -->
+<button
+  onclick="sftpModal.open()"
+  type="button"
+  class="border border-neutral-800/20 flex items-center gap-1.5 rounded-xl bg-white hover:bg-neutral-100 dark:bg-transparent dark:hover:bg-white/5 dark:border-white/10 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-sm font-medium shadow-sm transition duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-400/30"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 shrink-0">
+    <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd" />
+  </svg>
+  <span class="hidden sm:inline">SFTP</span>
+</button>
+
+<!-- SFTP Modal -->
+<div
+  id="sftpModalBackdrop"
+  class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200"
+  onclick="if(event.target===this) sftpModal.close()"
+>
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+
+  <!-- Sheet / Dialog -->
+  <div
+    id="sftpModalPanel"
+    class="relative w-full sm:max-w-md bg-white dark:bg-neutral-900 sm:rounded-2xl rounded-t-2xl shadow-2xl border-t border-x border-neutral-200 dark:border-white/10 sm:border translate-y-4 sm:translate-y-0 sm:scale-95 transition-all duration-200 overflow-hidden"
+  >
+    <!-- Header -->
+    <div class="flex items-center justify-between px-5 pt-5 pb-4 border-b border-neutral-100 dark:border-white/8">
+      <div class="flex items-center gap-2.5">
+        <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-neutral-100 dark:bg-white/8">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 text-neutral-600 dark:text-neutral-300">
+            <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-neutral-900 dark:text-white leading-tight">SFTP Access</h3>
+          <p class="text-xs text-neutral-500 dark:text-neutral-400 leading-tight">Connect via any SFTP client</p>
+        </div>
+      </div>
+      <button
+        onclick="sftpModal.close()"
+        class="flex items-center justify-center w-7 h-7 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/8 transition-colors"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+          <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div id="sftpStateLoading" class="px-5 py-10 flex flex-col items-center gap-3">
+      <div class="relative w-8 h-8">
+        <svg class="animate-spin w-8 h-8 text-neutral-300 dark:text-neutral-600" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+        </svg>
+        <svg class="animate-spin w-8 h-8 text-neutral-700 dark:text-neutral-300 absolute inset-0" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="text-sm text-neutral-500 dark:text-neutral-400">Generating credentials…</span>
+    </div>
+
+    <!-- Error -->
+    <div id="sftpStateError" class="hidden px-5 py-8 flex flex-col items-center gap-3 text-center">
+      <div class="flex items-center justify-center w-10 h-10 rounded-full bg-red-50 dark:bg-red-500/10">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5 text-red-500">
+          <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div>
+        <p class="text-sm font-medium text-neutral-800 dark:text-white">Failed to generate credentials</p>
+        <p id="sftpErrorMsg" class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs"></p>
+      </div>
+      <button
+        onclick="sftpModal.fetch()"
+        class="mt-1 text-xs font-medium text-neutral-600 dark:text-neutral-300 underline underline-offset-2 hover:text-neutral-900 dark:hover:text-white transition-colors"
+      >
+        Try again
+      </button>
+    </div>
+
+    <!-- Credentials -->
+    <div id="sftpStateCredentials" class="hidden">
+      <div class="px-5 pt-4 pb-2 space-y-2">
+        <!-- Row template repeated for each field -->
+        <div class="sftp-field-row">
+          <span class="sftp-field-label">Host</span>
+          <div class="sftp-field-right">
+            <span id="sftpValHost" class="sftp-field-value"></span>
+            <button onclick="sftpModal.copy('sftpValHost')" class="sftp-copy-btn" title="Copy host">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3.5">
+                <path d="M7.5 3.375c0-1.036.84-1.875 1.875-1.875h.375a3.75 3.75 0 0 1 3.75 3.75v1.875C13.5 8.161 14.34 9 15.375 9h1.875A3.75 3.75 0 0 1 21 12.75v3.375C21 17.16 20.16 18 19.125 18h-9.75A1.875 1.875 0 0 1 7.5 16.125V3.375Z" />
+                <path d="M15 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 17.25 7.5h-1.875A.375.375 0 0 1 15 7.125V5.25ZM4.875 6H6v10.125A3.375 3.375 0 0 0 9.375 19.5H16.5v1.125c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 0 1 3 20.625V7.875C3 6.839 3.84 6 4.875 6Z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sftp-field-row">
+          <span class="sftp-field-label">Port</span>
+          <div class="sftp-field-right">
+            <span id="sftpValPort" class="sftp-field-value"></span>
+            <button onclick="sftpModal.copy('sftpValPort')" class="sftp-copy-btn" title="Copy port">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3.5">
+                <path d="M7.5 3.375c0-1.036.84-1.875 1.875-1.875h.375a3.75 3.75 0 0 1 3.75 3.75v1.875C13.5 8.161 14.34 9 15.375 9h1.875A3.75 3.75 0 0 1 21 12.75v3.375C21 17.16 20.16 18 19.125 18h-9.75A1.875 1.875 0 0 1 7.5 16.125V3.375Z" />
+                <path d="M15 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 17.25 7.5h-1.875A.375.375 0 0 1 15 7.125V5.25ZM4.875 6H6v10.125A3.375 3.375 0 0 0 9.375 19.5H16.5v1.125c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 0 1 3 20.625V7.875C3 6.839 3.84 6 4.875 6Z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sftp-field-row">
+          <span class="sftp-field-label">Username</span>
+          <div class="sftp-field-right">
+            <span id="sftpValUser" class="sftp-field-value font-mono text-xs"></span>
+            <button onclick="sftpModal.copy('sftpValUser')" class="sftp-copy-btn" title="Copy username">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3.5">
+                <path d="M7.5 3.375c0-1.036.84-1.875 1.875-1.875h.375a3.75 3.75 0 0 1 3.75 3.75v1.875C13.5 8.161 14.34 9 15.375 9h1.875A3.75 3.75 0 0 1 21 12.75v3.375C21 17.16 20.16 18 19.125 18h-9.75A1.875 1.875 0 0 1 7.5 16.125V3.375Z" />
+                <path d="M15 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 17.25 7.5h-1.875A.375.375 0 0 1 15 7.125V5.25ZM4.875 6H6v10.125A3.375 3.375 0 0 0 9.375 19.5H16.5v1.125c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 0 1 3 20.625V7.875C3 6.839 3.84 6 4.875 6Z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sftp-field-row">
+          <span class="sftp-field-label">Password</span>
+          <div class="sftp-field-right">
+            <span
+              id="sftpValPass"
+              class="sftp-field-value font-mono text-xs blur-sm hover:blur-none focus:blur-none transition-[filter] duration-150 cursor-pointer select-all"
+              title="Hover to reveal"
+            ></span>
+            <button onclick="sftpModal.copy('sftpValPass')" class="sftp-copy-btn" title="Copy password">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3.5">
+                <path d="M7.5 3.375c0-1.036.84-1.875 1.875-1.875h.375a3.75 3.75 0 0 1 3.75 3.75v1.875C13.5 8.161 14.34 9 15.375 9h1.875A3.75 3.75 0 0 1 21 12.75v3.375C21 17.16 20.16 18 19.125 18h-9.75A1.875 1.875 0 0 1 7.5 16.125V3.375Z" />
+                <path d="M15 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 17.25 7.5h-1.875A.375.375 0 0 1 15 7.125V5.25ZM4.875 6H6v10.125A3.375 3.375 0 0 0 9.375 19.5H16.5v1.125c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 0 1 3 20.625V7.875C3 6.839 3.84 6 4.875 6Z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sftp-field-row">
+          <span class="sftp-field-label">Directory</span>
+          <div class="sftp-field-right">
+            <span id="sftpValDir" class="sftp-field-value font-mono text-xs"></span>
+            <button onclick="sftpModal.copy('sftpValDir')" class="sftp-copy-btn" title="Copy directory">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3.5">
+                <path d="M7.5 3.375c0-1.036.84-1.875 1.875-1.875h.375a3.75 3.75 0 0 1 3.75 3.75v1.875C13.5 8.161 14.34 9 15.375 9h1.875A3.75 3.75 0 0 1 21 12.75v3.375C21 17.16 20.16 18 19.125 18h-9.75A1.875 1.875 0 0 1 7.5 16.125V3.375Z" />
+                <path d="M15 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 17.25 7.5h-1.875A.375.375 0 0 1 15 7.125V5.25ZM4.875 6H6v10.125A3.375 3.375 0 0 0 9.375 19.5H16.5v1.125c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 0 1 3 20.625V7.875C3 6.839 3.84 6 4.875 6Z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expiry notice -->
+      <p id="sftpExpiry" class="px-5 pt-1 pb-2 text-xs text-neutral-400 dark:text-neutral-500"></p>
+    </div>
+
+    <!-- Footer -->
+    <div class="flex items-center justify-between gap-3 px-5 py-4 border-t border-neutral-100 dark:border-white/8">
+      <button
+        id="sftpRevokeBtn"
+        onclick="sftpModal.revoke()"
+        class="hidden text-xs font-medium text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
+      >
+        Revoke access
+      </button>
+      <div class="flex-1"></div>
+      <button
+        onclick="sftpModal.close()"
+        class="rounded-lg border border-neutral-200 dark:border-white/10 px-3.5 py-1.5 text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+.sftp-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.625rem;
+  background: rgb(0 0 0 / 0.03);
+  border: 1px solid rgb(0 0 0 / 0.06);
+}
+.dark .sftp-field-row {
+  background: rgb(255 255 255 / 0.04);
+  border-color: rgb(255 255 255 / 0.07);
+}
+.sftp-field-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  min-width: 4.5rem;
+  flex-shrink: 0;
+}
+.dark .sftp-field-label { color: #9ca3af; }
+.sftp-field-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: flex-end;
+  min-width: 0;
+}
+.sftp-field-value {
+  font-size: 0.8125rem;
+  color: #111827;
+  text-align: right;
+  word-break: break-all;
+  flex: 1;
+  min-width: 0;
+}
+.dark .sftp-field-value { color: #f3f4f6; }
+.sftp-copy-btn {
+  flex-shrink: 0;
+  color: #9ca3af;
+  padding: 0.2rem;
+  border-radius: 0.25rem;
+  transition: color 0.15s, background 0.15s;
+}
+.sftp-copy-btn:hover {
+  color: #374151;
+  background: rgb(0 0 0 / 0.06);
+}
+.dark .sftp-copy-btn:hover {
+  color: #e5e7eb;
+  background: rgb(255 255 255 / 0.08);
+}
+</style>
+
+<script>
+(function () {
+  const SERVER_ID = '<%= server.UUID %>';
+
+  function setState(state) {
+    ['Loading', 'Error', 'Credentials'].forEach(s => {
+      document.getElementById(`sftpState${s}`).classList.toggle('hidden', s.toLowerCase() !== state);
+    });
+    const revokeBtn = document.getElementById('sftpRevokeBtn');
+    if (revokeBtn) revokeBtn.classList.toggle('hidden', state !== 'credentials');
+  }
+
+  function setModalVisible(visible) {
+    const backdrop = document.getElementById('sftpModalBackdrop');
+    const panel = document.getElementById('sftpModalPanel');
+    if (visible) {
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      backdrop.classList.add('opacity-100');
+      panel.classList.remove('translate-y-4', 'sm:scale-95');
+      panel.classList.add('translate-y-0', 'sm:scale-100');
+      document.body.style.overflow = 'hidden';
+    } else {
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      backdrop.classList.remove('opacity-100');
+      panel.classList.add('translate-y-4', 'sm:scale-95');
+      panel.classList.remove('translate-y-0', 'sm:scale-100');
+      document.body.style.overflow = '';
+    }
+  }
+
+  async function fetchCredentials() {
+    setState('loading');
+    try {
+      const resp = await fetch(`/server/${SERVER_ID}/sftp/credentials`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed (${resp.status})`);
+      }
+      const data = await resp.json();
+      document.getElementById('sftpValHost').textContent = data.host;
+      document.getElementById('sftpValPort').textContent = data.port;
+      document.getElementById('sftpValUser').textContent = data.username;
+      document.getElementById('sftpValPass').textContent = data.password;
+      document.getElementById('sftpValDir').textContent = data.directory;
+      const expiry = document.getElementById('sftpExpiry');
+      if (data.expiresAt) {
+        expiry.textContent = `Expires ${new Date(data.expiresAt).toLocaleString()}`;
+      } else {
+        expiry.textContent = '';
+      }
+      setState('credentials');
+    } catch (err) {
+      document.getElementById('sftpErrorMsg').textContent = err.message || 'Unknown error.';
+      setState('error');
+    }
+  }
+
+  async function revokeCredentials() {
+    try {
+      await fetch(`/server/${SERVER_ID}/sftp/credentials`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      setModalVisible(false);
+      if (window.showToast) showToast('SFTP access revoked.', 'success');
+    } catch {
+      if (window.showToast) showToast('Failed to revoke SFTP access.', 'error');
+    }
+  }
+
+  function copyField(elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    navigator.clipboard.writeText(el.textContent || '').then(() => {
+      if (window.showToast) showToast('Copied to clipboard', 'success');
+    }).catch(() => {
+      if (window.showToast) showToast('Copy failed', 'error');
+    });
+  }
+
+  window.sftpModal = {
+    open() {
+      setModalVisible(true);
+      fetchCredentials();
+    },
+    close() {
+      setModalVisible(false);
+    },
+    fetch: fetchCredentials,
+    revoke: revokeCredentials,
+    copy: copyField,
+  };
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') window.sftpModal.close();
+  });
+})();
+</script>
