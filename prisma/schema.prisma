@@ -84,8 +84,7 @@ model Images {
     key           String
     createdAt     DateTime @default(now())
     allocatedPorts String?  @default("[]") // JSON array of allocated ports
-    sftpPort       Int      @default(22)
-servers       Server[]
+    servers       Server[]
   }
 
 model settings {
