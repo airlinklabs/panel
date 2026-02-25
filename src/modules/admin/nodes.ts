@@ -374,7 +374,7 @@ const adminModule: Module = {
           const address = req.body.address;
           const port = parseInt(req.body.port);
           const allocatedPorts = req.body.allocatedPorts || '[]';
-          const sftpPort = parseInt(req.body.sftpPort) || 22;
+        //  const sftpPort = parseInt(req.body.sftpPort) || 22;
 
           if (
             !name ||
@@ -421,7 +421,7 @@ const adminModule: Module = {
               address,
               port,
               allocatedPorts,
-              sftpPort,
+             // sftpPort,
             },
           });
 
