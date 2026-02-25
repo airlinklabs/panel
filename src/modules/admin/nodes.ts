@@ -421,6 +421,7 @@ const adminModule: Module = {
               address,
               port,
               allocatedPorts,
+              sftpPort,
             },
           });
 
