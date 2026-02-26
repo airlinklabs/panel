@@ -21,6 +21,41 @@ const sftpModule: Module = {
   router: () => {
     const router = Router();
 
+    router.get(
+      '/server/:id/sftp/credentials',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const serverId = getParamAsString(req.params?.id);
+
+        if (!serverId) {
+          res.status(400).json({ error: 'Server ID is required.' });
+          return;
+        }
+
+        try {
+          const stored = await (prisma as any).sftpCredential.findUnique({
+            where: { serverId },
+          });
+
+          if (!stored) {
+            res.status(404).json({ error: 'No credentials found.' });
+            return;
+          }
+
+          res.json({
+            username: stored.username,
+            password: stored.password,
+            host: stored.host,
+            port: stored.port,
+            expiresAt: stored.expiresAt,
+          });
+        } catch (error) {
+          logger.error('SFTP credential fetch error:', error);
+          res.status(500).json({ error: 'Internal error while fetching SFTP credentials.' });
+        }
+      },
+    );
+
     router.post(
       '/server/:id/sftp/credentials',
       isAuthenticatedForServer('id'),
@@ -43,23 +78,43 @@ const sftpModule: Module = {
             return;
           }
 
+          // Revoke existing credential on the daemon if one exists
+          const existing = await (prisma as any).sftpCredential.findUnique({
+            where: { serverId },
+          });
+
+          if (existing) {
+            try {
+              await axios({
+                method: 'DELETE',
+                url: `http://${server.node.address}:${server.node.port}/sftp/credentials`,
+                data: { id: server.UUID },
+                auth: { username: 'Airlink', password: server.node.key },
+                timeout: 10000,
+              });
+            } catch {
+              // Daemon revocation failure is non-fatal; proceed to regenerate
+            }
+          }
+
           const response = await axios({
             method: 'POST',
             url: `http://${server.node.address}:${server.node.port}/sftp/credentials`,
             data: { id: server.UUID },
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
+            auth: { username: 'Airlink', password: server.node.key },
             timeout: 15000,
           });
 
           const sftpPort = (server.node as any).sftpPort ?? 3003;
+          const { username, password, host, expiresAt } = response.data;
 
-          res.json({
-            ...response.data,
-            port: sftpPort,
+          await (prisma as any).sftpCredential.upsert({
+            where: { serverId },
+            update: { username, password, host, port: sftpPort, expiresAt: expiresAt ? new Date(expiresAt) : null },
+            create: { serverId, username, password, host, port: sftpPort, expiresAt: expiresAt ? new Date(expiresAt) : null },
           });
+
+          res.json({ username, password, host, port: sftpPort, expiresAt });
         } catch (error) {
           if (axios.isAxiosError(error)) {
             const status = error.response?.status || 500;
@@ -99,11 +154,12 @@ const sftpModule: Module = {
             method: 'DELETE',
             url: `http://${server.node.address}:${server.node.port}/sftp/credentials`,
             data: { id: server.UUID },
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
+            auth: { username: 'Airlink', password: server.node.key },
             timeout: 10000,
+          });
+
+          await (prisma as any).sftpCredential.deleteMany({
+            where: { serverId },
           });
 
           res.json({ message: 'SFTP credentials revoked.' });
