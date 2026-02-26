@@ -27,9 +27,25 @@ CREATE TABLE "new_Node" (
     "allocatedPorts" TEXT DEFAULT '[]',
     "sftpPort" INTEGER NOT NULL DEFAULT 3003
 );
-INSERT INTO "new_Node" ("address", "allocatedPorts", "cpu", "createdAt", "disk", "id", "key", "name", "port", "ram", "sftpPort") SELECT "address", "allocatedPorts", "cpu", "createdAt", "disk", "id", "key", "name", "port", "ram", "sftpPort" FROM "Node";
+INSERT INTO "new_Node" ("address", "allocatedPorts", "cpu", "createdAt", "disk", "id", "key", "name", "port", "ram") SELECT "address", "allocatedPorts", "cpu", "createdAt", "disk", "id", "key", "name", "port", "ram" FROM "Node";
 DROP TABLE "Node";
 ALTER TABLE "new_Node" RENAME TO "Node";
+CREATE TABLE "new_settings" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "title" TEXT NOT NULL DEFAULT 'Airlink',
+    "description" TEXT NOT NULL DEFAULT 'AirLink is a free and open source project by AirlinkLabs',
+    "logo" TEXT NOT NULL DEFAULT '../assets/logo.png',
+    "favicon" TEXT NOT NULL DEFAULT '../assets/favicon.ico',
+    "theme" TEXT NOT NULL DEFAULT 'default',
+    "language" TEXT NOT NULL DEFAULT 'en',
+    "allowRegistration" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    "sftpPort" INTEGER NOT NULL DEFAULT 3003
+);
+INSERT INTO "new_settings" ("allowRegistration", "createdAt", "description", "favicon", "id", "language", "logo", "theme", "title", "updatedAt") SELECT "allowRegistration", "createdAt", "description", "favicon", "id", "language", "logo", "theme", "title", "updatedAt" FROM "settings";
+DROP TABLE "settings";
+ALTER TABLE "new_settings" RENAME TO "settings";
 PRAGMA foreign_keys=ON;
 PRAGMA defer_foreign_keys=OFF;
 
