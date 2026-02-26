@@ -105,7 +105,7 @@ const sftpModule: Module = {
             timeout: 15000,
           });
 
-          const sftpPort = (server.node as any).sftpPort ?? 3003;
+          //const sftpPort = (server.node as any).sftpPort ?? 3003;
           const { username, password, host, expiresAt } = response.data;
 
           await (prisma as any).sftpCredential.upsert({
