@@ -48,8 +48,6 @@
                 <label for="nodePort" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.daemonPort %>:</label>
                 <input id="nodePort" value="<%= node.port %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="3002">
               </div>
-   
-              
 
               <div>
                 <label for="nodeKey" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.daemonKey %>:</label>
@@ -247,8 +245,7 @@
       disk: document.getElementById('nodeDisk').value,
       address: document.getElementById('nodeAddress').value,
       port: document.getElementById('nodePort').value,
-      allocatedPorts: JSON.stringify(allocatedPorts),
-      sftpPort: document.getElementById('nodeSftpPort').value,
+      allocatedPorts: JSON.stringify(allocatedPorts)
     };
 
     try {
@@ -273,6 +270,10 @@
   });
 
   // Initialize the UI
+  renderAllocatedPorts();
+</script>
+
+<%- include('../../components/footer') %>e UI
   renderAllocatedPorts();
 </script>
 
