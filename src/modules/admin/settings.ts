@@ -62,6 +62,7 @@ interface SettingsData {
   theme?: string;
   language?: string;
   allowRegistration?: boolean;
+  sftpPort?: number;
 }
 
 const adminModule: Module = {
@@ -116,6 +117,7 @@ const adminModule: Module = {
             theme: typeof rawData.theme === 'string' ? rawData.theme : undefined,
             language: typeof rawData.language === 'string' ? rawData.language : undefined,
             allowRegistration: rawData.allowRegistration === 'true' || rawData.allowRegistration === true,
+            sftpPort: rawData.sftpPort ? parseInt(rawData.sftpPort, 10) : undefined,
           };
 
           if (files.logo && files.logo[0]) {

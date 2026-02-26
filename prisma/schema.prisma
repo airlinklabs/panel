@@ -99,6 +99,7 @@ model settings {
   allowRegistration Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  sftpPort  Int  @default(3003)
 }
 
 model ApiKey {
