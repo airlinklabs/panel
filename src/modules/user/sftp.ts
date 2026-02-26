@@ -78,7 +78,6 @@ const sftpModule: Module = {
             return;
           }
 
-          // Revoke existing credential on the daemon if one exists
           const existing = await (prisma as any).sftpCredential.findUnique({
             where: { serverId },
           });
@@ -93,7 +92,7 @@ const sftpModule: Module = {
                 timeout: 10000,
               });
             } catch {
-              // Daemon revocation failure is non-fatal; proceed to regenerate
+              // non-fatal, proceed to regenerate
             }
           }
 
@@ -105,16 +104,15 @@ const sftpModule: Module = {
             timeout: 15000,
           });
 
-          //const sftpPort = (server.node as any).sftpPort ?? 3003;
-          const { username, password, host, expiresAt } = response.data;
+          const { username, password, host, port, expiresAt } = response.data;
 
           await (prisma as any).sftpCredential.upsert({
             where: { serverId },
-            update: { username, password, host, port: sftpPort, expiresAt: expiresAt ? new Date(expiresAt) : null },
-            create: { serverId, username, password, host, port: sftpPort, expiresAt: expiresAt ? new Date(expiresAt) : null },
+            update: { username, password, host, port, expiresAt: expiresAt ? new Date(expiresAt) : null },
+            create: { serverId, username, password, host, port, expiresAt: expiresAt ? new Date(expiresAt) : null },
           });
 
-          res.json({ username, password, host, port: sftpPort, expiresAt });
+          res.json({ username, password, host, port, expiresAt });
         } catch (error) {
           if (axios.isAxiosError(error)) {
             const status = error.response?.status || 500;
