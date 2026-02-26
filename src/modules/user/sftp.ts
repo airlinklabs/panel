@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
-import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
-import { getParamAsString } from '../../utils/typeHelpers';
+import { isAuthenticatedForServer } from '../../handlers/utils/server/serverOwnershipCheck';
+import { getParamAsString } from '../../handlers/utils/core/parameterParsing';
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
 import logger from '../../handlers/logger';
@@ -33,13 +33,10 @@ const sftpModule: Module = {
         }
 
         try {
-          const [server, settings] = await Promise.all([
-            prisma.server.findUnique({
-              where: { UUID: serverId },
-              include: { node: true },
-            }),
-            prisma.settings.findUnique({ where: { id: 1 } }),
-          ]);
+          const server = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true },
+          });
 
           if (!server) {
             res.status(404).json({ error: 'Server not found.' });
@@ -57,7 +54,7 @@ const sftpModule: Module = {
             timeout: 15000,
           });
 
-          const sftpPort = (settings as any)?.sftpPort ?? 3003;
+          const sftpPort = (server.node as any).sftpPort ?? 3003;
 
           res.json({
             ...response.data,
