@@ -161,3 +161,15 @@ model Backup {
   @@index([serverId])
   @@index([createdAt])
 }
+
+model SftpCredential {
+  id        Int      @id @default(autoincrement())
+  serverId  String   @unique
+  username  String
+  password  String
+  host      String
+  port      Int
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  server    Server   @relation(fields: [serverId], references: [UUID])
+}
