@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
-import { isAuthenticatedForServer } from '../../handlers/utils/server/serverOwnershipCheck';
-import { getParamAsString } from '../../handlers/utils/core/parameterParsing';
+import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
+import { getParamAsString } from '../../utils/typeHelpers';
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
 import logger from '../../handlers/logger';
