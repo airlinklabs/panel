@@ -73,6 +73,8 @@ function isImageFile(filename) {
               </svg>
               Upload File
           </button>
+
+           <%- include('../../components/sftp', { server: server }) %>
       </div>
         <% } %>
       </div>

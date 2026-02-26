@@ -42,6 +42,7 @@
     Variables String?
     StartCommand String?
     dockerImage String?
+    sftpCredential SftpCredential?
     allowStartupEdit Boolean @default(false)
     Installing Boolean @default(true)
     Queued   Boolean  @default(true)
@@ -84,6 +85,7 @@ model Images {
     key           String
     createdAt     DateTime @default(now())
     allocatedPorts String?  @default("[]") // JSON array of allocated ports
+    sftpPort       Int      @default(3003)
     servers       Server[]
   }
 
@@ -98,6 +100,7 @@ model settings {
   allowRegistration Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  sftpPort  Int  @default(3003)
 }
 
 model ApiKey {
@@ -158,4 +161,16 @@ model Backup {
 
   @@index([serverId])
   @@index([createdAt])
+}
+
+model SftpCredential {
+  id        Int      @id @default(autoincrement())
+  serverId  String   @unique
+  username  String
+  password  String
+  host      String
+  port      Int
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  server    Server   @relation(fields: [serverId], references: [UUID])
 }
