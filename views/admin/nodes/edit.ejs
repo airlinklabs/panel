@@ -35,20 +35,6 @@
               </div>
 
               <div>
-                <label for="nodeSftpPort" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">SFTP Port:</label>
-                <input
-                  id="nodeSftpPort"
-                  type="number"
-                  min="1024"
-                  max="65535"
-                  value="<%= node.sftpPort || 3003 %>"
-                  class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5"
-                  placeholder="3003"
-                >
-                <p class="text-xs text-neutral-500 dark:text-neutral-500 -mt-2 mb-2">Port the atmoz/sftp container will bind on this node. Must be open on the host firewall.</p>
-              </div>
-
-              <div>
                 <label for="nodeProcessor" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.cpu %>:</label>
                 <input id="nodeProcessor" value="<%= node.cpu %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="This is only for information purposes.">
               </div>
