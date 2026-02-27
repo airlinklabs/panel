@@ -2,6 +2,66 @@
 <%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
 
+<style>
+  .a-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px;
+    min-width: 0;
+    transition: border-color 0.15s;
+  }
+  .a-card:hover { border-color: rgba(255,255,255,0.1); }
+
+  .a-icon {
+    width: 36px; height: 36px; min-width: 36px;
+    border-radius: 9px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex-shrink: 0;
+  }
+  .a-icon svg { width: 16px; height: 16px; }
+
+  .a-badge {
+    font-size: 10px; font-weight: 500; line-height: 1;
+    padding: 3px 7px; border-radius: 99px; white-space: nowrap; flex-shrink: 0;
+  }
+  .a-badge-enabled  { background: rgba(34,197,94,0.12);  color: #4ade80; }
+  .a-badge-disabled { background: rgba(255,255,255,0.06); color: #525252; }
+
+  .a-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 1023px) { .a-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 639px)  { .a-grid { grid-template-columns: 1fr; } }
+
+  .toggle-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px; padding: 5px 12px;
+    font-size: 11px; font-weight: 500; cursor: pointer;
+    transition: background 0.12s, color 0.12s; border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .toggle-btn-enable {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.08);
+    color: #737373;
+  }
+  .toggle-btn-enable:hover { background: rgba(255,255,255,0.09); color: #d4d4d4; }
+  .toggle-btn-disable {
+    background: rgba(239,68,68,0.08);
+    border-color: rgba(239,68,68,0.15);
+    color: #f87171;
+  }
+  .toggle-btn-disable:hover { background: rgba(239,68,68,0.14); }
+</style>
+
 <main class="h-screen m-auto">
   <div class="flex h-screen">
     <div class="w-60 h-full">
@@ -14,15 +74,15 @@
           <h1 class="text-base font-medium text-white">Addons</h1>
           <p class="mt-0.5 text-sm text-neutral-500">Manage installed addons and browse the store</p>
         </div>
-        <button id="reloadBtn" class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-3 py-2 text-sm font-medium transition">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+        <button id="reloadBtn" class="inline-flex items-center gap-2 rounded-xl bg-neutral-800/80 hover:bg-neutral-700/80 border border-neutral-700/50 text-neutral-300 px-3 py-2 text-sm font-medium transition">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
           </svg>
           Reload
         </button>
       </div>
 
-      <div class="px-8 mt-4">
+      <div class="px-8 mt-5">
         <!-- Tabs -->
         <div class="flex border-b border-neutral-800 mb-6">
           <a href="/admin/addons" class="px-4 py-2.5 text-sm font-medium text-white border-b-2 border-white -mb-px">
@@ -33,68 +93,77 @@
 
         <!-- Migration warning -->
         <% if (!addonTableExists) { %>
-          <div class="flex gap-3 border border-amber-500/20 rounded-xl p-4 mb-6" style="background:rgba(245,158,11,0.06);">
+          <div class="flex gap-3 rounded-xl p-4 mb-6 border border-amber-500/20" style="background:rgba(245,158,11,0.06);">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 3.014-1.874 2.148-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
             </svg>
             <div>
               <p class="text-sm font-medium text-amber-400">Database migration required</p>
-              <p class="mt-1 text-xs text-amber-400/70">Run <code class="px-1 py-0.5 rounded font-mono" style="background:rgba(245,158,11,0.1);">npm run migrate:dev</code> then restart the panel to enable the addon system.</p>
+              <p class="mt-1 text-xs text-amber-400/70">Run <code class="px-1 py-0.5 rounded font-mono" style="background:rgba(245,158,11,0.1);">npm run migrate:dev</code> then restart the panel.</p>
             </div>
           </div>
         <% } %>
 
         <!-- Addon grid -->
         <% if (addons && addons.length > 0) { %>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="a-grid">
             <% addons.forEach(function(addon) { %>
-              <div class="bg-white/5 border border-neutral-800/20 hover:border-neutral-700/30 rounded-xl transition flex flex-col" data-slug="<%= addon.slug %>">
-                <div class="p-5 flex-1">
-                  <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                      <h3 class="text-sm font-semibold text-white truncate"><%= addon.name %></h3>
-                      <p class="text-xs text-neutral-500 mt-0.5">
-                        v<%= addon.version %><% if (addon.author) { %> &middot; <%= addon.author %><% } %>
-                      </p>
-                    </div>
-                    <span class="status-badge flex-shrink-0 text-xs font-medium px-2 py-0.5 rounded-full <%= addon.enabled ? 'bg-emerald-500/10 text-emerald-400' : 'bg-neutral-700/40 text-neutral-500' %>">
-                      <%= addon.enabled ? 'Enabled' : 'Disabled' %>
-                    </span>
+              <div class="a-card" data-slug="<%= addon.slug %>">
+
+                <!-- Top row: icon + badge -->
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+                  <div class="a-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="color:#404040;">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
+                    </svg>
                   </div>
+                  <span class="status-badge a-badge <%= addon.enabled ? 'a-badge-enabled' : 'a-badge-disabled' %>">
+                    <%= addon.enabled ? 'Enabled' : 'Disabled' %>
+                  </span>
+                </div>
+
+                <!-- Name + meta -->
+                <div style="display:flex;flex-direction:column;gap:4px;min-width:0;">
+                  <p style="font-size:13px;font-weight:600;color:#e5e5e5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><%= addon.name %></p>
+                  <p style="font-size:11px;color:#525252;">
+                    v<%= addon.version %><% if (addon.author) { %> &middot; <%= addon.author %><% } %>
+                  </p>
                   <% if (addon.description) { %>
-                    <p class="mt-3 text-xs text-neutral-500 leading-relaxed line-clamp-2"><%= addon.description %></p>
+                    <p style="font-size:12px;color:#404040;line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:2px;"><%= addon.description %></p>
                   <% } %>
                 </div>
-                <div class="px-5 py-3 border-t border-neutral-800/30">
+
+                <!-- Action -->
+                <div style="margin-top:auto;">
                   <button
                     onclick="toggleAddon('<%= addon.slug %>', <%= !addon.enabled %>)"
-                    class="toggle-btn w-full rounded-lg border border-neutral-700/40 hover:border-neutral-600/60 bg-neutral-800/50 hover:bg-neutral-800 text-neutral-300 hover:text-white px-3 py-1.5 text-xs font-medium transition <%= !addonTableExists ? 'opacity-40 cursor-not-allowed' : '' %>"
-                    <%= !addonTableExists ? 'disabled' : '' %>
-                  >
+                    class="toggle-btn toggle-btn w-full <%= addon.enabled ? 'toggle-btn-disable' : 'toggle-btn-enable' %>">
                     <%= addon.enabled ? 'Disable' : 'Enable' %>
                   </button>
                 </div>
+
               </div>
             <% }); %>
           </div>
 
         <% } else { %>
-          <div class="border border-neutral-800/20 rounded-xl p-12 text-center bg-white/[0.02]">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-10 h-10 text-neutral-700 mx-auto mb-4">
+          <!-- Empty state -->
+          <div class="py-20 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-10 h-10 mx-auto mb-4" style="color:#262626;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
             </svg>
-            <p class="text-sm font-medium text-neutral-400">
+            <p class="text-sm font-medium text-neutral-500">
               <% if (addonTableExists) { %>No addons installed<% } else { %>Migration required<% } %>
             </p>
-            <p class="mt-1.5 text-xs text-neutral-600 max-w-xs mx-auto">
+            <p class="mt-2 text-xs text-neutral-700 max-w-xs mx-auto">
               <% if (addonTableExists) { %>
-                Browse the store or drop addon folders into <code class="px-1 bg-neutral-800 rounded font-mono">storage/addons</code>
+                Browse the store or drop addon folders into <code class="px-1 py-0.5 rounded font-mono bg-neutral-800 text-neutral-500">storage/addons</code>
               <% } else { %>
                 Run database migrations to enable the addon system
               <% } %>
             </p>
             <% if (addonTableExists) { %>
-              <a href="/admin/addons/store" class="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-4 py-2 text-sm font-medium transition">
+              <a href="/admin/addons/store" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-neutral-800/80 hover:bg-neutral-700/80 border border-neutral-700/50 text-neutral-300 px-4 py-2 text-sm font-medium transition">
                 Browse Store
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
@@ -136,12 +205,13 @@
 
     const badge = card.querySelector('.status-badge');
     if (badge) {
-      badge.className = `status-badge flex-shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${enabled ? 'bg-emerald-500/10 text-emerald-400' : 'bg-neutral-700/40 text-neutral-500'}`;
+      badge.className = `status-badge a-badge ${enabled ? 'a-badge-enabled' : 'a-badge-disabled'}`;
       badge.textContent = enabled ? 'Enabled' : 'Disabled';
     }
 
     const btn = card.querySelector('.toggle-btn');
     if (btn) {
+      btn.className = `toggle-btn w-full ${enabled ? 'toggle-btn-disable' : 'toggle-btn-enable'}`;
       btn.textContent = enabled ? 'Disable' : 'Enable';
       btn.onclick = () => toggleAddon(slug, !enabled);
     }
