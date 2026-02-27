@@ -1,0 +1,737 @@
+<%- include('../../components/header', { title: 'Addon Store' }) %>
+<%- include('../../components/toast') %>
+
+<style>
+  .s-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px;
+    min-width: 0;
+  }
+  .s-card:hover {
+    border-color: rgba(255,255,255,0.11);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  }
+  .s-icon {
+    width: 36px; height: 36px; min-width: 36px;
+    border-radius: 9px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex-shrink: 0;
+  }
+  .s-icon img { width: 20px; height: 20px; object-fit: contain; display: block; }
+  .s-icon svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .s-badge {
+    font-size: 10px; font-weight: 500; line-height: 1;
+    padding: 3px 7px; border-radius: 99px; white-space: nowrap; flex-shrink: 0;
+  }
+  .s-badge-working   { background: rgba(34,197,94,0.12);  color: #4ade80; }
+  .s-badge-beta      { background: rgba(234,179,8,0.12);  color: #facc15; }
+  .s-badge-wip       { background: rgba(249,115,22,0.12); color: #fb923c; }
+  .s-badge-installed { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+  .s-tag {
+    font-size: 10px; color: #525252;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 99px; padding: 2px 7px; white-space: nowrap;
+  }
+  .s-skeleton {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 14px; height: 156px;
+    animation: sk-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes sk-pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .s-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 1023px) { .s-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 639px)  { .s-grid { grid-template-columns: 1fr; } }
+
+  /* ── Modal ── */
+  .m-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.18s;
+  }
+  .m-overlay.open { opacity: 1; pointer-events: auto; }
+  .m-dialog {
+    background: #141414;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    width: 100%; max-width: 580px;
+    max-height: 86vh;
+    display: flex; flex-direction: column;
+    transform: translateY(8px) scale(0.99);
+    transition: transform 0.18s cubic-bezier(0.23,1,0.32,1);
+    overflow: hidden;
+  }
+  .m-overlay.open .m-dialog { transform: none; }
+  .m-head    { padding: 20px 20px 0; flex-shrink: 0; }
+  .m-actions { display: flex; gap: 8px; margin-top: 16px; }
+  .m-tabs {
+    display: flex; flex-shrink: 0;
+    padding: 0 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-top: 14px;
+  }
+  .m-tab {
+    padding: 9px 14px;
+    font-size: 12px; font-weight: 500; color: #525252;
+    background: none; border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px; cursor: pointer;
+    transition: color 0.12s, border-color 0.12s;
+  }
+  .m-tab.on { color: #e5e5e5; border-bottom-color: #e5e5e5; }
+  .m-tab:hover:not(.on) { color: #a3a3a3; }
+  .m-body { flex: 1; overflow-y: auto; padding: 20px; }
+  .m-pane { display: none; }
+  .m-pane.on { display: block; }
+
+  /* Terminal */
+  .m-terminal {
+    background: #0a0a0a;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px; padding: 14px;
+    margin-bottom: 16px;
+  }
+  .m-term-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .m-term-label { font-size: 11px; font-weight: 500; color: #d4d4d4; }
+  .m-term-pct   { font-size: 10px; color: #404040; font-family: ui-monospace, monospace; }
+  .m-term-track { height: 2px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+  .m-term-fill  { height: 100%; background: #525252; border-radius: 99px; transition: width 0.3s ease; width: 0%; }
+  .m-term-log   {
+    margin-top: 12px; max-height: 160px; overflow-y: auto;
+    font-family: ui-monospace, 'SF Mono', monospace;
+    font-size: 11px; display: flex; flex-direction: column; gap: 3px;
+  }
+  .l-step   { color: #525252; }
+  .l-cmd    { color: #737373; }
+  .l-output { color: #404040; white-space: pre-wrap; word-break: break-all; }
+  .l-ok     { color: #4ade80; }
+  .l-err    { color: #f87171; }
+
+  /* Install guide */
+  .m-cmd-list {
+    background: #0d0d0d;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; padding: 12px 14px;
+  }
+  .m-cmd-list code {
+    font-family: ui-monospace, 'SF Mono', monospace;
+    font-size: 11px; color: #737373; display: block; line-height: 1.9;
+  }
+  .m-note {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; padding: 11px 13px; margin-top: 12px;
+    font-size: 11px; color: #525252; line-height: 1.65;
+  }
+  .m-note svg { flex-shrink: 0; margin-top: 1px; }
+
+  /* Buttons */
+  .btn-install {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #fff; color: #0a0a0a;
+    border: none; border-radius: 9px; padding: 8px 16px;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; flex: 1; justify-content: center;
+    transition: background 0.12s; white-space: nowrap;
+  }
+  .btn-install:hover:not(:disabled) { background: #e5e5e5; }
+  .btn-install:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-install svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .btn-remove {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(239,68,68,0.1); color: #f87171;
+    border: 1px solid rgba(239,68,68,0.18);
+    border-radius: 9px; padding: 8px 16px;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; flex: 1; justify-content: center;
+    transition: background 0.12s; white-space: nowrap;
+  }
+  .btn-remove:hover:not(:disabled) { background: rgba(239,68,68,0.18); }
+  .btn-remove:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-remove svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .btn-gh {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #737373; border-radius: 9px; padding: 8px 16px;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; text-decoration: none;
+    transition: background 0.12s, color 0.12s;
+  }
+  .btn-gh:hover { background: rgba(255,255,255,0.08); color: #d4d4d4; }
+  .btn-gh svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+  /* Features */
+  .feat-row { display: flex; gap: 8px; align-items: flex-start; padding: 3px 0; font-size: 12px; color: #737373; }
+  .feat-dot { width: 4px; height: 4px; border-radius: 50%; background: #404040; flex-shrink: 0; margin-top: 7px; }
+</style>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+
+    <div class="flex-1 overflow-y-auto pt-16">
+      <div class="px-8 pt-6 pb-0 flex items-center justify-between">
+        <div>
+          <h1 class="text-base font-medium text-white">Addons</h1>
+          <p class="mt-0.5 text-sm text-neutral-500">Manage installed addons and browse the store</p>
+        </div>
+      </div>
+
+      <div class="px-8 mt-5">
+        <!-- Tab bar -->
+        <div class="flex border-b border-neutral-800 mb-6">
+          <a href="/admin/addons" class="px-4 py-2.5 text-sm font-medium text-neutral-500 hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">
+            Installed <span class="ml-1 text-xs text-neutral-700"><%= addons ? addons.length : 0 %></span>
+          </a>
+          <a href="/admin/addons/store" class="px-4 py-2.5 text-sm font-medium text-white border-b-2 border-white -mb-px">Store</a>
+        </div>
+
+        <!-- Search + filters -->
+        <div class="flex items-center gap-3 mb-6 flex-wrap">
+          <input id="searchInput" type="text" placeholder="Search addons..."
+            class="bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-2 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-600 transition w-52" />
+          <div id="tagFilters" class="flex gap-2 flex-wrap"></div>
+        </div>
+
+        <!-- Skeletons -->
+        <div id="storeLoading" class="s-grid">
+          <div class="s-skeleton"></div><div class="s-skeleton"></div><div class="s-skeleton"></div>
+          <div class="s-skeleton"></div><div class="s-skeleton"></div><div class="s-skeleton"></div>
+        </div>
+
+        <!-- Error -->
+        <div id="storeError" style="display:none;" class="py-16 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-9 h-9 text-neutral-800 mx-auto mb-3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+          </svg>
+          <p id="storeErrorMsg" class="text-sm text-neutral-600"></p>
+          <button onclick="loadStore()" class="mt-3 text-xs text-neutral-700 hover:text-neutral-400 transition underline">Retry</button>
+        </div>
+
+        <!-- Grid -->
+        <div id="storeGrid" class="s-grid" style="display:none;"></div>
+
+        <!-- Empty -->
+        <div id="storeEmpty" style="display:none;" class="py-16 text-center">
+          <p class="text-sm text-neutral-600">No addons match your search.</p>
+          <button id="clearSearch" class="mt-3 text-xs text-neutral-700 hover:text-neutral-400 transition underline">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="m-overlay" id="mOverlay">
+  <div class="m-dialog">
+
+    <div class="m-head">
+      <div style="display:flex;align-items:flex-start;gap:14px;">
+        <div class="s-icon" id="mIcon" style="width:40px;height:40px;min-width:40px;border-radius:10px;"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+            <span id="mName" style="font-size:14px;font-weight:600;color:#fff;"></span>
+            <span id="mStatus" class="s-badge"></span>
+          </div>
+          <p id="mMeta" style="font-size:11px;color:#525252;margin-top:3px;"></p>
+        </div>
+        <button id="mClose" style="flex-shrink:0;width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,0.06);border:none;display:flex;align-items:center;justify-content:center;color:#525252;cursor:pointer;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:12px;height:12px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="m-actions">
+        <button id="mActionBtn" class="btn-install">
+          <svg id="mActionIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+          </svg>
+          <span id="mActionLabel">Install</span>
+        </button>
+        <a id="mGhBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-gh">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/>
+          </svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+
+    <div class="m-tabs">
+      <button class="m-tab on" data-tab="overview">Overview</button>
+      <button class="m-tab" data-tab="install">Installation</button>
+      <button class="m-tab" data-tab="reviews">Reviews</button>
+    </div>
+
+    <div class="m-body">
+
+      <div class="m-pane on" id="m-pane-overview">
+        <p id="mDesc" style="font-size:13px;color:#737373;line-height:1.7;margin-bottom:18px;"></p>
+        <div id="mFeatures"></div>
+      </div>
+
+      <div class="m-pane" id="m-pane-install">
+        <div id="mTerminal" class="m-terminal" style="display:none;">
+          <div class="m-term-head">
+            <span class="m-term-label" id="mTermLabel">Starting...</span>
+            <span class="m-term-pct" id="mTermPct">0%</span>
+          </div>
+          <div class="m-term-track"><div class="m-term-fill" id="mTermBar"></div></div>
+          <div class="m-term-log" id="mTermLog"></div>
+        </div>
+        <div id="mCmdGuide"></div>
+      </div>
+
+      <div class="m-pane" id="m-pane-reviews">
+        <p style="font-size:12px;color:#404040;margin-bottom:16px;line-height:1.6;">Reviews are powered by GitHub Discussions on the addons repository.</p>
+        <div id="mGiscus"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function show(id)     { const el = document.getElementById(id); if (el) el.style.display = ''; }
+  function hide(id)     { const el = document.getElementById(id); if (el) el.style.display = 'none'; }
+  function showGrid(id) { const el = document.getElementById(id); if (el) el.style.display = 'grid'; }
+
+  function badgeClass(status) {
+    if (status === 'beta') return 's-badge s-badge-beta';
+    if (status === 'wip')  return 's-badge s-badge-wip';
+    return 's-badge s-badge-working';
+  }
+
+  let allAddons    = [];
+  const INSTALLED  = new Set(<%- JSON.stringify((addons || []).map(a => a.slug)) %>);
+  let currentAddon = null;
+  let activeTag    = null;
+
+  async function loadStore() {
+    hide('storeError');
+    hide('storeGrid');
+    hide('storeEmpty');
+    showGrid('storeLoading');
+
+    try {
+      const listRes  = await fetch('/admin/addons/store/list');
+      const listData = await listRes.json();
+
+      if (!listData.success) throw new Error(listData.message || 'Failed to load');
+
+      allAddons = listData.addons || [];
+
+      buildTagFilters();
+      render(filtered());
+    } catch (err) {
+      hide('storeLoading');
+      document.getElementById('storeErrorMsg').textContent = err.message || 'Failed to load addon store.';
+      show('storeError');
+    }
+  }
+
+  function buildTagFilters() {
+    const counts = {};
+    allAddons.forEach(a => (a.tags || []).forEach(t => { counts[t] = (counts[t] || 0) + 1; }));
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8).map(e => e[0]);
+    const el  = document.getElementById('tagFilters');
+    el.innerHTML = '';
+    top.forEach(tag => {
+      const btn = document.createElement('button');
+      btn.textContent   = tag;
+      btn.className     = 's-tag';
+      btn.style.cssText = 'cursor:pointer;transition:background 0.12s,color 0.12s,border-color 0.12s;';
+      btn.addEventListener('click', () => {
+        activeTag = activeTag === tag ? null : tag;
+        el.querySelectorAll('button').forEach(b => {
+          const on = b.textContent === activeTag;
+          b.style.background  = on ? 'rgba(255,255,255,0.1)'  : 'rgba(255,255,255,0.04)';
+          b.style.color       = on ? '#e5e5e5'                : '#525252';
+          b.style.borderColor = on ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.06)';
+        });
+        render(filtered());
+      });
+      el.appendChild(btn);
+    });
+  }
+
+  function filtered() {
+    const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+    return allAddons.filter(a => {
+      const matchQ = !q || (a.name || '').toLowerCase().includes(q) || (a.description || '').toLowerCase().includes(q);
+      const matchT = !activeTag || (a.tags || []).includes(activeTag);
+      return matchQ && matchT;
+    });
+  }
+
+  function render(list) {
+    hide('storeLoading');
+    const grid = document.getElementById('storeGrid');
+
+    if (!list.length) {
+      hide('storeGrid');
+      show('storeEmpty');
+      return;
+    }
+
+    hide('storeEmpty');
+    grid.innerHTML = '';
+
+    list.forEach(addon => {
+      const installed = INSTALLED.has(addon.id);
+      const card      = document.createElement('div');
+      card.className  = 's-card';
+
+      const tagsHtml = (addon.tags || []).slice(0, 3).map(t => `<span class="s-tag">${esc(t)}</span>`).join('');
+      const badge    = installed ? 's-badge s-badge-installed' : badgeClass(addon.status);
+      const badgeTxt = installed ? 'Installed' : (addon.status || 'working');
+
+      card.innerHTML = `
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+          <div class="s-icon" data-icon-id="${esc(addon.id)}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px;color:#404040;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/>
+            </svg>
+          </div>
+          <span class="${badge}">${esc(badgeTxt)}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;">
+          <p style="font-size:13px;font-weight:600;color:#e5e5e5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(addon.name)}</p>
+          <p style="font-size:12px;color:#525252;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${esc(addon.description)}</p>
+        </div>
+        ${tagsHtml ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:auto;">${tagsHtml}</div>` : ''}`;
+
+      if (addon.icon) {
+        const iconEl = card.querySelector('[data-icon-id]');
+        const img    = new Image();
+        img.style.cssText = 'width:20px;height:20px;object-fit:contain;display:block;';
+        img.onload = () => { iconEl.innerHTML = ''; iconEl.appendChild(img); };
+        img.src = addon.icon;
+      }
+
+      card.addEventListener('click', () => openModal(addon));
+      grid.appendChild(card);
+    });
+
+    showGrid('storeGrid');
+  }
+
+  document.getElementById('searchInput').addEventListener('input', () => render(filtered()));
+  document.getElementById('clearSearch').addEventListener('click', () => {
+    document.getElementById('searchInput').value = '';
+    activeTag = null;
+    document.querySelectorAll('#tagFilters button').forEach(b => {
+      b.style.background  = 'rgba(255,255,255,0.04)';
+      b.style.color       = '#525252';
+      b.style.borderColor = 'rgba(255,255,255,0.06)';
+    });
+    render(filtered());
+  });
+
+  // ── Modal ─────────────────────────────────────────────────────────
+
+  function openModal(addon) {
+    currentAddon = addon;
+    const inst   = INSTALLED.has(addon.id);
+
+    const iconEl = document.getElementById('mIcon');
+    iconEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:18px;height:18px;color:#404040;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/></svg>';
+    if (addon.icon) {
+      const img = new Image();
+      img.style.cssText = 'width:20px;height:20px;object-fit:contain;display:block;';
+      img.onload = () => { iconEl.innerHTML = ''; iconEl.appendChild(img); };
+      img.src = addon.icon;
+    }
+
+    document.getElementById('mName').textContent = addon.name || '';
+    const statusEl       = document.getElementById('mStatus');
+    statusEl.textContent = inst ? 'Installed' : (addon.status || 'working');
+    statusEl.className   = inst ? 's-badge s-badge-installed' : badgeClass(addon.status);
+    document.getElementById('mMeta').textContent = 'by ' + (addon.author || 'Unknown') + (addon.version ? ' · v' + addon.version : '');
+    document.getElementById('mDesc').textContent = addon.longDescription || addon.description || 'No description available.';
+    document.getElementById('mGhBtn').href       = addon.github || ('https://github.com/airlinklabs/addons/tree/main/' + addon.id);
+
+    const featEl = document.getElementById('mFeatures');
+    featEl.innerHTML = '';
+    if ((addon.features || []).length) {
+      const lbl = document.createElement('p');
+      lbl.style.cssText = 'font-size:10px;color:#404040;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;';
+      lbl.textContent = 'Features';
+      featEl.appendChild(lbl);
+      addon.features.forEach(f => {
+        const row     = document.createElement('div');
+        row.className = 'feat-row';
+        row.innerHTML = '<div class="feat-dot"></div><span>' + esc(f) + '</span>';
+        featEl.appendChild(row);
+      });
+    }
+
+    const guideEl = document.getElementById('mCmdGuide');
+    guideEl.innerHTML = '';
+
+    if (addon.installRepo) {
+      const repoLine = document.createElement('div');
+      repoLine.style.cssText = 'font-size:11px;color:#525252;margin-bottom:12px;display:flex;align-items:center;gap:6px;';
+      repoLine.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:11px;height:11px;flex-shrink:0;"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>'
+        + '<span style="font-family:ui-monospace,monospace;">' + esc(addon.installRepo) + '</span>'
+        + '<span style="color:#404040;"> @ ' + esc(addon.installBranch || 'main') + '</span>';
+      guideEl.appendChild(repoLine);
+    }
+
+    const commands = addon.installCommands || {};
+    const keys     = Object.keys(commands).sort((a, b) => Number(a) - Number(b));
+    if (keys.length) {
+      const lbl = document.createElement('p');
+      lbl.style.cssText = 'font-size:10px;color:#404040;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
+      lbl.textContent = 'Commands';
+      guideEl.appendChild(lbl);
+      const block     = document.createElement('div');
+      block.className = 'm-cmd-list';
+      keys.forEach(k => {
+        const c       = document.createElement('code');
+        c.textContent = k + '.  ' + commands[k];
+        block.appendChild(c);
+      });
+      guideEl.appendChild(block);
+    }
+
+    if (addon.installNote) {
+      const note     = document.createElement('div');
+      note.className = 'm-note';
+      note.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:13px;height:13px;color:#525252;"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg><span>' + esc(addon.installNote) + '</span>';
+      guideEl.appendChild(note);
+    }
+
+    setActionBtn(inst);
+    switchTab('overview');
+    hide('mTerminal');
+    document.getElementById('mTermLog').innerHTML = '';
+
+    document.getElementById('mOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('mOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    document.getElementById('mGiscus').innerHTML = '';
+    currentAddon = null;
+  }
+
+  function setActionBtn(installed) {
+    const btn = document.getElementById('mActionBtn');
+    const lbl = document.getElementById('mActionLabel');
+    const ico = document.getElementById('mActionIcon');
+    if (installed) {
+      btn.className   = 'btn-remove';
+      ico.innerHTML   = '<path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>';
+      lbl.textContent = 'Uninstall';
+    } else {
+      btn.className   = 'btn-install';
+      ico.innerHTML   = '<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>';
+      lbl.textContent = 'Install';
+    }
+    btn.disabled = false;
+  }
+
+  function switchTab(name) {
+    document.querySelectorAll('.m-tab').forEach(t => t.classList.toggle('on', t.dataset.tab === name));
+    document.querySelectorAll('.m-pane').forEach(p => p.classList.toggle('on', p.id === 'm-pane-' + name));
+  }
+
+  document.querySelectorAll('.m-tab').forEach(t => t.addEventListener('click', () => {
+    switchTab(t.dataset.tab);
+    if (t.dataset.tab === 'reviews' && currentAddon) loadGiscus(currentAddon);
+  }));
+
+  document.getElementById('mClose').addEventListener('click', closeModal);
+  document.getElementById('mOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  function loadGiscus(addon) {
+    const c = document.getElementById('mGiscus');
+    c.innerHTML = '';
+    const s = document.createElement('script');
+    s.src = 'https://giscus.app/client.js';
+    s.setAttribute('data-repo', 'airlinklabs/addons');
+    s.setAttribute('data-repo-id', '');
+    s.setAttribute('data-category', 'General');
+    s.setAttribute('data-category-id', '');
+    s.setAttribute('data-mapping', 'specific');
+    s.setAttribute('data-term', addon.name || addon.id);
+    s.setAttribute('data-reactions-enabled', '1');
+    s.setAttribute('data-emit-metadata', '0');
+    s.setAttribute('data-input-position', 'bottom');
+    s.setAttribute('data-theme', 'dark');
+    s.setAttribute('data-lang', 'en');
+    s.setAttribute('data-loading', 'lazy');
+    s.crossOrigin = 'anonymous';
+    s.async = true;
+    c.appendChild(s);
+  }
+
+  document.getElementById('mActionBtn').addEventListener('click', async function () {
+    if (!currentAddon) return;
+    const btn  = document.getElementById('mActionBtn');
+    const slug = currentAddon.id;
+
+    if (INSTALLED.has(slug)) {
+      btn.disabled = true;
+      document.getElementById('mActionLabel').textContent = 'Removing...';
+      try {
+        const res  = await fetch('/admin/addons/store/uninstall', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          INSTALLED.delete(slug);
+          showToast(data.message, 'success');
+          closeModal();
+          render(filtered());
+        } else {
+          showToast(data.message || 'Failed to uninstall', 'error');
+          setActionBtn(true);
+        }
+      } catch {
+        showToast('An error occurred', 'error');
+        setActionBtn(true);
+      }
+      return;
+    }
+
+    switchTab('install');
+    const terminal  = document.getElementById('mTerminal');
+    const termBar   = document.getElementById('mTermBar');
+    const termLabel = document.getElementById('mTermLabel');
+    const termPct   = document.getElementById('mTermPct');
+    const termLog   = document.getElementById('mTermLog');
+
+    terminal.style.display = '';
+    termLog.innerHTML      = '';
+    termBar.style.width    = '0%';
+    termLabel.textContent  = 'Starting...';
+    termPct.textContent    = '0%';
+    btn.disabled           = true;
+    document.getElementById('mActionLabel').textContent = 'Installing...';
+
+    function logLine(text, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = text;
+      termLog.appendChild(d);
+      termLog.scrollTop = termLog.scrollHeight;
+    }
+
+    function setProgress(pct, label) {
+      termBar.style.width  = pct + '%';
+      termPct.textContent  = pct + '%';
+      if (label) termLabel.textContent = label;
+    }
+
+    try {
+      const res = await fetch('/admin/addons/store/install', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug }),
+      });
+
+      const ct = res.headers.get('content-type') || '';
+      if (!res.ok || ct.includes('application/json')) {
+        const data = await res.json();
+        logLine('Error: ' + (data.message || 'Server error'), 'l-err');
+        termLabel.textContent = 'Failed';
+        showToast(data.message || 'Install failed', 'error');
+        setActionBtn(false);
+        return;
+      }
+
+      const reader     = res.body.getReader();
+      const decoder    = new TextDecoder();
+      let buf          = '';
+      const totalSteps = Object.keys(currentAddon.installCommands || {}).length + 3;
+      let done         = 0;
+
+      outer: while (true) {
+        const { done: end, value } = await reader.read();
+        if (end) break;
+        buf += decoder.decode(value, { stream: true });
+        const parts = buf.split('\n\n');
+        buf = parts.pop();
+
+        for (const part of parts) {
+          const raw = part.replace(/^data:\s*/m, '').trim();
+          if (!raw) continue;
+          let evt;
+          try { evt = JSON.parse(raw); } catch { continue; }
+
+          if (evt.type === 'step') {
+            done++;
+            setProgress(Math.min(Math.round(done / totalSteps * 85), 85), evt.step || 'Running...');
+            logLine('> ' + (evt.step || '') + (evt.cmd ? ': ' + evt.cmd : ''), 'l-step');
+          } else if (evt.type === 'cmd') {
+            done++;
+            setProgress(Math.min(Math.round(done / totalSteps * 85), 85), evt.step || 'Running...');
+            logLine('$ ' + evt.cmd, 'l-cmd');
+          } else if (evt.type === 'output') {
+            logLine(evt.output, 'l-output');
+          } else if (evt.type === 'done') {
+            setProgress(100, 'Installed');
+            logLine(evt.message, 'l-ok');
+            INSTALLED.add(slug);
+            setActionBtn(true);
+            showToast(evt.message, 'success');
+            render(filtered());
+            break outer;
+          } else if (evt.type === 'error') {
+            logLine('Error: ' + evt.message, 'l-err');
+            termLabel.textContent = 'Failed';
+            showToast(evt.message, 'error');
+            setActionBtn(false);
+            break outer;
+          }
+        }
+      }
+    } catch (err) {
+      logLine('Error: ' + err.message, 'l-err');
+      termLabel.textContent = 'Failed';
+      showToast('Installation failed', 'error');
+      setActionBtn(false);
+    }
+  });
+
+  loadStore();
+})();
+</script>
+
+<%- include('../../components/footer') %>
