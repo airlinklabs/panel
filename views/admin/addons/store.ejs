@@ -1,0 +1,331 @@
+<%- include('../../components/header', { title: 'Addon Store' }) %>
+<%- include('../../components/toast') %>
+<%- include('../../components/loadingPopup') %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-white">Addons</h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500">Manage and discover panel addons</p>
+        </div>
+        <div class="mt-4 sm:ml-16 sm:mt-0">
+          <a href="/admin/addons" class="w-full md:w-auto rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 px-3 py-2 text-sm font-medium shadow-sm transition flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+            </svg>
+            Installed
+          </a>
+        </div>
+      </div>
+
+      <!-- Tab nav -->
+      <div class="px-8 mt-6">
+        <div class="flex gap-1 border-b border-neutral-800">
+          <a href="/admin/addons" class="px-4 py-2 text-sm font-medium text-neutral-500 hover:text-neutral-300 transition -mb-px">Installed</a>
+          <a href="/admin/addons/store" class="px-4 py-2 text-sm font-medium text-white border-b-2 border-white -mb-px">Store</a>
+        </div>
+      </div>
+
+      <!-- Search + filters -->
+      <div class="px-8 mt-5">
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-1">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+            <input
+              id="searchInput"
+              type="text"
+              placeholder="Search addons..."
+              class="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-600 transition"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Addon grid -->
+      <div class="px-8 mt-4">
+        <div id="storeLoading" class="py-16 text-center">
+          <svg class="animate-spin w-6 h-6 text-neutral-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="mt-3 text-sm text-neutral-600">Fetching addons...</p>
+        </div>
+
+        <div id="storeError" class="hidden py-16 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-10 h-10 text-neutral-700 mx-auto mb-3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+          </svg>
+          <p class="text-sm text-neutral-400" id="storeErrorMsg">Failed to load addon store.</p>
+          <button onclick="loadStore()" class="mt-3 text-sm text-neutral-500 hover:text-neutral-300 transition underline">Try again</button>
+        </div>
+
+        <div id="storeGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+
+        <div id="storeEmpty" class="hidden py-16 text-center">
+          <p class="text-sm text-neutral-500">No addons match your search.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Addon detail modal -->
+<div id="addonModal" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-black/60" id="modalBackdrop"></div>
+  <div class="relative flex items-end sm:items-center justify-center min-h-full p-4">
+    <div class="relative bg-neutral-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div class="p-6">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 id="modalName" class="text-lg font-semibold text-white"></h2>
+              <span id="modalVersion" class="text-xs text-neutral-500"></span>
+            </div>
+            <p id="modalAuthor" class="mt-0.5 text-xs text-neutral-500"></p>
+          </div>
+          <button id="modalClose" class="flex-shrink-0 rounded-lg p-1.5 text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <p id="modalDescription" class="mt-4 text-sm text-neutral-400 leading-relaxed"></p>
+
+        <div id="modalTags" class="mt-3 flex flex-wrap gap-1.5"></div>
+
+        <div class="mt-6 flex items-center gap-3">
+          <button id="modalInstallBtn" class="flex-1 rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-4 py-2 text-sm font-medium transition flex items-center justify-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            <span id="modalInstallLabel">Install</span>
+          </button>
+          <a id="modalRepoLink" href="#" target="_blank" rel="noopener noreferrer" class="rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-4 py-2 text-sm font-medium transition flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-4 h-4">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/>
+            </svg>
+            GitHub
+          </a>
+        </div>
+
+        <!-- Giscus reviews section -->
+        <div class="mt-8 pt-6 border-t border-neutral-800">
+          <h3 class="text-sm font-medium text-neutral-300 mb-4">Reviews &amp; Discussion</h3>
+          <div id="giscusContainer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const INSTALLED_SLUGS = new Set(<%- JSON.stringify((addons || []).map(a => a.slug)) %>);
+
+  let allAddons = [];
+  let currentSlug = null;
+
+  async function loadStore() {
+    document.getElementById('storeLoading').classList.remove('hidden');
+    document.getElementById('storeError').classList.add('hidden');
+    document.getElementById('storeGrid').classList.add('hidden');
+    document.getElementById('storeEmpty').classList.add('hidden');
+
+    try {
+      const res = await fetch('/admin/addons/store/list');
+      const data = await res.json();
+
+      if (!data.success) throw new Error(data.message || 'Unknown error');
+
+      allAddons = Array.isArray(data.addons) ? data.addons : [];
+      document.getElementById('storeLoading').classList.add('hidden');
+      renderGrid(allAddons);
+    } catch (err) {
+      document.getElementById('storeLoading').classList.add('hidden');
+      document.getElementById('storeErrorMsg').textContent = err.message || 'Failed to load addon store.';
+      document.getElementById('storeError').classList.remove('hidden');
+    }
+  }
+
+  function renderGrid(addons) {
+    const grid = document.getElementById('storeGrid');
+    const empty = document.getElementById('storeEmpty');
+
+    if (!addons.length) {
+      grid.classList.add('hidden');
+      empty.classList.remove('hidden');
+      return;
+    }
+
+    grid.classList.remove('hidden');
+    empty.classList.add('hidden');
+
+    grid.innerHTML = addons.map(addon => {
+      const installed = INSTALLED_SLUGS.has(addon.slug);
+      const tags = (addon.tags || []).slice(0, 3).map(t =>
+        `<span class="inline-block bg-neutral-800 text-neutral-400 rounded-full px-2 py-0.5 text-xs">${escapeHtml(t)}</span>`
+      ).join('');
+
+      return `
+        <div class="rounded-xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 transition p-5 flex flex-col gap-3 cursor-pointer" onclick="openAddon(${escapeHtml(JSON.stringify(addon))})">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-sm font-semibold text-white truncate">${escapeHtml(addon.name)}</h3>
+                ${installed ? '<span class="inline-flex items-center rounded-full bg-emerald-500/15 text-emerald-400 px-2 py-0.5 text-xs font-medium">Installed</span>' : ''}
+              </div>
+              <p class="mt-0.5 text-xs text-neutral-500">by ${escapeHtml(addon.author || 'Unknown')}</p>
+            </div>
+            <span class="text-xs text-neutral-600 flex-shrink-0">v${escapeHtml(addon.version || '1.0.0')}</span>
+          </div>
+          <p class="text-sm text-neutral-400 line-clamp-2">${escapeHtml(addon.description || '')}</p>
+          ${tags ? `<div class="flex flex-wrap gap-1.5">${tags}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  function openAddon(addon) {
+    currentSlug = addon.slug;
+    const installed = INSTALLED_SLUGS.has(addon.slug);
+
+    document.getElementById('modalName').textContent = addon.name || '';
+    document.getElementById('modalVersion').textContent = addon.version ? `v${addon.version}` : '';
+    document.getElementById('modalAuthor').textContent = addon.author ? `by ${addon.author}` : '';
+    document.getElementById('modalDescription').textContent = addon.description || 'No description provided.';
+
+    const tagsEl = document.getElementById('modalTags');
+    tagsEl.innerHTML = (addon.tags || []).map(t =>
+      `<span class="inline-block bg-neutral-800 text-neutral-400 rounded-full px-2.5 py-0.5 text-xs">${escapeHtml(t)}</span>`
+    ).join('');
+
+    const installBtn = document.getElementById('modalInstallBtn');
+    const installLabel = document.getElementById('modalInstallLabel');
+
+    installBtn.dataset.slug = addon.slug;
+    installBtn.dataset.installed = installed ? '1' : '0';
+
+    if (installed) {
+      installLabel.textContent = 'Uninstall';
+      installBtn.className = installBtn.className.replace('bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800', 'bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-600/30');
+    } else {
+      installLabel.textContent = 'Install';
+    }
+
+    const repoLink = document.getElementById('modalRepoLink');
+    repoLink.href = addon.repository || `https://github.com/airlinklabs/addons/tree/main/${addon.slug}`;
+
+    loadGiscus(addon.slug);
+
+    document.getElementById('addonModal').classList.remove('hidden');
+  }
+
+  function loadGiscus(slug) {
+    const container = document.getElementById('giscusContainer');
+    container.innerHTML = '';
+
+    const script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    script.setAttribute('data-repo', 'airlinklabs/addons');
+    script.setAttribute('data-repo-id', 'YOUR_REPO_ID');
+    script.setAttribute('data-category', 'Addon Reviews');
+    script.setAttribute('data-category-id', 'YOUR_CATEGORY_ID');
+    script.setAttribute('data-mapping', 'specific');
+    script.setAttribute('data-term', slug);
+    script.setAttribute('data-strict', '1');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-emit-metadata', '0');
+    script.setAttribute('data-input-position', 'bottom');
+    script.setAttribute('data-theme', 'dark');
+    script.setAttribute('data-lang', 'en');
+    script.setAttribute('data-loading', 'lazy');
+    script.crossOrigin = 'anonymous';
+    script.async = true;
+
+    container.appendChild(script);
+  }
+
+  document.getElementById('modalInstallBtn').addEventListener('click', async function() {
+    const slug = this.dataset.slug;
+    const isInstalled = this.dataset.installed === '1';
+
+    const action = isInstalled ? 'uninstall' : 'install';
+    const label = isInstalled ? 'Uninstalling...' : 'Installing...';
+
+    document.getElementById('modalInstallLabel').textContent = label;
+    this.disabled = true;
+
+    try {
+      const res = await fetch(`/admin/addons/store/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        showToast(data.message, 'success');
+        if (action === 'install') {
+          INSTALLED_SLUGS.add(slug);
+        } else {
+          INSTALLED_SLUGS.delete(slug);
+        }
+        closeModal();
+        renderGrid(filterAddons(document.getElementById('searchInput').value));
+      } else {
+        showToast(data.message || 'Operation failed', 'error');
+        document.getElementById('modalInstallLabel').textContent = isInstalled ? 'Uninstall' : 'Install';
+        this.disabled = false;
+      }
+    } catch (err) {
+      showToast('An error occurred', 'error');
+      document.getElementById('modalInstallLabel').textContent = isInstalled ? 'Uninstall' : 'Install';
+      this.disabled = false;
+    }
+  });
+
+  function closeModal() {
+    document.getElementById('addonModal').classList.add('hidden');
+    document.getElementById('giscusContainer').innerHTML = '';
+    currentSlug = null;
+  }
+
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('modalBackdrop').addEventListener('click', closeModal);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  function filterAddons(query) {
+    if (!query.trim()) return allAddons;
+    const q = query.toLowerCase();
+    return allAddons.filter(a =>
+      (a.name || '').toLowerCase().includes(q) ||
+      (a.description || '').toLowerCase().includes(q) ||
+      (a.author || '').toLowerCase().includes(q) ||
+      (a.tags || []).some(t => t.toLowerCase().includes(q))
+    );
+  }
+
+  document.getElementById('searchInput').addEventListener('input', function() {
+    renderGrid(filterAddons(this.value));
+  });
+
+  function escapeHtml(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  loadStore();
+</script>
+
+<%- include('../../components/footer') %>
