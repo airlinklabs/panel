@@ -2,6 +2,7 @@
 <%- include('../../components/toast') %>
 
 <style>
+  /* ── Cards ── */
   .s-card {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.06);
@@ -10,56 +11,51 @@
     transition: border-color 0.15s, box-shadow 0.15s;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 16px;
+    gap: 10px;
+    padding: 14px;
   }
   .s-card:hover {
     border-color: rgba(255,255,255,0.1);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   }
-
   .s-icon {
-    width: 36px; height: 36px;
-    border-radius: 8px;
+    width: 32px; height: 32px; min-width: 32px;
+    border-radius: 7px;
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.07);
     display: flex; align-items: center; justify-content: center;
-    overflow: hidden; flex-shrink: 0;
+    overflow: hidden;
   }
-  .s-icon img { width: 22px; height: 22px; object-fit: contain; display: block; }
-  .s-icon svg { width: 18px; height: 18px; color: #404040; }
-
+  .s-icon img { width: 20px; height: 20px; object-fit: contain; display: block; }
+  .s-icon svg { width: 16px; height: 16px; flex-shrink: 0; }
   .s-badge {
-    font-size: 11px; font-weight: 500;
-    padding: 2px 7px; border-radius: 99px;
-    flex-shrink: 0;
+    font-size: 10px; font-weight: 500; line-height: 1;
+    padding: 2px 6px; border-radius: 99px; white-space: nowrap;
   }
-  .s-badge-working { background: rgba(34,197,94,0.12); color: #4ade80; }
-  .s-badge-beta    { background: rgba(234,179,8,0.12);  color: #facc15; }
-  .s-badge-wip     { background: rgba(249,115,22,0.12); color: #fb923c; }
-  .s-badge-installed { background: rgba(99,102,241,0.15); color: #a5b4fc; }
-
+  .s-badge-working  { background: rgba(34,197,94,0.12);  color: #4ade80; }
+  .s-badge-beta     { background: rgba(234,179,8,0.12);   color: #facc15; }
+  .s-badge-wip      { background: rgba(249,115,22,0.12);  color: #fb923c; }
+  .s-badge-installed{ background: rgba(99,102,241,0.15);  color: #a5b4fc; }
   .s-tag {
-    font-size: 11px; color: #525252;
+    font-size: 10px; color: #525252;
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 99px;
-    padding: 1px 7px;
+    border-radius: 99px; padding: 1px 6px; white-space: nowrap;
   }
-
   .s-skeleton {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 12px;
-    height: 140px;
-    animation: s-pulse 1.6s ease-in-out infinite;
+    border-radius: 12px; height: 120px;
+    animation: sk-pulse 1.6s ease-in-out infinite;
   }
-  @keyframes s-pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  @keyframes sk-pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  /* ── Modal ── */
+  /* ── Modal backdrop ── */
   .m-overlay {
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     z-index: 100;
     display: flex; align-items: center; justify-content: center;
     padding: 16px;
@@ -68,162 +64,126 @@
   }
   .m-overlay.open { opacity: 1; pointer-events: auto; }
 
+  /* ── Modal dialog ── */
   .m-dialog {
     background: #141414;
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 14px;
-    width: 100%; max-width: 600px;
-    max-height: 88vh;
+    width: 100%; max-width: 580px;
+    max-height: 86vh;
     display: flex; flex-direction: column;
-    transform: translateY(6px);
+    transform: translateY(8px) scale(0.99);
     transition: transform 0.18s cubic-bezier(0.23,1,0.32,1);
     overflow: hidden;
   }
   .m-overlay.open .m-dialog { transform: none; }
 
-  .m-head {
-    padding: 18px 18px 0;
-    flex-shrink: 0;
-  }
+  .m-head { padding: 16px 16px 0; flex-shrink: 0; }
+  .m-actions { display: flex; gap: 8px; margin-top: 12px; }
 
   .m-tabs {
-    display: flex;
-    padding: 0 18px;
+    display: flex; flex-shrink: 0;
+    padding: 0 16px;
     border-bottom: 1px solid rgba(255,255,255,0.06);
-    margin-top: 14px;
-    flex-shrink: 0;
+    margin-top: 12px;
   }
   .m-tab {
-    padding: 9px 14px;
-    font-size: 13px; font-weight: 500;
-    color: #525252;
-    background: none; border: none;
+    padding: 8px 12px;
+    font-size: 12px; font-weight: 500;
+    color: #525252; background: none; border: none;
     border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    cursor: pointer;
+    margin-bottom: -1px; cursor: pointer;
     transition: color 0.12s, border-color 0.12s;
   }
   .m-tab.on { color: #e5e5e5; border-bottom-color: #e5e5e5; }
   .m-tab:hover:not(.on) { color: #a3a3a3; }
 
-  .m-body {
-    flex: 1; overflow-y: auto;
-    padding: 18px;
-  }
+  .m-body { flex: 1; overflow-y: auto; padding: 16px; }
   .m-pane { display: none; }
   .m-pane.on { display: block; }
 
-  /* Steps in installation tab */
-  .m-step { display: flex; gap: 12px; margin-bottom: 16px; }
-  .m-step-n {
-    width: 20px; height: 20px; border-radius: 50%;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.09);
-    font-size: 10px; font-weight: 600; color: #737373;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; margin-top: 2px;
-  }
-  .m-step-body { flex: 1; min-width: 0; }
-  .m-step-title { font-size: 13px; font-weight: 500; color: #d4d4d4; margin-bottom: 6px; }
-  .m-code {
+  /* ── Install steps (static guide) ── */
+  .m-cmd-list {
     background: #0d0d0d;
     border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 7px;
-    padding: 8px 11px;
+    border-radius: 8px; padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 1px;
   }
-  .m-code code {
-    font-family: ui-monospace, 'Cascadia Code', 'SF Mono', monospace;
-    font-size: 12px; color: #737373;
-    display: block; line-height: 1.7;
+  .m-cmd-list code {
+    font-family: ui-monospace, 'SF Mono', monospace;
+    font-size: 11px; color: #737373; display: block; line-height: 1.8;
   }
 
-  /* Progress block shown while installing */
-  .m-progress {
-    background: #0d0d0d;
+  /* ── Live install terminal ── */
+  .m-terminal {
+    background: #0a0a0a;
     border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px;
-    padding: 14px;
-    margin-bottom: 16px;
+    border-radius: 8px; padding: 12px;
+    margin-bottom: 14px;
   }
-  .m-prog-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .m-prog-label { font-size: 12px; font-weight: 500; color: #d4d4d4; }
-  .m-prog-pct   { font-size: 11px; color: #525252; font-family: ui-monospace, monospace; }
-  .m-prog-track {
-    height: 3px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 99px; overflow: hidden;
+  .m-term-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .m-term-label { font-size: 11px; font-weight: 500; color: #d4d4d4; }
+  .m-term-pct   { font-size: 10px; color: #404040; font-family: ui-monospace, monospace; }
+  .m-term-track { height: 2px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+  .m-term-fill  { height: 100%; background: #525252; border-radius: 99px; transition: width 0.3s ease; width: 0%; }
+  .m-term-log {
+    margin-top: 10px; max-height: 160px; overflow-y: auto;
+    font-family: ui-monospace, 'SF Mono', monospace;
+    font-size: 11px; display: flex; flex-direction: column; gap: 2px;
   }
-  .m-prog-fill {
-    height: 100%; background: #fff;
-    border-radius: 99px;
-    transition: width 0.35s ease;
-    width: 0%;
-  }
-  .m-log {
-    margin-top: 10px;
-    max-height: 100px; overflow-y: auto;
-    display: flex; flex-direction: column; gap: 2px;
-  }
-  .m-log-line {
-    font-family: ui-monospace, monospace;
-    font-size: 11px; color: #404040;
-    display: flex; gap: 5px;
-  }
-  .m-log-line.ok  { color: #4ade80; }
-  .m-log-line.err { color: #f87171; }
+  .m-term-log .l-step   { color: #525252; }
+  .m-term-log .l-cmd    { color: #737373; }
+  .m-term-log .l-output { color: #404040; white-space: pre-wrap; word-break: break-all; }
+  .m-term-log .l-ok     { color: #4ade80; }
+  .m-term-log .l-err    { color: #f87171; }
 
-  /* Note box */
+  /* ── Note box ── */
   .m-note {
     display: flex; gap: 8px; align-items: flex-start;
-    background: rgba(255,255,255,0.03);
+    background: rgba(255,255,255,0.02);
     border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px;
-    padding: 10px 12px;
-    margin-top: 12px;
-    font-size: 12px; color: #525252; line-height: 1.6;
+    border-radius: 7px; padding: 9px 11px;
+    margin-top: 10px;
+    font-size: 11px; color: #525252; line-height: 1.6;
   }
   .m-note svg { flex-shrink: 0; margin-top: 1px; }
 
-  /* Action buttons inside modal */
-  .m-btn-install {
-    display: inline-flex; align-items: center; gap: 6px;
+  /* ── Buttons ── */
+  .btn-install {
+    display: inline-flex; align-items: center; gap: 5px;
     background: #fff; color: #0a0a0a;
-    border: none; border-radius: 9px;
-    padding: 7px 14px;
-    font-size: 13px; font-weight: 500;
+    border: none; border-radius: 8px; padding: 6px 12px;
+    font-size: 12px; font-weight: 500;
     cursor: pointer; flex: 1; justify-content: center;
-    transition: background 0.12s;
+    transition: background 0.12s; white-space: nowrap;
   }
-  .m-btn-install:hover:not(:disabled) { background: #e5e5e5; }
-  .m-btn-install:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-install:hover:not(:disabled) { background: #e5e5e5; }
+  .btn-install:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-install svg, .btn-remove svg, .btn-gh svg { width: 13px; height: 13px; flex-shrink: 0; }
 
-  .m-btn-remove {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.18);
-    color: #f87171;
-    border-radius: 9px; padding: 7px 14px;
-    font-size: 13px; font-weight: 500;
+  .btn-remove {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.18);
+    color: #f87171; border-radius: 8px; padding: 6px 12px;
+    font-size: 12px; font-weight: 500;
     cursor: pointer; flex: 1; justify-content: center;
-    transition: background 0.12s;
+    transition: background 0.12s; white-space: nowrap;
   }
-  .m-btn-remove:hover:not(:disabled) { background: rgba(239,68,68,0.18); }
-  .m-btn-remove:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-remove:hover:not(:disabled) { background: rgba(239,68,68,0.18); }
+  .btn-remove:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  .m-btn-gh {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #737373;
-    border-radius: 9px; padding: 7px 14px;
-    font-size: 13px; font-weight: 500;
+  .btn-gh {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    color: #737373; border-radius: 8px; padding: 6px 12px;
+    font-size: 12px; font-weight: 500;
     cursor: pointer; text-decoration: none;
-    transition: background 0.12s, color 0.12s;
+    transition: background 0.12s, color 0.12s; white-space: nowrap;
   }
-  .m-btn-gh:hover { background: rgba(255,255,255,0.08); color: #d4d4d4; }
+  .btn-gh:hover { background: rgba(255,255,255,0.08); color: #d4d4d4; }
 
-  .feat-row { display: flex; gap: 8px; align-items: flex-start; padding: 3px 0; font-size: 13px; color: #737373; }
-  .feat-dot { width: 4px; height: 4px; border-radius: 50%; background: #404040; flex-shrink: 0; margin-top: 7px; }
+  .feat-row { display: flex; gap: 7px; align-items: flex-start; padding: 2px 0; font-size: 12px; color: #737373; }
+  .feat-dot { width: 3px; height: 3px; border-radius: 50%; background: #404040; flex-shrink: 0; margin-top: 6px; }
 </style>
 
 <main class="h-screen m-auto">
@@ -241,48 +201,48 @@
       </div>
 
       <div class="px-8 mt-4">
-        <!-- Tab bar -->
-        <div class="flex border-b border-neutral-800 mb-6">
+        <!-- Tabs -->
+        <div class="flex border-b border-neutral-800 mb-5">
           <a href="/admin/addons" class="px-4 py-2.5 text-sm font-medium text-neutral-500 hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">
-            Installed <span class="ml-1 text-xs text-neutral-700"><%= addons ? addons.length : 0 %></span>
+            Installed <span class="ml-1.5 text-xs text-neutral-700"><%= addons ? addons.length : 0 %></span>
           </a>
           <a href="/admin/addons/store" class="px-4 py-2.5 text-sm font-medium text-white border-b-2 border-white -mb-px">Store</a>
         </div>
 
-        <!-- Search + filters row -->
-        <div class="flex items-center gap-3 mb-5 flex-wrap">
+        <!-- Search + filters -->
+        <div class="flex items-center gap-2 mb-5 flex-wrap">
           <div class="relative">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600 pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-600 pointer-events-none">
               <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
             <input id="searchInput" type="text" placeholder="Search addons..."
-              class="bg-neutral-900 border border-neutral-800 rounded-xl pl-8 pr-4 py-1.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-600 transition w-56" />
+              class="bg-neutral-900 border border-neutral-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-600 transition w-48" />
           </div>
-          <div id="tagFilters" class="flex gap-1.5 flex-wrap"></div>
+          <div id="tagFilters" class="flex gap-1.5 flex-wrap items-center"></div>
         </div>
 
         <!-- Skeletons -->
-        <div id="storeLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div id="storeLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <div class="s-skeleton"></div><div class="s-skeleton"></div><div class="s-skeleton"></div>
           <div class="s-skeleton"></div><div class="s-skeleton"></div><div class="s-skeleton"></div>
         </div>
 
         <!-- Error -->
-        <div id="storeError" class="hidden py-16 text-center">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-9 h-9 text-neutral-800 mx-auto mb-3">
+        <div id="storeError" class="hidden py-14 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-8 h-8 text-neutral-800 mx-auto mb-3">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
           </svg>
-          <p id="storeErrorMsg" class="text-sm text-neutral-600">Failed to load addon store.</p>
+          <p id="storeErrorMsg" class="text-xs text-neutral-600">Failed to load addon store.</p>
           <button onclick="loadStore()" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline">Retry</button>
         </div>
 
         <!-- Grid -->
-        <div id="storeGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <div id="storeGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
 
         <!-- Empty -->
-        <div id="storeEmpty" class="hidden py-16 text-center">
-          <p class="text-sm text-neutral-600">No addons match your search.</p>
-          <button id="clearSearch" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline">Clear search</button>
+        <div id="storeEmpty" class="hidden py-14 text-center">
+          <p class="text-xs text-neutral-600">No addons match your search.</p>
+          <button id="clearSearch" class="mt-1.5 text-xs text-neutral-700 hover:text-neutral-400 transition underline">Clear</button>
         </div>
       </div>
     </div>
@@ -292,35 +252,32 @@
 <!-- Modal -->
 <div class="m-overlay" id="mOverlay">
   <div class="m-dialog">
-
-    <!-- Header -->
     <div class="m-head">
       <div class="flex items-start gap-3">
-        <div class="s-icon" id="mIcon"></div>
+        <div class="s-icon" id="mIcon" style="width:36px;height:36px;min-width:36px;border-radius:9px;"></div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
-            <span id="mName" class="text-sm font-semibold text-white"></span>
+            <span id="mName" class="text-sm font-semibold text-white leading-tight"></span>
             <span id="mStatus" class="s-badge"></span>
           </div>
           <p id="mMeta" class="text-xs text-neutral-600 mt-0.5"></p>
         </div>
         <button id="mClose" class="flex-shrink-0 w-6 h-6 rounded-md bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-neutral-500 hover:text-white transition">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      <!-- Action buttons -->
-      <div class="flex gap-2 mt-3">
-        <button id="mActionBtn" class="m-btn-install">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+      <div class="m-actions">
+        <button id="mActionBtn" class="btn-install">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
           </svg>
           <span id="mActionLabel">Install</span>
         </button>
-        <a id="mGhBtn" href="#" target="_blank" rel="noopener noreferrer" class="m-btn-gh">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+        <a id="mGhBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-gh">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/>
           </svg>
           GitHub
@@ -328,40 +285,40 @@
       </div>
     </div>
 
-    <!-- Tabs -->
     <div class="m-tabs">
       <button class="m-tab on" data-tab="overview">Overview</button>
       <button class="m-tab" data-tab="install">Installation</button>
       <button class="m-tab" data-tab="reviews">Reviews</button>
     </div>
 
-    <!-- Body -->
     <div class="m-body">
-
+      <!-- Overview -->
       <div class="m-pane on" id="m-pane-overview">
-        <p id="mDesc" class="text-sm text-neutral-500 leading-relaxed mb-4"></p>
+        <p id="mDesc" class="text-xs text-neutral-500 leading-relaxed mb-4"></p>
         <div id="mFeatures"></div>
       </div>
 
+      <!-- Install -->
       <div class="m-pane" id="m-pane-install">
-        <!-- Live progress — only visible while installing -->
-        <div id="mProgress" class="m-progress" style="display:none;">
-          <div class="m-prog-top">
-            <span class="m-prog-label" id="mProgLabel">Installing...</span>
-            <span class="m-prog-pct" id="mProgPct">0%</span>
+        <!-- Live terminal (hidden until install starts) -->
+        <div id="mTerminal" class="m-terminal" style="display:none;">
+          <div class="m-term-head">
+            <span class="m-term-label" id="mTermLabel">Installing...</span>
+            <span class="m-term-pct" id="mTermPct">0%</span>
           </div>
-          <div class="m-prog-track"><div class="m-prog-fill" id="mProgBar"></div></div>
-          <div class="m-log" id="mLog"></div>
+          <div class="m-term-track"><div class="m-term-fill" id="mTermBar"></div></div>
+          <div class="m-term-log" id="mTermLog"></div>
         </div>
-        <!-- Static install guide from install.json -->
-        <div id="mSteps"></div>
+
+        <!-- Static command guide from install.json -->
+        <div id="mCmdGuide"></div>
       </div>
 
+      <!-- Reviews -->
       <div class="m-pane" id="m-pane-reviews">
         <p class="text-xs text-neutral-700 mb-4 leading-relaxed">Reviews are powered by GitHub Discussions on the addons repository. Sign in with GitHub to leave a comment.</p>
         <div id="mGiscus"></div>
       </div>
-
     </div>
   </div>
 </div>
@@ -385,15 +342,13 @@
     return 's-badge s-badge-working';
   }
 
-  // ── Load ─────────────────────────────────────────────────────────
+  // ── Load ──────────────────────────────────────────────────────────────
 
   async function loadStore() {
     const loading = document.getElementById('storeLoading');
-    const grid    = document.getElementById('storeGrid');
     const errEl   = document.getElementById('storeError');
-
     loading.style.display = '';
-    grid.classList.add('hidden');
+    document.getElementById('storeGrid').classList.add('hidden');
     errEl.classList.add('hidden');
 
     try {
@@ -428,10 +383,8 @@
   function buildTags() {
     const tags = new Set();
     allAddons.forEach(a => (a.tags || []).forEach(t => tags.add(t)));
-
     const wrap = document.getElementById('tagFilters');
     wrap.innerHTML = '';
-
     const mkBtn = (label, tag, active) => {
       const b = document.createElement('button');
       b.dataset.tag = tag;
@@ -440,7 +393,6 @@
       if (active) b.style.cssText = 'background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.14);color:#d4d4d4;';
       wrap.appendChild(b);
     };
-
     mkBtn('All', 'all', true);
     tags.forEach(t => mkBtn(t, t, false));
 
@@ -458,7 +410,10 @@
     const q = document.getElementById('searchInput').value.trim().toLowerCase();
     return allAddons.filter(a => {
       const tagOk = activeTag === 'all' || (a.tags || []).includes(activeTag);
-      const qOk   = !q || (a.name||'').toLowerCase().includes(q) || (a.description||'').toLowerCase().includes(q) || (a.author||'').toLowerCase().includes(q);
+      const qOk   = !q ||
+        (a.name||'').toLowerCase().includes(q) ||
+        (a.description||'').toLowerCase().includes(q) ||
+        (a.author||'').toLowerCase().includes(q);
       return tagOk && qOk;
     });
   }
@@ -466,49 +421,48 @@
   function render(list) {
     const grid  = document.getElementById('storeGrid');
     const empty = document.getElementById('storeEmpty');
-
-    if (!list.length) {
-      grid.classList.add('hidden');
-      empty.classList.remove('hidden');
-      return;
-    }
+    if (!list.length) { grid.classList.add('hidden'); empty.classList.remove('hidden'); return; }
     grid.classList.remove('hidden');
     empty.classList.add('hidden');
 
     grid.innerHTML = list.map(a => {
-      const inst = INSTALLED.has(a.id);
+      const inst  = INSTALLED.has(a.id);
       const count = discussionCounts[a.id.toLowerCase()] || 0;
-      const tags = (a.tags || []).slice(0, 3).map(t => `<span class="s-tag">${esc(t)}</span>`).join('');
+      const tags  = (a.tags || []).slice(0, 3).map(t => `<span class="s-tag">${esc(t)}</span>`).join('');
 
       return `<div class="s-card" data-id="${esc(a.id)}">
-        <div style="display:flex;align-items:flex-start;gap:10px;">
+        <div style="display:flex;align-items:flex-start;gap:8px;">
           <div class="s-icon" id="si-${esc(a.id)}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="color:#404040;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/>
+            </svg>
           </div>
           <div style="flex:1;min-width:0;">
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <span style="font-size:13px;font-weight:600;color:#e5e5e5;">${esc(a.name)}</span>
+            <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+              <span style="font-size:12px;font-weight:600;color:#e5e5e5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;">${esc(a.name)}</span>
               ${inst ? '<span class="s-badge s-badge-installed">Installed</span>' : ''}
               <span class="${badgeClass(a.status)}" style="margin-left:auto;">${esc(a.status||'working')}</span>
             </div>
-            <p style="font-size:11px;color:#525252;margin-top:2px;">by ${esc(a.author||'Unknown')} · ${esc(a.version||'')}</p>
+            <p style="font-size:10px;color:#525252;margin-top:2px;">by ${esc(a.author||'Unknown')} · ${esc(a.version||'')}</p>
           </div>
         </div>
-        <p style="font-size:12px;color:#525252;line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${esc(a.description)}</p>
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-          <div style="display:flex;gap:4px;flex-wrap:wrap;">${tags}</div>
-          ${count > 0 ? `<span style="font-size:11px;color:#404040;flex-shrink:0;display:flex;align-items:center;gap:3px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/></svg>${count}</span>` : ''}
+        <p style="font-size:11px;color:#525252;line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${esc(a.description)}</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:auto;">
+          <div style="display:flex;gap:3px;flex-wrap:wrap;">${tags}</div>
+          ${count > 0 ? `<span style="font-size:10px;color:#404040;flex-shrink:0;display:flex;align-items:center;gap:2px;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:11px;height:11px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/>
+            </svg>${count}</span>` : ''}
         </div>
       </div>`;
     }).join('');
 
-    // lazy-load icons
     list.forEach(a => {
       if (!a.icon) return;
       const wrap = document.getElementById('si-' + a.id);
       if (!wrap) return;
       const img = new Image();
-      img.style.cssText = 'width:22px;height:22px;object-fit:contain;display:block;';
+      img.style.cssText = 'width:20px;height:20px;object-fit:contain;display:block;';
       img.onload = () => { wrap.innerHTML = ''; wrap.appendChild(img); };
       img.src = a.icon;
     });
@@ -527,18 +481,17 @@
     render(filtered());
   });
 
-  // ── Modal ─────────────────────────────────────────────────────────
+  // ── Modal ──────────────────────────────────────────────────────────────
 
   function openModal(addon) {
     currentAddon = addon;
     const inst = INSTALLED.has(addon.id);
 
-    // Icon
     const iconEl = document.getElementById('mIcon');
-    iconEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:18px;height:18px;color:#404040;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/></svg>';
+    iconEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px;color:#404040;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/></svg>';
     if (addon.icon) {
       const img = new Image();
-      img.style.cssText = 'width:22px;height:22px;object-fit:contain;display:block;';
+      img.style.cssText = 'width:20px;height:20px;object-fit:contain;display:block;';
       img.onload = () => { iconEl.innerHTML = ''; iconEl.appendChild(img); };
       img.src = addon.icon;
     }
@@ -551,12 +504,11 @@
     document.getElementById('mDesc').textContent = addon.longDescription || addon.description || 'No description available.';
     document.getElementById('mGhBtn').href = addon.github || `https://github.com/airlinklabs/addons/tree/main/${addon.id}`;
 
-    // Features
     const featEl = document.getElementById('mFeatures');
     featEl.innerHTML = '';
     if ((addon.features || []).length) {
       const lbl = document.createElement('p');
-      lbl.style.cssText = 'font-size:11px;color:#404040;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
+      lbl.style.cssText = 'font-size:10px;color:#404040;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:7px;';
       lbl.textContent = 'Features';
       featEl.appendChild(lbl);
       addon.features.forEach(f => {
@@ -567,36 +519,49 @@
       });
     }
 
-    // Steps — static install guide
-    const stepsEl = document.getElementById('mSteps');
-    stepsEl.innerHTML = '';
-    (addon.installSteps || []).forEach((step, i) => {
-      const wrap = document.createElement('div');
-      wrap.className = 'm-step';
-      const cmds = (step.commands || []).map(c => `<code>${esc(c)}</code>`).join('');
-      wrap.innerHTML = `
-        <div class="m-step-n">${i + 1}</div>
-        <div class="m-step-body">
-          <div class="m-step-title">${esc(step.title || '')}</div>
-          <div class="m-code">${cmds}</div>
-        </div>`;
-      stepsEl.appendChild(wrap);
-    });
+    // Build command guide from new install.json format
+    const guideEl = document.getElementById('mCmdGuide');
+    guideEl.innerHTML = '';
+
+    if (addon.installRepo) {
+      const repoLine = document.createElement('div');
+      repoLine.style.cssText = 'font-size:11px;color:#525252;margin-bottom:10px;display:flex;align-items:center;gap:6px;';
+      repoLine.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:11px;height:11px;flex-shrink:0;"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
+        <span style="font-family:ui-monospace,monospace;">${esc(addon.installRepo)}</span>
+        <span style="color:#404040;">@${esc(addon.installBranch||'main')}</span>`;
+      guideEl.appendChild(repoLine);
+    }
+
+    const commands = addon.installCommands || {};
+    const keys = Object.keys(commands).sort((a, b) => Number(a) - Number(b));
+
+    if (keys.length) {
+      const lbl = document.createElement('p');
+      lbl.style.cssText = 'font-size:10px;color:#404040;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;';
+      lbl.textContent = 'Commands';
+      guideEl.appendChild(lbl);
+
+      const block = document.createElement('div');
+      block.className = 'm-cmd-list';
+      keys.forEach(k => {
+        const c = document.createElement('code');
+        c.textContent = `${k}.  ${commands[k]}`;
+        block.appendChild(c);
+      });
+      guideEl.appendChild(block);
+    }
 
     if (addon.installNote) {
       const note = document.createElement('div');
       note.className = 'm-note';
-      note.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:14px;height:14px;color:#404040;"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg><span>${esc(addon.installNote)}</span>`;
-      stepsEl.appendChild(note);
+      note.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:12px;height:12px;color:#525252;"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg><span>${esc(addon.installNote)}</span>`;
+      guideEl.appendChild(note);
     }
 
-    // Action button state
     setActionBtn(inst);
-
-    // Reset to overview tab, hide progress
     switchTab('overview');
-    document.getElementById('mProgress').style.display = 'none';
-    document.getElementById('mLog').innerHTML = '';
+    document.getElementById('mTerminal').style.display = 'none';
+    document.getElementById('mTermLog').innerHTML = '';
 
     document.getElementById('mOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -612,13 +577,14 @@
   function setActionBtn(installed) {
     const btn = document.getElementById('mActionBtn');
     const lbl = document.getElementById('mActionLabel');
+    const svg = btn.querySelector('svg');
     if (installed) {
-      btn.className = 'm-btn-remove';
-      btn.querySelector('svg').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>';
+      btn.className = 'btn-remove';
+      svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>';
       lbl.textContent = 'Uninstall';
     } else {
-      btn.className = 'm-btn-install';
-      btn.querySelector('svg').innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>';
+      btn.className = 'btn-install';
+      svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>';
       lbl.textContent = 'Install';
     }
     btn.disabled = false;
@@ -663,7 +629,7 @@
     c.appendChild(s);
   }
 
-  // ── Install / Uninstall ───────────────────────────────────────────
+  // ── Install / Uninstall ───────────────────────────────────────────────
 
   document.getElementById('mActionBtn').addEventListener('click', async function () {
     if (!currentAddon) return;
@@ -692,43 +658,54 @@
       return;
     }
 
-    // Switch to install tab and show progress
     switchTab('install');
 
-    const progEl   = document.getElementById('mProgress');
-    const progBar  = document.getElementById('mProgBar');
-    const progLbl  = document.getElementById('mProgLabel');
-    const progPct  = document.getElementById('mProgPct');
-    const logEl    = document.getElementById('mLog');
+    const terminal  = document.getElementById('mTerminal');
+    const termBar   = document.getElementById('mTermBar');
+    const termLabel = document.getElementById('mTermLabel');
+    const termPct   = document.getElementById('mTermPct');
+    const termLog   = document.getElementById('mTermLog');
 
-    progEl.style.display = '';
-    logEl.innerHTML = '';
-    progBar.style.width = '0%';
-    progLbl.textContent = 'Starting...';
-    progPct.textContent = '0%';
+    terminal.style.display = '';
+    termLog.innerHTML = '';
+    termBar.style.width = '0%';
+    termLabel.textContent = 'Starting...';
+    termPct.textContent = '0%';
     this.disabled = true;
     document.getElementById('mActionLabel').textContent = 'Installing...';
 
-    let stepN = 0;
+    let progress = 0;
 
-    function log(text, cls) {
-      const line = document.createElement('div');
-      line.className = `m-log-line ${cls || ''}`;
-      line.innerHTML = `<span style="color:#333;">›</span><span>${esc(text)}</span>`;
-      logEl.appendChild(line);
-      logEl.scrollTop = logEl.scrollHeight;
+    function logLine(text, cls) {
+      const d = document.createElement('div');
+      d.className = cls || '';
+      d.textContent = text;
+      termLog.appendChild(d);
+      termLog.scrollTop = termLog.scrollHeight;
+    }
+
+    function setProgress(pct, label) {
+      termBar.style.width = pct + '%';
+      termPct.textContent = pct + '%';
+      if (label) termLabel.textContent = label;
     }
 
     try {
-      const res = await fetch('/admin/addons/store/install', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug }) });
+      const res = await fetch('/admin/addons/store/install', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug }),
+      });
+
       const reader  = res.body.getReader();
       const decoder = new TextDecoder();
       let buf = '';
-      const est = 6;
+      const totalCmds = Object.keys(currentAddon.installCommands || {}).length + 3; // +3 for clone/setup/register
+      let done = 0;
 
       while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+        const { done: streamDone, value } = await reader.read();
+        if (streamDone) break;
         buf += decoder.decode(value, { stream: true });
         const parts = buf.split('\n\n');
         buf = parts.pop();
@@ -739,24 +716,27 @@
           try {
             const evt = JSON.parse(raw);
             if (evt.type === 'step') {
-              stepN++;
-              const pct = Math.min(Math.round((stepN / est) * 90), 90);
-              progBar.style.width = pct + '%';
-              progPct.textContent = pct + '%';
-              progLbl.textContent = evt.stepTitle || 'Running...';
-              if (evt.cmd) log(`${evt.stepTitle}: ${evt.cmd}`);
+              done++;
+              const pct = Math.min(Math.round((done / totalCmds) * 90), 90);
+              setProgress(pct, evt.step || 'Running...');
+              logLine(`› ${evt.step}: ${evt.cmd || ''}`, 'l-step');
+            } else if (evt.type === 'cmd') {
+              done++;
+              const pct = Math.min(Math.round((done / totalCmds) * 90), 90);
+              setProgress(pct, evt.step || 'Running...');
+              logLine(`$ ${evt.cmd}`, 'l-cmd');
+            } else if (evt.type === 'output') {
+              logLine(evt.output, 'l-output');
             } else if (evt.type === 'done') {
-              progBar.style.width = '100%';
-              progPct.textContent = '100%';
-              progLbl.textContent = 'Installed';
-              log(evt.message, 'ok');
+              setProgress(100, 'Installed');
+              logLine(evt.message, 'l-ok');
               INSTALLED.add(slug);
               setActionBtn(true);
               showToast(evt.message, 'success');
               render(filtered());
             } else if (evt.type === 'error') {
-              log(evt.message, 'err');
-              progLbl.textContent = 'Failed';
+              logLine('✗ ' + evt.message, 'l-err');
+              termLabel.textContent = 'Failed';
               showToast(evt.message, 'error');
               setActionBtn(false);
             }
@@ -764,7 +744,7 @@
         }
       }
     } catch (err) {
-      log(err.message, 'err');
+      logLine('✗ ' + err.message, 'l-err');
       showToast('Installation failed', 'error');
       setActionBtn(false);
     }
