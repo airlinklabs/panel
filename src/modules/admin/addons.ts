@@ -3,6 +3,7 @@ import { execFile } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { Module } from '../../handlers/moduleInit';
 import { PrismaClient } from '@prisma/client';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
@@ -25,58 +26,68 @@ const ADDONS_REPO_NAME  = 'addons';
 const ADDONS_RAW_BASE   = `https://raw.githubusercontent.com/${ADDONS_REPO_OWNER}/${ADDONS_REPO_NAME}/main`;
 const GITHUB_API_BASE   = `https://api.github.com/repos/${ADDONS_REPO_OWNER}/${ADDONS_REPO_NAME}`;
 
-// Only these exact command strings are executable from install.json
-const ALLOWED_EXEC_TOKENS: Record<string, { bin: string; args: string[] }> = {
-  'npm install':   { bin: 'npm', args: ['install'] },
-  'npm ci':        { bin: 'npm', args: ['ci'] },
-  'npm run build': { bin: 'npm', args: ['run', 'build'] },
-  'yarn':          { bin: 'yarn', args: [] },
-  'yarn install':  { bin: 'yarn', args: ['install'] },
-};
+// Safe command prefixes allowed in install.json
+const ALLOWED_CMD_PREFIXES = [
+  'npm install', 'npm ci', 'npm run ', 'npx ',
+  'yarn', 'yarn install', 'yarn run ',
+  'npx prisma ', 'prisma ',
+  'mv ', 'cp ', 'mkdir ',
+];
 
-interface InstallStep {
-  title: string;
-  commands: string[];
+function isSafeCommand(cmd: string): boolean {
+  const c = cmd.trim();
+  return ALLOWED_CMD_PREFIXES.some(p => c === p.trimEnd() || c.startsWith(p));
+}
+
+function parseCommand(cmd: string): { bin: string; args: string[] } {
+  const parts = cmd.trim().split(/\s+/);
+  return { bin: parts[0], args: parts.slice(1) };
 }
 
 interface InstallManifest {
-  steps?: InstallStep[];
+  name?: string;
+  author?: string;
+  repo?: string;
+  branch?: string;
   note?: string;
+  commands?: Record<string, string>;
 }
 
-async function* executeInstallManifest(
-  addonDir: string
-): AsyncGenerator<{ stepTitle: string; cmd: string; done?: boolean; error?: string }> {
-  const manifestPath = path.join(addonDir, 'install.json');
-  if (!fs.existsSync(manifestPath)) {
-    yield { stepTitle: 'Setup', cmd: '', done: true };
+async function* runInstall(
+  manifest: InstallManifest,
+  workDir: string
+): AsyncGenerator<{ type: string; step?: string; cmd?: string; output?: string; message?: string }> {
+  const commands = manifest.commands || {};
+  const keys = Object.keys(commands).sort((a, b) => Number(a) - Number(b));
+
+  if (keys.length === 0) {
+    yield { type: 'done', message: 'No commands to run' };
     return;
   }
 
-  const manifest: InstallManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-  if (!Array.isArray(manifest.steps) || manifest.steps.length === 0) {
-    yield { stepTitle: 'Setup', cmd: '', done: true };
-    return;
-  }
+  for (const key of keys) {
+    const cmd = commands[key].trim();
 
-  for (const step of manifest.steps) {
-    for (const cmd of (step.commands || [])) {
-      const normalized = cmd.trim();
-      const allowed = ALLOWED_EXEC_TOKENS[normalized];
-      if (!allowed) {
-        yield {
-          stepTitle: step.title,
-          cmd: normalized,
-          error: `Command not permitted: "${normalized}". Allowed: ${Object.keys(ALLOWED_EXEC_TOKENS).join(', ')}`,
-        };
-        return;
-      }
-      yield { stepTitle: step.title, cmd: normalized };
-      await execFileAsync(allowed.bin, allowed.args, { cwd: addonDir });
+    if (!isSafeCommand(cmd)) {
+      yield { type: 'error', message: `Command not permitted: "${cmd}"` };
+      return;
+    }
+
+    yield { type: 'cmd', step: `Step ${key}`, cmd };
+
+    try {
+      const { bin, args } = parseCommand(cmd);
+      const { stdout, stderr } = await execFileAsync(bin, args, { cwd: workDir });
+      const output = (stdout + stderr).trim();
+      if (output) yield { type: 'output', step: `Step ${key}`, cmd, output };
+    } catch (err: any) {
+      const output = (err.stdout || '' + err.stderr || '').trim() || err.message;
+      yield { type: 'error', message: `"${cmd}" failed: ${output}` };
+      return;
     }
   }
 
-  yield { stepTitle: 'Complete', cmd: '', done: true };
+  yield { type: 'done', message: 'Installation complete' };
 }
 
 const addonsModule: Module = {
@@ -181,7 +192,6 @@ const addonsModule: Module = {
       }
     );
 
-    // Reads each addon folder's info.json from GitHub
     router.get(
       '/admin/addons/store/list',
       isAuthenticated(true, 'airlink.admin.addons.store'),
@@ -206,6 +216,16 @@ const addonsModule: Module = {
                 });
                 if (!infoRes.ok) return null;
                 const info = await infoRes.json() as any;
+
+                // Also fetch install.json for display in the store
+                let installManifest: InstallManifest = {};
+                try {
+                  const instRes = await fetch(`${ADDONS_RAW_BASE}/${folder.name}/install.json`, {
+                    headers: { 'User-Agent': 'airlink-panel' },
+                  });
+                  if (instRes.ok) installManifest = await instRes.json() as InstallManifest;
+                } catch {}
+
                 return {
                   id: folder.name,
                   name: info.name || folder.name,
@@ -216,11 +236,14 @@ const addonsModule: Module = {
                   status: info.status || 'working',
                   tags: info.tags || [],
                   icon: info.icon || '',
-                  iconType: info.iconType || 'url',
                   features: info.features || [],
                   github: info.github || `https://github.com/${ADDONS_REPO_OWNER}/${ADDONS_REPO_NAME}/tree/main/${folder.name}`,
                   screenshots: info.screenshots || [],
-                  installNote: info.installNote || '',
+                  // install.json fields surfaced to the frontend
+                  installRepo: installManifest.repo || '',
+                  installBranch: installManifest.branch || 'main',
+                  installNote: installManifest.note || '',
+                  installCommands: installManifest.commands || {},
                 };
               } catch {
                 return null;
@@ -236,16 +259,13 @@ const addonsModule: Module = {
       }
     );
 
-    // Returns discussion comment counts keyed by discussion title (addon id)
     router.get(
       '/admin/addons/store/discussions',
       isAuthenticated(true, 'airlink.admin.addons.store'),
       async (_req: Request, res: Response) => {
         try {
           const token = process.env.GITHUB_TOKEN;
-          if (!token) {
-            return res.json({ success: true, counts: {} });
-          }
+          if (!token) return res.json({ success: true, counts: {} });
 
           const query = `{
             repository(owner: "${ADDONS_REPO_OWNER}", name: "${ADDONS_REPO_NAME}") {
@@ -281,7 +301,7 @@ const addonsModule: Module = {
       }
     );
 
-    // SSE install endpoint — streams step-by-step progress
+    // SSE install — clones the addon's own repo, runs numbered commands
     router.post(
       '/admin/addons/store/install',
       isAuthenticated(true, 'airlink.admin.addons.install'),
@@ -293,13 +313,13 @@ const addonsModule: Module = {
         }
 
         const addonsDir = path.join(__dirname, '../../../storage/addons');
-        const targetDir = path.join(addonsDir, slug);
+        const finalDir  = path.join(addonsDir, slug);
 
-        if (!targetDir.startsWith(addonsDir + path.sep)) {
+        if (!finalDir.startsWith(addonsDir + path.sep)) {
           return res.status(400).json({ success: false, message: 'Invalid slug' });
         }
 
-        if (fs.existsSync(targetDir)) {
+        if (fs.existsSync(finalDir)) {
           return res.status(409).json({ success: false, message: 'Addon already installed' });
         }
 
@@ -310,49 +330,65 @@ const addonsModule: Module = {
 
         const send = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`);
 
+        // Unique temp folder to avoid collisions during parallel installs
+        const tempId  = crypto.randomBytes(4).toString('hex');
+        const tempDir = path.join(addonsDir, `${slug}-${tempId}`);
+
         try {
           fs.mkdirSync(addonsDir, { recursive: true });
 
-          send({ type: 'step', stepTitle: 'Cloning repository', cmd: 'git clone --sparse' });
+          // Fetch install.json from the registry repo to get repo/branch
+          const instRes = await fetch(`${ADDONS_RAW_BASE}/${slug}/install.json`, {
+            headers: { 'User-Agent': 'airlink-panel' },
+          });
 
-          await execFileAsync('git', [
-            'clone', '--depth=1', '--filter=blob:none', '--sparse',
-            `https://github.com/${ADDONS_REPO_OWNER}/${ADDONS_REPO_NAME}`,
-            targetDir,
-          ]);
-
-          send({ type: 'step', stepTitle: 'Extracting addon', cmd: `git sparse-checkout set ${slug}` });
-
-          await execFileAsync('git', ['sparse-checkout', 'set', slug], { cwd: targetDir });
-
-          const innerDir = path.join(targetDir, slug);
-          if (fs.existsSync(innerDir)) {
-            for (const item of fs.readdirSync(innerDir)) {
-              fs.renameSync(path.join(innerDir, item), path.join(targetDir, item));
-            }
-            fs.rmdirSync(innerDir);
+          if (!instRes.ok) {
+            send({ type: 'error', message: 'Could not fetch install.json for this addon' });
+            res.end();
+            return;
           }
 
-          const gitDir = path.join(targetDir, '.git');
+          const manifest: InstallManifest = await instRes.json() as InstallManifest;
+          const repoUrl = manifest.repo;
+          const branch  = manifest.branch || 'main';
+
+          if (!repoUrl || !/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+(\.git)?$/.test(repoUrl)) {
+            send({ type: 'error', message: 'install.json is missing a valid "repo" URL' });
+            res.end();
+            return;
+          }
+
+          send({ type: 'step', step: 'Clone', cmd: `git clone -b ${branch} ${repoUrl}` });
+
+          await execFileAsync('git', ['clone', '--depth=1', '-b', branch, repoUrl, tempDir]);
+
+          // Remove .git — we don't need history
+          const gitDir = path.join(tempDir, '.git');
           if (fs.existsSync(gitDir)) fs.rmSync(gitDir, { recursive: true, force: true });
 
-          for await (const event of executeInstallManifest(targetDir)) {
-            if (event.error) {
-              send({ type: 'error', message: event.error });
+          send({ type: 'step', step: 'Setup', cmd: `cd ${slug}-${tempId}` });
+
+          // Run user-defined commands from the cloned directory
+          for await (const event of runInstall(manifest, tempDir)) {
+            send(event);
+            if (event.type === 'error') {
+              fs.rmSync(tempDir, { recursive: true, force: true });
               res.end();
               return;
             }
-            if (!event.done) {
-              send({ type: 'step', stepTitle: event.stepTitle, cmd: event.cmd });
-            }
+            if (event.type === 'done') break;
           }
 
-          send({ type: 'step', stepTitle: 'Registering addon', cmd: 'loadAddons' });
+          // Move temp dir to final slug-named location
+          fs.renameSync(tempDir, finalDir);
+
+          send({ type: 'step', step: 'Register', cmd: 'loadAddons()' });
           await loadAddons(req.app);
 
-          send({ type: 'done', message: `Addon "${slug}" installed successfully` });
+          send({ type: 'done', message: `"${manifest.name || slug}" installed successfully` });
         } catch (error: any) {
           logger.error('Error installing addon:', error);
+          if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
           send({ type: 'error', message: error.message });
         }
 
@@ -384,9 +420,7 @@ const addonsModule: Module = {
 
           try {
             await prisma.addon.delete({ where: { slug } });
-          } catch {
-            // fine if not in DB
-          }
+          } catch {}
 
           fs.rmSync(targetDir, { recursive: true, force: true });
           await reloadAddons(req.app);
