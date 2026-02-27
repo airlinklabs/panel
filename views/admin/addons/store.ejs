@@ -2,7 +2,6 @@
 <%- include('../../components/toast') %>
 
 <style>
-  /* ── Cards ── */
   .s-card {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.06);
@@ -33,10 +32,10 @@
     font-size: 10px; font-weight: 500; line-height: 1;
     padding: 2px 6px; border-radius: 99px; white-space: nowrap; flex-shrink: 0;
   }
-  .s-badge-working   { background: rgba(34,197,94,0.12);  color: #4ade80; }
-  .s-badge-beta      { background: rgba(234,179,8,0.12);  color: #facc15; }
-  .s-badge-wip       { background: rgba(249,115,22,0.12); color: #fb923c; }
-  .s-badge-installed { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+  .s-badge-working  { background: rgba(34,197,94,0.12);  color: #4ade80; }
+  .s-badge-beta     { background: rgba(234,179,8,0.12);   color: #facc15; }
+  .s-badge-wip      { background: rgba(249,115,22,0.12);  color: #fb923c; }
+  .s-badge-installed{ background: rgba(99,102,241,0.15);  color: #a5b4fc; }
   .s-tag {
     font-size: 10px; color: #525252;
     background: rgba(255,255,255,0.04);
@@ -50,15 +49,16 @@
     animation: sk-pulse 1.6s ease-in-out infinite;
   }
   @keyframes sk-pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
   .s-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
   }
   @media (max-width: 1023px) { .s-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 639px)  { .s-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 639px)  { .s-grid { grid-template-columns: repeat(1, 1fr); } }
 
-  /* ── Modal ── */
+  /* Modal */
   .m-overlay {
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.55);
@@ -83,7 +83,7 @@
     overflow: hidden;
   }
   .m-overlay.open .m-dialog { transform: none; }
-  .m-head  { padding: 16px 16px 0; flex-shrink: 0; }
+  .m-head { padding: 16px 16px 0; flex-shrink: 0; }
   .m-actions { display: flex; gap: 8px; margin-top: 12px; }
   .m-tabs {
     display: flex; flex-shrink: 0;
@@ -93,8 +93,8 @@
   }
   .m-tab {
     padding: 8px 12px;
-    font-size: 12px; font-weight: 500; color: #525252;
-    background: none; border: none;
+    font-size: 12px; font-weight: 500;
+    color: #525252; background: none; border: none;
     border-bottom: 2px solid transparent;
     margin-bottom: -1px; cursor: pointer;
     transition: color 0.12s, border-color 0.12s;
@@ -105,7 +105,15 @@
   .m-pane { display: none; }
   .m-pane.on { display: block; }
 
-  /* Terminal block */
+  .m-cmd-list {
+    background: #0d0d0d;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; padding: 10px 12px;
+  }
+  .m-cmd-list code {
+    font-family: ui-monospace, 'SF Mono', monospace;
+    font-size: 11px; color: #737373; display: block; line-height: 1.8;
+  }
   .m-terminal {
     background: #0a0a0a;
     border: 1px solid rgba(255,255,255,0.06);
@@ -117,7 +125,7 @@
   .m-term-pct   { font-size: 10px; color: #404040; font-family: ui-monospace, monospace; }
   .m-term-track { height: 2px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
   .m-term-fill  { height: 100%; background: #525252; border-radius: 99px; transition: width 0.3s ease; width: 0%; }
-  .m-term-log   {
+  .m-term-log {
     margin-top: 10px; max-height: 160px; overflow-y: auto;
     font-family: ui-monospace, 'SF Mono', monospace;
     font-size: 11px; display: flex; flex-direction: column; gap: 2px;
@@ -127,17 +135,6 @@
   .l-output { color: #404040; white-space: pre-wrap; word-break: break-all; }
   .l-ok     { color: #4ade80; }
   .l-err    { color: #f87171; }
-
-  /* Install guide (static) */
-  .m-cmd-list {
-    background: #0d0d0d;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px; padding: 10px 12px;
-  }
-  .m-cmd-list code {
-    font-family: ui-monospace, 'SF Mono', monospace;
-    font-size: 11px; color: #737373; display: block; line-height: 1.8;
-  }
   .m-note {
     display: flex; gap: 8px; align-items: flex-start;
     background: rgba(255,255,255,0.02);
@@ -146,8 +143,6 @@
     font-size: 11px; color: #525252; line-height: 1.6;
   }
   .m-note svg { flex-shrink: 0; margin-top: 1px; }
-
-  /* Buttons */
   .btn-install {
     display: inline-flex; align-items: center; gap: 5px;
     background: #fff; color: #0a0a0a;
@@ -161,9 +156,8 @@
   .btn-install svg { width: 13px; height: 13px; flex-shrink: 0; }
   .btn-remove {
     display: inline-flex; align-items: center; gap: 5px;
-    background: rgba(239,68,68,0.1); color: #f87171;
-    border: 1px solid rgba(239,68,68,0.18);
-    border-radius: 8px; padding: 6px 12px;
+    background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.18);
+    color: #f87171; border-radius: 8px; padding: 6px 12px;
     font-size: 12px; font-weight: 500;
     cursor: pointer; flex: 1; justify-content: center;
     transition: background 0.12s; white-space: nowrap;
@@ -173,19 +167,16 @@
   .btn-remove svg { width: 13px; height: 13px; flex-shrink: 0; }
   .btn-gh {
     display: inline-flex; align-items: center; gap: 5px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
     color: #737373; border-radius: 8px; padding: 6px 12px;
     font-size: 12px; font-weight: 500;
     cursor: pointer; text-decoration: none;
-    transition: background 0.12s, color 0.12s;
+    transition: background 0.12s, color 0.12s; white-space: nowrap;
   }
   .btn-gh:hover { background: rgba(255,255,255,0.08); color: #d4d4d4; }
   .btn-gh svg { width: 13px; height: 13px; flex-shrink: 0; }
-
-  /* Features */
   .feat-row { display: flex; gap: 7px; align-items: flex-start; padding: 2px 0; font-size: 12px; color: #737373; }
-  .feat-dot { width: 4px; height: 4px; border-radius: 50%; background: #404040; flex-shrink: 0; margin-top: 6px; }
+  .feat-dot { width: 3px; height: 3px; border-radius: 50%; background: #404040; flex-shrink: 0; margin-top: 6px; }
 </style>
 
 <main class="h-screen m-auto">
@@ -195,78 +186,64 @@
     </div>
 
     <div class="flex-1 overflow-y-auto pt-16">
-      <div class="px-8 pt-6 pb-0 flex items-center justify-between">
-        <div>
-          <h1 class="text-base font-medium text-white">Addons</h1>
-          <p class="mt-0.5 text-sm text-neutral-500">Manage installed addons and browse the store</p>
-        </div>
+      <div class="px-8 pt-6 pb-0">
+        <h1 class="text-base font-medium text-white">Addons</h1>
+        <p class="mt-0.5 text-sm text-neutral-500">Manage installed addons and browse the store</p>
       </div>
 
       <div class="px-8 mt-4">
-        <!-- Tab bar -->
         <div class="flex border-b border-neutral-800 mb-5">
           <a href="/admin/addons" class="px-4 py-2.5 text-sm font-medium text-neutral-500 hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">
-            Installed <span class="ml-1 text-xs text-neutral-700"><%= addons ? addons.length : 0 %></span>
+            Installed <span class="ml-1.5 text-xs text-neutral-700"><%= addons ? addons.length : 0 %></span>
           </a>
           <a href="/admin/addons/store" class="px-4 py-2.5 text-sm font-medium text-white border-b-2 border-white -mb-px">Store</a>
         </div>
 
-        <!-- Search + filters -->
-        <div class="flex items-center gap-3 mb-5 flex-wrap">
-          <div class="relative">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600 pointer-events-none">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
-            <input id="searchInput" type="text" placeholder="Search addons..."
-              class="bg-neutral-900 border border-neutral-800 rounded-xl pl-8 pr-4 py-1.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-600 transition w-52" />
-          </div>
-          <div id="tagFilters" class="flex gap-1.5 flex-wrap"></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+          <input id="searchInput" type="text" placeholder="Search addons..."
+            style="background:#171717;border:1px solid #262626;border-radius:8px;padding:6px 10px;font-size:12px;color:#e5e5e5;outline:none;width:180px;transition:border-color 0.12s;"
+            onfocus="this.style.borderColor='#404040'" onblur="this.style.borderColor='#262626'" />
+          <div id="tagFilters" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;"></div>
         </div>
 
-        <!-- Skeletons -->
         <div id="storeLoading" class="s-grid">
           <div class="s-skeleton"></div><div class="s-skeleton"></div><div class="s-skeleton"></div>
           <div class="s-skeleton"></div><div class="s-skeleton"></div><div class="s-skeleton"></div>
         </div>
 
-        <!-- Error -->
-        <div id="storeError" style="display:none;" class="py-14 text-center">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-8 h-8 text-neutral-800 mx-auto mb-3">
+        <div id="storeError" style="display:none;padding:56px 0;text-align:center;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" style="width:32px;height:32px;color:#262626;margin:0 auto 12px;display:block;">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
           </svg>
-          <p id="storeErrorMsg" class="text-xs text-neutral-600"></p>
-          <button onclick="loadStore()" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline">Retry</button>
+          <p id="storeErrorMsg" style="font-size:12px;color:#525252;"></p>
+          <button onclick="loadStore()" style="margin-top:8px;font-size:11px;color:#404040;text-decoration:underline;background:none;border:none;cursor:pointer;">Retry</button>
         </div>
 
-        <!-- Grid -->
         <div id="storeGrid" class="s-grid" style="display:none;"></div>
 
-        <!-- Empty -->
-        <div id="storeEmpty" style="display:none;" class="py-14 text-center">
-          <p class="text-xs text-neutral-600">No addons match your search.</p>
-          <button id="clearSearch" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline">Clear</button>
+        <div id="storeEmpty" style="display:none;padding:56px 0;text-align:center;">
+          <p style="font-size:12px;color:#525252;">No addons match your search.</p>
+          <button id="clearSearch" style="margin-top:6px;font-size:11px;color:#404040;text-decoration:underline;background:none;border:none;cursor:pointer;">Clear</button>
         </div>
       </div>
     </div>
   </div>
 </main>
 
-<!-- Modal -->
 <div class="m-overlay" id="mOverlay">
   <div class="m-dialog">
-
     <div class="m-head">
       <div style="display:flex;align-items:flex-start;gap:12px;">
         <div class="s-icon" id="mIcon" style="width:36px;height:36px;min-width:36px;border-radius:9px;"></div>
         <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;">
             <span id="mName" style="font-size:13px;font-weight:600;color:#fff;"></span>
             <span id="mStatus" class="s-badge"></span>
           </div>
           <p id="mMeta" style="font-size:11px;color:#525252;margin-top:2px;"></p>
         </div>
         <button id="mClose" style="flex-shrink:0;width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,0.06);border:none;display:flex;align-items:center;justify-content:center;color:#525252;cursor:pointer;">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:11px;height:11px;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:12px;height:12px;">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
           </svg>
         </button>
@@ -294,7 +271,6 @@
     </div>
 
     <div class="m-body">
-
       <div class="m-pane on" id="m-pane-overview">
         <p id="mDesc" style="font-size:12px;color:#737373;line-height:1.65;margin-bottom:14px;"></p>
         <div id="mFeatures"></div>
@@ -313,169 +289,186 @@
       </div>
 
       <div class="m-pane" id="m-pane-reviews">
-        <p style="font-size:11px;color:#404040;margin-bottom:14px;line-height:1.6;">Reviews are powered by GitHub Discussions on the addons repository.</p>
+        <p style="font-size:11px;color:#404040;margin-bottom:14px;line-height:1.6;">Reviews are powered by GitHub Discussions. Sign in with GitHub to leave a comment.</p>
         <div id="mGiscus"></div>
       </div>
-
     </div>
   </div>
 </div>
 
 <script>
 (function () {
-  function esc(s) {
-    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  function show(id) { const el = document.getElementById(id); if (el) el.style.display = ''; }
-  function hide(id) { const el = document.getElementById(id); if (el) el.style.display = 'none'; }
-
-  function badgeClass(status) {
-    const map = { working: 's-badge s-badge-working', beta: 's-badge s-badge-beta', wip: 's-badge s-badge-wip' };
-    return map[status] || 's-badge s-badge-working';
-  }
-
+  const INSTALLED = new Set(<%- JSON.stringify((addons || []).map(a => a.slug)) %>);
   let allAddons = [];
-  let INSTALLED = new Set();
   let currentAddon = null;
-  let activeTag = null;
+  let activeTag = 'all';
+  let discussionCounts = {};
+
+  function esc(s) {
+    if (typeof s !== 'string') return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function badgeClass(s) {
+    if (s === 'beta') return 's-badge s-badge-beta';
+    if (s === 'wip')  return 's-badge s-badge-wip';
+    return 's-badge s-badge-working';
+  }
+
+  function show(id)  { document.getElementById(id).style.display = ''; }
+  function hide(id)  { document.getElementById(id).style.display = 'none'; }
+  function grid(id)  { document.getElementById(id).style.display = 'grid'; }
 
   async function loadStore() {
-    hide('storeError');
+    grid('storeLoading');
     hide('storeGrid');
+    hide('storeError');
     hide('storeEmpty');
-    show('storeLoading');
 
     try {
-      const [listRes, installedRes] = await Promise.all([
+      const [lr, dr] = await Promise.all([
         fetch('/admin/addons/store/list'),
-        fetch('/admin/addons/list'),
+        fetch('/admin/addons/store/discussions'),
       ]);
+      const ld = await lr.json();
+      if (!ld.success) throw new Error(ld.message || 'Failed to load');
 
-      const listData      = await listRes.json();
-      const installedData = await installedRes.json();
+      const dd = await dr.json();
+      discussionCounts = (dd.success && dd.counts) ? dd.counts : {};
+      allAddons = ld.addons || [];
+      allAddons.sort((a, b) => {
+        const ca = discussionCounts[a.id.toLowerCase()] || 0;
+        const cb = discussionCounts[b.id.toLowerCase()] || 0;
+        if (cb !== ca) return cb - ca;
+        return (a.name || '').localeCompare(b.name || '');
+      });
 
-      if (!listData.success) throw new Error(listData.message || 'Failed to load');
-
-      allAddons = listData.addons || [];
-      INSTALLED = new Set((installedData.addons || []).map(a => a.slug));
-
-      buildTagFilters();
-      render(filtered());
+      buildTags();
+      hide('storeLoading');
+      render(allAddons);
     } catch (err) {
       hide('storeLoading');
-      document.getElementById('storeErrorMsg').textContent = err.message || 'Failed to load addon store.';
+      document.getElementById('storeErrorMsg').textContent = err.message;
       show('storeError');
     }
   }
 
-  function buildTagFilters() {
-    const counts = {};
-    allAddons.forEach(a => (a.tags || []).forEach(t => { counts[t] = (counts[t] || 0) + 1; }));
-    const top = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 8).map(e => e[0]);
-    const el = document.getElementById('tagFilters');
-    el.innerHTML = '';
-    top.forEach(tag => {
-      const btn = document.createElement('button');
-      btn.textContent = tag;
-      btn.className = 's-tag';
-      btn.style.cssText = 'border:none;cursor:pointer;transition:background 0.12s,color 0.12s;';
-      btn.addEventListener('click', () => {
-        activeTag = activeTag === tag ? null : tag;
-        el.querySelectorAll('button').forEach(b => {
-          const on = b.textContent === activeTag;
-          b.style.background    = on ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)';
-          b.style.color         = on ? '#e5e5e5' : '#525252';
-          b.style.borderColor   = on ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)';
-        });
-        render(filtered());
+  function buildTags() {
+    const tags = new Set();
+    allAddons.forEach(a => (a.tags || []).forEach(t => tags.add(t)));
+    const wrap = document.getElementById('tagFilters');
+    wrap.innerHTML = '';
+
+    function mkBtn(label, tag, active) {
+      const b = document.createElement('button');
+      b.dataset.tag = tag;
+      b.textContent = label;
+      b.className = 's-tag';
+      b.style.cursor = 'pointer';
+      if (active) b.style.cssText += 'background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.14);color:#d4d4d4;cursor:pointer;';
+      wrap.appendChild(b);
+    }
+
+    mkBtn('All', 'all', true);
+    tags.forEach(t => mkBtn(t, t, false));
+
+    wrap.addEventListener('click', e => {
+      const btn = e.target.closest('[data-tag]');
+      if (!btn) return;
+      activeTag = btn.dataset.tag;
+      wrap.querySelectorAll('[data-tag]').forEach(b => {
+        b.style.cssText = 'cursor:pointer;';
       });
-      el.appendChild(btn);
+      btn.style.cssText = 'background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.14);color:#d4d4d4;cursor:pointer;';
+      render(filtered());
     });
   }
 
   function filtered() {
-    const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
     return allAddons.filter(a => {
-      const matchQ = !q || a.name.toLowerCase().includes(q) || (a.description || '').toLowerCase().includes(q);
-      const matchT = !activeTag || (a.tags || []).includes(activeTag);
-      return matchQ && matchT;
+      const tagOk = activeTag === 'all' || (a.tags || []).includes(activeTag);
+      const qOk   = !q ||
+        (a.name || '').toLowerCase().includes(q) ||
+        (a.description || '').toLowerCase().includes(q) ||
+        (a.author || '').toLowerCase().includes(q);
+      return tagOk && qOk;
     });
   }
 
   function render(list) {
-    hide('storeLoading');
     const grid  = document.getElementById('storeGrid');
     const empty = document.getElementById('storeEmpty');
-
     if (!list.length) {
-      hide('storeGrid');
-      show('storeEmpty');
+      grid.style.display = 'none';
+      empty.style.display = '';
       return;
     }
+    grid.style.display = 'grid';
+    empty.style.display = 'none';
 
-    hide('storeEmpty');
-    grid.innerHTML = '';
+    grid.innerHTML = list.map(a => {
+      const inst  = INSTALLED.has(a.id);
+      const count = discussionCounts[a.id.toLowerCase()] || 0;
+      const tags  = (a.tags || []).slice(0, 3).map(t => `<span class="s-tag">${esc(t)}</span>`).join('');
 
-    list.forEach(addon => {
-      const installed = INSTALLED.has(addon.id);
-      const card = document.createElement('div');
-      card.className = 's-card';
-
-      const tagsHtml = (addon.tags || []).slice(0, 3).map(t => `<span class="s-tag">${esc(t)}</span>`).join('');
-      const badge    = installed ? 's-badge s-badge-installed' : badgeClass(addon.status);
-      const badgeTxt = installed ? 'Installed' : (addon.status || 'working');
-
-      card.innerHTML = `
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
-          <div class="s-icon">
+      return `<div class="s-card" data-id="${esc(a.id)}">
+        <div style="display:flex;align-items:flex-start;gap:8px;min-width:0;">
+          <div class="s-icon" id="si-${esc(a.id)}">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:15px;height:15px;color:#404040;">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/>
             </svg>
           </div>
-          <span class="${badge}">${esc(badgeTxt)}</span>
+          <div style="flex:1;min-width:0;overflow:hidden;">
+            <div style="display:flex;align-items:center;gap:4px;min-width:0;">
+              <span style="font-size:12px;font-weight:600;color:#e5e5e5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;">${esc(a.name)}</span>
+              <span class="${badgeClass(a.status)}">${esc(a.status || 'working')}</span>
+            </div>
+            <p style="font-size:10px;color:#525252;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">by ${esc(a.author || 'Unknown')}${a.version ? ' · v' + esc(a.version) : ''}</p>
+          </div>
         </div>
-        <div style="min-width:0;">
-          <p style="font-size:12px;font-weight:600;color:#e5e5e5;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(addon.name)}</p>
-          <p style="font-size:11px;color:#525252;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${esc(addon.description)}</p>
+        ${inst ? '<div><span class="s-badge s-badge-installed">Installed</span></div>' : ''}
+        <p style="font-size:11px;color:#525252;line-height:1.6;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${esc(a.description || '')}</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:auto;">
+          <div style="display:flex;gap:3px;flex-wrap:wrap;min-width:0;">${tags}</div>
+          ${count > 0 ? `<span style="font-size:10px;color:#404040;flex-shrink:0;display:flex;align-items:center;gap:3px;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:11px;height:11px;flex-shrink:0;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/>
+            </svg>${count}</span>` : ''}
         </div>
-        ${tagsHtml ? `<div style="display:flex;gap:4px;flex-wrap:wrap;">${tagsHtml}</div>` : ''}`;
+      </div>`;
+    }).join('');
 
-      if (addon.icon) {
-        const img = new Image();
-        const iconEl = card.querySelector('.s-icon');
-        img.style.cssText = 'width:18px;height:18px;object-fit:contain;display:block;';
-        img.onload = () => { iconEl.innerHTML = ''; iconEl.appendChild(img); };
-        img.src = addon.icon;
-      }
-
-      card.addEventListener('click', () => openModal(addon));
-      grid.appendChild(card);
+    list.forEach(a => {
+      if (!a.icon) return;
+      const wrap = document.getElementById('si-' + a.id);
+      if (!wrap) return;
+      const img = new Image();
+      img.style.cssText = 'width:18px;height:18px;object-fit:contain;display:block;';
+      img.onload = () => { wrap.innerHTML = ''; wrap.appendChild(img); };
+      img.src = a.icon;
     });
 
-    show('storeGrid');
+    grid.querySelectorAll('.s-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const a = allAddons.find(x => x.id === card.dataset.id);
+        if (a) openModal(a);
+      });
+    });
   }
 
   document.getElementById('searchInput').addEventListener('input', () => render(filtered()));
   document.getElementById('clearSearch').addEventListener('click', () => {
     document.getElementById('searchInput').value = '';
-    activeTag = null;
-    document.querySelectorAll('#tagFilters button').forEach(b => {
-      b.style.background  = 'rgba(255,255,255,0.04)';
-      b.style.color       = '#525252';
-      b.style.borderColor = 'rgba(255,255,255,0.06)';
-    });
     render(filtered());
   });
-
-  // ── Modal ─────────────────────────────────────────────────────────
 
   function openModal(addon) {
     currentAddon = addon;
     const inst = INSTALLED.has(addon.id);
 
     const iconEl = document.getElementById('mIcon');
-    iconEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:18px;height:18px;color:#404040;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/></svg>';
+    iconEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px;color:#404040;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/></svg>';
     if (addon.icon) {
       const img = new Image();
       img.style.cssText = 'width:18px;height:18px;object-fit:contain;display:block;';
@@ -485,8 +478,8 @@
 
     document.getElementById('mName').textContent = addon.name || '';
     const statusEl = document.getElementById('mStatus');
-    statusEl.textContent = inst ? 'Installed' : (addon.status || 'working');
-    statusEl.className   = inst ? 's-badge s-badge-installed' : badgeClass(addon.status);
+    statusEl.textContent = addon.status || 'working';
+    statusEl.className = badgeClass(addon.status);
     document.getElementById('mMeta').textContent = 'by ' + (addon.author || 'Unknown') + (addon.version ? ' · v' + addon.version : '');
     document.getElementById('mDesc').textContent = addon.longDescription || addon.description || 'No description available.';
     document.getElementById('mGhBtn').href = addon.github || ('https://github.com/airlinklabs/addons/tree/main/' + addon.id);
@@ -514,7 +507,7 @@
       repoLine.style.cssText = 'font-size:11px;color:#525252;margin-bottom:10px;display:flex;align-items:center;gap:5px;';
       repoLine.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:11px;height:11px;flex-shrink:0;"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>'
         + '<span style="font-family:ui-monospace,monospace;">' + esc(addon.installRepo) + '</span>'
-        + '<span style="color:#404040;"> @ ' + esc(addon.installBranch || 'main') + '</span>';
+        + '<span style="color:#404040;">@ ' + esc(addon.installBranch || 'main') + '</span>';
       guideEl.appendChild(repoLine);
     }
 
@@ -579,26 +572,28 @@
     document.querySelectorAll('.m-pane').forEach(p => p.classList.toggle('on', p.id === 'm-pane-' + name));
   }
 
-  document.querySelectorAll('.m-tab').forEach(t => t.addEventListener('click', () => {
-    switchTab(t.dataset.tab);
-    if (t.dataset.tab === 'reviews' && currentAddon) loadGiscus(currentAddon);
-  }));
-
   document.getElementById('mClose').addEventListener('click', closeModal);
-  document.getElementById('mOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+  document.getElementById('mOverlay').addEventListener('click', e => { if (e.target.id === 'mOverlay') closeModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  document.querySelectorAll('.m-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      switchTab(tab.dataset.tab);
+      if (tab.dataset.tab === 'reviews' && currentAddon) loadGiscus(currentAddon.id);
+    });
+  });
 
-  function loadGiscus(addon) {
+  function loadGiscus(addonId) {
     const c = document.getElementById('mGiscus');
     c.innerHTML = '';
     const s = document.createElement('script');
     s.src = 'https://giscus.app/client.js';
     s.setAttribute('data-repo', 'airlinklabs/addons');
-    s.setAttribute('data-repo-id', '');
-    s.setAttribute('data-category', 'General');
-    s.setAttribute('data-category-id', '');
+    s.setAttribute('data-repo-id', 'YOUR_REPO_ID');
+    s.setAttribute('data-category', 'Marketplace');
+    s.setAttribute('data-category-id', 'YOUR_CATEGORY_ID');
     s.setAttribute('data-mapping', 'specific');
-    s.setAttribute('data-term', addon.name || addon.id);
+    s.setAttribute('data-term', addonId);
+    s.setAttribute('data-strict', '1');
     s.setAttribute('data-reactions-enabled', '1');
     s.setAttribute('data-emit-metadata', '0');
     s.setAttribute('data-input-position', 'bottom');
@@ -678,6 +673,7 @@
         body: JSON.stringify({ slug }),
       });
 
+      // Server returned a JSON error before streaming started
       const ct = res.headers.get('content-type') || '';
       if (!res.ok || ct.includes('application/json')) {
         const data = await res.json();
