@@ -20,10 +20,13 @@ registerPermission('airlink.admin.addons.reload');
 registerPermission('airlink.admin.addons.store');
 registerPermission('airlink.admin.addons.install');
 
-const ADDONS_REPO = 'https://github.com/airlinklabs/addons';
-const ADDONS_INDEX_URL = 'https://raw.githubusercontent.com/airlinklabs/addons/main/index.json';
+const ADDONS_REPO_OWNER = 'airlinklabs';
+const ADDONS_REPO_NAME  = 'addons';
+const ADDONS_RAW_BASE   = `https://raw.githubusercontent.com/${ADDONS_REPO_OWNER}/${ADDONS_REPO_NAME}/main`;
+const GITHUB_API_BASE   = `https://api.github.com/repos/${ADDONS_REPO_OWNER}/${ADDONS_REPO_NAME}`;
 
-const ALLOWED_COMMANDS: Record<string, { bin: string; args: string[] }> = {
+// Only these exact command strings are executable from install.json
+const ALLOWED_EXEC_TOKENS: Record<string, { bin: string; args: string[] }> = {
   'npm install':   { bin: 'npm', args: ['install'] },
   'npm ci':        { bin: 'npm', args: ['ci'] },
   'npm run build': { bin: 'npm', args: ['run', 'build'] },
@@ -31,26 +34,49 @@ const ALLOWED_COMMANDS: Record<string, { bin: string; args: string[] }> = {
   'yarn install':  { bin: 'yarn', args: ['install'] },
 };
 
-async function runInstallManifest(addonDir: string): Promise<void> {
+interface InstallStep {
+  title: string;
+  commands: string[];
+}
+
+interface InstallManifest {
+  steps?: InstallStep[];
+  note?: string;
+}
+
+async function* executeInstallManifest(
+  addonDir: string
+): AsyncGenerator<{ stepTitle: string; cmd: string; done?: boolean; error?: string }> {
   const manifestPath = path.join(addonDir, 'install.json');
-  if (!fs.existsSync(manifestPath)) return;
-
-  const raw = fs.readFileSync(manifestPath, 'utf-8');
-  const manifest = JSON.parse(raw);
-
-  if (!Array.isArray(manifest.commands)) {
-    throw new Error('install.json "commands" must be an array');
+  if (!fs.existsSync(manifestPath)) {
+    yield { stepTitle: 'Setup', cmd: '', done: true };
+    return;
   }
 
-  for (const cmd of manifest.commands) {
-    const allowed = ALLOWED_COMMANDS[cmd.trim()];
-    if (!allowed) {
-      throw new Error(
-        `Command not permitted: "${cmd}". Allowed: ${Object.keys(ALLOWED_COMMANDS).join(', ')}`
-      );
+  const manifest: InstallManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+  if (!Array.isArray(manifest.steps) || manifest.steps.length === 0) {
+    yield { stepTitle: 'Setup', cmd: '', done: true };
+    return;
+  }
+
+  for (const step of manifest.steps) {
+    for (const cmd of (step.commands || [])) {
+      const normalized = cmd.trim();
+      const allowed = ALLOWED_EXEC_TOKENS[normalized];
+      if (!allowed) {
+        yield {
+          stepTitle: step.title,
+          cmd: normalized,
+          error: `Command not permitted: "${normalized}". Allowed: ${Object.keys(ALLOWED_EXEC_TOKENS).join(', ')}`,
+        };
+        return;
+      }
+      yield { stepTitle: step.title, cmd: normalized };
+      await execFileAsync(allowed.bin, allowed.args, { cwd: addonDir });
     }
-    await execFileAsync(allowed.bin, allowed.args, { cwd: addonDir });
   }
+
+  yield { stepTitle: 'Complete', cmd: '', done: true };
 }
 
 const addonsModule: Module = {
@@ -81,18 +107,11 @@ const addonsModule: Module = {
           let addonTableExists = true;
           try {
             await prisma.$queryRaw`SELECT 1 FROM Addon LIMIT 1`;
-          } catch (_error) {
+          } catch {
             addonTableExists = false;
           }
 
-          res.render('admin/addons/addons', {
-            user,
-            req,
-            settings,
-            addons,
-            addonTableExists,
-            errorMessage: {},
-          });
+          res.render('admin/addons/addons', { user, req, settings, addons, addonTableExists, errorMessage: {} });
         } catch (error) {
           logger.error('Error fetching addons:', error);
           return res.redirect('/admin/overview');
@@ -106,10 +125,7 @@ const addonsModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const { slug } = req.params;
-          const { enabled } = req.body;
-
-          const enabledBool = enabled === 'true' || enabled === true;
-          logger.info(`Toggling addon ${slug} to ${enabledBool ? 'enabled' : 'disabled'}`);
+          const enabledBool = req.body.enabled === 'true' || req.body.enabled === true;
           const result = await toggleAddonStatus(getParamAsString(slug), enabledBool);
 
           if (result.success) {
@@ -155,8 +171,9 @@ const addonsModule: Module = {
           if (!user) return res.redirect('/login');
 
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const addons = await getAllAddons();
 
-          res.render('admin/addons/store', { user, req, settings, errorMessage: {} });
+          res.render('admin/addons/store', { user, req, settings, addons, errorMessage: {} });
         } catch (error) {
           logger.error('Error rendering addon store:', error);
           return res.redirect('/admin/addons');
@@ -164,17 +181,54 @@ const addonsModule: Module = {
       }
     );
 
+    // Reads each addon folder's info.json from GitHub
     router.get(
       '/admin/addons/store/list',
       isAuthenticated(true, 'airlink.admin.addons.store'),
       async (_req: Request, res: Response) => {
         try {
-          const response = await fetch(ADDONS_INDEX_URL);
-          if (!response.ok) {
-            return res.status(502).json({ success: false, message: 'Failed to fetch addon index from GitHub' });
+          const contentsRes = await fetch(`${GITHUB_API_BASE}/contents`, {
+            headers: { 'Accept': 'application/vnd.github+json', 'User-Agent': 'airlink-panel' },
+          });
+
+          if (!contentsRes.ok) {
+            return res.status(502).json({ success: false, message: 'Failed to fetch addon list from GitHub' });
           }
-          const data = await response.json();
-          res.json({ success: true, addons: data });
+
+          const contents: any[] = await contentsRes.json();
+          const folders = contents.filter((i: any) => i.type === 'dir' && !i.name.startsWith('.'));
+
+          const addonData = await Promise.all(
+            folders.map(async (folder: any) => {
+              try {
+                const infoRes = await fetch(`${ADDONS_RAW_BASE}/${folder.name}/info.json`, {
+                  headers: { 'User-Agent': 'airlink-panel' },
+                });
+                if (!infoRes.ok) return null;
+                const info = await infoRes.json();
+                return {
+                  id: folder.name,
+                  name: info.name || folder.name,
+                  version: info.version || '',
+                  description: info.description || '',
+                  longDescription: info.longDescription || info.description || '',
+                  author: info.author || '',
+                  status: info.status || 'working',
+                  tags: info.tags || [],
+                  icon: info.icon || '',
+                  iconType: info.iconType || 'url',
+                  features: info.features || [],
+                  github: info.github || `https://github.com/${ADDONS_REPO_OWNER}/${ADDONS_REPO_NAME}/tree/main/${folder.name}`,
+                  screenshots: info.screenshots || [],
+                  installNote: info.installNote || '',
+                };
+              } catch {
+                return null;
+              }
+            })
+          );
+
+          res.json({ success: true, addons: addonData.filter(Boolean) });
         } catch (error: any) {
           logger.error('Error fetching addon store list:', error);
           res.status(500).json({ success: false, message: error.message });
@@ -182,39 +236,95 @@ const addonsModule: Module = {
       }
     );
 
+    // Returns discussion comment counts keyed by discussion title (addon id)
+    router.get(
+      '/admin/addons/store/discussions',
+      isAuthenticated(true, 'airlink.admin.addons.store'),
+      async (_req: Request, res: Response) => {
+        try {
+          const token = process.env.GITHUB_TOKEN;
+          if (!token) {
+            return res.json({ success: true, counts: {} });
+          }
+
+          const query = `{
+            repository(owner: "${ADDONS_REPO_OWNER}", name: "${ADDONS_REPO_NAME}") {
+              discussions(first: 100) {
+                nodes { title comments { totalCount } }
+              }
+            }
+          }`;
+
+          const ghRes = await fetch('https://api.github.com/graphql', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'User-Agent': 'airlink-panel',
+            },
+            body: JSON.stringify({ query }),
+          });
+
+          if (!ghRes.ok) return res.json({ success: true, counts: {} });
+
+          const data: any = await ghRes.json();
+          const nodes = data?.data?.repository?.discussions?.nodes || [];
+          const counts: Record<string, number> = {};
+          for (const d of nodes) {
+            if (d.title) counts[d.title.toLowerCase()] = d.comments.totalCount;
+          }
+
+          res.json({ success: true, counts });
+        } catch {
+          res.json({ success: true, counts: {} });
+        }
+      }
+    );
+
+    // SSE install endpoint — streams step-by-step progress
     router.post(
       '/admin/addons/store/install',
       isAuthenticated(true, 'airlink.admin.addons.install'),
       async (req: Request, res: Response) => {
+        const { slug } = req.body;
+
+        if (!slug || !/^[a-z0-9][a-z0-9-_]*$/i.test(slug)) {
+          return res.status(400).json({ success: false, message: 'Invalid addon slug' });
+        }
+
+        const addonsDir = path.join(__dirname, '../../../storage/addons');
+        const targetDir = path.join(addonsDir, slug);
+
+        if (!targetDir.startsWith(addonsDir + path.sep)) {
+          return res.status(400).json({ success: false, message: 'Invalid slug' });
+        }
+
+        if (fs.existsSync(targetDir)) {
+          return res.status(409).json({ success: false, message: 'Addon already installed' });
+        }
+
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders();
+
+        const send = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`);
+
         try {
-          const { slug } = req.body;
-
-          if (!slug || !/^[a-z0-9][a-z0-9-_]*$/i.test(slug)) {
-            return res.status(400).json({ success: false, message: 'Invalid addon slug' });
-          }
-
-          const addonsDir = path.join(__dirname, '../../../storage/addons');
-          const targetDir = path.join(addonsDir, slug);
-
-          // Prevent path traversal
-          if (!targetDir.startsWith(addonsDir)) {
-            return res.status(400).json({ success: false, message: 'Invalid slug' });
-          }
-
-          if (fs.existsSync(targetDir)) {
-            return res.status(409).json({ success: false, message: 'Addon already installed' });
-          }
-
           fs.mkdirSync(addonsDir, { recursive: true });
 
-          // Clone the addons repo with sparse checkout to get only this addon
+          send({ type: 'step', stepTitle: 'Cloning repository', cmd: 'git clone --sparse' });
+
           await execFileAsync('git', [
-            'clone', '--depth=1', '--filter=blob:none', '--sparse', ADDONS_REPO, targetDir,
+            'clone', '--depth=1', '--filter=blob:none', '--sparse',
+            `https://github.com/${ADDONS_REPO_OWNER}/${ADDONS_REPO_NAME}`,
+            targetDir,
           ]);
+
+          send({ type: 'step', stepTitle: 'Extracting addon', cmd: `git sparse-checkout set ${slug}` });
 
           await execFileAsync('git', ['sparse-checkout', 'set', slug], { cwd: targetDir });
 
-          // Flatten: sparse checkout leaves files under slug/slug/
           const innerDir = path.join(targetDir, slug);
           if (fs.existsSync(innerDir)) {
             for (const item of fs.readdirSync(innerDir)) {
@@ -223,20 +333,30 @@ const addonsModule: Module = {
             fs.rmdirSync(innerDir);
           }
 
-          // Strip .git
           const gitDir = path.join(targetDir, '.git');
-          if (fs.existsSync(gitDir)) {
-            fs.rmSync(gitDir, { recursive: true, force: true });
+          if (fs.existsSync(gitDir)) fs.rmSync(gitDir, { recursive: true, force: true });
+
+          for await (const event of executeInstallManifest(targetDir)) {
+            if (event.error) {
+              send({ type: 'error', message: event.error });
+              res.end();
+              return;
+            }
+            if (!event.done) {
+              send({ type: 'step', stepTitle: event.stepTitle, cmd: event.cmd });
+            }
           }
 
-          await runInstallManifest(targetDir);
+          send({ type: 'step', stepTitle: 'Registering addon', cmd: 'loadAddons' });
           await loadAddons(req.app);
 
-          res.json({ success: true, message: `Addon "${slug}" installed successfully` });
+          send({ type: 'done', message: `Addon "${slug}" installed successfully` });
         } catch (error: any) {
           logger.error('Error installing addon:', error);
-          res.status(500).json({ success: false, message: error.message });
+          send({ type: 'error', message: error.message });
         }
+
+        res.end();
       }
     );
 
@@ -254,7 +374,7 @@ const addonsModule: Module = {
           const addonsDir = path.join(__dirname, '../../../storage/addons');
           const targetDir = path.join(addonsDir, slug);
 
-          if (!targetDir.startsWith(addonsDir)) {
+          if (!targetDir.startsWith(addonsDir + path.sep)) {
             return res.status(400).json({ success: false, message: 'Invalid slug' });
           }
 
@@ -264,8 +384,8 @@ const addonsModule: Module = {
 
           try {
             await prisma.addon.delete({ where: { slug } });
-          } catch (_) {
-            // Not in DB is fine
+          } catch {
+            // fine if not in DB
           }
 
           fs.rmSync(targetDir, { recursive: true, force: true });
