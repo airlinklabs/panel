@@ -26,7 +26,6 @@ const ADDONS_REPO_NAME  = 'addons';
 const ADDONS_RAW_BASE   = `https://raw.githubusercontent.com/${ADDONS_REPO_OWNER}/${ADDONS_REPO_NAME}/main`;
 const GITHUB_API_BASE   = `https://api.github.com/repos/${ADDONS_REPO_OWNER}/${ADDONS_REPO_NAME}`;
 
-// Safe command prefixes allowed in install.json
 const ALLOWED_CMD_PREFIXES = [
   'npm install', 'npm ci', 'npm run ', 'npx ',
   'yarn', 'yarn install', 'yarn run ',
@@ -81,7 +80,7 @@ async function* runInstall(
       const output = (stdout + stderr).trim();
       if (output) yield { type: 'output', step: `Step ${key}`, cmd, output };
     } catch (err: any) {
-      const output = (err.stdout || '' + err.stderr || '').trim() || err.message;
+      const output = ((err.stdout || '') + (err.stderr || '')).trim() || err.message;
       yield { type: 'error', message: `"${cmd}" failed: ${output}` };
       return;
     }
@@ -126,6 +125,19 @@ const addonsModule: Module = {
         } catch (error) {
           logger.error('Error fetching addons:', error);
           return res.redirect('/admin/overview');
+        }
+      }
+    );
+
+    router.get(
+      '/admin/addons/list',
+      isAuthenticated(true, 'airlink.admin.addons.view'),
+      async (_req: Request, res: Response) => {
+        try {
+          const addons = await getAllAddons();
+          res.json({ success: true, addons });
+        } catch (error: any) {
+          res.status(500).json({ success: false, message: error.message });
         }
       }
     );
@@ -217,7 +229,6 @@ const addonsModule: Module = {
                 if (!infoRes.ok) return null;
                 const info = await infoRes.json() as any;
 
-                // Also fetch install.json for display in the store
                 let installManifest: InstallManifest = {};
                 try {
                   const instRes = await fetch(`${ADDONS_RAW_BASE}/${folder.name}/install.json`, {
@@ -239,7 +250,6 @@ const addonsModule: Module = {
                   features: info.features || [],
                   github: info.github || `https://github.com/${ADDONS_REPO_OWNER}/${ADDONS_REPO_NAME}/tree/main/${folder.name}`,
                   screenshots: info.screenshots || [],
-                  // install.json fields surfaced to the frontend
                   installRepo: installManifest.repo || '',
                   installBranch: installManifest.branch || 'main',
                   installNote: installManifest.note || '',
@@ -301,7 +311,6 @@ const addonsModule: Module = {
       }
     );
 
-    // SSE install — clones the addon's own repo, runs numbered commands
     router.post(
       '/admin/addons/store/install',
       isAuthenticated(true, 'airlink.admin.addons.install'),
@@ -330,14 +339,12 @@ const addonsModule: Module = {
 
         const send = (data: object) => res.write(`data: ${JSON.stringify(data)}\n\n`);
 
-        // Unique temp folder to avoid collisions during parallel installs
         const tempId  = crypto.randomBytes(4).toString('hex');
         const tempDir = path.join(addonsDir, `${slug}-${tempId}`);
 
         try {
           fs.mkdirSync(addonsDir, { recursive: true });
 
-          // Fetch install.json from the registry repo to get repo/branch
           const instRes = await fetch(`${ADDONS_RAW_BASE}/${slug}/install.json`, {
             headers: { 'User-Agent': 'airlink-panel' },
           });
@@ -358,17 +365,37 @@ const addonsModule: Module = {
             return;
           }
 
-          send({ type: 'step', step: 'Clone', cmd: `git clone -b ${branch} ${repoUrl}` });
+          // Clone directly into the unique temp folder name so git never needs to derive a folder name.
+          // GIT_TERMINAL_PROMPT=0 prevents git from hanging on credential prompts.
+          // If the process exits non-zero (e.g. auth required), execFileAsync rejects and we surface the error.
+          send({ type: 'step', step: 'Clone', cmd: `git clone -b ${branch} ${repoUrl} ${slug}-${tempId}` });
 
-          await execFileAsync('git', ['clone', '--depth=1', '-b', branch, repoUrl, tempDir]);
+          try {
+            await execFileAsync(
+              'git',
+              ['clone', '--depth=1', '-b', branch, repoUrl, tempDir],
+              {
+                env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
+              }
+            );
+          } catch (cloneErr: any) {
+            const msg: string = ((cloneErr.stdout || '') + (cloneErr.stderr || '')).trim() || cloneErr.message;
+            // Detect cases where git is waiting for credentials despite the env flag
+            if (msg.toLowerCase().includes('username') || msg.toLowerCase().includes('authentication')) {
+              send({ type: 'error', message: 'Clone failed: repository requires authentication' });
+            } else {
+              send({ type: 'error', message: `Clone failed: ${msg}` });
+            }
+            if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
+            res.end();
+            return;
+          }
 
-          // Remove .git — we don't need history
           const gitDir = path.join(tempDir, '.git');
           if (fs.existsSync(gitDir)) fs.rmSync(gitDir, { recursive: true, force: true });
 
           send({ type: 'step', step: 'Setup', cmd: `cd ${slug}-${tempId}` });
 
-          // Run user-defined commands from the cloned directory
           for await (const event of runInstall(manifest, tempDir)) {
             send(event);
             if (event.type === 'error') {
@@ -379,7 +406,6 @@ const addonsModule: Module = {
             if (event.type === 'done') break;
           }
 
-          // Move temp dir to final slug-named location
           fs.renameSync(tempDir, finalDir);
 
           send({ type: 'step', step: 'Register', cmd: 'loadAddons()' });
