@@ -1,0 +1,781 @@
+<%- include('../components/header', { title: 'Addon Store' }) %>
+<%- include('../components/toast') %>
+
+<style>
+  .addon-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    display: flex;
+    flex-direction: column;
+  }
+  .addon-card:hover {
+    border-color: rgba(255,255,255,0.12);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+
+  .status-working { background: rgba(34,197,94,0.15); color: #4ade80; }
+  .status-beta    { background: rgba(234,179,8,0.15);  color: #facc15; }
+  .status-wip     { background: rgba(249,115,22,0.15); color: #fb923c; }
+
+  .addon-icon-wrap {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex-shrink: 0;
+  }
+  .addon-icon-wrap img { width: 24px; height: 24px; object-fit: contain; }
+  .addon-icon-wrap svg { width: 20px; height: 20px; color: #525252; }
+
+  .tag-pill {
+    display: inline-block;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 99px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: #737373;
+  }
+
+  .skeleton {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px;
+    height: 160px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* Popup overlay */
+  .ap-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .ap-overlay.open { opacity: 1; pointer-events: auto; }
+  .ap-popup {
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 16px;
+    width: 100%; max-width: 640px;
+    max-height: 90vh;
+    display: flex; flex-direction: column;
+    transform: translateY(8px) scale(0.98);
+    transition: transform 0.2s cubic-bezier(0.23,1,0.32,1);
+    overflow: hidden;
+  }
+  .ap-overlay.open .ap-popup { transform: none; }
+
+  .ap-header {
+    flex-shrink: 0;
+    padding: 20px 20px 0;
+  }
+  .ap-tab-bar {
+    flex-shrink: 0;
+    display: flex; gap: 2px;
+    padding: 0 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    margin-top: 16px;
+  }
+  .ap-tab {
+    padding: 8px 14px;
+    font-size: 13px; font-weight: 500;
+    color: #737373;
+    background: none; border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .ap-tab.active { color: #fff; border-bottom-color: #fff; }
+  .ap-tab:hover:not(.active) { color: #d4d4d4; }
+
+  .ap-body {
+    flex: 1; overflow-y: auto;
+    padding: 20px;
+  }
+  .ap-panel { display: none; }
+  .ap-panel.active { display: block; }
+
+  .ap-step {
+    display: flex; gap: 12px;
+    margin-bottom: 18px;
+  }
+  .ap-step-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #262626;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #a3a3a3;
+    font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .ap-step-body { flex: 1; }
+  .ap-step-body h4 { font-size: 13px; font-weight: 500; color: #e5e5e5; margin-bottom: 6px; }
+  .ap-code-block {
+    background: #0a0a0a;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .ap-code-block code {
+    font-family: ui-monospace, 'Cascadia Code', monospace;
+    font-size: 12px; color: #a3a3a3;
+    display: block;
+  }
+
+  /* Install progress */
+  .ap-progress {
+    background: #0a0a0a;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .ap-progress-bar-wrap {
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .ap-progress-bar {
+    height: 100%;
+    background: #fff;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .ap-progress-log {
+    margin-top: 10px;
+    max-height: 120px;
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .ap-log-line {
+    font-family: ui-monospace, monospace;
+    font-size: 11px; color: #737373;
+    display: flex; gap: 6px; align-items: flex-start;
+  }
+  .ap-log-line .lbl { color: #525252; flex-shrink: 0; }
+  .ap-log-line.done-line { color: #4ade80; }
+  .ap-log-line.err-line  { color: #f87171; }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #fff; color: #0a0a0a;
+    border-radius: 10px; padding: 8px 14px;
+    font-size: 13px; font-weight: 500;
+    transition: background 0.15s;
+    cursor: pointer; border: none;
+  }
+  .btn-primary:hover { background: #e5e5e5; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.09);
+    color: #a3a3a3;
+    border-radius: 10px; padding: 8px 14px;
+    font-size: 13px; font-weight: 500;
+    transition: background 0.15s, color 0.15s;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.09); color: #e5e5e5; }
+
+  .btn-danger {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.2);
+    color: #f87171;
+    border-radius: 10px; padding: 8px 14px;
+    font-size: 13px; font-weight: 500;
+    transition: background 0.15s;
+    cursor: pointer; border-width: 1px;
+  }
+  .btn-danger:hover { background: rgba(239,68,68,0.2); }
+  .btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .feat-item {
+    display: flex; gap: 8px; align-items: flex-start;
+    font-size: 13px; color: #a3a3a3;
+    padding: 4px 0;
+  }
+  .feat-check {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: rgba(34,197,94,0.15);
+    color: #4ade80;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+</style>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <div class="w-60 h-full">
+      <%- include('../components/template') %>
+    </div>
+    <div class="flex-1 overflow-y-auto pt-16">
+
+      <!-- Header -->
+      <div class="px-8 pt-8 pb-0 sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-white">Addons</h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500">Manage installed addons and browse the store</p>
+        </div>
+        <div class="mt-4 sm:ml-16 sm:mt-0">
+          <a href="/admin/addons" class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 px-3 py-2 text-sm font-medium transition">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
+            </svg>
+            Installed (<span id="installedCount"><%= addons ? addons.length : 0 %></span>)
+          </a>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="px-8 mt-5">
+        <div class="flex gap-0 border-b border-neutral-800 mb-6">
+          <a href="/admin/addons" class="px-4 py-2.5 text-sm font-medium text-neutral-500 hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">Installed</a>
+          <a href="/admin/addons/store" class="px-4 py-2.5 text-sm font-medium text-white border-b-2 border-white -mb-px">Store</a>
+        </div>
+
+        <!-- Search + tag filters -->
+        <div class="flex flex-col sm:flex-row gap-3 mb-5">
+          <div class="relative flex-1 max-w-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600 pointer-events-none">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+            <input id="searchInput" type="text" placeholder="Search addons..."
+              class="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-600 transition" />
+          </div>
+          <div id="tagFilters" class="flex gap-1.5 flex-wrap"></div>
+        </div>
+
+        <!-- Grid -->
+        <div id="storeLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+          <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+        </div>
+
+        <div id="storeError" class="hidden py-20 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-10 h-10 text-neutral-700 mx-auto mb-3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+          </svg>
+          <p id="storeErrorMsg" class="text-sm text-neutral-500">Failed to load addon store.</p>
+          <button onclick="loadStore()" class="mt-3 text-sm text-neutral-600 hover:text-neutral-300 transition underline">Try again</button>
+        </div>
+
+        <div id="storeGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <div id="storeEmpty" class="hidden py-20 text-center"><p class="text-sm text-neutral-500">No addons match your search.</p></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- Addon detail popup -->
+<div class="ap-overlay" id="apOverlay">
+  <div class="ap-popup">
+    <div class="ap-header">
+      <div class="flex items-start gap-3">
+        <div class="addon-icon-wrap" id="apIcon"></div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h2 id="apName" class="text-base font-semibold text-white"></h2>
+            <span id="apStatus" class="text-xs font-medium px-2 py-0.5 rounded-full"></span>
+          </div>
+          <p id="apMeta" class="text-xs text-neutral-500 mt-0.5"></p>
+        </div>
+        <button id="apClose" class="flex-shrink-0 w-7 h-7 rounded-lg bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-neutral-400 hover:text-white transition">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="flex gap-2 mt-4">
+        <button id="apInstallBtn" class="btn-primary flex-1 justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+          </svg>
+          <span id="apInstallLabel">Install</span>
+        </button>
+        <a id="apGithubBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-ghost">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-4 h-4">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/>
+          </svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+
+    <div class="ap-tab-bar">
+      <button class="ap-tab active" data-tab="overview">Overview</button>
+      <button class="ap-tab" data-tab="install">Installation</button>
+      <button class="ap-tab" data-tab="reviews">Reviews</button>
+    </div>
+
+    <div class="ap-body">
+      <div class="ap-panel active" id="ap-panel-overview">
+        <p id="apDesc" class="text-sm text-neutral-400 leading-relaxed mb-4"></p>
+        <div id="apFeatures"></div>
+      </div>
+
+      <div class="ap-panel" id="ap-panel-install">
+        <div id="apInstallProgress" class="hidden ap-progress mb-4">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-medium text-neutral-300" id="apProgressLabel">Installing...</span>
+            <span class="text-xs text-neutral-500" id="apProgressPct">0%</span>
+          </div>
+          <div class="ap-progress-bar-wrap"><div class="ap-progress-bar" id="apProgressBar"></div></div>
+          <div class="ap-progress-log" id="apProgressLog"></div>
+        </div>
+        <div id="apInstallSteps"></div>
+      </div>
+
+      <div class="ap-panel" id="ap-panel-reviews">
+        <p class="text-xs text-neutral-600 mb-4">Reviews are powered by GitHub Discussions on the addons repository. Sign in with GitHub to leave a comment.</p>
+        <div id="giscusContainer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const INSTALLED = new Set(<%- JSON.stringify((addons || []).map(a => a.slug)) %>);
+  let allAddons = [];
+  let currentAddon = null;
+  let activeTag = 'all';
+  let discussionCounts = {};
+
+  function esc(s) {
+    if (typeof s !== 'string') return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function statusClass(s) {
+    if (s === 'beta') return 'status-beta';
+    if (s === 'wip')  return 'status-wip';
+    return 'status-working';
+  }
+
+  async function loadStore() {
+    document.getElementById('storeLoading').classList.remove('hidden');
+    document.getElementById('storeLoading').innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+    document.getElementById('storeError').classList.add('hidden');
+    document.getElementById('storeGrid').classList.add('hidden');
+
+    try {
+      const [listRes, discRes] = await Promise.all([
+        fetch('/admin/addons/store/list'),
+        fetch('/admin/addons/store/discussions'),
+      ]);
+
+      const listData = await listRes.json();
+      if (!listData.success) throw new Error(listData.message || 'Failed to load');
+
+      const discData = await discRes.json();
+      discussionCounts = (discData.success && discData.counts) ? discData.counts : {};
+
+      allAddons = listData.addons || [];
+
+      // Sort: most discussion comments first, then alphabetical
+      allAddons.sort((a, b) => {
+        const ca = discussionCounts[a.id.toLowerCase()] || 0;
+        const cb = discussionCounts[b.id.toLowerCase()] || 0;
+        if (cb !== ca) return cb - ca;
+        return (a.name || '').localeCompare(b.name || '');
+      });
+
+      buildTagFilters();
+
+      document.getElementById('storeLoading').classList.add('hidden');
+      renderGrid(allAddons);
+    } catch (err) {
+      document.getElementById('storeLoading').classList.add('hidden');
+      document.getElementById('storeErrorMsg').textContent = err.message;
+      document.getElementById('storeError').classList.remove('hidden');
+    }
+  }
+
+  function buildTagFilters() {
+    const tags = new Set();
+    allAddons.forEach(a => (a.tags || []).forEach(t => tags.add(t)));
+
+    const wrap = document.getElementById('tagFilters');
+    const all = document.createElement('button');
+    all.className = 'tag-pill cursor-pointer hover:border-neutral-600 transition active-tag';
+    all.dataset.tag = 'all';
+    all.textContent = 'All';
+    all.style.cssText = 'background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15);color:#e5e5e5;';
+    wrap.appendChild(all);
+
+    tags.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'tag-pill cursor-pointer hover:border-neutral-600 transition';
+      btn.dataset.tag = t;
+      btn.textContent = t;
+      wrap.appendChild(btn);
+    });
+
+    wrap.addEventListener('click', e => {
+      const btn = e.target.closest('[data-tag]');
+      if (!btn) return;
+      activeTag = btn.dataset.tag;
+      wrap.querySelectorAll('[data-tag]').forEach(b => {
+        b.style.cssText = '';
+        b.classList.remove('active-tag');
+      });
+      btn.style.cssText = 'background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15);color:#e5e5e5;';
+      btn.classList.add('active-tag');
+      renderGrid(filtered());
+    });
+  }
+
+  function filtered() {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    return allAddons.filter(a => {
+      const matchTag = activeTag === 'all' || (a.tags || []).includes(activeTag);
+      const matchQ = !q || (a.name||'').toLowerCase().includes(q) || (a.description||'').toLowerCase().includes(q) || (a.author||'').toLowerCase().includes(q);
+      return matchTag && matchQ;
+    });
+  }
+
+  function renderGrid(list) {
+    const grid = document.getElementById('storeGrid');
+    const empty = document.getElementById('storeEmpty');
+
+    if (!list.length) {
+      grid.classList.add('hidden');
+      empty.classList.remove('hidden');
+      return;
+    }
+    grid.classList.remove('hidden');
+    empty.classList.add('hidden');
+
+    grid.innerHTML = list.map(addon => {
+      const installed = INSTALLED.has(addon.id);
+      const commentCount = discussionCounts[addon.id.toLowerCase()] || 0;
+      const tags = (addon.tags || []).slice(0, 3).map(t => `<span class="tag-pill">${esc(t)}</span>`).join('');
+
+      return `
+        <div class="addon-card p-5 gap-3" data-id="${esc(addon.id)}">
+          <div class="flex items-start gap-3">
+            <div class="addon-icon-wrap" id="icon-${esc(addon.id)}">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" /></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-sm font-semibold text-white">${esc(addon.name)}</span>
+                ${installed ? '<span class="text-xs px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-medium">Installed</span>' : ''}
+              </div>
+              <p class="text-xs text-neutral-500 mt-0.5">by ${esc(addon.author||'Unknown')} &middot; ${esc(addon.version||'')}</p>
+            </div>
+            <span class="text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${statusClass(addon.status)}">${esc(addon.status||'working')}</span>
+          </div>
+          <p class="text-sm text-neutral-400 leading-relaxed" style="-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden;">${esc(addon.description)}</p>
+          <div class="flex items-center justify-between mt-auto pt-1">
+            <div class="flex gap-1.5 flex-wrap">${tags}</div>
+            ${commentCount > 0 ? `
+            <div class="flex items-center gap-1 text-xs text-neutral-600 flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+              ${commentCount}
+            </div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Lazy-load icons
+    list.forEach(addon => {
+      if (!addon.icon) return;
+      const wrap = document.getElementById(`icon-${addon.id}`);
+      if (!wrap) return;
+      const img = new Image();
+      img.style.cssText = 'width:24px;height:24px;object-fit:contain;';
+      img.onerror = () => {};
+      img.onload = () => { wrap.innerHTML = ''; wrap.appendChild(img); };
+      img.src = addon.icon;
+    });
+
+    grid.querySelectorAll('.addon-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const addon = allAddons.find(a => a.id === card.dataset.id);
+        if (addon) openPopup(addon);
+      });
+    });
+  }
+
+  document.getElementById('searchInput').addEventListener('input', () => renderGrid(filtered()));
+
+  // ─── Popup ─────────────────────────────────────────────────────────────
+
+  function openPopup(addon) {
+    currentAddon = addon;
+    const installed = INSTALLED.has(addon.id);
+
+    // Icon
+    const iconEl = document.getElementById('apIcon');
+    iconEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-600"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/></svg>';
+    if (addon.icon) {
+      const img = new Image();
+      img.style.cssText = 'width:24px;height:24px;object-fit:contain;';
+      img.onload = () => { iconEl.innerHTML = ''; iconEl.appendChild(img); };
+      img.src = addon.icon;
+    }
+
+    document.getElementById('apName').textContent = addon.name || '';
+    const statusEl = document.getElementById('apStatus');
+    statusEl.textContent = addon.status || 'working';
+    statusEl.className = `text-xs font-medium px-2 py-0.5 rounded-full ${statusClass(addon.status)}`;
+    document.getElementById('apMeta').textContent = `by ${addon.author || 'Unknown'} · v${addon.version || ''}`;
+
+    document.getElementById('apDesc').textContent = addon.longDescription || addon.description || 'No description provided.';
+
+    const featEl = document.getElementById('apFeatures');
+    featEl.innerHTML = '';
+    if ((addon.features || []).length) {
+      const title = document.createElement('p');
+      title.className = 'text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2';
+      title.textContent = 'Features';
+      featEl.appendChild(title);
+      addon.features.forEach(f => {
+        const item = document.createElement('div');
+        item.className = 'feat-item';
+        item.innerHTML = `<div class="feat-check"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-2.5 h-2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg></div><span>${esc(f)}</span>`;
+        featEl.appendChild(item);
+      });
+    }
+
+    // Install steps (display-only guide)
+    const stepsEl = document.getElementById('apInstallSteps');
+    stepsEl.innerHTML = '';
+    if (addon.installSteps && addon.installSteps.length) {
+      addon.installSteps.forEach((step, i) => {
+        const div = document.createElement('div');
+        div.className = 'ap-step';
+        div.innerHTML = `
+          <div class="ap-step-num">${i + 1}</div>
+          <div class="ap-step-body">
+            <h4>${esc(step.title || '')}</h4>
+            <div class="ap-code-block">${(step.commands || []).map(c => `<code>${esc(c)}</code>`).join('')}</div>
+          </div>`;
+        stepsEl.appendChild(div);
+      });
+    }
+    if (addon.installNote) {
+      const note = document.createElement('div');
+      note.className = 'flex gap-2 mt-3 p-3 rounded-lg bg-neutral-800/50 border border-neutral-700/30 text-xs text-neutral-400';
+      note.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 flex-shrink-0 mt-0.5 text-neutral-500"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg><span>${esc(addon.installNote)}</span>`;
+      stepsEl.appendChild(note);
+    }
+
+    // Install/uninstall button
+    const installBtn = document.getElementById('apInstallBtn');
+    installBtn.dataset.slug = addon.id;
+    installBtn.disabled = false;
+    installBtn.className = installed ? 'btn-danger flex-1 justify-center' : 'btn-primary flex-1 justify-center';
+    document.getElementById('apInstallLabel').textContent = installed ? 'Uninstall' : 'Install';
+    installBtn.querySelector('svg').style.display = 'block';
+
+    document.getElementById('apGithubBtn').href = addon.github || `https://github.com/airlinklabs/addons/tree/main/${addon.id}`;
+
+    // Reset tabs
+    document.querySelectorAll('.ap-tab, .ap-panel').forEach(el => el.classList.remove('active'));
+    document.querySelector('[data-tab="overview"]').classList.add('active');
+    document.getElementById('ap-panel-overview').classList.add('active');
+    document.getElementById('apInstallProgress').classList.add('hidden');
+    document.getElementById('apProgressLog').innerHTML = '';
+
+    document.getElementById('apOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closePopup() {
+    document.getElementById('apOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    document.getElementById('giscusContainer').innerHTML = '';
+    currentAddon = null;
+  }
+
+  document.getElementById('apClose').addEventListener('click', closePopup);
+  document.getElementById('apOverlay').addEventListener('click', e => { if (e.target === document.getElementById('apOverlay')) closePopup(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
+
+  // Tab switching
+  document.querySelectorAll('.ap-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.ap-tab, .ap-panel').forEach(el => el.classList.remove('active'));
+      tab.classList.add('active');
+      const panel = document.getElementById(`ap-panel-${tab.dataset.tab}`);
+      if (panel) panel.classList.add('active');
+      if (tab.dataset.tab === 'reviews' && currentAddon) loadGiscus(currentAddon.id);
+    });
+  });
+
+  function loadGiscus(slug) {
+    const c = document.getElementById('giscusContainer');
+    c.innerHTML = '';
+    const s = document.createElement('script');
+    s.src = 'https://giscus.app/client.js';
+    s.setAttribute('data-repo', 'airlinklabs/addons');
+    s.setAttribute('data-repo-id', 'YOUR_REPO_ID');
+    s.setAttribute('data-category', 'Marketplace');
+    s.setAttribute('data-category-id', 'YOUR_CATEGORY_ID');
+    s.setAttribute('data-mapping', 'specific');
+    s.setAttribute('data-term', slug);
+    s.setAttribute('data-strict', '1');
+    s.setAttribute('data-reactions-enabled', '1');
+    s.setAttribute('data-emit-metadata', '0');
+    s.setAttribute('data-input-position', 'bottom');
+    s.setAttribute('data-theme', 'dark');
+    s.setAttribute('data-lang', 'en');
+    s.setAttribute('data-loading', 'lazy');
+    s.crossOrigin = 'anonymous';
+    s.async = true;
+    c.appendChild(s);
+  }
+
+  // ─── Install/Uninstall ─────────────────────────────────────────────────
+
+  document.getElementById('apInstallBtn').addEventListener('click', async function() {
+    const slug = this.dataset.slug;
+    const installing = !INSTALLED.has(slug);
+
+    if (!installing) {
+      // Uninstall — simple
+      this.disabled = true;
+      document.getElementById('apInstallLabel').textContent = 'Uninstalling...';
+      try {
+        const res = await fetch('/admin/addons/store/uninstall', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          INSTALLED.delete(slug);
+          showToast(data.message, 'success');
+          closePopup();
+          renderGrid(filtered());
+        } else {
+          showToast(data.message || 'Uninstall failed', 'error');
+          this.disabled = false;
+          document.getElementById('apInstallLabel').textContent = 'Uninstall';
+        }
+      } catch {
+        showToast('An error occurred', 'error');
+        this.disabled = false;
+        document.getElementById('apInstallLabel').textContent = 'Uninstall';
+      }
+      return;
+    }
+
+    // Install — switch to install tab and stream progress
+    document.querySelectorAll('.ap-tab, .ap-panel').forEach(el => el.classList.remove('active'));
+    document.querySelector('[data-tab="install"]').classList.add('active');
+    document.getElementById('ap-panel-install').classList.add('active');
+
+    const progressEl = document.getElementById('apInstallProgress');
+    const progressBar = document.getElementById('apProgressBar');
+    const progressLabel = document.getElementById('apProgressLabel');
+    const progressPct = document.getElementById('apProgressPct');
+    const logEl = document.getElementById('apProgressLog');
+
+    progressEl.classList.remove('hidden');
+    logEl.innerHTML = '';
+    progressBar.style.width = '0%';
+    progressLabel.textContent = 'Installing...';
+    this.disabled = true;
+    document.getElementById('apInstallLabel').textContent = 'Installing...';
+
+    let stepCount = 0;
+
+    function addLog(text, cls) {
+      const line = document.createElement('div');
+      line.className = `ap-log-line ${cls || ''}`;
+      line.innerHTML = `<span class="lbl">›</span><span>${esc(text)}</span>`;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    try {
+      const res = await fetch('/admin/addons/store/install', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug }),
+      });
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      const estimatedSteps = 5;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop();
+
+        for (const part of parts) {
+          const line = part.replace(/^data: /, '');
+          if (!line.trim()) continue;
+          try {
+            const evt = JSON.parse(line);
+            if (evt.type === 'step') {
+              stepCount++;
+              const pct = Math.min(Math.round((stepCount / estimatedSteps) * 90), 90);
+              progressBar.style.width = pct + '%';
+              progressPct.textContent = pct + '%';
+              progressLabel.textContent = evt.stepTitle || 'Running...';
+              if (evt.cmd) addLog(`${evt.stepTitle}: ${evt.cmd}`);
+            } else if (evt.type === 'done') {
+              progressBar.style.width = '100%';
+              progressPct.textContent = '100%';
+              progressLabel.textContent = 'Done';
+              addLog(evt.message, 'done-line');
+              INSTALLED.add(slug);
+              this.className = 'btn-danger flex-1 justify-center';
+              document.getElementById('apInstallLabel').textContent = 'Uninstall';
+              this.disabled = false;
+              this.dataset.slug = slug;
+              showToast(evt.message, 'success');
+              renderGrid(filtered());
+            } else if (evt.type === 'error') {
+              addLog(evt.message, 'err-line');
+              progressLabel.textContent = 'Failed';
+              showToast(evt.message, 'error');
+              this.disabled = false;
+              this.className = 'btn-primary flex-1 justify-center';
+              document.getElementById('apInstallLabel').textContent = 'Retry';
+            }
+          } catch {}
+        }
+      }
+    } catch (err) {
+      addLog(err.message, 'err-line');
+      showToast('Installation failed', 'error');
+      this.disabled = false;
+      this.className = 'btn-primary flex-1 justify-center';
+      document.getElementById('apInstallLabel').textContent = 'Retry';
+    }
+  });
+
+  loadStore();
+</script>
+
+<%- include('../components/footer') %>
