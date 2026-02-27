@@ -195,7 +195,7 @@ const addonsModule: Module = {
             return res.status(502).json({ success: false, message: 'Failed to fetch addon list from GitHub' });
           }
 
-          const contents: any[] = await contentsRes.json();
+          const contents = await contentsRes.json() as any[];
           const folders = contents.filter((i: any) => i.type === 'dir' && !i.name.startsWith('.'));
 
           const addonData = await Promise.all(
@@ -205,7 +205,7 @@ const addonsModule: Module = {
                   headers: { 'User-Agent': 'airlink-panel' },
                 });
                 if (!infoRes.ok) return null;
-                const info = await infoRes.json();
+                const info = await infoRes.json() as any;
                 return {
                   id: folder.name,
                   name: info.name || folder.name,
