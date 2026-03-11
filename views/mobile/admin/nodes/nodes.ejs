@@ -1,6 +1,6 @@
 <%- include('../../components/header', { title: req.translations.adminNodesTitle || 'Nodes' }) %>
 
-<main class="min-h-screen bg-white dark:bg-[#141414] pt-14 pb-20">
+<main class="">
   <%- include('../../components/template') %>
   <%- include('../../components/toast') %>
 
@@ -21,7 +21,7 @@
 
     <!-- Stats -->
     <div class="grid grid-cols-2 gap-3 mb-5">
-      <div class="rounded-xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.totalNodes || 'Total Nodes' %></p>
         <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= nodes.length %></p>
         <% if (nodes.length > 0) { %>
@@ -30,7 +30,7 @@
           <p class="text-xs text-neutral-500 mt-1"><%= req.translations.noNodesAvailable %></p>
         <% } %>
       </div>
-      <div class="rounded-xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Servers</p>
         <p class="text-2xl font-semibold text-neutral-800 dark:text-white">
           <%= nodes.reduce((t, n) => t + (n.instances ? n.instances.length : 0), 0) %>
@@ -63,7 +63,7 @@
     <!-- Node cards -->
     <div class="space-y-2">
       <% nodes.forEach(function(node) { %>
-        <div class="rounded-xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/5 px-4 py-3">
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
           <div class="flex items-center gap-3 mb-3">
             <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 flex items-center justify-center shrink-0">
               <% if (node.status === 'Online') { %>

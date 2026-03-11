@@ -22,12 +22,17 @@
       html, body { transition: background-color 0.25s ease-in, color 0.25s ease-in; }
     </style>
 </head>
-<body style="font-family: 'General Sans'" class="bg-white dark:bg-[#141414] h-full text-neutral-800 dark:text-white">
+<body style="font-family: 'General Sans'" class="bg-white dark:bg-[#141414] text-neutral-800 dark:text-white overflow-x-hidden">
+<style>
+  body {
+    /* Prevent page content from showing through the fixed bottom nav */
+    padding-top: 3.5rem;   /* 56px = h-14 */
+    padding-bottom: 4rem;  /* 64px = h-16 */
+    min-height: 100dvh;
+    box-sizing: border-box;
+  }
+</style>
 
-<!-- Desktop toggle hidden on mobile — topbar has its own -->
-<button id="theme-toggle" class="hidden" aria-hidden="true">
-    <span class="dot"></span>
-</button>
 
 <script>
 function initializeTheme() {
@@ -43,6 +48,8 @@ function initializeTheme() {
   function toggleTheme() {
     const isDark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    const dot = document.querySelector('#theme-toggle .dot');
+    if (dot) dot.style.transform = isDark ? 'translateX(20px)' : 'translateX(0)';
     if (typeof setTerminalTheme === 'function') {
       setTerminalTheme();
     }

@@ -1,6 +1,6 @@
 <%- include('../../components/header', { title: 'Player Statistics' }) %>
 
-<main class="min-h-screen bg-white dark:bg-[#141414] pt-14 pb-20">
+<main class="">
   <%- include('../../components/template') %>
   <%- include('../../components/toast') %>
 
@@ -30,22 +30,22 @@
 
     <!-- Stats grid -->
     <div class="grid grid-cols-2 gap-3 mb-5">
-      <div class="rounded-xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Total Players</p>
         <p id="totalPlayers" class="text-2xl font-semibold text-neutral-800 dark:text-white">0</p>
         <p class="text-xs text-neutral-500 mt-1">Across all servers</p>
       </div>
-      <div class="rounded-xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Capacity</p>
         <p id="maxCapacity" class="text-2xl font-semibold text-neutral-800 dark:text-white">0</p>
         <p class="text-xs text-neutral-500 mt-1">Max slots</p>
       </div>
-      <div class="rounded-xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Online Servers</p>
         <p id="onlineServers" class="text-2xl font-semibold text-neutral-800 dark:text-white">0</p>
         <p class="text-xs text-neutral-500 mt-1">Currently up</p>
       </div>
-      <div class="rounded-xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Utilization</p>
         <p id="utilization" class="text-2xl font-semibold text-neutral-800 dark:text-white">0%</p>
         <p class="text-xs text-neutral-500 mt-1">Capacity used</p>
@@ -53,7 +53,7 @@
     </div>
 
     <!-- Chart -->
-    <div class="rounded-xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/5 p-4 mb-5">
+    <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4 mb-5">
       <div class="flex items-center justify-between mb-3">
         <p class="text-sm font-medium text-neutral-800 dark:text-white">Player Count History</p>
         <p class="text-[10px] text-neutral-500">Last 48 hours</p>
@@ -66,7 +66,7 @@
     <!-- Server list -->
     <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2">Servers</p>
     <div id="serverList" class="space-y-2">
-      <div class="rounded-xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/5 px-4 py-3 text-center">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 text-center">
         <p class="text-xs text-neutral-500">Loading...</p>
       </div>
     </div>
@@ -123,11 +123,11 @@
       const list = document.getElementById('serverList');
       list.innerHTML = '';
       if (!data.servers || data.servers.length === 0) {
-        list.innerHTML = '<div class="rounded-xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/5 px-4 py-3 text-center"><p class="text-xs text-neutral-500">No servers found</p></div>';
+        list.innerHTML = '<div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 text-center"><p class="text-xs text-neutral-500">No servers found</p></div>';
       } else {
         data.servers.forEach(server => {
           const div = document.createElement('div');
-          div.className = 'rounded-xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/5 px-4 py-3 flex items-center gap-3';
+          div.className = 'rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 flex items-center gap-3';
           div.innerHTML = `
             <div class="w-2 h-2 rounded-full shrink-0 ${server.online ? 'bg-emerald-500' : 'bg-neutral-400'}"></div>
             <div class="flex-1 min-w-0">

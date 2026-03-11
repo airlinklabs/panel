@@ -1,11 +1,11 @@
 <%- include('../../components/header', { title: 'Server Settings' }) %>
 
-<main class="min-h-screen bg-white dark:bg-[#141414] pt-14 pb-20">
+<main class="">
   <%- include('../../components/template') %>
 
-  <section class="px-4 py-4">
+  <section class="px-4 py-5">
 <!-- Page Header -->
-      <header class="sm:flex sm:items-center px-8 pt-4">
+      <header class="flex items-start justify-between mb-5">
         <%- include('../../components/serverHeader') %>
       </header>
 
@@ -15,8 +15,8 @@
       <%- include('../../components/serverTemplate') %>
 
       <!-- Server Settings -->
-      <div class="px-8 mt-8">
-        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+      <div class="mt-4">
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">
           <h2 class="text-lg font-semibold mb-4 text-white">Server Settings</h2>
           <p class="text-sm text-neutral-400 mb-4">Configure your server's basic settings.</p>
 
@@ -40,7 +40,7 @@
         </div>
 
         <!-- Server Information -->
-        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20 mt-8">
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5 mt-4">
           <h2 class="text-lg font-semibold mb-4 text-white">Server Information</h2>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -92,7 +92,7 @@
         </div>
 
         <!-- Danger Zone -->
-        <div class="bg-red-950/20 rounded-xl p-6 shadow-lg border border-red-800/20 mt-8">
+        <div class="rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/20 p-5 mt-4">
           <h2 class="text-lg font-semibold mb-4 text-white">Danger Zone</h2>
 
           <div class="flex items-center justify-between mb-6">

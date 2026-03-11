@@ -1,13 +1,13 @@
 <%- include('../../components/header', { title: 'Startup' }) %>
 
-<main class="min-h-screen bg-white dark:bg-[#141414] pt-14 pb-20">
+<main class="">
   <!-- Success/Error Messages -->
   <div id="message-container" class="fixed top-4 right-4 z-50 max-w-md"></div>
   <%- include('../../components/template') %>
 
-  <section class="px-4 py-4">
+  <section class="px-4 py-5">
 <!-- Page Header -->
-      <header class="sm:flex sm:items-center px-8 pt-4">
+      <header class="flex items-start justify-between mb-5">
         <%- include('../../components/serverHeader') %>
       </header>
 
@@ -17,7 +17,7 @@
       <%- include('../../components/serverTemplate') %>
 
       <!-- Startup Configuration -->
-      <div class="px-8 mt-8">
+      <div class="mt-4">
         <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-300 dark:border-neutral-800/20">
           <div class="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 overflow-hidden mb-6">
             <div class="p-5 border-b border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
@@ -148,7 +148,7 @@
         </div>
 
         <!-- Server Variables -->
-        <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-300 dark:border-neutral-800/20 mt-8">
+        <div class="rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 p-5 mt-4">
           <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white">Server Variables</h2>
           <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4">Configure environment variables for your server.</p>
 

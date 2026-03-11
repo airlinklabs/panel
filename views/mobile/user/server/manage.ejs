@@ -29,12 +29,12 @@
     }
 </style>
 
-<main class="min-h-screen bg-white dark:bg-[#141414] pt-14 pb-20">
+<main class="">
   <%- include('../../components/template') %>
 
-  <div class="px-4 py-4">
+  <div class="px-4 py-5">
 <!-- Page Header -->
-      <div class="sm:flex sm:items-center px-8 pt-4">
+      <div class="flex items-start justify-between mb-5">
         <%- include('../../components/serverHeader') %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex gap-2.5">
             <button id="startButton" type="button"
@@ -74,7 +74,7 @@
 
       <!-- Server Suspended Warning -->
       <% if (server.Suspended) { %>
-      <div class="mx-8 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center">
+      <div class="mx-4 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center">
         <div class="flex-shrink-0 mr-3">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -89,7 +89,7 @@
 
       <!-- Daemon Offline Warning -->
       <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline) { %>
-      <div id="daemonOfflineWarning" class="mx-8 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center">
+      <div id="daemonOfflineWarning" class="mx-4 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center">
         <div class="flex-shrink-0 mr-3">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -175,7 +175,7 @@
       </dl>
     </div>
 
-      <div class="flex flex-col lg:flex-row px-8">
+      <div class="flex flex-col gap-4">
 
 <!-- Left side: Console -->
 <div class="w-full lg:w-2/3 lg:pr-5 flex flex-col">

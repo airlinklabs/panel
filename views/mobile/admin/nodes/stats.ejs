@@ -1,23 +1,23 @@
 <%- include('../../components/header', { title: 'Dashboard' }) %>
 
-<main class="min-h-screen bg-white dark:bg-[#141414] pt-14 pb-20">
+<main class="">
   <%- include('../../components/template') %>
 
-  <div class="px-4 py-4">
-<div class="sm:flex sm:items-center px-8 pt-4">
+  <div class="px-4 py-5">
+<div class="flex items-start justify-between mb-5">
         <div class="sm:flex-auto">
             <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminNodesTitle %></h1>
             <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminNodesText %></p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button onclick="location.href='/admin/nodes'" type="button" class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+          <button onclick="location.href='/admin/nodes'" type="button" class="border border-neutral-800/20 block rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
             Back
           </button>
         </div>
       </div>
 
-      <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
-        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+      <div id="stats" class="grid grid-cols-1 gap-4 mt-4">
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">
             <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Status</h2>
             <%
             const lastStat = stats.totalStats && stats.totalStats.length ? stats.totalStats.at(-1) : null;
@@ -31,7 +31,7 @@
             </p>
         </div>
 
-        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">
         <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Uptime</h2>
         <p class="text-4xl font-normal text-neutral-800 dark:text-white">
             <%= isOnline ? stats.uptime : 'N/A' %> 
@@ -45,7 +45,7 @@
       
       </div>
 
-      <div id="charts" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
+      <div id="charts" class="grid grid-cols-1 gap-4 mt-4">
         <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg">
           <h2 class="text-lg font-semibold text-neutral-800 dark:text-white mb-4">RAM Usage</h2>
           <canvas id="ramChart" class="w-full h-64"></canvas>
