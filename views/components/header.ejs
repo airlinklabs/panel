@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html class="h-full" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <% if (typeof csrfToken !== 'undefined') { %>
+    <meta name="csrf-token" content="<%= csrfToken %>">
+    <% } %>
+    <title><%= settings.title %> - <%= title %></title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" href="<%= settings.favicon %>" type="image/x-icon">
+    <link rel="shortcut icon" href="<%= settings.favicon %>" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.fontshare.com">
+    <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,300,600,400,700&display=swap" rel="stylesheet">
+    <script src="/js/csrf.js"></script>
+</head>
+<body style="font-family: 'General Sans'" class="bg-white dark:bg-[#141414] h-full text-neutral-800 dark:text-white">
+<button id="theme-toggle" class="absolute right-4 top-4 w-14 h-8 flex items-center bg-gray-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500 z-50">
+    <span class="dot bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
+</button>
+<script>
+function initializeTheme() {
+    const userPreference = localStorage.getItem('theme');
+    const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (userPreference === 'dark' || (!userPreference && systemPreference)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    updateSwitchPosition();
+  }
+
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    updateSwitchPosition();
+    if (typeof setTerminalTheme === 'function') {
+    setTerminalTheme();
+  }
+  }
+
+  function updateSwitchPosition() {
+    const isDark = document.documentElement.classList.contains('dark');
+    const dot = document.querySelector('#theme-toggle .dot');
+    if (isDark) {
+      dot.classList.add('translate-x-6');
+    } else {
+      dot.classList.remove('translate-x-6');
+    }
+  }
+
+  document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+  initializeTheme();
+  </script>

@@ -1,0 +1,82 @@
+<div class="mt-6 mb-8">
+    <div class="relative sm:block">
+      <div id="sliding-background" class="absolute w-fit h-9 px-3 transition-transform duration-200 ease-in-out z-0 bg-neutral-200 border border-neutral-300 dark:bg-white/5 dark:border-neutral-300/5 rounded-xl"></div>
+      <nav class="flex relative">
+        <ul role="list" class="flex min-w-full mt-1.5 gap-x-2 text-sm font-normal leading-6 text-neutral-600 dark:text-neutral-400">
+          <li class="transition">
+            <a href="/admin/settings" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 mb-0.5 inline-flex mr-1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+                  </svg>
+              General
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      var currentPagePath = window.location.pathname;
+      var navLinks2 = document.querySelectorAll('.nav-link2');
+      var slidingBackground = document.getElementById('sliding-background');
+
+      function updateActiveLink(clickedLink = null) {
+        var activeLink = null;
+        navLinks2.forEach(function(link) {
+          // Skip disabled links
+          if (link.classList.contains('cursor-not-allowed')) return;
+
+          if (currentPagePath.startsWith(link.getAttribute('href'))) {
+            activeLink = link;
+          }
+        });
+
+        if (activeLink) {
+          navLinks2.forEach(link => {
+            if (!link.classList.contains('cursor-not-allowed')) {
+              link.classList.remove('text-blue-500', 'font-semibold');
+            }
+          });
+
+          activeLink.classList.add('text-blue-500', 'font-semibold');
+          var linkRect = activeLink.getBoundingClientRect();
+          var navRect = activeLink.closest('nav').getBoundingClientRect();
+
+          // Set width and position of sliding background
+          slidingBackground.style.width = `${linkRect.width}px`;
+          slidingBackground.style.transform = `translateX(${linkRect.left - navRect.left}px)`;
+        }
+      }
+
+      // Initial setup
+      updateActiveLink();
+
+      navLinks2.forEach(function(link) {
+        // Skip disabled links
+        if (link.classList.contains('cursor-not-allowed')) return;
+
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          var href = this.getAttribute('href');
+          updateActiveLink(this);
+
+          // Add a subtle animation effect
+          this.classList.add('scale-105');
+          setTimeout(() => {
+            this.classList.remove('scale-105');
+          }, 150);
+
+          setTimeout(() => {
+            window.location.href = href;
+          }, 300);
+        });
+      });
+
+      window.addEventListener('popstate', function() {
+        currentPagePath = window.location.pathname;
+        updateActiveLink();
+      });
+    });
+  </script>
