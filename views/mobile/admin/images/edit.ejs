@@ -1,20 +1,20 @@
 <%- include('../../components/header', { title: 'Edit Image' }) %>
 
-<main class="min-h-screen bg-white dark:bg-[#141414] pt-14 pb-20">
+<main class="">
   <%- include('../../components/template') %>
 
-  <div class="px-4 py-4">
-<div class="sm:flex sm:items-center px-8 pt-4">
+  <div class="px-4 py-5">
+<div class="flex items-start justify-between mb-5">
         <div class="sm:flex-auto">
           <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">Edit Image: <%= image.name %></h1>
           <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-300">Edit the image configuration or export it as JSON.</p>
         </div>
         <!-- Action Buttons -->
         <div class="mt-4 sm:mt-0 sm:ml-4 sm:flex-none">
-          <a href="/admin/images/export/<%= image.id %>" class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2">
+          <a href="/admin/images/export/<%= image.id %>" class="border border-neutral-800/20 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2">
             Export JSON
           </a>
-          <a href="/admin/images" class="border border-neutral-800/20 rounded-xl ml-2 bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2">
+          <a href="/admin/images" class="border border-neutral-800/20 rounded-xl ml-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2">
             Back to Images
           </a>
         </div>
@@ -22,7 +22,7 @@
 
       <!-- Success Message -->
       <% if (req.query.success) { %>
-        <div class="rounded-xl bg-green-800/10 px-6 py-4 mt-8 mx-8">
+        <div class="rounded-xl bg-green-800/10 px-6 py-4 mt-4">
           <div class="flex items-center">
             <div class="flex-shrink-0">
               <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -40,7 +40,7 @@
       <% } %>
 
       <!-- Edit Form -->
-      <div class="mt-8 mx-8">
+      <div class="mt-4">
         <div class="grid grid-cols-1 gap-6">
           <!-- Basic Information -->
           <div class="bg-white dark:bg-neutral-800 shadow-md rounded-xl p-6 border border-neutral-800/20">
@@ -75,7 +75,7 @@
             <p class="text-sm text-neutral-500 dark:text-neutral-400 mb-4">Edit the JSON configuration directly. Make sure to maintain valid JSON format.</p>
             <div id="jsonEditor" class="w-full h-96 border border-neutral-300 dark:border-neutral-700 rounded-md"></div>
             <div class="mt-4 flex justify-end">
-              <button id="saveButton" type="button" class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2">
+              <button id="saveButton" type="button" class="border border-neutral-800/20 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2">
                 Save Changes
               </button>
             </div>

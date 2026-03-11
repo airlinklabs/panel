@@ -1,9 +1,9 @@
 <%- include('../../components/header', { title: 'Admin' }) %>
 
-<main class="min-h-screen bg-white dark:bg-[#141414] pt-14 pb-20">
+<main class="">
   <%- include('../../components/template') %>
 
-  <div class="px-4 py-4">
+  <div class="px-4 py-5">
     <div class="mb-5">
       <h1 class="text-base font-medium text-neutral-800 dark:text-white">Admin Panel</h1>
       <p class="text-xs text-neutral-500 mt-0.5">Manage your panel</p>
@@ -134,8 +134,10 @@
       <% if (adminMenuItems && adminMenuItems.length > 0) {
         adminMenuItems.forEach(item => { %>
       <a href="<%= item.url %>" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 active:scale-[0.98] transition-transform duration-100">
-        <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center shrink-0">
-          <%- item.icon %>
+        <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center shrink-0 overflow-hidden">
+          <div class="w-5 h-5 flex items-center justify-center [&>svg]:w-5 [&>svg]:h-5 [&>svg]:shrink-0">
+            <%- item.icon %>
+          </div>
         </div>
         <div class="flex-1 min-w-0">
           <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= item.label %></p>

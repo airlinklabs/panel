@@ -1,17 +1,17 @@
 <%- include('../../components/header', { title: 'Backups' }) %>
 
-<main class="min-h-screen bg-white dark:bg-[#141414] pt-14 pb-20">
+<main class="">
   <!-- Success/Error Messages -->
   <div id="message-container" class="fixed bottom-24 left-4 right-4 z-50"></div>
   <%- include('../../components/template') %>
 
-  <section class="px-4 py-4">
+  <section class="px-4 py-5">
 <!-- Page Header -->
-      <header class="sm:flex sm:items-center px-8 pt-4">
+      <header class="flex items-start justify-between mb-5">
         <%- include('../../components/serverHeader') %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex gap-2.5">
           <button id="createBackup" onclick="openCreateBackupModal()" type="button"
-              class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+              class="border border-neutral-800/20 block rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 inline-flex mr-1 text-neutral-800 mb-0.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
@@ -176,7 +176,7 @@
     <p class="mb-6 text-neutral-600">Please choose a name for this backup.</p>
     <input type="text"
       id="backupName"
-      class="w-full px-3 py-2 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition mb-4 text-neutral-800 bg-white"
+      class="w-full px-3 py-2 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition mb-4 text-neutral-800 dark:text-white bg-white dark:bg-neutral-800 border-neutral-300 dark:border-neutral-600"
       placeholder="Enter backup name"
       onkeydown="handleBackupNameKeyPress(event)">
     <div class="flex justify-end space-x-4">

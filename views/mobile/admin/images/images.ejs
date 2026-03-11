@@ -1,6 +1,6 @@
 <%- include('../../components/header', { title: req.translations.adminImagesTitle || 'Images' }) %>
 
-<main class="min-h-screen bg-white dark:bg-[#141414] pt-14 pb-20">
+<main class="">
   <%- include('../../components/template') %>
   <%- include('../../components/toast') %>
 
@@ -27,7 +27,7 @@
     <!-- Image cards -->
     <div class="space-y-2">
       <% images.forEach(function(image) { %>
-        <div class="rounded-xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/5 px-4 py-3">
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
           <div class="flex items-center gap-3 mb-3">
             <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 flex items-center justify-center shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-neutral-500">

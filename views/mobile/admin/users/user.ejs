@@ -1,10 +1,10 @@
 <%- include('../../components/header', { title: 'Overview' }) %>
 
-<main class="min-h-screen bg-white dark:bg-[#141414] pt-14 pb-20">
+<main class="">
   <%- include('../../components/template') %>
 
-  <div class="px-4 py-4">
-<div class="sm:flex sm:items-center px-8 pt-4">
+  <div class="px-4 py-5">
+<div class="flex items-start justify-between mb-5">
         <div class="sm:flex-auto">
            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminUserTitle %></h1>
            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminUserText %></p>
@@ -18,7 +18,7 @@
            </a>
          </div>
        </div>
-       <div class="px-8 mt-5">
+       <div class="px-4 mt-5">
          <!-- User details will be displayed here -->
          <div class="bg-white dark:bg-neutral-800/50 rounded-xl p-6 shadow-lg border border-neutral-200 dark:border-neutral-700/30">
            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

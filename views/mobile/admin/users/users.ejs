@@ -1,6 +1,6 @@
 <%- include('../../components/header', { title: req.translations.adminUsersTitle || 'Users' }) %>
 
-<main class="min-h-screen bg-white dark:bg-[#141414] pt-14 pb-20">
+<main class="">
   <%- include('../../components/template') %>
   <%- include('../../components/toast') %>
 
@@ -23,7 +23,7 @@
 
     <!-- Stats -->
     <div class="grid grid-cols-2 gap-3 mb-5">
-      <div class="rounded-xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.totalUsers || 'Total Users' %></p>
         <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= users.length %></p>
         <% if (onlineUsers.size > 0) { %>
@@ -32,7 +32,7 @@
           <p class="text-xs text-neutral-500 mt-1">None online</p>
         <% } %>
       </div>
-      <div class="rounded-xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.admins || 'Admins' %></p>
         <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= users.filter(u => u.isAdmin).length %></p>
         <p class="text-xs text-neutral-500 mt-1"><%= users.filter(u => !u.isAdmin).length %> regular</p>
@@ -51,7 +51,7 @@
     <!-- User cards -->
     <div class="space-y-2">
       <% users.forEach(function(user) { %>
-        <div class="rounded-xl bg-neutral-50 dark:bg-white/[0.03] border border-neutral-200 dark:border-white/5 px-4 py-3">
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
           <div class="flex items-center gap-3 mb-3">
             <div class="relative shrink-0">
               <img class="h-9 w-9 rounded-lg" src="https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(user.username) %>" alt="">
