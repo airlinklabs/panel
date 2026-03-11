@@ -15,7 +15,7 @@
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <div class="flex gap-2">
-            <button id="createButton" type="button" class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+            <button id="createButton" type="button" class="inline-flex items-center gap-1.5 border border-neutral-200 dark:border-neutral-700/40 rounded-xl bg-neutral-900 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-100 px-3 py-2 text-sm font-medium transition">
               <%= req.translations.createNewUser %>
             </button>
           </div>
@@ -24,7 +24,7 @@
 
       <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
 
-        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+        <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.totalUsers %></h2>
           <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= users.length %></p>
           <% if (onlineUsers.size > 0) { %>
@@ -33,7 +33,7 @@
             <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
           <% } %>
         </div>
-        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+        <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.admins || 'Admins' %></h2>
             <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= users.filter(user => user.isAdmin).length %></p>
             <% if (onlineUsers.size > 0) { %>
@@ -66,7 +66,7 @@
       <!-- Table of users -->
       <div class="overflow-hidden shadow rounded-lg m-8 border border-neutral-800/20" id="userTable">
         <table class="min-w-full divide-y divide-white/10">
-          <thead class="bg-white/5">
+          <thead class="bg-neutral-50 dark:bg-neutral-800/20">
             <tr>
               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.name %></th>
               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.role %></th>

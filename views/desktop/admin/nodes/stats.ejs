@@ -22,7 +22,7 @@
       </div>
 
       <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
-        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+        <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
             <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Status</h2>
             <%
             const lastStat = stats.totalStats && stats.totalStats.length ? stats.totalStats.at(-1) : null;
@@ -36,7 +36,7 @@
             </p>
         </div>
 
-        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+        <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
         <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Uptime</h2>
         <p class="text-4xl font-normal text-neutral-800 dark:text-white">
             <%= isOnline ? stats.uptime : 'N/A' %> 

@@ -24,7 +24,7 @@
 
       <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
 
-        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+        <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.totalNodes %></h2>
           <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= nodes.length %></p>
           <% if (nodes.length > 0) { %>
@@ -33,7 +33,7 @@
           <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noNodesAvailable %></p>
           <% } %>
         </div>
-        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+        <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Server Count</h2>
           <p class="text-4xl font-normal text-neutral-800 dark:text-white">
             <%= nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0) %>
@@ -93,7 +93,7 @@
       <!-- Table of nodes -->
       <div class="overflow-hidden shadow rounded-lg m-8 border border-neutral-800/20" id="nodeTable">
         <table class="min-w-full divide-y divide-white/10">
-          <thead class="bg-white/5">
+          <thead class="bg-neutral-50 dark:bg-neutral-800/20">
             <tr>
               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.name %></th>
               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.connection %></th>

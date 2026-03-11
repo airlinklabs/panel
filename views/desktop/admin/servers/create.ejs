@@ -16,7 +16,7 @@
       </div>
 
       <div id="nodeForm" class="mt-6 px-8 w-full">
-        <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-800/20">
+        <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <form id="createServerForm" method="POST" action="/admin/servers/create">
             <!-- General Category -->
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">General</h2>
@@ -131,7 +131,7 @@
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true">
-                    <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="allowStartupEditLabel">Disabled</span>
                   </label>
                 </div>
@@ -338,7 +338,7 @@
             checkboxInput.checked = variable.value || false;
 
             const toggleTrack = document.createElement('div');
-            toggleTrack.classList.add('w-11', 'h-6', 'bg-neutral-300', 'dark:bg-neutral-700', 'peer-focus:ring-2', 'peer-focus:ring-blue-300', 'dark:peer-focus:ring-blue-800', 'rounded-full', 'peer', 'peer-checked:after:translate-x-full', 'rtl:peer-checked:after:-translate-x-full', 'peer-checked:after:border-white', 'after:content-[\'\']', 'after:absolute', 'after:top-[2px]', 'after:start-[2px]', 'after:bg-white', 'after:border-gray-300', 'after:border', 'after:rounded-full', 'after:h-5', 'after:w-5', 'after:transition-all', 'peer-checked:bg-blue-600');
+            toggleTrack.classList.add('w-11', 'h-6', 'bg-neutral-300', 'dark:bg-neutral-700', 'peer-focus:ring-2', 'peer-focus:ring-blue-300', 'dark:peer-focus:ring-blue-800', 'rounded-full', 'peer', 'peer-checked:after:translate-x-full', 'rtl:peer-checked:after:-translate-x-full', 'peer-checked:after:border-white', 'after:content-[\'\']', 'after:absolute', 'after:top-[2px]', 'after:start-[2px]', 'after:bg-white', 'after:border-neutral-300', 'after:border', 'after:rounded-full', 'after:h-5', 'after:w-5', 'after:transition-all', 'peer-checked:bg-blue-600');
 
             const toggleLabel = document.createElement('span');
             toggleLabel.classList.add('ms-3', 'text-sm', 'font-medium', 'text-neutral-600', 'dark:text-neutral-300');
