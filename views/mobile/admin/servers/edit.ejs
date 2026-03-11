@@ -4,17 +4,16 @@
   <%- include('../../components/template') %>
 
   <div class="px-4 py-5">
-<div class="flex items-start justify-between mb-5">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">Edit Server: <%= server.name %></h1>
-            <p class="mt-1 tracking-tight text-sm text-neutral-500">Modify server settings and configuration.</p>
-        </div>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <a href="/admin/servers" class="rounded-xl bg-neutral-200 dark:bg-neutral-800 px-3 py-2 text-center text-sm font-medium text-neutral-700 dark:text-neutral-200 shadow-sm hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-all duration-200">
-            Back to Servers
-          </a>
-        </div>
-      </div>
+    <div class="mb-5">
+      <a href="/admin/servers" class="inline-flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 mb-3 hover:text-neutral-700 dark:hover:text-neutral-200 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+        </svg>
+        Back to Servers
+      </a>
+      <h1 class="text-base font-medium text-neutral-800 dark:text-white">Edit Server: <%= server.name %></h1>
+      <p class="text-xs text-neutral-500 mt-0.5">Modify server settings and configuration.</p>
+    </div>
 
       <div id="serverForm" class="mt-4 w-full">
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">
@@ -91,7 +90,7 @@
                 <textarea id="startCommand" name="StartCommand" rows="3" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5"><%= server.StartCommand %></textarea>
               </div>
 
-              <div class="bg-neutral-100 dark:bg-neutral-700/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
+              <div class="bg-neutral-100 dark:bg-neutral-800/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between">
                   <div class="flex items-center mb-2 md:mb-0">
                     <div class="flex-shrink-0 mr-3">
@@ -137,7 +136,7 @@
                   </div>
                 </div>
 
-                <div class="bg-neutral-100 dark:bg-neutral-700/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
+                <div class="bg-neutral-100 dark:bg-neutral-800/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
                   <div class="flex flex-col md:flex-row md:items-center justify-between">
                     <div class="flex items-center mb-2 md:mb-0">
                       <div class="flex-shrink-0 mr-3">

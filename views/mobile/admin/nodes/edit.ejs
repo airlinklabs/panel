@@ -130,7 +130,7 @@
       const isUsed = usedPorts.has(port);
 
       // Add different styling for used ports
-      portTag.className = `flex items-center justify-between rounded-lg ${isUsed ? 'bg-amber-600/10 dark:bg-amber-700/20' : 'bg-neutral-800/10 dark:bg-neutral-700/20'} px-3 py-1.5 text-sm`;
+      portTag.className = `flex items-center justify-between rounded-lg ${isUsed ? 'bg-amber-600/10 dark:bg-amber-700/20' : 'bg-neutral-800/10 dark:bg-neutral-800/20'} px-3 py-1.5 text-sm`;
 
       const portText = document.createElement('span');
       portText.className = isUsed ? 'text-amber-600 dark:text-amber-400 flex items-center' : 'text-neutral-800 dark:text-neutral-300';

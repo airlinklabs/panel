@@ -4,20 +4,23 @@
   <%- include('../../components/template') %>
 
   <div class="px-4 py-5">
-<div class="flex items-start justify-between mb-5">
-        <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">Edit Image: <%= image.name %></h1>
-          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-300">Edit the image configuration or export it as JSON.</p>
+    <div class="mb-5">
+      <a href="/admin/images" class="inline-flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 mb-3 hover:text-neutral-700 dark:hover:text-neutral-200 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+        </svg>
+        Back to Images
+      </a>
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-base font-medium text-neutral-800 dark:text-white">Edit Image: <%= image.name %></h1>
+          <p class="text-xs text-neutral-500 mt-0.5">Edit the image configuration or export it as JSON.</p>
         </div>
-        <!-- Action Buttons -->
-        <div class="mt-4 sm:mt-0 sm:ml-4 sm:flex-none">
-          <a href="/admin/images/export/<%= image.id %>" class="border border-neutral-800/20 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2">
-            Export JSON
-          </a>
-          <a href="/admin/images" class="border border-neutral-800/20 rounded-xl ml-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2">
-            Back to Images
-          </a>
-        </div>
+        <a href="/admin/images/export/<%= image.id %>" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition shrink-0">
+          Export JSON
+        </a>
+      </div>
+    </div>
       </div>
 
       <!-- Success Message -->

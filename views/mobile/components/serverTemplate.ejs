@@ -27,13 +27,20 @@
 
 <script>
 (function() {
-  const currentPath = window.location.pathname.replace(/\/$/, '');
-  document.querySelectorAll('.nav-link2').forEach(link => {
-    const href = link.getAttribute('href');
+  var currentPath = window.location.pathname.replace(/\/$/, '');
+  document.querySelectorAll('.nav-link2').forEach(function(link) {
+    var href = link.getAttribute('href');
     if (!href) return;
     if (href.replace(/\/$/, '') === currentPath) {
       link.classList.add('bg-neutral-100', 'dark:bg-white/10', 'border-neutral-200', 'dark:border-neutral-700/30', 'text-neutral-900', 'dark:text-white', 'font-medium');
-      link.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+      // Scroll active tab into view within the strip only, not the whole page
+      var strip = link.closest('.overflow-x-auto');
+      if (strip) {
+        var linkLeft = link.offsetLeft;
+        var linkWidth = link.offsetWidth;
+        var stripWidth = strip.offsetWidth;
+        strip.scrollLeft = linkLeft - (stripWidth / 2) + (linkWidth / 2);
+      }
     }
   });
 })();

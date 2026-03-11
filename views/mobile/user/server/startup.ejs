@@ -1,383 +1,202 @@
 <%- include('../../components/header', { title: 'Startup' }) %>
 
 <main class="">
-  <!-- Success/Error Messages -->
-  <div id="message-container" class="fixed top-4 right-4 z-50 max-w-md"></div>
   <%- include('../../components/template') %>
 
   <section class="px-4 py-5">
-<!-- Page Header -->
-      <header class="flex items-start justify-between mb-5">
-        <%- include('../../components/serverHeader') %>
-      </header>
 
-      <%- include('../../components/installHeader') %>
+    <header class="mb-5">
+      <%- include('../../components/serverHeader') %>
+    </header>
 
-      <!-- Server Template -->
-      <%- include('../../components/serverTemplate') %>
+    <%- include('../../components/installHeader') %>
+    <%- include('../../components/serverTemplate') %>
 
-      <!-- Startup Configuration -->
-      <div class="mt-4">
-        <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-300 dark:border-neutral-800/20">
-          <div class="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 overflow-hidden mb-6">
-            <div class="p-5 border-b border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
-              <div>
-                <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Startup Command</h2>
-                <p class="text-sm text-neutral-600 dark:text-neutral-400">Customize the command used to start your server.</p>
-              </div>
-              <%
-                let isStartupEditAllowed = false;
-                try {
-                  isStartupEditAllowed = server.allowStartupEdit === true;
-                } catch (e) {
-                  isStartupEditAllowed = false;
-                }
-                if (!isStartupEditAllowed) {
-              %>
-                <div class="flex items-center">
-                  <span class="inline-flex items-center rounded-md bg-red-50 dark:bg-red-900/20 px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-600/20 dark:ring-red-500/30">
-                    <svg class="mr-1.5 h-3 w-3 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
-                    </svg>
-                    Editing Disabled
-                  </span>
-                </div>
-              <% } else { %>
-                <div class="flex items-center">
-                  <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30">
-                    <svg class="mr-1.5 h-3 w-3 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
-                    </svg>
-                    Editing Enabled
-                  </span>
-                </div>
-              <% } %>
-            </div>
+    <div class="space-y-4 mt-4">
 
-            <form id="startupForm" action="/server/<%= server.UUID %>/startup/command" method="POST" enctype="application/x-www-form-urlencoded">
-              <%- include('../../components/csrf') %>
-              <div class="p-5">
-                <div class="mb-4">
-                  <label for="startCommand" class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2">Startup Command</label>
-                  <textarea id="startCommand" name="startCommand" rows="3" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 <%= !isStartupEditAllowed ? 'bg-neutral-100 dark:bg-neutral-800/50 cursor-not-allowed' : 'bg-white dark:bg-neutral-600/20' %> border border-neutral-300 dark:border-white/5" <%= !isStartupEditAllowed ? 'readonly' : '' %>><%= server.StartCommand %></textarea>
-                  <% if (!isStartupEditAllowed) { %>
-                    <p class="mt-2 text-xs text-red-500">Startup command editing is disabled for this server. Contact an administrator to enable this feature.</p>
-                  <% } else { %>
-                    <p class="mt-2 text-xs text-neutral-500">Use $ALVKT(VARIABLE_NAME) to reference environment variables.</p>
-                  <% } %>
-                </div>
-              </div>
-
-              <div class="px-5 py-4 bg-neutral-50 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-neutral-700">
-                <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors duration-200 <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %>>Save Command</button>
-              </div>
-            </form>
+      <!-- Startup command -->
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command</p>
+            <p class="text-xs text-neutral-500 mt-0.5">Customize the command used to start your server.</p>
           </div>
-
-          <!-- Docker Image Selection -->
-          <div class="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 overflow-hidden">
-            <div class="p-5 border-b border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
-              <div>
-                <h3 class="text-lg font-semibold text-neutral-800 dark:text-white">Docker Image</h3>
-                <p class="text-sm text-neutral-600 dark:text-neutral-400">Change the Docker image used by your server.</p>
-              </div>
-              <div class="flex items-center">
-                <span class="inline-flex items-center rounded-md bg-blue-50 dark:bg-blue-900/20 px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-600/20 dark:ring-blue-500/30">
-                  <svg class="mr-1.5 h-3 w-3 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
-                  </svg>
-                  Requires Restart
-                </span>
-              </div>
-            </div>
-
-            <form id="dockerImageForm" action="/server/<%= server.UUID %>/startup/docker-image" method="POST" enctype="application/x-www-form-urlencoded">
-              <%- include('../../components/csrf') %>
-              <div class="p-5">
-                <div class="mb-4">
-                  <label for="dockerImage" class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2">Docker Image</label>
-                  <%
-                    let currentDockerImage = '';
-                    try {
-                      const dockerImageObj = JSON.parse(server.dockerImage);
-                      currentDockerImage = Object.keys(dockerImageObj)[0];
-                    } catch (e) {
-                      currentDockerImage = '';
-                    }
-
-                    let availableDockerImages = [];
-                    try {
-                      if (server.image && server.image.dockerImages) {
-                        const dockerImagesArray = JSON.parse(server.image.dockerImages);
-                        dockerImagesArray.forEach(imageObj => {
-                          Object.keys(imageObj).forEach(key => {
-                            availableDockerImages.push(key);
-                          });
-                        });
-                      }
-                    } catch (e) {
-                      availableDockerImages = [];
-                    }
-                  %>
-
-                  <div class="relative">
-                    <select id="dockerImage" name="dockerImage" class="w-full rounded-xl appearance-none focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5 pr-10">
-                      <% if (availableDockerImages.length > 0) { %>
-                        <% availableDockerImages.forEach(image => { %>
-                          <option value="<%= image %>" <%= image === currentDockerImage ? 'selected' : '' %>><%= image %></option>
-                        <% }); %>
-                      <% } else { %>
-                        <option value="" disabled selected>No Docker images available</option>
-                      <% } %>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-neutral-500">
-                      <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                      </svg>
-                    </div>
-                  </div>
-                  <p class="mt-2 text-xs text-neutral-500">Changing the Docker image will restart your server if it's currently running.</p>
-                </div>
-              </div>
-
-              <div class="px-5 py-4 bg-neutral-50 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-neutral-700">
-                <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 hover:shadow-lg transition-all duration-200">Update Docker Image</button>
-              </div>
-            </form>
-          </div>
+          <%
+            var isStartupEditAllowed = false;
+            try { isStartupEditAllowed = server.allowStartupEdit === true; } catch(e) {}
+          %>
+          <% if (!isStartupEditAllowed) { %>
+          <span class="inline-flex items-center rounded-md bg-red-50 dark:bg-red-900/20 px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-600/20 shrink-0 ml-3">
+            Editing disabled
+          </span>
+          <% } else { %>
+          <span class="inline-flex items-center rounded-md bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400 ring-1 ring-inset ring-emerald-600/20 shrink-0 ml-3">
+            Editing enabled
+          </span>
+          <% } %>
         </div>
-
-        <!-- Server Variables -->
-        <div class="rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 p-5 mt-4">
-          <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white">Server Variables</h2>
-          <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4">Configure environment variables for your server.</p>
-
-          <form id="variablesForm" action="/server/<%= server.UUID %>/startup/variables" method="POST" enctype="application/x-www-form-urlencoded">
-            <%- include('../../components/csrf') %>
-            <div id="variablesContainer" class="space-y-4">
-              <% if (serverVariables && serverVariables.length > 0) { %>
-                <% serverVariables.forEach((variable, index) => { %>
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-neutral-100 dark:bg-neutral-700/20 rounded-lg border border-neutral-300 dark:border-white/5">
-                    <div>
-                      <label class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= variable.name %></label>
-                      <p class="text-xs text-neutral-500">Environment: <%= variable.env %></p>
-                    </div>
-                    <div class="md:col-span-2">
-                      <% if (variable.type === 'boolean') { %>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                          <input type="checkbox" name="var_<%= variable.env %>" id="toggle_<%= variable.env %>" class="sr-only peer" <%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'checked' : '' %>>
-                          <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                          <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="label_<%= variable.env %>"><%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'Enabled' : 'Disabled' %></span>
-                        </label>
-                        <script>
-                          document.getElementById('toggle_<%= variable.env %>').addEventListener('change', function() {
-                            document.getElementById('label_<%= variable.env %>').textContent = this.checked ? 'Enabled' : 'Disabled';
-                          });
-                        </script>
-                      <% } else if (variable.type === 'number') { %>
-                        <input type="number" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5">
-                      <% } else { %>
-                        <input type="text" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5">
-                      <% } %>
-                      <p class="mt-1 text-xs text-neutral-500">Type: <%= variable.type %></p>
-                    </div>
-                  </div>
-                <% }); %>
+        <form id="startupForm" action="/server/<%= server.UUID %>/startup/command" method="POST" enctype="application/x-www-form-urlencoded">
+          <%- include('../../components/csrf') %>
+          <div class="p-4">
+            <textarea id="startCommand" name="startCommand" rows="3"
+              class="w-full rounded-xl text-sm px-3 py-2 font-mono bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 text-neutral-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400 <%= !isStartupEditAllowed ? 'opacity-60 cursor-not-allowed' : '' %>"
+              <%= !isStartupEditAllowed ? 'readonly' : '' %>><%= server.StartCommand %></textarea>
+            <p class="text-xs text-neutral-500 mt-2">
+              <% if (!isStartupEditAllowed) { %>
+                Contact an administrator to enable startup command editing.
               <% } else { %>
-                <p class="text-neutral-600 dark:text-neutral-400">No variables available for this server.</p>
+                Use $ALVKT(VARIABLE_NAME) to reference environment variables.
               <% } %>
-            </div>
-
-            <div class="mt-6">
-              <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-lg hover:bg-blue-700 hover:scale-105 transition-all duration-200">Save Variables</button>
-            </div>
-          </form>
-        </div>
+            </p>
+          </div>
+          <div class="px-4 py-3 bg-neutral-100 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-white/5">
+            <button type="submit"
+              class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 transition <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>"
+              <%= !isStartupEditAllowed ? 'disabled' : '' %>>Save Command</button>
+          </div>
+        </form>
       </div>
-    </section>
-  </div>
+
+      <!-- Docker image -->
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-neutral-800 dark:text-white">Docker Image</p>
+            <p class="text-xs text-neutral-500 mt-0.5">Change the Docker image used by your server.</p>
+          </div>
+          <span class="inline-flex items-center rounded-md bg-blue-50 dark:bg-blue-900/20 px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-600/20 shrink-0 ml-3">
+            Requires restart
+          </span>
+        </div>
+        <form id="dockerImageForm" action="/server/<%= server.UUID %>/startup/docker-image" method="POST" enctype="application/x-www-form-urlencoded">
+          <%- include('../../components/csrf') %>
+          <div class="p-4">
+            <%
+              var currentDockerImage = '';
+              try { currentDockerImage = Object.keys(JSON.parse(server.dockerImage))[0]; } catch(e) {}
+              var availableDockerImages = [];
+              try {
+                if (server.image && server.image.dockerImages) {
+                  JSON.parse(server.image.dockerImages).forEach(function(obj) {
+                    Object.keys(obj).forEach(function(k) { availableDockerImages.push(k); });
+                  });
+                }
+              } catch(e) {}
+            %>
+            <div class="relative">
+              <select id="dockerImage" name="dockerImage"
+                class="w-full rounded-xl text-sm px-3 py-2 pr-8 bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 text-neutral-800 dark:text-white appearance-none focus:outline-none focus:ring-1 focus:ring-neutral-400">
+                <% if (availableDockerImages.length > 0) { %>
+                  <% availableDockerImages.forEach(function(image) { %>
+                    <option value="<%= image %>" <%= image === currentDockerImage ? 'selected' : '' %>><%= image %></option>
+                  <% }); %>
+                <% } else { %>
+                  <option disabled selected>No images available</option>
+                <% } %>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-neutral-500">
+                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <p class="text-xs text-neutral-500 mt-2">Changing the image will restart your server if it is running.</p>
+          </div>
+          <div class="px-4 py-3 bg-neutral-100 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-white/5">
+            <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 transition">Update Image</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Server variables -->
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">Server Variables</p>
+          <p class="text-xs text-neutral-500 mt-0.5">Configure environment variables for your server.</p>
+        </div>
+        <form id="variablesForm" action="/server/<%= server.UUID %>/startup/variables" method="POST" enctype="application/x-www-form-urlencoded">
+          <%- include('../../components/csrf') %>
+          <div class="p-4 space-y-4">
+            <% if (serverVariables && serverVariables.length > 0) { %>
+              <% serverVariables.forEach(function(variable, index) { %>
+              <div class="rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5 p-3">
+                <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-0.5"><%= variable.name %></label>
+                <p class="text-[10px] text-neutral-500 mb-2">ENV: <span class="font-mono"><%= variable.env %></span> &middot; type: <%= variable.type %></p>
+                <% if (variable.type === 'boolean') { %>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="var_<%= variable.env %>" id="toggle_<%= variable.env %>" class="sr-only peer"
+                      <%= (variable.value == true || variable.value === '1' || variable.value === 1) ? 'checked' : '' %>>
+                    <div class="relative w-9 h-5 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:w-4 after:h-4 after:transition-all peer-checked:after:translate-x-4"></div>
+                    <span class="text-xs text-neutral-600 dark:text-neutral-400" id="label_<%= variable.env %>">
+                      <%= (variable.value == true || variable.value === '1' || variable.value === 1) ? 'Enabled' : 'Disabled' %>
+                    </span>
+                  </label>
+                  <script>
+                    document.getElementById('toggle_<%= variable.env %>').addEventListener('change', function() {
+                      document.getElementById('label_<%= variable.env %>').textContent = this.checked ? 'Enabled' : 'Disabled';
+                    });
+                  </script>
+                <% } else if (variable.type === 'number') { %>
+                  <input type="number" name="var_<%= variable.env %>" value="<%= variable.value %>"
+                    class="w-full rounded-xl text-sm px-3 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-200 dark:border-white/5 text-neutral-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400">
+                <% } else { %>
+                  <input type="text" name="var_<%= variable.env %>" value="<%= variable.value %>"
+                    class="w-full rounded-xl text-sm px-3 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-200 dark:border-white/5 text-neutral-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400">
+                <% } %>
+              </div>
+              <% }); %>
+            <% } else { %>
+              <p class="text-xs text-neutral-500">No variables available for this server.</p>
+            <% } %>
+          </div>
+          <div class="px-4 py-3 bg-neutral-100 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-white/5">
+            <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 transition">Save Variables</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </section>
 </main>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const success = urlParams.get('success');
-    const error = urlParams.get('error');
-    const message = urlParams.get('message');
-
-    if (message) {
-      if (success === 'true') {
-        showMessage(message, 'success');
-      } else if (error === 'true') {
-        showMessage(message, 'error');
-      }
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('message')) {
+      var type = urlParams.get('success') === 'true' ? 'success' : 'error';
+      showToast(urlParams.get('message'), type);
     }
 
-    function showMessage(message, type) {
-      const messageContainer = document.getElementById('message-container');
-      const messageElement = document.createElement('div');
-      messageElement.className = `p-4 mb-4 rounded-xl shadow-lg ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`;
-      messageElement.innerHTML = `
-        <div class="flex items-center">
-          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-            ${type === 'success'
-              ? '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>'
-              : '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>'}
-          </svg>
-          <span>${message}</span>
-        </div>
-      `;
-
-      messageContainer.appendChild(messageElement);
-
-      setTimeout(() => {
-        messageElement.classList.add('opacity-0', 'transition-opacity', 'duration-500');
-        setTimeout(() => {
-          messageContainer.removeChild(messageElement);
-        }, 500);
-      }, 5000);
+    function handleFormSubmit(form, successMsg) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var btn = form.querySelector('button[type="submit"]');
+        var orig = btn.textContent;
+        btn.textContent = 'Saving...';
+        btn.disabled = true;
+        var formData = new FormData(form);
+        fetch(form.action, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' },
+          body: form.enctype === 'application/x-www-form-urlencoded'
+            ? new URLSearchParams(formData)
+            : formData
+        })
+        .then(function(r) { return r.ok ? r.json().catch(function() { return { success: true }; }) : r.json().then(function(d) { return Promise.reject(d); }); })
+        .then(function(data) {
+          btn.textContent = orig; btn.disabled = false;
+          if (data.success !== false) { showToast(successMsg, 'success'); setTimeout(function() { window.location.reload(); }, 1500); }
+          else { showToast(data.error || 'Failed', 'error'); }
+        })
+        .catch(function(err) {
+          btn.textContent = orig; btn.disabled = false;
+          showToast(err.error || err.message || 'Failed', 'error');
+        });
+      });
     }
-    const startupForm = document.getElementById('startupForm');
-    const dockerImageForm = document.getElementById('dockerImageForm');
-    const variablesForm = document.getElementById('variablesForm');
 
-    startupForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      const submitButton = startupForm.querySelector('button[type="submit"]');
-      const originalButtonText = submitButton.textContent;
-      submitButton.textContent = 'Saving...';
-      submitButton.disabled = true;
-
-      // Prepare form data
-      const formData = new FormData(startupForm);
-
-      // Submit via fetch (CSRF token will be added automatically by csrf.js)
-      fetch(startupForm.action, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json'
-        },
-        body: formData
-      })
-      .then(response => {
-        if (response.ok) {
-          return response.json().catch(() => ({ success: true }));
-        } else {
-          return response.json().then(data => Promise.reject(data));
-        }
-      })
-      .then(data => {
-        submitButton.textContent = originalButtonText;
-        submitButton.disabled = false;
-
-        if (data.success !== false) {
-          showMessage('Startup command saved successfully!', 'success');
-          setTimeout(() => window.location.reload(), 1500);
-        } else {
-          showMessage(data.error || 'Failed to save startup command', 'error');
-        }
-      })
-      .catch(error => {
-        submitButton.textContent = originalButtonText;
-        submitButton.disabled = false;
-        showMessage(error.message || error.error || 'Failed to save startup command', 'error');
-      });
-    });
-
-    dockerImageForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      const submitButton = dockerImageForm.querySelector('button[type="submit"]');
-      const originalButtonText = submitButton.textContent;
-      submitButton.textContent = 'Updating...';
-      submitButton.disabled = true;
-
-      // Prepare form data
-      const formData = new FormData(dockerImageForm);
-
-      // Submit via fetch (CSRF token will be added automatically by csrf.js)
-      fetch(dockerImageForm.action, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json'
-        },
-        body: formData
-      })
-      .then(response => {
-        if (response.ok) {
-          return response.json().catch(() => ({ success: true }));
-        } else {
-          return response.json().then(data => Promise.reject(data));
-        }
-      })
-      .then(data => {
-        submitButton.textContent = originalButtonText;
-        submitButton.disabled = false;
-
-        if (data.success !== false) {
-          showMessage('Docker image updated successfully! Server will be restarted if it was running.', 'success');
-          setTimeout(() => window.location.reload(), 2000);
-        } else {
-          showMessage(data.error || 'Failed to update Docker image', 'error');
-        }
-      })
-      .catch(error => {
-        submitButton.textContent = originalButtonText;
-        submitButton.disabled = false;
-        showMessage(error.message || error.error || 'Failed to update Docker image', 'error');
-      });
-    });
-
-    variablesForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      const submitButton = variablesForm.querySelector('button[type="submit"]');
-      const originalButtonText = submitButton.textContent;
-      submitButton.textContent = 'Saving...';
-      submitButton.disabled = true;
-
-      // Prepare form data as URL-encoded
-      const formData = new FormData(variablesForm);
-      const urlEncodedData = new URLSearchParams();
-
-      // Convert FormData to URLSearchParams
-      for (let [key, value] of formData.entries()) {
-        urlEncodedData.append(key, value);
-      }
-
-      // Submit via fetch (CSRF token will be added automatically by csrf.js)
-      fetch(variablesForm.action, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: urlEncodedData
-      })
-      .then(response => {
-        if (response.ok) {
-          return response.json().catch(() => ({ success: true }));
-        } else {
-          return response.json().then(data => Promise.reject(data));
-        }
-      })
-      .then(data => {
-        submitButton.textContent = originalButtonText;
-        submitButton.disabled = false;
-
-        if (data.success !== false) {
-          showMessage('Variables saved successfully!', 'success');
-          setTimeout(() => window.location.reload(), 1500);
-        } else {
-          showMessage(data.error || 'Failed to save variables', 'error');
-        }
-      })
-      .catch(error => {
-        submitButton.textContent = originalButtonText;
-        submitButton.disabled = false;
-        showMessage(error.message || error.error || 'Failed to save variables', 'error');
-      });
-    });
+    handleFormSubmit(document.getElementById('startupForm'), 'Startup command saved!');
+    handleFormSubmit(document.getElementById('dockerImageForm'), 'Docker image updated!');
+    handleFormSubmit(document.getElementById('variablesForm'), 'Variables saved!');
   });
 </script>

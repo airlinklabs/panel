@@ -3,9 +3,9 @@
   <%- include('../../components/template') %>
 
   <div class="px-4 py-5">
-<div class="flex items-start justify-between mb-5">
-        <%- include('../../components/serverHeader') %>
-      </div>
+    <header class="mb-5">
+      <%- include('../../components/serverHeader') %>
+    </header>
 
       <%- include('../../components/installHeader') %>
 
@@ -32,9 +32,9 @@
       <% } %>
 
       <div class="flex flex-col gap-4 mt-4">
-        <div class="overflow-hidden rounded-lg shadow-md w-full">
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden w-full">
           <!-- File Editor -->
-          <div class="bg-white dark:bg-neutral-800 p-6">
+          <div class="p-4">
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-lg font-medium text-neutral-900 dark:text-white">
                 <a class="text-neutral-300 hover:text-neutral-200 transition" href="/server/<%= server.UUID %>/files">/app/data/</a>

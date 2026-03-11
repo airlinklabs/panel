@@ -16,16 +16,29 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 
 <style>
-    canvas {
+    .xterm-viewport {
+        overflow-y: auto !important;
+    }
+    .xterm-screen {
+        overflow: hidden !important;
+    }
+    .stats-card {
+        position: relative;
+        overflow: hidden;
+    }
+    .stats-card > canvas {
         position: absolute;
         left: 0;
         top: 0;
         width: 100% !important;
         height: 100% !important;
+        pointer-events: none;
     }
-
-    .xterm-viewport {
-        overflow-y: hidden !important;
+    #terminal .xterm {
+        padding: 0;
+    }
+    #terminal .xterm-scroll-area {
+        overflow: hidden;
     }
 </style>
 
@@ -34,36 +47,27 @@
 
   <div class="px-4 py-5">
 <!-- Page Header -->
-      <div class="flex items-start justify-between mb-5">
+      <div class="mb-5">
         <%- include('../../components/serverHeader') %>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex gap-2.5">
+        <div class="flex gap-2 mt-3">
             <button id="startButton" type="button"
-                class="w-full md:w-auto rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2 <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                    class="size-4 inline-flex mr-1 text-emerald-100 mb-0.5">
-                    <path fill-rule="evenodd"
-                        d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z"
-                        clip-rule="evenodd" />
+                class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+                    <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
                 </svg>
                 <%= req.translations.start %>
             </button>
             <button id="restartButton" type="button"
-                class="w-full md:w-auto rounded-xl bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2 <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                    class="size-4 inline-flex mr-1 text-zinc-200 mb-0.5">
-                    <path fill-rule="evenodd"
-                        d="M4.755 10.059a7.5 7.5 0 0 1 12.548-3.364l1.903 1.903h-3.183a.75.75 0 1 0 0 1.5h4.992a.75.75 0 0 0 .75-.75V4.356a.75.75 0 0 0-1.5 0v3.18l-1.9-1.9A9 9 0 0 0 3.306 9.67a.75.75 0 1 0 1.45.388Zm15.408 3.352a.75.75 0 0 0-.919.53 7.5 7.5 0 0 1-12.548 3.364l-1.902-1.903h3.183a.75.75 0 0 0 0-1.5H2.984a.75.75 0 0 0-.75.75v4.992a.75.75 0 0 0 1.5 0v-3.18l1.9 1.9a9 9 0 0 0 15.059-4.035.75.75 0 0 0-.53-.918Z"
-                        clip-rule="evenodd" />
+                class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+                    <path fill-rule="evenodd" d="M4.755 10.059a7.5 7.5 0 0 1 12.548-3.364l1.903 1.903h-3.183a.75.75 0 1 0 0 1.5h4.992a.75.75 0 0 0 .75-.75V4.356a.75.75 0 0 0-1.5 0v3.18l-1.9-1.9A9 9 0 0 0 3.306 9.67a.75.75 0 1 0 1.45.388Zm15.408 3.352a.75.75 0 0 0-.919.53 7.5 7.5 0 0 1-12.548 3.364l-1.902-1.903h3.183a.75.75 0 0 0 0-1.5H2.984a.75.75 0 0 0-.75.75v4.992a.75.75 0 0 0 1.5 0v-3.18l1.9 1.9a9 9 0 0 0 15.059-4.035.75.75 0 0 0-.53-.918Z" clip-rule="evenodd" />
                 </svg>
                 <%= req.translations.restart %>
             </button>
             <button id="stopButton" type="button"
-                class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2 <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                    class="size-4 inline-flex mr-1 text-red-100 mb-0.5">
-                    <path fill-rule="evenodd"
-                        d="M4.5 7.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-9Z"
-                        clip-rule="evenodd" />
+                class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+                    <path fill-rule="evenodd" d="M4.5 7.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-9Z" clip-rule="evenodd" />
                 </svg>
                 <%= req.translations.stop %>
             </button>
@@ -74,32 +78,28 @@
 
       <!-- Server Suspended Warning -->
       <% if (server.Suspended) { %>
-      <div class="mx-4 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center">
-        <div class="flex-shrink-0 mr-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-        </div>
+      <div class="mt-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-4 py-3 flex items-start gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
         <div>
-          <h3 class="text-sm font-medium text-red-500">Server Suspended</h3>
-          <p class="text-xs text-red-400">This server has been suspended by an administrator. You cannot start or manage this server until the suspension is lifted. Please contact an administrator for assistance.</p>
+          <p class="text-sm font-medium text-red-600 dark:text-red-500">Server Suspended</p>
+          <p class="text-xs text-red-500 dark:text-red-400 mt-0.5">This server has been suspended. Contact an administrator for assistance.</p>
         </div>
       </div>
       <% } %>
 
       <!-- Daemon Offline Warning -->
       <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline) { %>
-      <div id="daemonOfflineWarning" class="mx-4 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center">
-        <div class="flex-shrink-0 mr-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-        </div>
+      <div id="daemonOfflineWarning" class="mt-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-4 py-3 flex items-start gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
         <div>
-          <h3 class="text-sm font-medium text-red-500">Connection Error</h3>
-          <p class="text-xs text-red-400"><%= serverStatus.error || 'The daemon appears to be offline. Server information and controls are unavailable.' %></p>
-          <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors">
-            Retry Connection
+          <p class="text-sm font-medium text-red-600 dark:text-red-500">Connection Error</p>
+          <p class="text-xs text-red-500 dark:text-red-400 mt-0.5"><%= serverStatus.error || 'The daemon appears to be offline. Server controls are unavailable.' %></p>
+          <button onclick="window.location.reload()" class="mt-2 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition">
+            Retry
           </button>
         </div>
       </div>
@@ -109,65 +109,55 @@
 
 
     <!-- Info Cards -->
-    <div class="mt-6 ml-8 mb-4">
-      <dl class="grid grid-cols-1 gap-4 sm:grid-cols-4 mr-8">
+    <div class="mt-4 mb-4">
+      <dl class="grid grid-cols-2 gap-3">
 
-        <div class="overflow-hidden bg-neutral-800/50 backdrop-blur-sm border border-neutral-700/30 rounded-xl px-4 py-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-neutral-700/30 group">
-          <div class="flex items-center">
-            <div class="flex-grow">
-              <dt class="truncate text-xs font-medium text-neutral-400 group-hover:text-neutral-300 transition-colors duration-300"><%= req.translations.addressIP %>:</dt>
-              <dd class="mt-0.5 text-base font-medium tracking-tight text-white">
-                <span>
-                  <%= server.node.address %><span class="text-neutral-400">:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.Port.split(':')[1]).pop() : '' %></span>
-                </span>
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3">
+          <div class="flex items-center gap-2">
+            <div class="min-w-0 flex-1">
+              <dt class="text-[10px] font-medium text-neutral-500 truncate"><%= req.translations.addressIP %></dt>
+              <dd class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white truncate">
+                <%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.Port.split(':')[1]).pop() : '' %>
               </dd>
             </div>
-            <div class="ml-3 shadow-md border border-white/10 rounded-lg p-2 bg-neutral-700/50 group-hover:bg-neutral-600/50 transition-all duration-300 transform group-hover:scale-110">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-5 w-5 text-neutral-300 group-hover:text-white transition-colors duration-300"><rect width="256" height="256" fill="none"/><path d="M240,120a8,8,0,0,1-8,8H200v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H176a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H72v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H24a8,8,0,0,1,0-16h96V88h-8A16,16,0,0,1,96,72V40a16,16,0,0,1,16-16h32a16,16,0,0,1,16,16V72a16,16,0,0,1-16,16h-8v24h96A8,8,0,0,1,240,120Z"/></svg>
+            <div class="rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-4 w-4 text-neutral-500 dark:text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M240,120a8,8,0,0,1-8,8H200v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H176a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H72v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H24a8,8,0,0,1,0-16h96V88h-8A16,16,0,0,1,96,72V40a16,16,0,0,1,16-16h32a16,16,0,0,1,16,16V72a16,16,0,0,1-16,16h-8v24h96A8,8,0,0,1,240,120Z"/></svg>
             </div>
           </div>
         </div>
 
-        <div class="overflow-hidden bg-neutral-800/50 backdrop-blur-sm border border-neutral-700/30 rounded-xl px-4 py-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-neutral-700/30 group">
-          <div class="flex items-center">
-            <div class="flex-grow">
-              <dt class="truncate text-xs font-medium text-neutral-400 group-hover:text-neutral-300 transition-colors duration-300"><%= req.translations.Image %>:</dt>
-              <dd class="mt-0.5 text-base font-medium tracking-tight text-white">
-                <span>
-                  <%= server.image.name %>
-                </span>
-              </dd>
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3">
+          <div class="flex items-center gap-2">
+            <div class="min-w-0 flex-1">
+              <dt class="text-[10px] font-medium text-neutral-500 truncate"><%= req.translations.Image %></dt>
+              <dd class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white truncate"><%= server.image.name %></dd>
             </div>
-            <div class="ml-3 shadow-md border border-white/10 rounded-lg p-2 bg-neutral-700/50 group-hover:bg-neutral-600/50 transition-all duration-300 transform group-hover:scale-110">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-5 w-5 text-neutral-300 group-hover:text-white transition-colors duration-300"><rect width="256" height="256" fill="none"/><path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/></svg>
+            <div class="rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-4 w-4 text-neutral-500 dark:text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/></svg>
             </div>
           </div>
         </div>
 
-        <div class="overflow-hidden bg-neutral-800/50 backdrop-blur-sm border border-neutral-700/30 rounded-xl px-4 py-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-neutral-700/30 group">
-          <div class="flex items-center">
-            <div class="flex-grow">
-              <dt class="truncate text-xs font-medium text-neutral-400 group-hover:text-neutral-300 transition-colors duration-300"><%= req.translations.Node %>:</dt>
-              <dd class="mt-0.5 text-base font-medium tracking-tight text-white">
-                <%= server.node.name %> <span class="text-neutral-500">(<%= server.node.address %>)</span>
-              </dd>
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3">
+          <div class="flex items-center gap-2">
+            <div class="min-w-0 flex-1">
+              <dt class="text-[10px] font-medium text-neutral-500 truncate"><%= req.translations.Node %></dt>
+              <dd class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white truncate"><%= server.node.name %></dd>
             </div>
-            <div class="ml-3 shadow-md border border-white/10 rounded-lg p-2 bg-neutral-700/50 group-hover:bg-neutral-600/50 transition-all duration-300 transform group-hover:scale-110">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-5 w-5 text-neutral-300 group-hover:text-white transition-colors duration-300"><rect width="256" height="256" fill="none"/><path d="M208,40H48A16,16,0,0,0,32,56v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40ZM180,92a12,12,0,1,1,12-12A12,12,0,0,1,180,92Z"/><path d="M208,136H48a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V152A16,16,0,0,0,208,136Zm-28,52a12,12,0,1,1,12-12A12,12,0,0,1,180,188Z"/></svg>
+            <div class="rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-4 w-4 text-neutral-500 dark:text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M208,40H48A16,16,0,0,0,32,56v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40ZM180,92a12,12,0,1,1,12-12A12,12,0,0,1,180,92Z"/><path d="M208,136H48a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V152A16,16,0,0,0,208,136Zm-28,52a12,12,0,1,1,12-12A12,12,0,0,1,180,188Z"/></svg>
             </div>
           </div>
         </div>
 
-        <div class="overflow-hidden bg-neutral-800/50 backdrop-blur-sm border border-neutral-700/30 rounded-xl px-4 py-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-neutral-700/30 group">
-          <div class="flex items-center">
-            <div class="flex-grow">
-              <dt class="truncate text-xs font-medium text-neutral-400 group-hover:text-neutral-300 transition-colors duration-300"><%= req.translations.identifier %>:</dt>
-              <dd class="mt-0.5 text-base font-medium tracking-tight text-white">
-                <%= server.UUID.split('-')[0] %>
-              </dd>
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3">
+          <div class="flex items-center gap-2">
+            <div class="min-w-0 flex-1">
+              <dt class="text-[10px] font-medium text-neutral-500 truncate"><%= req.translations.identifier %></dt>
+              <dd class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white font-mono"><%= server.UUID.split('-')[0] %></dd>
             </div>
-            <div class="ml-3 shadow-md border border-white/10 rounded-lg p-2 bg-neutral-700/50 group-hover:bg-neutral-600/50 transition-all duration-300 transform group-hover:scale-110">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-5 w-5 text-neutral-300 group-hover:text-white transition-colors duration-300"><rect width="256" height="256" fill="none"/><path d="M116.25,112h31.5l-8,32h-31.5ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48Zm-16,56a8,8,0,0,0-8-8H168.25l7.51-30.06a8,8,0,0,0-15.52-3.88L151.75,96h-31.5l7.51-30.06a8,8,0,0,0-15.52-3.88L103.75,96H64a8,8,0,0,0,0,16H99.75l-8,32H56a8,8,0,0,0,0,16H87.75l-7.51,30.06a8,8,0,0,0,5.82,9.7,8.13,8.13,0,0,0,2,.24,8,8,0,0,0,7.75-6.06L104.25,160h31.5l-7.51,30.06a8,8,0,0,0,5.82,9.7A8.13,8.13,0,0,0,136,200a8,8,0,0,0,7.75-6.06L152.25,160H192a8,8,0,0,0,0-16H156.25l8-32H200A8,8,0,0,0,208,104Z"/></svg>
+            <div class="rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-4 w-4 text-neutral-500 dark:text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M116.25,112h31.5l-8,32h-31.5ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48Zm-16,56a8,8,0,0,0-8-8H168.25l7.51-30.06a8,8,0,0,0-15.52-3.88L151.75,96h-31.5l7.51-30.06a8,8,0,0,0-15.52-3.88L103.75,96H64a8,8,0,0,0,0,16H99.75l-8,32H56a8,8,0,0,0,0,16H87.75l-7.51,30.06a8,8,0,0,0,5.82,9.7,8.13,8.13,0,0,0,2,.24,8,8,0,0,0,7.75-6.06L104.25,160h31.5l-7.51,30.06a8,8,0,0,0,5.82,9.7A8.13,8.13,0,0,0,136,200a8,8,0,0,0,7.75-6.06L152.25,160H192a8,8,0,0,0,0-16H156.25l8-32H200A8,8,0,0,0,208,104Z"/></svg>
             </div>
           </div>
         </div>
@@ -175,93 +165,69 @@
       </dl>
     </div>
 
-      <div class="flex flex-col gap-4">
-
-<!-- Left side: Console -->
-<div class="w-full lg:w-2/3 lg:pr-5 flex flex-col">
-    <div class="bg-neutral-100 dark:bg-neutral-900/50 border border-neutral-800/20 dark:border-neutral-600/10 shadow shadow-neutral-900/20 dark:shadow-transparent rounded-t-xl p-4 flex-1">
-        <div id="terminal" class="overflow-x-auto whitespace-pre-wrap min-h-full w-full"></div>
-    </div>
-    <div class="relative">
-        <input id="input" type="text" autocomplete="off" placeholder="Type a command..."
-            class="w-full px-4 py-3  bg-neutral-200 dark:bg-neutral-600/20 text-neutral-800 dark:text-white rounded-b-xl text-sm border-t border-neutral-600/20 select-none focus:ring-1  focus:ring-neutral-500/50 dark:focus:ring-neutral-100/20 focus:border-transparent placeholder:font-medium placeholder:text-neutral-600 dark:placeholder:text-neutral-500">
-
-            <% if (typeof features !== 'undefined' && features && features.includes('auto-complete')) { %>
-        <div id="settings-icon" class="absolute right-4 top-3 cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-neutral-600 dark:text-neutral-400">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
+      <!-- Terminal -->
+      <div class="rounded-xl bg-neutral-100 dark:bg-neutral-900/60 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div id="terminal-container" class="w-full" style="overflow: hidden; max-width: 100%;">
+          <div id="terminal"></div>
+        </div>
+        <div class="relative border-t border-neutral-200 dark:border-white/5">
+          <input id="input" type="text" autocomplete="off" placeholder="Type a command..."
+            class="w-full px-4 py-3 bg-neutral-200 dark:bg-neutral-800/60 text-neutral-800 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-neutral-400 placeholder:text-neutral-500 dark:placeholder:text-neutral-500">
+          <% if (typeof features !== 'undefined' && features && features.includes('auto-complete')) { %>
+          <div id="settings-icon" class="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-500">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
             </svg>
-        </div>
-
-        <div id="suggestions" class="absolute bg-neutral-800 text-white border border-neutral-600 rounded-b-lg w-full max-h-40 overflow-y-auto hidden -mt-2">
-            <!-- Auto Complete thingys come here -->
-        </div>
-        <div id="settings-menu" class="absolute bg-neutral-700 text-white p-4 rounded-lg hidden mt-10 right-0 w-48">
-            <label class="flex items-center space-x-2">
-                <input type="checkbox" id="auto-complete-toggle" class="form-checkbox h-4 w-4 text-neutral-400" />
-                <span>Enable Auto-Completion</span>
+          </div>
+          <div id="suggestions" class="absolute bottom-full left-0 right-0 bg-neutral-800 text-white border border-neutral-600 rounded-t-lg max-h-40 overflow-y-auto hidden">
+          </div>
+          <div id="settings-menu" class="absolute bottom-full right-0 bg-neutral-800 text-white p-3 rounded-lg hidden w-48 border border-neutral-700">
+            <label class="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" id="auto-complete-toggle" class="w-4 h-4" />
+              <span>Auto-complete</span>
             </label>
+          </div>
+          <% } %>
         </div>
-        <% } %>
-    </div>
-</div>
+      </div>
 
-        <!-- Right side: Stats Cards -->
-        <div class="w-full lg:w-1/3 mt-4 lg:mt-0 space-y-4 flex flex-col">
-            <!-- Status Card -->
-            <div class="overflow-hidden bg-neutral-800/50 backdrop-blur-sm border border-neutral-700/30 rounded-xl px-4 py-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-neutral-700/30 group flex-1">
-                <canvas id="statusChart" class="absolute inset-0 w-full h-full"></canvas>
-                <div class="relative z-10 flex items-center justify-between">
-                  <div>
-                    <h2 class="text-sm font-medium text-neutral-400"><%= req.translations.Status %>:</h2>
-                    <p id="status" class="mt-1 text-lg font-medium tracking-tight text-white">-</p>
-                  </div>
+      <!-- Stats grid -->
+      <div class="grid grid-cols-2 gap-3 mt-3">
 
-                <% if (typeof features !== 'undefined' && features && features.includes('players')) { %>
-                  <div id="players-deco" class="flex items-center transition-all duration-[1.5s,15s] translate-y-32">
-                    <div class="relative inline-flex items-center">
-                      <div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white/10 transform hover:-translate-y-2 transition-all duration-500 relative z-30">
-                        <img src="https://mc-heads.net/avatar/privt" alt="Avatar 1" class="w-full h-full" />
-                      </div>
-                      <div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white/10 transform -translate-y-1 hover:-translate-y-3 transition-all duration-700 -ml-4 relative z-20">
-                        <img src="https://mc-heads.net/avatar/manu4dev" alt="Avatar 2" class="w-full h-full" />
-                      </div>
-                      <div class="w-14 h-14 rounded-lg overflow-hidden border-2 border-white/10 transform hover:-translate-y-4 transition-all duration-500 -ml-4 relative z-10">
-                        <img src="https://mc-heads.net/avatar/dc7431" alt="Avatar 3" class="w-full h-full" />
-                      </div>
-                    </div>
-                  </div>
-                <% } %>
-                </div>
-              </div>
+        <!-- Status -->
+        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-20">
+          <canvas id="statusChart"></canvas>
+          <div class="relative z-10">
+            <p class="text-[10px] font-medium text-neutral-500"><%= req.translations.Status %></p>
+            <p id="status" class="mt-0.5 text-base font-semibold text-neutral-800 dark:text-white leading-tight">—</p>
+          </div>
+        </div>
 
+        <!-- RAM -->
+        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-20">
+          <canvas id="ramChart"></canvas>
+          <div class="relative z-10">
+            <p class="text-[10px] font-medium text-neutral-500"><%= req.translations.ramUsage %></p>
+            <p id="ramUsage" class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white leading-tight break-all">0%</p>
+          </div>
+        </div>
 
-            <!-- RAM Usage Card -->
-            <div class="overflow-hidden bg-neutral-800/50 backdrop-blur-sm border border-neutral-700/30 rounded-xl px-4 py-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-neutral-700/30 group flex-1">
-                <canvas id="ramChart" class="absolute inset-0 w-full h-full"></canvas>
-                <div class="relative z-10">
-                    <h2 class="text-sm font-medium text-neutral-400"><%= req.translations.ramUsage %>:</h2>
-                    <p id="ramUsage" class="mt-1 text-lg font-medium tracking-tight text-white">0% (0 Bytes / 0 Bytes)</p>
-                </div>
-            </div>
+        <!-- CPU -->
+        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-20">
+          <canvas id="cpuChart"></canvas>
+          <div class="relative z-10">
+            <p class="text-[10px] font-medium text-neutral-500"><%= req.translations.cpuUsage %></p>
+            <p id="cpuUsage" class="mt-0.5 text-base font-semibold text-neutral-800 dark:text-white leading-tight">0%</p>
+          </div>
+        </div>
 
-            <!-- CPU Usage Card -->
-            <div class="overflow-hidden bg-neutral-800/50 backdrop-blur-sm border border-neutral-700/30 rounded-xl px-4 py-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-neutral-700/30 group flex-1">
-                <canvas id="cpuChart" class="absolute inset-0 w-full h-full"></canvas>
-                <div class="relative z-10">
-                    <h2 class="text-sm font-medium text-neutral-400"><%= req.translations.cpuUsage %>:</h2>
-                    <p id="cpuUsage" class="mt-1 text-lg font-medium tracking-tight text-white">0%</p>
-                </div>
-            </div>
-
-            <!-- Disk Usage Card -->
-            <div class="overflow-hidden bg-neutral-800/50 backdrop-blur-sm border border-neutral-700/30 rounded-xl px-4 py-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-neutral-700/30 group flex-1">
-                <canvas id="diskChart" class="absolute inset-0 w-full h-full hidden"></canvas>
-                <div class="relative z-10">
-                    <h2 class="text-sm font-medium text-neutral-400"><%= req.translations.diskUsage %>:</h2>
-                    <p id="diskUsage" class="mt-1 text-lg font-medium tracking-tight text-white">-</p>
-                </div>
-            </div>
+        <!-- Disk -->
+        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-20">
+          <canvas id="diskChart" class="hidden"></canvas>
+          <div class="relative z-10">
+            <p class="text-[10px] font-medium text-neutral-500"><%= req.translations.diskUsage %></p>
+            <p id="diskUsage" class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white leading-tight break-all">—</p>
+          </div>
         </div>
 
       </div>
@@ -310,18 +276,47 @@ function createTerminal(theme) {
   return new Terminal({
     disableStdin: true,
     allowProposedApi: true,
-    lineHeight: 1.35,
-    rows: 19,
-    cols: 100,
+    lineHeight: 1.3,
+    rows: 18,
+    cols: 80,
     fontFamily: 'Menlo, monospace',
     theme: theme,
     allowTransparency: true,
-    fontSize: 12
+    fontSize: 11,
+    scrollback: 500
   });
 }
 
 let term = createTerminal(document.documentElement.classList.contains('dark') ? baseTheme : lightTheme);
 term.open(document.getElementById('terminal'));
+
+function fitTerminal() {
+  var container = document.getElementById('terminal-container');
+  if (!container || !term) return;
+  // Measure actual char width by sampling a rendered xterm cell
+  var xtermCore = term._core;
+  var charWidth = xtermCore && xtermCore._renderService
+    ? xtermCore._renderService.dimensions.actualCellWidth
+    : 6.6;
+  if (!charWidth || charWidth <= 0) charWidth = 6.6;
+  var available = container.getBoundingClientRect().width;
+  if (available <= 0) available = window.innerWidth - 32;
+  var cols = Math.max(40, Math.floor(available / charWidth));
+  term.resize(cols, 18);
+}
+
+// Wait for fonts and layout before fitting
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(function() {
+    requestAnimationFrame(fitTerminal);
+  });
+} else {
+  setTimeout(fitTerminal, 100);
+}
+
+window.addEventListener('resize', function() {
+  requestAnimationFrame(fitTerminal);
+});
 
 function setTerminalTheme() {
   const isDark = document.documentElement.classList.contains('dark');

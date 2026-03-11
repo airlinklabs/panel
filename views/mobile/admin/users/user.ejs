@@ -4,19 +4,18 @@
   <%- include('../../components/template') %>
 
   <div class="px-4 py-5">
-<div class="flex items-start justify-between mb-5">
-        <div class="sm:flex-auto">
-           <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminUserTitle %></h1>
-           <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminUserText %></p>
+<div class="flex items-center justify-between mb-5">
+        <div>
+           <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminUserTitle %></h1>
+           <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminUserText %></p>
          </div>
-         <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-           <a href="/admin/users/edit/<%= dataUser.id %>" class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-             </svg>
-             <%= req.translations.editUser || 'Edit User' %>
-           </a>
-         </div>
+         <a href="/admin/users/edit/<%= dataUser.id %>" class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 px-3 py-2 text-xs font-medium text-white transition shrink-0">
+           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+             <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
+           </svg>
+           <%= req.translations.editUser || 'Edit User' %>
+         </a>
+       </div>
        </div>
        <div class="px-4 mt-5">
          <!-- User details will be displayed here -->
