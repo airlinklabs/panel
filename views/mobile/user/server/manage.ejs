@@ -1,0 +1,1496 @@
+<%- include('../../components/header', { title: 'Console' }) %>
+<%- include('../../components/serverFeatures') %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.js"
+    integrity="sha512-2PRgAav8Os8vLcOAh1gSaDoNLe1fAyq8/G3QSdyjFFD+OqNjLeHE/8q4+S4MEZgPsuo+itHopj+hJvqS8XUQ8A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.css"
+    integrity="sha512-iLYuqv+v/P4u9erpk+KM83Ioe/l7SEmr7wB6g+Kg1qmEit8EShDKnKtLHlv2QXUp7GGJhmqDI+1PhJYLTsfb8w=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/addons/attach/attach.min.js"
+    integrity="sha512-43J76SR5UijcuJTzs73z8NpkyWon8a8EoV+dX6obqXW7O26Yb268H2vP6EiJjD7sWXqxS3G/YOqPyyLF9fmqgA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/addons/fit/fit.min.js"
+    integrity="sha512-+wh8VA1djpWk3Dj9/IJDu6Ufi4vVQ0zxLv9Vmfo70AbmYFJm0z3NLnV98vdRKBdPDV4Kwpi7EZdr8mDY9L8JIA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+
+<style>
+    .xterm-viewport {
+        overflow-y: auto !important;
+    }
+    .xterm-screen {
+        overflow: hidden !important;
+    }
+    .stats-card {
+        position: relative;
+        overflow: hidden;
+    }
+    .stats-card > canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100% !important;
+        height: 100% !important;
+        pointer-events: none;
+    }
+    #terminal .xterm {
+        padding: 0;
+    }
+    #terminal .xterm-scroll-area {
+        overflow: hidden;
+    }
+</style>
+
+<main class="">
+  <%- include('../../components/template') %>
+
+  <div class="px-4 py-5">
+<!-- Page Header -->
+      <div class="mb-5">
+        <%- include('../../components/serverHeader') %>
+        <div class="flex gap-2 mt-3">
+            <button id="startButton" type="button"
+                class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+                    <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
+                </svg>
+                <%= req.translations.start %>
+            </button>
+            <button id="restartButton" type="button"
+                class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+                    <path fill-rule="evenodd" d="M4.755 10.059a7.5 7.5 0 0 1 12.548-3.364l1.903 1.903h-3.183a.75.75 0 1 0 0 1.5h4.992a.75.75 0 0 0 .75-.75V4.356a.75.75 0 0 0-1.5 0v3.18l-1.9-1.9A9 9 0 0 0 3.306 9.67a.75.75 0 1 0 1.45.388Zm15.408 3.352a.75.75 0 0 0-.919.53 7.5 7.5 0 0 1-12.548 3.364l-1.902-1.903h3.183a.75.75 0 0 0 0-1.5H2.984a.75.75 0 0 0-.75.75v4.992a.75.75 0 0 0 1.5 0v-3.18l1.9 1.9a9 9 0 0 0 15.059-4.035.75.75 0 0 0-.53-.918Z" clip-rule="evenodd" />
+                </svg>
+                <%= req.translations.restart %>
+            </button>
+            <button id="stopButton" type="button"
+                class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+                    <path fill-rule="evenodd" d="M4.5 7.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-9Z" clip-rule="evenodd" />
+                </svg>
+                <%= req.translations.stop %>
+            </button>
+        </div>
+      </div>
+
+      <%- include('../../components/installHeader') %>
+
+      <!-- Server Suspended Warning -->
+      <% if (server.Suspended) { %>
+      <div class="mt-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-4 py-3 flex items-start gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <div>
+          <p class="text-sm font-medium text-red-600 dark:text-red-500">Server Suspended</p>
+          <p class="text-xs text-red-500 dark:text-red-400 mt-0.5">This server has been suspended. Contact an administrator for assistance.</p>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Daemon Offline Warning -->
+      <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline) { %>
+      <div id="daemonOfflineWarning" class="mt-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-4 py-3 flex items-start gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <div>
+          <p class="text-sm font-medium text-red-600 dark:text-red-500">Connection Error</p>
+          <p class="text-xs text-red-500 dark:text-red-400 mt-0.5"><%= serverStatus.error || 'The daemon appears to be offline. Server controls are unavailable.' %></p>
+          <button onclick="window.location.reload()" class="mt-2 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition">
+            Retry
+          </button>
+        </div>
+      </div>
+      <% } %>
+
+      <%- include('../../components/serverTemplate') %>
+
+
+    <!-- Info Cards -->
+    <div class="mt-4 mb-4">
+      <dl class="grid grid-cols-2 gap-3">
+
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3">
+          <div class="flex items-center gap-2">
+            <div class="min-w-0 flex-1">
+              <dt class="text-[10px] font-medium text-neutral-500 truncate"><%= req.translations.addressIP %></dt>
+              <dd class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white truncate">
+                <%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.Port.split(':')[1]).pop() : '' %>
+              </dd>
+            </div>
+            <div class="rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-4 w-4 text-neutral-500 dark:text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M240,120a8,8,0,0,1-8,8H200v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H176a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H72v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H24a8,8,0,0,1,0-16h96V88h-8A16,16,0,0,1,96,72V40a16,16,0,0,1,16-16h32a16,16,0,0,1,16,16V72a16,16,0,0,1-16,16h-8v24h96A8,8,0,0,1,240,120Z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3">
+          <div class="flex items-center gap-2">
+            <div class="min-w-0 flex-1">
+              <dt class="text-[10px] font-medium text-neutral-500 truncate"><%= req.translations.Image %></dt>
+              <dd class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white truncate"><%= server.image.name %></dd>
+            </div>
+            <div class="rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-4 w-4 text-neutral-500 dark:text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3">
+          <div class="flex items-center gap-2">
+            <div class="min-w-0 flex-1">
+              <dt class="text-[10px] font-medium text-neutral-500 truncate"><%= req.translations.Node %></dt>
+              <dd class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white truncate"><%= server.node.name %></dd>
+            </div>
+            <div class="rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-4 w-4 text-neutral-500 dark:text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M208,40H48A16,16,0,0,0,32,56v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40ZM180,92a12,12,0,1,1,12-12A12,12,0,0,1,180,92Z"/><path d="M208,136H48a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V152A16,16,0,0,0,208,136Zm-28,52a12,12,0,1,1,12-12A12,12,0,0,1,180,188Z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3">
+          <div class="flex items-center gap-2">
+            <div class="min-w-0 flex-1">
+              <dt class="text-[10px] font-medium text-neutral-500 truncate"><%= req.translations.identifier %></dt>
+              <dd class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white font-mono"><%= server.UUID.split('-')[0] %></dd>
+            </div>
+            <div class="rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-4 w-4 text-neutral-500 dark:text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M116.25,112h31.5l-8,32h-31.5ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48Zm-16,56a8,8,0,0,0-8-8H168.25l7.51-30.06a8,8,0,0,0-15.52-3.88L151.75,96h-31.5l7.51-30.06a8,8,0,0,0-15.52-3.88L103.75,96H64a8,8,0,0,0,0,16H99.75l-8,32H56a8,8,0,0,0,0,16H87.75l-7.51,30.06a8,8,0,0,0,5.82,9.7,8.13,8.13,0,0,0,2,.24,8,8,0,0,0,7.75-6.06L104.25,160h31.5l-7.51,30.06a8,8,0,0,0,5.82,9.7A8.13,8.13,0,0,0,136,200a8,8,0,0,0,7.75-6.06L152.25,160H192a8,8,0,0,0,0-16H156.25l8-32H200A8,8,0,0,0,208,104Z"/></svg>
+            </div>
+          </div>
+        </div>
+
+      </dl>
+    </div>
+
+      <!-- Terminal -->
+      <div class="rounded-xl bg-neutral-100 dark:bg-neutral-900/60 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div id="terminal-container" class="w-full" style="overflow: hidden; max-width: 100%;">
+          <div id="terminal"></div>
+        </div>
+        <div class="relative border-t border-neutral-200 dark:border-white/5">
+          <input id="input" type="text" autocomplete="off" placeholder="Type a command..."
+            class="w-full px-4 py-3 bg-neutral-200 dark:bg-neutral-800/60 text-neutral-800 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 placeholder:text-neutral-500 dark:placeholder:text-neutral-500">
+          <% if (typeof features !== 'undefined' && features && features.includes('auto-complete')) { %>
+          <div id="settings-icon" class="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-500">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
+            </svg>
+          </div>
+          <div id="suggestions" class="absolute bottom-full left-0 right-0 bg-neutral-800 text-white border border-neutral-600 rounded-t-lg max-h-40 overflow-y-auto hidden">
+          </div>
+          <div id="settings-menu" class="absolute bottom-full right-0 bg-neutral-800 text-white p-3 rounded-lg hidden w-48 border border-neutral-700">
+            <label class="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" id="auto-complete-toggle" class="w-4 h-4" />
+              <span>Auto-complete</span>
+            </label>
+          </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Stats grid -->
+      <div class="grid grid-cols-2 gap-3 mt-3">
+
+        <!-- Status -->
+        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-20">
+          <canvas id="statusChart"></canvas>
+          <div class="relative z-10">
+            <p class="text-[10px] font-medium text-neutral-500"><%= req.translations.Status %></p>
+            <p id="status" class="mt-0.5 text-base font-semibold text-neutral-800 dark:text-white leading-tight">—</p>
+          </div>
+        </div>
+
+        <!-- RAM -->
+        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-20">
+          <canvas id="ramChart"></canvas>
+          <div class="relative z-10">
+            <p class="text-[10px] font-medium text-neutral-500"><%= req.translations.ramUsage %></p>
+            <p id="ramUsage" class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white leading-tight break-all">0%</p>
+          </div>
+        </div>
+
+        <!-- CPU -->
+        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-20">
+          <canvas id="cpuChart"></canvas>
+          <div class="relative z-10">
+            <p class="text-[10px] font-medium text-neutral-500"><%= req.translations.cpuUsage %></p>
+            <p id="cpuUsage" class="mt-0.5 text-base font-semibold text-neutral-800 dark:text-white leading-tight">0%</p>
+          </div>
+        </div>
+
+        <!-- Disk -->
+        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-20">
+          <canvas id="diskChart" class="hidden"></canvas>
+          <div class="relative z-10">
+            <p class="text-[10px] font-medium text-neutral-500"><%= req.translations.diskUsage %></p>
+            <p id="diskUsage" class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white leading-tight break-all">—</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/loadingPopup') %>
+
+<%- include('../../components/footer') %>
+
+<script>
+const baseTheme = {
+  foreground: '#c5c9d1',
+  background: 'rgba(0, 0, 0, 0)',
+  selection: '#5DA5D533',
+  black: '#1E1E1D',
+  brightBlack: '#262625',
+  red: '#E54B4B',
+  green: '#9ECE58',
+  yellow: '#FAED70',
+  blue: '#396FE2',
+  magenta: '#BB80B3',
+  cyan: '#2DDAFD',
+  white: '#d0d0d0',
+  brightRed: '#FF5370',
+  brightGreen: '#C3E88D',
+  brightYellow: '#FFCB6B',
+  brightBlue: '#82AAFF',
+  brightMagenta: '#C792EA',
+  brightCyan: '#89DDFF',
+  brightWhite: '#ffffff',
+  cursor: '#c5c9d1',
+  cursorAccent: '#c5c9d1'
+};
+
+const lightTheme = {
+  ...baseTheme,
+  foreground: '#1E1E1D',
+  selection: '#5DA5D533'
+};
+
+function createTerminal(theme) {
+  return new Terminal({
+    disableStdin: true,
+    allowProposedApi: true,
+    lineHeight: 1.3,
+    rows: 18,
+    cols: 80,
+    fontFamily: 'Menlo, monospace',
+    theme: theme,
+    allowTransparency: true,
+    fontSize: 11,
+    scrollback: 500
+  });
+}
+
+let term = createTerminal(document.documentElement.classList.contains('dark') ? baseTheme : lightTheme);
+term.open(document.getElementById('terminal'));
+
+function fitTerminal() {
+  var container = document.getElementById('terminal-container');
+  if (!container || !term) return;
+  // Measure actual char width by sampling a rendered xterm cell
+  var xtermCore = term._core;
+  var charWidth = xtermCore && xtermCore._renderService
+    ? xtermCore._renderService.dimensions.actualCellWidth
+    : 6.6;
+  if (!charWidth || charWidth <= 0) charWidth = 6.6;
+  var available = container.getBoundingClientRect().width;
+  if (available <= 0) available = window.innerWidth - 32;
+  var cols = Math.max(40, Math.floor(available / charWidth));
+  term.resize(cols, 18);
+}
+
+// Wait for fonts and layout before fitting
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(function() {
+    requestAnimationFrame(fitTerminal);
+  });
+} else {
+  setTimeout(fitTerminal, 100);
+}
+
+window.addEventListener('resize', function() {
+  requestAnimationFrame(fitTerminal);
+});
+
+function setTerminalTheme() {
+  const isDark = document.documentElement.classList.contains('dark');
+  term.setOption('theme', isDark ? baseTheme : lightTheme);
+}
+
+
+    const maxCommands = 10;
+    let commandHistory = [];
+    let currentCommandIndex = -1;
+
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.host;
+    const path = '/console/<%= server.UUID %>';
+
+    const socketUrl = `${protocol}//${host}${path}`;
+
+    let socket;
+
+let isReconnecting = false;
+let reconnectAttempts = 0;
+let maxReconnectAttempts = 10;
+let reconnectInterval = 2000;
+let reconnectTimer = null;
+
+function connectWebSocket() {
+    if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN)) {
+        console.log("WebSocket is already connecting or open. Skipping new connection.");
+        return;
+    }
+
+    if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+    }
+
+    isReconnecting = true;
+
+    if (socket) {
+        console.log("Closing existing WebSocket connection...");
+        try {
+            socket.close();
+        } catch (e) {
+            console.error("Error closing socket:", e);
+        }
+    }
+
+    try {
+        socket = new WebSocket(socketUrl);
+
+        socket.onopen = () => {
+            console.log('WebSocket connection established');
+            writeConsole('system', 'system', 'WebSocket connection established');
+            isReconnecting = false;
+            reconnectAttempts = 0;
+            reconnectInterval = 2000;
+
+            // Hide daemon offline warning if it exists
+            const daemonOfflineWarning = document.getElementById('daemonOfflineWarning');
+            if (daemonOfflineWarning) {
+                daemonOfflineWarning.classList.add('hidden');
+            }
+        };
+
+        socket.onmessage = handleWebSocketMessage;
+
+        socket.onerror = (error) => {
+            console.error('WebSocket Error:', error);
+            writeConsole('system', 'error', `WebSocket Error: Connection failed`);
+
+            // Show daemon offline warning if it exists
+            const daemonOfflineWarning = document.getElementById('daemonOfflineWarning');
+            if (daemonOfflineWarning) {
+                daemonOfflineWarning.classList.remove('hidden');
+            }
+        };
+
+        socket.onclose = (event) => {
+            console.log(`WebSocket connection closed (${event.code}). Reconnecting...`);
+            writeConsole('system', 'system', 'WebSocket connection closed. Reconnecting...');
+
+            if (!isReconnecting) {
+                scheduleReconnect();
+            }
+        };
+    } catch (error) {
+        console.error('Error creating WebSocket:', error);
+        scheduleReconnect();
+    }
+}
+
+function scheduleReconnect() {
+    isReconnecting = true;
+    reconnectAttempts++;
+
+    const backoffTime = Math.min(30000, reconnectInterval * Math.pow(1.5, reconnectAttempts - 1));
+
+    console.log(`Scheduling reconnect attempt ${reconnectAttempts} in ${backoffTime}ms`);
+
+    if (reconnectAttempts <= maxReconnectAttempts) {
+        reconnectTimer = setTimeout(() => {
+            console.log(`Attempting reconnect ${reconnectAttempts} of ${maxReconnectAttempts}`);
+            connectWebSocket();
+        }, backoffTime);
+    } else {
+        console.log('Maximum reconnect attempts reached. Please refresh the page.');
+        writeConsole('system', 'error', 'Maximum reconnect attempts reached. Please refresh the page.');
+    }
+}
+
+connectWebSocket();
+
+
+    function handleWebSocketMessage(msg) {
+        const lines = msg.data.split('\n');
+        let isFirstLine = true;
+        let previousLineWasEmpty = false;
+
+        lines.forEach(line => {
+            const trimmedLine = line.trim();
+
+            if (trimmedLine.includes("Failed to attach to container")) {
+                return;
+            }
+
+            if (trimmedLine === '' && previousLineWasEmpty) return;
+
+            if (!isFirstLine && !previousLineWasEmpty) {
+                term.write('\r\n');
+            }
+
+            term.write('\x1b[0m' + trimmedLine);
+
+            if (trimmedLine.includes("Working on")) {
+                term.write('\r\n\u001b[1m\u001b[33m[panel] \u001b[0mReconnecting socket, hold on...');
+                term.clear();
+                socket.close();
+            }
+
+            if (trimmedLine.includes("airlinkd server appears to be down")) {
+                socket.close();
+
+                // Show daemon offline warning if it exists
+                const daemonOfflineWarning = document.getElementById('daemonOfflineWarning');
+                if (daemonOfflineWarning) {
+                    daemonOfflineWarning.classList.remove('hidden');
+                }
+            }
+
+            isFirstLine = false;
+            previousLineWasEmpty = (trimmedLine === '');
+        });
+    }
+
+    function writeConsole(prefix, type, message) {
+        const colors = {
+            airlinkd: baseTheme.blue,
+            system: baseTheme.yellow,
+            error: baseTheme.red,
+            info: baseTheme.blue,
+            success: baseTheme.green,
+            normal: baseTheme.foreground
+        };
+
+        const color = colors[type.toLowerCase()] || baseTheme.foreground;
+        const messageColor = baseTheme.white;
+
+        const prefixText = (prefix && type !== 'normal') ? `[${prefix}] ` : '';
+
+        const formattedMessage =
+            `\x1b[38;2;${hexToRgb(color).join(';')}m${prefixText}` +
+            `\x1b[38;2;${hexToRgb(messageColor).join(';')}m${message}\x1b[0m\r\n`;
+
+        term.write(formattedMessage);
+    }
+
+    function restartWebSocket() {
+        if (socket) {
+            console.log("Restarting WebSocket connection...");
+            socket.close();
+        }
+        setTimeout(connectWebSocket, 500);
+    }
+
+    function sendCommand() {
+        const inputElement = document.getElementById('input');
+        const command = inputElement.value.trim();
+        if (command && socket) {
+            term.write('\u001b[1m\u001b[33m~ \u001b[0m' + command + '\r\n');
+            socket.send(JSON.stringify({
+                event: 'CMD',
+                command: command
+            }));
+
+            if (commandHistory.length === maxCommands) {
+                commandHistory.shift();
+            }
+            commandHistory.push(command);
+            currentCommandIndex = commandHistory.length;
+
+            inputElement.value = '';
+        }
+    }
+
+    function handleKeyUp(event) {
+        if (event.key === 'ArrowUp') {
+            if (currentCommandIndex > 0) {
+                currentCommandIndex--;
+                document.getElementById('input').value = commandHistory[currentCommandIndex];
+            }
+            event.preventDefault();
+        } else if (event.key === 'ArrowDown') {
+            if (currentCommandIndex < commandHistory.length - 1) {
+                currentCommandIndex++;
+                document.getElementById('input').value = commandHistory[currentCommandIndex];
+            } else {
+                currentCommandIndex = commandHistory.length;
+                document.getElementById('input').value = '';
+            }
+            event.preventDefault();
+        }
+    }
+
+    function hexToRgb(hex) {
+        const bigint = parseInt(hex.replace('#', ''), 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+        return [r, g, b];
+    }
+
+    let id = 0;
+
+    const startButton = document.getElementById('startButton');
+    <% if (!server.Suspended) { %>
+    startButton.addEventListener('click', () => {
+        const serverUUID = '<%= server.UUID %>';
+        const loader = showLoadingPopup('Starting Server', 'Sending start command...');
+
+        fetch(`/server/${serverUUID}/power/start`, {
+            method: 'POST',
+        })
+            .then(response => response.json())
+            .then(data => {
+                loader.updateProgress(100, 'Server starting...');
+                setTimeout(() => {
+                    loader.close();
+                    showToast('Server start command sent successfully', 'success');
+                    restartWebSocket();
+                }, 1000);
+            })
+            .catch(error => {
+                loader.close();
+                console.error('Error:', error);
+                showToast('Failed to start server', 'error');
+            });
+    });
+    <% } else { %>
+    startButton.addEventListener('click', () => {
+        showToast('This server is suspended. Please contact an administrator for assistance.', 'error');
+    });
+    <% } %>
+
+    const restartButton = document.getElementById('restartButton');
+    <% if (!server.Suspended) { %>
+    restartButton.addEventListener('click', () => {
+        const serverUUID = '<%= server.UUID %>';
+
+        // Create confirmation modal
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300';
+        modal.id = 'restartServerModal';
+
+        modal.innerHTML = `
+          <div class="bg-white dark:bg-neutral-800 rounded-xl p-5 w-full mx-4 transform scale-95 transition-transform duration-300">
+            <h2 class="text-2xl font-medium mb-1 text-neutral-800">Confirm Restart Server</h2>
+            <p class="mb-6 text-neutral-600">Are you sure you want to restart the server? This will disconnect all users.</p>
+            <div class="flex justify-end space-x-4">
+              <button id="cancelRestartBtn" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
+              <button id="confirmRestartBtn" class="w-full md:w-auto rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Restart Server</button>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        setTimeout(() => {
+          modal.classList.remove('opacity-0', 'pointer-events-none');
+          modal.querySelector('div').classList.remove('scale-95');
+          modal.querySelector('div').classList.add('scale-100');
+        }, 10);
+
+        document.getElementById('cancelRestartBtn').addEventListener('click', () => {
+          modal.classList.add('opacity-0', 'pointer-events-none');
+          modal.querySelector('div').classList.remove('scale-100');
+          modal.querySelector('div').classList.add('scale-95');
+          setTimeout(() => document.body.removeChild(modal), 300);
+        });
+
+        document.getElementById('confirmRestartBtn').addEventListener('click', () => {
+          modal.classList.add('opacity-0', 'pointer-events-none');
+          modal.querySelector('div').classList.remove('scale-100');
+          modal.querySelector('div').classList.add('scale-95');
+          setTimeout(() => document.body.removeChild(modal), 300);
+
+          const loader = showLoadingPopup('Restarting Server', 'Sending restart command...');
+
+          fetch(`/server/${serverUUID}/power/restart`, {
+              method: 'POST',
+          })
+              .then(response => response.json())
+              .then(data => {
+                  loader.updateProgress(100, 'Server restarting...');
+                  setTimeout(() => {
+                      loader.close();
+                      showToast('Server restart command sent successfully', 'success');
+                      restartWebSocket();
+                  }, 1000);
+              })
+              .catch(error => {
+                  loader.close();
+                  console.error('Error:', error);
+                  showToast('Failed to restart server', 'error');
+              });
+        });
+    });
+    <% } else { %>
+    restartButton.addEventListener('click', () => {
+        showToast('This server is suspended. Please contact an administrator for assistance.', 'error');
+    });
+    <% } %>
+
+    const stopButton = document.getElementById('stopButton');
+    <% if (!server.Suspended) { %>
+    stopButton.addEventListener('click', () => {
+        const serverUUID = '<%= server.UUID %>';
+
+        // Create confirmation modal
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300';
+        modal.id = 'stopServerModal';
+
+        modal.innerHTML = `
+          <div class="bg-white dark:bg-neutral-800 rounded-xl p-5 w-full mx-4 transform scale-95 transition-transform duration-300">
+            <h2 class="text-2xl font-medium mb-1 text-neutral-800">Confirm Stop Server</h2>
+            <p class="mb-6 text-neutral-600">Are you sure you want to stop the server? This will disconnect all users.</p>
+            <div class="flex justify-end space-x-4">
+              <button id="cancelStopBtn" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
+              <button id="confirmStopBtn" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Stop Server</button>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        setTimeout(() => {
+          modal.classList.remove('opacity-0', 'pointer-events-none');
+          modal.querySelector('div').classList.remove('scale-95');
+          modal.querySelector('div').classList.add('scale-100');
+        }, 10);
+
+        document.getElementById('cancelStopBtn').addEventListener('click', () => {
+          modal.classList.add('opacity-0', 'pointer-events-none');
+          modal.querySelector('div').classList.remove('scale-100');
+          modal.querySelector('div').classList.add('scale-95');
+          setTimeout(() => {
+            document.body.removeChild(modal);
+          }, 300);
+        });
+
+        document.getElementById('confirmStopBtn').addEventListener('click', () => {
+          // Set the server status to stopping AFTER confirmation
+          console.log('Stop confirmed, setting status to stopping');
+
+          // Update status to "Stopping"
+          const statusElement = document.getElementById('status');
+          statusElement.textContent = 'Stopping';
+          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-orange-500';
+          updateStatusChart('rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.2)');
+
+          <% if (features.includes('players')) { %>
+          // Hide players decoration
+          const playersDeco = document.getElementById('players-deco');
+          playersDeco.classList.add('translate-y-32');
+          <% } %>
+
+          // Close the modal
+          modal.classList.add('opacity-0', 'pointer-events-none');
+          modal.querySelector('div').classList.remove('scale-100');
+          modal.querySelector('div').classList.add('scale-95');
+          setTimeout(() => document.body.removeChild(modal), 300);
+
+          const loader = showLoadingPopup('Stopping Server', 'Sending stop command...');
+
+          // Send the stop command to the server
+          fetch(`/server/${serverUUID}/power/stop`, {
+              method: 'POST',
+          })
+              .then(response => response.json())
+              .then(data => {
+                  loader.updateProgress(100, 'Server stopping...');
+                  setTimeout(() => {
+                      loader.close();
+                      showToast('Server stop command sent successfully', 'success');
+                      restartWebSocket();
+
+                      // Set up polling to detect when server is fully stopped
+                      const stoppingPoll = setInterval(function() {
+                        console.log('Checking if server is fully stopped (5-second interval)');
+                        fetch(`/server/${serverUUID}/status`, {
+                          method: 'GET',
+                          headers: {
+                            'Accept': 'application/json'
+                          }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                          console.log('Server stopping status check:', data);
+
+                          if (!data.online && !data.starting && !data.stopping) {
+                            console.log('Server is now offline, updating display');
+                            clearInterval(stoppingPoll);
+
+                            // Force update stats to offline state
+                            setAllStatsOffline();
+                          }
+                        })
+                        .catch(error => {
+                          console.error('Error checking server status during shutdown:', error);
+                        });
+                      }, 5000); // Check every 5 seconds
+
+                      // Stop polling after 30 seconds to avoid resource waste
+                      setTimeout(function() {
+                        console.log('Stopping shutdown polling after 30 seconds');
+                        clearInterval(stoppingPoll);
+
+                        // Force update stats to offline state if still not detected
+                        setAllStatsOffline();
+                      }, 30000);
+                  }, 1000);
+              })
+              .catch(error => {
+                  loader.close();
+                  console.error('Error:', error);
+                  showToast('Failed to stop server', 'error');
+
+                  // Revert status to online if there's an error
+                  statusElement.textContent = 'Online';
+                  statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+                  updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
+
+                  <% if (features.includes('players')) { %>
+                  // Show players decoration again
+                  playersDeco.classList.remove('translate-y-32');
+                  <% } %>
+              });
+        });
+    });
+    <% } else { %>
+    stopButton.addEventListener('click', () => {
+        showToast('This server is suspended. Please contact an administrator for assistance.', 'error');
+    });
+    <% } %>
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const inputElement = document.getElementById('input');
+        inputElement.addEventListener('keypress', function (event) {
+            if (event.key === 'Enter') {
+                sendCommand();
+            }
+        });
+
+        inputElement.addEventListener('keydown', handleKeyUp);
+    });
+
+    let statsWs;
+    let statsReconnectTimer;
+    let statsReconnectAttempts = 0;
+    let maxStatsReconnectAttempts = 10;
+    let statsReconnectInterval = 2000;
+    let isStatsReconnecting = false;
+
+    function initStatsWebSocket() {
+        if (statsReconnectTimer) {
+            clearTimeout(statsReconnectTimer);
+            statsReconnectTimer = null;
+        }
+
+        if (statsWs && (statsWs.readyState === WebSocket.CONNECTING || statsWs.readyState === WebSocket.OPEN)) {
+            console.log("Stats WebSocket is already connecting or open. Skipping new connection.");
+            return;
+        }
+
+        isStatsReconnecting = true;
+
+        if (statsWs) {
+            try {
+                statsWs.close();
+            } catch (e) {
+                console.error("Error closing stats socket:", e);
+            }
+        }
+
+        try {
+            statsWs = new WebSocket(`${protocol}//${host}/status/<%= server.UUID %>`);
+
+            statsWs.onmessage = event => {
+                if (isValidJson(event.data)) {
+                    const stats = JSON.parse(event.data);
+                    if (stats.error) {
+                        // Only log in development mode to reduce console spam
+                        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                            console.error('Error fetching stats:', stats.error);
+                        }
+                        setAllStatsOffline();
+                        return;
+                    }
+
+                    // Check if server is offline based on the event data
+                    if (stats.event === 'status' && stats.data && stats.data.running === false) {
+                        // Only log in development mode
+                        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                            console.log('Server is offline, updating all stats');
+                        }
+                        setAllStatsOffline();
+                        return;
+                    }
+
+                    // Check if memory usage is NaN, which indicates server is offline
+                    if (stats.data && stats.data.memory && stats.data.memory.percentage === "NaN") {
+                        // Only log in development mode
+                        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                            console.log('Server appears to be offline (NaN memory usage), updating all stats');
+                        }
+                        setAllStatsOffline();
+                        return;
+                    }
+
+                    // Server is online, update all stats normally
+                    updateRamUsage(stats);
+                    updateCpuUsage(stats);
+                    updateDiskUsage(stats);
+                    updateStatus(stats);
+                } else {
+                    console.log('Received non-JSON data:', event.data);
+                    setAllStatsOffline();
+                }
+            };
+
+            statsWs.onopen = () => {
+                console.log('WebSocket Stats connection established');
+                isStatsReconnecting = false;
+                statsReconnectAttempts = 0;
+                statsReconnectInterval = 2000;
+                // No need to hide daemon down message as it's been removed
+            };
+
+            statsWs.onerror = (error) => {
+                console.error('Stats WebSocket Error:', error);
+                // Set all stats to offline on WebSocket error
+                setAllStatsOffline();
+            };
+
+            statsWs.onclose = (event) => {
+                console.log(`WebSocket Stats connection closed (${event.code}). Reconnecting...`);
+
+                // Set all stats to offline when connection is lost
+                setAllStatsOffline();
+
+                // Update status text to show connection lost
+                const statusElement = document.getElementById('status');
+                statusElement.textContent = 'Connection Lost!';
+                statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
+
+                if (!isStatsReconnecting) {
+                    scheduleStatsReconnect();
+                }
+            };
+        } catch (error) {
+            console.error('Error creating Stats WebSocket:', error);
+            scheduleStatsReconnect();
+        }
+    }
+
+    function scheduleStatsReconnect() {
+        isStatsReconnecting = true;
+        statsReconnectAttempts++;
+        const backoffTime = Math.min(30000, statsReconnectInterval * Math.pow(1.5, statsReconnectAttempts - 1));
+
+        console.log(`Scheduling stats reconnect attempt ${statsReconnectAttempts} in ${backoffTime}ms`);
+
+        if (statsReconnectAttempts <= maxStatsReconnectAttempts) {
+            statsReconnectTimer = setTimeout(() => {
+                console.log(`Attempting stats reconnect ${statsReconnectAttempts} of ${maxStatsReconnectAttempts}`);
+                initStatsWebSocket();
+            }, backoffTime);
+        } else {
+            console.log('Maximum stats reconnect attempts reached. Please refresh the page.');
+        }
+    }
+
+    function formatBytes(bytes, decimals = 2) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    function createBackgroundChart(canvasId, type = 'line') {
+            return new Chart(document.getElementById(canvasId).getContext('2d'), {
+                type: type,
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderWidth: 1,
+                        pointRadius: 0,
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    },
+                    animation: true
+                }
+            });
+        }
+
+    const statusChart = createBackgroundChart('statusChart');
+    const ramChart = createBackgroundChart('ramChart');
+    const cpuChart = createBackgroundChart('cpuChart');
+    const diskChart = createBackgroundChart('diskChart', 'doughnut');
+
+    function updateRamUsage(stats) {
+    const ramStatsUsage = stats?.data?.memory?.usage || 0;
+    const ramStatsLimit = stats?.data?.memory?.limit || <%- server.Memory %> * 1024 * 1024 * 1024;
+    let ramUsagePercent = Number(stats?.data?.memory?.percentage) || 0;
+    const ramUsageInMB = ramStatsUsage / 1024 / 1024;
+    const ramLimitInMB = ramStatsLimit / 1024 / 1024;
+
+    if (isNaN(ramUsagePercent)) {
+        ramUsagePercent = 0;
+    }
+
+    const ramUsageText = `${ramUsagePercent.toFixed(1)}% (${formatBytes(ramStatsUsage)} / ${formatBytes(ramStatsLimit)})`;
+    document.getElementById('ramUsage').textContent = ramUsageText;
+
+    if (ramStatsUsage > 0) {
+        updateChart(ramChart, ramUsagePercent);
+    }
+}
+
+    function updateCpuUsage(stats) {
+        let cpuUsagePercent = stats.data.cpu.percentage || 0;
+
+        if (isNaN(cpuUsagePercent)) {
+            cpuUsagePercent = 0;
+        }
+
+        document.getElementById('cpuUsage').textContent = `${cpuUsagePercent}% / ${<%- server.Cpu * 100 %>}%`;
+
+        if (cpuUsagePercent > 0) {
+            updateChart(cpuChart, cpuUsagePercent);
+        }
+    }
+
+    function updateDiskUsage(stats) {
+        const diskUsageRaw = parseFloat(stats.data.storage.usage) || 0;
+        const diskLimitRaw = 10 * 1024;
+        const diskUsagePercent = (diskUsageRaw / diskLimitRaw * 100).toFixed(2);
+        document.getElementById('diskUsage').textContent = `${diskUsagePercent}% (${formatBytes(diskUsageRaw * 1024 * 1024)} / ${formatBytes(diskLimitRaw * 1024 * 1024)})`;
+    }
+
+    function updateStatus(stats) {
+        <% if (features.includes('players')) { %>
+        const playersDeco = document.getElementById('players-deco');
+        <% } %>
+        const statusElement = document.getElementById('status');
+        const ramUsageRaw = stats.data.memory.percentage;
+
+        // Check if server is in starting state
+        if (stats.data && stats.data.starting === true) {
+            statusElement.textContent = 'Starting';
+            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
+            <% if (features.includes('players')) { %>
+            playersDeco.classList.add('translate-y-32');
+            <% } %>
+            updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
+            // No need to hide daemon down message as it's been removed
+        } else if (ramUsageRaw !== "NaN") {
+            statusElement.textContent = 'Online';
+            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+            <% if (features.includes('players')) { %>
+            playersDeco.classList.remove('translate-y-32');
+            <% } %>
+            updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
+            // No need to hide daemon down message as it's been removed
+        } else {
+            statusElement.textContent = 'Offline';
+            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
+            <% if (features.includes('players')) { %>
+            playersDeco.classList.add('translate-y-32');
+            <% } %>
+            updateStatusChart('rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.2)');
+        }
+    }
+
+    function updateChart(chart, value) {
+        chart.data.labels.push('');
+        chart.data.datasets[0].data.push(value);
+
+        if (chart.data.labels.length > 20) {
+            chart.data.labels.shift();
+            chart.data.datasets[0].data.shift();
+        }
+
+        chart.update();
+    }
+
+    function updateStatusChart(backgroundColor, borderColor) {
+        statusChart.data.datasets[0].backgroundColor = backgroundColor;
+        statusChart.data.datasets[0].borderColor = borderColor;
+        statusChart.data.labels = [''];
+        statusChart.data.datasets[0].data = [100];
+        statusChart.update();
+    }
+
+    // Function to set all stats to offline state
+    function setAllStatsOffline() {
+        // Update status display
+        const statusElement = document.getElementById('status');
+        statusElement.textContent = 'Offline';
+        statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
+
+        // Update status chart
+        updateStatusChart('rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.2)');
+
+        // Update RAM usage
+        document.getElementById('ramUsage').textContent = `0% (0 Bytes / ${formatBytes(<%- server.Memory %> * 1024 * 1024 * 1024)})`;
+
+        // Update CPU usage
+        document.getElementById('cpuUsage').textContent = `0% / ${<%- server.Cpu %>}%`;
+
+        // Update disk usage
+        document.getElementById('diskUsage').textContent = '0% (0 Bytes / 10 GB)';
+
+        // Hide players decoration if it exists
+        <% if (features.includes('players')) { %>
+        const playersDeco = document.getElementById('players-deco');
+        playersDeco.classList.add('translate-y-32');
+        <% } %>
+
+        // No need to show daemon down message as it's been removed
+
+        // Reset charts
+        resetCharts();
+    }
+
+    // Function to reset all charts
+    function resetCharts() {
+        // Reset RAM chart
+        ramChart.data.labels = [];
+        ramChart.data.datasets[0].data = [];
+        ramChart.update();
+
+        // Reset CPU chart
+        cpuChart.data.labels = [];
+        cpuChart.data.datasets[0].data = [];
+        cpuChart.update();
+    }
+
+    function isValidJson(str) {
+        try {
+            JSON.parse(str);
+        } catch (e) {
+            return false;
+        }
+        return true;
+    }
+
+    initStatsWebSocket();
+
+    // Create a global WebSocket for server status that can be shared
+    // This will be used by both the page and the server header component
+    if (!window.serverStatusWebSocket) {
+      window.serverStatusWebSocket = new WebSocket(`${protocol}//${host}/ws/server/<%= server.UUID %>/status`);
+
+      window.serverStatusWebSocket.onopen = function() {
+        console.log('Global server status WebSocket connection established');
+
+        // Dispatch a custom event that other components can listen for
+        window.dispatchEvent(new CustomEvent('serverStatusWebSocketOpen'));
+      };
+
+      window.serverStatusWebSocket.onclose = function() {
+        console.log('Global server status WebSocket connection closed');
+
+        // Dispatch a custom event that other components can listen for
+        window.dispatchEvent(new CustomEvent('serverStatusWebSocketClose'));
+
+        // Clean up the global reference
+        window.serverStatusWebSocket = null;
+      };
+
+      window.serverStatusWebSocket.onerror = function(error) {
+        console.error('Global server status WebSocket error:', error);
+        // No need to show daemon down message as it's been removed
+
+        // Dispatch a custom event that other components can listen for
+        window.dispatchEvent(new CustomEvent('serverStatusWebSocketError', { detail: error }));
+      };
+    }
+
+    // Set up message handler for the manage page
+    window.serverStatusWebSocket.addEventListener('message', function(event) {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('Server status update received (manage page):', data);
+
+        // Extract the actual status data, handling different message formats
+        let statusData = data;
+        if (data.event === 'status' && data.data) {
+          statusData = data.data;
+        }
+
+        // Check for starting state
+        if (statusData.starting === true ||
+            statusData.status === 'starting' ||
+            data.status === 'starting') {
+          console.log('Server is starting, updating status');
+
+          // Update status display
+          const statusElement = document.getElementById('status');
+          statusElement.textContent = 'Starting';
+          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
+
+          // Update status chart
+          updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
+
+          // No need to hide daemon down message as it's been removed
+
+          <% if (features.includes('players')) { %>
+          // Hide players decoration
+          const playersDeco = document.getElementById('players-deco');
+          playersDeco.classList.add('translate-y-32');
+          <% } %>
+        }
+        // Check for stopping state
+        else if (statusData.stopping === true ||
+                statusData.status === 'stopping' ||
+                data.status === 'stopping') {
+          console.log('Server is stopping, updating status');
+
+          // Update status display
+          const statusElement = document.getElementById('status');
+          statusElement.textContent = 'Stopping';
+          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-orange-500';
+
+          // Update status chart
+          updateStatusChart('rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.2)');
+
+          // No need to hide daemon down message as it's been removed
+
+          <% if (features.includes('players')) { %>
+          // Hide players decoration
+          const playersDeco = document.getElementById('players-deco');
+          playersDeco.classList.add('translate-y-32');
+          <% } %>
+        }
+        // Check for offline status
+        else if (statusData.running === false ||
+                statusData.status === 'offline' ||
+                data.status === 'offline') {
+          console.log('Server is offline, updating all stats');
+          setAllStatsOffline();
+        }
+        // Check for online status
+        else if (statusData.running === true ||
+                statusData.status === 'online' ||
+                data.status === 'online') {
+          console.log('Server is online, updating status');
+
+          // Update status display
+          const statusElement = document.getElementById('status');
+          statusElement.textContent = 'Online';
+          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+
+          // Update status chart
+          updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
+
+          <% if (features.includes('players')) { %>
+          const playersDeco = document.getElementById('players-deco');
+          playersDeco.classList.remove('translate-y-32');
+          <% } %>
+        }
+      } catch (error) {
+        console.error('Error processing server status message:', error);
+      }
+    });
+
+    // Listen for server start events
+    document.getElementById('startButton').addEventListener('click', function() {
+      console.log('Start button clicked, setting up status polling');
+
+      // Update status immediately to "Starting"
+      const statusElement = document.getElementById('status');
+      statusElement.textContent = 'Starting';
+      statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
+      updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
+
+      // No need to hide daemon down message as it's been removed
+
+      // Set up initial status check after 5 seconds
+      setTimeout(function() {
+        console.log('Performing initial server status check after start button click');
+
+        // Create a variable to track if we've found the server online
+        let serverFoundOnline = false;
+
+        // Set up polling to detect when server is fully started (every 5 seconds)
+        const startupPoll = setInterval(function() {
+          // Skip if we've already found the server online
+          if (serverFoundOnline) return;
+
+          console.log('Checking server status (5-second interval)');
+          fetch(`/server/<%= server.UUID %>/status`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json'
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Server startup status check:', data);
+
+            if (data.online) {
+              console.log('Server is now online, updating display');
+              serverFoundOnline = true;
+              clearInterval(startupPoll);
+
+              // Update status display
+              statusElement.textContent = 'Online';
+              statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+              updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
+
+              <% if (features.includes('players')) { %>
+              const playersDeco = document.getElementById('players-deco');
+              playersDeco.classList.remove('translate-y-32');
+              <% } %>
+
+              // Start local uptime counter for smooth updates
+              if (data.startedAt) {
+                const startTime = new Date(data.startedAt).getTime();
+                const uptimeElement = document.getElementById('uptime');
+
+                if (uptimeElement) {
+                  // Initial update
+                  updateLocalUptime(startTime, uptimeElement);
+
+                  // Update every second
+                  const uptimeInterval = setInterval(function() {
+                    updateLocalUptime(startTime, uptimeElement);
+                  }, 1000);
+
+                  // Store the interval ID in a data attribute for cleanup
+                  uptimeElement.dataset.intervalId = uptimeInterval;
+                }
+              }
+            }
+          })
+          .catch(error => {
+            console.error('Error checking server status during startup:', error);
+          });
+        }, 5000); // Check every 5 seconds
+
+        // Do an initial check
+        fetch(`/server/<%= server.UUID %>/status`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Initial server status check:', data);
+
+          if (data.online) {
+            serverFoundOnline = true;
+            clearInterval(startupPoll);
+
+            // Update status display
+            statusElement.textContent = 'Online';
+            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+            updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
+
+            <% if (features.includes('players')) { %>
+            const playersDeco = document.getElementById('players-deco');
+            playersDeco.classList.remove('translate-y-32');
+            <% } %>
+          }
+        })
+        .catch(error => {
+          console.error('Error checking initial server status:', error);
+        });
+      }, 5000); // Wait 5 seconds before first check
+
+      // Stop polling after 60 seconds to avoid resource waste
+      setTimeout(function() {
+        console.log('Stopping startup polling after 60 seconds');
+        if (typeof startupPoll !== 'undefined') {
+          clearInterval(startupPoll);
+        }
+      }, 60000);
+    });
+
+    // The stop button event listener is now defined above
+
+    // Function to update local uptime display
+    function updateLocalUptime(startTime, element) {
+      if (!startTime || !element) return;
+
+      const now = Date.now();
+      const uptimeSeconds = Math.floor((now - startTime) / 1000);
+      element.textContent = formatUptime(uptimeSeconds);
+    }
+
+    // Function to format uptime in a human-readable format
+    function formatUptime(seconds) {
+      if (typeof seconds !== 'number' || isNaN(seconds)) {
+        return '0s';
+      }
+
+      const days = Math.floor(seconds / 86400);
+      const hours = Math.floor((seconds % 86400) / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = Math.floor(seconds % 60);
+
+      if (days > 0) {
+        return `${days}d ${hours}h ${minutes}m`;
+      } else if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+      } else if (minutes > 0) {
+        return `${minutes}m ${secs}s`;
+      } else {
+        return `${secs}s`;
+      }
+    }
+
+    // Check server status periodically (every 5 seconds)
+    setInterval(function() {
+      // Make a direct API call to check server status
+      fetch(`/server/<%= server.UUID %>/status`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Server status check:', data);
+
+        // Handle starting state
+        if (data.starting) {
+          console.log('Server is starting (from status check), updating status');
+
+          // Update status display
+          const statusElement = document.getElementById('status');
+          statusElement.textContent = 'Starting';
+          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
+
+          // Update status chart
+          updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
+
+          // No need to hide daemon down message as it's been removed
+
+          <% if (features.includes('players')) { %>
+          // Hide players decoration
+          const playersDeco = document.getElementById('players-deco');
+          playersDeco.classList.add('translate-y-32');
+          <% } %>
+        }
+        // Handle stopping state
+        else if (data.stopping) {
+          console.log('Server is stopping (from status check), updating status');
+
+          // Update status display
+          const statusElement = document.getElementById('status');
+          statusElement.textContent = 'Stopping';
+          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-orange-500';
+
+          // Update status chart
+          updateStatusChart('rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.2)');
+
+          // No need to hide daemon down message as it's been removed
+
+          <% if (features.includes('players')) { %>
+          // Hide players decoration
+          const playersDeco = document.getElementById('players-deco');
+          playersDeco.classList.add('translate-y-32');
+          <% } %>
+        }
+        // Handle online state
+        else if (data.online) {
+          console.log('Server is online (from status check), updating status');
+
+          // Update status display
+          const statusElement = document.getElementById('status');
+          statusElement.textContent = 'Online';
+          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+
+          // Update status chart
+          updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
+
+          // No need to hide daemon down message as it's been removed
+
+          <% if (features.includes('players')) { %>
+          // Show players decoration
+          const playersDeco = document.getElementById('players-deco');
+          playersDeco.classList.remove('translate-y-32');
+          <% } %>
+
+          // Update uptime if we have a start time
+          if (data.startedAt) {
+            const startTime = new Date(data.startedAt).getTime();
+            const uptimeElement = document.getElementById('uptime');
+
+            if (uptimeElement) {
+              // Clear any existing interval
+              const existingInterval = uptimeElement.dataset.intervalId;
+              if (existingInterval) {
+                clearInterval(parseInt(existingInterval));
+              }
+
+              // Initial update
+              updateLocalUptime(startTime, uptimeElement);
+
+              // Update every second
+              const uptimeInterval = setInterval(function() {
+                updateLocalUptime(startTime, uptimeElement);
+              }, 1000);
+
+              // Store the interval ID for cleanup
+              uptimeElement.dataset.intervalId = uptimeInterval;
+            }
+          }
+        }
+        // Handle offline state
+        else if (data.status === 'offline' || !data.online) {
+          console.log('Server is offline (from status check), updating all stats');
+          setAllStatsOffline();
+
+          // Clear any uptime interval
+          const uptimeElement = document.getElementById('uptime');
+          if (uptimeElement && uptimeElement.dataset.intervalId) {
+            clearInterval(parseInt(uptimeElement.dataset.intervalId));
+            delete uptimeElement.dataset.intervalId;
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error checking server status:', error);
+      });
+    }, 5000); // Check every 5 seconds
+</script>

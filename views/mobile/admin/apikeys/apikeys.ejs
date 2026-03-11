@@ -1,0 +1,255 @@
+<%- include('../../components/header', { title: 'API Keys' }) %>
+
+<main class="">
+  <%- include('../../components/template') %>
+  <%- include('../../components/toast') %>
+
+  <div class="px-4 py-5">
+
+    <div class="flex items-start justify-between mb-5">
+      <div>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white">API Keys</h1>
+        <p class="text-xs text-neutral-500 mt-0.5">Manage API keys and permissions</p>
+      </div>
+      <div class="flex gap-2 shrink-0">
+        <a href="/admin/api/docs">
+          <button type="button" class="inline-flex items-center rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Docs</button>
+        </a>
+        <button id="createApiKeyBtn" type="button" class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-300 hover:bg-neutral-800 dark:hover:bg-neutral-700 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          New Key
+        </button>
+      </div>
+    </div>
+
+    <!-- API key cards -->
+    <div class="space-y-2">
+      <% if (apiKeys.length === 0) { %>
+        <div class="py-16 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-10 h-10 mx-auto mb-3 text-neutral-300 dark:text-neutral-700">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 0 1 21.75 8.25Z" />
+          </svg>
+          <p class="text-sm text-neutral-500">No API keys yet</p>
+        </div>
+      <% } else { %>
+        <% apiKeys.forEach(apiKey => { %>
+          <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+            <div class="flex items-start gap-3 mb-3">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-0.5">
+                  <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= apiKey.name %></p>
+                  <span class="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-md <%= apiKey.active ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' : 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20' %>">
+                    <%= apiKey.active ? 'Active' : 'Inactive' %>
+                  </span>
+                </div>
+                <% if (apiKey.description) { %>
+                  <p class="text-xs text-neutral-500 truncate"><%= apiKey.description %></p>
+                <% } %>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 mb-3 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg px-3 py-2">
+              <code class="text-xs font-mono text-neutral-600 dark:text-neutral-400 flex-1 truncate"><%= apiKey.key.substring(0, 8) %>...</code>
+              <button onclick="copyToClipboard('<%= apiKey.key %>')" class="shrink-0 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <p class="text-xs text-neutral-500">By <%= apiKey.user ? apiKey.user.username : 'System' %> · <%= new Date(apiKey.createdAt).toLocaleDateString() %></p>
+              <div class="flex gap-1.5">
+                <button onclick="showEditModal('<%= apiKey.id %>', '<%= apiKey.name %>', '<%= (apiKey.description || '').replace(/'/g, "\\'") %>', <%= JSON.stringify(apiKey.permissions) %>)" type="button" class="rounded-lg bg-blue-600 p-1.5 text-white hover:bg-blue-500 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
+                  </svg>
+                </button>
+                <form action="/admin/apikeys/toggle/<%= apiKey.id %>" method="POST" class="inline">
+                  <%- include('../../components/csrf') %>
+                  <button type="submit" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+                      <% if (apiKey.active) { %>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
+                      <% } else { %>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                      <% } %>
+                    </svg>
+                  </button>
+                </form>
+                <form action="/admin/apikeys/delete/<%= apiKey.id %>" method="POST" class="inline" onsubmit="return confirm('Delete this API key?')">
+                  <%- include('../../components/csrf') %>
+                  <button type="submit" class="rounded-lg bg-red-600 p-1.5 text-white hover:bg-red-500 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                    </svg>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      <% } %>
+    </div>
+
+  </div>
+</main>
+
+<!-- Create Key Modal -->
+<div id="createApiKeyModal" class="fixed inset-0 z-50 hidden items-start justify-center pt-4 px-4 pb-20 bg-black/60 overflow-y-auto">
+  <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-2xl p-5 w-full shadow-xl mt-2">
+    <div class="flex items-center justify-between mb-4">
+      <p class="text-sm font-medium text-neutral-800 dark:text-white">Create API Key</p>
+      <button onclick="hideCreateModal()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+
+    <form action="/admin/apikeys/create" method="POST" class="space-y-4">
+      <%- include('../../components/csrf') %>
+      <input type="text" name="name" placeholder="Key name" required class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 focus:outline-none transition">
+      <textarea name="description" placeholder="Description (optional)" rows="2" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 focus:outline-none transition resize-none"></textarea>
+
+      <div class="flex gap-2">
+        <button type="button" id="selectAllBtn" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">All</button>
+        <button type="button" id="selectNoneBtn" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">None</button>
+        <button type="button" id="selectReadOnlyBtn" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Read-Only</button>
+      </div>
+
+      <div class="rounded-xl bg-neutral-100 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/40 p-3 space-y-3">
+        <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Permissions</p>
+        <% ['servers', 'users', 'nodes', 'settings'].forEach(category => { %>
+          <div>
+            <button type="button" class="w-full flex items-center justify-between py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300" onclick="this.nextElementSibling.classList.toggle('hidden')">
+              <span class="capitalize"><%= category %></span>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 text-neutral-400"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+            </button>
+            <div class="hidden pt-1.5 space-y-1.5 pl-2 border-l border-neutral-300 dark:border-neutral-600">
+              <% allPermissions.filter(p => p.value.includes(category)).forEach(permission => { %>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input id="permission-<%= permission.value %>" name="permissions" value="<%= permission.value %>" type="checkbox" class="h-3.5 w-3.5 rounded border-neutral-300 dark:border-neutral-600 permission-checkbox" data-category="<%= category %>">
+                  <span class="text-xs text-neutral-700 dark:text-neutral-300"><%= permission.name %></span>
+                </label>
+              <% }); %>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+
+      <div class="flex gap-2 justify-end pt-1">
+        <button type="button" onclick="hideCreateModal()" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 px-4 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
+        <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white px-4 py-2 text-xs font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">Create</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Key Modal -->
+<div id="editApiKeyModal" class="fixed inset-0 z-50 hidden items-start justify-center pt-4 px-4 pb-20 bg-black/60 overflow-y-auto">
+  <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-2xl p-5 w-full shadow-xl mt-2">
+    <div class="flex items-center justify-between mb-4">
+      <p class="text-sm font-medium text-neutral-800 dark:text-white">Edit API Key</p>
+      <button onclick="hideEditModal()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+
+    <form id="editApiKeyForm" action="/admin/apikeys/edit/0" method="POST" class="space-y-4">
+      <%- include('../../components/csrf') %>
+      <input type="text" name="name" id="edit-name" placeholder="Key name" required class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 focus:outline-none transition">
+      <textarea name="description" id="edit-description" placeholder="Description (optional)" rows="2" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 focus:outline-none transition resize-none"></textarea>
+
+      <div class="flex gap-2">
+        <button type="button" id="editSelectAllBtn" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">All</button>
+        <button type="button" id="editSelectNoneBtn" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">None</button>
+        <button type="button" id="editSelectReadOnlyBtn" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Read-Only</button>
+      </div>
+
+      <div class="rounded-xl bg-neutral-100 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/40 p-3 space-y-3">
+        <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Permissions</p>
+        <% ['servers', 'users', 'nodes', 'settings'].forEach(category => { %>
+          <div>
+            <button type="button" class="w-full flex items-center justify-between py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300" onclick="this.nextElementSibling.classList.toggle('hidden')">
+              <span class="capitalize"><%= category %></span>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 text-neutral-400"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+            </button>
+            <div class="hidden pt-1.5 space-y-1.5 pl-2 border-l border-neutral-300 dark:border-neutral-600">
+              <% allPermissions.filter(p => p.value.includes(category)).forEach(permission => { %>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input id="edit-permission-<%= permission.value %>" name="permissions" value="<%= permission.value %>" type="checkbox" class="h-3.5 w-3.5 rounded border-neutral-300 dark:border-neutral-600 edit-permission-checkbox" data-category="<%= category %>">
+                  <span class="text-xs text-neutral-700 dark:text-neutral-300"><%= permission.name %></span>
+                </label>
+              <% }); %>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+
+      <div class="flex gap-2 justify-end pt-1">
+        <button type="button" onclick="hideEditModal()" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 px-4 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
+        <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white px-4 py-2 text-xs font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">Update</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text)
+      .then(() => showToast('API key copied', 'success'))
+      .catch(() => showToast('Failed to copy', 'error'));
+  }
+
+  function showModal(id) {
+    const el = document.getElementById(id);
+    el.classList.remove('hidden');
+    el.classList.add('flex');
+  }
+  function hideModal(id) {
+    const el = document.getElementById(id);
+    el.classList.add('hidden');
+    el.classList.remove('flex');
+  }
+
+  document.getElementById('createApiKeyBtn').addEventListener('click', () => showModal('createApiKeyModal'));
+  function hideCreateModal() { hideModal('createApiKeyModal'); }
+  function hideEditModal() { hideModal('editApiKeyModal'); }
+
+  function showEditModal(id, name, description, permissions) {
+    document.getElementById('editApiKeyForm').action = `/admin/apikeys/edit/${id}`;
+    document.getElementById('edit-name').value = name;
+    document.getElementById('edit-description').value = description;
+    document.querySelectorAll('[id^="edit-permission-"]').forEach(cb => cb.checked = false);
+    try {
+      const perms = typeof permissions === 'string' ? JSON.parse(permissions) : permissions;
+      perms.forEach(p => {
+        const cb = document.getElementById(`edit-permission-${p}`);
+        if (cb) cb.checked = true;
+      });
+    } catch {}
+    showModal('editApiKeyModal');
+  }
+
+  document.getElementById('selectAllBtn').addEventListener('click', () => {
+    document.querySelectorAll('.permission-checkbox').forEach(cb => cb.checked = true);
+  });
+  document.getElementById('selectNoneBtn').addEventListener('click', () => {
+    document.querySelectorAll('.permission-checkbox').forEach(cb => cb.checked = false);
+  });
+  document.getElementById('selectReadOnlyBtn').addEventListener('click', () => {
+    document.querySelectorAll('.permission-checkbox').forEach(cb => { cb.checked = cb.value.includes('.read'); });
+  });
+  document.getElementById('editSelectAllBtn').addEventListener('click', () => {
+    document.querySelectorAll('.edit-permission-checkbox').forEach(cb => cb.checked = true);
+  });
+  document.getElementById('editSelectNoneBtn').addEventListener('click', () => {
+    document.querySelectorAll('.edit-permission-checkbox').forEach(cb => cb.checked = false);
+  });
+  document.getElementById('editSelectReadOnlyBtn').addEventListener('click', () => {
+    document.querySelectorAll('.edit-permission-checkbox').forEach(cb => { cb.checked = cb.value.includes('.read'); });
+  });
+</script>
+
+<%- include('../../components/footer') %>

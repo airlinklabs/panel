@@ -1,0 +1,43 @@
+<!-- Loading State Component -->
+<div id="loading-state" class="flex flex-col items-center justify-center py-12">
+  <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-neutral-600 dark:border-neutral-300 mb-4"></div>
+  <h3 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Loading...</h3>
+  <p class="text-sm text-neutral-500 dark:text-neutral-400 text-center max-w-md">
+    Connecting to the server. This may take a moment.
+  </p>
+</div>
+
+<!-- Error State Component -->
+<div id="error-state" class="hidden flex flex-col items-center justify-center py-12">
+  <div class="rounded-full h-16 w-16 flex items-center justify-center bg-red-100 dark:bg-red-900/20 mb-4">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    </svg>
+  </div>
+  <h3 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Connection Error</h3>
+  <p class="text-sm text-neutral-500 dark:text-neutral-400 text-center max-w-md mb-4">
+    Unable to connect to the daemon. The daemon may be offline or not responding.
+  </p>
+  <button id="retry-button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+    Retry Connection
+  </button>
+</div>
+
+<script>
+  function showLoadingState() {
+    document.getElementById('loading-state').classList.remove('hidden');
+    document.getElementById('error-state').classList.add('hidden');
+  }
+  
+  function showErrorState() {
+    document.getElementById('loading-state').classList.add('hidden');
+    document.getElementById('error-state').classList.remove('hidden');
+  }
+  
+  // Add event listener to retry button
+  document.getElementById('retry-button').addEventListener('click', function() {
+    showLoadingState();
+    // Reload the page to retry the connection
+    window.location.reload();
+  });
+</script>

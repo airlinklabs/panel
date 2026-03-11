@@ -1,0 +1,97 @@
+<%- include('../components/header', { title: 'Servers' }) %>
+
+<main class="">
+  <%- include('../components/template') %>
+
+  <div class="px-4 py-5">
+    <!-- Page header -->
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.userDashboardTitle %></h1>
+        <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.userDashboardText %></p>
+      </div>
+    </div>
+
+    <!-- Errors -->
+    <% if (req.query.err === "NOTACTIVEYET") { %>
+      <div class="rounded-xl bg-amber-50 dark:bg-amber-800/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-4">
+        <p class="text-sm font-medium text-amber-700 dark:text-amber-400">Awaiting Installation</p>
+        <p class="text-xs text-amber-600 dark:text-amber-400/60 mt-0.5">The server isn't installed yet or is in a failed state.</p>
+      </div>
+    <% } %>
+
+    <% if (typeof daemonOffline !== 'undefined' && daemonOffline) { %>
+      <div class="rounded-xl bg-red-50 dark:bg-red-800/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-4">
+        <p class="text-sm font-medium text-red-700 dark:text-red-400">Connection Error</p>
+        <p class="text-xs text-red-600 dark:text-red-400/60 mt-0.5">One or more nodes are offline.</p>
+        <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded-lg">Retry</button>
+      </div>
+    <% } %>
+
+    <!-- Servers -->
+    <% if (servers.length === 0) { %>
+      <div class="flex flex-col items-center justify-center mt-32 text-center px-4">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-20 w-20 text-neutral-300 dark:text-neutral-600 mb-4">
+          <path fill-rule="evenodd" d="M11.622 1.602a.75.75 0 0 1 .756 0l2.25 1.313a.75.75 0 0 1-.756 1.295L12 3.118 10.128 4.21a.75.75 0 1 1-.756-1.295l2.25-1.313ZM5.898 5.81a.75.75 0 0 1-.27 1.025l-1.14.665 1.14.665a.75.75 0 1 1-.756 1.295L3.75 8.806v.944a.75.75 0 0 1-1.5 0V7.5a.75.75 0 0 1 .372-.648l2.25-1.312a.75.75 0 0 1 1.026.27Zm12.204 0a.75.75 0 0 1 1.026-.27l2.25 1.312a.75.75 0 0 1 .372.648v2.25a.75.75 0 0 1-1.5 0v-.944l-1.122.654a.75.75 0 1 1-.756-1.295l1.14-.665-1.14-.665a.75.75 0 0 1-.27-1.025Zm-9 5.25a.75.75 0 0 1 1.026-.27L12 11.882l1.872-1.092a.75.75 0 1 1 .756 1.295l-1.878 1.096V15a.75.75 0 0 1-1.5 0v-1.82l-1.878-1.095a.75.75 0 0 1-.27-1.025Z" clip-rule="evenodd" />
+        </svg>
+        <h2 class="text-base font-medium text-neutral-800 dark:text-white">No servers yet</h2>
+        <p class="text-sm text-neutral-500 mt-1">
+          <% if (user.isAdmin) { %>
+            <a href="/admin/servers/create" class="text-blue-500">Create one now</a>
+          <% } else { %>
+            An admin will assign one to you.
+          <% } %>
+        </p>
+      </div>
+    <% } else { %>
+      <div class="space-y-3">
+        <% servers.forEach(server => { %>
+          <a href="../server/<%= server.UUID %>" class="block bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 p-4 active:scale-[0.98] transition-transform duration-100">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-medium text-neutral-900 dark:text-white truncate mr-2"><%= server.name %></h3>
+              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-md shrink-0
+                  <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' %>">
+                <span class="relative flex h-1.5 w-1.5">
+                  <% if (server.status === 'running') { %>
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                  <% } else { %>
+                    <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500"></span>
+                  <% } %>
+                </span>
+                <%= server.status === 'running' ? 'Running' : 'Stopped' %>
+              </span>
+            </div>
+            <div class="flex gap-4">
+              <div class="flex-1 bg-neutral-50 dark:bg-neutral-700/30 rounded-lg px-3 py-2">
+                <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">RAM</p>
+                <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsage %>%</p>
+              </div>
+              <div class="flex-1 bg-neutral-50 dark:bg-neutral-700/30 rounded-lg px-3 py-2">
+                <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">CPU</p>
+                <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.cpuUsage %>%</p>
+              </div>
+            </div>
+          </a>
+        <% }); %>
+      </div>
+
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+        <div class="flex items-center justify-center gap-3 mt-6">
+          <% if (currentPage > 1) { %>
+            <a href="/?page=<%= currentPage - 1 %>" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg">Prev</a>
+          <% } %>
+          <span class="text-sm text-neutral-500"><%= currentPage %> / <%= totalPages %></span>
+          <% if (currentPage < totalPages) { %>
+            <a href="/?page=<%= currentPage + 1 %>" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg">Next</a>
+          <% } %>
+        </div>
+      <% } %>
+    <% } %>
+  </div>
+
+  </div>
+</main>
+
+<%- include('../components/footer') %>

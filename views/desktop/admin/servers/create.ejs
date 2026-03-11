@@ -1,0 +1,509 @@
+<%- include('../../components/header', { title: 'Dashboard' }) %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <!-- Content -->
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminCreateServerTitle %></h1>
+            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminCreateServerText %></p>
+        </div>
+      </div>
+
+      <div id="nodeForm" class="mt-6 px-8 w-full">
+        <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+          <form id="createServerForm" method="POST" action="/admin/servers/create">
+            <!-- General Category -->
+            <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">General</h2>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <label for="serverName" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.name %>:</label>
+                <div class="flex items-center space-x-2">
+                    <input id="serverName" name="name" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server">
+                    <div class="flex-shrink-0 p-2 mb-1 -ml-5" onclick="generateRandomName()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-neutral-300">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+              <div>
+                <label for="serverDescription" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.description %>:</label>
+                <input id="serverDescription" name="description" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server description">
+              </div>
+
+              <div>
+                <label for="serverUser" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.user %>:</label>
+                <select id="serverUser" name="ownerId" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                  <% users.forEach(user => { %>
+                    <option value="<%= user.id %>"><%= user.username %></option>
+                  <% }); %>
+                </select>
+              </div>
+
+              <div>
+                <label for="serverNode" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                  <%= req.translations.Node %>:
+                </label>
+                <div class="relative mt-2 mb-4">
+                  <select id="serverNode" name="nodeId"
+                          class="block w-full rounded-xl bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 text-neutral-800 dark:text-white text-sm px-4 py-2 focus:outline-none focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 hover:bg-white/5 dark:hover:bg-neutral-700/30">
+                    <% if (nodes.length > 0) { %>
+                      <% nodes.forEach(node => { %>
+                        <option value="<%= node.id %>"><%= node.name %></option>
+                      <% }); %>
+                    <% } else { %>
+                      <option value="" disabled selected>No nodes available</option>
+                    <% } %>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resources Category -->
+            <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Resources</h2>
+            <div class="grid grid-cols-3 gap-4">
+              <div>
+                <label for="serverCPU" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">CPU (Cores):</label>
+                <input id="serverCPU" name="Cpu" type="number" min="1" max="128" value="2" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+              </div>
+
+              <div>
+                <label for="serverMemory" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Memory (GB):</label>
+                <input id="serverMemory" name="Memory" type="number" min="1" max="128" value="4" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+              </div>
+
+              <div>
+                <label for="serverStorage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Storage (GB):</label>
+                <input id="serverStorage" name="Storage" type="number" min="1" max="1000" value="20" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+              </div>
+            </div>
+
+            <!-- Startup Category -->
+            <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Startup</h2>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <label for="serverImage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.Image %>:</label>
+                <select id="serverImage" name="imageId"
+                        class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                  <% images.forEach(image => { %>
+                    <option value="<%= image.id %>" data-docker-images='<%= image.dockerImages %>' data-variables='<%= image.variables %>'>
+                      <%= image.name %>
+                    </option>
+                  <% }); %>
+                </select>
+              </div>
+
+              <div>
+                <label for="dockerImage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.DockerImage %>:</label>
+                <select id="dockerImage" name="dockerImage"
+                        class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                  <option value="" disabled selected>Select a Docker image</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="serverPorts" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.Ports %>:</label>
+                <select id="serverPorts" name="Ports" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                  <option value="" disabled selected>Select a port</option>
+                  <!-- Port options will be populated based on selected node -->
+                </select>
+              </div>
+
+              <div class="bg-neutral-100 dark:bg-neutral-700/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between">
+                  <div class="flex items-center mb-2 md:mb-0">
+                    <div class="flex-shrink-0 mr-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
+                      <p class="text-xs text-neutral-600 dark:text-neutral-400">When enabled, users can modify the startup command for this server.</p>
+                    </div>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true">
+                    <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="allowStartupEditLabel">Disabled</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div id="variablesSection" style="display: none;">
+              <h2 class="text-neutral-700 dark:text-neutral-300 text-md font-semibold mb-4">Variables</h2>
+
+              <div class="grid grid-cols-4 gap-4 mb-6" id="variablesContainer">
+                <!-- here come the variables -->
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="col-span-2">
+                <button type="submit" class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+                    <%= req.translations.create %>
+                  </button>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/loadingPopup') %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const serverImageSelect = document.getElementById('serverImage');
+    const dockerImageSelect = document.getElementById('dockerImage');
+    const serverNodeSelect = document.getElementById('serverNode');
+    const serverPortsSelect = document.getElementById('serverPorts');
+    const variablesContainer = document.getElementById('variablesContainer');
+    const form = document.getElementById('createServerForm');
+
+    // Store node data
+    let nodesData = {};
+
+    // Fetch nodes data with allocated ports
+    async function fetchNodesData() {
+      try {
+        const response = await fetch('/admin/nodes/list');
+        const nodes = await response.json();
+
+        // Store nodes data for later use
+        nodes.forEach(node => {
+          let ports = [];
+          try {
+            if (node.allocatedPorts) {
+              ports = JSON.parse(node.allocatedPorts);
+            }
+          } catch (e) {
+            console.error('Error parsing allocated ports:', e);
+          }
+
+          nodesData[node.id] = {
+            ...node,
+            parsedPorts: ports
+          };
+        });
+
+        // Update ports when a node is selected
+        updatePortsForSelectedNode();
+      } catch (error) {
+        console.error('Error fetching nodes:', error);
+      }
+    }
+
+    // Update available ports based on selected node
+    function updatePortsForSelectedNode() {
+      const selectedNodeId = serverNodeSelect.value;
+      serverPortsSelect.innerHTML = '<option value="" disabled selected>Select a port</option>';
+
+      if (!selectedNodeId || !nodesData[selectedNodeId]) {
+        return;
+      }
+
+      const node = nodesData[selectedNodeId];
+      const nodeAddress = node.address;
+
+      if (!node.parsedPorts || node.parsedPorts.length === 0) {
+        const option = document.createElement('option');
+        option.disabled = true;
+        option.textContent = 'No ports allocated for this node';
+        serverPortsSelect.appendChild(option);
+        return;
+      }
+
+      // Get ports that are already in use by existing servers
+      const usedPorts = new Set();
+      if (node.servers && node.servers.length > 0) {
+        node.servers.forEach(server => {
+          try {
+            if (server.Ports) {
+              const ports = JSON.parse(server.Ports);
+              ports.forEach(portInfo => {
+                const port = parseInt(portInfo.Port.split(':')[0]);
+                if (!isNaN(port)) {
+                  usedPorts.add(port);
+                }
+              });
+            }
+          } catch (e) {
+            console.error('Error parsing server ports:', e);
+          }
+        });
+      }
+
+      // Add each available port as an option (filtering out used ports)
+      let availablePortsCount = 0;
+      node.parsedPorts.forEach(port => {
+        if (!usedPorts.has(port)) {
+          const option = document.createElement('option');
+          option.value = `${port}:${port}`;
+          option.textContent = `${nodeAddress}:${port}`;
+          serverPortsSelect.appendChild(option);
+          availablePortsCount++;
+        }
+      });
+
+      // If all ports are in use, show a message
+      if (availablePortsCount === 0 && node.parsedPorts.length > 0) {
+        const option = document.createElement('option');
+        option.disabled = true;
+        option.textContent = 'All allocated ports are currently in use';
+        serverPortsSelect.appendChild(option);
+      }
+    }
+
+    function updateDockerImages() {
+      const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+      const dockerImagesData = selectedOption.getAttribute('data-docker-images');
+
+      dockerImageSelect.innerHTML = '<option value="" disabled selected>Select a Docker image</option>';
+
+      if (dockerImagesData) {
+        const dockerImages = JSON.parse(dockerImagesData);
+        dockerImages.forEach(imageObj => {
+          Object.entries(imageObj).forEach(([key, value]) => {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = key;
+            dockerImageSelect.appendChild(option);
+          });
+        });
+      }
+    }
+
+    function updateVariables() {
+      const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+      const variables = JSON.parse(selectedOption.getAttribute('data-variables')) || [];
+      const variablesSection = document.getElementById('variablesSection');
+
+      variablesContainer.innerHTML = '';
+
+      if (variables.length === 0) {
+        variablesSection.style.display = 'none';
+        return;
+      } else {
+        variablesSection.style.display = 'block';
+      }
+
+      variables.forEach(variable => {
+        const variableDiv = document.createElement('div');
+        variableDiv.classList.add('mb-4', 'flex', 'items-center');
+
+        const label = document.createElement('label');
+        label.setAttribute('for', variable.env);
+        label.classList.add('text-neutral-700', 'dark:text-neutral-400', 'text-sm', 'tracking-tight', 'mr-2');
+        label.textContent = variable.name + (variable.required ? ' *' : '');
+
+        let input;
+
+        switch (variable.type) {
+          case 'text':
+            input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = `Enter ${variable.name}`;
+            break;
+          case 'number':
+            input = document.createElement('input');
+            input.type = 'number';
+            input.placeholder = `Enter ${variable.name}`;
+            input.min = variable.min || 1;
+            input.max = variable.max || 1000;
+            break;
+          case 'boolean':
+            input = document.createElement('div');
+            input.classList.add('flex', 'items-center', 'space-x-2', 'mt-1');
+
+            const checkboxContainer = document.createElement('label');
+            checkboxContainer.setAttribute('for', variable.env);
+            checkboxContainer.classList.add('relative', 'inline-flex', 'items-center', 'cursor-pointer');
+
+            const checkboxInput = document.createElement('input');
+            checkboxInput.type = 'checkbox';
+            checkboxInput.id = variable.env;
+            checkboxInput.name = variable.env;
+            checkboxInput.classList.add('sr-only', 'peer');
+            checkboxInput.checked = variable.value || false;
+
+            const toggleTrack = document.createElement('div');
+            toggleTrack.classList.add('w-11', 'h-6', 'bg-neutral-300', 'dark:bg-neutral-700', 'peer-focus:ring-2', 'peer-focus:ring-blue-300', 'dark:peer-focus:ring-blue-800', 'rounded-full', 'peer', 'peer-checked:after:translate-x-full', 'rtl:peer-checked:after:-translate-x-full', 'peer-checked:after:border-white', 'after:content-[\'\']', 'after:absolute', 'after:top-[2px]', 'after:start-[2px]', 'after:bg-white', 'after:border-neutral-300', 'after:border', 'after:rounded-full', 'after:h-5', 'after:w-5', 'after:transition-all', 'peer-checked:bg-blue-600');
+
+            const toggleLabel = document.createElement('span');
+            toggleLabel.classList.add('ms-3', 'text-sm', 'font-medium', 'text-neutral-600', 'dark:text-neutral-300');
+            toggleLabel.textContent = checkboxInput.checked ? 'Enabled' : 'Disabled';
+
+            // Update label when toggle changes
+            checkboxInput.addEventListener('change', function() {
+              toggleLabel.textContent = this.checked ? 'Enabled' : 'Disabled';
+            });
+
+            checkboxContainer.appendChild(checkboxInput);
+            checkboxContainer.appendChild(toggleTrack);
+            checkboxContainer.appendChild(toggleLabel);
+            input.appendChild(checkboxContainer);
+            break;
+          default:
+            input = document.createElement('input');
+            input.type = 'text';
+            break;
+        }
+
+        if (variable.type !== 'boolean') {
+          input.classList.add(
+            'rounded-xl',
+            'focus:ring',
+            'focus:ring-neutral-800/10',
+            'focus:border-neutral-800/20',
+            'text-neutral-800',
+            'dark:text-white',
+            'text-sm',
+            'w-full',
+            'hover:bg-white/5',
+            'px-4',
+            'py-2',
+            'bg-neutral-400/10',
+            'dark:bg-neutral-600/20',
+            'border',
+            'border-neutral-800/10',
+            'dark:border-white/5'
+          );
+        }
+
+        input.id = variable.env;
+        input.name = variable.env;
+        input.value = variable.value || '';
+        input.required = variable.required;
+
+        variableDiv.appendChild(label);
+        variableDiv.appendChild(input);
+        variablesContainer.appendChild(variableDiv);
+      });
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const variablesArray = [];
+
+      const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+      const variables = JSON.parse(selectedOption.getAttribute('data-variables')) || [];
+
+      variables.forEach(variable => {
+        let variableValue = formData.get(variable.env);
+        if (variable.type === 'boolean') {
+          variableValue = (variableValue === 'on') ? 1 : 0;
+        } else if (variable.type === 'number') {
+          variableValue = parseInt(variableValue);
+        }
+        if (variableValue !== null) {
+          variablesArray.push({
+            env: variable.env,
+            name: variable.name,
+            value: variableValue,
+            type: variable.type
+          });
+        }
+      });
+
+      const data = Object.fromEntries(formData);
+      data.variables = variablesArray;
+
+      const loader = showLoadingPopup('Creating Server', 'Initializing server creation...');
+      loader.updateProgress(20, 'Sending server configuration...');
+
+      fetch('/admin/servers/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Server creation failed');
+          }
+          return response;
+        })
+        .then(data => {
+          loader.updateProgress(100, 'Server created successfully!');
+          setTimeout(() => {
+            loader.close();
+            showToast('Server created successfully!', 'success');
+            setTimeout(() => {
+              window.location.href = '/admin/servers?err=none';
+            }, 1000);
+          }, 500);
+        })
+        .catch(error => {
+          loader.close();
+          console.error('Error:', error);
+          showToast('Failed to create server: ' + error.message, 'error');
+        });
+    });
+
+    // Fetch nodes data on page load
+    fetchNodesData();
+
+    // Initialize UI
+    updateDockerImages();
+    updateVariables();
+
+    // Toggle for startup command edit permission
+    const allowStartupEditToggle = document.getElementById('allowStartupEdit');
+    const allowStartupEditLabel = document.getElementById('allowStartupEditLabel');
+
+    allowStartupEditToggle.addEventListener('change', function() {
+      allowStartupEditLabel.textContent = this.checked ? 'Enabled' : 'Disabled';
+    });
+
+    // Event listeners
+    serverImageSelect.addEventListener('change', () => {
+      updateDockerImages();
+      updateVariables();
+    });
+
+    serverNodeSelect.addEventListener('change', () => {
+      updatePortsForSelectedNode();
+    });
+  });
+</script>
+<script>
+const listA = [
+    "Charged", "Fiery", "Mystical", "Dark", "Angry", "Enchanted",
+    "Blazing", "Cursed", "Frozen", "Swift", "Ancient", "Wicked",
+    "Luminous", "Vengeful", "Radiant", "Thunderous", "Shadow",
+    "Frost", "Vibrant", "Spectral", "Nether", "Ender", "Caving",
+    "Toxic", "Haunted", "Radiant", "Ghostly"
+];
+
+const listB = [
+    "Creeper", "Dragon", "Zombie", "Ghoul", "Enderman", "Skeleton",
+    "Wither", "Magma Cube", "Blaze", "Witch", "Slime", "Spider",
+    "Phantom", "Villager", "Pillager", "Vindicator", "Drowned",
+    "Illager", "Ender Dragon", "Husk", "Stray", "Ravager", "Piglin",
+    "Hoglin", "Shulker", "Warden"
+];
+
+  function generateRandomName() {
+      let randomA, randomB;
+      do {
+          randomA = listA[Math.floor(Math.random() * listA.length)];
+          randomB = listB[Math.floor(Math.random() * listB.length)];
+      } while (randomA === randomB);
+      const randomName = randomA + " " + randomB;
+      document.getElementById("serverName").value = randomName;
+  }
+  </script>

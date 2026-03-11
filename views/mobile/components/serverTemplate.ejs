@@ -1,0 +1,54 @@
+<div class="overflow-x-auto border-b border-neutral-200 dark:border-white/5 mb-4 -mx-4 px-4">
+  <nav class="flex gap-1 min-w-max pb-1">
+    <%
+    const menuItems = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
+    if (!menuItems || menuItems.length === 0) {
+    %>
+    <a href="/server/<%= server.UUID %>" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false">Console</a>
+    <a href="/server/<%= server.UUID %>/files" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false">Files</a>
+    <% if (features.includes('players')) { %>
+    <a href="/server/<%= server.UUID %>/players" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false">Players</a>
+    <% } %>
+    <% if (features.includes('worlds')) { %>
+    <a href="/server/<%= server.UUID %>/worlds" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false">Worlds</a>
+    <% } %>
+    <a href="/server/<%= server.UUID %>/startup" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false">Startup</a>
+    <a href="/server/<%= server.UUID %>/backups" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false">Backups</a>
+    <a href="/server/<%= server.UUID %>/settings" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false">Settings</a>
+    <% } else {
+      menuItems.forEach(item => {
+        if (item.feature && !features.includes(item.feature)) return;
+        const url = item.url.replace(':uuid', server.UUID);
+    %>
+    <a href="<%= url %>" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false"><%= item.label %></a>
+    <% }); } %>
+  </nav>
+</div>
+
+<script>
+(function() {
+  var currentPath = window.location.pathname.replace(/\/$/, '');
+  document.querySelectorAll('.nav-link2').forEach(function(link) {
+    var href = link.getAttribute('href');
+    if (!href) return;
+    if (href.replace(/\/$/, '') === currentPath) {
+      link.classList.add('bg-neutral-100', 'dark:bg-white/10', 'border-neutral-200', 'dark:border-neutral-700/30', 'text-neutral-900', 'dark:text-white', 'font-medium');
+      // Scroll active tab into view within the strip only, not the whole page
+      var strip = link.closest('.overflow-x-auto');
+      if (strip) {
+        var linkLeft = link.offsetLeft;
+        var linkWidth = link.offsetWidth;
+        var stripWidth = strip.offsetWidth;
+        strip.scrollLeft = linkLeft - (stripWidth / 2) + (linkWidth / 2);
+      }
+    }
+  });
+})();
+</script>
+
+<% if (global.uiComponentStore) {
+  const serverSections = global.uiComponentStore.getServerSections(server.UUID);
+  if (serverSections && serverSections.length > 0) {
+    serverSections.forEach(section => { %>
+  <%- section.content %>
+<% }); } } %>

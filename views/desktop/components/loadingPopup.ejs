@@ -1,0 +1,66 @@
+<!-- Loading Popup Component -->
+<div id="loadingPopup" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
+        <h2 id="loadingTitle" class="text-2xl font-medium mb-1 text-neutral-800">Processing Request</h2>
+        <div class="mb-4">
+            <div class="w-full bg-neutral-200 rounded-full h-2.5">
+                <div id="loadingBar" class="bg-neutral-400 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+        </div>
+        <p id="loadingMessage" class="text-center text-neutral-600">Initializing...</p>
+        <div class="flex justify-end mt-4">
+            <button id="hideLoadingPopup" class="w-full md:w-auto rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Hide</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        if (window.loadingPopupSystem) return;
+
+        window.loadingPopupSystem = () => {
+            const loadingPopup = document.getElementById('loadingPopup');
+            const loadingTitle = document.getElementById('loadingTitle');
+            const loadingBar = document.getElementById('loadingBar');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const hideButton = document.getElementById('hideLoadingPopup');
+
+            const showLoadingPopup = (title = 'Processing Request', initialMessage = 'Initializing...') => {
+                loadingTitle.textContent = title;
+                loadingMessage.textContent = initialMessage;
+                loadingBar.style.width = '0%';
+
+                loadingPopup.classList.remove('opacity-0', 'pointer-events-none');
+                loadingPopup.querySelector('div').classList.remove('scale-95');
+                loadingPopup.querySelector('div').classList.add('scale-100');
+
+                return {
+                    updateProgress: (percent, message) => {
+                        loadingBar.style.width = `${percent}%`;
+                        if (message) loadingMessage.textContent = message;
+                    },
+                    updateMessage: (message) => {
+                        loadingMessage.textContent = message;
+                    },
+                    close: () => {
+                        hideLoadingPopup();
+                    }
+                };
+            };
+
+            const hideLoadingPopup = () => {
+                loadingPopup.classList.add('opacity-0', 'pointer-events-none');
+                loadingPopup.querySelector('div').classList.remove('scale-100');
+                loadingPopup.querySelector('div').classList.add('scale-95');
+            };
+
+            hideButton.addEventListener('click', hideLoadingPopup);
+
+            return { showLoadingPopup, hideLoadingPopup };
+        };
+
+        const { showLoadingPopup, hideLoadingPopup } = window.loadingPopupSystem();
+        window.showLoadingPopup = showLoadingPopup;
+        window.hideLoadingPopup = hideLoadingPopup;
+    })();
+</script>

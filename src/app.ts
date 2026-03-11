@@ -232,9 +232,70 @@ app.use((_req, res, next) => {
     false,
   );
 
-  // Override res.render for SPA support
-  const originalRender = res.render;
-  res.render = handleSPAPageRequest(originalRender);
+  const viewportCookie = (_req as any).cookies?.viewport_mode;
+  const isMobileViewport = viewportCookie === 'mobile';
+  res.locals.isMobileViewport = isMobileViewport;
+
+  const originalRenderBase = res.render.bind(res);
+  res.render = function (view: string, options?: any, callback?: any) {
+    const isAbsolutePath = path.isAbsolute(view);
+    const isAddonView = view.includes('/storage/addons/') || view.includes('\\storage\\addons\\');
+
+    if (isAbsolutePath || isAddonView) {
+      // Addon is passing a full path — render it directly without Express's view lookup
+      const ejsMod = require('ejs');
+      const data = { ...res.locals, ...(typeof options === 'object' ? options : {}) };
+      ejsMod.renderFile(view, data, {}, (err: any, html: string) => {
+        if (err) {
+          if (typeof callback === 'function') return callback(err);
+          return (res as any).status(500).send('View render error: ' + err.message);
+        }
+        if (typeof callback === 'function') return callback(null, html);
+        (res as any).send(html);
+      });
+      return;
+    }
+
+    const prefix = isMobileViewport ? 'mobile/' : 'desktop/';
+    const prefixedView =
+      view.startsWith('desktop/') || view.startsWith('mobile/')
+        ? view
+        : prefix + view;
+
+    // Check if the prefixed view exists in the main views directory
+    const prefixedViewPath = path.join(viewsPath, prefixedView + '.ejs');
+    if (!fs.existsSync(prefixedViewPath) && !view.startsWith('desktop/') && !view.startsWith('mobile/')) {
+      // Not found in main views — look in addon views directories
+      const addonsDir = path.join(__dirname, '../../storage/addons');
+      if (fs.existsSync(addonsDir)) {
+        const addonDirs = fs.readdirSync(addonsDir, { withFileTypes: true })
+          .filter(d => d.isDirectory())
+          .map(d => d.name);
+
+        for (const addonDir of addonDirs) {
+          const addonViewPath = path.join(addonsDir, addonDir, 'views', view + '.ejs');
+          if (fs.existsSync(addonViewPath)) {
+            const ejsMod = require('ejs');
+            const data = { ...res.locals, ...(typeof options === 'object' ? options : {}) };
+            ejsMod.renderFile(addonViewPath, data, {}, (err: any, html: string) => {
+              if (err) {
+                if (typeof callback === 'function') return callback(err);
+                return (res as any).status(500).send('View render error: ' + err.message);
+              }
+              if (typeof callback === 'function') return callback(null, html);
+              (res as any).send(html);
+            });
+            return;
+          }
+        }
+      }
+    }
+
+    return originalRenderBase(prefixedView, options, callback);
+  };
+
+  const renderWithViewport = res.render;
+  res.render = handleSPAPageRequest(renderWithViewport);
 
   next();
 });

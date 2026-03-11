@@ -1,0 +1,168 @@
+<%- include('../../components/header', { title: 'Player Statistics' }) %>
+
+<main class="">
+  <%- include('../../components/template') %>
+  <%- include('../../components/toast') %>
+
+  <div class="px-4 py-5">
+
+    <div class="flex items-start justify-between mb-5">
+      <div>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white">Player Statistics</h1>
+        <p class="text-xs text-neutral-500 mt-0.5">Live player counts across all servers</p>
+      </div>
+      <button id="refreshBtn" type="button" class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+        Refresh
+      </button>
+    </div>
+
+    <% if (errorMessage && errorMessage.message) { %>
+      <div class="rounded-xl bg-red-50 dark:bg-red-800/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-4 flex items-start gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-red-500 shrink-0 mt-0.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 3.014-1.874 2.148-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+        </svg>
+        <p class="text-xs text-red-600 dark:text-red-400"><%= errorMessage.message %></p>
+      </div>
+    <% } %>
+
+    <!-- Stats grid -->
+    <div class="grid grid-cols-2 gap-3 mb-5">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+        <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Total Players</p>
+        <p id="totalPlayers" class="text-2xl font-semibold text-neutral-800 dark:text-white">0</p>
+        <p class="text-xs text-neutral-500 mt-1">Across all servers</p>
+      </div>
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+        <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Capacity</p>
+        <p id="maxCapacity" class="text-2xl font-semibold text-neutral-800 dark:text-white">0</p>
+        <p class="text-xs text-neutral-500 mt-1">Max slots</p>
+      </div>
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+        <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Online Servers</p>
+        <p id="onlineServers" class="text-2xl font-semibold text-neutral-800 dark:text-white">0</p>
+        <p class="text-xs text-neutral-500 mt-1">Currently up</p>
+      </div>
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+        <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Utilization</p>
+        <p id="utilization" class="text-2xl font-semibold text-neutral-800 dark:text-white">0%</p>
+        <p class="text-xs text-neutral-500 mt-1">Capacity used</p>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4 mb-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-sm font-medium text-neutral-800 dark:text-white">Player Count History</p>
+        <p class="text-[10px] text-neutral-500">Last 48 hours</p>
+      </div>
+      <div class="h-44">
+        <canvas id="playerChart" class="w-full h-full"></canvas>
+      </div>
+    </div>
+
+    <!-- Server list -->
+    <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2">Servers</p>
+    <div id="serverList" class="space-y-2">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 text-center">
+        <p class="text-xs text-neutral-500">Loading...</p>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  let playerChart;
+
+  const ctx = document.getElementById('playerChart').getContext('2d');
+  playerChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Players',
+        data: [],
+        backgroundColor: 'rgba(163,163,163,0.1)',
+        borderColor: 'rgba(163,163,163,0.8)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          ticks: { color: 'rgba(128,128,128,0.8)', maxRotation: 0, callback: (v, i, all) => i % Math.ceil(all.length / 4) === 0 ? new Date(this.getLabelForValue ? this.getLabelForValue(v) : v).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '' },
+          grid: { color: 'rgba(128,128,128,0.1)' }
+        },
+        y: { beginAtZero: true, ticks: { color: 'rgba(128,128,128,0.8)' }, grid: { color: 'rgba(128,128,128,0.1)' } }
+      }
+    }
+  });
+
+  async function fetchData() {
+    try {
+      const response = await fetch('/api/admin/playerstats');
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+
+      document.getElementById('totalPlayers').textContent = data.totalPlayers ?? 0;
+      document.getElementById('maxCapacity').textContent = data.totalMaxPlayers ?? 0;
+      document.getElementById('onlineServers').textContent = data.onlineServers ?? 0;
+      const pct = data.totalMaxPlayers > 0 ? Math.round((data.totalPlayers / data.totalMaxPlayers) * 100) : 0;
+      document.getElementById('utilization').textContent = `${pct}%`;
+
+      const list = document.getElementById('serverList');
+      list.innerHTML = '';
+      if (!data.servers || data.servers.length === 0) {
+        list.innerHTML = '<div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 text-center"><p class="text-xs text-neutral-500">No servers found</p></div>';
+      } else {
+        data.servers.forEach(server => {
+          const div = document.createElement('div');
+          div.className = 'rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 flex items-center gap-3';
+          div.innerHTML = `
+            <div class="w-2 h-2 rounded-full shrink-0 ${server.online ? 'bg-emerald-500' : 'bg-neutral-400'}"></div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-neutral-800 dark:text-white truncate">${server.serverName || 'Unknown'}</p>
+              <p class="text-xs text-neutral-500">${server.version || 'Unknown version'}</p>
+            </div>
+            <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300 shrink-0">${server.playerCount ?? 0}/${server.maxPlayers ?? 0}</p>
+          `;
+          list.appendChild(div);
+        });
+      }
+
+      if (data.historicalData && data.historicalData.length > 0) {
+        playerChart.data.labels = data.historicalData.map(e => new Date(e.timestamp).toISOString());
+        playerChart.data.datasets[0].data = data.historicalData.map(e => e.totalPlayers);
+        playerChart.update();
+      }
+    } catch (err) {
+      console.error('Error fetching player data:', err);
+    }
+  }
+
+  fetchData();
+  const interval = setInterval(fetchData, 300000);
+
+  document.getElementById('refreshBtn').addEventListener('click', fetchData);
+  document.getElementById('refreshBtn').addEventListener('dblclick', async (e) => {
+    e.preventDefault();
+    try {
+      await fetch('/api/admin/playerstats/collect', { method: 'POST' });
+      setTimeout(fetchData, 1000);
+    } catch {}
+  });
+
+  window.addEventListener('beforeunload', () => clearInterval(interval));
+</script>
+
+<%- include('../../components/footer') %>
