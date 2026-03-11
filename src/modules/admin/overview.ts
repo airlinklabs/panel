@@ -102,6 +102,23 @@ const adminModule: Module = {
       },
     );
 
+    router.get(
+      '/admin/menu',
+      isAuthenticated(true, 'airlink.admin.overview.main'),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) return res.redirect('/login');
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          res.render('admin/menu/menu', { user, req, settings });
+        } catch (error) {
+          logger.error('Error rendering admin menu:', error);
+          res.redirect('/admin/overview');
+        }
+      },
+    );
+
     return router;
   },
 };

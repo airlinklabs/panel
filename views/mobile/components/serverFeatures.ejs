@@ -1,0 +1,134 @@
+
+<!-- EULA Feature -->
+
+<% if (typeof features !== 'undefined' && features && features.includes('eula')) { %>
+        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur z-50">
+            <div class="bg-neutral-900/80 backdrop-blur py-8 px-8 rounded-2xl shadow-lg w-1/2 h-48 border border-neutral-300/20">
+                <p class="text-white text-lg font-medium">Do you accept Minecraft's EULA?</p>
+                <p class="text-sm text-neutral-400">By pressing this button you agree to the <a class="text-white" href="https://account.mojang.com/documents/minecraft_eula">Mojang EULA</a>.</p>
+                <button
+                onclick="fetch('/server/<%= req.params.id %>/feature/eula', { method: 'POST' })
+                    .then( () => {
+                            location.reload();
+                    })
+                    .catch(error => {
+                        console.error('There was an error!', error);
+                    });"
+                class="mt-8 bg-white text-sm font-sm text-gray-800 px-4 font-medium transition py-2 rounded-xl hover:bg-gray-100">
+                I agree
+                </button>
+            </div>
+        </div>
+<% } %>
+
+
+<!-- AUTO-COMPLETE FEATURE -->
+
+<% if (typeof features !== 'undefined' && features && features.includes('auto-complete')) { %>
+    <script>
+        setTimeout(() => {
+            const suggestions = [
+                "help", "pardon", "ban [PLAYER]", "kick [PLAYER]", "teleport [PLAYER]",
+                "time", "weather", "give [ITEM] [PLAYER]", "gamemode [MODE] [PLAYER]",
+                "difficulty", "summon [ENTITY] [PLAYER]", "say", "me", "list", "scoreboard",
+                "tp", "setworldspawn", "clear", "op", "deop", "banlist", "spawnpoint",
+                "stop", "save-all", "setblock", "execute", "fill", "replaceitem", "event",
+                "advancement", "item", "effect", "playsound", "team", "title",
+                "gamerule", "clone", "debug", "publish", "ban-ip", "whitelist", "enchant",
+                "msg", "tellraw", "seed", "defaultgamemode", "xp", "worldborder", "tps", "tell"
+            ];
+
+            const inputField = document.getElementById("input");
+            const suggestionsBox = document.getElementById("suggestions");
+            const settingsIcon = document.getElementById("settings-icon");
+            const settingsMenu = document.getElementById("settings-menu");
+            let autoCompleteToggle = null;
+
+            autoCompleteToggle = document.getElementById("auto-complete-toggle");
+            const isAutoCompleteEnabled = getCookie("auto-complete-enabled") === "true";
+            autoCompleteToggle.checked = isAutoCompleteEnabled;
+
+            settingsIcon.addEventListener("click", () => {
+                settingsMenu.classList.toggle("hidden");
+            });
+
+            autoCompleteToggle.addEventListener("change", () => {
+                const isEnabled = autoCompleteToggle.checked;
+                setCookie("auto-complete-enabled", isEnabled, 365);
+
+                if (isEnabled) {
+                    suggestionsBox.classList.remove("hidden");
+                } else {
+                    suggestionsBox.classList.add("hidden");
+                }
+            });
+
+            inputField.addEventListener("input", () => {
+                if (!autoCompleteToggle.checked) return;
+
+                const query = inputField.value.toLowerCase();
+                suggestionsBox.innerHTML = "";
+
+                if (query) {
+                    const filteredSuggestions = suggestions.filter(suggestion =>
+                        suggestion.toLowerCase().startsWith(query)
+                    );
+
+                    if (filteredSuggestions.length > 0) {
+                        suggestionsBox.classList.remove("hidden");
+                        filteredSuggestions.forEach(suggestion => {
+                            const suggestionDiv = document.createElement("div");
+                            suggestionDiv.textContent = suggestion;
+                            suggestionDiv.className = "px-4 py-2 hover:bg-neutral-600 cursor-pointer";
+
+                            suggestionDiv.addEventListener("click", () => {
+                                inputField.value = suggestion;
+
+                                const bracketStart = inputField.value.indexOf("[");
+                                const bracketEnd = inputField.value.indexOf("]", bracketStart);
+
+                                if (bracketStart !== -1 && bracketEnd !== -1) {
+                                    setTimeout(() => {
+                                        inputField.setSelectionRange(bracketStart, bracketEnd + 1);
+                                        inputField.focus();
+                                    }, 0);
+                                }
+
+                                suggestionsBox.classList.add("hidden");
+                            });
+
+                            suggestionsBox.appendChild(suggestionDiv);
+                        });
+                    } else {
+                        suggestionsBox.classList.add("hidden");
+                    }
+                } else {
+                    suggestionsBox.classList.add("hidden");
+                }
+            });
+
+            document.addEventListener("click", (event) => {
+                if (!event.target.closest("#input") && !event.target.closest("#suggestions") && !event.target.closest("#settings-icon")) {
+                    suggestionsBox.classList.add("hidden");
+                    settingsMenu.classList.add("hidden");
+                }
+            });
+
+            function setCookie(name, value, days) {
+                const expires = new Date();
+                expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+                document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/`;
+            }
+
+            function getCookie(name) {
+                const nameEQ = name + "=";
+                const ca = document.cookie.split(';');
+                for (let i = 0; i < ca.length; i++) {
+                    let c = ca[i].trim();
+                    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+                }
+                return null;
+            }
+        }, 100);
+    </script>
+    <% } %>
