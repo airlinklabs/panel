@@ -15,8 +15,10 @@
 </div>
 
 <%
-const sidebarItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
-const extraItems = (sidebarItems && sidebarItems.length > 3) ? sidebarItems.slice(3) : [];
+const allSidebarItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
+const sidebarItems = allSidebarItems.filter(function(item) { return item.id !== 'account'; });
+const mainNavItems = sidebarItems.slice(0, 3);
+const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 %>
 
 <!-- Mobile bottom nav -->
@@ -33,7 +35,7 @@ const extraItems = (sidebarItems && sidebarItems.length > 3) ? sidebarItems.slic
         </a>
       </li>
     <% } else { %>
-      <% sidebarItems.slice(0, 3).forEach(function(item) { %>
+      <% mainNavItems.forEach(function(item) { %>
       <li class="flex-1">
         <a href="<%= item.url %>" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400">
           <div class="w-5 h-5 flex items-center justify-center [&>svg]:w-5 [&>svg]:h-5 [&>svg]:shrink-0"><%- item.icon %></div>

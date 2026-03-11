@@ -1,0 +1,711 @@
+<div class="sm:flex-auto">
+  <div class="flex items-center">
+    <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">
+      <%= server.name.charAt(0).toUpperCase() + server.name.slice(1) %>
+    </h1>
+
+    <% if (typeof serverStatus !== 'undefined') { %>
+      <div class="ml-3" data-server-status-container>
+        <% if (serverStatus.online) { %>
+          <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+            <span class="relative flex h-2 w-2 mr-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+              <% if (typeof serverStatus.uptime !== 'undefined') { %>
+                Uptime: <span id="uptime-display"><%= formatUptime(serverStatus.uptime) %></span>
+                <% if (typeof serverStatus.startedAt !== 'undefined' && serverStatus.startedAt) { %>
+                  <span id="server-started-at" class="hidden"><%= serverStatus.startedAt %></span>
+                <% } %>
+              <% } else { %>
+                Online
+              <% } %>
+            </span>
+          </div>
+        <% } else { %>
+          <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+            <span class="inline-flex h-2 w-2 rounded-full bg-red-500 mr-2"></span>
+            <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Offline</span>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="flex items-center mt-1">
+    <p class="tracking-tight text-sm text-neutral-500 dark:text-neutral-400">
+      <%= server.description %>
+    </p>
+
+    <% if (typeof serverStatus !== 'undefined' && serverStatus.online && typeof serverStatus.startedAt !== 'undefined' && serverStatus.startedAt) { %>
+      <div class="ml-3 text-xs text-neutral-500 dark:text-neutral-500 flex items-center" data-server-started-container>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span data-server-started-time>Started: <%= new Date(serverStatus.startedAt).toLocaleString() %></span>
+      </div>
+    <% } else { %>
+      <div class="ml-3 text-xs text-neutral-500 dark:text-neutral-500 hidden items-center" data-server-started-container>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span data-server-started-time>Started: Unknown</span>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%
+function formatUptime(seconds) {
+  if (typeof seconds !== 'number' || isNaN(seconds)) {
+    return 'Unknown';
+  }
+
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  if (days > 0) {
+    return `${days}d ${hours}h ${minutes}m`;
+  } else if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  } else if (minutes > 0) {
+    return `${minutes}m ${secs}s`;
+  } else {
+    return `${secs}s`;
+  }
+}
+%>
+
+<% if (typeof server !== 'undefined' && server.UUID) { %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Helper function to check if we should log (only in development and when daemon is online)
+    const isDaemonOffline = <%= typeof serverStatus !== 'undefined' && serverStatus.daemonOffline ? 'true' : 'false' %>;
+    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const shouldLog = isDevelopment && !isDaemonOffline;
+
+    // Simple function to format uptime
+    function formatUptime(seconds) {
+      const days = Math.floor(seconds / 86400);
+      const hours = Math.floor((seconds % 86400) / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = Math.floor(seconds % 60);
+
+      if (days > 0) {
+        return `${days}d ${hours}h ${minutes}m`;
+      } else if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+      } else if (minutes > 0) {
+        return `${minutes}m ${secs}s`;
+      } else {
+        return `${secs}s`;
+      }
+    }
+
+    // Get the server start time from the hidden element
+    const startedAtElement = document.getElementById('server-started-at');
+    let startTime = null;
+
+    if (startedAtElement && startedAtElement.textContent) {
+      startTime = new Date(startedAtElement.textContent).getTime();
+      if (shouldLog) {
+        console.log('Server start time:', new Date(startTime).toLocaleString());
+      }
+    }
+
+    // Variables for uptime tracking
+    let uptimeInterval = null;
+    let backendFetchInterval = null;
+    let lastBackendFetch = 0;
+    let localUptimeSeconds = 0;
+
+    // Function to update the uptime display
+    function updateUptime(uptimeValue) {
+      // Only log in development mode to reduce console spam
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('Updating uptime display with value:', uptimeValue);
+      }
+
+      const uptimeDisplay = document.getElementById('uptime-display');
+      if (!uptimeDisplay) {
+        // Only log error in development mode
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          console.error('Uptime display element not found!');
+        }
+        return;
+      }
+
+      // If we have a specific uptime value, use it
+      if (typeof uptimeValue === 'number') {
+        const formattedUptime = formatUptime(uptimeValue);
+        // Only log in development mode
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          console.log('Setting uptime display to:', formattedUptime);
+        }
+        uptimeDisplay.textContent = formattedUptime;
+        // Store the last known uptime value
+        localUptimeSeconds = uptimeValue;
+      }
+      // Otherwise use the calculated value based on start time
+      else if (startTime) {
+        const now = Date.now();
+        localUptimeSeconds = Math.floor((now - startTime) / 1000);
+        const formattedUptime = formatUptime(localUptimeSeconds);
+        // Only log in development mode
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          console.log('Setting calculated uptime display to:', formattedUptime);
+        }
+        uptimeDisplay.textContent = formattedUptime;
+      } else {
+        // Only warn in development mode
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          console.warn('No uptime value or start time available');
+        }
+      }
+    }
+
+    // Function to fetch uptime from the backend (every 5 seconds)
+    function fetchUptimeFromBackend() {
+      // Check if daemon is offline to avoid spamming console
+      const isDaemonOffline = <%= typeof serverStatus !== 'undefined' && serverStatus.daemonOffline ? 'true' : 'false' %>;
+
+      // Only log in development mode and when daemon is not offline
+      if (!isDaemonOffline && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        console.log('Fetching uptime from backend...');
+      }
+
+      fetch(`/server/<%= server.UUID %>/status`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Only log in development mode and when daemon is not offline
+        if (!isDaemonOffline && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+          console.log('Backend uptime fetch response:', data);
+        }
+        lastBackendFetch = Date.now();
+
+        // Check for starting state
+        if (data.starting) {
+          // Only log in development mode
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('Server is starting (from backend), updating header');
+          }
+
+          // Update status container
+          const statusContainer = document.querySelector('[data-server-status-container]');
+          if (statusContainer) {
+            statusContainer.innerHTML = `
+              <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+                <span class="relative flex h-2 w-2 mr-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+                </span>
+                <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Starting</span>
+              </div>
+            `;
+          }
+
+          // Hide the started time until fully started
+          const startedTimeContainer = document.querySelector('[data-server-started-container]');
+          if (startedTimeContainer) {
+            startedTimeContainer.style.display = 'none';
+          }
+
+          // Stop the uptime counter until fully started
+          stopUptimeCounter();
+
+          // Check again in 1 second
+          setTimeout(fetchUptimeFromBackend, 1000);
+        }
+        // Check for online state
+        else if (data.online) {
+          // Only log in development mode
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('Server is online (from backend), updating header');
+          }
+
+          // If we have uptime from the backend, use it directly
+          if (typeof data.uptime === 'number') {
+            // Only log in development mode
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+              console.log('Using uptime directly from backend:', data.uptime);
+            }
+
+            // Force update the status container to ensure it shows the uptime
+            const statusContainer = document.querySelector('[data-server-status-container]');
+            if (statusContainer) {
+              statusContainer.innerHTML = `
+                <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+                  <span class="relative flex h-2 w-2 mr-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                    Uptime: <span id="uptime-display">${formatUptime(data.uptime)}</span>
+                  </span>
+                </div>
+              `;
+            }
+
+            // Also update the uptime display directly
+            const uptimeDisplay = document.getElementById('uptime-display');
+            if (uptimeDisplay) {
+              uptimeDisplay.textContent = formatUptime(data.uptime);
+            }
+          }
+
+          // If we have a start time, update it
+          if (data.startedAt) {
+            startTime = new Date(data.startedAt).getTime();
+            // Only log in development mode
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+              console.log('Updated start time from backend:', new Date(startTime).toLocaleString());
+            }
+
+            // Update the started time display
+            const startedTimeElement = document.querySelector('[data-server-started-time]');
+            if (startedTimeElement) {
+              startedTimeElement.textContent = `Started: ${new Date(startTime).toLocaleString()}`;
+            }
+
+            // Show the started time container
+            const startedTimeContainer = document.querySelector('[data-server-started-container]');
+            if (startedTimeContainer) {
+              startedTimeContainer.style.display = 'flex';
+            }
+
+            // Start the uptime counter if it's not already running
+            if (!uptimeInterval) {
+              startUptimeCounter();
+            }
+          }
+        }
+        // Check for offline state
+        else if (!data.online) {
+          // Server is offline, stop the uptime counter
+          stopUptimeCounter();
+
+          // Update the status display
+          const statusContainer = document.querySelector('[data-server-status-container]');
+          if (statusContainer) {
+            statusContainer.innerHTML = `
+              <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+                <span class="inline-flex h-2 w-2 rounded-full bg-red-500 mr-2"></span>
+                <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Offline</span>
+              </div>
+            `;
+          }
+
+          // Hide the started time
+          const startedTimeContainer = document.querySelector('[data-server-started-container]');
+          if (startedTimeContainer) {
+            startedTimeContainer.style.display = 'none';
+          }
+        }
+      })
+      .catch(error => {
+        // Only log errors in development mode or when it's not a daemon offline error
+        if (shouldLog || !error.message.includes('Failed to fetch')) {
+          console.error('Error fetching uptime from backend:', error);
+        }
+      });
+    }
+
+    // Function to start the uptime counter
+    function startUptimeCounter() {
+      // Only log in development mode
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('Starting uptime counter...');
+      }
+
+      // Clear any existing intervals first
+      stopUptimeCounter();
+
+      // Do an initial backend fetch to get the accurate uptime
+      fetchUptimeFromBackend();
+
+      // Start the backend fetch interval (every 5 seconds)
+      backendFetchInterval = setInterval(fetchUptimeFromBackend, 5000);
+
+      // Start the local update interval (every second) for smooth updates between backend fetches
+      uptimeInterval = setInterval(function() {
+        // Always update the display every second for smooth counting
+        if (startTime) {
+          const now = Date.now();
+          const currentUptime = Math.floor((now - startTime) / 1000);
+
+          // Update the display directly
+          const uptimeDisplay = document.getElementById('uptime-display');
+          if (uptimeDisplay) {
+            uptimeDisplay.textContent = formatUptime(currentUptime);
+          }
+        }
+      }, 1000);
+
+      // Only log in development mode
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('Started uptime counter with backend sync (fetch every 5s, display update every 1s)');
+      }
+    }
+
+    // Function to stop the uptime counter
+    function stopUptimeCounter() {
+      if (uptimeInterval) {
+        clearInterval(uptimeInterval);
+        uptimeInterval = null;
+      }
+
+      if (backendFetchInterval) {
+        clearInterval(backendFetchInterval);
+        backendFetchInterval = null;
+      }
+
+      startTime = null;
+      localUptimeSeconds = 0;
+    }
+
+    // Start the uptime counter if we have a start time
+    if (startTime) {
+      startUptimeCounter();
+    }
+
+    // Use the global WebSocket for server status if it exists, or create one if not
+    if (!window.serverStatusWebSocket) {
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${wsProtocol}//${window.location.host}/ws/server/<%= server.UUID %>/status`;
+      window.serverStatusWebSocket = new WebSocket(wsUrl);
+
+      window.serverStatusWebSocket.onopen = function() {
+        if (shouldLog) {
+          console.log('Global server status WebSocket connection established (from header)');
+        }
+
+        // Dispatch a custom event that other components can listen for
+        window.dispatchEvent(new CustomEvent('serverStatusWebSocketOpen'));
+
+        // Immediately check server status when WebSocket connects
+        fetchUptimeFromBackend();
+      };
+
+      window.serverStatusWebSocket.onclose = function() {
+        if (shouldLog) {
+          console.log('Global server status WebSocket connection closed (from header)');
+        }
+
+        // Dispatch a custom event that other components can listen for
+        window.dispatchEvent(new CustomEvent('serverStatusWebSocketClose'));
+
+        // Clean up the global reference
+        window.serverStatusWebSocket = null;
+      };
+
+      window.serverStatusWebSocket.onerror = function(error) {
+        if (shouldLog) {
+          console.error('Global server status WebSocket error (from header):', error);
+        }
+
+        // Dispatch a custom event that other components can listen for
+        window.dispatchEvent(new CustomEvent('serverStatusWebSocketError', { detail: error }));
+      };
+    } else {
+      console.log('Using existing global WebSocket connection for server header');
+
+      // Immediately check server status
+      fetchUptimeFromBackend();
+    }
+
+    // Function to handle WebSocket messages for the server header
+    function handleServerHeaderWebSocketMessage(event) {
+      try {
+        const data = JSON.parse(event.data);
+        if (shouldLog) {
+          console.log('Server header status update received:', data);
+        }
+
+        // Extract the actual status data, handling different message formats
+        let statusData = data;
+        if (data.event === 'status' && data.data) {
+          statusData = data.data;
+        }
+
+        if (shouldLog) {
+          console.log('Processed status data:', statusData);
+        }
+
+        // Check for any indication that the server is running or starting
+        const isRunning = statusData.running === true ||
+                         statusData.status === 'online' ||
+                         data.status === 'online';
+
+        const isStarting = statusData.starting === true ||
+                          statusData.status === 'starting' ||
+                          data.status === 'starting';
+
+        const isOffline = statusData.running === false ||
+                         statusData.status === 'offline' ||
+                         data.status === 'offline';
+
+        // If we get any message, immediately check the actual server status
+        // This helps catch status changes that might not be properly reflected in the message
+        fetchUptimeFromBackend();
+      } catch (error) {
+        console.error('Error processing server header status message:', error);
+      }
+    }
+
+    // Add the message handler to the global WebSocket
+    window.serverStatusWebSocket.addEventListener('message', handleServerHeaderWebSocketMessage);
+
+    // Add handler for server status updates
+    function updateServerHeaderStatus(statusData) {
+      // Check for any indication that the server is running, starting, or stopping
+      const isRunning = statusData.running === true ||
+                       statusData.status === 'online' ||
+                       statusData.status === 'online';
+
+      const isStarting = statusData.starting === true ||
+                        statusData.status === 'starting' ||
+                        statusData.status === 'starting';
+
+      const isStopping = statusData.stopping === true ||
+                        statusData.status === 'stopping' ||
+                        statusData.status === 'stopping';
+
+      const isOffline = statusData.running === false ||
+                       statusData.status === 'offline' ||
+                       statusData.status === 'offline';
+
+      // Handle offline state
+      if (isOffline) {
+        console.log('Server is offline, updating header');
+
+        // Update status container
+        const statusContainer = document.querySelector('[data-server-status-container]');
+        if (statusContainer) {
+          statusContainer.innerHTML = `
+            <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+              <span class="inline-flex h-2 w-2 rounded-full bg-red-500 mr-2"></span>
+              <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Offline</span>
+            </div>
+          `;
+        }
+
+        // Hide the started time
+        const startedTimeContainer = document.querySelector('[data-server-started-container]');
+        if (startedTimeContainer) {
+          startedTimeContainer.style.display = 'none';
+        }
+
+        // Stop the uptime counter
+        stopUptimeCounter();
+
+        // Set up a polling mechanism to detect when server comes back online (every 5 seconds)
+        const recoveryPoll = setInterval(function() {
+          console.log('Recovery poll: checking if server is back online (5-second interval)');
+          fetchUptimeFromBackend();
+        }, 5000);
+
+        // Stop the recovery polling after 30 seconds
+        setTimeout(function() {
+          console.log('Stopping recovery polling after 30 seconds');
+          clearInterval(recoveryPoll);
+        }, 30000);
+      }
+      // Handle stopping state
+      else if (isStopping) {
+        console.log('Server is stopping, updating header');
+
+        // Update status container
+        const statusContainer = document.querySelector('[data-server-status-container]');
+        if (statusContainer) {
+          statusContainer.innerHTML = `
+            <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+              <span class="relative flex h-2 w-2 mr-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+              </span>
+              <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Stopping</span>
+            </div>
+          `;
+        }
+
+        // Keep the started time visible during stopping
+        const startedTimeContainer = document.querySelector('[data-server-started-container]');
+        if (startedTimeContainer) {
+          startedTimeContainer.style.display = 'flex';
+        }
+
+        // Stop the uptime counter during stopping
+        stopUptimeCounter();
+
+        // Set up a polling mechanism to detect when server is fully stopped (every 5 seconds)
+        const stoppingPoll = setInterval(function() {
+          console.log('Stopping poll: checking if server is fully stopped (5-second interval)');
+          fetchUptimeFromBackend();
+        }, 5000);
+
+        // Stop the stopping polling after 30 seconds
+        setTimeout(function() {
+          console.log('Stopping shutdown polling after 30 seconds');
+          clearInterval(stoppingPoll);
+        }, 30000);
+      }
+      // Handle starting state
+      else if (isStarting) {
+        console.log('Server is starting, updating header');
+
+        // Update status container
+        const statusContainer = document.querySelector('[data-server-status-container]');
+        if (statusContainer) {
+          statusContainer.innerHTML = `
+            <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+              <span class="relative flex h-2 w-2 mr-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+              </span>
+              <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Starting</span>
+            </div>
+          `;
+        }
+
+        // Hide the started time until fully started
+        const startedTimeContainer = document.querySelector('[data-server-started-container]');
+        if (startedTimeContainer) {
+          startedTimeContainer.style.display = 'none';
+        }
+
+        // Stop the uptime counter until fully started
+        stopUptimeCounter();
+
+        // Set up a polling mechanism to detect when server is fully started (every 5 seconds)
+        const startupPoll = setInterval(function() {
+          console.log('Startup poll: checking if server is fully started (5-second interval)');
+          fetchUptimeFromBackend();
+        }, 5000);
+
+        // Stop the startup polling after 60 seconds
+        setTimeout(function() {
+          console.log('Stopping startup polling after 60 seconds');
+          clearInterval(startupPoll);
+        }, 60000);
+      }
+      // Handle online state
+      else if (isRunning) {
+        console.log('Server is online, updating header');
+
+        // Update status container
+        const statusContainer = document.querySelector('[data-server-status-container]');
+        if (statusContainer) {
+          statusContainer.innerHTML = `
+            <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+              <span class="relative flex h-2 w-2 mr-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                Uptime: <span id="uptime-display">0s</span>
+              </span>
+            </div>
+          `;
+        }
+
+        // Check for uptime and start time updates
+        const newStartTime = statusData.startedAt || (statusData.data && statusData.data.startedAt);
+        const newUptime = statusData.uptime || (statusData.data && statusData.data.uptime);
+
+        // If we have uptime data, update it directly
+        if (typeof newUptime === 'number') {
+          console.log('WebSocket provided uptime:', newUptime);
+
+          // Force update the status container to ensure it shows the uptime
+          const statusContainer = document.querySelector('[data-server-status-container]');
+          if (statusContainer) {
+            statusContainer.innerHTML = `
+              <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+                <span class="relative flex h-2 w-2 mr-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                  Uptime: <span id="uptime-display">${formatUptime(newUptime)}</span>
+                </span>
+              </div>
+            `;
+          }
+
+          // Also update the uptime display directly
+          const uptimeDisplay = document.getElementById('uptime-display');
+          if (uptimeDisplay) {
+            uptimeDisplay.textContent = formatUptime(newUptime);
+          }
+
+          lastBackendFetch = Date.now(); // Mark as recently updated
+        }
+
+        // If we have a new start time, update it
+        if (newStartTime) {
+          console.log('Server start time updated:', newStartTime);
+          startTime = new Date(newStartTime).getTime();
+
+          // Update the started time display if it exists
+          const startedTimeElement = document.querySelector('[data-server-started-time]');
+          if (startedTimeElement) {
+            startedTimeElement.textContent = `Started: ${new Date(startTime).toLocaleString()}`;
+          }
+
+          // Show the started time if it was hidden
+          const startedTimeContainer = document.querySelector('[data-server-started-container]');
+          if (startedTimeContainer) {
+            startedTimeContainer.style.display = 'flex';
+          }
+        }
+
+        // Make sure the uptime counter is running
+        if (!uptimeInterval || !backendFetchInterval) {
+          startUptimeCounter();
+        }
+      }
+    }
+
+    // Function to handle WebSocket messages for the server header
+    function handleServerHeaderWebSocketMessage(event) {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('Server header status update received:', data);
+
+        // Extract the actual status data, handling different message formats
+        let statusData = data;
+        if (data.event === 'status' && data.data) {
+          statusData = data.data;
+        }
+
+        console.log('Processed status data for header:', statusData);
+
+        // Update the header based on the status data
+        updateServerHeaderStatus(statusData);
+
+        // If we get any message, check the actual server status
+        // This helps catch status changes that might not be properly reflected in the message
+        fetchUptimeFromBackend();
+      } catch (error) {
+        console.error('Error processing server header status message:', error);
+      }
+    }
+
+    // We don't need this additional check since we're already fetching status every 5 seconds
+    // in the fetchUptimeFromBackend function
+  });
+</script>
+<% } %>
