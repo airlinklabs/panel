@@ -232,9 +232,22 @@ app.use((_req, res, next) => {
     false,
   );
 
-  // Override res.render for SPA support
-  const originalRender = res.render;
-  res.render = handleSPAPageRequest(originalRender);
+  const viewportCookie = (_req as any).cookies?.viewport_mode;
+  const isMobileViewport = viewportCookie === 'mobile';
+  res.locals.isMobileViewport = isMobileViewport;
+
+  const originalRenderBase = res.render.bind(res);
+  res.render = function (view: string, options?: any, callback?: any) {
+    const prefix = isMobileViewport ? 'mobile/' : 'desktop/';
+    const prefixedView =
+      view.startsWith('desktop/') || view.startsWith('mobile/')
+        ? view
+        : prefix + view;
+    return originalRenderBase(prefixedView, options, callback);
+  };
+
+  const renderWithViewport = res.render;
+  res.render = handleSPAPageRequest(renderWithViewport);
 
   next();
 });

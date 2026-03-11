@@ -1,0 +1,111 @@
+<%- include('../components/header', { title: 'Login'}) %>
+<div class="min-h-full flex">
+  <div class="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24 border-r border-neutral-950/20">
+    <div class="mx-auto w-full max-w-sm lg:w-96">
+      <div>
+        <% if (settings.logo) { %><img class="h-12 w-auto rounded-xl" src="<%= settings.logo %>"> <% } %>
+        <h2 class="<% if (settings.logo == true) { %>mt-6<% } %> text-3xl font-medium text-neutral-800 dark:text-white">Sign in to <%= settings.title %></h2>
+        <p class="mt-2 text-sm font-normal text-neutral-500">
+          Please enter your account credentials below.
+        </p>
+      </div>
+
+      <div class="mt-8">
+        <div class="mt-6">
+          <form id="login-form" class="space-y-6" action="/login" method="POST">
+            <%- include('../components/csrf') %>
+            
+            <!-- Error Messages Section -->
+            <% if (req.query.err) { %>
+              <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+                      <% if (req.query.err === 'missing_credentials') { %>
+                        Missing Information
+                      <% } else if (req.query.err === 'invalid_credentials') { %>
+                        Invalid Credentials
+                      <% } else if (req.query.err === 'user_not_found') { %>
+                        User Not Found
+                      <% } else if (req.query.err === 'incorrect_password') { %>
+                        Incorrect Password
+                      <% } else if (req.query.err === 'database_error') { %>
+                        Server Error
+                      <% } else if (req.query.err === 'registration_disabled') { %>
+                        Registration Disabled
+                      <% } else { %>
+                        Login Error
+                      <% } %>
+                    </h3>
+                    <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+                      <% if (req.query.err === 'missing_credentials') { %>
+                        Please enter both your username/email and password.
+                      <% } else if (req.query.err === 'invalid_credentials') { %>
+                        The username/email or password you entered is incorrect. Please check your credentials and try again.
+                      <% } else if (req.query.err === 'user_not_found') { %>
+                        No account found with that username or email address. Please check your input or create a new account.
+                      <% } else if (req.query.err === 'incorrect_password') { %>
+                        The password you entered is incorrect. Please try again or use the "Forgot Password" option.
+                      <% } else if (req.query.err === 'database_error') { %>
+                        We're experiencing technical difficulties. Please try again in a few moments.
+                      <% } else if (req.query.err === 'registration_disabled') { %>
+                        Registration is currently disabled. Please contact an administrator if you need an account.
+                      <% } else { %>
+                        An unexpected error occurred. Please try again.
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+
+            <div>
+              <label for="email" class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"> Username or Email </label>
+              <div class="mt-2">
+                <input name="identifier" placeholder="example" id="username" autocomplete="username" required class="appearance-none block w-full px-3 py-2 bg-white dark:bg-white/10 border border-neutral-300 dark:border-neutral-800/10 rounded-xl placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-neutral-800 dark:text-white transition sm:text-sm">
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <label for="password" class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"> Password </label>
+              <div class="mt-2">
+                <input id="password" name="password" placeholder="********" type="password" autocomplete="current-password" required class="appearance-none block w-full px-3 py-2 bg-white dark:bg-white/10 border border-neutral-300 dark:border-neutral-800/10 rounded-xl placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:ring-neutral-500 focus:border-neutral-500 text-neutral-800 dark:text-white transition sm:text-sm">
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-neutral-600 focus:ring-neutral-500 border-neutral-300 bg-white dark:border-white/10 dark:bg-white/5 rounded">
+                <label for="remember-me" class="ml-2 block text-sm text-neutral-600 dark:text-neutral-400"> Remember me </label>
+              </div>
+
+              <div class="text-sm">
+                <a class="font-normal text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition cursor-pointer">Forgot your password?</a>
+              </div>
+            </div>
+
+            <div>
+              <button type="submit" class="w-full flex transition justify-center py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-neutral-800 bg-white hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500">Sign in</button>
+            </div>
+
+            <% if (settings.register) { %>
+            <div class="mt-6 text-sm text-neutral-500 py-[-50px]">
+              Need an account? <a href="/register" class="font-normal text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition">Register</a>
+            </div>
+            <% } %>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hidden lg:block relative w-0 flex-1">
+    <img class="absolute inset-0 h-full w-full object-cover" src="https://i.imgur.com/j9BodUY.jpeg" alt="">
+  </div>
+</div>
+<%- include('../components/footer') %>
