@@ -1,0 +1,195 @@
+<%- include('../../components/header', { title: req.translations.adminNodesTitle || 'Nodes' }) %>
+
+<main class="">
+  <%- include('../../components/template') %>
+  <%- include('../../components/toast') %>
+
+  <div class="px-4 py-5">
+
+    <div class="flex items-start justify-between mb-5">
+      <div>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminNodesTitle %></h1>
+        <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminNodesText %></p>
+      </div>
+      <button id="createButton" type="button" class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-300 hover:bg-neutral-800 dark:hover:bg-neutral-700 transition shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        New Node
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 gap-3 mb-5">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+        <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.totalNodes || 'Total Nodes' %></p>
+        <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= nodes.length %></p>
+        <% if (nodes.length > 0) { %>
+          <p class="text-xs text-emerald-500 mt-1"><%= nodes.filter(n => n.status === 'Online').length %> online</p>
+        <% } else { %>
+          <p class="text-xs text-neutral-500 mt-1"><%= req.translations.noNodesAvailable %></p>
+        <% } %>
+      </div>
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+        <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Servers</p>
+        <p class="text-2xl font-semibold text-neutral-800 dark:text-white">
+          <%= nodes.reduce((t, n) => t + (n.instances ? n.instances.length : 0), 0) %>
+        </p>
+        <p class="text-xs text-neutral-500 mt-1">across all nodes</p>
+      </div>
+    </div>
+
+    <% if (req.query.err == "none") { %>
+      <div class="rounded-xl bg-emerald-50 dark:bg-emerald-800/10 border border-emerald-200 dark:border-emerald-500/20 px-4 py-3 mb-4 flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-emerald-500 shrink-0">
+          <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+        </svg>
+        <p class="text-sm text-emerald-700 dark:text-emerald-400"><%= req.translations.actionCompleted %></p>
+      </div>
+    <% } %>
+
+    <% if (nodes.some(n => n.status === 'Offline')) { %>
+      <div class="rounded-xl bg-red-50 dark:bg-red-800/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-4 flex items-start gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-red-500 shrink-0 mt-0.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 3.014-1.874 2.148-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+        </svg>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-red-700 dark:text-red-400">One or more nodes are offline</p>
+          <button onclick="window.location.reload()" class="mt-1.5 px-3 py-1 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition">Retry</button>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Node cards -->
+    <div class="space-y-2">
+      <% nodes.forEach(function(node) { %>
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 flex items-center justify-center shrink-0">
+              <% if (node.status === 'Online') { %>
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+              <% } else if (node.status === 'Offline') { %>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              <% } else { %>
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                </span>
+              <% } %>
+            </div>
+            <div class="flex-1 min-w-0">
+              <a href="/admin/node/<%= node.id %>/stats" class="text-sm font-medium text-neutral-800 dark:text-white truncate block"><%= node.name %></a>
+              <p class="text-xs text-neutral-500 truncate font-mono"><%= node.address %>:<%= node.port %></p>
+            </div>
+            <span class="text-[10px] font-medium px-2 py-0.5 rounded-md shrink-0 <%= node.versionRelease ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' : 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20' %>">
+              <%= node.versionRelease || 'unknown' %>
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <p class="text-xs text-neutral-500"><%= node.instances ? node.instances.length : 0 %> instance<%= node.instances && node.instances.length !== 1 ? 's' : '' %></p>
+            <div class="flex gap-2">
+              <button onclick="configure('<%= node.id %>')" type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Configure</button>
+              <a href="/admin/node/<%= node.id %>">
+                <button type="button" class="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-blue-500 transition">Edit</button>
+              </a>
+              <button onclick="deleteNode('<%= node.id %>')" type="button" class="rounded-lg bg-red-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-red-500 transition">Remove</button>
+            </div>
+          </div>
+          <% if (node.error && node.status === 'Offline') { %>
+            <p class="text-[11px] text-red-500 mt-2 font-mono truncate"><%= node.error %></p>
+          <% } %>
+        </div>
+      <% }); %>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  document.getElementById('createButton').addEventListener('click', () => {
+    location.href = '/admin/nodes/create';
+  });
+
+  async function deleteNode(nodeId) {
+    try {
+      const response = await fetch(`/admin/node/${nodeId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const result = await response.json();
+      if (response.ok) {
+        showToast('Node deleted', 'success');
+        window.location.reload();
+      } else if (result.error === 'There are instances on the node') {
+        if (confirm('There are still instances on this node. Delete all and remove the node?')) {
+          await retryDeleteNode(nodeId, true);
+        }
+      }
+    } catch (err) {
+      console.error('Request failed:', err);
+    }
+  }
+
+  async function retryDeleteNode(nodeId, deleteInstances) {
+    const response = await fetch(`/admin/node/${nodeId}?deleteInstances=${deleteInstances}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (response.ok) {
+      showToast('Node and instances deleted', 'success');
+      window.location.reload();
+    }
+  }
+
+  async function configure(nodeId) {
+    try {
+      const response = await fetch(`/admin/node/${nodeId}/configure`);
+      if (!response.ok) throw new Error('Failed to fetch configure command');
+      const data = await response.json();
+      showConfigurePopup(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function showConfigurePopup(command) {
+    const overlay = document.createElement('div');
+    overlay.id = 'config-overlay';
+    overlay.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 opacity-0 transition-opacity duration-200';
+
+    const dialog = document.createElement('div');
+    dialog.className = 'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-2xl p-5 w-full shadow-xl';
+    dialog.innerHTML = `
+      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-1">Node Configuration</p>
+      <p class="text-xs text-neutral-500 mb-4">Run this command to auto-configure your node:</p>
+      <pre class="bg-neutral-100 dark:bg-neutral-800 rounded-xl p-3 text-xs font-mono text-emerald-600 dark:text-emerald-400 overflow-x-auto mb-4">${command}</pre>
+      <div class="flex gap-2 justify-end">
+        <button id="cfg-copy" class="rounded-xl bg-emerald-600 text-white px-4 py-2 text-xs font-medium hover:bg-emerald-700 transition">Copy</button>
+        <button id="cfg-close" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-xs font-medium hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Close</button>
+      </div>
+    `;
+
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.replace('opacity-0', 'opacity-100'));
+
+    dialog.querySelector('#cfg-copy').addEventListener('click', function() {
+      navigator.clipboard.writeText(command).then(() => {
+        this.textContent = 'Copied!';
+        setTimeout(() => { this.textContent = 'Copy'; }, 2000);
+      });
+    });
+
+    function close() {
+      overlay.classList.replace('opacity-100', 'opacity-0');
+      setTimeout(() => overlay.remove(), 200);
+    }
+    dialog.querySelector('#cfg-close').addEventListener('click', close);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  }
+</script>
+
+<%- include('../../components/footer') %>

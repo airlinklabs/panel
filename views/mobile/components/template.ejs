@@ -1,0 +1,171 @@
+<!-- Mobile top bar -->
+<div class="fixed top-0 left-0 right-0 z-50 h-14 flex items-center justify-between px-4 bg-white dark:bg-[#141414] border-b border-neutral-200 dark:border-white/5">
+  <a href="/" class="flex items-center gap-2">
+    <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 w-8 rounded-lg bg-neutral-950/90 dark:bg-transparent p-0.5">
+    <span class="text-sm font-medium text-neutral-800 dark:text-white"><%= settings.title %></span>
+  </a>
+  <div class="flex items-center gap-2.5">
+    <button id="theme-toggle" class="w-11 h-6 flex items-center bg-gray-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500">
+      <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
+    </button>
+    <a href="/account">
+      <img class="h-8 w-8 rounded-lg border border-neutral-200 dark:border-neutral-700" src="https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(user.username) %>" alt="Avatar">
+    </a>
+  </div>
+</div>
+
+<%
+const allSidebarItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
+const sidebarItems = allSidebarItems.filter(function(item) { return item.id !== 'account'; });
+const mainNavItems = sidebarItems.slice(0, 3);
+const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
+%>
+
+<!-- Mobile bottom nav -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#141414] border-t border-neutral-200 dark:border-white/5">
+  <ul class="flex items-center justify-around h-16">
+
+    <% if (!sidebarItems || sidebarItems.length === 0) { %>
+      <li class="flex-1">
+        <a href="/" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400" data-match-exact="true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+            <path d="M12.378 1.602a.75.75 0 0 0-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03ZM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 0 0 .372-.648V7.93ZM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 0 0 .372.648l8.628 5.033Z" />
+          </svg>
+          <span class="text-[10px] font-medium">Servers</span>
+        </a>
+      </li>
+    <% } else { %>
+      <% mainNavItems.forEach(function(item) { %>
+      <li class="flex-1">
+        <a href="<%= item.url %>" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400">
+          <div class="w-5 h-5 flex items-center justify-center [&>svg]:w-5 [&>svg]:h-5 [&>svg]:shrink-0"><%- item.icon %></div>
+          <span class="text-[10px] font-medium"><%= item.label %></span>
+        </a>
+      </li>
+      <% }); %>
+    <% } %>
+
+    <% if (extraItems.length > 0) { %>
+    <li class="flex-1">
+      <button id="more-nav-btn" class="flex flex-col items-center justify-center w-full h-16 gap-1 text-neutral-500 dark:text-neutral-400">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+        <span class="text-[10px] font-medium">More</span>
+      </button>
+    </li>
+    <% } %>
+
+    <% if (user.isAdmin === true) { %>
+    <li class="flex-1">
+      <a href="/admin/menu" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400" data-match-prefix="/admin">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+        </svg>
+        <span class="text-[10px] font-medium">Admin</span>
+      </a>
+    </li>
+    <% } %>
+
+    <li class="flex-1">
+      <a href="/logout" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+        </svg>
+        <span class="text-[10px] font-medium">Logout</span>
+      </a>
+    </li>
+
+  </ul>
+</nav>
+
+<% if (extraItems.length > 0) { %>
+<div id="more-sheet-backdrop" class="fixed inset-0 z-40 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-200"></div>
+<div id="more-sheet" class="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#1c1c1c] border-t border-neutral-200 dark:border-white/5 rounded-t-2xl translate-y-full transition-transform duration-300 ease-out">
+  <div class="flex items-center justify-between px-4 pt-4 pb-2">
+    <p class="text-sm font-medium text-neutral-800 dark:text-white">More</p>
+    <button id="more-sheet-close" class="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+  <div class="px-4 pb-8 space-y-1">
+    <% extraItems.forEach(function(item) { %>
+    <a href="<%= item.url %>" class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition">
+      <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 shrink-0 [&>svg]:w-4 [&>svg]:h-4 [&>svg]:shrink-0">
+        <%- item.icon %>
+      </div>
+      <span class="text-sm font-medium text-neutral-700 dark:text-neutral-200"><%= item.label %></span>
+    </a>
+    <% }); %>
+  </div>
+</div>
+<% } %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+
+  document.querySelectorAll('.mobile-nav-link').forEach(function(link) {
+    var href = (link.getAttribute('href') || '').replace(/\/$/, '') || '/';
+    var matchPrefix = link.getAttribute('data-match-prefix');
+    var matchExact = link.getAttribute('data-match-exact') === 'true';
+
+    var active = false;
+    if (matchPrefix) {
+      active = currentPath.startsWith(matchPrefix);
+    } else if (matchExact) {
+      active = href === currentPath;
+    } else {
+      active = href === currentPath;
+    }
+
+    if (active) {
+      link.classList.remove('text-neutral-500', 'dark:text-neutral-400');
+      link.classList.add('text-neutral-900', 'dark:text-white');
+    }
+  });
+
+  document.getElementById('theme-toggle').addEventListener('click', function() {
+    if (typeof toggleTheme === 'function') {
+      toggleTheme();
+    } else {
+      var isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      updateDot();
+    }
+  });
+
+  function updateDot() {
+    var isDark = document.documentElement.classList.contains('dark');
+    var dot = document.querySelector('#theme-toggle .dot');
+    if (dot) dot.style.transform = isDark ? 'translateX(20px)' : 'translateX(0)';
+  }
+
+  updateDot();
+
+  var moreBtn = document.getElementById('more-nav-btn');
+  var moreSheet = document.getElementById('more-sheet');
+  var moreBackdrop = document.getElementById('more-sheet-backdrop');
+  var moreClose = document.getElementById('more-sheet-close');
+
+  function openSheet() {
+    moreSheet.classList.remove('translate-y-full');
+    moreBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+  }
+
+  function closeSheet() {
+    moreSheet.classList.add('translate-y-full');
+    moreBackdrop.classList.add('opacity-0', 'pointer-events-none');
+  }
+
+  if (moreBtn) moreBtn.addEventListener('click', openSheet);
+  if (moreClose) moreClose.addEventListener('click', closeSheet);
+  if (moreBackdrop) moreBackdrop.addEventListener('click', closeSheet);
+
+  var wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  var ws = new WebSocket(wsProtocol + '//' + window.location.host + '/online-check');
+  ws.addEventListener('error', function() {});
+});
+</script>

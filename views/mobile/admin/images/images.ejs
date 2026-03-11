@@ -1,0 +1,165 @@
+<%- include('../../components/header', { title: req.translations.adminImagesTitle || 'Images' }) %>
+
+<main class="">
+  <%- include('../../components/template') %>
+  <%- include('../../components/toast') %>
+
+  <div class="px-4 py-5">
+
+    <div class="flex items-start justify-between mb-5">
+      <div>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminImagesTitle %></h1>
+        <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminImagesText %></p>
+      </div>
+      <div class="flex gap-2 shrink-0">
+        <button id="uploadimage" type="button" class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+          Upload
+        </button>
+        <button onclick="openModal('createModal')" type="button" class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-300 hover:bg-neutral-800 dark:hover:bg-neutral-700 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          Create
+        </button>
+      </div>
+    </div>
+
+    <!-- Image cards -->
+    <div class="space-y-2">
+      <% images.forEach(function(image) { %>
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 flex items-center justify-center shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-neutral-500">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= image.name %></p>
+              <p class="text-xs text-neutral-500 truncate">by <%= image.author %></p>
+            </div>
+            <p class="text-xs text-neutral-500 shrink-0"><%= new Date(image.createdAt).toLocaleDateString() %></p>
+          </div>
+          <div class="flex gap-2 justify-end">
+            <a href="/admin/images/edit/<%= image.id %>">
+              <button type="button" class="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-blue-500 transition">Edit</button>
+            </a>
+            <a href="/admin/images/export/<%= image.id %>">
+              <button type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Export</button>
+            </a>
+            <button onclick="deleteImage('<%= image.id %>')" type="button" class="rounded-lg bg-red-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-red-500 transition">Delete</button>
+          </div>
+        </div>
+      <% }); %>
+
+      <% if (images.length === 0) { %>
+        <div class="py-16 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-10 h-10 mx-auto mb-3 text-neutral-300 dark:text-neutral-700">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+          </svg>
+          <p class="text-sm text-neutral-500">No images yet</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</main>
+
+<!-- Create Image Modal -->
+<div id="createModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60">
+  <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-2xl p-5 w-full shadow-xl max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-4">
+      <p class="text-sm font-medium text-neutral-800 dark:text-white">Create Image</p>
+      <button onclick="closeModal('createModal')" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <form action="/admin/images/create" method="POST" class="space-y-3">
+      <input type="text" name="name" placeholder="Image name" required class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition">
+      <input type="text" name="image" placeholder="Image URL or Base64" required class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition">
+      <textarea name="scripts" placeholder="Scripts (optional)" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition resize-none min-h-[80px]"></textarea>
+      <textarea name="variables" placeholder="Variables (optional)" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition resize-none min-h-[80px]"></textarea>
+      <div class="flex gap-2 justify-end pt-1">
+        <button type="button" onclick="closeModal('createModal')" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 px-4 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
+        <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white px-4 py-2 text-xs font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">Create</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openModal(id) {
+    const el = document.getElementById(id);
+    el.classList.remove('hidden');
+    el.classList.add('flex');
+  }
+
+  function closeModal(id) {
+    const el = document.getElementById(id);
+    el.classList.add('hidden');
+    el.classList.remove('flex');
+  }
+
+  async function deleteImage(imageId) {
+    if (confirm('Delete this image?')) {
+      try {
+        const response = await fetch(`/admin/images/delete/${imageId}`, { method: 'DELETE' });
+        if (response.ok) {
+          showToast('Image deleted', 'success');
+          setTimeout(() => location.reload(), 800);
+        } else {
+          const msg = await response.text();
+          showToast(msg || 'Failed to delete image', 'error');
+        }
+      } catch (err) {
+        showToast('An error occurred', 'error');
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('uploadimage').addEventListener('click', () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.click();
+      input.addEventListener('change', event => {
+        const file = event.target.files[0];
+        if (!file || file.type !== 'application/json') {
+          showToast('Please select a JSON file', 'error');
+          return;
+        }
+        showToast('Uploading...', 'info');
+        const reader = new FileReader();
+        reader.onload = e => {
+          try {
+            JSON.parse(e.target.result);
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/admin/images/upload', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = () => {
+              if (xhr.status === 200) {
+                const res = JSON.parse(xhr.responseText);
+                showToast(res.message || 'Uploaded', 'success');
+                setTimeout(() => location.reload(), 800);
+              } else {
+                try {
+                  const err = JSON.parse(xhr.responseText);
+                  showToast(err.error || 'Upload failed', 'error');
+                } catch { showToast('Upload failed', 'error'); }
+              }
+            };
+            xhr.onerror = () => showToast('Network error', 'error');
+            xhr.send(e.target.result);
+          } catch (err) {
+            showToast('Invalid JSON: ' + err.message, 'error');
+          }
+        };
+        reader.readAsText(file);
+      });
+    });
+  });
+</script>
+
+<%- include('../../components/footer') %>

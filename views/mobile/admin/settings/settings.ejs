@@ -1,0 +1,174 @@
+<%- include('../../components/header', { title: req.translations.adminSettingsTitle || 'Settings' }) %>
+
+<main class="">
+  <%- include('../../components/template') %>
+  <%- include('../../components/toast') %>
+
+  <div class="px-4 py-5">
+
+    <div class="mb-5">
+      <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminSettingsTitle %></h1>
+      <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminSettingsText %></p>
+    </div>
+
+    <%- include('../../components/settingsTemplate') %>
+
+    <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+      <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+        <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.general || 'General Settings' %></p>
+      </div>
+
+      <form id="settingsForm" class="p-4 space-y-4" enctype="multipart/form-data">
+
+        <div>
+          <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.siteTitle || 'Site Title' %></label>
+          <input type="text" name="title" placeholder="<%= settings.title %>" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition">
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.uploadLogo || 'Upload Logo' %></label>
+          <input type="file" name="logo" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm text-neutral-600 dark:text-neutral-400 focus:outline-none transition file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-700 file:text-neutral-700 dark:file:text-neutral-300">
+          <% if (settings.logo) { %>
+            <div class="mt-2 flex items-center gap-2">
+              <p class="text-[10px] text-neutral-500">Current:</p>
+              <img src="<%= settings.logo %>" alt="Logo" class="h-6 object-contain">
+            </div>
+          <% } %>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.uploadFavicon || 'Upload Favicon' %></label>
+          <input type="file" name="favicon" accept=".ico,.png,.jpg,.jpeg" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm text-neutral-600 dark:text-neutral-400 focus:outline-none transition file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-700 file:text-neutral-700 dark:file:text-neutral-300">
+          <% if (settings.favicon) { %>
+            <div class="mt-2 flex items-center gap-2">
+              <p class="text-[10px] text-neutral-500">Current:</p>
+              <img src="<%= settings.favicon %>" alt="Favicon" class="h-6 object-contain">
+            </div>
+          <% } %>
+          <p class="text-[10px] text-neutral-500 mt-1"><%= req.translations.faviconUploadHelp || 'Accepts .ico, .png, or .jpg. Converted to 32x32 .ico.' %></p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.theme || 'Theme' %></label>
+          <select name="theme" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
+            <option value="default" <%= settings.theme === 'default' ? 'selected' : '' %>>Default</option>
+            <option value="dark" <%= settings.theme === 'dark' ? 'selected' : '' %> disabled>Dark</option>
+            <option value="light" <%= settings.theme === 'light' ? 'selected' : '' %> disabled>Light</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.defaultLanguage || 'Default Language' %></label>
+          <select name="language" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
+            <option value="en" <%= settings.language === 'en' ? 'selected' : '' %>>English</option>
+            <option value="fr" <%= settings.language === 'fr' ? 'selected' : '' %>>Français</option>
+            <option value="de" <%= settings.language === 'de' ? 'selected' : '' %>>Deutsch</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2"><%= req.translations.allowRegistration || 'Allow Registration' %></label>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <div class="relative">
+              <input type="checkbox" name="allowRegistration" value="true" class="sr-only peer" <%= settings.allowRegistration ? 'checked' : '' %>>
+              <div class="w-10 h-5.5 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:bg-emerald-600 transition-colors duration-200 relative h-6">
+                <div class="absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform duration-200 peer-checked:translate-x-4" style="transform: translateX(0)"></div>
+              </div>
+            </div>
+            <span class="text-xs text-neutral-600 dark:text-neutral-400"><%= req.translations.allowRegistrationDescription || 'Enable new user registration' %></span>
+          </label>
+          <p class="text-[10px] text-neutral-500 mt-1.5"><%= req.translations.allowRegistrationHelp || 'When disabled, only the first user can register.' %></p>
+        </div>
+
+        <div class="flex gap-2 pt-2 border-t border-neutral-200 dark:border-white/5">
+          <button type="button" id="resetButton" class="flex-1 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-4 py-2.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+            <%= req.translations.resetToDefault || 'Reset' %>
+          </button>
+          <button type="submit" class="flex-1 rounded-xl bg-neutral-900 dark:bg-white px-4 py-2.5 text-xs font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+            <%= req.translations.saveSettings || 'Save Settings' %>
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('settingsForm');
+
+    // Sync checkbox with its visual toggle
+    const checkbox = form.querySelector('input[name="allowRegistration"]');
+    const toggleDot = form.querySelector('.peer ~ div div');
+    if (checkbox && toggleDot) {
+      function syncToggle() {
+        toggleDot.style.transform = checkbox.checked ? 'translateX(1rem)' : 'translateX(0)';
+      }
+      syncToggle();
+      checkbox.addEventListener('change', syncToggle);
+    }
+
+    const faviconInput = form.querySelector('input[name="favicon"]');
+    faviconInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file || file.name.toLowerCase().endsWith('.ico')) return;
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 32; canvas.height = 32;
+        const img = new Image();
+        img.onload = () => {
+          canvas.getContext('2d').drawImage(img, 0, 0, 32, 32);
+          canvas.toBlob(blob => {
+            const dt = new DataTransfer();
+            dt.items.add(new File([blob], 'favicon.ico', { type: 'image/x-icon' }));
+            faviconInput.files = dt.files;
+            showToast('Image converted to favicon format', 'success');
+          }, 'image/x-icon');
+        };
+        img.src = URL.createObjectURL(file);
+      } catch (err) {
+        showToast('Failed to convert image', 'error');
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      try {
+        const fd = new FormData(form);
+        if (!fd.get('title')) fd.set('title', '<%= settings.title %>');
+        if (!fd.get('theme')) fd.set('theme', '<%= settings.theme %>');
+        if (!fd.get('language')) fd.set('language', '<%= settings.language %>');
+        const response = await fetch('/admin/settings', { method: 'POST', body: fd });
+        if (response.ok) {
+          showToast('<%= req.translations.settingsSaved || "Settings saved" %>', 'success');
+          setTimeout(() => window.location.reload(), 1200);
+        } else {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err.error || 'Failed to save settings');
+        }
+      } catch (err) {
+        showToast(err.message, 'error');
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    });
+
+    document.getElementById('resetButton').addEventListener('click', () => {
+      if (confirm('<%= req.translations.resetSettingsConfirm || "Reset all settings to default?" %>')) {
+        const tempForm = document.createElement('form');
+        tempForm.method = 'POST';
+        tempForm.action = '/admin/settings/reset';
+        document.body.appendChild(tempForm);
+        tempForm.submit();
+      }
+    });
+  });
+</script>
+
+<%- include('../../components/footer') %>

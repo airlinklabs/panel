@@ -1,0 +1,202 @@
+<%- include('../../components/header', { title: 'Startup' }) %>
+
+<main class="">
+  <%- include('../../components/template') %>
+
+  <section class="px-4 py-5">
+
+    <header class="mb-5">
+      <%- include('../../components/serverHeader') %>
+    </header>
+
+    <%- include('../../components/installHeader') %>
+    <%- include('../../components/serverTemplate') %>
+
+    <div class="space-y-4 mt-4">
+
+      <!-- Startup command -->
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command</p>
+            <p class="text-xs text-neutral-500 mt-0.5">Customize the command used to start your server.</p>
+          </div>
+          <%
+            var isStartupEditAllowed = false;
+            try { isStartupEditAllowed = server.allowStartupEdit === true; } catch(e) {}
+          %>
+          <% if (!isStartupEditAllowed) { %>
+          <span class="inline-flex items-center rounded-md bg-red-50 dark:bg-red-900/20 px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-600/20 shrink-0 ml-3">
+            Editing disabled
+          </span>
+          <% } else { %>
+          <span class="inline-flex items-center rounded-md bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400 ring-1 ring-inset ring-emerald-600/20 shrink-0 ml-3">
+            Editing enabled
+          </span>
+          <% } %>
+        </div>
+        <form id="startupForm" action="/server/<%= server.UUID %>/startup/command" method="POST" enctype="application/x-www-form-urlencoded">
+          <%- include('../../components/csrf') %>
+          <div class="p-4">
+            <textarea id="startCommand" name="startCommand" rows="3"
+              class="w-full rounded-xl text-sm px-3 py-2 font-mono bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 text-neutral-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400 <%= !isStartupEditAllowed ? 'opacity-60 cursor-not-allowed' : '' %>"
+              <%= !isStartupEditAllowed ? 'readonly' : '' %>><%= server.StartCommand %></textarea>
+            <p class="text-xs text-neutral-500 mt-2">
+              <% if (!isStartupEditAllowed) { %>
+                Contact an administrator to enable startup command editing.
+              <% } else { %>
+                Use $ALVKT(VARIABLE_NAME) to reference environment variables.
+              <% } %>
+            </p>
+          </div>
+          <div class="px-4 py-3 bg-neutral-100 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-white/5">
+            <button type="submit"
+              class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 transition <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>"
+              <%= !isStartupEditAllowed ? 'disabled' : '' %>>Save Command</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Docker image -->
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-neutral-800 dark:text-white">Docker Image</p>
+            <p class="text-xs text-neutral-500 mt-0.5">Change the Docker image used by your server.</p>
+          </div>
+          <span class="inline-flex items-center rounded-md bg-blue-50 dark:bg-blue-900/20 px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-600/20 shrink-0 ml-3">
+            Requires restart
+          </span>
+        </div>
+        <form id="dockerImageForm" action="/server/<%= server.UUID %>/startup/docker-image" method="POST" enctype="application/x-www-form-urlencoded">
+          <%- include('../../components/csrf') %>
+          <div class="p-4">
+            <%
+              var currentDockerImage = '';
+              try { currentDockerImage = Object.keys(JSON.parse(server.dockerImage))[0]; } catch(e) {}
+              var availableDockerImages = [];
+              try {
+                if (server.image && server.image.dockerImages) {
+                  JSON.parse(server.image.dockerImages).forEach(function(obj) {
+                    Object.keys(obj).forEach(function(k) { availableDockerImages.push(k); });
+                  });
+                }
+              } catch(e) {}
+            %>
+            <div class="relative">
+              <select id="dockerImage" name="dockerImage"
+                class="w-full rounded-xl text-sm px-3 py-2 pr-8 bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 text-neutral-800 dark:text-white appearance-none focus:outline-none focus:ring-1 focus:ring-neutral-400">
+                <% if (availableDockerImages.length > 0) { %>
+                  <% availableDockerImages.forEach(function(image) { %>
+                    <option value="<%= image %>" <%= image === currentDockerImage ? 'selected' : '' %>><%= image %></option>
+                  <% }); %>
+                <% } else { %>
+                  <option disabled selected>No images available</option>
+                <% } %>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-neutral-500">
+                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <p class="text-xs text-neutral-500 mt-2">Changing the image will restart your server if it is running.</p>
+          </div>
+          <div class="px-4 py-3 bg-neutral-100 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-white/5">
+            <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 transition">Update Image</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Server variables -->
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">Server Variables</p>
+          <p class="text-xs text-neutral-500 mt-0.5">Configure environment variables for your server.</p>
+        </div>
+        <form id="variablesForm" action="/server/<%= server.UUID %>/startup/variables" method="POST" enctype="application/x-www-form-urlencoded">
+          <%- include('../../components/csrf') %>
+          <div class="p-4 space-y-4">
+            <% if (serverVariables && serverVariables.length > 0) { %>
+              <% serverVariables.forEach(function(variable, index) { %>
+              <div class="rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5 p-3">
+                <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-0.5"><%= variable.name %></label>
+                <p class="text-[10px] text-neutral-500 mb-2">ENV: <span class="font-mono"><%= variable.env %></span> &middot; type: <%= variable.type %></p>
+                <% if (variable.type === 'boolean') { %>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="var_<%= variable.env %>" id="toggle_<%= variable.env %>" class="sr-only peer"
+                      <%= (variable.value == true || variable.value === '1' || variable.value === 1) ? 'checked' : '' %>>
+                    <div class="relative w-9 h-5 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:w-4 after:h-4 after:transition-all peer-checked:after:translate-x-4"></div>
+                    <span class="text-xs text-neutral-600 dark:text-neutral-400" id="label_<%= variable.env %>">
+                      <%= (variable.value == true || variable.value === '1' || variable.value === 1) ? 'Enabled' : 'Disabled' %>
+                    </span>
+                  </label>
+                  <script>
+                    document.getElementById('toggle_<%= variable.env %>').addEventListener('change', function() {
+                      document.getElementById('label_<%= variable.env %>').textContent = this.checked ? 'Enabled' : 'Disabled';
+                    });
+                  </script>
+                <% } else if (variable.type === 'number') { %>
+                  <input type="number" name="var_<%= variable.env %>" value="<%= variable.value %>"
+                    class="w-full rounded-xl text-sm px-3 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-200 dark:border-white/5 text-neutral-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400">
+                <% } else { %>
+                  <input type="text" name="var_<%= variable.env %>" value="<%= variable.value %>"
+                    class="w-full rounded-xl text-sm px-3 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-200 dark:border-white/5 text-neutral-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400">
+                <% } %>
+              </div>
+              <% }); %>
+            <% } else { %>
+              <p class="text-xs text-neutral-500">No variables available for this server.</p>
+            <% } %>
+          </div>
+          <div class="px-4 py-3 bg-neutral-100 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-white/5">
+            <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 transition">Save Variables</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('message')) {
+      var type = urlParams.get('success') === 'true' ? 'success' : 'error';
+      showToast(urlParams.get('message'), type);
+    }
+
+    function handleFormSubmit(form, successMsg) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var btn = form.querySelector('button[type="submit"]');
+        var orig = btn.textContent;
+        btn.textContent = 'Saving...';
+        btn.disabled = true;
+        var formData = new FormData(form);
+        fetch(form.action, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' },
+          body: form.enctype === 'application/x-www-form-urlencoded'
+            ? new URLSearchParams(formData)
+            : formData
+        })
+        .then(function(r) { return r.ok ? r.json().catch(function() { return { success: true }; }) : r.json().then(function(d) { return Promise.reject(d); }); })
+        .then(function(data) {
+          btn.textContent = orig; btn.disabled = false;
+          if (data.success !== false) { showToast(successMsg, 'success'); setTimeout(function() { window.location.reload(); }, 1500); }
+          else { showToast(data.error || 'Failed', 'error'); }
+        })
+        .catch(function(err) {
+          btn.textContent = orig; btn.disabled = false;
+          showToast(err.error || err.message || 'Failed', 'error');
+        });
+      });
+    }
+
+    handleFormSubmit(document.getElementById('startupForm'), 'Startup command saved!');
+    handleFormSubmit(document.getElementById('dockerImageForm'), 'Docker image updated!');
+    handleFormSubmit(document.getElementById('variablesForm'), 'Variables saved!');
+  });
+</script>
