@@ -46,7 +46,7 @@
     <% } else { %>
       <div class="space-y-3">
         <% servers.forEach(server => { %>
-          <a href="../server/<%= server.UUID %>" class="block bg-white dark:bg-neutral-800/50 rounded-xl border border-neutral-200 dark:border-neutral-700/30 p-4 active:scale-[0.98] transition-transform duration-100">
+          <a href="../server/<%= server.UUID %>" class="block bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 p-4 active:scale-[0.98] transition-transform duration-100">
             <div class="flex items-center justify-between mb-3">
               <h3 class="text-sm font-medium text-neutral-900 dark:text-white truncate mr-2"><%= server.name %></h3>
               <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-md shrink-0
@@ -91,7 +91,7 @@
     <% } %>
   </div>
 
-  </div><!-- close mobile-content-area -->
+  </div>
 </main>
 
 <%- include('../components/footer') %>

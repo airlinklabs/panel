@@ -4,17 +4,15 @@
   <%- include('../../components/template') %>
 
   <div class="px-4 py-5">
-<div class="flex items-start justify-between mb-5">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminNodesTitle %></h1>
-            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminNodesText %></p>
-        </div>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button onclick="location.href='/admin/nodes'" type="button" class="border border-neutral-800/20 block rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
-            Back
-          </button>
-        </div>
+<div class="flex items-center justify-between mb-5">
+      <div>
+          <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminNodesTitle %></h1>
+          <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminNodesText %></p>
       </div>
+      <a href="/admin/nodes" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition shrink-0">
+        Back
+      </a>
+    </div>
 
       <div id="stats" class="grid grid-cols-1 gap-4 mt-4">
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">

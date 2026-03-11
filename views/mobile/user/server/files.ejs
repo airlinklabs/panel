@@ -48,29 +48,27 @@ function isImageFile(filename) {
 
   <div class="px-4 py-5">
 <!-- Page Header -->
-      <div class="flex items-start justify-between mb-5">
+      <div class="mb-5">
         <%- include('../../components/serverHeader') %>
         <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex gap-2.5">
+        <div class="flex gap-2 mt-3">
           <button id="createFile" onclick="openCreateFileModal()" type="button"
-              class="border border-neutral-800/20 block rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2 mr-2">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 inline-flex mr-1 text-neutral-800 mb-0.5">
+              class="flex items-center gap-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
                 <path fill-rule="evenodd" d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875ZM12.75 12a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V18a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V12Z" clip-rule="evenodd" />
                 <path d="M14.25 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Z" />
               </svg>
-              Create File
+              Create
           </button>
-
           <button id="uploadFile" onclick="openUploadFileModal()" type="button"
-              class="border border-neutral-800/20 block rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 inline-flex mr-1 text-neutral-800 mb-0.5">
+              class="flex items-center gap-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
                 <path fill-rule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1-1.06 1.06l-3.22-3.22V16.5a.75.75 0 0 1-1.5 0V4.81L8.03 8.03a.75.75 0 0 1-1.06-1.06l4.5-4.5ZM3 15.75a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
               </svg>
-              Upload File
+              Upload
           </button>
-
-           <%- include('../../components/sftp', { server: server }) %>
-      </div>
+          <%- include('../../components/sftp', { server: server }) %>
+        </div>
         <% } %>
       </div>
 
@@ -125,7 +123,7 @@ function isImageFile(filename) {
       <% } else { %>
         <!-- File Table -->
         <div class="mt-4">
-          <div class="overflow-hidden rounded-lg shadow-md border border-neutral-700/10 dark:bg-neutral-400/20">
+          <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
             <table class="min-w-full bg-white dark:bg-neutral-800">
 
                     <div class="p-2 overflow-hidden">
@@ -156,21 +154,21 @@ function isImageFile(filename) {
        </div>
             <thead class="text-neutral-800 dark:text-neutral-100">
               <tr>
-                <th class="px-6 py-3 text-left">
+                <th class="px-4 py-3 text-left">
                   <input type="checkbox" id="selectAll" class="form-checkbox h-5 w-5 text-neutral-500 bg-white/10 border border-white/15 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox">
                 </th>
-                <th class="px-6 py-3 text-left text-sm font-semibold">File Name</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold">Size</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold">&nbsp;</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-600 dark:text-neutral-400">File Name</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-600 dark:text-neutral-400">Size</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-600 dark:text-neutral-400">&nbsp;</th>
               </tr>
             </thead>
             <tbody>
               <% files.forEach(file => { %>
                 <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700/30 cursor-pointer">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white border-none">
+                  <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-neutral-800 dark:text-white border-none">
                     <input type="checkbox" class="form-checkbox h-5 w-5 text-neutral-500 bg-white/5 border border-white/10 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>">
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white border-none">
+                  <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-neutral-800 dark:text-white border-none">
                     <%
                       const isImage = file.type !== 'directory' && isImageFile(file.name);
                       const filePath = currentPath && currentPath !== '/'
@@ -201,10 +199,10 @@ function isImageFile(filename) {
                     <%= file.name %>
                     </a>
                   </td>
-                  <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
+                  <td class="px-4 py-3 text-xs text-neutral-500">
                     <%= fileSize %>
                   </td>
-                  <td class="px-6 py-4 text-sm">
+                  <td class="px-4 py-3 text-sm">
                     <button onclick="toggleDropdown(event, '<%= file.name %>')" class="text-neutral-400 hover:text-white transition">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
@@ -270,7 +268,7 @@ function isImageFile(filename) {
 
    <!-- Floating Action Bar (only show when daemon is online) -->
    <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-   <div id="floatingActionBar" class="fixed bottom-16 w-full bg-neutral-800 z-50 backdrop-blur text-white py-4 px-6 transform transition-transform duration-300 ease-in-out flex justify-between items-center">
+   <div id="floatingActionBar" class="fixed bottom-16 left-0 right-0 bg-neutral-900 dark:bg-neutral-800 z-50 text-white py-3 px-4 transform transition-transform duration-300 ease-in-out flex justify-between items-center">
     <span id="selectedFilesCount">0 files selected</span>
     <div class="flex gap-4">
         <button id="massDeleteBtn" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
