@@ -65,7 +65,7 @@ systemctl stop airlink-panel # Stopping the panel
 
 5. Build the application:
    ```bash
-   npm run build-ts
+   npm run build
    ```
 
 6. Run the application:
