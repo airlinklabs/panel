@@ -264,7 +264,10 @@ app.use((_req, res, next) => {
     const prefixedViewPath = path.join(viewsPath, prefixedView + '.ejs');
     if (!fs.existsSync(prefixedViewPath) && !view.startsWith('desktop/') && !view.startsWith('mobile/')) {
       for (const addonDir of getAddonDirs()) {
-        const addonViewPath = path.join(addonViewsDir, addonDir, 'views', view + '.ejs');
+        const viewportSubdir = isMobileViewport ? 'mobile' : 'desktop';
+        const addonViewportPath = path.join(addonViewsDir, addonDir, 'views', viewportSubdir, view + '.ejs');
+        const addonFallbackPath = path.join(addonViewsDir, addonDir, 'views', view + '.ejs');
+        const addonViewPath = fs.existsSync(addonViewportPath) ? addonViewportPath : addonFallbackPath;
         if (fs.existsSync(addonViewPath)) {
           const data = { ...res.locals, ...(typeof options === 'object' ? options : {}) };
           (ejs as any).renderFile(addonViewPath, data, {}, (err: any, html: string) => {
