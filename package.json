@@ -12,7 +12,7 @@
     "start": "node dist/app.js",
     "start:dev": "concurrently \"npm run dev\"",
     "dev": "npx prisma migrate dev --name init && npx prisma generate && nodemon",
-    "build": "tsc",
+    "build": "tsc && npx tailwindcss -i ./public/tw.css -o ./public/styles.css",
     "build:css": "npx tailwindcss -i ./public/tw.css -o ./public/styles.css --watch",
     "migrate:dev": "npx prisma migrate dev --name init && npx prisma generate",
     "migrate:deploy": "npx prisma migrate deploy && npx prisma generate",
