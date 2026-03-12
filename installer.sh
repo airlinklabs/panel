@@ -872,6 +872,9 @@ install_single_addon() {
     
     info "Building $display_name addon (this will show build output)..."
     npm run build
+    
+    cd /var/www/panel/
+    npx tailwindcss -i ./public/tw.css -o ./public/styles.css
     ok "$display_name addon installed successfully"
 }
 
