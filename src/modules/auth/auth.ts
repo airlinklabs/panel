@@ -1,9 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import logger from '../../handlers/logger';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../db';
 
-const prisma = new PrismaClient();
 
 const authModule: Module = {
   info: {

@@ -1,10 +1,9 @@
 // install.ts
 
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../db';
 import bcrypt from 'bcrypt';
 import logger from '../logger';
 
-const prisma = new PrismaClient();
 
 class Install {
   async install(key: string, email: string, password: string): Promise<void> {

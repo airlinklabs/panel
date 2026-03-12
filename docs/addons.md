@@ -32,7 +32,11 @@ my-addon/
 ├── package.json       # Addon metadata and configuration
 ├── index.ts           # Main entry point
 ├── views/             # EJS templates
-│   └── my-view.ejs    # Example view
+│   ├── desktop/       # Desktop-specific views
+│   │   └── my-view.ejs
+│   ├── mobile/        # Mobile-specific views
+│   │   └── my-view.ejs
+│   └── my-view.ejs    # Shared fallback (used if no desktop/mobile version exists)
 ├── public/            # Static assets (optional)
 │   ├── css/           # CSS files
 │   ├── js/            # JavaScript files
@@ -156,12 +160,14 @@ interface AddonAPI {
   prisma: PrismaClient; // Prisma ORM client for database access
 
   // Path utilities
-  addonPath: string;    // Path to the addon directory
-  viewsPath: string;    // Path to the addon's views directory
+  addonPath: string;         // Path to the addon directory
+  viewsPath: string;         // Path to the addon's views directory (base)
+  desktopViewsPath: string;  // Path to views/desktop/
+  mobileViewsPath: string;   // Path to views/mobile/
   getComponentPath: (componentPath: string) => string; // Get path to a panel component
 
   // View utilities
-  renderView: (viewName: string, data?: any) => string;
+  renderView: (viewName: string, data?: any, isMobile?: boolean) => string;
 
   // User and server utilities
   utils: {
@@ -222,9 +228,11 @@ api.registerRoute('/my-addon/api', apiRouter);
 
 ## Creating Views
 
-Views are created using EJS templates. Create a `views` directory in your addon folder and add your EJS templates there.
+Views are created using EJS templates. The addon system supports the same desktop/mobile two-view layout as the rest of the panel.
 
-Example view (`views/my-view.ejs`):
+Place templates in `views/desktop/` for desktop and `views/mobile/` for mobile. If only one version exists, place it in `views/` as a shared fallback — the system will use it for both viewports.
+
+Example desktop view (`views/desktop/my-view.ejs`):
 
 ```html
 <%- include(components.header, { title: 'My Addon', user: user }) %>
@@ -244,20 +252,32 @@ Example view (`views/my-view.ejs`):
 <%- include(components.footer) %>
 ```
 
-To render a view:
+To render a view using `res.render` (viewport is resolved automatically from the cookie):
 
 ```typescript
 router.get('/', async (req, res) => {
-  res.render(path.join(api.viewsPath, 'my-view.ejs'), {
+  res.render('my-view', {
     user: req.session?.user,
     req,
     settings: await prisma.settings.findUnique({ where: { id: 1 } }),
     components: {
-      header: api.getComponentPath('views/components/header'),
-      template: api.getComponentPath('views/components/template'),
-      footer: api.getComponentPath('views/components/footer')
+      header: api.getComponentPath('views/desktop/components/header'),
+      template: api.getComponentPath('views/desktop/components/template'),
+      footer: api.getComponentPath('views/desktop/components/footer')
     }
   });
+});
+```
+
+To render a view manually using the `renderView` helper (pass `isMobile` from `res.locals`):
+
+```typescript
+router.get('/', async (req, res) => {
+  const isMobile = res.locals.isMobileViewport;
+  const html = api.renderView('my-view.ejs', {
+    user: req.session?.user,
+  }, isMobile);
+  res.send(html);
 });
 ```
 

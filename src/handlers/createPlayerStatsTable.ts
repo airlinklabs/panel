@@ -7,10 +7,9 @@
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
  */
 
-import { PrismaClient } from '@prisma/client';
+import prisma from '../db';
 import logger from './logger';
 
-const prisma = new PrismaClient();
 
 /**
  * Creates the PlayerStats table if it doesn't exist

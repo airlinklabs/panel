@@ -1,6 +1,6 @@
 import { createInterface } from 'readline';
 import axios from 'axios';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../db';
 
 /**
  * Validates the seed data before inserting it into the database
@@ -19,7 +19,6 @@ const FIELD_MAPPING: Record<string, string> = {
   docker_images: 'dockerImages',
 };
 
-const prisma = new PrismaClient();
 const rl = createInterface({
   input: process.stdin,
   output: process.stdout,

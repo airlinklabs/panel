@@ -2,11 +2,10 @@ import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
 import { getParamAsString } from '../../utils/typeHelpers';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../db';
 import axios from 'axios';
 import logger from '../../handlers/logger';
 
-const prisma = new PrismaClient();
 
 const sftpModule: Module = {
   info: {

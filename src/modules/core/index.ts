@@ -2,10 +2,9 @@ import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import logger from '../../handlers/logger';
 import os from 'os';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../db';
 import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
 
-const prisma = new PrismaClient();
 
 const coreModule: Module = {
   info: {

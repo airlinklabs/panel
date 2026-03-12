@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../db';
 import { Module } from '../../handlers/moduleInit';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
@@ -60,7 +60,6 @@ export function processImageUpload(imageData: any): any {
   return normalizedData;
 }
 
-const prisma = new PrismaClient();
 
 const adminModule: Module = {
   info: {
@@ -385,9 +384,5 @@ const adminModule: Module = {
   },
 };
 
-process.on('SIGINT', async () => {
-  await prisma.$disconnect();
-  process.exit();
-});
 
 export default adminModule;

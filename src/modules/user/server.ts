@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
-import { PrismaClient } from '@prisma/client';
 import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
@@ -8,16 +7,12 @@ import { checkEulaStatus, isWorld } from '../../handlers/features';
 import { checkForServerInstallation } from '../../handlers/checkForServerInstallation';
 import { queueer } from '../../handlers/queueer';
 import { getServerStatus } from '../../handlers/utils/server/serverStatus';
-import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
+import { getParamAsString } from '../../utils/typeHelpers';
+import prisma from '../../db';
 
-// Declare global serverStoppingStates
 declare global {
-  var serverStoppingStates: {
-    [key: string]: boolean;
-  };
+  var serverStoppingStates: { [key: string]: boolean };
 }
-
-const prisma = new PrismaClient();
 
 interface ErrorMessage {
   message?: string;
@@ -39,6 +34,49 @@ interface ServerVariable {
   type: 'boolean' | 'text' | 'number';
   default: string | number | boolean;
   value: string | number | boolean;
+}
+
+function getImageFeatures(image: any): string[] {
+  if (!image) return [];
+  try {
+    const info = typeof image.info === 'string' ? JSON.parse(image.info) : image.info;
+    return Array.isArray(info?.features) ? info.features : [];
+  } catch {
+    return [];
+  }
+}
+
+function buildEnvVariables(variablesJson: string | null): Record<string, string | number | boolean> {
+  if (!variablesJson) return {};
+  try {
+    const vars = JSON.parse(variablesJson) as ServerVariable[];
+    const env: Record<string, string | number | boolean> = {};
+    for (const v of vars) {
+      if (!v.env || v.value === undefined || !v.type) continue;
+      switch (v.type) {
+        case 'boolean':
+          env[v.env] = v.value === 1 || v.value === '1' ? 'true' : 'false';
+          break;
+        case 'number':
+          env[v.env] = Number(v.value);
+          break;
+        default:
+          env[v.env] = String(v.value);
+      }
+    }
+    return env;
+  } catch {
+    return {};
+  }
+}
+
+function getPrimaryPort(portsJson: string): number | undefined {
+  try {
+    const ports = JSON.parse(portsJson) as Port[];
+    return ports.filter((p) => p.primary).map((p) => p.Port).pop();
+  } catch {
+    return undefined;
+  }
 }
 
 const dashboardModule: Module = {
@@ -90,27 +128,7 @@ const dashboardModule: Module = {
 
           let features: string[] = [];
 
-          if (server.image && typeof server.image.info === 'string') {
-            try {
-              const parsedInfo = JSON.parse(
-                server.image.info,
-              ) as ServerImageInfo;
-              if (Array.isArray(parsedInfo.features)) {
-                features = parsedInfo.features;
-              }
-            } catch (error) {
-              console.error('Failed to parse server.image.info:', error);
-            }
-          } else if (
-            server.image &&
-            typeof server.image.info === 'object' &&
-            server.image.info !== null
-          ) {
-            const info = server.image.info as ServerImageInfo;
-            if (Array.isArray(info.features)) {
-              features = info.features;
-            }
-          }
+          features = getImageFeatures(server.image);
 
           if (features.includes('eula')) {
             const eulaStatus = await checkEulaStatus(server.UUID);
@@ -342,48 +360,9 @@ const dashboardModule: Module = {
             return;
           }
 
-          const ports = (JSON.parse(server.Ports) as Port[])
-            .filter((port) => port.primary)
-            .map((port) => port.Port)
-            .pop();
+          const ports = getPrimaryPort(server.Ports);
 
-          const envVariables: Record<string, string | number | boolean> = {};
-          if (server.Variables) {
-            try {
-              const serverVariables = JSON.parse(
-                server.Variables,
-              ) as ServerVariable[];
-              serverVariables.forEach((variable) => {
-                if (
-                  variable.env &&
-                  variable.value !== undefined &&
-                  variable.type
-                ) {
-                  let processedValue: string | number | boolean;
-                  switch (variable.type) {
-                    case 'boolean':
-                      processedValue =
-                        variable.value === 1 || variable.value === '1'
-                          ? 'true'
-                          : 'false';
-                      break;
-                    case 'number':
-                      processedValue = Number(variable.value);
-                      break;
-                    case 'text':
-                      processedValue = String(variable.value);
-                      break;
-                    default:
-                      processedValue = variable.value;
-                  }
-                  envVariables[variable.env] = processedValue;
-                }
-              });
-            } catch (error) {
-              logger.error('Error processing server.Variables:', error);
-              throw new Error('Invalid format in server.Variables');
-            }
-          }
+          const envVariables = buildEnvVariables(server.Variables);
 
           if (!server.dockerImage) {
             res.status(400).json({ error: 'Docker image not found.' });
@@ -496,27 +475,7 @@ const dashboardModule: Module = {
 
           let features: string[] = [];
 
-          if (server.image && typeof server.image.info === 'string') {
-            try {
-              const parsedInfo = JSON.parse(
-                server.image.info,
-              ) as ServerImageInfo;
-              if (Array.isArray(parsedInfo.features)) {
-                features = parsedInfo.features;
-              }
-            } catch (error) {
-              console.error('Failed to parse server.image.info:', error);
-            }
-          } else if (
-            server.image &&
-            typeof server.image.info === 'object' &&
-            server.image.info !== null
-          ) {
-            const info = server.image.info as ServerImageInfo;
-            if (Array.isArray(info.features)) {
-              features = info.features;
-            }
-          }
+          features = getImageFeatures(server.image);
 
           // Get server status including uptime
           const serverInfos = {
@@ -571,27 +530,7 @@ const dashboardModule: Module = {
 
           // Extract features from server image
           let features: string[] = [];
-          if (server.image && typeof server.image.info === 'string') {
-            try {
-              const parsedInfo = JSON.parse(
-                server.image.info,
-              ) as ServerImageInfo;
-              if (Array.isArray(parsedInfo.features)) {
-                features = parsedInfo.features;
-              }
-            } catch (error) {
-              console.error('Failed to parse server.image.info:', error);
-            }
-          } else if (
-            server.image &&
-            typeof server.image.info === 'object' &&
-            server.image.info !== null
-          ) {
-            const info = server.image.info as ServerImageInfo;
-            if (Array.isArray(info.features)) {
-              features = info.features;
-            }
-          }
+          features = getImageFeatures(server.image);
 
           // Get server status to determine if daemon is offline
           const serverInfos = {
@@ -676,27 +615,7 @@ const dashboardModule: Module = {
 
           let features: string[] = [];
 
-          if (server.image && typeof server.image.info === 'string') {
-            try {
-              const parsedInfo = JSON.parse(
-                server.image.info,
-              ) as ServerImageInfo;
-              if (Array.isArray(parsedInfo.features)) {
-                features = parsedInfo.features;
-              }
-            } catch (error) {
-              console.error('Failed to parse server.image.info:', error);
-            }
-          } else if (
-            server.image &&
-            typeof server.image.info === 'object' &&
-            server.image.info !== null
-          ) {
-            const info = server.image.info as ServerImageInfo;
-            if (Array.isArray(info.features)) {
-              features = info.features;
-            }
-          }
+          features = getImageFeatures(server.image);
 
           // Get server status including uptime
           const serverInfos = {
@@ -743,27 +662,7 @@ const dashboardModule: Module = {
 
           // Extract features from server image
           let features: string[] = [];
-          if (server.image && typeof server.image.info === 'string') {
-            try {
-              const parsedInfo = JSON.parse(
-                server.image.info,
-              ) as ServerImageInfo;
-              if (Array.isArray(parsedInfo.features)) {
-                features = parsedInfo.features;
-              }
-            } catch (error) {
-              console.error('Failed to parse server.image.info:', error);
-            }
-          } else if (
-            server.image &&
-            typeof server.image.info === 'object' &&
-            server.image.info !== null
-          ) {
-            const info = server.image.info as ServerImageInfo;
-            if (Array.isArray(info.features)) {
-              features = info.features;
-            }
-          }
+          features = getImageFeatures(server.image);
 
           // Get server status to determine if daemon is offline
           const serverInfos = {
@@ -1247,27 +1146,7 @@ const dashboardModule: Module = {
 
           let features: string[] = [];
 
-          if (server.image && typeof server.image.info === 'string') {
-            try {
-              const parsedInfo = JSON.parse(
-                server.image.info,
-              ) as ServerImageInfo;
-              if (Array.isArray(parsedInfo.features)) {
-                features = parsedInfo.features;
-              }
-            } catch (error) {
-              console.error('Failed to parse server.image.info:', error);
-            }
-          } else if (
-            server.image &&
-            typeof server.image.info === 'object' &&
-            server.image.info !== null
-          ) {
-            const info = server.image.info as ServerImageInfo;
-            if (Array.isArray(info.features)) {
-              features = info.features;
-            }
-          }
+          features = getImageFeatures(server.image);
 
           if (!primaryPort) {
             return res.render('user/server/players', {
@@ -1866,27 +1745,7 @@ const dashboardModule: Module = {
 
           let features: string[] = [];
 
-          if (server.image && typeof server.image.info === 'string') {
-            try {
-              const parsedInfo = JSON.parse(
-                server.image.info,
-              ) as ServerImageInfo;
-              if (Array.isArray(parsedInfo.features)) {
-                features = parsedInfo.features;
-              }
-            } catch (error) {
-              console.error('Failed to parse server.image.info:', error);
-            }
-          } else if (
-            server.image &&
-            typeof server.image.info === 'object' &&
-            server.image.info !== null
-          ) {
-            const info = server.image.info as ServerImageInfo;
-            if (Array.isArray(info.features)) {
-              features = info.features;
-            }
-          }
+          features = getImageFeatures(server.image);
 
           let serverVariables: ServerVariable[] = [];
           if (server.Variables) {
@@ -2717,27 +2576,7 @@ const dashboardModule: Module = {
 
           let features: string[] = [];
 
-          if (server.image && typeof server.image.info === 'string') {
-            try {
-              const parsedInfo = JSON.parse(
-                server.image.info,
-              ) as ServerImageInfo;
-              if (Array.isArray(parsedInfo.features)) {
-                features = parsedInfo.features;
-              }
-            } catch (error) {
-              console.error('Failed to parse server.image.info:', error);
-            }
-          } else if (
-            server.image &&
-            typeof server.image.info === 'object' &&
-            server.image.info !== null
-          ) {
-            const info = server.image.info as ServerImageInfo;
-            if (Array.isArray(info.features)) {
-              features = info.features;
-            }
-          }
+          features = getImageFeatures(server.image);
 
           return res.render('user/server/settings', {
             errorMessage,
@@ -2850,48 +2689,9 @@ const dashboardModule: Module = {
 
           await new Promise((resolve) => setTimeout(resolve, 2000));
 
-          const ports = (JSON.parse(server.Ports) as Port[])
-            .filter((port) => port.primary)
-            .map((port) => port.Port)
-            .pop();
+          const ports = getPrimaryPort(server.Ports);
 
-          const envVariables: Record<string, string | number | boolean> = {};
-          if (server.Variables) {
-            try {
-              const serverVariables = JSON.parse(
-                server.Variables,
-              ) as ServerVariable[];
-              serverVariables.forEach((variable) => {
-                if (
-                  variable.env &&
-                  variable.value !== undefined &&
-                  variable.type
-                ) {
-                  let processedValue: string | number | boolean;
-                  switch (variable.type) {
-                    case 'boolean':
-                      processedValue =
-                        variable.value === 1 || variable.value === '1'
-                          ? 'true'
-                          : 'false';
-                      break;
-                    case 'number':
-                      processedValue = Number(variable.value);
-                      break;
-                    case 'text':
-                      processedValue = String(variable.value);
-                      break;
-                    default:
-                      processedValue = variable.value;
-                  }
-                  envVariables[variable.env] = processedValue;
-                }
-              });
-            } catch (error) {
-              logger.error('Error processing server.Variables:', error);
-              throw new Error('Invalid format in server.Variables');
-            }
-          }
+          const envVariables = buildEnvVariables(server.Variables);
 
           if (!server.dockerImage) {
             res.status(400).json({ error: 'Docker image not found.' });
@@ -3512,9 +3312,5 @@ const dashboardModule: Module = {
   },
 };
 
-process.on('SIGINT', async () => {
-  await prisma.$disconnect();
-  process.exit();
-});
 
 export default dashboardModule;
