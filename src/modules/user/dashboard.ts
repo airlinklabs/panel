@@ -1,12 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { getUser } from '../../handlers/utils/user/user';
 import logger from '../../handlers/logger';
 import axios from 'axios';
 
-const prisma = new PrismaClient();
 
 interface ErrorMessage {
   message?: string;
@@ -238,9 +237,5 @@ const dashboardModule: Module = {
   },
 };
 
-process.on('SIGINT', async () => {
-  await prisma.$disconnect();
-  process.exit();
-});
 
 export default dashboardModule;

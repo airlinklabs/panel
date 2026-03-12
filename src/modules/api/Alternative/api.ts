@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Module } from '../../../handlers/moduleInit';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../../db';
 import logger from '../../../handlers/logger';
 import axios from 'axios';
 import QueueHandler from '../../../handlers/utils/core/queueer';
@@ -10,7 +10,6 @@ import { getParamAsString, getParamAsNumber } from "../../../utils/typeHelpers";
 
 const queueer = new QueueHandler();
 
-const prisma = new PrismaClient();
 
 const coreModule: Module = {
   info: {

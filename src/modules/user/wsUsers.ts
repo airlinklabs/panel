@@ -1,13 +1,12 @@
 import { Router, Request } from 'express';
 import { Module } from '../../handlers/moduleInit';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../db';
 import { WebSocket } from 'ws';
 import logger from '../../handlers/logger';
 
 export const onlineUsers: Set<string> = new Set();
 export const userTimeouts: Map<string, NodeJS.Timeout> = new Map();
 
-const prisma = new PrismaClient();
 
 const wsUsersModule: Module = {
   info: {
@@ -68,9 +67,5 @@ const wsUsersModule: Module = {
   },
 };
 
-process.on('SIGINT', async () => {
-  await prisma.$disconnect();
-  process.exit();
-});
 
 export default wsUsersModule;
