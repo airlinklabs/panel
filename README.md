@@ -34,7 +34,7 @@ For full documentation, visit **[airlinklabs.github.io/home](https://airlinklabs
 ### Option 1 — Installer script
 
 Run as root:
-
+- **run `sudo su` then run the below script.**
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/airlinklabs/panel/refs/heads/main/installer.sh)
 ```
