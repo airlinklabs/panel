@@ -31,8 +31,8 @@ readonly DAEMON_REPO="https://github.com/airlinklabs/daemon.git"
 # Format: "display_name|repo_url|branch|directory_name"
 # ============================================================================
 declare -a ADDONS=(
-    "Modrinth|https://github.com/g-flame-oss/airlink-addons.git|modrinth-addon|modrinth-store"
-    "Parachute|https://github.com/g-flame-oss/airlink-addons.git|parachute|parachute"
+    "Modrinth|https://github.com/airlinklabs/addons.git|modrinth|modrinth"
+    "Parachute|https://github.com/airlinklabs/addons.git|parachute|parachute"
     # Add more addons below following the same format:
     # "Display Name|https://github.com/user/repo.git|branch-name|folder-name"
 )
