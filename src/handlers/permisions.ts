@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../db';
 import { Request, Response, NextFunction } from 'express';
 
-const prisma = new PrismaClient();
 
 const permissions: string[] = [];
 

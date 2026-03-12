@@ -1,12 +1,11 @@
 import { Router, Request } from 'express';
 import { Module } from '../../handlers/moduleInit';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../db';
 import { WebSocket } from 'ws';
 import { isAuthenticatedForServerWS } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
 import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 
-const prisma = new PrismaClient();
 
 const wsServerConsoleModule: Module = {
   info: {
@@ -243,9 +242,5 @@ const wsServerConsoleModule: Module = {
   },
 };
 
-process.on('SIGINT', async () => {
-  await prisma.$disconnect();
-  process.exit();
-});
 
 export default wsServerConsoleModule;

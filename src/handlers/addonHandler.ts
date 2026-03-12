@@ -2,10 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import { Express, Router } from 'express';
 import { uiComponentStore, SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from './uiComponentHandler';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../db';
+import type { PrismaClient } from '@prisma/client';
 import logger from './logger';
 
-const prisma = new PrismaClient();
 
 interface MigrationTemplate {
   name: string;
@@ -38,8 +38,10 @@ export interface AddonAPI {
 
   addonPath: string;
   viewsPath: string;
+  desktopViewsPath: string;
+  mobileViewsPath: string;
 
-  renderView: (viewName: string, data?: any) => string;
+  renderView: (viewName: string, data?: any, isMobile?: boolean) => string;
 
   getComponentPath: (componentPath: string) => string;
 
@@ -183,8 +185,17 @@ export async function loadAddons(app: Express | any) {
         }
 
         const addonViewsPath = path.join(addonPath, 'views');
+        const addonDesktopViewsPath = path.join(addonViewsPath, 'desktop');
+        const addonMobileViewsPath = path.join(addonViewsPath, 'mobile');
+
         if (!fs.existsSync(addonViewsPath)) {
           fs.mkdirSync(addonViewsPath, { recursive: true });
+        }
+        if (!fs.existsSync(addonDesktopViewsPath)) {
+          fs.mkdirSync(addonDesktopViewsPath, { recursive: true });
+        }
+        if (!fs.existsSync(addonMobileViewsPath)) {
+          fs.mkdirSync(addonMobileViewsPath, { recursive: true });
         }
 
         const addonRouter = Router();
@@ -196,6 +207,8 @@ export async function loadAddons(app: Express | any) {
           prisma,
           addonPath,
           viewsPath: addonViewsPath,
+          desktopViewsPath: addonDesktopViewsPath,
+          mobileViewsPath: addonMobileViewsPath,
           getComponentPath: (componentPath: string) => {
             return path.join(__dirname, '../..', componentPath);
           },
@@ -213,9 +226,12 @@ export async function loadAddons(app: Express | any) {
             removeServerSectionItem: (sectionId: string, itemId: string) => uiComponentStore.removeServerSectionItem(sectionId, itemId),
             getServerSectionItems: (sectionId: string) => uiComponentStore.getServerSectionItems(sectionId)
           },
-          renderView: (viewName: string, data: any = {}) => {
+          renderView: (viewName: string, data: any = {}, isMobile: boolean = false) => {
             const ejs = require('ejs');
-            const viewPath = path.join(addonViewsPath, viewName);
+            const viewportDir = isMobile ? addonMobileViewsPath : addonDesktopViewsPath;
+            const viewportPath = path.join(viewportDir, viewName);
+            const fallbackPath = path.join(addonViewsPath, viewName);
+            const viewPath = fs.existsSync(viewportPath) ? viewportPath : fallbackPath;
 
             try {
               if (!fs.existsSync(viewPath)) {

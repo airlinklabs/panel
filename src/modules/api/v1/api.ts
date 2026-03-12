@@ -1,11 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../../handlers/moduleInit';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../../db';
 import logger from '../../../handlers/logger';
 import { apiValidator } from '../../../handlers/utils/api/apiValidator';
 import { getParamAsString, getParamAsNumber } from "../../../utils/typeHelpers";
 
-const prisma = new PrismaClient();
 
 const coreModule: Module = {
   info: {

@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from './db';
 import crypto from 'crypto';
 
-const prisma = new PrismaClient();
 
 async function createApiKey() {
   try {

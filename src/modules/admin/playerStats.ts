@@ -1,12 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
 import { registerPermission } from '../../handlers/permisions';
 
-const prisma = new PrismaClient();
 
 registerPermission('airlink.admin.playerstats.view');
 

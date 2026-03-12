@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import fs from 'fs/promises';
@@ -8,7 +8,6 @@ import path from 'path';
 import axios from 'axios';
 import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 
-const prisma = new PrismaClient();
 
 const radarModule: Module = {
   info: {
@@ -147,9 +146,5 @@ const radarModule: Module = {
   }
 };
 
-process.on('SIGINT', async () => {
-  await prisma.$disconnect();
-  process.exit();
-});
 
 export default radarModule;

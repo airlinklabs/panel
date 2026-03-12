@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../../db';
 import logger from '../../logger';
 
-const prisma = new PrismaClient();
 
 /**
  * Middleware to validate API keys and check permissions

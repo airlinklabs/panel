@@ -1,12 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { getUser } from '../../handlers/utils/user/user';
 import bcrypt from 'bcrypt';
 import logger from '../../handlers/logger';
 
-const prisma = new PrismaClient();
 
 interface ErrorMessage {
   message?: string;
@@ -352,9 +351,5 @@ const accountModule: Module = {
   },
 };
 
-process.on('SIGINT', async () => {
-  await prisma.$disconnect();
-  process.exit();
-});
 
 export default accountModule;

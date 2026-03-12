@@ -68,10 +68,23 @@ const viewsPath = path.join(__dirname, '../views');
 app.set('views', viewsPath);
 app.set('view engine', 'ejs');
 
-const ejs = require('ejs');
-const originalRenderFile = ejs.renderFile;
+import ejs from 'ejs';
 
-ejs.renderFile = function (
+const originalRenderFile = (ejs as any).__express
+  ? (ejs as any).__express.bind(ejs)
+  : (ejs as any).renderFile.bind(ejs);
+
+const addonViewsDir = path.join(__dirname, '../../storage/addons');
+
+function getAddonDirs(): string[] {
+  if (!fs.existsSync(addonViewsDir)) return [];
+  return fs
+    .readdirSync(addonViewsDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name);
+}
+
+(ejs as any).renderFile = function (
   file: string,
   data: any,
   options: any,
@@ -83,26 +96,14 @@ ejs.renderFile = function (
     }
 
     const viewName = path.basename(file);
-    const addonViewsDir = path.join(__dirname, '../../storage/addons');
 
-    if (fs.existsSync(addonViewsDir)) {
-      const addonDirs = fs
-        .readdirSync(addonViewsDir, { withFileTypes: true })
-        .filter((dirent) => dirent.isDirectory())
-        .map((dirent) => dirent.name);
-
-      for (const addonDir of addonDirs) {
-        const addonViewPath = path.join(
-          addonViewsDir,
-          addonDir,
-          'views',
-          viewName,
-        );
-        if (fs.existsSync(addonViewPath)) {
-          return originalRenderFile(addonViewPath, data, options, callback);
-        }
+    for (const addonDir of getAddonDirs()) {
+      const addonViewPath = path.join(addonViewsDir, addonDir, 'views', viewName);
+      if (fs.existsSync(addonViewPath)) {
+        return originalRenderFile(addonViewPath, data, options, callback);
       }
     }
+
     const mainViewPath = path.join(viewsPath, viewName);
     if (fs.existsSync(mainViewPath)) {
       return originalRenderFile(mainViewPath, data, options, callback);
@@ -242,10 +243,8 @@ app.use((_req, res, next) => {
     const isAddonView = view.includes('/storage/addons/') || view.includes('\\storage\\addons\\');
 
     if (isAbsolutePath || isAddonView) {
-      // Addon is passing a full path — render it directly without Express's view lookup
-      const ejsMod = require('ejs');
       const data = { ...res.locals, ...(typeof options === 'object' ? options : {}) };
-      ejsMod.renderFile(view, data, {}, (err: any, html: string) => {
+      (ejs as any).renderFile(view, data, {}, (err: any, html: string) => {
         if (err) {
           if (typeof callback === 'function') return callback(err);
           return (res as any).status(500).send('View render error: ' + err.message);
@@ -262,31 +261,24 @@ app.use((_req, res, next) => {
         ? view
         : prefix + view;
 
-    // Check if the prefixed view exists in the main views directory
     const prefixedViewPath = path.join(viewsPath, prefixedView + '.ejs');
     if (!fs.existsSync(prefixedViewPath) && !view.startsWith('desktop/') && !view.startsWith('mobile/')) {
-      // Not found in main views — look in addon views directories
-      const addonsDir = path.join(__dirname, '../../storage/addons');
-      if (fs.existsSync(addonsDir)) {
-        const addonDirs = fs.readdirSync(addonsDir, { withFileTypes: true })
-          .filter(d => d.isDirectory())
-          .map(d => d.name);
-
-        for (const addonDir of addonDirs) {
-          const addonViewPath = path.join(addonsDir, addonDir, 'views', view + '.ejs');
-          if (fs.existsSync(addonViewPath)) {
-            const ejsMod = require('ejs');
-            const data = { ...res.locals, ...(typeof options === 'object' ? options : {}) };
-            ejsMod.renderFile(addonViewPath, data, {}, (err: any, html: string) => {
-              if (err) {
-                if (typeof callback === 'function') return callback(err);
-                return (res as any).status(500).send('View render error: ' + err.message);
-              }
-              if (typeof callback === 'function') return callback(null, html);
-              (res as any).send(html);
-            });
-            return;
-          }
+      for (const addonDir of getAddonDirs()) {
+        const viewportSubdir = isMobileViewport ? 'mobile' : 'desktop';
+        const addonViewportPath = path.join(addonViewsDir, addonDir, 'views', viewportSubdir, view + '.ejs');
+        const addonFallbackPath = path.join(addonViewsDir, addonDir, 'views', view + '.ejs');
+        const addonViewPath = fs.existsSync(addonViewportPath) ? addonViewportPath : addonFallbackPath;
+        if (fs.existsSync(addonViewPath)) {
+          const data = { ...res.locals, ...(typeof options === 'object' ? options : {}) };
+          (ejs as any).renderFile(addonViewPath, data, {}, (err: any, html: string) => {
+            if (err) {
+              if (typeof callback === 'function') return callback(err);
+              return (res as any).status(500).send('View render error: ' + err.message);
+            }
+            if (typeof callback === 'function') return callback(null, html);
+            (res as any).send(html);
+          });
+          return;
         }
       }
     }
@@ -335,15 +327,11 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
       });
     });
 
-    // on close of the application
     process.on('SIGINT', () => {
       logger.info('Shutting down...');
-      // database close
-      const { PrismaClient } = require('@prisma/client');
-      const prisma = new PrismaClient();
-      prisma.$disconnect();
-      // server close
-      server.close(() => {
+      server.close(async () => {
+        const { default: prisma } = await import('./db');
+        await prisma.$disconnect();
         logger.info('Server closed');
       });
     });

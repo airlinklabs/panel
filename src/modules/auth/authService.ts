@@ -1,10 +1,9 @@
 import bcrypt from 'bcrypt';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../db';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import logger from '../../handlers/logger';
 
-const prisma = new PrismaClient();
 
 declare module 'express-session' {
   interface SessionData {
@@ -169,9 +168,5 @@ const authServiceModule: Module = {
   },
 };
 
-process.on('SIGINT', async () => {
-  await prisma.$disconnect();
-  process.exit();
-});
 
 export default authServiceModule;

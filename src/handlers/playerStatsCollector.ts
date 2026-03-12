@@ -7,11 +7,10 @@
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
  */
 
-import { PrismaClient } from '@prisma/client';
+import prisma from '../db';
 import axios from 'axios';
 import logger from './logger';
 
-const prisma = new PrismaClient();
 
 // Interval in milliseconds (5 minutes)
 const COLLECTION_INTERVAL = 5 * 60 * 1000;
