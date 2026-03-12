@@ -1,13 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { onlineUsers } from '../user/wsUsers';
 import logger from '../../handlers/logger';
 import bcrypt from 'bcrypt';
 import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 
-const prisma = new PrismaClient();
 
 async function listUsers(res: Response) {
   try {
@@ -328,9 +327,5 @@ const adminModule: Module = {
   },
 };
 
-process.on('SIGINT', async () => {
-  await prisma.$disconnect();
-  process.exit();
-});
 
 export default adminModule;

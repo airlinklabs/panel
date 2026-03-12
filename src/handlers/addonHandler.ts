@@ -2,10 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import { Express, Router } from 'express';
 import { uiComponentStore, SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from './uiComponentHandler';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../db';
+import type { PrismaClient } from '@prisma/client';
 import logger from './logger';
 
-const prisma = new PrismaClient();
 
 interface MigrationTemplate {
   name: string;

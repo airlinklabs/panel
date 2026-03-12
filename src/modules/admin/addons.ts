@@ -5,14 +5,13 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { Module } from '../../handlers/moduleInit';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { getAllAddons, toggleAddonStatus, reloadAddons, loadAddons } from '../../handlers/addonHandler';
 import { registerPermission } from '../../handlers/permisions';
 import { getParamAsString } from '../../utils/typeHelpers';
 
-const prisma = new PrismaClient();
 const execFileAsync = promisify(execFile);
 
 registerPermission('airlink.admin.addons.view');
@@ -463,9 +462,5 @@ const addonsModule: Module = {
   },
 };
 
-process.on('SIGINT', async () => {
-  await prisma.$disconnect();
-  process.exit();
-});
 
 export default addonsModule;
