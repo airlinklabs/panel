@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { exec } from 'child_process';
 import { Express, Router } from 'express';
 import { uiComponentStore, SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from './uiComponentHandler';
 import prisma from '../db';
@@ -61,6 +62,17 @@ export interface AddonAPI {
     removeServerSectionItem: (sectionId: string, itemId: string) => void;
     getServerSectionItems: (sectionId: string) => ServerSectionItem[];
   };
+}
+
+function buildTailwind() {
+  exec('npx tailwindcss -i ./public/tw.css -o ./public/styles.css', (error, stdout, stderr) => {
+    if (error) {
+      logger.error('Tailwind build failed:', error.message);
+      return;
+    }
+    if (stderr) logger.debug('Tailwind:', stderr.trim());
+    if (stdout) logger.debug('Tailwind:', stdout.trim());
+  });
 }
 
 export async function loadAddons(app: Express | any) {
@@ -345,6 +357,8 @@ export async function loadAddons(app: Express | any) {
   } else {
     logger.debug('No addons found');
   }
+
+  buildTailwind();
 }
 
 /**
