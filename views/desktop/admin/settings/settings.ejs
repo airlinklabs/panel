@@ -19,32 +19,32 @@
 
         <%- include('../../components/settingsTemplate') %>
 
-        <div class="flex flex-col bg-white/5 pt-0 py-5 rounded-xl">
-            <h1 class="text-white text-[18px] px-5 py-4 mb-1 w-full bg-white/5 rounded-t-xl font-medium"><%= req.translations.general || 'General Settings' %></h1>
+        <div class="flex flex-col bg-neutral-50 dark:bg-white/5 pt-0 py-5 rounded-xl">
+            <h1 class="text-neutral-800 dark:text-white text-[18px] px-5 py-4 mb-1 w-full bg-neutral-100 dark:bg-white/5 rounded-t-xl font-medium"><%= req.translations.general || 'General Settings' %></h1>
 
             <form id="settingsForm" class="space-y-6" enctype="multipart/form-data">
               <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-5 mt-5">
                   <div>
-                      <label class="block text-white text-sm font-medium mb-2"><%= req.translations.siteTitle || 'Site Title' %></label>
+                      <label class="block text-neutral-700 dark:text-white text-sm font-medium mb-2"><%= req.translations.siteTitle || 'Site Title' %></label>
                       <input
                           type="text"
                           name="title"
                           placeholder="<%= settings.title %>"
-                          class="rounded-xl border border-neutral-600/30 focus:border-white/70 focus:ring-1 focus:ring-white/50 focus:outline-none text-sm mt-1 mb-0 w-full transition-colors duration-200 ease-in-out hover:bg-white/5 px-4 py-2 bg-neutral-700/20 placeholder-neutral-400"
+                          class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/50 focus:outline-none text-sm mt-1 mb-0 w-full transition-colors duration-200 ease-in-out bg-neutral-100 dark:bg-neutral-700/20 hover:bg-neutral-200 dark:hover:bg-white/5 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-400"
                       >
                   </div>
 
                   <!-- Upload Logo -->
                   <div>
-                      <label class="block text-white text-sm font-medium mb-2"><%= req.translations.uploadLogo || 'Upload Logo' %></label>
+                      <label class="block text-neutral-700 dark:text-white text-sm font-medium mb-2"><%= req.translations.uploadLogo || 'Upload Logo' %></label>
                       <input
                           type="file"
                           name="logo"
-                          class="rounded-xl border border-neutral-600/30 focus:border-white/70 focus:ring-1 focus:ring-white/50 focus:outline-none text-sm mt-1 mb-0 w-full transition-colors duration-200 ease-in-out hover:bg-white/5 px-4 py-2 bg-neutral-700/20 placeholder-neutral-400"
+                          class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/50 focus:outline-none text-sm mt-1 mb-0 w-full transition-colors duration-200 ease-in-out bg-neutral-100 dark:bg-neutral-700/20 hover:bg-neutral-200 dark:hover:bg-white/5 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-400"
                       >
                       <% if (settings.logo) { %>
                       <div class="mt-2">
-                          <p class="text-white text-xs mb-1"><%= req.translations.currentLogo || 'Current Logo' %>:</p>
+                          <p class="text-neutral-600 dark:text-white text-xs mb-1"><%= req.translations.currentLogo || 'Current Logo' %>:</p>
                           <img src="<%= settings.logo %>" alt="Current Logo" class="h-10 object-contain">
                       </div>
                       <% } %>
@@ -52,16 +52,16 @@
 
                   <!-- Upload Favicon -->
                   <div>
-                      <label class="block text-white text-sm font-medium mb-2"><%= req.translations.uploadFavicon || 'Upload Favicon' %></label>
+                      <label class="block text-neutral-700 dark:text-white text-sm font-medium mb-2"><%= req.translations.uploadFavicon || 'Upload Favicon' %></label>
                       <input
                           type="file"
                           name="favicon"
                           accept=".ico,.png,.jpg,.jpeg"
-                          class="rounded-xl border border-neutral-600/30 focus:border-white/70 focus:ring-1 focus:ring-white/50 focus:outline-none text-sm mt-1 mb-0 w-full transition-colors duration-200 ease-in-out hover:bg-white/5 px-4 py-2 bg-neutral-700/20 placeholder-neutral-400"
+                          class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/50 focus:outline-none text-sm mt-1 mb-0 w-full transition-colors duration-200 ease-in-out bg-neutral-100 dark:bg-neutral-700/20 hover:bg-neutral-200 dark:hover:bg-white/5 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-400"
                       >
                       <% if (settings.favicon) { %>
                       <div class="mt-2">
-                          <p class="text-white text-xs mb-1"><%= req.translations.currentFavicon || 'Current Favicon' %>:</p>
+                          <p class="text-neutral-600 dark:text-white text-xs mb-1"><%= req.translations.currentFavicon || 'Current Favicon' %>:</p>
                           <img src="<%= settings.favicon %>" alt="Current Favicon" class="h-10 object-contain">
                       </div>
                       <% } %>
@@ -69,10 +69,10 @@
                   </div>
 
                   <div>
-                      <label class="block text-white text-sm font-medium mb-2"><%= req.translations.theme || 'Theme' %></label>
+                      <label class="block text-neutral-700 dark:text-white text-sm font-medium mb-2"><%= req.translations.theme || 'Theme' %></label>
                       <select
                           name="theme"
-                          class="rounded-xl border border-neutral-600/30 focus:border-white/70 focus:ring-1 focus:ring-white/50 focus:outline-none text-sm mt-1 mb-0 w-full transition-colors duration-200 ease-in-out hover:bg-white/5 px-4 py-2 bg-neutral-700/20 text-white"
+                          class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/50 focus:outline-none text-sm mt-1 mb-0 w-full transition-colors duration-200 ease-in-out bg-neutral-100 dark:bg-neutral-700/20 hover:bg-neutral-200 dark:hover:bg-white/5 px-4 py-2 text-neutral-800 dark:text-white"
                       >
                           <option class="text-black" value="default" <%= settings.theme === 'default' ? 'selected' : '' %>>Default</option>
                           <option class="text-black" value="dark" <%= settings.theme === 'dark' ? 'selected' : '' %> disabled>Dark</option>
@@ -81,10 +81,10 @@
                   </div>
 
                   <div>
-                      <label class="block text-white text-sm font-medium mb-2"><%= req.translations.defaultLanguage || 'Default Language' %></label>
+                      <label class="block text-neutral-700 dark:text-white text-sm font-medium mb-2"><%= req.translations.defaultLanguage || 'Default Language' %></label>
                       <select
                           name="language"
-                          class="rounded-xl border border-neutral-600/30 focus:border-white/70 focus:ring-1 focus:ring-white/50 focus:outline-none text-sm mt-1 mb-0 w-full transition-colors duration-200 ease-in-out hover:bg-white/5 px-4 py-2 bg-neutral-700/20 text-white"
+                          class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/50 focus:outline-none text-sm mt-1 mb-0 w-full transition-colors duration-200 ease-in-out bg-neutral-100 dark:bg-neutral-700/20 hover:bg-neutral-200 dark:hover:bg-white/5 px-4 py-2 text-neutral-800 dark:text-white"
                       >
                           <option class="text-black" value="en" <%= settings.language === 'en' ? 'selected' : '' %>>English</option>
                           <option class="text-black" value="fr" <%= settings.language === 'fr' ? 'selected' : '' %>>Français</option>
@@ -93,7 +93,7 @@
                   </div>
 
                   <div>
-                      <label class="block text-white text-sm font-medium mb-2"><%= req.translations.uploadLimit || 'Upload File Size Limit' %></label>
+                      <label class="block text-neutral-700 dark:text-white text-sm font-medium mb-2"><%= req.translations.uploadLimit || 'Upload File Size Limit' %></label>
                       <div class="relative mt-1">
                           <input
                               type="number"
@@ -101,7 +101,7 @@
                               value="<%= settings.uploadLimit %>"
                               min="1"
                               max="10240"
-                              class="rounded-xl border border-neutral-600/30 focus:border-white/70 focus:ring-1 focus:ring-white/50 focus:outline-none text-sm mb-0 w-full transition-colors duration-200 ease-in-out hover:bg-white/5 px-4 py-2 pr-14 bg-neutral-700/20 text-white placeholder-neutral-400"
+                              class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/50 focus:outline-none text-sm mb-0 w-full transition-colors duration-200 ease-in-out bg-neutral-100 dark:bg-neutral-700/20 hover:bg-neutral-200 dark:hover:bg-white/5 px-4 py-2 pr-14 text-neutral-800 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-400"
                           >
                           <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-neutral-400 pointer-events-none">MB</span>
                       </div>
@@ -109,7 +109,7 @@
                   </div>
 
                   <div>
-                      <label class="block text-white text-sm font-medium mb-2"><%= req.translations.allowRegistration || 'Allow Registration' %></label>
+                      <label class="block text-neutral-700 dark:text-white text-sm font-medium mb-2"><%= req.translations.allowRegistration || 'Allow Registration' %></label>
                       <div class="flex items-center">
                           <label class="relative inline-flex items-center cursor-pointer">
                               <input
@@ -119,8 +119,8 @@
                                   class="sr-only peer"
                                   <%= settings.allowRegistration ? 'checked' : '' %>
                               >
-                              <div class="w-11 h-6 bg-neutral-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-neutral-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-neutral-600 peer-checked:bg-blue-600"></div>
-                              <span class="ml-3 text-sm font-medium text-neutral-400">
+                              <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-neutral-600 peer-checked:bg-blue-600"></div>
+                              <span class="ml-3 text-sm font-medium text-neutral-600 dark:text-neutral-400">
                                   <%= req.translations.allowRegistrationDescription || 'Enable new user registration' %>
                               </span>
                           </label>
@@ -135,13 +135,13 @@
                 <button
                     type="button"
                     id="resetButton"
-                    class="md:w-auto rounded-lg bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2"
+                    class="md:w-auto rounded-lg bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2"
                 >
                     <%= req.translations.resetToDefault || 'Reset to Default' %>
                 </button>
                 <button
                     type="submit"
-                    class="md:w-auto rounded-lg bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-6 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2"
+                    class="md:w-auto rounded-lg bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-800 px-6 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2"
                 >
                     <%= req.translations.saveSettings || 'Save Settings' %>
                 </button>

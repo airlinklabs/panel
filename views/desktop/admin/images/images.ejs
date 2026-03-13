@@ -32,8 +32,8 @@
       </div>
 
       <!-- Images Table -->
-      <div class="overflow-hidden shadow-lg rounded-lg m-8 border border-neutral-800/20" id="imagesTable">
-        <table class="min-w-full divide-y divide-white/10">
+      <div class="overflow-hidden shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/20" id="imagesTable">
+        <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
           <thead class="bg-neutral-50 dark:bg-neutral-800/20">
             <tr>
               <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Name</th>
@@ -42,9 +42,9 @@
               <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-white/5 bg-white/5">
+          <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-transparent">
             <% images.forEach(function(image) { %>
-              <tr class="hover:bg-white/[0.05] transition-colors">
+              <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors">
                 <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-white"><%= image.name %></td>
                 <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-neutral-400"><%= image.author %></td>
                 <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-500"><%= new Date(image.createdAt).toLocaleDateString() %></td>
@@ -59,9 +59,12 @@
                     <button
                       onclick="deleteImage('<%= image.id %>')"
                       type="button"
-                      class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition"
+                      class="rounded-xl bg-red-600 hover:bg-red-500 px-3 py-2 text-center text-sm font-medium shadow-sm transition"
+                      aria-label="Delete image"
                     >
-                      Delete
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-white">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                      </svg>
                     </button>
                   </div>
                 </td>
@@ -84,7 +87,7 @@
         </button>
         <button
           type="submit"
-          class="px-4 py-2 text-sm font-medium text-white bg-neutral-800 rounded-md hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
+          class="px-4 py-2 text-sm font-medium text-neutral-800 dark:text-white bg-neutral-100 dark:bg-neutral-800 rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
         >
           Upload
         </button>
@@ -92,45 +95,65 @@
     </form>
   </div>
 </div>
-<div id="createModal" class="modal hidden fixed inset-0 z-50 bg-neutral-900/50 transition-opacity">
+<div id="createModal" class="modal hidden fixed inset-0 z-50 bg-neutral-900/60 dark:bg-neutral-900/80 transition-opacity">
   <div class="h-full w-full flex justify-center items-center">
-  <div class="modal-content bg-white dark:bg-neutral-800 rounded-xl p-6 w-96 border border-neutral-800/20 shadow-lg">
-    <span class="close absolute top-0 right-0 mt-4 mr-4 text-neutral-800 dark:text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 cursor-pointer" onclick="closeModal('createModal')">&times;</span>
+  <div class="modal-content bg-white dark:bg-neutral-800 rounded-xl p-6 w-96 border border-neutral-200 dark:border-neutral-800/20 shadow-lg">
 
-    <h2 class="text-xl font-medium text-neutral-800 dark:text-white">Create Image</h2>
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-base font-medium text-neutral-800 dark:text-white">Create Image</h2>
+      <button
+        type="button"
+        onclick="closeModal('createModal')"
+        class="rounded-lg p-1.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+        aria-label="Close"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
 
-    <form action="/admin/images/create" method="POST" class="mt-6 space-y-4">
+    <form action="/admin/images/create" method="POST" class="space-y-4">
       <div class="flex flex-col gap-4">
         <input
           type="text"
           name="name"
           placeholder="Image Name"
-          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-600/20 rounded-xl focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
+          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600/20 rounded-xl text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600"
           required
         />
         <input
           type="text"
           name="image"
           placeholder="Image URL or Base64"
-          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-600/20 rounded-xl focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
+          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600/20 rounded-xl text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600"
           required
         />
         <textarea
           name="scripts"
           placeholder="Optional: Scripts"
-          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-600/20 rounded-xl focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2 resize-none min-h-[100px]"
+          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600/20 rounded-xl text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 resize-none min-h-[100px]"
         ></textarea>
         <textarea
           name="variables"
           placeholder="Optional: Variables"
-          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-600/20 rounded-xl focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2 resize-none min-h-[100px]"
+          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600/20 rounded-xl text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 resize-none min-h-[100px]"
         ></textarea>
-        <button
-          type="submit"
-          class="w-full py-2 px-3 border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
-        >
-          Create Image
-        </button>
+        <div class="flex gap-3 pt-1">
+          <button
+            type="button"
+            onclick="closeModal('createModal')"
+            class="flex-1 py-2 px-3 border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-600 text-neutral-700 dark:text-white text-sm font-medium transition duration-200"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="flex-1 py-2 px-3 rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-100 text-white dark:text-neutral-900 text-sm font-medium shadow-sm transition duration-200"
+          >
+            Create
+          </button>
+        </div>
       </div>
     </form>
   </div>

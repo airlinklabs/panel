@@ -10,7 +10,7 @@
     <div class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-white"><%= req.translations.adminEditUserTitle || 'Edit User' %></h1>
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminEditUserTitle || 'Edit User' %></h1>
           <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminEditUserText || 'Edit user details and permissions.' %></p>
         </div>
         <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -29,13 +29,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- User Information Section -->
               <div class="space-y-6">
-                <h2 class="text-lg font-medium text-white border-b border-white/10 pb-2">
+                <h2 class="text-lg font-medium text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-white/10 pb-2">
                   <%= req.translations.userInformation || 'User Information' %>
                 </h2>
 
                 <!-- Username -->
                 <div>
-                  <label for="username" class="block text-white text-sm font-medium mb-2">
+                  <label for="username" class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">
                     <%= req.translations.username || 'Username' %>
                   </label>
                   <input
@@ -50,7 +50,7 @@
 
                 <!-- Email -->
                 <div>
-                  <label for="email" class="block text-white text-sm font-medium mb-2">
+                  <label for="email" class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">
                     <%= req.translations.email || 'Email' %>
                   </label>
                   <input
@@ -65,7 +65,7 @@
 
                 <!-- Description -->
                 <div>
-                  <label for="description" class="block text-white text-sm font-medium mb-2">
+                  <label for="description" class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">
                     <%= req.translations.description || 'Description' %>
                   </label>
                   <textarea
@@ -79,13 +79,13 @@
 
               <!-- Security Section -->
               <div class="space-y-6">
-                <h2 class="text-lg font-medium text-white border-b border-white/10 pb-2">
+                <h2 class="text-lg font-medium text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-white/10 pb-2">
                   <%= req.translations.security || 'Security' %>
                 </h2>
 
                 <!-- Password -->
                 <div>
-                  <label for="password" class="block text-white text-sm font-medium mb-2">
+                  <label for="password" class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">
                     <%= req.translations.newPassword || 'New Password' %> <span class="text-neutral-400 text-xs">(<%= req.translations.leaveBlankToKeep || 'Leave blank to keep current password' %>)</span>
                   </label>
                   <input
@@ -98,7 +98,7 @@
 
                 <!-- Confirm Password -->
                 <div>
-                  <label for="confirmPassword" class="block text-white text-sm font-medium mb-2">
+                  <label for="confirmPassword" class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">
                     <%= req.translations.confirmPassword || 'Confirm Password' %>
                   </label>
                   <input
@@ -115,7 +115,7 @@
                     <div class="bg-neutral-400/10 dark:bg-neutral-600/20 p-4 rounded-xl border border-neutral-800/10 dark:border-white/5 w-full">
                       <div class="flex items-center justify-between">
                         <div>
-                          <h3 class="text-sm font-medium text-white">
+                          <h3 class="text-sm font-medium text-neutral-800 dark:text-white">
                             <%= req.translations.adminStatus || 'Administrator Status' %>
                           </h3>
                           <p class="text-xs text-neutral-400 mt-1">
@@ -127,7 +127,7 @@
                           <span class="block w-12 h-6 bg-neutral-400 peer-checked:bg-blue-500 rounded-full"></span>
                           <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full peer-checked:translate-x-6 transition"></span>
                         </label>
-                        <span class="ms-3 text-sm font-medium text-white" id="adminStatusLabel"><%= dataUser.isAdmin ? req.translations.enabled || 'Enabled' : req.translations.disabled || 'Disabled' %></span>
+                        <span class="ms-3 text-sm font-medium text-neutral-700 dark:text-white" id="adminStatusLabel"><%= dataUser.isAdmin ? req.translations.enabled || 'Enabled' : req.translations.disabled || 'Disabled' %></span>
                       </div>
                     </div>
                   </div>

@@ -71,10 +71,10 @@
     <div class="flex-1 overflow-y-auto pt-16">
       <div class="px-8 pt-6 pb-0 flex items-center justify-between">
         <div>
-          <h1 class="text-base font-medium text-white">Addons</h1>
+          <h1 class="text-base font-medium text-neutral-800 dark:text-white">Addons</h1>
           <p class="mt-0.5 text-sm text-neutral-500">Manage installed addons and browse the store</p>
         </div>
-        <button id="reloadBtn" class="inline-flex items-center gap-2 rounded-xl bg-neutral-800/80 hover:bg-neutral-700/80 border border-neutral-700/50 text-neutral-300 px-3 py-2 text-sm font-medium transition">
+        <button id="reloadBtn" class="inline-flex items-center gap-2 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 hover:bg-neutral-200 dark:hover:bg-neutral-700/80 border border-neutral-200 dark:border-neutral-700/50 text-neutral-600 dark:text-neutral-300 px-3 py-2 text-sm font-medium transition">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
           </svg>
@@ -85,7 +85,7 @@
       <div class="px-8 mt-5">
         <!-- Tabs -->
         <div class="flex border-b border-neutral-800 mb-6">
-          <a href="/admin/addons" class="px-4 py-2.5 text-sm font-medium text-white border-b-2 border-white -mb-px">
+          <a href="/admin/addons" class="px-4 py-2.5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px">
             Installed <span class="ml-1.5 text-xs text-neutral-600"><%= addons ? addons.length : 0 %></span>
           </a>
           <a href="/admin/addons/store" class="px-4 py-2.5 text-sm font-medium text-neutral-500 hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">Store</a>
@@ -157,13 +157,13 @@
             </p>
             <p class="mt-2 text-xs text-neutral-700 max-w-xs mx-auto">
               <% if (addonTableExists) { %>
-                Browse the store or drop addon folders into <code class="px-1 py-0.5 rounded font-mono bg-neutral-800 text-neutral-500">storage/addons</code>
+                Browse the store or drop addon folders into <code class="px-1 py-0.5 rounded font-mono bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-500">storage/addons</code>
               <% } else { %>
                 Run database migrations to enable the addon system
               <% } %>
             </p>
             <% if (addonTableExists) { %>
-              <a href="/admin/addons/store" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-neutral-800/80 hover:bg-neutral-700/80 border border-neutral-700/50 text-neutral-300 px-4 py-2 text-sm font-medium transition">
+              <a href="/admin/addons/store" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 hover:bg-neutral-200 dark:hover:bg-neutral-700/80 border border-neutral-200 dark:border-neutral-700/50 text-neutral-600 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">
                 Browse Store
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />

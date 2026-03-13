@@ -16,7 +16,7 @@
           description: 'Monitor and analyze your server performance and player activity'
         }) %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button id="refreshBtn" class="border border-neutral-800/20 block rounded-xl bg-white/5 hover:bg-white/10 text-white px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+          <button id="refreshBtn" class="border border-neutral-200 dark:border-neutral-800/20 block rounded-xl bg-white dark:bg-white/5 hover:bg-neutral-50 dark:hover:bg-white/10 text-neutral-800 dark:text-white px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
@@ -73,81 +73,74 @@
           <!-- Stats Cards -->
           <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
             <!-- Total Players Card -->
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
+            <div class="rounded-xl bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none px-4 py-4">
               <div class="flex items-center justify-between">
-                <dt class="truncate text-sm font-medium text-neutral-300">Total Players</dt>
-                <div class="rounded-lg bg-neutral-700/30 p-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Total Players</dt>
+                <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                   </svg>
                 </div>
               </div>
-              <dd id="totalPlayers" class="mt-3 text-3xl font-semibold tracking-tight text-white">0</dd>
-              <p class="mt-1 text-sm text-neutral-400">Players across all servers</p>
+              <dd id="totalPlayers" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">0</dd>
+              <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Players across all servers</p>
             </div>
 
             <!-- Max Capacity Card -->
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
+            <div class="rounded-xl bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none px-4 py-4">
               <div class="flex items-center justify-between">
-                <dt class="truncate text-sm font-medium text-neutral-300">Max Capacity</dt>
-                <div class="rounded-lg bg-neutral-700/30 p-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Max Capacity</dt>
+                <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 0 1-3-3m3 3a3 3 0 1 0 0 6h13.5a3 3 0 1 0 0-6m-16.5-3a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3m-19.5 0a4.5 4.5 0 0 1 .9-2.7L5.737 5.1a3.375 3.375 0 0 1 2.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 0 1 .9 2.7m0 0a3 3 0 0 1-3 3m0 3h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Zm-3 6h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Z" />
                   </svg>
                 </div>
               </div>
-              <dd id="maxCapacity" class="mt-3 text-3xl font-semibold tracking-tight text-white">0</dd>
-              <p class="mt-1 text-sm text-neutral-400">Total player capacity</p>
+              <dd id="maxCapacity" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">0</dd>
+              <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Total player capacity</p>
             </div>
 
             <!-- Online Servers Card -->
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
+            <div class="rounded-xl bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none px-4 py-4">
               <div class="flex items-center justify-between">
-                <dt class="truncate text-sm font-medium text-neutral-300">Online Servers</dt>
-                <div class="rounded-lg bg-neutral-700/30 p-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
-                    <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
-                    <line x1="6" y1="6" x2="6.01" y2="6"></line>
-                    <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Online Servers</dt>
+                <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v.75a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25v-.75m19.5 0A2.25 2.25 0 0 0 21.75 15m-19.5 2.25A2.25 2.25 0 0 1 2.25 15m19.5 0v-3.75A2.25 2.25 0 0 0 19.5 9h-15a2.25 2.25 0 0 0-2.25 2.25V15m19.5 0h-19.5M5.625 12h.008v.008H5.625V12Zm3 0h.008v.008H8.625V12Zm3 0h.008v.008h-.008V12Z" />
                   </svg>
                 </div>
               </div>
-              <dd id="onlineServers" class="mt-3 text-3xl font-semibold tracking-tight text-white">0</dd>
-              <p class="mt-1 text-sm text-neutral-400">Servers currently online</p>
+              <dd id="onlineServers" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">0</dd>
+              <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Servers currently online</p>
             </div>
 
             <!-- Utilization Card -->
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
+            <div class="rounded-xl bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none px-4 py-4">
               <div class="flex items-center justify-between">
-                <dt class="truncate text-sm font-medium text-neutral-300">Utilization</dt>
-                <div class="rounded-lg bg-neutral-700/30 p-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Utilization</dt>
+                <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                   </svg>
                 </div>
               </div>
-              <dd id="utilization" class="mt-3 text-3xl font-semibold tracking-tight text-white">0%</dd>
-              <p class="mt-1 text-sm text-neutral-400">Player capacity utilization</p>
+              <dd id="utilization" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">0%</dd>
+              <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Player capacity utilization</p>
             </div>
           </dl>
 
           <!-- Player Graph -->
-          <div class="bg-gradient-to-br from-neutral-800/20 to-neutral-900/10 border border-neutral-700/20 rounded-xl mb-8 shadow-md p-6">
+          <div class="bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-neutral-700/20 rounded-xl mb-8 shadow-sm dark:shadow-none p-6">
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
-              <h2 class="text-lg font-semibold text-white">Player Count History</h2>
+              <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Player Count History</h2>
               <div class="text-xs text-neutral-400">Last 48 hours • Updated every 5 minutes</div>
             </div>
 
             <!-- Loading State -->
             <div id="chartLoading" class="h-60 flex items-center justify-center hidden">
               <div class="text-center">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
-                <p class="text-sm text-neutral-400">Loading chart data...</p>
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-400 dark:border-white mx-auto mb-2"></div>
+                <p class="text-sm text-neutral-500 dark:text-neutral-400">Loading chart data...</p>
               </div>
             </div>
 
@@ -157,10 +150,10 @@
             </div>
 
             <div class="mt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-              <div class="text-xs text-neutral-400">
-                <p>💡 Double-click the Refresh button to manually trigger data collection</p>
+              <div class="text-xs text-neutral-500 dark:text-neutral-400">
+                <p>Double-click Refresh to manually trigger data collection</p>
               </div>
-              <button id="serverDetailsBtn" class="border border-neutral-800/20 rounded-xl bg-white/5 hover:bg-white/10 text-white px-4 py-2 text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+              <button id="serverDetailsBtn" class="border border-neutral-200 dark:border-neutral-800/20 rounded-xl bg-white dark:bg-white/5 hover:bg-neutral-50 dark:hover:bg-white/10 text-neutral-800 dark:text-white px-4 py-2 text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
@@ -176,77 +169,77 @@
           <div class="text-center py-12">
             <div class="mx-auto h-12 w-12 text-neutral-400 mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
               </svg>
             </div>
-            <h3 class="text-lg font-medium text-white mb-2">Performance Metrics Coming Soon</h3>
-            <p class="text-neutral-400 max-w-md mx-auto">
+            <h3 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Performance Metrics Coming Soon</h3>
+            <p class="text-neutral-500 dark:text-neutral-400 max-w-md mx-auto">
               Detailed server performance monitoring including CPU, memory, disk usage, and network statistics will be available in a future update.
             </p>
           </div>
 
           <!-- Placeholder Cards -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-50">
-            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md">
-              <h3 class="text-lg font-medium text-white mb-4 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+            <div class="overflow-hidden rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 px-6 py-5 shadow-sm dark:shadow-none">
+              <h3 class="text-lg font-medium text-neutral-800 dark:text-white mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 mr-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
                 </svg>
                 Server Load
               </h3>
               <div class="space-y-3">
                 <div class="flex justify-between">
-                  <span class="text-sm text-neutral-400">CPU Usage</span>
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">CPU Usage</span>
                   <span class="text-sm font-medium text-neutral-500">--</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-sm text-neutral-400">Memory Usage</span>
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">Memory Usage</span>
                   <span class="text-sm font-medium text-neutral-500">--</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-sm text-neutral-400">Disk Usage</span>
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">Disk Usage</span>
                   <span class="text-sm font-medium text-neutral-500">--</span>
                 </div>
               </div>
             </div>
 
-            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md">
-              <h3 class="text-lg font-medium text-white mb-4 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+            <div class="overflow-hidden rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 px-6 py-5 shadow-sm dark:shadow-none">
+              <h3 class="text-lg font-medium text-neutral-800 dark:text-white mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 mr-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
                 </svg>
                 Network
               </h3>
               <div class="space-y-3">
                 <div class="flex justify-between">
-                  <span class="text-sm text-neutral-400">Bandwidth In</span>
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">Bandwidth In</span>
                   <span class="text-sm font-medium text-neutral-500">--</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-sm text-neutral-400">Bandwidth Out</span>
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">Bandwidth Out</span>
                   <span class="text-sm font-medium text-neutral-500">--</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-sm text-neutral-400">Latency</span>
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">Latency</span>
                   <span class="text-sm font-medium text-neutral-500">--</span>
                 </div>
               </div>
             </div>
 
-            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md">
-              <h3 class="text-lg font-medium text-white mb-4 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div class="overflow-hidden rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 px-6 py-5 shadow-sm dark:shadow-none">
+              <h3 class="text-lg font-medium text-neutral-800 dark:text-white mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 mr-2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 Uptime
               </h3>
               <div class="space-y-3">
                 <div class="flex justify-between">
-                  <span class="text-sm text-neutral-400">Current Uptime</span>
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">Current Uptime</span>
                   <span class="text-sm font-medium text-neutral-500">--</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-sm text-neutral-400">30-day Average</span>
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">30-day Average</span>
                   <span class="text-sm font-medium text-neutral-500">--</span>
                 </div>
               </div>
@@ -260,56 +253,55 @@
           <div class="text-center py-12 mb-8">
             <div class="mx-auto h-12 w-12 text-neutral-400 mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
               </svg>
             </div>
-            <h3 class="text-lg font-medium text-white mb-2">Usage Analytics Coming Soon</h3>
-            <p class="text-neutral-400 max-w-md mx-auto">
+            <h3 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Usage Analytics Coming Soon</h3>
+            <p class="text-neutral-500 dark:text-neutral-400 max-w-md mx-auto">
               Comprehensive usage analytics including API calls, storage metrics, and user activity tracking will be available in a future update.
             </p>
           </div>
 
           <!-- Placeholder Cards -->
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 opacity-50">
-            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md text-center">
+            <div class="overflow-hidden rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 px-6 py-5 shadow-sm dark:shadow-none text-center">
               <div class="mx-auto h-8 w-8 text-neutral-400 mb-3">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3V6a3 3 0 013-3h13.5a3 3 0 013 3v5.25a3 3 0 01-3 3m-16.5 0a3 3 0 013 3v5.25a3 3 0 013-3h13.5a3 3 0 013 3v5.25a3 3 0 01-3 3H6a3 3 0 01-3-3v-5.25z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v.75a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25v-.75m19.5 0A2.25 2.25 0 0 0 21.75 15m-19.5 2.25A2.25 2.25 0 0 1 2.25 15m19.5 0v-3.75A2.25 2.25 0 0 0 19.5 9h-15a2.25 2.25 0 0 0-2.25 2.25V15m19.5 0h-19.5M5.625 12h.008v.008H5.625V12Zm3 0h.008v.008H8.625V12Zm3 0h.008v.008h-.008V12Z" />
                 </svg>
               </div>
               <div class="text-3xl font-bold text-neutral-500" id="totalServersCount">--</div>
-              <div class="text-sm text-neutral-400 mt-2">Total Servers</div>
+              <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-2">Total Servers</div>
             </div>
 
-            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md text-center">
+            <div class="overflow-hidden rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 px-6 py-5 shadow-sm dark:shadow-none text-center">
               <div class="mx-auto h-8 w-8 text-neutral-400 mb-3">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                 </svg>
               </div>
               <div class="text-3xl font-bold text-neutral-500" id="activeUsersCount">--</div>
-              <div class="text-sm text-neutral-400 mt-2">Active Users</div>
+              <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-2">Active Users</div>
             </div>
 
-            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md text-center">
+            <div class="overflow-hidden rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 px-6 py-5 shadow-sm dark:shadow-none text-center">
               <div class="mx-auto h-8 w-8 text-neutral-400 mb-3">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0-1-3m1 3-1-3m-9-3h9v-9a1.5 1.5 0 00-1.5-1.5H6a1.5 1.5 0 00-1.5 1.5v9z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
                 </svg>
               </div>
               <div class="text-3xl font-bold text-neutral-500" id="apiCallsCount">--</div>
-              <div class="text-sm text-neutral-400 mt-2">API Calls</div>
+              <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-2">API Calls</div>
             </div>
 
-            <div class="overflow-hidden rounded-xl bg-white/5 border border-neutral-800/20 px-6 py-5 shadow-md text-center">
+            <div class="overflow-hidden rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 px-6 py-5 shadow-sm dark:shadow-none text-center">
               <div class="mx-auto h-8 w-8 text-neutral-400 mb-3">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
                 </svg>
               </div>
               <div class="text-3xl font-bold text-neutral-500" id="storageUsedCount">--</div>
-              <div class="text-sm text-neutral-400 mt-2">Storage Used</div>
+              <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-2">Storage Used</div>
             </div>
           </div>
         </div>
@@ -321,17 +313,17 @@
 <%- include('../../components/toast') %>
 
 <!-- Server Details Modal -->
-<div id="serverDetailsModal" class="fixed inset-0 z-50 hidden bg-neutral-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-300">
-  <div class="relative transform overflow-hidden rounded-xl bg-neutral-800 px-6 py-6 text-left shadow-2xl transition-all w-full max-w-4xl border border-neutral-700 max-h-[80vh] flex flex-col">
+<div id="serverDetailsModal" class="fixed inset-0 z-50 hidden bg-black/50 dark:bg-neutral-900/80 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-300">
+  <div class="relative transform overflow-hidden rounded-xl bg-white dark:bg-neutral-800 px-6 py-6 text-left shadow-2xl transition-all w-full max-w-4xl border border-neutral-200 dark:border-neutral-700 max-h-[80vh] flex flex-col">
     <!-- Modal Header -->
-    <div class="flex items-center justify-between border-b border-neutral-700 pb-4 mb-4">
+    <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700 pb-4 mb-4">
       <div class="flex items-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-neutral-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
-        <h3 class="text-lg font-semibold text-white">Server Details</h3>
+        <h3 class="text-lg font-semibold text-neutral-800 dark:text-white">Server Details</h3>
       </div>
-      <button type="button" id="closeServerDetailsModalBtn" class="rounded-lg p-2 text-neutral-400 hover:text-white hover:bg-neutral-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-500">
+      <button type="button" id="closeServerDetailsModalBtn" class="rounded-lg p-2 text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-500">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
@@ -342,21 +334,21 @@
     <!-- Modal Content -->
     <div class="flex-1 overflow-y-auto">
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-neutral-700/20">
-          <thead class="bg-neutral-700/20">
+        <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700/30">
+          <thead class="bg-neutral-50 dark:bg-neutral-700/20">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Server</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Players</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Version</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-300 uppercase tracking-wider">Server</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-300 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-300 uppercase tracking-wider">Players</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-300 uppercase tracking-wider">Version</th>
             </tr>
           </thead>
-          <tbody id="serverTableBody" class="divide-y divide-neutral-700/20">
+          <tbody id="serverTableBody" class="divide-y divide-neutral-100 dark:divide-neutral-700/30 bg-white dark:bg-transparent">
             <tr>
               <td colspan="4" class="px-6 py-8 text-center">
                 <div class="flex flex-col items-center">
-                  <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-3"></div>
-                  <p class="text-neutral-400">Loading server data...</p>
+                  <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-500 dark:border-white mb-3"></div>
+                  <p class="text-neutral-500 dark:text-neutral-400">Loading server data...</p>
                 </div>
               </td>
             </tr>
@@ -366,18 +358,18 @@
     </div>
 
     <!-- Modal Footer -->
-    <div class="mt-6 flex justify-between items-center border-t border-neutral-700 pt-4">
+    <div class="mt-6 flex justify-between items-center border-t border-neutral-200 dark:border-neutral-700 pt-4">
       <p class="text-xs text-neutral-400">
         Real-time server status and player counts
       </p>
       <div class="flex gap-3">
-        <button type="button" id="refreshServerDataBtn" class="rounded-xl border border-neutral-600 bg-neutral-700 hover:bg-neutral-600 text-white px-4 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-500">
+        <button type="button" id="refreshServerDataBtn" class="rounded-xl border border-neutral-200 dark:border-neutral-600 bg-white dark:bg-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-600 text-neutral-800 dark:text-white px-4 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-500">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
           Refresh
         </button>
-        <button type="button" id="closeServerDetailsModalBtn2" class="rounded-xl border border-neutral-600 bg-neutral-800 hover:bg-neutral-700 text-white px-4 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-500">
+        <button type="button" id="closeServerDetailsModalBtn2" class="rounded-xl border border-neutral-200 dark:border-neutral-600 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white px-4 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-500">
           Close
         </button>
       </div>
@@ -394,8 +386,13 @@
 let playerChart;
 let refreshInterval;
 
+function getIsDark() {
+  return document.documentElement.classList.contains('dark');
+}
+
 // Chart initialization with error handling
 function initializeChart() {
+  const isDark = getIsDark();
   // Check if Chart.js is loaded
   if (typeof Chart === 'undefined') {
     console.error('Chart.js library not loaded');
@@ -419,18 +416,18 @@ function initializeChart() {
       datasets: [{
         label: 'Total Players',
         data: [],
-        backgroundColor: 'rgba(163, 163, 163, 0.15)',
-        borderColor: 'rgba(163, 163, 163, 1)',
+        backgroundColor: isDark ? 'rgba(163, 163, 163, 0.12)' : 'rgba(82, 82, 91, 0.08)',
+        borderColor: isDark ? 'rgba(163, 163, 163, 0.9)' : 'rgba(82, 82, 91, 0.7)',
         borderWidth: 2,
         fill: true,
         tension: 0.4,
         pointRadius: 3,
-        pointBackgroundColor: 'rgba(163, 163, 163, 1)',
-        pointBorderColor: '#fff',
+        pointBackgroundColor: isDark ? 'rgba(163, 163, 163, 0.9)' : 'rgba(82, 82, 91, 0.7)',
+        pointBorderColor: isDark ? '#1a1a1a' : '#fff',
         pointBorderWidth: 2,
         pointHoverRadius: 6,
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgba(163, 163, 163, 1)',
+        pointHoverBackgroundColor: isDark ? '#fff' : '#3f3f46',
+        pointHoverBorderColor: isDark ? 'rgba(163, 163, 163, 1)' : 'rgba(82, 82, 91, 1)',
         pointHoverBorderWidth: 2
       }]
     },
@@ -446,10 +443,10 @@ function initializeChart() {
           display: false
         },
         tooltip: {
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          titleColor: '#fff',
-          bodyColor: '#fff',
-          borderColor: 'rgba(163, 163, 163, 1)',
+          backgroundColor: isDark ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.95)',
+          titleColor: isDark ? '#fff' : '#171717',
+          bodyColor: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)',
+          borderColor: isDark ? 'rgba(163, 163, 163, 0.4)' : 'rgba(0,0,0,0.1)',
           borderWidth: 1,
           callbacks: {
             title: function(tooltipItems) {
@@ -464,7 +461,7 @@ function initializeChart() {
       scales: {
         x: {
           ticks: {
-            color: 'rgba(255, 255, 255, 0.7)',
+            color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)',
             maxRotation: 45,
             minRotation: 45,
             callback: function(value, index, values) {
@@ -476,27 +473,27 @@ function initializeChart() {
             }
           },
           grid: {
-            color: 'rgba(255, 255, 255, 0.1)',
+            color: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.07)',
             drawBorder: false
           }
         },
         y: {
           beginAtZero: true,
           ticks: {
-            color: 'rgba(255, 255, 255, 0.7)',
+            color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)',
             padding: 10,
             font: {
               weight: '500'
             }
           },
           grid: {
-            color: 'rgba(255, 255, 255, 0.1)',
+            color: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.07)',
             drawBorder: false
           },
           title: {
             display: true,
             text: 'Players Online',
-            color: 'rgba(255, 255, 255, 0.8)',
+            color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.5)',
             font: {
               size: 12,
               weight: '500'
@@ -528,8 +525,7 @@ function switchTab(tabName) {
 
     // Remove active state from all tabs
     document.querySelectorAll('.tab-button').forEach(tab => {
-        tab.classList.remove('bg-white/20', 'text-white');
-        tab.classList.add('text-neutral-400');
+        tab.classList.remove('tab-button--active');
     });
 
     // Show selected tab content
@@ -541,8 +537,7 @@ function switchTab(tabName) {
     // Add active state to selected tab
     const activeTab = document.getElementById(`tab-${tabName}`);
     if (activeTab) {
-        activeTab.classList.remove('text-neutral-400');
-        activeTab.classList.add('bg-white/20', 'text-white');
+        activeTab.classList.add('tab-button--active');
     }
 
     // Load content based on tab
@@ -644,11 +639,11 @@ function updateServerTable(servers) {
 
   servers.forEach(server => {
     const row = document.createElement('tr');
-    row.className = 'hover:bg-white/5 transition-colors duration-200';
+    row.className = 'hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors duration-200';
 
     const statusClass = server.online
-      ? 'text-emerald-200 bg-emerald-500/20 border border-emerald-500/30'
-      : 'text-red-200 bg-red-500/20 border border-red-500/30';
+      ? 'text-emerald-700 dark:text-emerald-200 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/30'
+      : 'text-red-700 dark:text-red-200 bg-red-100 dark:bg-red-500/20 border border-red-300 dark:border-red-500/30';
     const statusText = server.online ? 'Online' : 'Offline';
     const statusIcon = server.online
       ? '<div class="w-2 h-2 bg-emerald-400 rounded-full mr-2"></div>'
@@ -658,7 +653,7 @@ function updateServerTable(servers) {
       <td class="px-6 py-4 whitespace-nowrap">
         <div class="flex items-center">
           <div>
-            <div class="text-sm font-medium text-white">${escapeHtml(server.serverName || 'Unknown')}</div>
+            <div class="text-sm font-medium text-neutral-800 dark:text-white">${escapeHtml(server.serverName || 'Unknown')}</div>
             <div class="text-sm text-neutral-400">${escapeHtml(server.serverId || 'N/A')}</div>
           </div>
         </div>
@@ -668,10 +663,10 @@ function updateServerTable(servers) {
           ${statusIcon}${statusText}
         </span>
       </td>
-      <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-800 dark:text-white font-medium">
         ${server.playerCount || 0} / ${server.maxPlayers || 0}
       </td>
-      <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-400">
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500 dark:text-neutral-400">
         ${escapeHtml(server.version || 'Unknown')}
       </td>
     `;
@@ -796,6 +791,38 @@ function hideServerDetailsModal() {
 }
 
 // DOM Content Loaded - Initialize everything
+function applyChartTheme() {
+    if (!playerChart) return;
+    const isDark = getIsDark();
+
+    const lineColor = isDark ? 'rgba(163, 163, 163, 0.9)' : 'rgba(82, 82, 91, 0.7)';
+    const fillColor = isDark ? 'rgba(163, 163, 163, 0.12)' : 'rgba(82, 82, 91, 0.08)';
+    const tickColor = isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)';
+    const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
+    const titleColor = isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)';
+
+    const ds = playerChart.data.datasets[0];
+    ds.borderColor = lineColor;
+    ds.backgroundColor = fillColor;
+    ds.pointBackgroundColor = lineColor;
+    ds.pointBorderColor = isDark ? '#1a1a1a' : '#fff';
+    ds.pointHoverBackgroundColor = isDark ? '#fff' : '#3f3f46';
+    ds.pointHoverBorderColor = isDark ? 'rgba(163,163,163,1)' : 'rgba(82,82,91,1)';
+
+    playerChart.options.plugins.tooltip.backgroundColor = isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.95)';
+    playerChart.options.plugins.tooltip.titleColor = isDark ? '#fff' : '#171717';
+    playerChart.options.plugins.tooltip.bodyColor = isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)';
+    playerChart.options.plugins.tooltip.borderColor = isDark ? 'rgba(163,163,163,0.4)' : 'rgba(0,0,0,0.1)';
+
+    playerChart.options.scales.x.ticks.color = tickColor;
+    playerChart.options.scales.x.grid.color = gridColor;
+    playerChart.options.scales.y.ticks.color = tickColor;
+    playerChart.options.scales.y.grid.color = gridColor;
+    playerChart.options.scales.y.title.color = titleColor;
+
+    playerChart.update('none');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize chart and default tab with a small delay to ensure Chart.js is loaded
     setTimeout(() => {
@@ -803,24 +830,33 @@ document.addEventListener('DOMContentLoaded', function() {
         switchTab('playerstats');
     }, 100);
 
+    // Re-theme chart whenever dark mode class changes on <html>
+    const themeObserver = new MutationObserver(() => applyChartTheme());
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
     // Refresh button event listener
     const refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) {
         // Single click - refresh current tab
         refreshBtn.addEventListener('click', () => {
-            const activeTab = document.querySelector('.tab-button.bg-white\\/20');
+            const activeTab = document.querySelector('.tab-button.tab-button--active');
             if (activeTab) {
                 const tabId = activeTab.id.replace('tab-', '');
                 switch (tabId) {
                     case 'playerstats':
                         fetchPlayerData();
+                        showToast('Player data refreshed', 'success');
                         break;
                     case 'performance':
                         loadPerformanceData();
+                        showToast('Performance data refreshed', 'success');
                         break;
                     case 'usage':
                         loadUsageData();
+                        showToast('Usage data refreshed', 'success');
                         break;
+                    default:
+                        showToast('Data refreshed', 'success');
                 }
             }
         });
@@ -828,7 +864,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Double click - trigger data collection (player stats only)
         refreshBtn.addEventListener('dblclick', (e) => {
             e.preventDefault();
-            const activeTab = document.querySelector('.tab-button.bg-white\\/20');
+            const activeTab = document.querySelector('.tab-button.tab-button--active');
             if (activeTab && activeTab.id === 'tab-playerstats') {
                 triggerDataCollection();
             }

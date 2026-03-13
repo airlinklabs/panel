@@ -46,67 +46,66 @@
   <%- include('../../components/template') %>
 
   <div class="px-4 py-5">
-<!-- Page Header -->
-      <div class="mb-5">
-        <%- include('../../components/serverHeader') %>
-        <div class="flex gap-2 mt-3">
-            <button id="startButton" type="button"
-                class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
-                    <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
-                </svg>
-                <%= req.translations.start %>
-            </button>
-            <button id="restartButton" type="button"
-                class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
-                    <path fill-rule="evenodd" d="M4.755 10.059a7.5 7.5 0 0 1 12.548-3.364l1.903 1.903h-3.183a.75.75 0 1 0 0 1.5h4.992a.75.75 0 0 0 .75-.75V4.356a.75.75 0 0 0-1.5 0v3.18l-1.9-1.9A9 9 0 0 0 3.306 9.67a.75.75 0 1 0 1.45.388Zm15.408 3.352a.75.75 0 0 0-.919.53 7.5 7.5 0 0 1-12.548 3.364l-1.902-1.903h3.183a.75.75 0 0 0 0-1.5H2.984a.75.75 0 0 0-.75.75v4.992a.75.75 0 0 0 1.5 0v-3.18l1.9 1.9a9 9 0 0 0 15.059-4.035.75.75 0 0 0-.53-.918Z" clip-rule="evenodd" />
-                </svg>
-                <%= req.translations.restart %>
-            </button>
-            <button id="stopButton" type="button"
-                class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
-                    <path fill-rule="evenodd" d="M4.5 7.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-9Z" clip-rule="evenodd" />
-                </svg>
-                <%= req.translations.stop %>
-            </button>
-        </div>
-      </div>
+
+    <!-- Page Header -->
+    <div class="mb-4">
+      <%- include('../../components/serverHeader') %>
 
       <%- include('../../components/installHeader') %>
 
-      <!-- Server Suspended Warning -->
       <% if (server.Suspended) { %>
-      <div class="mt-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-4 py-3 flex items-start gap-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      <div class="mt-3 flex items-center gap-2.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-3 py-2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0 text-red-500">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
         </svg>
-        <div>
-          <p class="text-sm font-medium text-red-600 dark:text-red-500">Server Suspended</p>
-          <p class="text-xs text-red-500 dark:text-red-400 mt-0.5">This server has been suspended. Contact an administrator for assistance.</p>
+        <div class="min-w-0">
+          <p class="text-xs font-medium text-red-700 dark:text-red-400">Server suspended</p>
+          <p class="text-[11px] text-red-500 dark:text-red-400/70 truncate">Contact an administrator for assistance.</p>
         </div>
       </div>
       <% } %>
 
-      <!-- Daemon Offline Warning -->
       <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline) { %>
-      <div id="daemonOfflineWarning" class="mt-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-4 py-3 flex items-start gap-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      <div id="daemonOfflineWarning" class="mt-3 flex items-center gap-2.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-3 py-2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0 text-red-500">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
         </svg>
-        <div>
-          <p class="text-sm font-medium text-red-600 dark:text-red-500">Connection Error</p>
-          <p class="text-xs text-red-500 dark:text-red-400 mt-0.5"><%= serverStatus.error || 'The daemon appears to be offline. Server controls are unavailable.' %></p>
-          <button onclick="window.location.reload()" class="mt-2 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition">
-            Retry
-          </button>
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-medium text-red-700 dark:text-red-400">Node offline</p>
+          <p class="text-[11px] text-red-500 dark:text-red-400/70 truncate"><%= serverStatus.error || 'Daemon is unreachable. Server controls unavailable.' %></p>
         </div>
+        <button onclick="window.location.reload()" class="shrink-0 px-2.5 py-1 bg-red-600 hover:bg-red-500 text-white text-[11px] font-medium rounded-lg transition">
+          Retry
+        </button>
       </div>
       <% } %>
 
-      <%- include('../../components/serverTemplate') %>
+      <div class="flex gap-2 mt-3">
+        <button id="startButton" type="button"
+          class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+            <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
+          </svg>
+          <%= req.translations.start %>
+        </button>
+        <button id="restartButton" type="button"
+          class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+            <path fill-rule="evenodd" d="M4.755 10.059a7.5 7.5 0 0 1 12.548-3.364l1.903 1.903h-3.183a.75.75 0 1 0 0 1.5h4.992a.75.75 0 0 0 .75-.75V4.356a.75.75 0 0 0-1.5 0v3.18l-1.9-1.9A9 9 0 0 0 3.306 9.67a.75.75 0 1 0 1.45.388Zm15.408 3.352a.75.75 0 0 0-.919.53 7.5 7.5 0 0 1-12.548 3.364l-1.902-1.903h3.183a.75.75 0 0 0 0-1.5H2.984a.75.75 0 0 0-.75.75v4.992a.75.75 0 0 0 1.5 0v-3.18l1.9 1.9a9 9 0 0 0 15.059-4.035.75.75 0 0 0-.53-.918Z" clip-rule="evenodd" />
+          </svg>
+          <%= req.translations.restart %>
+        </button>
+        <button id="stopButton" type="button"
+          class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+            <path fill-rule="evenodd" d="M4.5 7.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-9Z" clip-rule="evenodd" />
+          </svg>
+          <%= req.translations.stop %>
+        </button>
+      </div>
+    </div>
 
+    <%- include('../../components/serverTemplate') %>
 
     <!-- Info Cards -->
     <div class="mt-4 mb-4">
@@ -166,13 +165,13 @@
     </div>
 
       <!-- Terminal -->
-      <div class="rounded-xl bg-neutral-100 dark:bg-neutral-900/60 border border-neutral-200 dark:border-white/5 overflow-hidden">
+      <div class="rounded-xl bg-neutral-900 border border-neutral-800 overflow-hidden">
         <div id="terminal-container" class="w-full" style="overflow: hidden; max-width: 100%;">
           <div id="terminal"></div>
         </div>
-        <div class="relative border-t border-neutral-200 dark:border-white/5">
+        <div class="relative border-t border-neutral-800">
           <input id="input" type="text" autocomplete="off" placeholder="Type a command..."
-            class="w-full px-4 py-3 bg-neutral-200 dark:bg-neutral-800/60 text-neutral-800 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 placeholder:text-neutral-500 dark:placeholder:text-neutral-500">
+            class="w-full px-4 py-3 bg-neutral-800 text-white text-sm outline-none placeholder:text-neutral-500">
           <% if (typeof features !== 'undefined' && features && features.includes('auto-complete')) { %>
           <div id="settings-icon" class="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-500">
@@ -287,7 +286,7 @@ function createTerminal(theme) {
   });
 }
 
-let term = createTerminal(document.documentElement.classList.contains('dark') ? baseTheme : lightTheme);
+let term = createTerminal(baseTheme);
 term.open(document.getElementById('terminal'));
 
 function fitTerminal() {
@@ -319,8 +318,7 @@ window.addEventListener('resize', function() {
 });
 
 function setTerminalTheme() {
-  const isDark = document.documentElement.classList.contains('dark');
-  term.setOption('theme', isDark ? baseTheme : lightTheme);
+  term.setOption('theme', baseTheme);
 }
 
 
