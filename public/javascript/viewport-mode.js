@@ -1,5 +1,5 @@
 (function () {
-  var MOBILE_BREAKPOINT = 768;
+  var MOBILE_BREAKPOINT = 1024;
   var COOKIE_NAME = 'viewport_mode';
   var FORCE_COOKIE = 'force_desktop';
   var CHECK_DELAY = 300;
