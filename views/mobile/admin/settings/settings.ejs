@@ -67,12 +67,28 @@
         </div>
 
         <div>
+          <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.uploadLimit || 'Upload File Size Limit' %></label>
+          <div class="relative">
+            <input
+              type="number"
+              name="uploadLimit"
+              value="<%= settings.uploadLimit %>"
+              min="1"
+              max="10240"
+              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 pr-12 text-sm text-neutral-800 dark:text-white focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition"
+            >
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-400 pointer-events-none">MB</span>
+          </div>
+          <p class="text-[10px] text-neutral-500 mt-1"><%= req.translations.uploadLimitHelp || 'Maximum file size users can upload to servers, in megabytes.' %></p>
+        </div>
+
+        <div>
           <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2"><%= req.translations.allowRegistration || 'Allow Registration' %></label>
           <label class="flex items-center gap-3 cursor-pointer">
             <div class="relative">
               <input type="checkbox" name="allowRegistration" value="true" class="sr-only peer" <%= settings.allowRegistration ? 'checked' : '' %>>
-              <div class="w-10 h-5.5 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:bg-emerald-600 transition-colors duration-200 relative h-6">
-                <div class="absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform duration-200 peer-checked:translate-x-4" style="transform: translateX(0)"></div>
+              <div class="w-10 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:bg-emerald-600 transition-colors duration-200">
+                <div class="absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform duration-200 peer-checked:translate-x-4"></div>
               </div>
             </div>
             <span class="text-xs text-neutral-600 dark:text-neutral-400"><%= req.translations.allowRegistrationDescription || 'Enable new user registration' %></span>
@@ -98,17 +114,6 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('settingsForm');
-
-    // Sync checkbox with its visual toggle
-    const checkbox = form.querySelector('input[name="allowRegistration"]');
-    const toggleDot = form.querySelector('.peer ~ div div');
-    if (checkbox && toggleDot) {
-      function syncToggle() {
-        toggleDot.style.transform = checkbox.checked ? 'translateX(1rem)' : 'translateX(0)';
-      }
-      syncToggle();
-      checkbox.addEventListener('change', syncToggle);
-    }
 
     const faviconInput = form.querySelector('input[name="favicon"]');
     faviconInput.addEventListener('change', async (e) => {

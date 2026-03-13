@@ -1,50 +1,34 @@
 {
   "_commentary": "Titres et descriptions des sections de catégorie",
   "_commentary_admin": "Section de catégorie admin",
-
   "adminOverviewTitle": "Aperçu",
   "adminOverviewText": "Un aperçu simple de votre Panneau.",
-
   "adminImagesTitle": "Gérer les Images",
   "adminImagesText": "Téléchargez facilement ou créez manuellement des images pour vos instances.",
-
   "adminSettingsTitle": "Paramètres",
   "adminSettingsText": "Une liste de tous les paramètres du panneau Airlink.",
-
   "adminEditNodeTitle": "Modifier le Nœud",
   "adminEditNodeText": "Modifier un nœud individuel.",
-
   "adminNodesTitle": "Nœuds",
   "adminNodesText": "Une liste de tous les nœuds configurés sur le panneau Airlink.",
-
   "adminCreateNodeTitle": "Créer un Nœud",
   "adminCreateNodeText": "Créer un nouveau nœud sur Airlink.",
-
   "adminCreateServerTitle": "Créer un Serveur",
   "adminCreateServerText": "Créer un nouveau serveur sur Airlink.",
-
   "adminServersTitle": "Serveurs",
   "adminServersText": "Une liste de tous les serveurs configurés sur le panneau Airlink.",
-
   "adminCreateUserTitle": "Créer un Utilisateur",
   "adminCreateUserText": "Créer un nouvel utilisateur sur Airlink.",
-
   "adminUsersTitle": "Utilisateurs",
   "adminUsersText": "Une liste de tous les utilisateurs sur le panneau Airlink.",
-
   "adminUserTitle": "Utilisateur",
   "adminUserText": "Gérer un utilisateur individuel.",
-
   "_commentary_user": "Section de catégorie utilisateur",
-
   "userDashboardTitle": "Tableau de Bord",
   "userDashboardText": "Voir et gérer vos serveurs.",
-
   "userAccountTitle": "Compte",
   "userAccountText": "Gérer les paramètres de votre compte.",
-
   "_commentary_other": "Section de catégorie autre",
-
   "createNewNode": "Créer un nouveau nœud",
   "configure": "Configurer",
   "ram": "RAM",
@@ -183,5 +167,7 @@
   "noUsersOnline": "Aucun utilisateur en ligne",
   "errorCheckingUsername": "Erreur lors de la vérification du nom d'utilisateur",
   "areYouSureDeleteUser": "Êtes-vous sûr de vouloir supprimer cet utilisateur ?",
-  "failedToDeleteUser": "Échec de la suppression de l'utilisateur."
+  "failedToDeleteUser": "Échec de la suppression de l'utilisateur.",
+  "uploadLimit": "Limite de taille de fichier",
+  "uploadLimitHelp": "Taille maximale des fichiers que les utilisateurs peuvent envoyer sur les serveurs, en mégaoctets."
 }

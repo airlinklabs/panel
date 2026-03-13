@@ -62,6 +62,7 @@ interface SettingsData {
   language?: string;
   allowRegistration?: boolean;
   sftpPort?: number;
+  uploadLimit?: number;
 }
 
 const adminModule: Module = {
@@ -117,6 +118,7 @@ const adminModule: Module = {
             language: typeof rawData.language === 'string' ? rawData.language : undefined,
             allowRegistration: rawData.allowRegistration === 'true' || rawData.allowRegistration === true,
             sftpPort: rawData.sftpPort ? parseInt(rawData.sftpPort, 10) : undefined,
+            uploadLimit: rawData.uploadLimit ? parseInt(rawData.uploadLimit, 10) : undefined,
           };
 
           if (files.logo && files.logo[0]) {
