@@ -3,9 +3,9 @@
 
 <% if (typeof features !== 'undefined' && features && features.includes('eula')) { %>
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur z-50">
-            <div class="bg-neutral-900/80 backdrop-blur py-8 px-8 rounded-2xl shadow-lg w-1/2 h-48 border border-neutral-300/20">
-                <p class="text-white text-lg font-medium">Do you accept Minecraft's EULA?</p>
-                <p class="text-sm text-neutral-400">By pressing this button you agree to the <a class="text-white" href="https://account.mojang.com/documents/minecraft_eula">Mojang EULA</a>.</p>
+            <div class="bg-neutral-100 dark:bg-neutral-900/80 backdrop-blur py-8 px-8 rounded-2xl shadow-lg w-1/2 h-48 border border-neutral-200 dark:border-neutral-300/20">
+                <p class="text-neutral-800 dark:text-white text-lg font-medium">Do you accept Minecraft's EULA?</p>
+                <p class="text-sm text-neutral-600 dark:text-neutral-400">By pressing this button you agree to the <a class="text-neutral-800 dark:text-white underline" href="https://account.mojang.com/documents/minecraft_eula">Mojang EULA</a>.</p>
                 <button
                 onclick="fetch('/server/<%= req.params.id %>/feature/eula', { method: 'POST' })
                     .then( () => {

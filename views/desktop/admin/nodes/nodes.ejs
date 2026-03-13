@@ -91,8 +91,8 @@
       <% } %>
 
       <!-- Table of nodes -->
-      <div class="overflow-hidden shadow rounded-lg m-8 border border-neutral-800/20" id="nodeTable">
-        <table class="min-w-full divide-y divide-white/10">
+      <div class="overflow-hidden shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/20" id="nodeTable">
+        <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
           <thead class="bg-neutral-50 dark:bg-neutral-800/20">
             <tr>
               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.name %></th>
@@ -101,9 +101,9 @@
               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.actions %></th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-white/5 bg-white/5">
+          <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-transparent">
             <% nodes.forEach(function(node) { %>
-              <tr class="hover:bg-white/[0.05] transition-colors clickable-row cursor-pointer" onclick="handleRowClick(event, '/admin/node/<%= node.id %>/stats')">
+              <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors clickable-row cursor-pointer" onclick="handleRowClick(event, '/admin/node/<%= node.id %>/stats')">
                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                   <div class="flex items-center">
                     <div class="mr-5">
@@ -131,20 +131,24 @@
                     <div class="font-medium text-neutral-800 dark:text-white"><%= node.name %></div>
                   </div>
                 </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= node.address %>:<%= node.port %>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400"><%= node.address %>:<%= node.port %>
                   <div class="mt-1 ml-2 inline-flex items-center rounded-md
-                  <%= node.versionRelease ? 'bg-emerald-600/10 text-emerald-400 ring-emerald-600/20' : 'bg-red-600/10 text-red-400 ring-red-600/20' %>
+                  <%= node.versionRelease ? 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' : 'bg-red-600/10 text-red-600 dark:text-red-400 ring-red-600/20' %>
                   px-2 py-1 text-xs font-medium ring-1 ring-inset">
                     <%= node.versionRelease || 'unknown' %>
                   </div></td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-400"><%= node.instances ? node.instances.length : 0 %></td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400"><%= node.instances ? node.instances.length : 0 %></td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                   <div class="flex gap-3">
                     <button onclick="configure('<%= node.id %>')" type="button" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">Configure</button>
                     <a href="./node/<%= node.id %>">
                       <button type="button" class="rounded-xl bg-white border border-neutral-800/20 hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">Edit</button>
                     </a>
-                    <button onclick="deleteNode('<%= node.id %>')" type="button" class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-red-500 transition">Remove</button>
+                    <button onclick="deleteNode('<%= node.id %>')" type="button" class="rounded-xl bg-red-600 hover:bg-red-500 px-3 py-2 text-center text-sm font-medium shadow-sm transition" aria-label="Delete node">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-white">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                      </svg>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -239,7 +243,7 @@
 
   function createPopup(command) {
     const popup = document.createElement('div');
-    popup.className = 'bg-neutral-800 text-white border border-white/5 rounded-xl shadow-xl p-6 max-w-2xl w-full mx-4 transform transition-all duration-300 scale-95 opacity-0';
+    popup.className = 'bg-white dark:bg-neutral-800 text-neutral-800 dark:text-white border border-neutral-200 dark:border-white/5 rounded-xl shadow-xl p-6 max-w-2xl w-full mx-4 transform transition-all duration-300 scale-95 opacity-0';
     popup.innerHTML = `
       <div class="flex justify-center items-center mb-6">
         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 48 48" class="text-emerald-500">
@@ -248,11 +252,11 @@
         </svg>
       </div>
       <h2 class="text-2xl font-bold mb-2 text-center">Token Created</h2>
-      <p class="mb-4 text-neutral-300 text-center">To auto-configure your node, run the following command:</p>
-      <pre class="bg-neutral-900 p-3 rounded-xl mb-4 overflow-x-auto"><code id="commandCode" class="text-emerald-500">${command}</code></pre>
+      <p class="mb-4 text-neutral-600 dark:text-neutral-300 text-center">To auto-configure your node, run the following command:</p>
+      <pre class="bg-neutral-100 dark:bg-neutral-900 p-3 rounded-xl mb-4 overflow-x-auto"><code id="commandCode" class="text-emerald-500">${command}</code></pre>
       <div class="flex justify-end">
         <button id="copyBtn" class="bg-emerald-600 text-white px-4 py-2 rounded-xl mr-2 hover:bg-emerald-700 transition-colors">Copy</button>
-        <button id="doneBtn" class="bg-neutral-700 text-white px-4 py-2 rounded-xl hover:bg-neutral-600 transition-colors">Close</button>
+        <button id="doneBtn" class="bg-neutral-800 dark:bg-neutral-700 text-white px-4 py-2 rounded-xl hover:bg-neutral-700 dark:hover:bg-neutral-600 transition-colors">Close</button>
       </div>
     `;
     return popup;

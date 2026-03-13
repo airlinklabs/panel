@@ -47,8 +47,15 @@
       <div class="space-y-3">
         <% servers.forEach(server => { %>
           <a href="../server/<%= server.UUID %>" class="block bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 p-4 active:scale-[0.98] transition-transform duration-100">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-sm font-medium text-neutral-900 dark:text-white truncate mr-2"><%= server.name %></h3>
+            <div class="flex items-start justify-between mb-2.5">
+              <div class="min-w-0 flex-1 mr-2">
+                <h3 class="text-sm font-medium text-neutral-900 dark:text-white truncate"><%= server.name %></h3>
+                <% if (server.description) { %>
+                  <p class="text-xs text-neutral-500 dark:text-neutral-400 truncate mt-0.5"><%= server.description %></p>
+                <% } else { %>
+                  <p class="text-xs text-neutral-400 italic truncate mt-0.5">No description</p>
+                <% } %>
+              </div>
               <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-md shrink-0
                   <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' %>">
                 <span class="relative flex h-1.5 w-1.5">
@@ -62,15 +69,28 @@
                 <%= server.status === 'running' ? 'Running' : 'Stopped' %>
               </span>
             </div>
-            <div class="flex gap-4">
-              <div class="flex-1 bg-neutral-50 dark:bg-neutral-700/30 rounded-lg px-3 py-2">
+            <div class="flex gap-2 mb-3">
+              <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
                 <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">RAM</p>
                 <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsage %>%</p>
               </div>
-              <div class="flex-1 bg-neutral-50 dark:bg-neutral-700/30 rounded-lg px-3 py-2">
+              <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
                 <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">CPU</p>
                 <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.cpuUsage %>%</p>
               </div>
+              <% if (server.ramLimit) { %>
+              <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
+                <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">Limit</p>
+                <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramLimit %></p>
+              </div>
+              <% } %>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <img class="h-4 w-4 rounded-full shrink-0" src="https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="">
+              <span class="text-xs text-neutral-500 dark:text-neutral-400 truncate flex-1"><%= server.owner ? server.owner.username : 'Unknown' %></span>
+              <% if (server.node) { %>
+              <span class="text-xs text-neutral-400 dark:text-neutral-500 shrink-0 truncate max-w-[6rem]"><%= server.node.name || server.node.address %></span>
+              <% } %>
             </div>
           </a>
         <% }); %>

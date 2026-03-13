@@ -235,7 +235,7 @@
     <div class="flex-1 overflow-y-auto pt-16">
       <div class="px-8 pt-6 pb-0 flex items-center justify-between">
         <div>
-          <h1 class="text-base font-medium text-white">Addons</h1>
+          <h1 class="text-base font-medium text-neutral-800 dark:text-white">Addons</h1>
           <p class="mt-0.5 text-sm text-neutral-500">Manage installed addons and browse the store</p>
         </div>
       </div>
@@ -246,7 +246,7 @@
           <a href="/admin/addons" class="px-4 py-2.5 text-sm font-medium text-neutral-500 hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">
             Installed <span class="ml-1 text-xs text-neutral-700"><%= addons ? addons.length : 0 %></span>
           </a>
-          <a href="/admin/addons/store" class="px-4 py-2.5 text-sm font-medium text-white border-b-2 border-white -mb-px">Store</a>
+          <a href="/admin/addons/store" class="px-4 py-2.5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px">Store</a>
         </div>
 
         <!-- Search + filters row -->
@@ -256,7 +256,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
             <input id="searchInput" type="text" placeholder="Search addons..."
-              class="bg-neutral-900 border border-neutral-800 rounded-xl pl-8 pr-4 py-1.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-600 transition w-56" />
+              class="bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl pl-8 pr-4 py-1.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-600 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition w-56" />
           </div>
           <div id="tagFilters" class="flex gap-1.5 flex-wrap"></div>
         </div>
@@ -299,12 +299,12 @@
         <div class="s-icon" id="mIcon"></div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
-            <span id="mName" class="text-sm font-semibold text-white"></span>
+            <span id="mName" class="text-sm font-semibold text-neutral-800 dark:text-white"></span>
             <span id="mStatus" class="s-badge"></span>
           </div>
           <p id="mMeta" class="text-xs text-neutral-600 mt-0.5"></p>
         </div>
-        <button id="mClose" class="flex-shrink-0 w-6 h-6 rounded-md bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-neutral-500 hover:text-white transition">
+        <button id="mClose" class="flex-shrink-0 w-6 h-6 rounded-md bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 flex items-center justify-center text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
           </svg>

@@ -108,20 +108,20 @@ function isImageFile(filename) {
       <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
         <!-- Daemon Offline Message -->
         <div class="px-8 mt-8">
-          <div class="bg-neutral-800/30 rounded-xl p-8 text-center">
+          <div class="bg-neutral-100 dark:bg-neutral-800/30 rounded-xl p-8 text-center">
             <div class="flex justify-center mb-6">
-              <div class="w-16 h-16 rounded-full bg-neutral-700/50 flex items-center justify-center">
+              <div class="w-16 h-16 rounded-full bg-neutral-200 dark:bg-neutral-700/50 flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m3 3 8.735 8.735m0 0a.374.374 0 1 1 .53.53m-.53-.53.53.53m0 0L21 21M14.652 9.348a3.75 3.75 0 0 1 0 5.304m2.121-7.425a6.75 6.75 0 0 1 0 9.546m2.121-11.667c3.808 3.807 3.808 9.98 0 13.788m-9.546-4.242a3.733 3.733 0 0 1-1.06-2.122m-1.061 4.243a6.75 6.75 0 0 1-1.625-6.929m-.496 9.05c-3.068-3.067-3.664-7.67-1.79-11.334M12 12h.008v.008H12V12Z" />
               </svg>
               </div>
             </div>
-            <h2 class="text-xl font-semibold text-neutral-300">Daemon Offline</h2>
+            <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300">Daemon Offline</h2>
             <p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
               The daemon appears to be offline. File management is unavailable until the connection is restored.
             </p>
             <div class="mt-6">
-              <button onclick="window.location.reload()" class="px-4 py-2 bg-neutral-600 hover:bg-neutral-700 text-white text-sm rounded-lg transition-colors">
+              <button onclick="window.location.reload()" class="px-4 py-2 bg-neutral-700 dark:bg-neutral-600 hover:bg-neutral-600 text-white text-sm rounded-lg transition-colors">
                 Retry Connection
               </button>
             </div>
@@ -134,8 +134,8 @@ function isImageFile(filename) {
             <table class="min-w-full bg-white dark:bg-neutral-800">
 
                     <div class="p-2 overflow-hidden">
-        <h1 class="text-white text-sm">
-          <a class="text-neutral-300 hover:text-neutral-200 transition" href="./files">/app/data/</a>
+        <h1 class="text-neutral-800 dark:text-white text-sm">
+          <a class="text-neutral-500 dark:text-neutral-300 hover:text-neutral-700 dark:hover:text-neutral-200 transition" href="./files">/app/data/</a>
           <%
               if (req.query.path) {
                   const parts = req.query.path.split('/');
@@ -146,7 +146,7 @@ function isImageFile(filename) {
 
                       if (index < parts.length - 1) {
                           %>
-                          <a href="./files?path=<%= currentPath %>" class="text-neutral-300 hover:text-neutral-200 transition -ml-1"><%= part %></a>/
+                          <a href="./files?path=<%= currentPath %>" class="text-neutral-500 dark:text-neutral-300 hover:text-neutral-700 dark:hover:text-neutral-200 transition -ml-1"><%= part %></a>/
                           <%
                           currentPath += '/';
                       } else {
@@ -162,7 +162,7 @@ function isImageFile(filename) {
             <thead class="text-neutral-800 dark:text-neutral-100">
               <tr>
                 <th class="px-6 py-3 text-left">
-                  <input type="checkbox" id="selectAll" class="form-checkbox h-5 w-5 text-neutral-500 bg-white/10 border border-white/15 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox">
+                  <input type="checkbox" id="selectAll" class="form-checkbox h-5 w-5 text-neutral-500 bg-neutral-100 dark:bg-white/10 border border-neutral-300 dark:border-white/15 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox">
                 </th>
                 <th class="px-6 py-3 text-left text-sm font-semibold">File Name</th>
                 <th class="px-6 py-3 text-left text-sm font-semibold">Size</th>
@@ -172,10 +172,10 @@ function isImageFile(filename) {
             <tbody>
               <% files.forEach(file => { %>
                 <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700/30 cursor-pointer">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white border-none">
-                    <input type="checkbox" class="form-checkbox h-5 w-5 text-neutral-500 bg-white/5 border border-white/10 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-800 dark:text-white border-none">
+                    <input type="checkbox" class="form-checkbox h-5 w-5 text-neutral-500 bg-neutral-50 dark:bg-white/5 border border-neutral-300 dark:border-white/10 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>">
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white border-none">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-800 dark:text-white border-none">
                     <%
                       const isImage = file.type !== 'directory' && isImageFile(file.name);
                       const filePath = currentPath && currentPath !== '/'
@@ -210,7 +210,7 @@ function isImageFile(filename) {
                     <%= fileSize %>
                   </td>
                   <td class="px-6 py-4 text-sm">
-                    <button onclick="toggleDropdown(event, '<%= file.name %>')" class="text-neutral-400 hover:text-white transition">
+                    <button onclick="toggleDropdown(event, '<%= file.name %>')" class="text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                       </svg>
@@ -275,7 +275,7 @@ function isImageFile(filename) {
 
    <!-- Floating Action Bar (only show when daemon is online) -->
    <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-   <div id="floatingActionBar" class="fixed bottom-0 w-full bg-neutral-800 z-50 backdrop-blur text-white py-4 px-6 transform transition-transform duration-300 ease-in-out flex justify-between items-center">
+   <div id="floatingActionBar" class="fixed bottom-0 w-full bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700 z-50 backdrop-blur text-neutral-800 dark:text-white py-4 px-6 transform transition-transform duration-300 ease-in-out flex justify-between items-center">
     <span id="selectedFilesCount">0 files selected</span>
     <div class="flex gap-4">
         <button id="massDeleteBtn" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
@@ -310,7 +310,7 @@ function isImageFile(filename) {
         onkeydown="handleFileNameKeyPress(event)">
         <div class="flex justify-end space-x-4">
           <button onclick="closeCreateFileModal()" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
-          <button onclick="confirmCreateFile()" class="w-full md:w-auto rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Create</button>
+          <button onclick="confirmCreateFile()" class="w-full md:w-auto rounded-xl bg-neutral-800 dark:bg-neutral-950 hover:bg-neutral-700 dark:hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Create</button>
         </div>
     </div>
   </div>
@@ -350,7 +350,7 @@ function isImageFile(filename) {
         </div>
         <div class="flex justify-end space-x-4">
           <button onclick="closeUploadFileModal()" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
-          <button id="uploadButton" class="w-full md:w-auto rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2" disabled>Upload</button>
+          <button id="uploadButton" class="w-full md:w-auto rounded-xl bg-neutral-800 dark:bg-neutral-950 hover:bg-neutral-700 dark:hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2" disabled>Upload</button>
         </div>
     </div>
   </div>
@@ -372,7 +372,7 @@ function isImageFile(filename) {
     <input type="hidden" id="currentFilePath">
     <div class="flex justify-end space-x-4">
       <button onclick="closeRenameModal()" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
-      <button onclick="confirmRename()" class="w-full md:w-auto rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Rename</button>
+      <button onclick="confirmRename()" class="w-full md:w-auto rounded-xl bg-neutral-800 dark:bg-neutral-950 hover:bg-neutral-700 dark:hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Rename</button>700 dark:hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Rename</button>
     </div>
   </div>
 </div>

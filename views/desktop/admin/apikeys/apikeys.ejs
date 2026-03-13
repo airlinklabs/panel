@@ -54,7 +54,7 @@
           <div class="mt-8 flow-root">
             <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <table class="min-w-full divide-y divide-neutral-700/10 dark:divide-neutral-800">
+                <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-800">
                   <thead>
                     <tr>
                       <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-neutral-800 dark:text-white sm:pl-0">Name</th>
@@ -67,14 +67,14 @@
                       </th>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-neutral-700/10 dark:divide-neutral-800">
+                  <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800">
                     <% if (apiKeys.length === 0) { %>
                       <tr>
                         <td colspan="6" class="py-4 pl-4 pr-3 text-sm text-center text-neutral-500 sm:pl-0">No API keys found</td>
                       </tr>
                     <% } else { %>
                       <% apiKeys.forEach(apiKey => { %>
-                        <tr>
+                        <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.03] transition-colors">
                           <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-neutral-800 dark:text-white sm:pl-0">
                             <%= apiKey.name %>
                             <% if (apiKey.description) { %>
@@ -497,7 +497,7 @@
   </div>
 </div>
 
-<div id="modal-backdrop" class="fixed inset-0 bg-neutral-900 bg-opacity-80 backdrop-blur-sm transition-opacity hidden"></div>
+<div id="modal-backdrop" class="fixed inset-0 bg-neutral-900/80 dark:bg-neutral-900 dark:bg-opacity-80 backdrop-blur-sm transition-opacity hidden"></div>
 
 <script>
 

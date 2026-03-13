@@ -107,7 +107,7 @@
               if (value.includes(':disk')) value = value.replace(':disk', `${server.Storage} MB`);
           %>
             <div>
-              <h3 class="text-sm font-medium text-neutral-300 mb-2"><%= item.label %></h3>
+              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= item.label %></h3>
               <% if (item.type === 'link') { %>
                 <a href="<%= item.url %>" class="text-neutral-400 hover:text-neutral-300 transition"><%= value %></a>
               <% } else if (item.type === 'button') { %>
