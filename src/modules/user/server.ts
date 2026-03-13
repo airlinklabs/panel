@@ -1514,17 +1514,19 @@ const dashboardModule: Module = {
     );
 
     const multer = require('multer');
-    const upload = multer({
-      storage: multer.memoryStorage(),
-      limits: {
-        fileSize: 100 * 1024 * 1024, // 100MB
-      },
-    });
 
     router.post(
       '/server/:id/upload',
       isAuthenticatedForServer('id'),
-      upload.single('file'),
+      async (req: Request, res: Response, next) => {
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        const limitMb = settings?.uploadLimit ?? 100;
+        const upload = multer({
+          storage: multer.memoryStorage(),
+          limits: { fileSize: limitMb * 1024 * 1024 },
+        });
+        upload.single('file')(req, res, next);
+      },
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;

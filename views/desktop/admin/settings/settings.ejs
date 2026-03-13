@@ -88,8 +88,24 @@
                       >
                           <option class="text-black" value="en" <%= settings.language === 'en' ? 'selected' : '' %>>English</option>
                           <option class="text-black" value="fr" <%= settings.language === 'fr' ? 'selected' : '' %>>Français</option>
-                          <option class="text-black" value="fr" <%= settings.language === 'fr' ? 'selected' : '' %>>Deutsch</option>
+                          <option class="text-black" value="de" <%= settings.language === 'de' ? 'selected' : '' %>>Deutsch</option>
                       </select>
+                  </div>
+
+                  <div>
+                      <label class="block text-white text-sm font-medium mb-2"><%= req.translations.uploadLimit || 'Upload File Size Limit' %></label>
+                      <div class="relative mt-1">
+                          <input
+                              type="number"
+                              name="uploadLimit"
+                              value="<%= settings.uploadLimit %>"
+                              min="1"
+                              max="10240"
+                              class="rounded-xl border border-neutral-600/30 focus:border-white/70 focus:ring-1 focus:ring-white/50 focus:outline-none text-sm mb-0 w-full transition-colors duration-200 ease-in-out hover:bg-white/5 px-4 py-2 pr-14 bg-neutral-700/20 text-white placeholder-neutral-400"
+                          >
+                          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-neutral-400 pointer-events-none">MB</span>
+                      </div>
+                      <p class="mt-1 text-xs text-neutral-500"><%= req.translations.uploadLimitHelp || 'Maximum file size users can upload to servers, in megabytes.' %></p>
                   </div>
 
                   <div>
@@ -191,42 +207,10 @@
           }
       });
 
-      async function fetchSettings() {
-          try {
-              // Get current settings directly from the settings object that's already available
-              const titleInput = form.querySelector('input[name="title"]');
-              const themeSelect = form.querySelector('select[name="theme"]');
-              const languageSelect = form.querySelector('select[name="language"]');
-              const allowRegistrationInput = form.querySelector('input[name="allowRegistration"]');
-
-              if (titleInput) titleInput.value = '<%= settings.title %>';
-
-              if (themeSelect) {
-                  const themeOption = themeSelect.querySelector(`option[value="<%= settings.theme %>"]`);
-                  if (themeOption) themeOption.selected = true;
-              }
-
-              if (languageSelect) {
-                  const langOption = languageSelect.querySelector(`option[value="<%= settings.language %>"]`);
-                  if (langOption) langOption.selected = true;
-              }
-
-              if (allowRegistrationInput) {
-                  allowRegistrationInput.checked = <%= settings.allowRegistration ? 'true' : 'false' %>;
-              }
-          } catch (error) {
-              console.error('Error setting form values:', error);
-          }
-      }
-
-      // Load current settings
-      fetchSettings();
-
       form.addEventListener('submit', async (e) => {
           e.preventDefault();
           const formData = new FormData(form);
 
-          // Show loading state
           const submitButton = form.querySelector('button[type="submit"]');
           const originalText = submitButton.textContent;
           submitButton.disabled = true;
@@ -239,88 +223,33 @@
           `;
 
           try {
-              // Make sure we have all the required fields
-              const title = formData.get('title');
-              if (!title) {
-                  formData.set('title', '<%= settings.title %>');
-              }
-
-              const theme = formData.get('theme');
-              if (!theme) {
-                  formData.set('theme', '<%= settings.theme %>');
-              }
-
-              const language = formData.get('language');
-              if (!language) {
-                  formData.set('language', '<%= settings.language %>');
-              }
-
               const response = await fetch('/admin/settings', {
                   method: 'POST',
-                  body: formData
+                  body: formData,
               });
 
               if (response.ok) {
                   showToast('<%= req.translations.settingsSaved || "Settings saved successfully!" %>', 'success');
-                  setTimeout(() => {
-                      window.location.reload();
-                  }, 1500);
+                  setTimeout(() => window.location.reload(), 1500);
               } else {
                   const errorData = await response.json().catch(() => ({}));
                   throw new Error(errorData.error || '<%= req.translations.failedToSaveSettings || "Failed to save settings" %>');
               }
           } catch (error) {
-              console.error('Error:', error);
               showToast(error.message || '<%= req.translations.failedToSaveSettings || "Failed to save settings" %>', 'error');
-
-              // Reset button state
               submitButton.disabled = false;
               submitButton.innerHTML = originalText;
           }
       });
 
-      resetButton.addEventListener('click', async () => {
-          if (confirm('<%= req.translations.resetSettingsConfirm || "Reset all settings to default?" %>')) {
-              // Show loading state
-              const originalText = resetButton.textContent;
-              resetButton.disabled = true;
-              resetButton.innerHTML = `
-                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Resetting...
-              `;
+      resetButton.addEventListener('click', () => {
+          if (!confirm('<%= req.translations.resetSettingsConfirm || "Reset all settings to default?" %>')) return;
 
-              try {
-                  // Use a simple form submission to avoid CORS issues
-                  const tempForm = document.createElement('form');
-                  tempForm.method = 'POST';
-                  tempForm.action = '/admin/settings/reset';
-                  document.body.appendChild(tempForm);
-
-                  const submitPromise = new Promise((resolve) => {
-                      tempForm.addEventListener('submit', () => {
-                          setTimeout(resolve, 1000);
-                      });
-                  });
-
-                  tempForm.submit();
-                  await submitPromise;
-
-                  showToast('<%= req.translations.settingsReset || "Settings reset to default!" %>', 'success');
-                  setTimeout(() => {
-                      window.location.reload();
-                  }, 1500);
-              } catch (error) {
-                  console.error('Error:', error);
-                  showToast('<%= req.translations.failedToResetSettings || "Failed to reset settings" %>', 'error');
-
-                  // Reset button state
-                  resetButton.disabled = false;
-                  resetButton.innerHTML = originalText;
-              }
-          }
+          const tempForm = document.createElement('form');
+          tempForm.method = 'POST';
+          tempForm.action = '/admin/settings/reset';
+          document.body.appendChild(tempForm);
+          tempForm.submit();
       });
   });
 </script>

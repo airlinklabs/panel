@@ -14,6 +14,7 @@ export const settingsLoader = async () => {
           theme: 'default',
           language: 'en',
           allowRegistration: false,
+          uploadLimit: 100,
         },
       });
       logger.info('Settings created');
