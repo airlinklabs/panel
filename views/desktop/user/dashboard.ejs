@@ -98,12 +98,10 @@
                     <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5"><%= req.translations.cpu || 'CPU' %></p>
                     <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.cpuUsage %>%</p>
                   </div>
-                  <% if (server.ramLimit) { %>
                   <div class="flex-1 bg-neutral-100 dark:bg-neutral-700/30 rounded-lg px-3 py-2">
-                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5"><%= req.translations.limit || 'Limit' %></p>
-                    <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramLimit %></p>
+                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">Used</p>
+                    <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsed || '0MB' %></p>
                   </div>
-                  <% } %>
                 </div>
 
                 <div class="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-white/5">
