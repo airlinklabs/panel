@@ -114,63 +114,55 @@
 
             <!-- Server Status -->
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Server Status</h2>
-            <div class="grid grid-cols-2 gap-4 mb-6">
-              <div>
-                <div class="flex items-center space-x-2 mb-4">
-                  <div class="flex-shrink-0">
-                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full <%= server.Suspended ? 'bg-red-100 text-red-500' : 'bg-green-100 text-green-500' %>">
-                      <% if (server.Suspended) { %>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                        </svg>
-                      <% } else { %>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                        </svg>
-                      <% } %>
-                    </span>
-                  </div>
-                  <div>
-                    <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Status: <span class="<%= server.Suspended ? 'text-red-500' : 'text-green-500' %>"><%= server.Suspended ? 'Suspended' : 'Active' %></span></p>
-                    <p class="text-xs text-neutral-500">Server ID: <%= server.UUID %></p>
-                  </div>
-                </div>
-
-                <div class="bg-neutral-100 dark:bg-neutral-800/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
-                  <div class="flex flex-col md:flex-row md:items-center justify-between">
-                    <div class="flex items-center mb-2 md:mb-0">
-                      <div class="flex-shrink-0 mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Server Suspension</h3>
-                        <p class="text-xs text-neutral-600 dark:text-neutral-400">When enabled, the server will be suspended and stopped. Users will not be able to start the server while it's suspended.</p>
-                      </div>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" name="Suspended" id="suspendServer" class="sr-only peer" value="true" <%= server.Suspended ? 'checked' : '' %>>
-                      <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-600"></div>
-                      <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="suspendServerLabel"><%= server.Suspended ? 'Suspended' : 'Active' %></span>
-                    </label>
-                  </div>
+            <div class="mb-6 space-y-4">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex items-center justify-center h-8 w-8 rounded-full shrink-0 <%= server.Suspended ? 'bg-red-100 text-red-500' : 'bg-green-100 text-green-500' %>">
+                  <% if (server.Suspended) { %>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                  <% } else { %>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                  <% } %>
+                </span>
+                <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Status: <span class="<%= server.Suspended ? 'text-red-500' : 'text-green-500' %>"><%= server.Suspended ? 'Suspended' : 'Enabled' %></span></p>
+                  <p class="text-xs text-neutral-500">Server ID: <%= server.UUID %></p>
                 </div>
               </div>
 
-              <div>
-                <div class="flex items-center space-x-2 mb-4">
-                  <div class="flex-shrink-0">
-                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 text-blue-500">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+              <div class="bg-neutral-100 dark:bg-neutral-800/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 w-full">
+                <div class="flex items-start justify-between gap-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="shrink-0 mt-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                       </svg>
-                    </span>
+                    </div>
+                    <div class="min-w-0">
+                      <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Server Suspension</h3>
+                      <p class="text-xs text-neutral-600 dark:text-neutral-400 mt-0.5">When enabled, the server will be suspended and stopped. Users will not be able to start it while suspended.</p>
+                    </div>
                   </div>
-                  <div>
-                    <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Created</p>
-                    <p class="text-xs text-neutral-500"><%= new Date(server.createdAt).toLocaleString() %></p>
-                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input type="checkbox" name="Suspended" id="suspendServer" class="sr-only peer" value="true" <%= server.Suspended ? 'checked' : '' %>>
+                    <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-600"></div>
+                    <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300 w-16" id="suspendServerLabel"><%= server.Suspended ? 'Suspended' : 'Enabled' %></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 text-blue-500 shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+                <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Created</p>
+                  <p class="text-xs text-neutral-500"><%= new Date(server.createdAt).toLocaleString() %></p>
                 </div>
               </div>
             </div>
@@ -208,7 +200,7 @@
     });
 
     suspendServerToggle.addEventListener('change', function() {
-      suspendServerLabel.textContent = this.checked ? 'Suspended' : 'Active';
+      suspendServerLabel.textContent = this.checked ? 'Suspended' : 'Enabled';
 
       if (this.checked) {
         showToast('Warning: Suspending the server will stop it and prevent users from starting it.', 'warning');
