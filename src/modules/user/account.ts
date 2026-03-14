@@ -354,7 +354,7 @@ const accountModule: Module = {
         }
 
         // Validate language is supported
-        const supportedLanguages = ['en', 'fr', 'de'];
+        const supportedLanguages = ['en', 'fr', 'de', 'es', 'pt', 'it', 'ru', 'zh', 'ja'];
         if (!supportedLanguages.includes(language)) {
           res.status(400).send('Unsupported language.');
           return;

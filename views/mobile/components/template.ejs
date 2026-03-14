@@ -1,7 +1,7 @@
 <!-- Mobile top bar -->
-<div class="fixed top-0 left-0 right-0 z-50 h-14 flex items-center justify-between px-4 bg-white dark:bg-[#141414] border-b border-neutral-200 dark:border-white/5">
+<div class="mobile-top-bar fixed top-0 left-0 right-0 z-50 h-14 flex items-center justify-between px-4 bg-white dark:bg-[#141414] border-b border-neutral-200 dark:border-white/5">
   <a href="/" class="flex items-center gap-2 min-w-0 flex-1 mr-3">
-    <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 w-8 rounded-lg bg-neutral-950/90 dark:bg-transparent p-0.5 shrink-0">
+    <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="logo-bg h-8 w-8 rounded-lg bg-neutral-950/90 dark:bg-transparent p-0.5 shrink-0">
     <span class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= settings.title %></span>
   </a>
   <div class="flex items-center gap-2.5">
@@ -22,7 +22,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 %>
 
 <!-- Mobile bottom nav -->
-<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#141414] border-t border-neutral-200 dark:border-white/5">
+<nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#141414] border-t border-neutral-200 dark:border-white/5">
   <ul class="flex items-center justify-around h-16">
 
     <% if (!sidebarItems || sidebarItems.length === 0) { %>
@@ -81,7 +81,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 
 <% if (extraItems.length > 0) { %>
 <div id="more-sheet-backdrop" class="fixed inset-0 z-40 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-200"></div>
-<div id="more-sheet" class="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#1c1c1c] border-t border-neutral-200 dark:border-white/5 rounded-t-2xl translate-y-full transition-transform duration-300 ease-out">
+<div id="more-sheet" class="mobile-more-sheet fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#1c1c1c] border-t border-neutral-200 dark:border-white/5 rounded-t-2xl translate-y-full transition-transform duration-300 ease-out">
   <div class="flex items-center justify-between px-4 pt-4 pb-2">
     <p class="text-sm font-medium text-neutral-800 dark:text-white">More</p>
     <button id="more-sheet-close" class="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition">
@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (active) {
       link.classList.remove('text-neutral-500', 'dark:text-neutral-400');
-      link.classList.add('text-neutral-900', 'dark:text-white');
+      link.classList.add('text-neutral-900', 'dark:text-white', 'active-mobile');
     }
   });
 

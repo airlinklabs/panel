@@ -253,8 +253,13 @@
         if (res.ok) {
           showToast('Language saved.', 'success');
           setTimeout(() => window.location.reload(), 1500);
+        } else {
+          const body = await res.text();
+          showToast(body || 'Failed to save language.', 'error');
         }
-      } catch (e) {}
+      } catch (err) {
+        showToast(err.message || 'Failed to save language.', 'error');
+      }
     });
 
     // Avatar upload

@@ -1,17 +1,83 @@
 /*
  * Solarized Light
  * Built-in theme — do not remove this file
+ *
+ * Palette reference (Ethan Schoonover's Solarized):
+ *   base03  #002b36  darkest background
+ *   base02  #073642  dark background highlights
+ *   base01  #586e75  comments / secondary content (used as text in light)
+ *   base00  #657b83  body text
+ *   base0   #839496  comments in light mode
+ *   base1   #93a1a1  emphasized in light (subtle)
+ *   base2   #eee8d5  background highlights
+ *   base3   #fdf6e3  main background
+ *   yellow  #b58900
+ *   orange  #cb4b16
+ *   red     #dc322f
+ *   magenta #d33682
+ *   violet  #6c71c4
+ *   blue    #268bd2
+ *   cyan    #2aa198
+ *   green   #859900
  */
 
 :root {
-  --theme-bg: #fdf6e3;
-  --theme-bg-secondary: #eee8d5;
-  --theme-bg-tertiary: #e8e0cc;
-  --theme-border: #d3c9b1;
-  --theme-text: #657b83;
-  --theme-text-strong: #586e75;
-  --theme-text-muted: #93a1a1;
-  --theme-accent: #268bd2;
+  /* --- Page backgrounds --- */
+  --theme-bg:               #fdf6e3;
+  --theme-bg-secondary:     #eee8d5;
+  --theme-bg-tertiary:      #e5dece;
+  --theme-bg-card:          #eee8d5;
+  --theme-bg-hover:         #e0d9c5;
+  --theme-bg-input:         #f5eed8;
+  --theme-bg-active-nav:    rgba(0, 0, 0, 0.06);
+
+  /* --- Borders --- */
+  --theme-border:           #d3c9b1;
+  --theme-border-subtle:    rgba(0, 0, 0, 0.07);
+  --theme-border-input:     #c9bfa7;
+
+  /* --- Text --- */
+  --theme-text:             #657b83;
+  --theme-text-strong:      #586e75;
+  --theme-text-muted:       #93a1a1;
+  --theme-text-nav:         #839496;
+  --theme-text-nav-active:  #586e75;
+  --theme-text-placeholder: #aab5b7;
+
+  /* --- Accent / brand --- */
+  --theme-accent:           #268bd2;
+  --theme-accent-hover:     #1a7abf;
+  --theme-accent-text:      #ffffff;
+
+  /* --- Status colours --- */
+  --theme-success:          #859900;
+  --theme-warning:          #b58900;
+  --theme-danger:           #dc322f;
+  --theme-info:             #2aa198;
+
+  /* --- Nav chrome (sidebar + mobile bars) --- */
+  --theme-nav-bg:           #eee8d5;
+  --theme-nav-border:       #d3c9b1;
+  --theme-nav-text:         #839496;
+  --theme-nav-text-active:  #586e75;
+  --theme-nav-icon:         #93a1a1;
+
+  /* --- Toggle / switch --- */
+  --theme-toggle-track:     #c9bfa7;
+  --theme-toggle-dot:       #fdf6e3;
+
+  /* --- Search --- */
+  --theme-search-bg:        #f5eed8;
+  --theme-search-border:    #d3c9b1;
+  --theme-search-text:      #657b83;
+  --theme-search-results:   #eee8d5;
+
+  /* --- Scrollbar --- */
+  --theme-scrollbar-track:  #fdf6e3;
+  --theme-scrollbar-thumb:  #d3c9b1;
+
+  /* --- Logo background --- */
+  --theme-logo-bg:          rgba(0, 0, 0, 0.08);
 }
 
 body {
@@ -19,28 +85,105 @@ body {
   color: var(--theme-text) !important;
 }
 
+/* Page-level backgrounds */
 .bg-white,
 [class*="bg-neutral-50"],
 [class*="bg-neutral-100"] {
   background-color: var(--theme-bg-secondary) !important;
 }
 
-[class*="dark:bg-"] {
-  background-color: var(--theme-bg-secondary) !important;
+/* Cards */
+[class*="bg-neutral-200"],
+[class*="dark:bg-neutral-8"] {
+  background-color: var(--theme-bg-card) !important;
 }
 
+/* Inputs */
+[class*="bg-neutral-100"],
+[class*="dark:bg-neutral-7\/20"],
+[class*="dark:bg-white\/5"] {
+  background-color: var(--theme-bg-input) !important;
+}
+
+/* All borders */
 [class*="border-neutral"],
 [class*="dark:border-"] {
   border-color: var(--theme-border) !important;
 }
 
+/* Strong text */
 .text-neutral-800,
-.dark\:text-white {
+.dark\:text-white,
+.text-neutral-900 {
   color: var(--theme-text-strong) !important;
 }
 
-.text-neutral-500,
+/* Body text */
 .text-neutral-600,
-.dark\:text-neutral-400 {
+.text-neutral-700 {
+  color: var(--theme-text) !important;
+}
+
+/* Muted text */
+.text-neutral-500,
+.dark\:text-neutral-400,
+.dark\:text-neutral-300 {
   color: var(--theme-text-muted) !important;
+}
+
+/* Nav chrome — sidebar */
+#pc-sidebar,
+#pc-sidebar2 {
+  background-color: var(--theme-nav-bg) !important;
+  border-color: var(--theme-nav-border) !important;
+}
+
+.nav-link {
+  color: var(--theme-nav-text) !important;
+}
+
+.nav-link.active,
+.nav-link:hover {
+  color: var(--theme-nav-text-active) !important;
+}
+
+#active-background {
+  background-color: var(--theme-bg-active-nav) !important;
+  border-color: var(--theme-border-subtle) !important;
+}
+
+/* Nav chrome — mobile top bar and bottom nav */
+.mobile-top-bar,
+.mobile-bottom-nav {
+  background-color: var(--theme-nav-bg) !important;
+  border-color: var(--theme-nav-border) !important;
+}
+
+.mobile-nav-link {
+  color: var(--theme-nav-text) !important;
+}
+
+.mobile-nav-link.active-mobile {
+  color: var(--theme-nav-text-active) !important;
+}
+
+.mobile-more-sheet {
+  background-color: var(--theme-bg-secondary) !important;
+  border-color: var(--theme-nav-border) !important;
+}
+
+/* Search */
+#searchResults {
+  background-color: var(--theme-search-results) !important;
+  border-color: var(--theme-border) !important;
+}
+
+/* Theme toggle track */
+#theme-toggle {
+  background-color: var(--theme-toggle-track) !important;
+}
+
+/* Logo background */
+.logo-bg {
+  background-color: var(--theme-logo-bg) !important;
 }
