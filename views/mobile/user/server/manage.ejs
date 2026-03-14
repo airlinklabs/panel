@@ -1,26 +1,15 @@
 <%- include('../../components/header', { title: 'Console' }) %>
 <%- include('../../components/serverFeatures') %>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.js"
-    integrity="sha512-2PRgAav8Os8vLcOAh1gSaDoNLe1fAyq8/G3QSdyjFFD+OqNjLeHE/8q4+S4MEZgPsuo+itHopj+hJvqS8XUQ8A=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.css"
-    integrity="sha512-iLYuqv+v/P4u9erpk+KM83Ioe/l7SEmr7wB6g+Kg1qmEit8EShDKnKtLHlv2QXUp7GGJhmqDI+1PhJYLTsfb8w=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/addons/attach/attach.min.js"
-    integrity="sha512-43J76SR5UijcuJTzs73z8NpkyWon8a8EoV+dX6obqXW7O26Yb268H2vP6EiJjD7sWXqxS3G/YOqPyyLF9fmqgA=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/addons/fit/fit.min.js"
-    integrity="sha512-+wh8VA1djpWk3Dj9/IJDu6Ufi4vVQ0zxLv9Vmfo70AbmYFJm0z3NLnV98vdRKBdPDV4Kwpi7EZdr8mDY9L8JIA=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.3.0/lib/xterm.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.3.0/css/xterm.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-canvas@0.7.0/lib/addon-canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.8.0/lib/addon-fit.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 
 <style>
     .xterm-viewport {
-        overflow-y: auto !important;
-    }
-    .xterm-screen {
-        overflow: hidden !important;
+        overflow-y: scroll !important;
     }
     .stats-card {
         position: relative;
@@ -36,9 +25,6 @@
     }
     #terminal .xterm {
         padding: 0;
-    }
-    #terminal .xterm-scroll-area {
-        overflow: hidden;
     }
 </style>
 
@@ -276,42 +262,25 @@ function createTerminal(theme) {
     disableStdin: true,
     allowProposedApi: true,
     lineHeight: 1.3,
-    rows: 18,
-    cols: 80,
     fontFamily: 'Menlo, monospace',
     theme: theme,
-    allowTransparency: true,
+    allowTransparency: false,
     fontSize: 11,
-    scrollback: 500
+    scrollback: 5000,
+    fastScrollModifier: 'shift',
   });
 }
 
 let term = createTerminal(baseTheme);
+const canvasAddon = new CanvasAddon.CanvasAddon();
+const fitAddon = new FitAddon.FitAddon();
+term.loadAddon(canvasAddon);
+term.loadAddon(fitAddon);
 term.open(document.getElementById('terminal'));
+fitAddon.fit();
 
-function fitTerminal() {
-  var container = document.getElementById('terminal-container');
-  if (!container || !term) return;
-  // Measure actual char width by sampling a rendered xterm cell
-  var xtermCore = term._core;
-  var charWidth = xtermCore && xtermCore._renderService
-    ? xtermCore._renderService.dimensions.actualCellWidth
-    : 6.6;
-  if (!charWidth || charWidth <= 0) charWidth = 6.6;
-  var available = container.getBoundingClientRect().width;
-  if (available <= 0) available = window.innerWidth - 32;
-  var cols = Math.max(40, Math.floor(available / charWidth));
-  term.resize(cols, 18);
-}
-
-// Wait for fonts and layout before fitting
-if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(function() {
-    requestAnimationFrame(fitTerminal);
-  });
-} else {
-  setTimeout(fitTerminal, 100);
-}
+document.getElementById('terminal').addEventListener('wheel', e => e.stopPropagation(), { passive: false });
+window.addEventListener('resize', () => fitAddon.fit());
 
 window.addEventListener('resize', function() {
   requestAnimationFrame(fitTerminal);
