@@ -11,6 +11,24 @@
       <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.userAccountText %></p>
     </div>
 
+    <!-- Profile Picture -->
+    <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+      <h2 class="text-sm font-medium text-neutral-800 dark:text-white mb-4">Profile Picture</h2>
+      <div class="flex items-center gap-4">
+        <img id="avatar-preview" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="Avatar" class="h-16 w-16 rounded-xl border border-neutral-200 dark:border-neutral-700/30 object-cover shrink-0">
+        <div class="flex flex-col gap-2">
+          <label for="avatar-input" class="cursor-pointer inline-block rounded-xl bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-neutral-600/30 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 transition active:scale-95">
+            Choose image
+          </label>
+          <input id="avatar-input" type="file" accept="image/*" class="hidden">
+          <p class="text-[10px] text-neutral-400">JPG, PNG, GIF or WebP — max 2 MB</p>
+          <% if (user.avatar) { %>
+          <button id="remove-avatar-btn" type="button" class="text-xs text-red-500 text-left">Remove picture</button>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
     <!-- Account settings -->
     <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
       <h2 class="text-sm font-medium text-neutral-800 dark:text-white mb-4"><%= req.translations.updateAccount %></h2>
@@ -81,6 +99,12 @@
           <option class="text-black" value="en" <%= req.lang === 'en' ? 'selected' : '' %>>English</option>
           <option class="text-black" value="fr" <%= req.lang === 'fr' ? 'selected' : '' %>>Français</option>
           <option class="text-black" value="de" <%= req.lang === 'de' ? 'selected' : '' %>>Deutsch</option>
+          <option class="text-black" value="es" <%= req.lang === 'es' ? 'selected' : '' %>>Español</option>
+          <option class="text-black" value="pt" <%= req.lang === 'pt' ? 'selected' : '' %>>Português</option>
+          <option class="text-black" value="it" <%= req.lang === 'it' ? 'selected' : '' %>>Italiano</option>
+          <option class="text-black" value="ru" <%= req.lang === 'ru' ? 'selected' : '' %>>Русский</option>
+          <option class="text-black" value="zh" <%= req.lang === 'zh' ? 'selected' : '' %>>中文</option>
+          <option class="text-black" value="ja" <%= req.lang === 'ja' ? 'selected' : '' %>>日本語</option>
         </select>
         <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium">
           <%= req.translations.saveLanguagePreference || 'Save' %>
@@ -231,6 +255,61 @@
           setTimeout(() => window.location.reload(), 1500);
         }
       } catch (e) {}
+    });
+
+    // Avatar upload
+    const avatarInput = document.getElementById('avatar-input');
+    const avatarPreview = document.getElementById('avatar-preview');
+
+    avatarInput?.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('Image must be under 2 MB.', 'error');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      try {
+        const response = await fetch('/upload-avatar', {
+          method: 'POST',
+          headers: { 'CSRF-Token': getCSRF() },
+          body: formData,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          avatarPreview.src = data.avatar;
+          showToast('Profile picture updated.', 'success');
+        } else {
+          const err = await response.json().catch(() => ({}));
+          showToast(err.message || 'Failed to upload image.', 'error');
+        }
+      } catch {
+        showToast('Failed to upload image.', 'error');
+      }
+    });
+
+    document.getElementById('remove-avatar-btn')?.addEventListener('click', async () => {
+      try {
+        const response = await fetch('/remove-avatar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'CSRF-Token': getCSRF() },
+        });
+
+        if (response.ok) {
+          avatarPreview.src = 'https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(user.username) %>';
+          showToast('Profile picture removed.', 'success');
+          setTimeout(() => window.location.reload(), 1200);
+        } else {
+          showToast('Failed to remove picture.', 'error');
+        }
+      } catch {
+        showToast('Failed to remove picture.', 'error');
+      }
     });
   });
 </script>

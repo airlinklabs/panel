@@ -12,6 +12,8 @@ export const settingsLoader = async () => {
           description: 'AirLink is a free and open source project by AirlinkLabs',
           logo: '../assets/logo.png',
           theme: 'default',
+          lightTheme: 'default',
+          darkTheme: 'default',
           language: 'en',
           allowRegistration: false,
           uploadLimit: 100,

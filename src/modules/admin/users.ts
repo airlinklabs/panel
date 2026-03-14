@@ -101,6 +101,20 @@ const adminModule: Module = {
           return;
         }
 
+        if (!/^[a-zA-Z0-9]{3,20}$/.test(username)) {
+          res.status(400).json({
+            message: 'Username must be 3–20 characters and contain only letters and numbers.',
+          });
+          return;
+        }
+
+        if (password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) {
+          res.status(400).json({
+            message: 'Password must be at least 8 characters and contain at least one letter and one number.',
+          });
+          return;
+        }
+
         // Convert isAdmin to boolean if it's not already
         const isAdminBool = typeof isAdmin === 'boolean' ? isAdmin : isAdmin === 'true';
 

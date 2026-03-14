@@ -1,0 +1,8 @@
+/* Example light mode theme */
+:root {
+  --color-primary: #4f46e5;
+}
+
+body {
+  /* Add your light mode overrides here */
+}

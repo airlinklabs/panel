@@ -8,8 +8,14 @@
     <% } %>
     <title><%= settings.title %> - <%= title %></title>
     <link rel="stylesheet" href="/styles.css">
-    <link rel="icon" href="<%= settings.favicon %>" type="image/x-icon">
-    <link rel="shortcut icon" href="<%= settings.favicon %>" type="image/x-icon">
+    <link rel="icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
+    <link rel="shortcut icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
+    <% if (settings.lightTheme && settings.lightTheme !== 'default') { %>
+    <link rel="stylesheet" href="<%= settings.lightTheme %>" id="light-theme-css" data-theme-mode="light">
+    <% } %>
+    <% if (settings.darkTheme && settings.darkTheme !== 'default') { %>
+    <link rel="stylesheet" href="<%= settings.darkTheme %>" id="dark-theme-css" data-theme-mode="dark">
+    <% } %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.fontshare.com">
@@ -36,16 +42,26 @@ function initializeTheme() {
     } else {
       document.documentElement.classList.remove('dark');
     }
+    applyThemeSheets();
     updateSwitchPosition();
+  }
+
+  function applyThemeSheets() {
+    const isDark = document.documentElement.classList.contains('dark');
+    const lightSheet = document.getElementById('light-theme-css');
+    const darkSheet = document.getElementById('dark-theme-css');
+    if (lightSheet) lightSheet.disabled = isDark;
+    if (darkSheet) darkSheet.disabled = !isDark;
   }
 
   function toggleTheme() {
     const isDark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    applyThemeSheets();
     updateSwitchPosition();
     if (typeof setTerminalTheme === 'function') {
-    setTerminalTheme();
-  }
+      setTerminalTheme();
+    }
   }
 
   function updateSwitchPosition() {

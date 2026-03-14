@@ -1,15 +1,15 @@
 <!-- Mobile top bar -->
 <div class="fixed top-0 left-0 right-0 z-50 h-14 flex items-center justify-between px-4 bg-white dark:bg-[#141414] border-b border-neutral-200 dark:border-white/5">
-  <a href="/" class="flex items-center gap-2">
-    <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 w-8 rounded-lg bg-neutral-950/90 dark:bg-transparent p-0.5">
-    <span class="text-sm font-medium text-neutral-800 dark:text-white"><%= settings.title %></span>
+  <a href="/" class="flex items-center gap-2 min-w-0 flex-1 mr-3">
+    <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 w-8 rounded-lg bg-neutral-950/90 dark:bg-transparent p-0.5 shrink-0">
+    <span class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= settings.title %></span>
   </a>
   <div class="flex items-center gap-2.5">
     <button id="theme-toggle" class="w-11 h-6 flex items-center bg-gray-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500">
       <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
     </button>
     <a href="/account">
-      <img class="h-8 w-8 rounded-lg border border-neutral-200 dark:border-neutral-700" src="https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(user.username) %>" alt="Avatar">
+      <img class="h-8 w-8 rounded-lg border border-neutral-200 dark:border-neutral-700" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="Avatar">
     </a>
   </div>
 </div>
@@ -127,23 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  document.getElementById('theme-toggle').addEventListener('click', function() {
-    if (typeof toggleTheme === 'function') {
-      toggleTheme();
-    } else {
-      var isDark = document.documentElement.classList.toggle('dark');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      updateDot();
-    }
-  });
-
-  function updateDot() {
-    var isDark = document.documentElement.classList.contains('dark');
-    var dot = document.querySelector('#theme-toggle .dot');
-    if (dot) dot.style.transform = isDark ? 'translateX(20px)' : 'translateX(0)';
-  }
-
-  updateDot();
+  if (typeof updateToggleDot === 'function') updateToggleDot();
 
   var moreBtn = document.getElementById('more-nav-btn');
   var moreSheet = document.getElementById('more-sheet');
