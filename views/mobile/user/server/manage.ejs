@@ -552,25 +552,52 @@ connectWebSocket();
     <% if (!server.Suspended) { %>
     startButton.addEventListener('click', () => {
         const serverUUID = '<%= server.UUID %>';
-        const loader = showLoadingPopup('Starting Server', 'Sending start command...');
+        const p = window.loadingPopupSystem;
+        p.open('Starting Server', 'start');
+        p.setProgress(5, 'Sending start request...');
+        p.addStep('Start request dispatched');
 
-        fetch(`/server/${serverUUID}/power/start`, {
-            method: 'POST',
-        })
-            .then(response => response.json())
-            .then(data => {
-                loader.updateProgress(100, 'Server starting...');
-                setTimeout(() => {
-                    loader.close();
-                    showToast('Server start command sent successfully', 'success');
-                    restartWebSocket();
-                }, 1000);
+        fetch(`/server/${serverUUID}/power/start`, { method: 'POST' })
+            .then(r => r.json())
+            .then(() => {
+                p.setProgress(15);
+                p.addStep('Panel received request');
+                const beats = [
+                    { delay: 800,  pct: 25, step: 'Removing old container' },
+                    { delay: 1800, pct: 35, step: 'Pulling Docker image' },
+                    { delay: 4500, pct: 50, step: 'Creating container' },
+                    { delay: 7000, pct: 65, step: 'Starting container process' },
+                    { delay: 10000, pct: 75, step: 'Waiting for server to come online' },
+                ];
+                beats.forEach(b => setTimeout(() => { p.setProgress(b.pct); p.addStep(b.step); }, b.delay));
+                let seenDockerStatus = '', attempts = 0;
+                const poll = setInterval(() => {
+                    attempts++;
+                    fetch(`/server/${serverUUID}/status`).then(r => r.json()).then(data => {
+                        const ds = data.dockerStatus || data.status || '';
+                        if (ds && ds !== seenDockerStatus && ds !== 'unknown') { seenDockerStatus = ds; p.addStep(`Container status: ${ds}`); }
+                        if (data.starting) { p.setProgress(82, 'Server process starting up...'); }
+                        else if (data.online) {
+                            clearInterval(poll);
+                            p.setProgress(100, 'Server is online');
+                            p.addStep('Server is online', 'done');
+                            if (data.startedAt) { const ago = Math.round((Date.now() - new Date(data.startedAt)) / 1000); p.addStep(`Up for ${ago}s`, 'done'); }
+                            p.setIcon('done');
+                            showToast('Server started successfully', 'success');
+                            restartWebSocket();
+                            setTimeout(() => p.close(), 3000);
+                        } else if (attempts >= 28) {
+                            clearInterval(poll);
+                            p.setProgress(100, 'Start sent — monitor console');
+                            p.setIcon('done');
+                            showToast('Start command sent', 'success');
+                            restartWebSocket();
+                            setTimeout(() => p.close(), 2000);
+                        }
+                    }).catch(() => {});
+                }, 2500);
             })
-            .catch(error => {
-                loader.close();
-                console.error('Error:', error);
-                showToast('Failed to start server', 'error');
-            });
+            .catch(() => { p.setProgress(100); p.addStep('Failed to send start request', 'error'); p.setIcon('error'); showToast('Failed to start server', 'error'); });
     });
     <% } else { %>
     startButton.addEventListener('click', () => {
@@ -620,25 +647,57 @@ connectWebSocket();
           modal.querySelector('div').classList.add('scale-95');
           setTimeout(() => document.body.removeChild(modal), 300);
 
-          const loader = showLoadingPopup('Restarting Server', 'Sending restart command...');
+          const serverUUID = '<%= server.UUID %>';
+          const p = window.loadingPopupSystem;
+          p.open('Restarting Server', 'restart');
+          p.setProgress(5, 'Sending stop request...');
+          p.addStep('Restart initiated');
 
-          fetch(`/server/${serverUUID}/power/restart`, {
-              method: 'POST',
-          })
-              .then(response => response.json())
-              .then(data => {
-                  loader.updateProgress(100, 'Server restarting...');
-                  setTimeout(() => {
-                      loader.close();
-                      showToast('Server restart command sent successfully', 'success');
-                      restartWebSocket();
-                  }, 1000);
+          fetch(`/server/${serverUUID}/power/restart`, { method: 'POST' })
+              .then(r => r.json())
+              .then(() => {
+                  p.setProgress(10);
+                  p.addStep('Restart request accepted');
+                  setTimeout(() => { p.setProgress(20); p.addStep('Sending stop command to container'); }, 600);
+                  setTimeout(() => { p.setProgress(30); p.addStep('Waiting for container to exit'); }, 2000);
+                  let phase = 'stopping', seenDockerStatus = '', attempts = 0;
+                  const poll = setInterval(() => {
+                      attempts++;
+                      fetch(`/server/${serverUUID}/status`).then(r => r.json()).then(data => {
+                          const ds = data.dockerStatus || data.status || '';
+                          if (ds && ds !== seenDockerStatus && ds !== 'unknown') { seenDockerStatus = ds; p.addStep(`Container status: ${ds}`); }
+                          if (phase === 'stopping' && !data.online && !data.starting && !data.stopping) {
+                              phase = 'starting';
+                              p.setProgress(48);
+                              p.addStep('Container stopped', 'done');
+                              const startBeats = [
+                                  { delay: 400,  pct: 55, step: 'Pulling Docker image' },
+                                  { delay: 2500, pct: 65, step: 'Creating new container' },
+                                  { delay: 5000, pct: 75, step: 'Starting container process' },
+                                  { delay: 8000, pct: 85, step: 'Waiting for server to come online' },
+                              ];
+                              startBeats.forEach(b => setTimeout(() => { p.setProgress(b.pct); p.addStep(b.step); }, b.delay));
+                          } else if (phase === 'starting' && data.online) {
+                              clearInterval(poll);
+                              p.setProgress(100, 'Server is back online');
+                              p.addStep('Server is online', 'done');
+                              if (data.startedAt) { const ago = Math.round((Date.now() - new Date(data.startedAt)) / 1000); p.addStep(`Up for ${ago}s`, 'done'); }
+                              p.setIcon('done');
+                              showToast('Server restarted successfully', 'success');
+                              restartWebSocket();
+                              setTimeout(() => p.close(), 3000);
+                          } else if (attempts >= 36) {
+                              clearInterval(poll);
+                              p.setProgress(100, 'Restart sent — monitor console');
+                              p.setIcon('done');
+                              showToast('Restart command sent', 'success');
+                              restartWebSocket();
+                              setTimeout(() => p.close(), 2000);
+                          }
+                      }).catch(() => {});
+                  }, 2500);
               })
-              .catch(error => {
-                  loader.close();
-                  console.error('Error:', error);
-                  showToast('Failed to restart server', 'error');
-              });
+              .catch(() => { p.setProgress(100); p.addStep('Failed to restart server', 'error'); p.setIcon('error'); showToast('Failed to restart server', 'error'); });
         });
     });
     <% } else { %>
@@ -686,91 +745,71 @@ connectWebSocket();
         });
 
         document.getElementById('confirmStopBtn').addEventListener('click', () => {
-          // Set the server status to stopping AFTER confirmation
-          console.log('Stop confirmed, setting status to stopping');
-
-          // Update status to "Stopping"
           const statusElement = document.getElementById('status');
           statusElement.textContent = 'Stopping';
           statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-orange-500';
           updateStatusChart('rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.2)');
 
           <% if (features.includes('players')) { %>
-          // Hide players decoration
-          const playersDeco = document.getElementById('players-deco');
-          playersDeco.classList.add('translate-y-32');
+          document.getElementById('players-deco').classList.add('translate-y-32');
           <% } %>
 
-          // Close the modal
           modal.classList.add('opacity-0', 'pointer-events-none');
           modal.querySelector('div').classList.remove('scale-100');
           modal.querySelector('div').classList.add('scale-95');
           setTimeout(() => document.body.removeChild(modal), 300);
 
-          const loader = showLoadingPopup('Stopping Server', 'Sending stop command...');
+          const p = window.loadingPopupSystem;
+          p.open('Stopping Server', 'stop');
+          p.setProgress(5, 'Sending stop command...');
+          p.addStep('Stop request dispatched');
 
-          // Send the stop command to the server
-          fetch(`/server/${serverUUID}/power/stop`, {
-              method: 'POST',
-          })
-              .then(response => response.json())
-              .then(data => {
-                  loader.updateProgress(100, 'Server stopping...');
-                  setTimeout(() => {
-                      loader.close();
-                      showToast('Server stop command sent successfully', 'success');
-                      restartWebSocket();
-
-                      // Set up polling to detect when server is fully stopped
-                      const stoppingPoll = setInterval(function() {
-                        console.log('Checking if server is fully stopped (5-second interval)');
-                        fetch(`/server/${serverUUID}/status`, {
-                          method: 'GET',
-                          headers: {
-                            'Accept': 'application/json'
-                          }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                          console.log('Server stopping status check:', data);
-
+          fetch(`/server/${serverUUID}/power/stop`, { method: 'POST' })
+              .then(r => r.json())
+              .then(() => {
+                  p.setProgress(20);
+                  p.addStep('Stop command accepted by panel');
+                  setTimeout(() => { p.setProgress(35); p.addStep('Sending stop signal to container'); }, 800);
+                  setTimeout(() => { p.setProgress(50); p.addStep('Waiting for process to exit'); }, 2500);
+                  let seenDockerStatus = '', attempts = 0;
+                  const poll = setInterval(() => {
+                      attempts++;
+                      fetch(`/server/${serverUUID}/status`).then(r => r.json()).then(data => {
+                          const ds = data.dockerStatus || data.status || '';
+                          if (ds && ds !== seenDockerStatus && ds !== 'unknown' && ds !== 'running') { seenDockerStatus = ds; p.addStep(`Container status: ${ds}`); }
                           if (!data.online && !data.starting && !data.stopping) {
-                            console.log('Server is now offline, updating display');
-                            clearInterval(stoppingPoll);
-
-                            // Force update stats to offline state
-                            setAllStatsOffline();
+                              clearInterval(poll);
+                              p.setProgress(100, 'Server stopped');
+                              if (data.finishedAt) {
+                                  const ts = new Date(data.finishedAt).toLocaleTimeString();
+                                  p.addStep(`Container exited at ${ts}`, 'done');
+                              } else {
+                                  p.addStep('Container offline', 'done');
+                              }
+                              p.setIcon('done');
+                              setAllStatsOffline();
+                              showToast('Server stopped', 'success');
+                              restartWebSocket();
+                              setTimeout(() => p.close(), 3000);
+                          } else if (attempts >= 20) {
+                              clearInterval(poll);
+                              p.setProgress(100, 'Stop sent — monitor console');
+                              p.setIcon('done');
+                              showToast('Stop command sent', 'success');
+                              restartWebSocket();
+                              setAllStatsOffline();
+                              setTimeout(() => p.close(), 2000);
                           }
-                        })
-                        .catch(error => {
-                          console.error('Error checking server status during shutdown:', error);
-                        });
-                      }, 5000); // Check every 5 seconds
-
-                      // Stop polling after 30 seconds to avoid resource waste
-                      setTimeout(function() {
-                        console.log('Stopping shutdown polling after 30 seconds');
-                        clearInterval(stoppingPoll);
-
-                        // Force update stats to offline state if still not detected
-                        setAllStatsOffline();
-                      }, 30000);
-                  }, 1000);
+                      }).catch(() => {});
+                  }, 2500);
               })
-              .catch(error => {
-                  loader.close();
-                  console.error('Error:', error);
-                  showToast('Failed to stop server', 'error');
-
-                  // Revert status to online if there's an error
+              .catch(() => {
+                  p.setProgress(100, 'Failed to stop server');
+                  p.setIcon('error');
                   statusElement.textContent = 'Online';
                   statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
                   updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
-
-                  <% if (features.includes('players')) { %>
-                  // Show players decoration again
-                  playersDeco.classList.remove('translate-y-32');
-                  <% } %>
+                  showToast('Failed to stop server', 'error');
               });
         });
     });

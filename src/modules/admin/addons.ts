@@ -181,8 +181,6 @@ const addonsModule: Module = {
       }
     );
 
-    // ─── Store ────────────────────────────────────────────────────────────
-
     router.get(
       '/admin/addons/store',
       isAuthenticated(true, 'airlink.admin.addons.store'),
@@ -364,9 +362,6 @@ const addonsModule: Module = {
             return;
           }
 
-          // Clone directly into the unique temp folder name so git never needs to derive a folder name.
-          // GIT_TERMINAL_PROMPT=0 prevents git from hanging on credential prompts.
-          // If the process exits non-zero (e.g. auth required), execFileAsync rejects and we surface the error.
           send({ type: 'step', step: 'Clone', cmd: `git clone -b ${branch} ${repoUrl} ${slug}-${tempId}` });
 
           try {
@@ -461,6 +456,5 @@ const addonsModule: Module = {
     return router;
   },
 };
-
 
 export default addonsModule;

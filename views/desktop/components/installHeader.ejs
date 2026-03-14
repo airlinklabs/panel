@@ -1,21 +1,117 @@
 <% if (installed.failed) { %>
-  <div class="bg-neutral-100 dark:bg-neutral-500/20 border border-neutral-200 dark:border-transparent p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start space-x-4">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 mt-2 ml-1 text-red-400">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>          
+  <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start gap-3">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-0.5 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+    </svg>
     <div>
-      <p class="text-neutral-800 dark:text-white">This server failed to install</p>
-      <p class="text-sm text-neutral-600 dark:text-neutral-400">There was an error during installation. Please check the logs or try again.</p>
+      <p class="text-sm font-medium text-red-700 dark:text-red-400">Installation failed</p>
+      <p class="text-xs text-red-500 dark:text-red-400/70 mt-0.5">An error occurred during installation. Check logs or contact an administrator.</p>
     </div>
   </div>
 <% } else if (!installed.installed && !installed.error) { %>
-  <div class="bg-neutral-100 dark:bg-neutral-500/20 border border-neutral-200 dark:border-transparent p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start space-x-4">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 mt-2 ml-1 text-blue-400">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-    </svg>          
-    <div>
-      <p class="text-neutral-800 dark:text-white">This server is currently installing</p>
-      <p class="text-sm text-neutral-600 dark:text-neutral-400">This server is currently installing, try again in a few moments.</p>
+  <div id="installBanner" class="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 p-4 ml-8 mr-8 mt-4 rounded-xl">
+    <div class="flex items-start gap-3">
+      <svg id="installSpinner" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-0.5 shrink-0 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"/>
+      </svg>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-blue-700 dark:text-blue-300">Installing server</p>
+        <p id="installStateText" class="text-xs text-blue-500 dark:text-blue-400/80 mt-0.5">Waiting for daemon...</p>
+        <div class="mt-2 w-full bg-blue-100 dark:bg-blue-900/40 rounded-full h-1 overflow-hidden">
+          <div id="installProgressBar" class="h-1 rounded-full bg-blue-500 transition-all duration-700 ease-out" style="width: 5%"></div>
+        </div>
+        <div id="installSteps" class="mt-2 space-y-0.5"></div>
+      </div>
     </div>
   </div>
+
+  <script>
+  (function () {
+    const serverUUID = '<%= server.UUID %>';
+    const banner = document.getElementById('installBanner');
+    const stateText = document.getElementById('installStateText');
+    const progressBar = document.getElementById('installProgressBar');
+    const stepsEl = document.getElementById('installSteps');
+    const spinner = document.getElementById('installSpinner');
+
+    const stateMessages = {
+      installing: { text: 'Downloading and configuring files...', pct: 40 },
+      installed:  { text: 'Installation complete.', pct: 100 },
+      failed:     { text: 'Installation failed.', pct: 100 },
+    };
+
+    const steps = [
+      { threshold: 5,  label: 'Daemon acknowledged request' },
+      { threshold: 25, label: 'Pulling container image' },
+      { threshold: 40, label: 'Running install scripts' },
+      { threshold: 75, label: 'Configuring server files' },
+      { threshold: 100, label: null },
+    ];
+
+    let shownSteps = new Set();
+    let currentPct = 5;
+
+    function addStep(label) {
+      if (!label || shownSteps.has(label)) return;
+      shownSteps.add(label);
+      const row = document.createElement('div');
+      row.className = 'flex items-center gap-1.5 opacity-0 transition-opacity duration-300';
+      row.innerHTML = `<span class="text-[10px] text-emerald-500">✓</span><span class="text-[11px] text-blue-400 dark:text-blue-400/70">${label}</span>`;
+      stepsEl.appendChild(row);
+      requestAnimationFrame(() => row.classList.remove('opacity-0'));
+    }
+
+    function setProgress(pct) {
+      currentPct = pct;
+      progressBar.style.width = pct + '%';
+      steps.forEach(s => {
+        if (pct >= s.threshold && s.label) addStep(s.label);
+      });
+    }
+
+    let smooth = setInterval(() => {
+      if (currentPct < 70) setProgress(Math.min(currentPct + 1, 70));
+    }, 800);
+
+    let pollAttempts = 0;
+
+    function poll() {
+      fetch(`/server/${serverUUID}/status`)
+        .then(r => r.json())
+        .then(data => {
+          pollAttempts++;
+          const state = data.state || (data.installed ? 'installed' : data.failed ? 'failed' : 'installing');
+          const info = stateMessages[state];
+
+          if (info) {
+            stateText.textContent = info.text;
+            setProgress(info.pct);
+          }
+
+          if (state === 'installed') {
+            clearInterval(smooth);
+            clearInterval(poller);
+            addStep('Server ready');
+            spinner.classList.remove('animate-spin');
+            spinner.classList.add('text-emerald-500');
+            spinner.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>';
+            banner.className = banner.className.replace(/blue/g, 'emerald');
+            setTimeout(() => window.location.reload(), 2000);
+          } else if (state === 'failed') {
+            clearInterval(smooth);
+            clearInterval(poller);
+            progressBar.classList.remove('bg-blue-500');
+            progressBar.classList.add('bg-red-500');
+            spinner.classList.remove('animate-spin', 'text-blue-500');
+            spinner.classList.add('text-red-500');
+          }
+        })
+        .catch(() => {});
+    }
+
+    const poller = setInterval(poll, 3000);
+    poll();
+  })();
+  </script>
 <% } %>

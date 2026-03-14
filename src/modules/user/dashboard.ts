@@ -26,9 +26,12 @@ const dashboardModule: Module = {
 
     router.get('/', isAuthenticated(), async (req: Request, res: Response) => {
       const errorMessage: ErrorMessage = {};
+      const userId = req.session?.user?.id;
       try {
-        const userId = req.session?.user?.id;
-        const user = await prisma.users.findUnique({ where: { id: userId } });
+        const [user, settings] = await Promise.all([
+          prisma.users.findUnique({ where: { id: userId } }),
+          prisma.settings.findUnique({ where: { id: 1 } }),
+        ]);
         if (!user) {
           errorMessage.message = 'User not found.';
           res.render('user/dashboard', { errorMessage, user, req });
@@ -39,7 +42,6 @@ const dashboardModule: Module = {
           where: { ownerId: user.id },
           include: { node: true, owner: true },
         });
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
         let page: number = 1;
 
@@ -55,11 +57,9 @@ const dashboardModule: Module = {
         const startIndex = (page - 1) * perPage;
         const endIndex = page * perPage;
 
-        // Check if any node is offline
         let anyNodeOffline = false;
         const nodeStatuses: Record<number, { online: boolean }> = {};
 
-        // First check node statuses
         for (const server of servers) {
           if (!nodeStatuses[server.node.id]) {
             try {
@@ -82,7 +82,6 @@ const dashboardModule: Module = {
           }
         }
 
-        // If any node is offline, render the page with a daemon offline error
         if (anyNodeOffline) {
           return res.render('user/dashboard', {
             errorMessage: {
@@ -103,8 +102,7 @@ const dashboardModule: Module = {
         const serversWithStats = await Promise.all(
           servers.map(async (server) => {
             try {
-              // Skip servers on offline nodes
-              if (
+                    if (
                 nodeStatuses[server.node.id] &&
                 !nodeStatuses[server.node.id].online
               ) {
@@ -159,8 +157,7 @@ const dashboardModule: Module = {
                     ramLimit = `${memLimitGB}GB`;
                   }
                 } catch (statsError) {
-                  // Only log error if it's not a connection error (daemon offline)
-                  if (axios.isAxiosError(statsError)) {
+                            if (axios.isAxiosError(statsError)) {
                     if (
                       statsError.code !== 'ECONNREFUSED' &&
                       statsError.code !== 'ETIMEDOUT' &&
@@ -207,10 +204,7 @@ const dashboardModule: Module = {
 
         const paginatedServers = serversWithStats.slice(startIndex, endIndex);
 
-        // For initial page load, use SPA layout; for AJAX requests, use SPA content template
-        const template = res.locals.isSPA ? 'user/dashboard' : 'user/dashboard';
-
-        res.render(template, {
+        res.render('user/dashboard', {
           errorMessage,
           user,
           req,
@@ -223,12 +217,11 @@ const dashboardModule: Module = {
       } catch (error) {
         logger.error('Error fetching user:', error);
         errorMessage.message = 'Error fetching user data.';
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         res.render('user/dashboard', {
           errorMessage,
           user: getUser(req),
           req,
-          settings,
+          settings: null,
         });
       }
     });

@@ -3,6 +3,7 @@ import { Module } from '../../handlers/moduleInit';
 import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
+import multer from 'multer';
 import { checkEulaStatus, isWorld } from '../../handlers/features';
 import { checkForServerInstallation } from '../../handlers/checkForServerInstallation';
 import { queueer } from '../../handlers/queueer';
@@ -46,10 +47,10 @@ function getImageFeatures(image: any): string[] {
   }
 }
 
-function buildEnvVariables(variablesJson: string | null): Record<string, string | number | boolean> {
-  if (!variablesJson) return {};
+function buildEnvVariables(variables: string | null | ServerVariable[]): Record<string, string | number | boolean> {
+  if (!variables) return {};
   try {
-    const vars = JSON.parse(variablesJson) as ServerVariable[];
+    const vars = Array.isArray(variables) ? variables : JSON.parse(variables) as ServerVariable[];
     const env: Record<string, string | number | boolean> = {};
     for (const v of vars) {
       if (!v.env || v.value === undefined || !v.type) continue;
@@ -100,7 +101,7 @@ const dashboardModule: Module = {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
-
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
@@ -111,9 +112,6 @@ const dashboardModule: Module = {
           const server = await prisma.server.findUnique({
             where: { UUID: String(serverId) },
             include: { node: true, image: true, owner: true },
-          });
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
           });
           if (!server) {
             errorMessage.message = 'Server not found.';
@@ -126,9 +124,7 @@ const dashboardModule: Module = {
             });
           }
 
-          let features: string[] = [];
-
-          features = getImageFeatures(server.image);
+          let features = getImageFeatures(server.image);
 
           if (features.includes('eula')) {
             const eulaStatus = await checkEulaStatus(server.UUID);
@@ -140,7 +136,6 @@ const dashboardModule: Module = {
           }
 
 
-          // Get server status including uptime
           const serverInfos = {
             nodeAddress: server.node.address,
             nodePort: server.node.port,
@@ -161,9 +156,6 @@ const dashboardModule: Module = {
           });
         } catch (error) {
           logger.error('Error fetching user:', error);
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
           errorMessage.message = 'Error fetching user data.';
           return res.render('user/server/manage', {
             errorMessage,
@@ -196,7 +188,6 @@ const dashboardModule: Module = {
             return;
           }
 
-          // Get server status including uptime
           const serverInfos = {
             nodeAddress: server.node.address,
             nodePort: server.node.port,
@@ -248,7 +239,6 @@ const dashboardModule: Module = {
             });
           }
 
-          // Check if server is suspended and trying to start
           if (server.Suspended && powerAction === 'start') {
             logger.warn(
               `Attempt to start suspended server ${serverId} by user ${userId}`,
@@ -261,8 +251,7 @@ const dashboardModule: Module = {
           }
 
           if (powerAction === 'stop') {
-            // First, update the server status to indicate it's stopping
-            try {
+              try {
               // Get current server status
               const serverInfos = {
                 nodeAddress: server.node.address,
@@ -280,16 +269,12 @@ const dashboardModule: Module = {
                 startedAt: null,
               };
 
-              // Create a cache key for this server's stopping state
-              const cacheKey = `server_stopping_${serverId}`;
+                  const cacheKey = `server_stopping_${serverId}`;
 
-              // Store the stopping state in a global variable or cache
-              // This will be used by the getServerStatus function
-              global.serverStoppingStates = global.serverStoppingStates || {};
+                      global.serverStoppingStates = global.serverStoppingStates || {};
               global.serverStoppingStates[cacheKey] = true;
 
-              // Set a timeout to clear the stopping state after 2 minutes
-              setTimeout(() => {
+                  setTimeout(() => {
                 if (
                   global.serverStoppingStates &&
                   global.serverStoppingStates[cacheKey]
@@ -301,15 +286,13 @@ const dashboardModule: Module = {
                 }
               }, 120000); // 2 minutes
 
-              // Return the stopping status to the client
-              res.status(200).json({
+                  res.status(200).json({
                 success: true,
                 message: 'Server is stopping...',
                 status: stoppingStatus,
               });
 
-              // Now actually stop the container
-              const requestData = {
+                  const requestData = {
                 method: 'POST',
                 url: `http://${server.node.address}:${server.node.port}/container/stop`,
                 auth: {
@@ -337,8 +320,7 @@ const dashboardModule: Module = {
                   'Container already stopped or not found: ' + serverId,
                 );
 
-                // Clear the stopping state if the container is already stopped
-                const cacheKey = `server_stopping_${serverId}`;
+                      const cacheKey = `server_stopping_${serverId}`;
                 if (
                   global.serverStoppingStates &&
                   global.serverStoppingStates[cacheKey]
@@ -352,11 +334,57 @@ const dashboardModule: Module = {
             }
           }
 
-          if (powerAction !== 'start') {
+          if (powerAction !== 'start' && powerAction !== 'stop' && powerAction !== 'restart') {
             logger.error('Invalid power action:', powerAction);
-            res
-              .status(400)
-              .json({ error: `Invalid power action: ${powerAction}` });
+            res.status(400).json({ error: `Invalid power action: ${powerAction}` });
+            return;
+          }
+
+          if (powerAction === 'restart') {
+            // The dedicated restart route is registered after this wildcard so
+            // Express never reaches it. Handle restart inline here.
+            try {
+              await axios({
+                method: 'POST',
+                url: `http://${server.node.address}:${server.node.port}/container/stop`,
+                auth: { username: 'Airlink', password: server.node.key },
+                headers: { 'Content-Type': 'application/json' },
+                data: { id: String(serverId), stopCmd: 'stop' },
+              });
+            } catch (stopErr) {
+              // Container may already be stopped — continue to start
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            const restartPorts = getPrimaryPort(server.Ports);
+            const restartEnv = buildEnvVariables(server.Variables);
+
+            if (!server.dockerImage) {
+              res.status(400).json({ error: 'Docker image not found.' });
+              return;
+            }
+
+            const restartImage = Object.values(JSON.parse(server.dockerImage))[0];
+
+            await axios({
+              method: 'POST',
+              url: `http://${server.node.address}:${server.node.port}/container/start`,
+              auth: { username: 'Airlink', password: server.node.key },
+              headers: { 'Content-Type': 'application/json' },
+              data: {
+                id: String(serverId),
+                image: String(restartImage),
+                ports: restartPorts,
+                Memory: server.Memory * 1024,
+                Cpu: server.Cpu,
+                env: restartEnv,
+                StartCommand: server.StartCommand,
+              },
+            });
+
+            logger.info('Container restarted successfully: ' + serverId);
+            res.status(200).json({ success: true, message: 'Server restarted successfully' });
             return;
           }
 
@@ -418,6 +446,7 @@ const dashboardModule: Module = {
         path = typeof path === 'string' ? path : String(path);
         path = path.replace(/\/+/g, '/');
 
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
@@ -429,9 +458,6 @@ const dashboardModule: Module = {
           const server = await prisma.server.findUnique({
             where: { UUID: String(serverId) },
             include: { node: true, image: true, owner: true },
-          });
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
           });
 
           if (!server) {
@@ -460,7 +486,6 @@ const dashboardModule: Module = {
           let files = (await axios(filesRequest)).data as any[];
           files = typeof files === 'string' ? JSON.parse(files) : files;
 
-          // Filter out the airlink folder
           files = files.filter((file: any) => file.name !== 'airlink');
 
           files = files.sort((a: any, b: any) => {
@@ -473,11 +498,8 @@ const dashboardModule: Module = {
             }
           });
 
-          let features: string[] = [];
+          const features = getImageFeatures(server.image);
 
-          features = getImageFeatures(server.image);
-
-          // Get server status including uptime
           const serverInfos = {
             nodeAddress: server.node.address,
             nodePort: server.node.port,
@@ -499,7 +521,6 @@ const dashboardModule: Module = {
             settings,
           });
         } catch (error) {
-          // Only log error if it's not a connection error (daemon offline)
           if (axios.isAxiosError(error)) {
             if (
               error.code !== 'ECONNREFUSED' &&
@@ -513,7 +534,6 @@ const dashboardModule: Module = {
             logger.error('Error fetching files:', error);
           }
 
-          // Still need to get server data for the template
           const server = await prisma.server.findUnique({
             where: { UUID: getParamAsString(serverId) },
             include: {
@@ -528,9 +548,7 @@ const dashboardModule: Module = {
             return;
           }
 
-          // Extract features from server image
-          let features: string[] = [];
-          features = getImageFeatures(server.image);
+          const features = getImageFeatures(server.image);
 
           // Get server status to determine if daemon is offline
           const serverInfos = {
@@ -541,11 +559,6 @@ const dashboardModule: Module = {
           };
           const serverStatus = await getServerStatus(serverInfos);
 
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
-
-          // Set appropriate error message based on daemon status
           if (serverStatus.daemonOffline) {
             errorMessage.message =
               'Unable to access files. The daemon appears to be offline.';
@@ -579,7 +592,7 @@ const dashboardModule: Module = {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
         const filePath = req.params?.path;
-
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
@@ -609,15 +622,9 @@ const dashboardModule: Module = {
           });
 
           const extension = getParamAsString(filePath).split('.').pop()?.toLowerCase() || '';
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
 
-          let features: string[] = [];
+          const features = getImageFeatures(server.image);
 
-          features = getImageFeatures(server.image);
-
-          // Get server status including uptime
           const serverInfos = {
             nodeAddress: server.node.address,
             nodePort: server.node.port,
@@ -645,7 +652,6 @@ const dashboardModule: Module = {
         } catch (error) {
           logger.error('Error fetching file:', error);
 
-          // Still need to get server data for the template
           const server = await prisma.server.findUnique({
             where: { UUID: getParamAsString(serverId) },
             include: {
@@ -660,9 +666,7 @@ const dashboardModule: Module = {
             return;
           }
 
-          // Extract features from server image
-          let features: string[] = [];
-          features = getImageFeatures(server.image);
+          const features = getImageFeatures(server.image);
 
           // Get server status to determine if daemon is offline
           const serverInfos = {
@@ -673,11 +677,6 @@ const dashboardModule: Module = {
           };
           const serverStatus = await getServerStatus(serverInfos);
 
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
-
-          // Set appropriate error message based on daemon status
           let errorMessage = 'Error fetching file data.';
           if (serverStatus.daemonOffline) {
             errorMessage =
@@ -796,7 +795,6 @@ const dashboardModule: Module = {
             return;
           }
 
-          // Check if the server is a Minecraft world
           const isMinecraftWorld = await isWorld(getParamAsString(filePath), {
             nodeAddress: server.node.address,
             nodePort: server.node.port,
@@ -1004,11 +1002,6 @@ const dashboardModule: Module = {
             return;
           }
 
-          console.log('Server found:', {
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-          });
-
           const cleanPath = relativePath
             .replace(/\/+/g, '/')
             .replace(/^\/|\/$/g, '');
@@ -1144,9 +1137,7 @@ const dashboardModule: Module = {
                 .pop()
             : '';
 
-          let features: string[] = [];
-
-          features = getImageFeatures(server.image);
+          const features = getImageFeatures(server.image);
 
           if (!primaryPort) {
             return res.render('user/server/players', {
@@ -1218,8 +1209,7 @@ const dashboardModule: Module = {
               hadFetchError = true;
             }
           } catch (error) {
-            // Only log error if it's not a connection error (daemon offline)
-            if (axios.isAxiosError(error)) {
+              if (axios.isAxiosError(error)) {
               if (
                 error.code !== 'ECONNREFUSED' &&
                 error.code !== 'ETIMEDOUT' &&
@@ -1239,12 +1229,9 @@ const dashboardModule: Module = {
             hadFetchError = true;
           }
 
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           const hasError = hadFetchError && !serverIsOnline;
 
-          // Get server status including uptime
           const serverInfos = {
             nodeAddress: server.node.address,
             nodePort: server.node.port,
@@ -1284,7 +1271,7 @@ const dashboardModule: Module = {
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
-
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
@@ -1321,8 +1308,7 @@ const dashboardModule: Module = {
               serverUUID: server.UUID,
               nodeKey: server.node.key,
             };
-            // Use the imported axios instead of requiring it again
-            const response = await axios(worldsRequest);
+              const response = await axios(worldsRequest);
             const Folders = response.data;
 
             const worlds = [];
@@ -1335,36 +1321,9 @@ const dashboardModule: Module = {
               }
             }
 
-            const settings = await prisma.settings.findUnique({
-              where: { id: 1 },
-            });
+            const features = getImageFeatures(server.image);
 
-            let features: string[] = [];
-
-            if (server.image && typeof server.image.info === 'string') {
-              try {
-                const parsedInfo = JSON.parse(
-                  server.image.info,
-                ) as ServerImageInfo;
-                if (Array.isArray(parsedInfo.features)) {
-                  features = parsedInfo.features;
-                }
-              } catch (error) {
-                logger.error('Failed to parse server.image.info:', error);
-              }
-            } else if (
-              server.image &&
-              typeof server.image.info === 'object' &&
-              server.image.info !== null
-            ) {
-              const info = server.image.info as ServerImageInfo;
-              if (Array.isArray(info.features)) {
-                features = info.features;
-              }
-            }
-
-            // Get server status including uptime
-            const serverStatus = await getServerStatus(serverInfos);
+              const serverStatus = await getServerStatus(serverInfos);
 
             return res.render('user/server/worlds', {
               errorMessage: {},
@@ -1378,8 +1337,7 @@ const dashboardModule: Module = {
               settings,
             });
           } catch (fileRequestError) {
-            // Only log error if it's not a connection error (daemon offline)
-            if (axios.isAxiosError(fileRequestError)) {
+              if (axios.isAxiosError(fileRequestError)) {
               if (
                 fileRequestError.code !== 'ECONNREFUSED' &&
                 fileRequestError.code !== 'ETIMEDOUT' &&
@@ -1392,12 +1350,6 @@ const dashboardModule: Module = {
               logger.error('Error fetching files:', fileRequestError);
             }
 
-            // Render the worlds page with an error message instead of returning JSON
-            const settings = await prisma.settings.findUnique({
-              where: { id: 1 },
-            });
-
-            // Get server status including uptime
             const serverStatus = await getServerStatus({
               nodeAddress: server.node.address,
               nodePort: server.node.port,
@@ -1424,10 +1376,6 @@ const dashboardModule: Module = {
           logger.error('Error getting worlds:', error);
 
           // Render the worlds page with an error message
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
-
           return res.render('user/server/worlds', {
             errorMessage: {
               message: 'Failed to load worlds. Please try again later.',
@@ -1438,7 +1386,7 @@ const dashboardModule: Module = {
             installed: false,
             server: null,
             req,
-            settings,
+            settings: null,
           });
         }
       },
@@ -1503,7 +1451,7 @@ const dashboardModule: Module = {
             await axios(renameRequest);
             res.status(200).json({ success: true });
           } catch (error) {
-            console.error('Error renaming file:', error);
+            logger.error('Error renaming file:', error);
             res.status(500).json({ error: 'Failed to rename file' });
           }
         } catch (error) {
@@ -1512,8 +1460,6 @@ const dashboardModule: Module = {
         }
       },
     );
-
-    const multer = require('multer');
 
     router.post(
       '/server/:id/upload',
@@ -1719,7 +1665,7 @@ const dashboardModule: Module = {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
-
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
@@ -1730,9 +1676,6 @@ const dashboardModule: Module = {
           const server = await prisma.server.findUnique({
             where: { UUID: String(serverId) },
             include: { node: true, image: true, owner: true },
-          });
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
           });
 
           if (!server) {
@@ -1745,9 +1688,7 @@ const dashboardModule: Module = {
             });
           }
 
-          let features: string[] = [];
-
-          features = getImageFeatures(server.image);
+          const features = getImageFeatures(server.image);
 
           let serverVariables: ServerVariable[] = [];
           if (server.Variables) {
@@ -1762,7 +1703,6 @@ const dashboardModule: Module = {
             logger.info(`No variables found for server ${serverId}`);
           }
 
-          // Get server status including uptime
           const serverInfos = {
             nodeAddress: server.node.address,
             nodePort: server.node.port,
@@ -1784,9 +1724,6 @@ const dashboardModule: Module = {
           });
         } catch (error) {
           logger.error('Error fetching server startup data:', error);
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
           errorMessage.message = 'Error fetching server data.';
           return res.render('user/server/startup', {
             errorMessage,
@@ -1839,8 +1776,6 @@ const dashboardModule: Module = {
             return;
           }
 
-          // Check if startup command editing is allowed
-          // Get the allowStartupEdit value from the database
           const allowStartupEdit =
             await prisma.$queryRaw`SELECT "allowStartupEdit" FROM "Server" WHERE "UUID" = ${serverId}`;
           const isEditAllowed =
@@ -1918,44 +1853,7 @@ const dashboardModule: Module = {
                 .map((port) => port.Port)
                 .pop();
 
-              const envVariables: Record<string, string | number | boolean> =
-                {};
-              if (server.Variables) {
-                try {
-                  const serverVariables = JSON.parse(
-                    server.Variables,
-                  ) as ServerVariable[];
-                  serverVariables.forEach((variable) => {
-                    if (
-                      variable.env &&
-                      variable.value !== undefined &&
-                      variable.type
-                    ) {
-                      let processedValue: string | number | boolean;
-                      switch (variable.type) {
-                        case 'boolean':
-                          processedValue =
-                            variable.value === 1 || variable.value === '1'
-                              ? 'true'
-                              : 'false';
-                          break;
-                        case 'number':
-                          processedValue = Number(variable.value);
-                          break;
-                        case 'text':
-                          processedValue = String(variable.value);
-                          break;
-                        default:
-                          processedValue = variable.value;
-                      }
-                      envVariables[variable.env] = processedValue;
-                    }
-                  });
-                } catch (error) {
-                  logger.error('Error processing server.Variables:', error);
-                  throw new Error('Invalid format in server.Variables');
-                }
-              }
+              const envVariables = buildEnvVariables(server.Variables);
 
               if (!server.dockerImage) {
                 res.status(400).json({ error: 'Docker image not found.' });
@@ -2057,7 +1955,6 @@ const dashboardModule: Module = {
             return;
           }
 
-          // Validate that the Docker image exists in the available images
           let availableDockerImages = [];
           let validImage = false;
 
@@ -2097,7 +1994,6 @@ const dashboardModule: Module = {
             return;
           }
 
-          // Find the Docker image object that contains the selected image
           let dockerImageObj = {};
           try {
             if (server.image && server.image.dockerImages) {
@@ -2116,7 +2012,6 @@ const dashboardModule: Module = {
             );
           }
 
-          // Update the server with the new Docker image
           await prisma.server.update({
             where: { UUID: getParamAsString(serverId) },
             data: { dockerImage: JSON.stringify(dockerImageObj) },
@@ -2126,7 +2021,6 @@ const dashboardModule: Module = {
             `Docker image updated in database for server ${serverId}`,
           );
 
-          // Check if the server is running and restart it if necessary
           try {
             const statusRequest = {
               method: 'GET',
@@ -2173,44 +2067,7 @@ const dashboardModule: Module = {
                 .map((port) => port.Port)
                 .pop();
 
-              const envVariables: Record<string, string | number | boolean> =
-                {};
-              if (server.Variables) {
-                try {
-                  const serverVariables = JSON.parse(
-                    server.Variables,
-                  ) as ServerVariable[];
-                  serverVariables.forEach((variable) => {
-                    if (
-                      variable.env &&
-                      variable.value !== undefined &&
-                      variable.type
-                    ) {
-                      let processedValue: string | number | boolean;
-                      switch (variable.type) {
-                        case 'boolean':
-                          processedValue =
-                            variable.value === 1 || variable.value === '1'
-                              ? 'true'
-                              : 'false';
-                          break;
-                        case 'number':
-                          processedValue = Number(variable.value);
-                          break;
-                        case 'text':
-                          processedValue = String(variable.value);
-                          break;
-                        default:
-                          processedValue = variable.value;
-                      }
-                      envVariables[variable.env] = processedValue;
-                    }
-                  });
-                } catch (error) {
-                  logger.error('Error processing server.Variables:', error);
-                  throw new Error('Invalid format in server.Variables');
-                }
-              }
+              const envVariables = buildEnvVariables(server.Variables);
 
               const startRequestData = {
                 method: 'POST',
@@ -2438,36 +2295,7 @@ const dashboardModule: Module = {
                 .map((port) => port.Port)
                 .pop();
 
-              const envVariables: Record<string, string | number | boolean> =
-                {};
-              if (variables && Array.isArray(variables)) {
-                variables.forEach((variable: ServerVariable) => {
-                  if (
-                    variable.env &&
-                    variable.value !== undefined &&
-                    variable.type
-                  ) {
-                    let processedValue: string | number | boolean;
-                    switch (variable.type) {
-                      case 'boolean':
-                        processedValue =
-                          variable.value === 1 || variable.value === '1'
-                            ? 'true'
-                            : 'false';
-                        break;
-                      case 'number':
-                        processedValue = Number(variable.value);
-                        break;
-                      case 'text':
-                        processedValue = String(variable.value);
-                        break;
-                      default:
-                        processedValue = variable.value;
-                    }
-                    envVariables[variable.env] = processedValue;
-                  }
-                });
-              }
+              const envVariables = buildEnvVariables(variables);
 
               if (!server.dockerImage) {
                 logger.error(
@@ -2550,7 +2378,7 @@ const dashboardModule: Module = {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
-
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
@@ -2561,9 +2389,6 @@ const dashboardModule: Module = {
           const server = await prisma.server.findUnique({
             where: { UUID: String(serverId) },
             include: { node: true, image: true, owner: true },
-          });
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
           });
 
           if (!server) {
@@ -2576,9 +2401,7 @@ const dashboardModule: Module = {
             });
           }
 
-          let features: string[] = [];
-
-          features = getImageFeatures(server.image);
+          const features = getImageFeatures(server.image);
 
           return res.render('user/server/settings', {
             errorMessage,
@@ -2591,9 +2414,6 @@ const dashboardModule: Module = {
           });
         } catch (error) {
           logger.error('Error fetching server settings data:', error);
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
           errorMessage.message = 'Error fetching server data.';
           return res.render('user/server/settings', {
             errorMessage,

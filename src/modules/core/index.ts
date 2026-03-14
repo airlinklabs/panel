@@ -5,7 +5,6 @@ import os from 'os';
 import prisma from '../../db';
 import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
 
-
 const coreModule: Module = {
   info: {
     name: 'Core Module',
@@ -19,26 +18,20 @@ const coreModule: Module = {
   router: () => {
     const router = Router();
 
-    /**
-     * Core system status endpoint
-     * Returns information about the panel and connected nodes
-     */
     router.get('/api/system/status', async (_req: Request, res: Response) => {
       try {
-        // Get system information
         const systemInfo = {
           hostname: os.hostname(),
           platform: os.platform(),
           arch: os.arch(),
           cpus: os.cpus().length,
           memory: {
-            total: Math.round(os.totalmem() / (1024 * 1024 * 1024) * 100) / 100, // GB
-            free: Math.round(os.freemem() / (1024 * 1024 * 1024) * 100) / 100, // GB
+            total: Math.round(os.totalmem() / (1024 * 1024 * 1024) * 100) / 100,
+            free: Math.round(os.freemem() / (1024 * 1024 * 1024) * 100) / 100,
           },
-          uptime: Math.floor(os.uptime() / 60), // minutes
+          uptime: Math.floor(os.uptime() / 60),
         };
 
-        // Get node information
         const nodes = await prisma.node.findMany();
         const nodeStatuses = await Promise.all(
           nodes.map(async (node) => {
@@ -52,7 +45,6 @@ const coreModule: Module = {
           })
         );
 
-        // Get server count
         const serverCount = await prisma.server.count();
         const userCount = await prisma.users.count();
 
@@ -71,18 +63,10 @@ const coreModule: Module = {
       }
     });
 
-    /**
-     * Health check endpoint
-     * Used by monitoring systems to check if the panel is running
-     */
     router.get('/api/health', (_req: Request, res: Response) => {
       res.status(200).json({ status: 'ok' });
     });
 
-    /**
-     * Node connection test endpoint
-     * Tests the connection to a node
-     */
     router.post('/api/system/test-node-connection', async (req: Request, res: Response) => {
       try {
         const { address, port, key } = req.body;
@@ -92,10 +76,8 @@ const coreModule: Module = {
           return;
         }
 
-        // Create a test node object
         const testNode = { address, port, key };
 
-        // Test the connection
         const nodeWithStatus = await checkNodeStatus(testNode);
 
         if (nodeWithStatus.status === 'Offline') {
@@ -106,13 +88,12 @@ const coreModule: Module = {
           });
           return;
         }
-        res.json({ 
-          success: true, 
+        res.json({
+          success: true,
           message: 'Successfully connected to node',
           version: nodeWithStatus.versionRelease,
-          status: nodeWithStatus.status
+          status: nodeWithStatus.status,
         });
-        return;
       } catch (error) {
         logger.error('Error testing node connection:', error);
         res.status(500).json({ 

@@ -5,7 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
 import { registerPermission } from '../../handlers/permisions';
-
+import { collectPlayerStats } from '../../handlers/playerStatsCollector';
 
 registerPermission('airlink.admin.playerstats.view');
 
@@ -31,6 +31,7 @@ const adminModule: Module = {
       isAuthenticated(true, 'airlink.admin.playerstats.view'),
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
         try {
           const userId = req.session?.user?.id;
@@ -39,19 +40,10 @@ const adminModule: Module = {
             return res.redirect('/login');
           }
 
-          // Get all servers
           const servers = await prisma.server.findMany({
-            include: {
-              node: true,
-            },
+            include: { node: true },
           });
 
-          // Get settings
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
-
-          // Render the player stats page
           res.render('admin/playerstats/playerstats', {
             errorMessage,
             user,
@@ -62,11 +54,6 @@ const adminModule: Module = {
         } catch (error) {
           logger.error('Error fetching player stats:', error);
           errorMessage.message = 'Error fetching player statistics.';
-
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
-
           return res.render('admin/playerstats/playerstats', {
             errorMessage,
             user: req.session?.user,
@@ -78,13 +65,11 @@ const adminModule: Module = {
       }
     );
 
-    // API endpoint to get player counts for all servers
     router.get(
       '/api/admin/playerstats',
       isAuthenticated(true, 'airlink.admin.playerstats.view'),
       async (req: Request, res: Response) => {
         try {
-          // Get all servers
           const servers = await prisma.server.findMany({
             include: {
               node: true,
@@ -95,8 +80,7 @@ const adminModule: Module = {
           const playerData = await Promise.all(
             servers.map(async (server) => {
               try {
-                // Parse ports to find the primary port
-                const ports = JSON.parse(server.Ports || '[]');
+                      const ports = JSON.parse(server.Ports || '[]');
                 const primaryPort = ports.find((p: any) => p.primary)?.Port;
 
                 if (!primaryPort) {
@@ -110,8 +94,7 @@ const adminModule: Module = {
                   };
                 }
 
-                // Fetch player data from the daemon
-                const response = await axios({
+                      const response = await axios({
                   method: 'GET',
                   url: `http://${server.node.address}:${server.node.port}/minecraft/players`,
                   params: {
@@ -147,12 +130,10 @@ const adminModule: Module = {
             })
           );
 
-          // Calculate total players
           const totalPlayers = playerData.reduce((sum, server) => sum + server.playerCount, 0);
           const totalMaxPlayers = playerData.reduce((sum, server) => sum + server.maxPlayers, 0);
           const onlineServers = playerData.filter(server => server.online).length;
 
-          // Get historical data (48 hours worth of data at 5-minute intervals)
           const historicalData = await prisma.playerStats.findMany({
             orderBy: {
               timestamp: 'asc'
@@ -169,25 +150,19 @@ const adminModule: Module = {
             historicalData
           });
         } catch (error) {
-          // Silently handle errors during player stats fetching
-          // This prevents console errors when nodes are offline
           res.status(500).json({ error: 'Failed to fetch player statistics' });
         }
       }
     );
 
-    // API endpoint to manually trigger player stats collection
     router.post(
       '/api/admin/playerstats/collect',
       isAuthenticated(true, 'airlink.admin.playerstats.view'),
       async (req: Request, res: Response) => {
         try {
-          const { collectPlayerStats } = require('../../handlers/playerStatsCollector');
           await collectPlayerStats();
           res.json({ success: true, message: 'Player statistics collected successfully' });
         } catch (error) {
-          // Silently handle errors during player stats collection
-          // This prevents console errors when nodes are offline
           res.status(500).json({ error: 'Failed to collect player statistics' });
         }
       }

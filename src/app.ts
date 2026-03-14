@@ -27,7 +27,6 @@ import {
   uiComponentStore,
 } from './handlers/uiComponentHandler';
 import { startPlayerStatsCollection } from './handlers/playerStatsCollector';
-import { createPlayerStatsTable } from './handlers/createPlayerStatsTable';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
@@ -111,7 +110,7 @@ function getAddonDirs(): string[] {
 
     return originalRenderFile(file, data, options, callback);
   } catch (error) {
-    console.error('Error in EJS renderFile override:', error);
+    logger.error('Error in EJS renderFile override:', error);
     return originalRenderFile(file, data, options, callback);
   }
 };
@@ -321,10 +320,7 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
     setupSPARoutes(app);
 
     const server = app.listen(port, () => {
-      // Create PlayerStats table and start collection
-      createPlayerStatsTable().then(() => {
-        startPlayerStatsCollection();
-      });
+      startPlayerStatsCollection();
     });
 
     process.on('SIGINT', () => {
