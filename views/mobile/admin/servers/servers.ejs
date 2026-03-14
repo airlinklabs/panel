@@ -35,17 +35,12 @@
           <!-- Header row -->
           <div class="flex items-center gap-3 mb-3">
             <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 flex items-center justify-center shrink-0">
-              <% if (server.status === 'Online') { %>
-                <span class="relative flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-              <% } else if (server.status === 'Offline') { %>
+              <% if (server.Suspended) { %>
                 <span class="relative inline-flex rounded-full h-2 w-2 bg-neutral-400"></span>
               <% } else { %>
                 <span class="relative flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
               <% } %>
             </div>
@@ -54,7 +49,7 @@
               <p class="text-xs text-neutral-500 font-mono truncate"><%= server.UUID %></p>
             </div>
             <span class="text-[10px] font-medium px-2 py-0.5 rounded-md shrink-0 <%= server.Suspended ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' %>">
-              <%= server.Suspended ? 'Suspended' : 'Active' %>
+              <%= server.Suspended ? 'Suspended' : 'Enabled' %>
             </span>
           </div>
 
