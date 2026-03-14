@@ -1,8 +1,186 @@
-/* Example light mode theme */
+/*
+ * Example Theme — Light Mode
+ *
+ * See dark.css for full documentation on every variable.
+ * This file mirrors the same variable list for light mode.
+ */
+
 :root {
-  --color-primary: #4f46e5;
+  /* ------------------------------------------------------------------ */
+  /* PAGE BACKGROUNDS                                                     */
+  /* ------------------------------------------------------------------ */
+  --theme-bg:               #ffffff;
+  --theme-bg-secondary:     #f5f5f5;
+  --theme-bg-tertiary:      #ececec;
+  --theme-bg-card:          #f9f9f9;
+  --theme-bg-hover:         #eeeeee;
+  --theme-bg-input:         #f0f0f0;
+  --theme-bg-active-nav:    rgba(0, 0, 0, 0.05);
+
+  /* ------------------------------------------------------------------ */
+  /* BORDERS                                                              */
+  /* ------------------------------------------------------------------ */
+  --theme-border:           #e0e0e0;
+  --theme-border-subtle:    rgba(0, 0, 0, 0.06);
+  --theme-border-input:     #d4d4d4;
+
+  /* ------------------------------------------------------------------ */
+  /* TEXT                                                                 */
+  /* ------------------------------------------------------------------ */
+  --theme-text:             #525252;
+  --theme-text-strong:      #171717;
+  --theme-text-muted:       #a3a3a3;
+  --theme-text-nav:         #737373;
+  --theme-text-nav-active:  #171717;
+  --theme-text-placeholder: #bbbbbb;
+
+  /* ------------------------------------------------------------------ */
+  /* ACCENT / BRAND                                                       */
+  /* ------------------------------------------------------------------ */
+  --theme-accent:           #6366f1;
+  --theme-accent-hover:     #4f46e5;
+  --theme-accent-text:      #ffffff;
+
+  /* ------------------------------------------------------------------ */
+  /* STATUS COLOURS                                                       */
+  /* ------------------------------------------------------------------ */
+  --theme-success:          #16a34a;
+  --theme-warning:          #d97706;
+  --theme-danger:           #dc2626;
+  --theme-info:             #2563eb;
+
+  /* ------------------------------------------------------------------ */
+  /* NAV CHROME                                                           */
+  /* ------------------------------------------------------------------ */
+  --theme-nav-bg:           #f5f5f5;
+  --theme-nav-border:       #e0e0e0;
+  --theme-nav-text:         #737373;
+  --theme-nav-text-active:  #171717;
+  --theme-nav-icon:         #a3a3a3;
+
+  /* ------------------------------------------------------------------ */
+  /* THEME TOGGLE SWITCH                                                  */
+  /* ------------------------------------------------------------------ */
+  --theme-toggle-track:     #d4d4d4;
+  --theme-toggle-dot:       #ffffff;
+
+  /* ------------------------------------------------------------------ */
+  /* SEARCH                                                               */
+  /* ------------------------------------------------------------------ */
+  --theme-search-bg:        #f0f0f0;
+  --theme-search-border:    #e0e0e0;
+  --theme-search-text:      #525252;
+  --theme-search-results:   #ffffff;
+
+  /* ------------------------------------------------------------------ */
+  /* SCROLLBAR                                                            */
+  /* ------------------------------------------------------------------ */
+  --theme-scrollbar-track:  #ffffff;
+  --theme-scrollbar-thumb:  #e0e0e0;
+
+  /* ------------------------------------------------------------------ */
+  /* LOGO BACKGROUND                                                      */
+  /* ------------------------------------------------------------------ */
+  --theme-logo-bg:          rgba(0, 0, 0, 0.08);
 }
 
+
+/* ------------------------------------------------------------------ */
+/* SELECTORS — wire variables to panel elements                         */
+/* ------------------------------------------------------------------ */
+
 body {
-  /* Add your light mode overrides here */
+  background-color: var(--theme-bg) !important;
+  color: var(--theme-text) !important;
+}
+
+.bg-white,
+[class*="bg-neutral-50"],
+[class*="bg-neutral-100"] {
+  background-color: var(--theme-bg-secondary) !important;
+}
+
+[class*="bg-neutral-200"],
+[class*="dark:bg-neutral-8"] {
+  background-color: var(--theme-bg-card) !important;
+}
+
+[class*="bg-neutral-100"],
+[class*="dark:bg-neutral-7\/20"],
+[class*="dark:bg-white\/5"] {
+  background-color: var(--theme-bg-input) !important;
+}
+
+[class*="border-neutral"],
+[class*="dark:border-"] {
+  border-color: var(--theme-border) !important;
+}
+
+.text-neutral-800,
+.dark\:text-white,
+.text-neutral-900 {
+  color: var(--theme-text-strong) !important;
+}
+
+.text-neutral-600,
+.text-neutral-700 {
+  color: var(--theme-text) !important;
+}
+
+.text-neutral-500,
+.dark\:text-neutral-400,
+.dark\:text-neutral-300 {
+  color: var(--theme-text-muted) !important;
+}
+
+#pc-sidebar,
+#pc-sidebar2 {
+  background-color: var(--theme-nav-bg) !important;
+  border-color: var(--theme-nav-border) !important;
+}
+
+.nav-link {
+  color: var(--theme-nav-text) !important;
+}
+
+.nav-link.active,
+.nav-link:hover {
+  color: var(--theme-nav-text-active) !important;
+}
+
+#active-background {
+  background-color: var(--theme-bg-active-nav) !important;
+  border-color: var(--theme-border-subtle) !important;
+}
+
+.mobile-top-bar,
+.mobile-bottom-nav {
+  background-color: var(--theme-nav-bg) !important;
+  border-color: var(--theme-nav-border) !important;
+}
+
+.mobile-nav-link {
+  color: var(--theme-nav-text) !important;
+}
+
+.mobile-nav-link.active-mobile {
+  color: var(--theme-nav-text-active) !important;
+}
+
+.mobile-more-sheet {
+  background-color: var(--theme-bg-secondary) !important;
+  border-color: var(--theme-nav-border) !important;
+}
+
+#searchResults {
+  background-color: var(--theme-search-results) !important;
+  border-color: var(--theme-border) !important;
+}
+
+#theme-toggle {
+  background-color: var(--theme-toggle-track) !important;
+}
+
+.logo-bg {
+  background-color: var(--theme-logo-bg) !important;
 }

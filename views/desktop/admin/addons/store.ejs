@@ -185,6 +185,97 @@
   /* Features */
   .feat-row { display: flex; gap: 8px; align-items: flex-start; padding: 3px 0; font-size: 12px; color: #737373; }
   .feat-dot { width: 4px; height: 4px; border-radius: 50%; background: #404040; flex-shrink: 0; margin-top: 7px; }
+
+  /* ── Light mode overrides ── */
+  html:not(.dark) .s-card {
+    background: #ffffff;
+    border-color: #e5e5e5;
+  }
+  html:not(.dark) .s-card:hover {
+    border-color: #d4d4d4;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+  html:not(.dark) .s-icon {
+    background: #f5f5f5;
+    border-color: #e5e5e5;
+  }
+  html:not(.dark) .s-tag {
+    color: #737373;
+    background: #f5f5f5;
+    border-color: #e5e5e5;
+  }
+  html:not(.dark) .s-skeleton {
+    background: #f5f5f5;
+    border-color: #e5e5e5;
+  }
+
+  html:not(.dark) .m-dialog {
+    background: #ffffff;
+    border-color: #e5e5e5;
+  }
+  html:not(.dark) .m-tabs {
+    border-bottom-color: #e5e5e5;
+  }
+  html:not(.dark) .m-tab {
+    color: #a3a3a3;
+  }
+  html:not(.dark) .m-tab.on {
+    color: #171717;
+    border-bottom-color: #171717;
+  }
+  html:not(.dark) .m-tab:hover:not(.on) {
+    color: #525252;
+  }
+  html:not(.dark) .m-terminal {
+    background: #f5f5f5;
+    border-color: #e5e5e5;
+  }
+  html:not(.dark) .m-term-label { color: #171717; }
+  html:not(.dark) .m-term-pct   { color: #a3a3a3; }
+  html:not(.dark) .m-term-track { background: #e5e5e5; }
+  html:not(.dark) .m-term-fill  { background: #a3a3a3; }
+  html:not(.dark) .l-step   { color: #a3a3a3; }
+  html:not(.dark) .l-cmd    { color: #737373; }
+  html:not(.dark) .l-output { color: #a3a3a3; }
+
+  html:not(.dark) .m-cmd-list {
+    background: #f5f5f5;
+    border-color: #e5e5e5;
+  }
+  html:not(.dark) .m-cmd-list code { color: #737373; }
+
+  html:not(.dark) .m-note {
+    background: #fafafa;
+    border-color: #e5e5e5;
+    color: #737373;
+  }
+
+  html:not(.dark) .btn-gh {
+    background: #f5f5f5;
+    border-color: #e5e5e5;
+    color: #525252;
+  }
+  html:not(.dark) .btn-gh:hover {
+    background: #ebebeb;
+    color: #171717;
+  }
+
+  html:not(.dark) .btn-install {
+    background: #171717;
+    color: #ffffff;
+  }
+  html:not(.dark) .btn-install:hover:not(:disabled) {
+    background: #333333;
+  }
+
+  html:not(.dark) .feat-row { color: #525252; }
+  html:not(.dark) .feat-dot { background: #d4d4d4; }
+
+  html:not(.dark) .m-head p,
+  html:not(.dark) .m-head h2,
+  html:not(.dark) .m-head span { color: #171717; }
+  html:not(.dark) .m-head p.text-neutral-500,
+  html:not(.dark) .m-head span.text-neutral-500 { color: #737373; }
 </style>
 
 <main class="h-screen m-auto">

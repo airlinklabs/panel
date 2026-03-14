@@ -1,17 +1,83 @@
 /*
  * Solarized Dark
  * Built-in theme — do not remove this file
+ *
+ * Palette reference (Ethan Schoonover's Solarized):
+ *   base03  #002b36  darkest background
+ *   base02  #073642  dark background highlights
+ *   base01  #586e75  comments / secondary content
+ *   base00  #657b83  body text (light-on-dark)
+ *   base0   #839496  body text
+ *   base1   #93a1a1  emphasized content
+ *   base2   #eee8d5  background highlights (light mode)
+ *   base3   #fdf6e3  lightest background (light mode)
+ *   yellow  #b58900
+ *   orange  #cb4b16
+ *   red     #dc322f
+ *   magenta #d33682
+ *   violet  #6c71c4
+ *   blue    #268bd2
+ *   cyan    #2aa198
+ *   green   #859900
  */
 
 :root {
-  --theme-bg: #002b36;
-  --theme-bg-secondary: #073642;
-  --theme-bg-tertiary: #0d3c4a;
-  --theme-border: #1a4a56;
-  --theme-text: #839496;
-  --theme-text-strong: #93a1a1;
-  --theme-text-muted: #657b83;
-  --theme-accent: #268bd2;
+  /* --- Page backgrounds --- */
+  --theme-bg:               #002b36;
+  --theme-bg-secondary:     #073642;
+  --theme-bg-tertiary:      #0d3c4a;
+  --theme-bg-card:          #073642;
+  --theme-bg-hover:         #0d4050;
+  --theme-bg-input:         #04303d;
+  --theme-bg-active-nav:    rgba(255, 255, 255, 0.06);
+
+  /* --- Borders --- */
+  --theme-border:           #1a4855;
+  --theme-border-subtle:    rgba(255, 255, 255, 0.05);
+  --theme-border-input:     #1e5060;
+
+  /* --- Text --- */
+  --theme-text:             #839496;
+  --theme-text-strong:      #93a1a1;
+  --theme-text-muted:       #586e75;
+  --theme-text-nav:         #657b83;
+  --theme-text-nav-active:  #93a1a1;
+  --theme-text-placeholder: #4a6670;
+
+  /* --- Accent / brand --- */
+  --theme-accent:           #268bd2;
+  --theme-accent-hover:     #2f9de0;
+  --theme-accent-text:      #ffffff;
+
+  /* --- Status colours --- */
+  --theme-success:          #859900;
+  --theme-warning:          #b58900;
+  --theme-danger:           #dc322f;
+  --theme-info:             #2aa198;
+
+  /* --- Nav chrome (sidebar + mobile bars) --- */
+  --theme-nav-bg:           #002b36;
+  --theme-nav-border:       #1a4855;
+  --theme-nav-text:         #657b83;
+  --theme-nav-text-active:  #93a1a1;
+  --theme-nav-icon:         #586e75;
+
+  /* --- Toggle / switch --- */
+  --theme-toggle-track:     #1a4855;
+  --theme-toggle-dot:       #839496;
+
+  /* --- Search --- */
+  --theme-search-bg:        #04303d;
+  --theme-search-border:    #1a4855;
+  --theme-search-text:      #839496;
+  --theme-search-results:   #073642;
+
+  /* --- Scrollbar (for browsers that support it) --- */
+  --theme-scrollbar-track:  #002b36;
+  --theme-scrollbar-thumb:  #1a4855;
+
+  /* --- Logo background --- */
+  --theme-logo-bg:          transparent;
 }
 
 html.dark body {
@@ -19,20 +85,107 @@ html.dark body {
   color: var(--theme-text) !important;
 }
 
+/* Page-level backgrounds */
 html.dark .dark\:bg-\[#141414\],
-html.dark [class*="dark:bg-neutral"] {
+html.dark [class*="dark:bg-neutral-9"],
+html.dark [class*="dark:bg-neutral-8"] {
   background-color: var(--theme-bg-secondary) !important;
 }
 
+/* Cards and raised surfaces */
+html.dark [class*="dark:bg-neutral-7"] {
+  background-color: var(--theme-bg-card) !important;
+}
+
+/* Input fields */
+html.dark [class*="dark:bg-neutral-7\/20"],
+html.dark [class*="dark:bg-neutral-7\/10"],
+html.dark [class*="dark:bg-white\/5"] {
+  background-color: var(--theme-bg-input) !important;
+}
+
+/* All borders */
 html.dark [class*="dark:border-"] {
   border-color: var(--theme-border) !important;
 }
 
+/* Strong text (headings, labels) */
 html.dark .dark\:text-white {
   color: var(--theme-text-strong) !important;
 }
 
+/* Body / secondary text */
 html.dark .dark\:text-neutral-400,
-html.dark .dark\:text-neutral-300 {
+html.dark .dark\:text-neutral-300,
+html.dark .dark\:text-neutral-200 {
   color: var(--theme-text-muted) !important;
+}
+
+/* Nav chrome — sidebar */
+html.dark #pc-sidebar,
+html.dark #pc-sidebar2 {
+  background-color: var(--theme-nav-bg) !important;
+  border-color: var(--theme-nav-border) !important;
+}
+
+html.dark .nav-link {
+  color: var(--theme-nav-text) !important;
+}
+
+html.dark .nav-link.active,
+html.dark .nav-link:hover {
+  color: var(--theme-nav-text-active) !important;
+}
+
+html.dark #active-background {
+  background-color: var(--theme-bg-active-nav) !important;
+  border-color: var(--theme-border-subtle) !important;
+}
+
+/* Nav chrome — mobile top bar and bottom nav */
+html.dark .mobile-top-bar,
+html.dark .mobile-bottom-nav {
+  background-color: var(--theme-nav-bg) !important;
+  border-color: var(--theme-nav-border) !important;
+}
+
+html.dark .mobile-nav-link {
+  color: var(--theme-nav-text) !important;
+}
+
+html.dark .mobile-nav-link.active-mobile {
+  color: var(--theme-nav-text-active) !important;
+}
+
+html.dark .mobile-more-sheet {
+  background-color: var(--theme-bg-secondary) !important;
+  border-color: var(--theme-nav-border) !important;
+}
+
+/* Search */
+html.dark #searchResults {
+  background-color: var(--theme-search-results) !important;
+  border-color: var(--theme-border) !important;
+}
+
+/* Theme toggle track */
+html.dark #theme-toggle {
+  background-color: var(--theme-toggle-track) !important;
+}
+
+/* Logo background */
+html.dark .logo-bg {
+  background-color: var(--theme-logo-bg) !important;
+}
+
+/* Accent buttons */
+html.dark [class*="dark:bg-blue"],
+html.dark [class*="dark:bg-indigo"] {
+  background-color: var(--theme-accent) !important;
+}
+
+/* Hover backgrounds in lists */
+html.dark [class*="dark:hover:bg-white\/5"]:hover,
+html.dark [class*="dark:hover:bg-neutral"]:hover {
+  background-color: var(--theme-bg-hover) !important;
 }
