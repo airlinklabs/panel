@@ -16,7 +16,7 @@
           <form id="createServerForm" method="POST" action="/admin/servers/create">
             <!-- General Category -->
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">General</h2>
-            <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="grid grid-cols-1 gap-4 mb-6">
               <div>
                 <label for="serverName" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.name %>:</label>
                 <div class="flex items-center space-x-2">
@@ -64,7 +64,7 @@
 
             <!-- Resources Category -->
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Resources</h2>
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 gap-4 mb-6">
               <div>
                 <label for="serverCPU" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">CPU (Cores):</label>
                 <input id="serverCPU" name="Cpu" type="number" min="1" max="128" value="2" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
@@ -83,7 +83,7 @@
 
             <!-- Startup Category -->
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Startup</h2>
-            <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="grid grid-cols-1 gap-4 mb-6">
               <div>
                 <label for="serverImage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.Image %>:</label>
                 <select id="serverImage" name="imageId"
@@ -137,7 +137,7 @@
             <div id="variablesSection" style="display: none;">
               <h2 class="text-neutral-700 dark:text-neutral-300 text-md font-semibold mb-4">Variables</h2>
 
-              <div class="grid grid-cols-4 gap-4 mb-6" id="variablesContainer">
+              <div class="grid grid-cols-1 gap-4 mb-6" id="variablesContainer">
                 <!-- here come the variables -->
               </div>
             </div>
@@ -296,11 +296,11 @@
 
       variables.forEach(variable => {
         const variableDiv = document.createElement('div');
-        variableDiv.classList.add('mb-4', 'flex', 'items-center');
+        variableDiv.classList.add('mb-2', 'flex', 'flex-col', 'gap-1.5');
 
         const label = document.createElement('label');
         label.setAttribute('for', variable.env);
-        label.classList.add('text-neutral-700', 'dark:text-neutral-400', 'text-sm', 'tracking-tight', 'mr-2');
+        label.classList.add('text-neutral-700', 'dark:text-neutral-400', 'text-sm', 'font-medium', 'tracking-tight');
         label.textContent = variable.name + (variable.required ? ' *' : '');
 
         let input;
