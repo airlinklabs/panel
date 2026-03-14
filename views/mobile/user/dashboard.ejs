@@ -69,19 +69,18 @@
                 <%= server.status === 'running' ? 'Running' : 'Stopped' %>
               </span>
             </div>
-              <div class="flex gap-2 mb-3">
-                <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
-                  <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">RAM</p>
-                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsage %>%</p>
-                </div>
-                <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
-                  <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">CPU</p>
-                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.cpuUsage %>%</p>
-                </div>
-                <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
-                  <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">Used</p>
-                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsed || '0MB' %></p>
-                </div>
+            <div class="flex gap-2 mb-3">
+              <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
+                <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">RAM</p>
+                <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsage %>%</p>
+              </div>
+              <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
+                <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">CPU</p>
+                <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.cpuUsage %>%</p>
+              </div>
+              <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
+                <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">Used</p>
+                <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsed || '0MB' %></p>
               </div>
             </div>
             <div class="flex items-center gap-1.5">
