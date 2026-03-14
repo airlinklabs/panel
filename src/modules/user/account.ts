@@ -11,23 +11,25 @@ import fs from 'fs';
 
 const avatarStorage = multer.diskStorage({
   destination: (req, _file, cb) => {
-    const dir = path.join(process.cwd(), 'public', 'uploads', 'avatars');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const username = (req as any).session?.user?.username;
+    if (!username) return cb(new Error('Not authenticated'), '');
 
-    const userId = (req as any).session?.user?.id;
-    if (userId) {
-      const existing = fs.readdirSync(dir).filter(f => f.startsWith(`avatar-${userId}.`));
+    const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', username);
+
+    if (!fs.existsSync(userDir)) {
+      fs.mkdirSync(userDir, { recursive: true });
+    } else {
+      const existing = fs.readdirSync(userDir);
       existing.forEach(f => {
-        try { fs.unlinkSync(path.join(dir, f)); } catch (_) {}
+        try { fs.unlinkSync(path.join(userDir, f)); } catch (_) {}
       });
     }
 
-    cb(null, dir);
+    cb(null, userDir);
   },
-  filename: (req, file, cb) => {
-    const userId = (req as any).session?.user?.id;
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `avatar-${userId}${ext}`);
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase() || '.png';
+    cb(null, `avatar${ext}`);
   },
 });
 
@@ -143,7 +145,7 @@ const accountModule: Module = {
             data: { description },
           });
 
-          res.status(200).redirect('/account');
+          res.status(200).json({ message: 'Description updated successfully.' });
           return;
         } catch (error) {
           logger.error('Error updating description:', error);
@@ -397,7 +399,8 @@ const accountModule: Module = {
 
         try {
           const userId = req.session?.user?.id;
-          const avatarPath = `/uploads/avatars/${req.file.filename}`;
+          const username = (req as any).session?.user?.username;
+          const avatarPath = `/uploads/avatars/${username}/${req.file.filename}`;
 
           await prisma.users.update({
             where: { id: userId },
@@ -418,13 +421,14 @@ const accountModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
+          const username = (req as any).session?.user?.username;
 
-          const avatarDir = path.join(process.cwd(), 'public', 'uploads', 'avatars');
-          if (fs.existsSync(avatarDir)) {
-            const stale = fs.readdirSync(avatarDir).filter(f => f.startsWith(`avatar-${userId}.`));
-            stale.forEach(f => {
-              try { fs.unlinkSync(path.join(avatarDir, f)); } catch (_) {}
+          const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', username);
+          if (fs.existsSync(userDir)) {
+            fs.readdirSync(userDir).forEach(f => {
+              try { fs.unlinkSync(path.join(userDir, f)); } catch (_) {}
             });
+            try { fs.rmdirSync(userDir); } catch (_) {}
           }
 
           await prisma.users.update({

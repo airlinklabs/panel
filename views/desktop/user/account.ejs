@@ -300,7 +300,7 @@
       );
 
       const sidebarUsername = document.getElementById('sidebar-username');
-      sidebarUsername.textContent = newUsername;
+      if (sidebarUsername) sidebarUsername.textContent = newUsername;
 
       usernameInput.placeholder = newUsername;
     });
@@ -330,7 +330,7 @@
        );
 
        const sidebarDescription = document.getElementById('sidebar-description');
-       sidebarDescription.textContent = description;
+       if (sidebarDescription) sidebarDescription.textContent = description;
 
        descriptionEl.placeholder = description;
     });
@@ -393,7 +393,6 @@
     const newPasswordInput = document.getElementById('newPassword');
     const currentPasswordFeedback = document.getElementById('current-password-feedback');
     let currentPasswordTimeoutId;
-    let controller;
 
     function clearPasswordFeedback() {
       currentPasswordFeedback.innerHTML = '';
@@ -443,11 +442,7 @@
 
     currentPasswordInput?.addEventListener('input', () => {
       clearTimeout(currentPasswordTimeoutId);
-      if (controller) {
-        controller.abort();
-      }
 
-      controller = new AbortController();
       const currentPassword = currentPasswordInput.value.trim();
 
       currentPasswordTimeoutId = setTimeout(() => {
@@ -515,12 +510,13 @@
       `;
     }
 
-    // Avatar upload
+    // ── Avatar crop popup ────────────────────────────────────────────────────
+
     const avatarInput = document.getElementById('avatar-input');
     const avatarPreview = document.getElementById('avatar-preview');
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-    avatarInput?.addEventListener('change', async (e) => {
+    avatarInput?.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
@@ -529,27 +525,11 @@
         return;
       }
 
-      const formData = new FormData();
-      formData.append('avatar', file);
+      const reader = new FileReader();
+      reader.onload = (evt) => openCropPopup(evt.target.result, csrfToken);
+      reader.readAsDataURL(file);
 
-      try {
-        const response = await fetch('/upload-avatar', {
-          method: 'POST',
-          headers: { 'CSRF-Token': csrfToken },
-          body: formData,
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          avatarPreview.src = data.avatar;
-          showToast('Profile picture updated.', 'success');
-        } else {
-          const err = await response.json().catch(() => ({}));
-          showToast(err.message || 'Failed to upload image.', 'error');
-        }
-      } catch (error) {
-        showToast('Failed to upload image.', 'error');
-      }
+      avatarInput.value = '';
     });
 
     document.getElementById('remove-avatar-btn')?.addEventListener('click', async () => {
@@ -570,6 +550,174 @@
         showToast('Failed to remove picture.', 'error');
       }
     });
+
+    function openCropPopup(dataUrl, csrf) {
+      const overlay = document.createElement('div');
+      overlay.id = 'crop-overlay';
+      overlay.className = 'fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center p-4';
+      overlay.innerHTML = `
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl border border-neutral-200 dark:border-white/10 w-full max-w-lg overflow-hidden">
+          <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b border-neutral-100 dark:border-white/5">
+            <div>
+              <p class="text-sm font-semibold text-neutral-800 dark:text-white">Position your photo</p>
+              <p class="text-xs text-neutral-500 mt-0.5">Drag and resize the box to select the area to use.</p>
+            </div>
+            <button id="crop-cancel" class="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+          <div class="relative bg-neutral-950 select-none overflow-hidden" style="height:360px;" id="crop-stage">
+            <img id="crop-img" src="${dataUrl}" draggable="false" style="position:absolute;top:0;left:0;user-select:none;max-width:none;"/>
+            <div id="crop-box" style="position:absolute;border:2px solid white;box-shadow:0 0 0 9999px rgba(0,0,0,0.55);cursor:move;box-sizing:border-box;">
+              <div class="crop-handle" data-dir="nw" style="position:absolute;top:-5px;left:-5px;width:10px;height:10px;background:white;border-radius:50%;cursor:nw-resize;"></div>
+              <div class="crop-handle" data-dir="ne" style="position:absolute;top:-5px;right:-5px;width:10px;height:10px;background:white;border-radius:50%;cursor:ne-resize;"></div>
+              <div class="crop-handle" data-dir="sw" style="position:absolute;bottom:-5px;left:-5px;width:10px;height:10px;background:white;border-radius:50%;cursor:sw-resize;"></div>
+              <div class="crop-handle" data-dir="se" style="position:absolute;bottom:-5px;right:-5px;width:10px;height:10px;background:white;border-radius:50%;cursor:se-resize;"></div>
+            </div>
+          </div>
+          <div class="flex gap-3 px-5 py-4 border-t border-neutral-100 dark:border-white/5">
+            <button id="crop-cancel-btn" class="flex-1 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition">Cancel</button>
+            <button id="crop-save" class="flex-1 rounded-xl bg-neutral-950 dark:bg-white py-2.5 text-sm font-medium text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 transition">Save photo</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const stage = document.getElementById('crop-stage');
+      const img = document.getElementById('crop-img');
+      const box = document.getElementById('crop-box');
+      const stageW = stage.offsetWidth;
+      const stageH = stage.offsetHeight;
+
+      img.onload = () => {
+        const natW = img.naturalWidth;
+        const natH = img.naturalHeight;
+        const scale = Math.min(stageW / natW, stageH / natH);
+        const dispW = natW * scale;
+        const dispH = natH * scale;
+        img.style.width = dispW + 'px';
+        img.style.height = dispH + 'px';
+        img.style.left = ((stageW - dispW) / 2) + 'px';
+        img.style.top = ((stageH - dispH) / 2) + 'px';
+        img._scale = scale;
+        img._offX = (stageW - dispW) / 2;
+        img._offY = (stageH - dispH) / 2;
+
+        const boxSize = Math.min(dispW, dispH, 220);
+        box.style.width = boxSize + 'px';
+        box.style.height = boxSize + 'px';
+        box.style.left = ((stageW - boxSize) / 2) + 'px';
+        box.style.top = ((stageH - boxSize) / 2) + 'px';
+      };
+
+      if (img.complete) img.onload();
+
+      let action = null, startX, startY, startBox;
+
+      const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+      box.addEventListener('mousedown', (e) => {
+        if (e.target.classList.contains('crop-handle')) return;
+        e.preventDefault();
+        action = 'move';
+        startX = e.clientX; startY = e.clientY;
+        startBox = { l: parseInt(box.style.left), t: parseInt(box.style.top), w: box.offsetWidth, h: box.offsetHeight };
+      });
+
+      box.querySelectorAll('.crop-handle').forEach(h => {
+        h.addEventListener('mousedown', (e) => {
+          e.preventDefault(); e.stopPropagation();
+          action = h.dataset.dir;
+          startX = e.clientX; startY = e.clientY;
+          startBox = { l: parseInt(box.style.left), t: parseInt(box.style.top), w: box.offsetWidth, h: box.offsetHeight };
+        });
+      });
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+
+      function onUp() { action = null; }
+
+      function onMove(e) {
+        if (!action) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        const minSize = 60;
+
+        if (action === 'move') {
+          box.style.left = clamp(startBox.l + dx, 0, stageW - startBox.w) + 'px';
+          box.style.top  = clamp(startBox.t + dy, 0, stageH - startBox.h) + 'px';
+        } else {
+          let l = startBox.l, t = startBox.t, w = startBox.w, h = startBox.h;
+          if (action.includes('e')) w = Math.max(minSize, startBox.w + dx);
+          if (action.includes('s')) h = Math.max(minSize, startBox.h + dy);
+          if (action.includes('w')) { const nw = Math.max(minSize, startBox.w - dx); l = startBox.l + (startBox.w - nw); w = nw; }
+          if (action.includes('n')) { const nh = Math.max(minSize, startBox.h - dy); t = startBox.t + (startBox.h - nh); h = nh; }
+          l = clamp(l, 0, stageW - minSize);
+          t = clamp(t, 0, stageH - minSize);
+          w = Math.min(w, stageW - l);
+          h = Math.min(h, stageH - t);
+          box.style.left = l + 'px'; box.style.top = t + 'px';
+          box.style.width = w + 'px'; box.style.height = h + 'px';
+        }
+      }
+
+      const close = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        overlay.remove();
+      };
+      document.getElementById('crop-cancel').addEventListener('click', close);
+      document.getElementById('crop-cancel-btn').addEventListener('click', close);
+
+      document.getElementById('crop-save').addEventListener('click', () => {
+        const scale = img._scale;
+        const offX = img._offX;
+        const offY = img._offY;
+        const boxL = parseInt(box.style.left);
+        const boxT = parseInt(box.style.top);
+        const boxW = box.offsetWidth;
+        const boxH = box.offsetHeight;
+
+        const srcX = (boxL - offX) / scale;
+        const srcY = (boxT - offY) / scale;
+        const srcW = boxW / scale;
+        const srcH = boxH / scale;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, 256, 256);
+
+        canvas.toBlob(async (blob) => {
+          const form = new FormData();
+          form.append('avatar', blob, 'avatar.png');
+
+          try {
+            const response = await fetch('/upload-avatar', {
+              method: 'POST',
+              headers: { 'CSRF-Token': csrf },
+              body: form,
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              avatarPreview.src = data.avatar + '?t=' + Date.now();
+              showToast('Profile picture updated.', 'success');
+              close();
+            } else {
+              const err = await response.json().catch(() => ({}));
+              showToast(err.message || 'Failed to upload.', 'error');
+            }
+          } catch {
+            showToast('Failed to upload.', 'error');
+          }
+        }, 'image/png');
+      });
+    }
   });
   </script>
 <%- include('../components/footer') %>
