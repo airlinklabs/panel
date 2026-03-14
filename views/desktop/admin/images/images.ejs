@@ -96,66 +96,116 @@
   </div>
 </div>
 <div id="createModal" class="modal hidden fixed inset-0 z-50 bg-neutral-900/60 dark:bg-neutral-900/80 transition-opacity">
-  <div class="h-full w-full flex justify-center items-center">
-  <div class="modal-content bg-white dark:bg-neutral-800 rounded-xl p-6 w-96 border border-neutral-200 dark:border-neutral-800/20 shadow-lg">
+  <div class="h-full w-full flex justify-center items-center p-4">
+  <div class="modal-content bg-white dark:bg-neutral-900 rounded-2xl w-full max-w-lg border border-neutral-200 dark:border-white/5 shadow-xl max-h-[90vh] overflow-y-auto">
 
-    <div class="flex items-center justify-between mb-5">
-      <h2 class="text-base font-medium text-neutral-800 dark:text-white">Create Image</h2>
+    <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-neutral-100 dark:border-white/5">
+      <div>
+        <h2 class="text-base font-semibold text-neutral-800 dark:text-white">Create Image</h2>
+        <p class="text-xs text-neutral-500 mt-0.5">Fill in the basics — you can configure Docker images and variables after creation.</p>
+      </div>
       <button
         type="button"
         onclick="closeModal('createModal')"
-        class="rounded-lg p-1.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+        class="rounded-lg p-1.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
         aria-label="Close"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
         </svg>
       </button>
     </div>
 
-    <form action="/admin/images/create" method="POST" class="space-y-4">
-      <div class="flex flex-col gap-4">
-        <input
-          type="text"
-          name="name"
-          placeholder="Image Name"
-          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600/20 rounded-xl text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600"
-          required
-        />
-        <input
-          type="text"
-          name="image"
-          placeholder="Image URL or Base64"
-          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600/20 rounded-xl text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600"
-          required
-        />
-        <textarea
-          name="scripts"
-          placeholder="Optional: Scripts"
-          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600/20 rounded-xl text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 resize-none min-h-[100px]"
-        ></textarea>
-        <textarea
-          name="variables"
-          placeholder="Optional: Variables"
-          class="w-full p-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600/20 rounded-xl text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 resize-none min-h-[100px]"
-        ></textarea>
-        <div class="flex gap-3 pt-1">
-          <button
-            type="button"
-            onclick="closeModal('createModal')"
-            class="flex-1 py-2 px-3 border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-600 text-neutral-700 dark:text-white text-sm font-medium transition duration-200"
+    <form action="/admin/images/create" method="POST" class="px-6 py-5 space-y-4">
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="col-span-2 flex flex-col gap-1">
+          <label for="create-name" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            Name <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="create-name"
+            name="name"
+            placeholder="e.g. Minecraft Java"
+            required
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition"
           >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            class="flex-1 py-2 px-3 rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-100 text-white dark:text-neutral-900 text-sm font-medium shadow-sm transition duration-200"
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="create-author" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Author</label>
+          <input
+            type="text"
+            id="create-author"
+            name="author"
+            placeholder="e.g. github.com/you"
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition"
           >
-            Create
-          </button>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="create-authorName" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Author Name</label>
+          <input
+            type="text"
+            id="create-authorName"
+            name="authorName"
+            placeholder="e.g. Your Name"
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition"
+          >
+        </div>
+
+        <div class="col-span-2 flex flex-col gap-1">
+          <label for="create-startup" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            Startup Command <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="create-startup"
+            name="startup"
+            placeholder="e.g. java -Xms128M -jar server.jar"
+            required
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition font-mono"
+          >
+          <p class="text-xs text-neutral-400 dark:text-neutral-500">Use <code class="px-1 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 font-mono">$ALVKT(VAR_NAME)</code> to reference variables.</p>
+        </div>
+
+        <div class="col-span-2 flex flex-col gap-1">
+          <label for="create-description" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Description</label>
+          <textarea
+            id="create-description"
+            name="description"
+            rows="2"
+            placeholder="What does this image run?"
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition resize-none"
+          ></textarea>
         </div>
       </div>
+
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-4 py-3 flex items-start gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-neutral-400 shrink-0 mt-0.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+        </svg>
+        <p class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">After creating the image you'll be taken directly to the editor where you can add Docker images, environment variables, and install scripts.</p>
+      </div>
+
+      <div class="flex gap-3 pt-1">
+        <button
+          type="button"
+          onclick="closeModal('createModal')"
+          class="flex-1 py-2.5 px-3 border border-neutral-200 dark:border-white/5 rounded-xl bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-white text-sm font-medium transition"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="flex-1 py-2.5 px-3 rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-100 text-white dark:text-neutral-900 text-sm font-medium shadow-sm transition"
+        >
+          Create &amp; Edit
+        </button>
+      </div>
     </form>
+
   </div>
   </div>
 </div>
