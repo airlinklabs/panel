@@ -653,51 +653,96 @@ connectWebSocket();
           p.setProgress(5, 'Sending stop request...');
           p.addStep('Restart initiated');
 
-          fetch(`/server/${serverUUID}/power/restart`, { method: 'POST' })
+          fetch(`/server/${serverUUID}/status`)
               .then(r => r.json())
-              .then(() => {
-                  p.setProgress(10);
-                  p.addStep('Restart request accepted');
-                  setTimeout(() => { p.setProgress(20); p.addStep('Sending stop command to container'); }, 600);
-                  setTimeout(() => { p.setProgress(30); p.addStep('Waiting for container to exit'); }, 2000);
-                  let phase = 'stopping', seenDockerStatus = '', attempts = 0;
-                  const poll = setInterval(() => {
-                      attempts++;
-                      fetch(`/server/${serverUUID}/status`).then(r => r.json()).then(data => {
-                          const ds = data.dockerStatus || data.status || '';
-                          if (ds && ds !== seenDockerStatus && ds !== 'unknown') { seenDockerStatus = ds; p.addStep(`Container status: ${ds}`); }
-                          if (phase === 'stopping' && !data.online && !data.starting && !data.stopping) {
+              .then(currentState => {
+                  const alreadyStopped = !currentState.online && !currentState.starting && !currentState.stopping;
+
+                  fetch(`/server/${serverUUID}/power/restart`, { method: 'POST' })
+                      .then(r => r.json())
+                      .then(() => {
+                          p.setProgress(10);
+                          p.addStep('Restart request accepted');
+
+                          let phase, seenDockerStatus = '', attempts = 0;
+                          const maxAttempts = 36;
+
+                          if (alreadyStopped) {
                               phase = 'starting';
-                              p.setProgress(48);
-                              p.addStep('Container stopped', 'done');
+                              p.setProgress(40);
+                              p.addStep('Server was already stopped');
                               const startBeats = [
-                                  { delay: 400,  pct: 55, step: 'Pulling Docker image' },
-                                  { delay: 2500, pct: 65, step: 'Creating new container' },
+                                  { delay: 400,  pct: 50, step: 'Pulling Docker image' },
+                                  { delay: 2500, pct: 62, step: 'Creating container' },
                                   { delay: 5000, pct: 75, step: 'Starting container process' },
                                   { delay: 8000, pct: 85, step: 'Waiting for server to come online' },
                               ];
                               startBeats.forEach(b => setTimeout(() => { p.setProgress(b.pct); p.addStep(b.step); }, b.delay));
-                          } else if (phase === 'starting' && data.online) {
-                              clearInterval(poll);
-                              p.setProgress(100, 'Server is back online');
-                              p.addStep('Server is online', 'done');
-                              if (data.startedAt) { const ago = Math.round((Date.now() - new Date(data.startedAt)) / 1000); p.addStep(`Up for ${ago}s`, 'done'); }
-                              p.setIcon('done');
-                              showToast('Server restarted successfully', 'success');
-                              restartWebSocket();
-                              setTimeout(() => p.close(), 3000);
-                          } else if (attempts >= 36) {
-                              clearInterval(poll);
-                              p.setProgress(100, 'Restart sent — monitor console');
-                              p.setIcon('done');
-                              showToast('Restart command sent', 'success');
-                              restartWebSocket();
-                              setTimeout(() => p.close(), 2000);
+                          } else {
+                              phase = 'stopping';
+                              setTimeout(() => { p.setProgress(20); p.addStep('Sending stop command to container'); }, 600);
+                              setTimeout(() => { p.setProgress(30); p.addStep('Waiting for container to exit'); }, 2000);
                           }
-                      }).catch(() => {});
-                  }, 2500);
+
+                          const poll = setInterval(() => {
+                              attempts++;
+                              fetch(`/server/${serverUUID}/status`)
+                                  .then(r => r.json())
+                                  .then(data => {
+                                      const ds = data.dockerStatus || data.status || '';
+                                      if (ds && ds !== seenDockerStatus && ds !== 'unknown') {
+                                          seenDockerStatus = ds;
+                                          p.addStep(`Container status: ${ds}`);
+                                      }
+
+                                      if (phase === 'stopping' && !data.online && !data.starting && !data.stopping) {
+                                          phase = 'starting';
+                                          p.setProgress(48);
+                                          p.addStep('Container stopped', 'done');
+                                          const startBeats = [
+                                              { delay: 400,  pct: 55, step: 'Pulling Docker image' },
+                                              { delay: 2500, pct: 65, step: 'Creating new container' },
+                                              { delay: 5000, pct: 75, step: 'Starting container process' },
+                                              { delay: 8000, pct: 85, step: 'Waiting for server to come online' },
+                                          ];
+                                          startBeats.forEach(b => setTimeout(() => { p.setProgress(b.pct); p.addStep(b.step); }, b.delay));
+                                      } else if (phase === 'starting' && data.online) {
+                                          clearInterval(poll);
+                                          p.setProgress(100, 'Server is back online');
+                                          p.addStep('Server is online', 'done');
+                                          if (data.startedAt) {
+                                              const ago = Math.round((Date.now() - new Date(data.startedAt)) / 1000);
+                                              p.addStep(`Up for ${ago}s`, 'done');
+                                          }
+                                          p.setIcon('done');
+                                          showToast('Server restarted successfully', 'success');
+                                          restartWebSocket();
+                                          setTimeout(() => p.close(), 3000);
+                                      } else if (attempts >= maxAttempts) {
+                                          clearInterval(poll);
+                                          p.setProgress(100, 'Restart sent — monitor console');
+                                          p.setIcon('done');
+                                          showToast('Restart command sent', 'success');
+                                          restartWebSocket();
+                                          setTimeout(() => p.close(), 2000);
+                                      }
+                                  })
+                                  .catch(() => {});
+                          }, 2500);
+                      })
+                      .catch(() => {
+                          p.setProgress(100);
+                          p.addStep('Failed to restart server', 'error');
+                          p.setIcon('error');
+                          showToast('Failed to restart server', 'error');
+                      });
               })
-              .catch(() => { p.setProgress(100); p.addStep('Failed to restart server', 'error'); p.setIcon('error'); showToast('Failed to restart server', 'error'); });
+              .catch(() => {
+                  p.setProgress(100);
+                  p.addStep('Failed to check server state', 'error');
+                  p.setIcon('error');
+                  showToast('Failed to restart server', 'error');
+              });
         });
     });
     <% } else { %>
@@ -751,7 +796,8 @@ connectWebSocket();
           updateStatusChart('rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.2)');
 
           <% if (features.includes('players')) { %>
-          document.getElementById('players-deco').classList.add('translate-y-32');
+          const _pDecoStop = document.getElementById('players-deco');
+          if (_pDecoStop) _pDecoStop.classList.add('translate-y-32');
           <% } %>
 
           modal.classList.add('opacity-0', 'pointer-events-none');
