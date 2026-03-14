@@ -5,7 +5,6 @@ import logger from '../../../handlers/logger';
 import { apiValidator } from '../../../handlers/utils/api/apiValidator';
 import { getParamAsString, getParamAsNumber } from "../../../utils/typeHelpers";
 
-
 const coreModule: Module = {
   info: {
     name: 'API Module',
@@ -19,22 +18,13 @@ const coreModule: Module = {
   router: () => {
     const router = Router();
 
-    // Ping endpoint for health checks and latency measurement
-    router.get('/api/v1/ping', async (_req: Request, res: Response) => {
-      try {
-        res.json({
-          status: 'ok',
-          timestamp: new Date().toISOString(),
-          uptime: process.uptime(),
-          version: '1.0.0'
-        });
-      } catch (error) {
-        logger.error('Error in ping endpoint:', error);
-        res.status(500).json({
-          status: 'error',
-          message: 'Internal Server Error'
-        });
-      }
+    router.get('/api/v1/ping', (_req: Request, res: Response) => {
+      res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        version: '1.0.0',
+      });
     });
 
     router.get('/api', async (req: Request, res: Response) => {
@@ -53,7 +43,6 @@ const coreModule: Module = {
         });
       }
     });
-
 
     router.get(
       '/api/v1/users',
@@ -110,7 +99,6 @@ const coreModule: Module = {
         }
       }
     );
-
 
     router.get(
       '/api/v1/servers',
@@ -185,7 +173,6 @@ const coreModule: Module = {
         }
       }
     );
-
 
     router.get(
       '/api/v1/nodes',
@@ -264,9 +251,6 @@ const coreModule: Module = {
       }
     );
 
-
-
-
     router.get(
       '/api/v1/settings',
       apiValidator('airlink.api.settings.read'),
@@ -295,14 +279,12 @@ const coreModule: Module = {
         try {
           const { title, description, logo, favicon, theme, language } = req.body;
 
-
           const currentSettings = await prisma.settings.findFirst();
 
           if (!currentSettings) {
             res.status(404).json({ error: 'Settings not found' });
             return;
           }
-
 
           const updatedSettings = await prisma.settings.update({
             where: { id: currentSettings.id },

@@ -3,12 +3,10 @@ import { Module } from '../../../handlers/moduleInit';
 import prisma from '../../../db';
 import logger from '../../../handlers/logger';
 import axios from 'axios';
-import QueueHandler from '../../../handlers/utils/core/queueer';
+import { queueer } from '../../../handlers/queueer';
 import bcrypt from 'bcrypt';
 import { Buffer } from 'buffer';
 import { getParamAsString, getParamAsNumber } from "../../../utils/typeHelpers";
-
-const queueer = new QueueHandler();
 
 
 const coreModule: Module = {
@@ -29,7 +27,7 @@ const coreModule: Module = {
         const keys = await prisma.apiKey.findMany();
         validKeys = keys.map((key: any) => key.key);
       } catch (error) {
-        console.error('Error loading API keys:', error);
+        logger.error('Error loading API keys:', error);
       }
     }
 
@@ -49,7 +47,7 @@ const coreModule: Module = {
       if (validKeys.includes(apiKey)) {
         next();
       } else {
-        console.error('Invalid API key:', apiKey);
+        logger.error('Invalid API key:', apiKey);
         res.status(401).json({ error: 'Unauthorized: Invalid API Key' });
       }
     }
@@ -124,7 +122,7 @@ const coreModule: Module = {
             },
           });
         } catch (error) {
-          console.error('Error fetching users:', error);
+          logger.error('Error fetching users:', error);
           res.status(500).json({ error: 'Internal Server Error' });
         }
       },
@@ -236,7 +234,7 @@ const coreModule: Module = {
 
           res.status(200).json(userResponse);
         } catch (error) {
-          console.error('Error fetching user:', error);
+          logger.error('Error fetching user:', error);
           res.status(500).json({ error: 'Internal server error' });
         }
       },
@@ -286,14 +284,14 @@ const coreModule: Module = {
           });
 
           res.status(201).json({
-            atributes: {
+            attributes: {
               id: newUser.id,
               username: newUser.username,
               email: newUser.email,
             },
           });
         } catch (error) {
-          console.error('Error creating user:', error);
+          logger.error('Error creating user:', error);
           res.status(500).json({ error: 'Internal server error' });
         }
       },
@@ -327,9 +325,7 @@ const coreModule: Module = {
           if (email) updatedData.email = email;
           if (first_name) updatedData.first_name = first_name;
           if (last_name) updatedData.last_name = last_name;
-          if (password) updatedData.password = password;
-
-          updatedData.password = await bcrypt.hash(password, 10);
+          if (password) updatedData.password = await bcrypt.hash(password, 10);
 
           const updatedUser = await prisma.users.update({
             where: { id: userId },
@@ -345,7 +341,7 @@ const coreModule: Module = {
             },
           });
         } catch (error) {
-          console.error('Error updating user:', error);
+          logger.error('Error updating user:', error);
           res.status(500).json({ error: 'Internal server error' });
         }
       },
@@ -611,7 +607,7 @@ const coreModule: Module = {
               try {
                 ServerEnv = JSON.parse(server.Variables);
               } catch (error) {
-                console.error(
+                logger.error(
                   `Error parsing Variables for server ID ${server.id}:`,
                   error,
                 );
@@ -623,7 +619,7 @@ const coreModule: Module = {
               }
 
               if (!Array.isArray(ServerEnv)) {
-                console.error(
+                logger.error(
                   `ServerEnv is not an array for server ID ${server.id}. Skipping...`,
                 );
                 await prisma.server.update({
@@ -649,7 +645,7 @@ const coreModule: Module = {
                 try {
                   scripts = JSON.parse(server.image.scripts);
                 } catch (error) {
-                  console.error(
+                  logger.error(
                     `Error parsing scripts for server ID ${server.id}:`,
                     error,
                   );
@@ -688,18 +684,18 @@ const coreModule: Module = {
                     data: { Queued: false },
                   });
                 } catch (error) {
-                  console.error(
+                  logger.error(
                     `Error sending install request for server ID ${server.id}:`,
                     error,
                   );
                 }
               } else {
-                console.warn(
+                logger.warn(
                   `No scripts found for server ID ${server.id}. Skipping...`,
                 );
               }
             }
-          }, 0);
+          });
 
           res.status(201).json({
             message: 'Server created successfully',

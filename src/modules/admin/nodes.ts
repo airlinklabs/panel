@@ -41,21 +41,14 @@ async function listNodes(res: Response, includeServers = false) {
 
     for (const node of nodes) {
       const instances = await prisma.server.findMany({
-        where: {
-          nodeId: node.id,
-        },
+        where: { nodeId: node.id },
       });
 
-      // Create a node object with instances
       const nodeWithInstances: NodeWithInstances = {
         ...node,
-        instances: instances || []
+        instances,
+        ...(includeServers ? { servers: instances } : {}),
       };
-
-      // Add servers data if requested (for port allocation UI)
-      if (includeServers) {
-        nodeWithInstances.servers = instances;
-      }
 
       nodesWithStatus.push(await checkNodeStatus(nodeWithInstances));
     }
@@ -373,7 +366,6 @@ const adminModule: Module = {
           const address = req.body.address;
           const port = parseInt(req.body.port);
           const allocatedPorts = req.body.allocatedPorts || '[]';
-         // const sftpPort = parseInt(req.body.sftpPort) || 3003;
 
           if (
             !name ||
@@ -420,7 +412,6 @@ const adminModule: Module = {
               address,
               port,
               allocatedPorts,
-             // sftpPort,
             },
           });
 

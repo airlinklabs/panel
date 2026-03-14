@@ -68,27 +68,23 @@ const accountModule: Module = {
       '/account',
       isAuthenticated(),
       async (req: Request, res: Response) => {
-        // todo : remove this fucking shit use like flash or somethings like that but not that bro, idk why we do that
         const errorMessage: ErrorMessage = {};
+        const userId = req.session?.user?.id;
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
-          const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
+          const [user, loginHistory] = await Promise.all([
+            prisma.users.findUnique({ where: { id: userId } }),
+            prisma.loginHistory.findMany({
+              where: { userId },
+              orderBy: { timestamp: 'desc' },
+              take: 10,
+            }),
+          ]);
           if (!user) {
             errorMessage.message = 'User not found.';
             res.render('user/account', { errorMessage, user, req });
             return;
           }
-
-          // Fetch login history
-          const loginHistory = await prisma.loginHistory.findMany({
-            where: { userId },
-            orderBy: { timestamp: 'desc' },
-            take: 10 // Limit to last 10 logins
-          });
-
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
 
           res.render('user/account', {
             errorMessage,
@@ -100,9 +96,6 @@ const accountModule: Module = {
         } catch (error) {
           logger.error('Error fetching user:', error);
           errorMessage.message = 'Error fetching user data.';
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
           res.render('user/account', {
             errorMessage,
             user: getUser(req),

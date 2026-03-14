@@ -1,66 +1,154 @@
-<!-- Loading Popup Component -->
-<div id="loadingPopup" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-    <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
-        <h2 id="loadingTitle" class="text-2xl font-medium mb-1 text-neutral-800">Processing Request</h2>
-        <div class="mb-4">
-            <div class="w-full bg-neutral-200 rounded-full h-2.5">
-                <div id="loadingBar" class="bg-neutral-400 h-2.5 rounded-full" style="width: 0%"></div>
-            </div>
-        </div>
-        <p id="loadingMessage" class="text-center text-neutral-600">Initializing...</p>
-        <div class="flex justify-end mt-4">
-            <button id="hideLoadingPopup" class="w-full md:w-auto rounded-xl bg-neutral-800 dark:bg-neutral-950 hover:bg-neutral-700 dark:hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Hide</button>
-        </div>
+<style>
+  .popup-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: popup-spin 0.7s linear infinite;
+  }
+  @keyframes popup-spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+
+<div id="loadingPopup" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+  <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl p-6 w-full max-w-sm mx-4 mb-4 sm:mb-0 sm:scale-95 transition-all duration-300 shadow-2xl">
+
+    <div class="flex items-start gap-3 mb-4">
+      <div id="loadingIconWrap" class="mt-0.5 shrink-0 text-neutral-400">
+        <div id="loadingSpinner" class="popup-spinner"></div>
+        <svg id="loadingCheckIcon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-500 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+        </svg>
+        <svg id="loadingErrorIcon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-500 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p id="loadingTitle" class="text-sm font-semibold text-neutral-800 dark:text-white leading-tight">Processing</p>
+        <p id="loadingMessage" class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 leading-tight">Initializing...</p>
+      </div>
     </div>
+
+    <div class="w-full bg-neutral-100 dark:bg-neutral-800 rounded-full h-1 mb-4 overflow-hidden">
+      <div id="loadingBar" class="h-1 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+    </div>
+
+    <div id="loadingSteps" class="space-y-1.5 mb-4 overflow-hidden transition-all duration-300" style="max-height: 0px"></div>
+
+    <button id="hideLoadingPopup" class="w-full rounded-xl bg-neutral-900 dark:bg-neutral-100 hover:bg-neutral-700 dark:hover:bg-neutral-300 text-white dark:text-neutral-900 px-3 py-2 text-xs font-medium transition">
+      Hide
+    </button>
+  </div>
 </div>
 
 <script>
-    (function() {
-        if (window.loadingPopupSystem) return;
+(function () {
+  if (window.loadingPopupSystem) return;
 
-        window.loadingPopupSystem = () => {
-            const loadingPopup = document.getElementById('loadingPopup');
-            const loadingTitle = document.getElementById('loadingTitle');
-            const loadingBar = document.getElementById('loadingBar');
-            const loadingMessage = document.getElementById('loadingMessage');
-            const hideButton = document.getElementById('hideLoadingPopup');
+  const barColors = {
+    start:   '#10b981',
+    stop:    '#ef4444',
+    restart: '#f59e0b',
+    default: '#6b7280',
+  };
 
-            const showLoadingPopup = (title = 'Processing Request', initialMessage = 'Initializing...') => {
-                loadingTitle.textContent = title;
-                loadingMessage.textContent = initialMessage;
-                loadingBar.style.width = '0%';
+  const spinnerColors = {
+    start:   'text-emerald-500',
+    stop:    'text-red-500',
+    restart: 'text-amber-500',
+    default: 'text-neutral-400',
+  };
 
-                loadingPopup.classList.remove('opacity-0', 'pointer-events-none');
-                loadingPopup.querySelector('div').classList.remove('scale-95');
-                loadingPopup.querySelector('div').classList.add('scale-100');
+  const el = {
+    popup:     () => document.getElementById('loadingPopup'),
+    inner:     () => document.getElementById('loadingPopup').querySelector('div'),
+    title:     () => document.getElementById('loadingTitle'),
+    message:   () => document.getElementById('loadingMessage'),
+    bar:       () => document.getElementById('loadingBar'),
+    steps:     () => document.getElementById('loadingSteps'),
+    iconWrap:  () => document.getElementById('loadingIconWrap'),
+    spinner:   () => document.getElementById('loadingSpinner'),
+    checkIcon: () => document.getElementById('loadingCheckIcon'),
+    errorIcon: () => document.getElementById('loadingErrorIcon'),
+  };
 
-                return {
-                    updateProgress: (percent, message) => {
-                        loadingBar.style.width = `${percent}%`;
-                        if (message) loadingMessage.textContent = message;
-                    },
-                    updateMessage: (message) => {
-                        loadingMessage.textContent = message;
-                    },
-                    close: () => {
-                        hideLoadingPopup();
-                    }
-                };
-            };
+  let stepCount = 0;
 
-            const hideLoadingPopup = () => {
-                loadingPopup.classList.add('opacity-0', 'pointer-events-none');
-                loadingPopup.querySelector('div').classList.remove('scale-100');
-                loadingPopup.querySelector('div').classList.add('scale-95');
-            };
+  function addStep(text, type) {
+    stepCount++;
+    const isActive  = !type;
+    const isDone    = type === 'done';
+    const isError   = type === 'error';
 
-            hideButton.addEventListener('click', hideLoadingPopup);
+    const dotColor  = isDone ? 'text-emerald-500' : isError ? 'text-red-400' : 'text-neutral-300 dark:text-neutral-600';
+    const textColor = isDone ? 'text-neutral-600 dark:text-neutral-300' : isError ? 'text-red-400' : 'text-neutral-500 dark:text-neutral-400';
+    const dot       = isDone ? '✓' : isError ? '✕' : '–';
 
-            return { showLoadingPopup, hideLoadingPopup };
-        };
+    const stepsEl = el.steps();
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-2 opacity-0 transition-opacity duration-200';
+    row.innerHTML = `<span class="text-[11px] font-mono ${dotColor} shrink-0 w-3 text-center leading-none">${dot}</span><span class="text-xs ${textColor} leading-tight">${text}</span>`;
+    stepsEl.appendChild(row);
+    stepsEl.style.maxHeight = (stepCount * 24) + 'px';
+    requestAnimationFrame(() => row.classList.remove('opacity-0'));
+  }
 
-        const { showLoadingPopup, hideLoadingPopup } = window.loadingPopupSystem();
-        window.showLoadingPopup = showLoadingPopup;
-        window.hideLoadingPopup = hideLoadingPopup;
-    })();
+  function setIcon(state) {
+    el.spinner().classList.add('hidden');
+    el.checkIcon().classList.add('hidden');
+    el.errorIcon().classList.add('hidden');
+    if (state === 'done')       el.checkIcon().classList.remove('hidden');
+    else if (state === 'error') el.errorIcon().classList.remove('hidden');
+    else                        el.spinner().classList.remove('hidden');
+  }
+
+  function open(title, theme) {
+    stepCount = 0;
+    el.steps().innerHTML = '';
+    el.steps().style.maxHeight = '0px';
+    el.bar().style.width = '0%';
+    el.bar().style.backgroundColor = barColors[theme] || barColors.default;
+
+    const spinColor = spinnerColors[theme] || spinnerColors.default;
+    el.spinner().className = `popup-spinner ${spinColor}`;
+
+    el.title().textContent = title;
+    el.message().textContent = '';
+    setIcon('spin');
+
+    el.popup().classList.remove('opacity-0', 'pointer-events-none');
+    el.inner().classList.remove('scale-95');
+    el.inner().classList.add('scale-100');
+  }
+
+  function close() {
+    el.popup().classList.add('opacity-0', 'pointer-events-none');
+    el.inner().classList.add('scale-95');
+    el.inner().classList.remove('scale-100');
+  }
+
+  window.loadingPopupSystem = {
+    open, close, addStep, setIcon,
+    setProgress(pct, msg) {
+      el.bar().style.width = `${pct}%`;
+      if (msg !== undefined) el.message().textContent = msg;
+    },
+    setMessage(msg) { el.message().textContent = msg; },
+  };
+
+  document.getElementById('hideLoadingPopup').addEventListener('click', close);
+
+  window.showLoadingPopup = (title, msg) => {
+    open(title, 'default');
+    if (msg) el.message().textContent = msg;
+    return {
+      updateProgress: (pct, m) => window.loadingPopupSystem.setProgress(pct, m),
+      updateMessage:  (m)      => window.loadingPopupSystem.setMessage(m),
+      close:          ()       => window.loadingPopupSystem.close(),
+    };
+  };
+  window.hideLoadingPopup = close;
+})();
 </script>

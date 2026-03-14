@@ -26,26 +26,22 @@ const analyticsModule: Module = {
   router: () => {
     const router = Router();
 
-    // Main analytics page
     router.get(
       '/admin/analytics',
       isAuthenticated(true, 'airlink.admin.analytics.view'),
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
+        const userId = req.session?.user?.id;
 
         try {
-          const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
+          const [user, settings] = await Promise.all([
+            prisma.users.findUnique({ where: { id: userId } }),
+            prisma.settings.findUnique({ where: { id: 1 } }),
+          ]);
           if (!user) {
             return res.redirect('/login');
           }
 
-          // Get settings
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
-
-          // Render the analytics page
           res.render('admin/analytics/analytics', {
             errorMessage,
             user,
@@ -57,40 +53,33 @@ const analyticsModule: Module = {
           logger.error('Error loading analytics page:', error);
           errorMessage.message = 'Error loading analytics page.';
 
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
-
           return res.render('admin/analytics/analytics', {
             errorMessage,
             user: req.session?.user,
             req,
-            settings,
+            settings: null,
             title: 'Analytics'
           });
         }
       }
     );
 
-    // API endpoint to get player stats data for analytics
     router.get(
       '/admin/playerstats/data',
       isAuthenticated(true, 'airlink.admin.analytics.view'),
       async (req: Request, res: Response) => {
         try {
-          // Get all servers
+          const DAEMON_REQUEST_TIMEOUT = parseInt(process.env.DAEMON_TIMEOUT || '5000');
           const servers = await prisma.server.findMany({
             include: {
               node: true,
             },
           });
 
-          // Fetch player counts for each server
           const playerData = await Promise.all(
             servers.map(async (server) => {
               try {
-                // Parse ports to find the primary port
-                const ports = JSON.parse(server.Ports || '[]');
+                    const ports = JSON.parse(server.Ports || '[]');
                 const primaryPort = ports.find((p: any) => p.primary)?.Port;
 
                 if (!primaryPort) {
@@ -103,9 +92,6 @@ const analyticsModule: Module = {
                     error: 'No primary port found'
                   };
                 }
-                const DAEMON_REQUEST_TIMEOUT = parseInt(process.env.DAEMON_TIMEOUT || '5000');
-              
-                // Fetch player data from the daemon
                 const response = await axios({
                   method: 'GET',
                   url: `http://${server.node.address}:${server.node.port}/minecraft/players`,
@@ -142,12 +128,10 @@ const analyticsModule: Module = {
             })
           );
 
-          // Calculate total players
           const totalPlayers = playerData.reduce((sum, server) => sum + server.playerCount, 0);
           const totalMaxPlayers = playerData.reduce((sum, server) => sum + server.maxPlayers, 0);
           const onlineServers = playerData.filter(server => server.online).length;
 
-          // Get historical data (48 hours worth of data at 5-minute intervals)
           const historicalData = await prisma.playerStats.findMany({
             orderBy: {
               timestamp: 'asc'
@@ -173,21 +157,17 @@ const analyticsModule: Module = {
       }
     );
 
-    // API endpoint for performance metrics
     router.get(
       '/api/admin/analytics/performance',
       isAuthenticated(true, 'airlink.admin.analytics.view'),
       async (req: Request, res: Response) => {
         try {
-          // TODO: Implement actual performance metrics collection
-          // This should include real CPU, memory, disk, and network metrics
-          // Consider integrating with system monitoring tools or node.js performance APIs
           res.json({
             cpu: { usage: 0, cores: 0 },
             memory: { used: 0, total: 0 },
             disk: { used: 0, total: 0 },
             network: { in: 0, out: 0, latency: 0 },
-            uptime: { current: 0, average: 0 }
+            uptime: { current: 0, average: 0 },
           });
         } catch (error) {
           logger.error('Error fetching performance metrics:', error);
@@ -196,13 +176,11 @@ const analyticsModule: Module = {
       }
     );
 
-    // API endpoint for usage analytics
     router.get(
       '/api/admin/analytics/usage',
       isAuthenticated(true, 'airlink.admin.analytics.view'),
       async (req: Request, res: Response) => {
         try {
-          // Get basic usage statistics
           const totalServers = await prisma.server.count();
           const totalUsers = await prisma.users.count();
           

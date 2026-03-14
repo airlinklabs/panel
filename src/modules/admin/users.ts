@@ -115,11 +115,7 @@ const adminModule: Module = {
           return;
         }
 
-        // Convert isAdmin to boolean if it's not already
         const isAdminBool = typeof isAdmin === 'boolean' ? isAdmin : isAdmin === 'true';
-
-        // Log the admin status for debugging
-        logger.info(`Creating user with admin status: ${isAdminBool}, original value: ${isAdmin}, type: ${typeof isAdmin}`);
 
         try {
           const existingUser = await prisma.users.findFirst({
@@ -135,16 +131,14 @@ const adminModule: Module = {
             return;
           }
 
-          if (!existingUser) {
-            await prisma.users.create({
-              data: {
-                email,
-                username,
-                password: await bcrypt.hash(password, 10),
-                isAdmin: isAdminBool,
-              },
-            });
-          }
+          await prisma.users.create({
+            data: {
+              email,
+              username,
+              password: await bcrypt.hash(password, 10),
+              isAdmin: isAdminBool,
+            },
+          });
 
           res.status(200).json({ message: 'User created successfully.' });
           return;

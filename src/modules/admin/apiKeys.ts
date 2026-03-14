@@ -6,8 +6,6 @@ import logger from '../../handlers/logger';
 import { registerPermission } from '../../handlers/permisions';
 import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 
-
-
 registerPermission('airlink.admin.apikeys.view');
 registerPermission('airlink.admin.apikeys.create');
 registerPermission('airlink.admin.apikeys.delete');
@@ -37,7 +35,6 @@ const coreModule: Module = {
 
   router: () => {
     const router = Router();
-
 
     router.get(
       '/admin/api/docs',
@@ -278,7 +275,6 @@ const coreModule: Module = {
       }
     );
 
-
     router.get(
       '/admin/apikeys',
       isAuthenticated(true, 'airlink.admin.apikeys.view'),
@@ -332,7 +328,6 @@ const coreModule: Module = {
       },
     );
 
-
     router.post(
       '/admin/apikeys/create',
       isAuthenticated(true, 'airlink.admin.apikeys.create'),
@@ -347,7 +342,6 @@ const coreModule: Module = {
 
           const key = generateApiKey(32);
           const userId = req.session.user?.id;
-
 
           const permissionsArray = permissions ?
             (Array.isArray(permissions) ? permissions : [permissions]) :
@@ -372,7 +366,6 @@ const coreModule: Module = {
       },
     );
 
-
     router.post(
       '/admin/apikeys/delete/:id',
       isAuthenticated(true, 'airlink.admin.apikeys.delete'),
@@ -391,7 +384,6 @@ const coreModule: Module = {
         }
       },
     );
-
 
     router.post(
       '/admin/apikeys/toggle/:id',
@@ -425,7 +417,6 @@ const coreModule: Module = {
       },
     );
 
-
     router.post(
       '/admin/apikeys/edit/:id',
       isAuthenticated(true, 'airlink.admin.apikeys.edit'),
@@ -438,7 +429,6 @@ const coreModule: Module = {
             res.status(400).json({ error: 'API key name is required' });
             return;
           }
-
 
           const permissionsArray = permissions ?
             (Array.isArray(permissions) ? permissions : [permissions]) :

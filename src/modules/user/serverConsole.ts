@@ -4,8 +4,62 @@ import prisma from '../../db';
 import { WebSocket } from 'ws';
 import { isAuthenticatedForServerWS } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
-import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
+import { getParamAsString } from '../../utils/typeHelpers';
 
+async function proxyConsole(
+  ws: WebSocket,
+  req: Request,
+  userId: number,
+  daemonPath: (nodeAddress: string, nodePort: number, serverId: string) => string,
+) {
+  try {
+    const user = await prisma.users.findUnique({ where: { id: userId } });
+    if (!user?.username) {
+      ws.send(JSON.stringify({ error: 'User not found or username missing' }));
+      ws.close();
+      return;
+    }
+
+    const serverId = getParamAsString(req.params.id);
+    if (!serverId) {
+      ws.send(JSON.stringify({ error: 'Server ID is required' }));
+      ws.close();
+      return;
+    }
+
+    const server = await prisma.server.findUnique({
+      where: { UUID: getParamAsString(serverId) },
+      include: { node: true },
+    });
+    if (!server) {
+      ws.send(JSON.stringify({ error: 'Server not found' }));
+      ws.close();
+      return;
+    }
+
+    const { node } = server;
+    const socket = new WebSocket(daemonPath(node.address, node.port, serverId));
+
+    socket.onopen = () => {
+      socket.send(JSON.stringify({ event: 'auth', args: [node.key] }));
+    };
+
+    socket.onmessage = (msg) => ws.send(msg.data);
+
+    socket.onerror = () => {
+      ws.send('\x1b[31;1mThis instance is unavailable!\x1b[0m');
+    };
+
+    socket.onclose = () => ws.close();
+
+    ws.onmessage = (msg) => socket.send(msg.data);
+    ws.on('close', () => socket.close());
+  } catch (error) {
+    logger.error('Error in console proxy:', error);
+    ws.send(JSON.stringify({ error: 'Internal server error' }));
+    ws.close();
+  }
+}
 
 const wsServerConsoleModule: Module = {
   info: {
@@ -30,66 +84,10 @@ const wsServerConsoleModule: Module = {
           ws.close();
           return;
         }
-
-        try {
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user || !user.username) {
-            ws.send(
-              JSON.stringify({ error: 'User not found or username missing' }),
-            );
-            ws.close();
-            return;
-          }
-
-          const serverId = req.params.id;
-          if (!serverId) {
-            ws.send(JSON.stringify({ error: 'Server ID is required' }));
-            ws.close();
-            return;
-          }
-
-          const server = await prisma.server.findUnique({
-            where: { UUID: getParamAsString(serverId) },
-            include: { node: true },
-          });
-          if (!server) {
-            ws.send(JSON.stringify({ error: 'Server not found' }));
-            ws.close();
-            return;
-          }
-
-          const node = server.node;
-
-          const socket = new WebSocket(
-            `ws://${node.address}:${node.port}/container/${serverId}`,
-          );
-
-          socket.onopen = () => {
-            socket.send(JSON.stringify({ event: 'auth', args: [node.key] }));
-          };
-
-          socket.onmessage = (msg) => {
-            ws.send(msg.data);
-          };
-
-          socket.onerror = () => {
-            ws.send('\x1b[31;1mThis instance is unavailable!\x1b[0m');
-          };
-
-          socket.onclose = () => {};
-
-          ws.onmessage = (msg) => {
-            socket.send(msg.data);
-          };
-
-          ws.on('close', () => {
-            socket.close();
-          });
-        } catch (error) {
-          logger.error('Error fetching user:', error);
-          ws.send(JSON.stringify({ error: 'Internal server error' }));
-          ws.close();
-        }
+        await proxyConsole(
+          ws, req, userId,
+          (addr, port, id) => `ws://${addr}:${port}/container/${id}`,
+        );
       },
     );
 
@@ -102,68 +100,10 @@ const wsServerConsoleModule: Module = {
           ws.close();
           return;
         }
-
-        const userId = +req.query.userId;
-
-        try {
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user || !user.username) {
-            ws.send(
-              JSON.stringify({ error: 'User not found or username missing' }),
-            );
-            ws.close();
-            return;
-          }
-
-          const serverId = req.params.id;
-          if (!serverId) {
-            ws.send(JSON.stringify({ error: 'Server ID is required' }));
-            ws.close();
-            return;
-          }
-
-          const server = await prisma.server.findUnique({
-            where: { UUID: getParamAsString(serverId) },
-            include: { node: true },
-          });
-          if (!server) {
-            ws.send(JSON.stringify({ error: 'Server not found' }));
-            ws.close();
-            return;
-          }
-
-          const node = server.node;
-
-          const socket = new WebSocket(
-            `ws://${node.address}:${node.port}/container/${serverId}`,
-          );
-
-          socket.onopen = () => {
-            socket.send(JSON.stringify({ event: 'auth', args: [node.key] }));
-          };
-
-          socket.onmessage = (msg) => {
-            ws.send(msg.data);
-          };
-
-          socket.onerror = () => {
-            ws.send('\x1b[31;1mThis instance is unavailable!\x1b[0m');
-          };
-
-          socket.onclose = () => {};
-
-          ws.onmessage = (msg) => {
-            socket.send(msg.data);
-          };
-
-          ws.on('close', () => {
-            socket.close();
-          });
-        } catch (error) {
-          logger.error('Error fetching user:', error);
-          ws.send(JSON.stringify({ error: 'Internal server error' }));
-          ws.close();
-        }
+        await proxyConsole(
+          ws, req, +req.query.userId,
+          (addr, port, id) => `ws://${addr}:${port}/container/${id}`,
+        );
       },
     );
 
@@ -177,70 +117,15 @@ const wsServerConsoleModule: Module = {
           ws.close();
           return;
         }
-
-        try {
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user || !user.username) {
-            ws.send(
-              JSON.stringify({ error: 'User not found or username missing' }),
-            );
-            ws.close();
-            return;
-          }
-
-          const serverId = req.params.id;
-          if (!serverId) {
-            ws.send(JSON.stringify({ error: 'Server ID is required' }));
-            ws.close();
-            return;
-          }
-
-          const server = await prisma.server.findUnique({
-            where: { UUID: getParamAsString(serverId) },
-            include: { node: true },
-          });
-          if (!server) {
-            ws.send(JSON.stringify({ error: 'Server not found' }));
-            ws.close();
-            return;
-          }
-
-          const node = server.node;
-
-          const socket = new WebSocket(
-            `ws://${node.address}:${node.port}/containerstatus/${serverId}`,
-          );
-
-          socket.onopen = () => {
-            socket.send(JSON.stringify({ event: 'auth', args: [node.key] }));
-          };
-
-          socket.onmessage = (msg) => {
-            ws.send(msg.data);
-          };
-
-          socket.onerror = () => {
-            ws.send('\x1b[31;1mThis instance is unavailable!\x1b[0m');
-          };
-
-          socket.onclose = () => {
-            ws.close();
-          };
-
-          ws.on('close', () => {
-            socket.close();
-          });
-        } catch (error) {
-          logger.error('Error fetching user:', error);
-          ws.send(JSON.stringify({ error: 'Internal server error' }));
-          ws.close();
-        }
+        await proxyConsole(
+          ws, req, userId,
+          (addr, port, id) => `ws://${addr}:${port}/containerstatus/${id}`,
+        );
       },
     );
 
     return router;
   },
 };
-
 
 export default wsServerConsoleModule;

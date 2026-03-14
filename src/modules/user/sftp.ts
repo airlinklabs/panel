@@ -32,7 +32,7 @@ const sftpModule: Module = {
         }
 
         try {
-          const stored = await (prisma as any).sftpCredential.findUnique({
+          const stored = await prisma.sftpCredential.findUnique({
             where: { serverId },
           });
 
@@ -77,7 +77,7 @@ const sftpModule: Module = {
             return;
           }
 
-          const existing = await (prisma as any).sftpCredential.findUnique({
+          const existing = await prisma.sftpCredential.findUnique({
             where: { serverId },
           });
 
@@ -105,7 +105,7 @@ const sftpModule: Module = {
 
           const { username, password, host, port, expiresAt } = response.data;
 
-          await (prisma as any).sftpCredential.upsert({
+          await prisma.sftpCredential.upsert({
             where: { serverId },
             update: { username, password, host, port, expiresAt: expiresAt ? new Date(expiresAt) : null },
             create: { serverId, username, password, host, port, expiresAt: expiresAt ? new Date(expiresAt) : null },
@@ -155,7 +155,7 @@ const sftpModule: Module = {
             timeout: 10000,
           });
 
-          await (prisma as any).sftpCredential.deleteMany({
+          await prisma.sftpCredential.deleteMany({
             where: { serverId },
           });
 

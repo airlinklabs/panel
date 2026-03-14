@@ -4,11 +4,9 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
-import QueueHandler from '../../handlers/utils/core/queueer';
+import { queueer } from '../../handlers/queueer';
 import { Buffer } from 'buffer';
 import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
-
-const queueer = new QueueHandler();
 
 
 const adminModule: Module = {
@@ -452,10 +450,7 @@ const adminModule: Module = {
                   type: 'text',
                 });
               } catch (error: unknown) {
-                console.error(
-                  `Error parsing Variables for server ID ${server.id}:`,
-                  error,
-                );
+                logger.error(`Error parsing Variables for server ID ${server.id}:`, error);
                 await prisma.server.update({
                   where: { id: server.id },
                   data: { Queued: false },
@@ -464,9 +459,7 @@ const adminModule: Module = {
               }
 
               if (!Array.isArray(ServerEnv)) {
-                console.error(
-                  `ServerEnv is not an array for server ID ${server.id}. Skipping...`,
-                );
+                logger.error(`ServerEnv is not an array for server ID ${server.id}. Skipping...`);
                 await prisma.server.update({
                   where: { id: server.id },
                   data: { Queued: false },
@@ -490,10 +483,7 @@ const adminModule: Module = {
                 try {
                   scripts = JSON.parse(server.image.scripts);
                 } catch (error: unknown) {
-                  console.error(
-                    `Error parsing scripts for server ID ${server.id}:`,
-                    error,
-                  );
+                  logger.error(`Error parsing scripts for server ID ${server.id}:`, error);
                   await prisma.server.update({
                     where: { id: server.id },
                     data: { Queued: false },
@@ -556,18 +546,13 @@ const adminModule: Module = {
                     data: { Queued: false },
                   });
                 } catch (error: unknown) {
-                  console.error(
-                    `Error sending install request for server ID ${server.id}:`,
-                    error,
-                  );
+                  logger.error(`Error sending install request for server ID ${server.id}:`, error);
                 }
               } else {
-                console.warn(
-                  `No scripts found for server ID ${server.id}. Skipping...`,
-                );
+                logger.warn(`No scripts found for server ID ${server.id}. Skipping...`);
               }
             }
-          }, 0);
+          });
 
           res.status(200).send('Server created successfully');
         } catch (error: unknown) {
