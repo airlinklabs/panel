@@ -111,7 +111,7 @@ const dashboardModule: Module = {
                   status: 'unknown',
                   ramUsage: '0',
                   cpuUsage: '0',
-                  ramLimit: '1GB',
+                  ramUsed: '0MB',
                   nodeOffline: true,
                 };
               }
@@ -130,7 +130,7 @@ const dashboardModule: Module = {
               const isRunning = statusResponse.data?.running === true;
               let ramUsage = '0';
               let cpuUsage = '0';
-              let ramLimit = '1GB';
+              let ramUsed = '0MB';
 
               if (isRunning) {
                 try {
@@ -149,12 +149,11 @@ const dashboardModule: Module = {
                     ramUsage = statsResponse.data.memory?.percentage || '0';
                     cpuUsage = statsResponse.data.cpu?.percentage || '0';
 
-                    const memLimitBytes = statsResponse.data.memory?.limit || 0;
-                    const memLimitGB = (
-                      memLimitBytes /
-                      (1024 * 1024 * 1024)
-                    ).toFixed(1);
-                    ramLimit = `${memLimitGB}GB`;
+                    const memUsageBytes = statsResponse.data.memory?.usage || 0;
+                    const memUsageMB = memUsageBytes / (1024 * 1024);
+                    ramUsed = memUsageMB >= 1024
+                      ? `${(memUsageMB / 1024).toFixed(1)}GB`
+                      : `${memUsageMB.toFixed(0)}MB`;
                   }
                 } catch (statsError) {
                             if (axios.isAxiosError(statsError)) {
@@ -182,7 +181,7 @@ const dashboardModule: Module = {
                 status: isRunning ? 'running' : 'stopped',
                 ramUsage,
                 cpuUsage,
-                ramLimit,
+                ramUsed,
                 nodeOffline: false,
               };
             } catch (error) {
@@ -195,7 +194,7 @@ const dashboardModule: Module = {
                 status: 'unknown',
                 ramUsage: '0',
                 cpuUsage: '0',
-                ramLimit: '1GB',
+                ramUsed: '0MB',
                 nodeOffline: true,
               };
             }
