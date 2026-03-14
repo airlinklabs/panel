@@ -108,7 +108,7 @@
 
                 <div class="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-white/5">
                   <div class="flex items-center gap-1.5 min-w-0">
-                    <img class="h-4 w-4 rounded-full shrink-0" src="https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="">
+                    <img class="h-4 w-4 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="">
                     <span class="text-xs text-neutral-500 dark:text-neutral-400 truncate"><%= server.owner ? server.owner.username : 'Unknown' %></span>
                   </div>
                   <% if (server.node) { %>
