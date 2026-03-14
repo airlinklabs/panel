@@ -10,14 +10,23 @@ import path from 'path';
 import fs from 'fs';
 
 const avatarStorage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
+  destination: (req, _file, cb) => {
     const dir = path.join(process.cwd(), 'public', 'uploads', 'avatars');
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    const userId = (req as any).session?.user?.id;
+    if (userId) {
+      const existing = fs.readdirSync(dir).filter(f => f.startsWith(`avatar-${userId}.`));
+      existing.forEach(f => {
+        try { fs.unlinkSync(path.join(dir, f)); } catch (_) {}
+      });
+    }
+
     cb(null, dir);
   },
   filename: (req, file, cb) => {
     const userId = (req as any).session?.user?.id;
-    const ext = path.extname(file.originalname);
+    const ext = path.extname(file.originalname).toLowerCase();
     cb(null, `avatar-${userId}${ext}`);
   },
 });
@@ -409,11 +418,13 @@ const accountModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
 
-          if (user?.avatar) {
-            const filePath = path.join(process.cwd(), 'public', user.avatar);
-            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+          const avatarDir = path.join(process.cwd(), 'public', 'uploads', 'avatars');
+          if (fs.existsSync(avatarDir)) {
+            const stale = fs.readdirSync(avatarDir).filter(f => f.startsWith(`avatar-${userId}.`));
+            stale.forEach(f => {
+              try { fs.unlinkSync(path.join(avatarDir, f)); } catch (_) {}
+            });
           }
 
           await prisma.users.update({
