@@ -182,7 +182,7 @@
     <input type="text"
       id="backupName"
       class="w-full px-3 py-2 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition mb-4 text-neutral-800 bg-white"
-      placeholder="Enter backup name"
+      placeholder="<%= req.translations.enterBackupName || 'Enter backup name' %>"
       onkeydown="handleBackupNameKeyPress(event)">
     <div class="flex justify-end space-x-4">
       <button onclick="closeCreateBackupModal()" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>

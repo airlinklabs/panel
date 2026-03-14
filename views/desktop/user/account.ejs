@@ -180,6 +180,7 @@
                     <option class="text-black" value="ru" <%= req.lang === 'ru' ? 'selected' : '' %>>Русский</option>
                     <option class="text-black" value="zh" <%= req.lang === 'zh' ? 'selected' : '' %>>中文</option>
                     <option class="text-black" value="ja" <%= req.lang === 'ja' ? 'selected' : '' %>>日本語</option>
+                    <option class="text-black" value="ta" <%= req.lang === 'ta' ? 'selected' : '' %>>தமிழ்</option>
                   </select>
                   <button type="submit"
                     class="block rounded-xl bg-white hover:bg-neutral-200 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2">
@@ -484,6 +485,7 @@
             ru: 'Языковые настройки сохранены. Обновление страницы...',
             zh: '语言偏好已保存，正在刷新页面...',
             ja: '言語設定が保存されました。ページを更新中...',
+            ta: 'மொழி விருப்பம் சேமிக்கப்பட்டது. பக்கம் புதுப்பிக்கப்படுகிறது...',
           };
           const successMessage = successMessages[language] || 'Language preference saved. Refreshing page...';
 

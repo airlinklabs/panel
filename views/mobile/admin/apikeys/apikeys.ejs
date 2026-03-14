@@ -8,7 +8,7 @@
 
     <div class="flex items-start justify-between mb-5">
       <div>
-        <h1 class="text-base font-medium text-neutral-800 dark:text-white">API Keys</h1>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.navApiKeys || 'API Keys' %></h1>
         <p class="text-xs text-neutral-500 mt-0.5">Manage API keys and permissions</p>
       </div>
       <div class="flex gap-2 shrink-0">
@@ -139,8 +139,8 @@
       </div>
 
       <div class="flex gap-2 justify-end pt-1">
-        <button type="button" onclick="hideCreateModal()" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 px-4 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
-        <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white px-4 py-2 text-xs font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">Create</button>
+        <button type="button" onclick="hideCreateModal()" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 px-4 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition"><%= req.translations.cancel || 'Cancel' %></button>
+        <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white px-4 py-2 text-xs font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition"><%= req.translations.create || 'Create' %></button>
       </div>
     </form>
   </div>
@@ -188,7 +188,7 @@
       </div>
 
       <div class="flex gap-2 justify-end pt-1">
-        <button type="button" onclick="hideEditModal()" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 px-4 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
+        <button type="button" onclick="hideEditModal()" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 px-4 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition"><%= req.translations.cancel || 'Cancel' %></button>
         <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white px-4 py-2 text-xs font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">Update</button>
       </div>
     </form>

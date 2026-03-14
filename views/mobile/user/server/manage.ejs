@@ -170,7 +170,7 @@
           <div id="terminal"></div>
         </div>
         <div class="relative border-t border-neutral-800">
-          <input id="input" type="text" autocomplete="off" placeholder="Type a command..."
+          <input id="input" type="text" autocomplete="off" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
             class="w-full px-4 py-3 bg-neutral-800 text-white text-sm outline-none placeholder:text-neutral-500">
           <% if (typeof features !== 'undefined' && features && features.includes('auto-complete')) { %>
           <div id="settings-icon" class="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer">
@@ -183,7 +183,7 @@
           <div id="settings-menu" class="absolute bottom-full right-0 bg-neutral-800 text-white p-3 rounded-lg hidden w-48 border border-neutral-700">
             <label class="flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" id="auto-complete-toggle" class="w-4 h-4" />
-              <span>Auto-complete</span>
+              <span><%= req.translations.autoComplete || 'Auto-complete' %></span>
             </label>
           </div>
           <% } %>
@@ -590,11 +590,11 @@ connectWebSocket();
 
         modal.innerHTML = `
           <div class="bg-white dark:bg-neutral-800 rounded-xl p-5 w-full mx-4 transform scale-95 transition-transform duration-300">
-            <h2 class="text-2xl font-medium mb-1 text-neutral-800">Confirm Restart Server</h2>
-            <p class="mb-6 text-neutral-600">Are you sure you want to restart the server? This will disconnect all users.</p>
+            <h2 class="text-2xl font-medium mb-1 text-neutral-800"><%= req.translations.confirmRestartServer || 'Confirm Restart Server' %></h2>
+            <p class="mb-6 text-neutral-600"><%= req.translations.confirmRestartDesc || 'Are you sure you want to restart the server? This will disconnect all users.' %></p>
             <div class="flex justify-end space-x-4">
-              <button id="cancelRestartBtn" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
-              <button id="confirmRestartBtn" class="w-full md:w-auto rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Restart Server</button>
+              <button id="cancelRestartBtn" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition"><%= req.translations.cancel || 'Cancel' %></button>
+              <button id="confirmRestartBtn" class="w-full md:w-auto rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2"><%= req.translations.restartServer || 'Restart Server' %></button>
             </div>
           </div>
         `;
@@ -659,11 +659,11 @@ connectWebSocket();
 
         modal.innerHTML = `
           <div class="bg-white dark:bg-neutral-800 rounded-xl p-5 w-full mx-4 transform scale-95 transition-transform duration-300">
-            <h2 class="text-2xl font-medium mb-1 text-neutral-800">Confirm Stop Server</h2>
-            <p class="mb-6 text-neutral-600">Are you sure you want to stop the server? This will disconnect all users.</p>
+            <h2 class="text-2xl font-medium mb-1 text-neutral-800"><%= req.translations.confirmStopServer || 'Confirm Stop Server' %></h2>
+            <p class="mb-6 text-neutral-600"><%= req.translations.confirmStopDesc || 'Are you sure you want to stop the server? This will disconnect all users.' %></p>
             <div class="flex justify-end space-x-4">
-              <button id="cancelStopBtn" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
-              <button id="confirmStopBtn" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Stop Server</button>
+              <button id="cancelStopBtn" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition"><%= req.translations.cancel || 'Cancel' %></button>
+              <button id="confirmStopBtn" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2"><%= req.translations.stopServer || 'Stop Server' %></button>
             </div>
           </div>
         `;

@@ -15,16 +15,16 @@
     <!-- Errors -->
     <% if (req.query.err === "NOTACTIVEYET") { %>
       <div class="rounded-xl bg-amber-50 dark:bg-amber-800/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-4">
-        <p class="text-sm font-medium text-amber-700 dark:text-amber-400">Awaiting Installation</p>
-        <p class="text-xs text-amber-600 dark:text-amber-400/60 mt-0.5">The server isn't installed yet or is in a failed state.</p>
+        <p class="text-sm font-medium text-amber-700 dark:text-amber-400"><%= req.translations.awaitingInstallation || 'Awaiting Installation' %></p>
+        <p class="text-xs text-amber-600 dark:text-amber-400/60 mt-0.5"><%= req.translations.awaitingInstallationDesc || "The server isn't installed yet or is in a failed state." %></p>
       </div>
     <% } %>
 
     <% if (typeof daemonOffline !== 'undefined' && daemonOffline) { %>
       <div class="rounded-xl bg-red-50 dark:bg-red-800/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-4">
-        <p class="text-sm font-medium text-red-700 dark:text-red-400">Connection Error</p>
-        <p class="text-xs text-red-600 dark:text-red-400/60 mt-0.5">One or more nodes are offline.</p>
-        <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded-lg">Retry</button>
+        <p class="text-sm font-medium text-red-700 dark:text-red-400"><%= req.translations.connectionError || 'Connection Error' %></p>
+        <p class="text-xs text-red-600 dark:text-red-400/60 mt-0.5"><%= req.translations.connectionErrorDesc || 'One or more nodes are offline.' %></p>
+        <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded-lg"><%= req.translations.retry || 'Retry' %></button>
       </div>
     <% } %>
 
@@ -34,10 +34,10 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-20 w-20 text-neutral-300 dark:text-neutral-600 mb-4">
           <path fill-rule="evenodd" d="M11.622 1.602a.75.75 0 0 1 .756 0l2.25 1.313a.75.75 0 0 1-.756 1.295L12 3.118 10.128 4.21a.75.75 0 1 1-.756-1.295l2.25-1.313ZM5.898 5.81a.75.75 0 0 1-.27 1.025l-1.14.665 1.14.665a.75.75 0 1 1-.756 1.295L3.75 8.806v.944a.75.75 0 0 1-1.5 0V7.5a.75.75 0 0 1 .372-.648l2.25-1.312a.75.75 0 0 1 1.026.27Zm12.204 0a.75.75 0 0 1 1.026-.27l2.25 1.312a.75.75 0 0 1 .372.648v2.25a.75.75 0 0 1-1.5 0v-.944l-1.122.654a.75.75 0 1 1-.756-1.295l1.14-.665-1.14-.665a.75.75 0 0 1-.27-1.025Zm-9 5.25a.75.75 0 0 1 1.026-.27L12 11.882l1.872-1.092a.75.75 0 1 1 .756 1.295l-1.878 1.096V15a.75.75 0 0 1-1.5 0v-1.82l-1.878-1.095a.75.75 0 0 1-.27-1.025Z" clip-rule="evenodd" />
         </svg>
-        <h2 class="text-base font-medium text-neutral-800 dark:text-white">No servers yet</h2>
+        <h2 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.noServersYet || 'No servers yet' %></h2>
         <p class="text-sm text-neutral-500 mt-1">
           <% if (user.isAdmin) { %>
-            <a href="/admin/servers/create" class="text-blue-500">Create one now</a>
+            <a href="/admin/servers/create" class="text-blue-500"><%= req.translations.createOneNow || 'Create one now' %></a>
           <% } else { %>
             An admin will assign one to you.
           <% } %>
@@ -53,7 +53,7 @@
                 <% if (server.description) { %>
                   <p class="text-xs text-neutral-500 dark:text-neutral-400 truncate mt-0.5"><%= server.description %></p>
                 <% } else { %>
-                  <p class="text-xs text-neutral-400 italic truncate mt-0.5">No description</p>
+                  <p class="text-xs text-neutral-400 italic truncate mt-0.5"><%= req.translations.noDescription || 'No description' %></p>
                 <% } %>
               </div>
               <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-md shrink-0
@@ -100,11 +100,11 @@
       <% if (totalPages > 1) { %>
         <div class="flex items-center justify-center gap-3 mt-6">
           <% if (currentPage > 1) { %>
-            <a href="/?page=<%= currentPage - 1 %>" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg">Prev</a>
+            <a href="/?page=<%= currentPage - 1 %>" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg"><%= req.translations.prev || 'Prev' %></a>
           <% } %>
           <span class="text-sm text-neutral-500"><%= currentPage %> / <%= totalPages %></span>
           <% if (currentPage < totalPages) { %>
-            <a href="/?page=<%= currentPage + 1 %>" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg">Next</a>
+            <a href="/?page=<%= currentPage + 1 %>" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg"><%= req.translations.next || 'Next' %></a>
           <% } %>
         </div>
       <% } %>

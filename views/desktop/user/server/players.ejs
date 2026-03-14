@@ -22,7 +22,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg> 
       <div>
-        <p class="text-neutral-800 dark:text-white">Error</p>
+        <p class="text-neutral-800 dark:text-white"><%= req.translations.connectionError || 'Error' %></p>
         <p class="text-sm text-neutral-600 dark:text-neutral-400"><%= errorMessage.message %></p>
       </div>
     </div>
@@ -39,7 +39,7 @@
         <div class="bg-neutral-100 dark:bg-neutral-800/50 rounded-xl p-6 mb-6 shadow-lg">
           <div class="flex flex-col md:flex-row justify-between items-center mb-4">
             <div>
-              <h2 class="text-xl font-semibold text-neutral-800 dark:text-white mb-1">Players</h2>
+              <h2 class="text-xl font-semibold text-neutral-800 dark:text-white mb-1"><%= req.translations.players || 'Players' %></h2>
               <p class="text-neutral-600 dark:text-neutral-400 text-sm">
                 <% if (typeof serverInfo !== 'undefined') { %>
                   <span class="font-medium"><%= serverInfo.onlinePlayers || 0 %></span> / <span><%= serverInfo.maxPlayers || 0 %></span> players online
@@ -87,7 +87,7 @@
                   <p class="text-lg font-bold text-neutral-800 dark:text-white"><%= player.name %></p>
                   <div class="flex items-center mt-1">
                     <span class="inline-flex h-2 w-2 rounded-full bg-green-500 mr-2"></span>
-                    <span class="text-xs text-neutral-500 dark:text-neutral-400">Online</span>
+                    <span class="text-xs text-neutral-500 dark:text-neutral-400"><%= req.translations.online || 'Online' %></span>
                   </div>
                 </div>
               </div>
@@ -105,7 +105,7 @@
                   </svg>
                 </div>
               </div>
-              <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300">Server Offline</h2>
+              <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300"><%= req.translations.serverOffline || 'Server Offline' %></h2>
               <p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
                 The server appears to be offline. Start your server to see online players.
               </p>
@@ -126,7 +126,7 @@
                   </svg>
                 </div>
               </div>
-              <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300">Server is online</h2>
+              <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300"><%= req.translations.serverOnline || 'Server is online' %></h2>
               <p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
                 Your server is running but no players are currently connected. Players will appear here when they join.
               </p>
@@ -149,7 +149,7 @@
                   </svg>
                 </div>
               </div>
-              <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300">Status Unknown</h2>
+              <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300"><%= req.translations.statusUnknown || 'Status Unknown' %></h2>
               <p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
                 We couldn't determine if your server is online. It may be starting up or in an unusual state.
               </p>

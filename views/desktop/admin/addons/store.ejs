@@ -303,7 +303,7 @@
 
         <!-- Search + filters -->
         <div class="flex items-center gap-3 mb-6 flex-wrap">
-          <input id="searchInput" type="text" placeholder="Search addons..."
+          <input id="searchInput" type="text" placeholder="<%= req.translations.searchAddons || 'Search addons...' %>"
             class="bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-600 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition w-52" />
           <div id="tagFilters" class="flex gap-2 flex-wrap"></div>
         </div>
@@ -361,7 +361,7 @@
           <svg id="mActionIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
           </svg>
-          <span id="mActionLabel">Install</span>
+          <span id="mActionLabel"><%= req.translations.install || 'Install' %></span>
         </button>
         <a id="mGhBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-gh">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">

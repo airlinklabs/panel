@@ -104,7 +104,7 @@
     <p class="text-sm text-neutral-500 mb-4">Choose a name for this backup.</p>
     <input type="text" id="backupName"
       class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-700 text-neutral-800 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-neutral-400 mb-4"
-      placeholder="Backup name"
+      placeholder="<%= req.translations.backupName || 'Backup name' %>"
       onkeydown="handleBackupNameKeyPress(event)">
     <div class="flex justify-end gap-2">
       <button onclick="closeCreateBackupModal()" class="px-4 py-2 rounded-xl bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white text-sm hover:bg-neutral-300 dark:hover:bg-neutral-600 transition">Cancel</button>
