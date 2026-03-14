@@ -1,27 +1,12 @@
 <%- include('../../components/header', { title: 'Console' }) %>
 <%- include('../../components/serverFeatures') %>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.js"
-    integrity="sha512-2PRgAav8Os8vLcOAh1gSaDoNLe1fAyq8/G3QSdyjFFD+OqNjLeHE/8q4+S4MEZgPsuo+itHopj+hJvqS8XUQ8A=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.css"
-    integrity="sha512-iLYuqv+v/P4u9erpk+KM83Ioe/l7SEmr7wB6g+Kg1qmEit8EShDKnKtLHlv2QXUp7GGJhmqDI+1PhJYLTsfb8w=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/addons/attach/attach.min.js"
-    integrity="sha512-43J76SR5UijcuJTzs73z8NpkyWon8a8EoV+dX6obqXW7O26Yb268H2vP6EiJjD7sWXqxS3G/YOqPyyLF9fmqgA=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/addons/fit/fit.min.js"
-    integrity="sha512-+wh8VA1djpWk3Dj9/IJDu6Ufi4vVQ0zxLv9Vmfo70AbmYFJm0z3NLnV98vdRKBdPDV4Kwpi7EZdr8mDY9L8JIA=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css" />
+<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 
 <style>
-    .xterm-viewport {
-        overflow-y: auto !important;
-    }
-    .xterm-screen {
-        overflow: hidden !important;
-    }
     .stats-card {
         position: relative;
         overflow: hidden;
@@ -34,11 +19,23 @@
         height: 100% !important;
         pointer-events: none;
     }
-    #terminal .xterm {
-        padding: 0;
+
+    #terminal {
+        height: 300px;
+        background: #141414;
     }
-    #terminal .xterm-scroll-area {
-        overflow: hidden;
+
+    #terminal .xterm {
+        padding: 6px;
+        height: 100%;
+    }
+
+    #terminal .xterm-viewport {
+        background: #141414 !important;
+    }
+
+    #terminal .xterm-screen {
+        background: #141414;
     }
 </style>
 
@@ -165,8 +162,8 @@
     </div>
 
       <!-- Terminal -->
-      <div class="rounded-xl bg-neutral-900 border border-neutral-800 overflow-hidden">
-        <div id="terminal-container" class="w-full" style="overflow: hidden; max-width: 100%;">
+      <div class="rounded-xl bg-[#141414] border border-neutral-800 overflow-hidden">
+        <div id="terminal-container" class="w-full">
           <div id="terminal"></div>
         </div>
         <div class="relative border-t border-neutral-800">
@@ -241,10 +238,10 @@
 <%- include('../../components/footer') %>
 
 <script>
-const baseTheme = {
+const termTheme = {
   foreground: '#c5c9d1',
-  background: 'rgba(0, 0, 0, 0)',
-  selection: '#5DA5D533',
+  background: '#141414',
+  selectionBackground: '#5DA5D580',
   black: '#1E1E1D',
   brightBlack: '#262625',
   red: '#E54B4B',
@@ -262,64 +259,34 @@ const baseTheme = {
   brightCyan: '#89DDFF',
   brightWhite: '#ffffff',
   cursor: '#c5c9d1',
-  cursorAccent: '#c5c9d1'
+  cursorAccent: '#141414'
 };
 
-const lightTheme = {
-  ...baseTheme,
-  foreground: '#1E1E1D',
-  selection: '#5DA5D533'
-};
+const term = new Terminal({
+  disableStdin: true,
+  lineHeight: 1.3,
+  fontFamily: 'Menlo, Monaco, Consolas, monospace',
+  fontSize: 11,
+  theme: termTheme,
+  scrollback: 1000,
+  convertEol: true
+});
 
-function createTerminal(theme) {
-  return new Terminal({
-    disableStdin: true,
-    allowProposedApi: true,
-    lineHeight: 1.3,
-    rows: 18,
-    cols: 80,
-    fontFamily: 'Menlo, monospace',
-    theme: theme,
-    allowTransparency: true,
-    fontSize: 11,
-    scrollback: 500
-  });
-}
-
-let term = createTerminal(baseTheme);
+const fitAddon = new FitAddon.FitAddon();
+term.loadAddon(fitAddon);
 term.open(document.getElementById('terminal'));
 
 function fitTerminal() {
-  var container = document.getElementById('terminal-container');
-  if (!container || !term) return;
-  // Measure actual char width by sampling a rendered xterm cell
-  var xtermCore = term._core;
-  var charWidth = xtermCore && xtermCore._renderService
-    ? xtermCore._renderService.dimensions.actualCellWidth
-    : 6.6;
-  if (!charWidth || charWidth <= 0) charWidth = 6.6;
-  var available = container.getBoundingClientRect().width;
-  if (available <= 0) available = window.innerWidth - 32;
-  var cols = Math.max(40, Math.floor(available / charWidth));
-  term.resize(cols, 18);
+  fitAddon.fit();
 }
 
-// Wait for fonts and layout before fitting
 if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(function() {
-    requestAnimationFrame(fitTerminal);
-  });
+  document.fonts.ready.then(() => requestAnimationFrame(fitTerminal));
 } else {
   setTimeout(fitTerminal, 100);
 }
 
-window.addEventListener('resize', function() {
-  requestAnimationFrame(fitTerminal);
-});
-
-function setTerminalTheme() {
-  term.setOption('theme', baseTheme);
-}
+window.addEventListener('resize', () => requestAnimationFrame(fitTerminal));
 
 
     const maxCommands = 10;
@@ -470,25 +437,17 @@ connectWebSocket();
     }
 
     function writeConsole(prefix, type, message) {
-        const colors = {
-            airlinkd: baseTheme.blue,
-            system: baseTheme.yellow,
-            error: baseTheme.red,
-            info: baseTheme.blue,
-            success: baseTheme.green,
-            normal: baseTheme.foreground
+        const ansi = {
+            system: '\x1b[33m',
+            error: '\x1b[31m',
+            info: '\x1b[34m',
+            success: '\x1b[32m',
+            normal: '\x1b[0m'
         };
 
-        const color = colors[type.toLowerCase()] || baseTheme.foreground;
-        const messageColor = baseTheme.white;
-
+        const color = ansi[type.toLowerCase()] || '\x1b[0m';
         const prefixText = (prefix && type !== 'normal') ? `[${prefix}] ` : '';
-
-        const formattedMessage =
-            `\x1b[38;2;${hexToRgb(color).join(';')}m${prefixText}` +
-            `\x1b[38;2;${hexToRgb(messageColor).join(';')}m${message}\x1b[0m\r\n`;
-
-        term.write(formattedMessage);
+        term.write(`${color}${prefixText}\x1b[37m${message}\x1b[0m\r\n`);
     }
 
     function restartWebSocket() {
@@ -536,14 +495,6 @@ connectWebSocket();
             }
             event.preventDefault();
         }
-    }
-
-    function hexToRgb(hex) {
-        const bigint = parseInt(hex.replace('#', ''), 16);
-        const r = (bigint >> 16) & 255;
-        const g = (bigint >> 8) & 255;
-        const b = bigint & 255;
-        return [r, g, b];
     }
 
     let id = 0;
