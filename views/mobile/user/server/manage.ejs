@@ -793,6 +793,7 @@ connectWebSocket();
           const statusElement = document.getElementById('status');
           statusElement.textContent = 'Stopping';
           statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-orange-500';
+          updateHeaderDot('stopping');
           updateStatusChart('rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.2)');
 
           <% if (features.includes('players')) { %>
@@ -1086,6 +1087,45 @@ connectWebSocket();
         document.getElementById('diskUsage').textContent = `${diskUsagePercent}% (${formatBytes(diskUsageRaw * 1024 * 1024)} / ${formatBytes(diskLimitRaw * 1024 * 1024)})`;
     }
 
+    function updateHeaderDot(state) {
+        const container = document.querySelector('[data-server-status-container]');
+        if (!container) return;
+        if (state === 'online') {
+            container.innerHTML = `
+              <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+                <span class="relative flex h-2 w-2 mr-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <span class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Online</span>
+              </div>`;
+        } else if (state === 'starting') {
+            container.innerHTML = `
+              <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+                <span class="relative flex h-2 w-2 mr-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+                </span>
+                <span class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Starting</span>
+              </div>`;
+        } else if (state === 'stopping') {
+            container.innerHTML = `
+              <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+                <span class="relative flex h-2 w-2 mr-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                </span>
+                <span class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Stopping</span>
+              </div>`;
+        } else {
+            container.innerHTML = `
+              <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
+                <span class="inline-flex h-2 w-2 rounded-full bg-red-500 mr-2"></span>
+                <span class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Offline</span>
+              </div>`;
+        }
+    }
+
     function updateStatus(stats) {
         <% if (features.includes('players')) { %>
         const playersDeco = document.getElementById('players-deco');
@@ -1093,26 +1133,26 @@ connectWebSocket();
         const statusElement = document.getElementById('status');
         const ramUsageRaw = stats.data.memory.percentage;
 
-        // Check if server is in starting state
         if (stats.data && stats.data.starting === true) {
             statusElement.textContent = 'Starting';
             statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
+            updateHeaderDot('starting');
             <% if (features.includes('players')) { %>
             playersDeco.classList.add('translate-y-32');
             <% } %>
             updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
-            // No need to hide daemon down message as it's been removed
         } else if (ramUsageRaw !== "NaN") {
             statusElement.textContent = 'Online';
             statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+            updateHeaderDot('online');
             <% if (features.includes('players')) { %>
             playersDeco.classList.remove('translate-y-32');
             <% } %>
             updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
-            // No need to hide daemon down message as it's been removed
         } else {
             statusElement.textContent = 'Offline';
             statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
+            updateHeaderDot('offline');
             <% if (features.includes('players')) { %>
             playersDeco.classList.add('translate-y-32');
             <% } %>
@@ -1140,14 +1180,11 @@ connectWebSocket();
         statusChart.update();
     }
 
-    // Function to set all stats to offline state
     function setAllStatsOffline() {
-        // Update status display
         const statusElement = document.getElementById('status');
         statusElement.textContent = 'Offline';
         statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
-
-        // Update status chart
+        updateHeaderDot('offline');
         updateStatusChart('rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.2)');
 
         // Update RAM usage
