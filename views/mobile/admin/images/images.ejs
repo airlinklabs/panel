@@ -66,24 +66,103 @@
 
 <!-- Create Image Modal -->
 <div id="createModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60">
-  <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-2xl p-5 w-full shadow-xl max-h-[90vh] overflow-y-auto">
-    <div class="flex items-center justify-between mb-4">
-      <p class="text-sm font-medium text-neutral-800 dark:text-white">Create Image</p>
-      <button onclick="closeModal('createModal')" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+  <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-2xl w-full shadow-xl max-h-[92vh] overflow-y-auto">
+
+    <div class="flex items-start justify-between px-4 pt-4 pb-3 border-b border-neutral-100 dark:border-white/5">
+      <div>
+        <p class="text-sm font-semibold text-neutral-800 dark:text-white">Create Image</p>
+        <p class="text-xs text-neutral-500 mt-0.5">Configure Docker images and variables after creation.</p>
+      </div>
+      <button onclick="closeModal('createModal')" class="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition ml-3">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
         </svg>
       </button>
     </div>
-    <form action="/admin/images/create" method="POST" class="space-y-3">
-      <input type="text" name="name" placeholder="Image name" required class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition">
-      <input type="text" name="image" placeholder="Image URL or Base64" required class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition">
-      <textarea name="scripts" placeholder="Scripts (optional)" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition resize-none min-h-[80px]"></textarea>
-      <textarea name="variables" placeholder="Variables (optional)" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition resize-none min-h-[80px]"></textarea>
-      <div class="flex gap-2 justify-end pt-1">
-        <button type="button" onclick="closeModal('createModal')" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 px-4 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
-        <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white px-4 py-2 text-xs font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">Create</button>
+
+    <form action="/admin/images/create" method="POST" class="px-4 py-4 space-y-3">
+
+      <div class="flex flex-col gap-1">
+        <label for="m-create-name" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+          Name <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          id="m-create-name"
+          name="name"
+          placeholder="e.g. Minecraft Java"
+          required
+          class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-100 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition"
+        >
       </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div class="flex flex-col gap-1">
+          <label for="m-create-author" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Author</label>
+          <input
+            type="text"
+            id="m-create-author"
+            name="author"
+            placeholder="github.com/you"
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-100 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition"
+          >
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="m-create-authorName" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Author Name</label>
+          <input
+            type="text"
+            id="m-create-authorName"
+            name="authorName"
+            placeholder="Your Name"
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-100 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition"
+          >
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label for="m-create-startup" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+          Startup Command <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          id="m-create-startup"
+          name="startup"
+          placeholder="java -Xms128M -jar server.jar"
+          required
+          class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-100 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition font-mono"
+        >
+        <p class="text-xs text-neutral-400 dark:text-neutral-500">Use <code class="px-1 py-0.5 rounded bg-neutral-100 dark:bg-neutral-700 font-mono text-neutral-500 dark:text-neutral-300">$ALVKT(VAR)</code> for variables.</p>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label for="m-create-description" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Description</label>
+        <textarea
+          id="m-create-description"
+          name="description"
+          rows="2"
+          placeholder="What does this image run?"
+          class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-100 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition resize-none"
+        ></textarea>
+      </div>
+
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-3 py-2.5 flex items-start gap-2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 text-neutral-400 shrink-0 mt-0.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+        </svg>
+        <p class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">You'll be taken to the editor to add Docker images, variables, and scripts after creation.</p>
+      </div>
+
+      <div class="flex gap-2 pt-1">
+        <button type="button" onclick="closeModal('createModal')"
+          class="flex-1 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+          Cancel
+        </button>
+        <button type="submit"
+          class="flex-1 rounded-xl bg-neutral-900 dark:bg-white px-4 py-2.5 text-sm font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+          Create &amp; Edit
+        </button>
+      </div>
+
     </form>
   </div>
 </div>
