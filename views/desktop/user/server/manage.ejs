@@ -1,18 +1,9 @@
 <%- include('../../components/header', { title: 'Console' }) %>
 <%- include('../../components/serverFeatures') %>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.js"
-    integrity="sha512-2PRgAav8Os8vLcOAh1gSaDoNLe1fAyq8/G3QSdyjFFD+OqNjLeHE/8q4+S4MEZgPsuo+itHopj+hJvqS8XUQ8A=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.css"
-    integrity="sha512-iLYuqv+v/P4u9erpk+KM83Ioe/l7SEmr7wB6g+Kg1qmEit8EShDKnKtLHlv2QXUp7GGJhmqDI+1PhJYLTsfb8w=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/addons/attach/attach.min.js"
-    integrity="sha512-43J76SR5UijcuJTzs73z8NpkyWon8a8EoV+dX6obqXW7O26Yb268H2vP6EiJjD7sWXqxS3G/YOqPyyLF9fmqgA=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/addons/fit/fit.min.js"
-    integrity="sha512-+wh8VA1djpWk3Dj9/IJDu6Ufi4vVQ0zxLv9Vmfo70AbmYFJm0z3NLnV98vdRKBdPDV4Kwpi7EZdr8mDY9L8JIA=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css" />
+<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 
 <style>
@@ -24,8 +15,23 @@
         height: 100% !important;
     }
 
-    .xterm-viewport {
-        overflow-y: hidden !important;
+    #terminal {
+        height: 420px;
+        background: #141414;
+    }
+
+    #terminal .xterm {
+        padding: 8px;
+        height: 100%;
+    }
+
+    #terminal .xterm-viewport {
+        background: #141414 !important;
+        border-radius: 0;
+    }
+
+    #terminal .xterm-screen {
+        background: #141414;
     }
 </style>
 
@@ -37,7 +43,7 @@
     </div>
 
     <!-- Content -->
-    <div class="flex-1 p-6 overflow-y-auto pt-16">
+    <div class="flex-1 min-w-0 p-6 overflow-y-auto pt-16">
       <!-- Page Header -->
       <div class="sm:flex sm:items-center px-8 pt-4">
         <%- include('../../components/serverHeader') %>
@@ -183,9 +189,9 @@
       <div class="flex flex-col lg:flex-row px-8">
 
 <!-- Left side: Console -->
-<div class="w-full lg:w-2/3 lg:pr-5 flex flex-col">
-    <div class="bg-[#141414] border border-neutral-800 shadow rounded-t-xl p-4 flex-1">
-        <div id="terminal" class="overflow-x-auto whitespace-pre-wrap min-h-full w-full"></div>
+<div class="w-full lg:w-2/3 lg:pr-5 flex flex-col min-w-0">
+    <div class="bg-[#141414] border border-neutral-800 shadow rounded-t-xl overflow-hidden flex-1">
+        <div id="terminal"></div>
     </div>
     <div class="relative">
         <input id="input" type="text" autocomplete="off" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
@@ -281,10 +287,10 @@
 <%- include('../../components/footer') %>
 
 <script>
-const baseTheme = {
+const termTheme = {
   foreground: '#c5c9d1',
-  background: 'rgba(0, 0, 0, 0)',
-  selection: '#5DA5D533',
+  background: '#141414',
+  selectionBackground: '#5DA5D580',
   black: '#1E1E1D',
   brightBlack: '#262625',
   red: '#E54B4B',
@@ -302,53 +308,25 @@ const baseTheme = {
   brightCyan: '#89DDFF',
   brightWhite: '#ffffff',
   cursor: '#c5c9d1',
-  cursorAccent: '#c5c9d1'
+  cursorAccent: '#141414'
 };
 
-const lightTheme = {
-  foreground: '#c5c9d1',
-  background: 'rgba(0, 0, 0, 0)',
-  selection: '#5DA5D533',
-  black: '#1E1E1D',
-  brightBlack: '#262625',
-  red: '#E54B4B',
-  green: '#9ECE58',
-  yellow: '#FAED70',
-  blue: '#396FE2',
-  magenta: '#BB80B3',
-  cyan: '#2DDAFD',
-  white: '#d0d0d0',
-  brightRed: '#FF5370',
-  brightGreen: '#C3E88D',
-  brightYellow: '#FFCB6B',
-  brightBlue: '#82AAFF',
-  brightMagenta: '#C792EA',
-  brightCyan: '#89DDFF',
-  brightWhite: '#ffffff',
-  cursor: '#c5c9d1',
-  cursorAccent: '#c5c9d1'
-};
+const term = new Terminal({
+  disableStdin: true,
+  lineHeight: 1.35,
+  fontFamily: 'Menlo, Monaco, Consolas, monospace',
+  fontSize: 12,
+  theme: termTheme,
+  scrollback: 1000,
+  convertEol: true
+});
 
-function createTerminal(theme) {
-  return new Terminal({
-    disableStdin: true,
-    allowProposedApi: true,
-    lineHeight: 1.35,
-    rows: 19,
-    cols: 100,
-    fontFamily: 'Menlo, monospace',
-    theme: theme,
-    allowTransparency: true,
-    fontSize: 12
-  });
-}
-
-let term = createTerminal(baseTheme);
+const fitAddon = new FitAddon.FitAddon();
+term.loadAddon(fitAddon);
 term.open(document.getElementById('terminal'));
+fitAddon.fit();
 
-function setTerminalTheme() {
-  term.setOption('theme', baseTheme);
-}
+window.addEventListener('resize', () => fitAddon.fit());
 
 
     const maxCommands = 10;
@@ -499,25 +477,17 @@ connectWebSocket();
     }
 
     function writeConsole(prefix, type, message) {
-        const colors = {
-            airlinkd: baseTheme.blue,
-            system: baseTheme.yellow,
-            error: baseTheme.red,
-            info: baseTheme.blue,
-            success: baseTheme.green,
-            normal: baseTheme.foreground
+        const ansi = {
+            system: '\x1b[33m',
+            error: '\x1b[31m',
+            info: '\x1b[34m',
+            success: '\x1b[32m',
+            normal: '\x1b[0m'
         };
 
-        const color = colors[type.toLowerCase()] || baseTheme.foreground;
-        const messageColor = baseTheme.white;
-
+        const color = ansi[type.toLowerCase()] || '\x1b[0m';
         const prefixText = (prefix && type !== 'normal') ? `[${prefix}] ` : '';
-
-        const formattedMessage =
-            `\x1b[38;2;${hexToRgb(color).join(';')}m${prefixText}` +
-            `\x1b[38;2;${hexToRgb(messageColor).join(';')}m${message}\x1b[0m\r\n`;
-
-        term.write(formattedMessage);
+        term.write(`${color}${prefixText}\x1b[37m${message}\x1b[0m\r\n`);
     }
 
     function restartWebSocket() {
@@ -565,14 +535,6 @@ connectWebSocket();
             }
             event.preventDefault();
         }
-    }
-
-    function hexToRgb(hex) {
-        const bigint = parseInt(hex.replace('#', ''), 16);
-        const r = (bigint >> 16) & 255;
-        const g = (bigint >> 8) & 255;
-        const b = bigint & 255;
-        return [r, g, b];
     }
 
     let id = 0;
