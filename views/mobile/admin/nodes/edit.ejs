@@ -1,238 +1,203 @@
-<%- include('../../components/header', { title: 'Dashboard' }) %>
+<%- include('../../components/header', { title: req.translations.adminEditNodeTitle || 'Edit Node' }) %>
 
-<main class="">
+<main>
   <%- include('../../components/template') %>
 
-  <div class="px-4 py-5">
-<div class="flex items-start justify-between mb-5">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminEditNodeTitle %></h1>
-            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminEditNodeText %></p>
-        </div>
-      </div>
+  <div class="px-4 pt-5 pb-8">
 
-      <div id="nodeForm" class="mt-4 w-full">
-        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">
-          <form>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label for="nodeName" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.name %>:</label>
-                <input id="nodeName" value="<%= node.name %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="My node">
-              </div>
-
-              <div>
-                <label for="nodeRam" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.ram %> (GB):</label>
-                <input id="nodeRam" value="<%= node.ram %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="This is only for information purposes.">
-              </div>
-
-              <div>
-                <label for="nodeDisk" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.disk %> (GB):</label>
-                <input id="nodeDisk" value="<%= node.disk %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="This is only for information purposes.">
-              </div>
-
-              <div>
-                <label for="nodeProcessor" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.cpu %>:</label>
-                <input id="nodeProcessor" value="<%= node.cpu %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="This is only for information purposes.">
-              </div>
-
-              <div>
-                <label for="nodeAddress" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.addressIP %>:</label>
-                <input id="nodeAddress" value="<%= node.address %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="localhost">
-              </div>
-
-              <div>
-                <label for="nodePort" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.daemonPort %>:</label>
-                <input id="nodePort" value="<%= node.port %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="3002">
-              </div>
-
-              <div>
-                <label for="nodeKey" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.daemonKey %>:</label>
-                <input id="nodeKey" value="<%= node.key %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= node.key %>" disabled>
-              </div>
-
-              <div class="col-span-2">
-                <label for="allocatedPorts" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Allocated Ports:</label>
-                <div class="flex flex-col space-y-2">
-                  <div id="allocatedPortsList" class="grid grid-cols-4 gap-2 mb-2">
-                    <!-- Port tags will be inserted here -->
-                  </div>
-                  <div class="flex items-center space-x-2">
-                    <input id="newPortInput" type="text" placeholder="25565 or 25565-25570" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
-                    <button id="addPortBtn" type="button" class="rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/30 px-3 py-2 text-center text-sm font-medium shadow-lg hover:bg-neutral-800 dark:hover:bg-neutral-700 transition-all duration-200 text-neutral-300">
-                      Add Port
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-span-2 mt-4">
-                <button id="updateNodeBtn" type="button" class="w-full md:w-auto rounded-lg bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
-                    <%= req.translations.update %>
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-
+    <div class="mb-5">
+      <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminEditNodeTitle %></h1>
+      <p class="mt-1 text-sm text-neutral-500"><%= req.translations.adminEditNodeText %></p>
     </div>
+
+    <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+      <form>
+
+        <div class="space-y-4">
+
+          <div class="flex flex-col gap-1">
+            <label for="nodeName" class="text-sm font-medium text-neutral-700 dark:text-neutral-400"><%= req.translations.name %>:</label>
+            <input id="nodeName" value="<%= node.name %>" type="text" placeholder="My node"
+              class="w-full rounded-xl border border-neutral-800/10 dark:border-white/5 bg-neutral-400/10 dark:bg-neutral-600/20 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-neutral-800/20 dark:focus:ring-white/10">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1">
+              <label for="nodeRam" class="text-sm font-medium text-neutral-700 dark:text-neutral-400"><%= req.translations.ram %> (GB):</label>
+              <input id="nodeRam" value="<%= node.ram %>" type="number" placeholder="8"
+                class="w-full rounded-xl border border-neutral-800/10 dark:border-white/5 bg-neutral-400/10 dark:bg-neutral-600/20 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-neutral-800/20 dark:focus:ring-white/10">
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label for="nodeDisk" class="text-sm font-medium text-neutral-700 dark:text-neutral-400"><%= req.translations.disk %> (GB):</label>
+              <input id="nodeDisk" value="<%= node.disk %>" type="number" placeholder="100"
+                class="w-full rounded-xl border border-neutral-800/10 dark:border-white/5 bg-neutral-400/10 dark:bg-neutral-600/20 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-neutral-800/20 dark:focus:ring-white/10">
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label for="nodeProcessor" class="text-sm font-medium text-neutral-700 dark:text-neutral-400"><%= req.translations.cpu %>:</label>
+            <input id="nodeProcessor" value="<%= node.cpu %>" type="number" placeholder="4"
+              class="w-full rounded-xl border border-neutral-800/10 dark:border-white/5 bg-neutral-400/10 dark:bg-neutral-600/20 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-neutral-800/20 dark:focus:ring-white/10">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1">
+              <label for="nodeAddress" class="text-sm font-medium text-neutral-700 dark:text-neutral-400"><%= req.translations.addressIP %>:</label>
+              <input id="nodeAddress" value="<%= node.address %>" type="text" placeholder="localhost"
+                class="w-full rounded-xl border border-neutral-800/10 dark:border-white/5 bg-neutral-400/10 dark:bg-neutral-600/20 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-neutral-800/20 dark:focus:ring-white/10">
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label for="nodePort" class="text-sm font-medium text-neutral-700 dark:text-neutral-400"><%= req.translations.daemonPort %>:</label>
+              <input id="nodePort" value="<%= node.port %>" type="number" placeholder="3002"
+                class="w-full rounded-xl border border-neutral-800/10 dark:border-white/5 bg-neutral-400/10 dark:bg-neutral-600/20 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-neutral-800/20 dark:focus:ring-white/10">
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label for="nodeKey" class="text-sm font-medium text-neutral-700 dark:text-neutral-400"><%= req.translations.daemonKey %>:</label>
+            <input id="nodeKey" value="<%= node.key %>" type="text" disabled
+              class="w-full rounded-xl border border-neutral-800/10 dark:border-white/5 bg-neutral-300/10 dark:bg-neutral-700/20 px-4 py-2.5 text-sm text-neutral-500 dark:text-neutral-500 opacity-60 cursor-not-allowed">
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-neutral-700 dark:text-neutral-400">Allocated Ports:</label>
+            <div id="allocatedPortsList" class="grid grid-cols-2 gap-2 min-h-[2rem]">
+            </div>
+            <div class="flex gap-2">
+              <input id="newPortInput" type="text" placeholder="25565 or 25565-25570"
+                class="flex-1 rounded-xl border border-neutral-800/10 dark:border-white/5 bg-neutral-400/10 dark:bg-neutral-600/20 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-neutral-800/20 dark:focus:ring-white/10">
+              <button id="addPortBtn" type="button"
+                class="shrink-0 rounded-xl bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/30 px-4 py-2.5 text-sm font-medium text-neutral-200 dark:text-neutral-200 hover:bg-neutral-800 dark:hover:bg-neutral-600 transition">
+                Add
+              </button>
+            </div>
+          </div>
+
+          <button id="updateNodeBtn" type="button"
+            class="w-full rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-900 px-4 py-3 text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-100 transition">
+            <%= req.translations.update %>
+          </button>
+
+        </div>
+      </form>
+    </div>
+
   </div>
 </main>
 
 <%- include('../../components/toast') %>
 
 <script>
-  // Initialize allocated ports
   let allocatedPorts = <%= node.allocatedPorts ? node.allocatedPorts : '[]' %>;
 
-  // Get ports that are already in use by existing servers
   function getUsedPorts() {
     const usedPorts = new Set();
-
-    // Check if node has servers
     <% if (node.servers && node.servers.length > 0) { %>
       <% node.servers.forEach(function(server) { %>
         try {
           const ports = JSON.parse('<%= server.Ports %>');
           ports.forEach(portInfo => {
             const port = parseInt(portInfo.Port.split(':')[0]);
-            if (!isNaN(port)) {
-              usedPorts.add(port);
-            }
+            if (!isNaN(port)) usedPorts.add(port);
           });
-        } catch (e) {
-          console.error('Error parsing server ports:', e);
-        }
+        } catch (e) {}
       <% }); %>
     <% } %>
-
     return usedPorts;
   }
 
-  // Render allocated ports
   function renderAllocatedPorts() {
     const portsList = document.getElementById('allocatedPortsList');
     portsList.innerHTML = '';
 
     if (allocatedPorts.length === 0) {
-      const emptyMessage = document.createElement('div');
-      emptyMessage.className = 'col-span-4 text-sm text-neutral-500 italic';
-      emptyMessage.textContent = 'No ports allocated yet. Add ports that will be available for servers.';
-      portsList.appendChild(emptyMessage);
+      const msg = document.createElement('p');
+      msg.className = 'col-span-2 text-sm text-neutral-500 italic';
+      msg.textContent = 'No ports allocated yet.';
+      portsList.appendChild(msg);
       return;
     }
 
-    // Get ports that are already in use
     const usedPorts = getUsedPorts();
 
     allocatedPorts.forEach(port => {
-      const portTag = document.createElement('div');
       const isUsed = usedPorts.has(port);
 
-      // Add different styling for used ports
-      portTag.className = `flex items-center justify-between rounded-lg ${isUsed ? 'bg-amber-600/10 dark:bg-amber-700/20' : 'bg-neutral-800/10 dark:bg-neutral-800/20'} px-3 py-1.5 text-sm`;
+      const tag = document.createElement('div');
+      tag.className = `flex items-center justify-between rounded-lg px-3 py-2 text-sm ${
+        isUsed ? 'bg-amber-600/10' : 'bg-neutral-800/10 dark:bg-neutral-700/20'
+      }`;
 
-      const portText = document.createElement('span');
-      portText.className = isUsed ? 'text-amber-600 dark:text-amber-400 flex items-center' : 'text-neutral-800 dark:text-neutral-300';
-
-      // Add indicator for used ports
+      const label = document.createElement('span');
+      label.className = isUsed ? 'text-amber-600 dark:text-amber-400 flex items-center gap-1.5' : 'text-neutral-800 dark:text-neutral-300';
       if (isUsed) {
-        portText.innerHTML = `${port} <span class="ml-2 text-xs bg-amber-600/20 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded">In use</span>`;
+        label.innerHTML = `${port} <span class="text-xs bg-amber-600/20 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded">In use</span>`;
       } else {
-        portText.textContent = port;
+        label.textContent = port;
       }
 
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'ml-2 text-neutral-500 hover:text-red-500 transition-colors';
-      deleteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>';
-
-      // Disable delete button for ports that are in use
-      if (isUsed) {
-        deleteBtn.disabled = true;
-        deleteBtn.title = 'Cannot remove port that is in use by a server';
-        deleteBtn.className += ' opacity-50 cursor-not-allowed';
-      } else {
-        deleteBtn.onclick = (e) => {
-          e.preventDefault();
-          removePort(port);
-        };
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'ml-2 text-neutral-400 hover:text-red-500 transition-colors' + (isUsed ? ' opacity-40 cursor-not-allowed' : '');
+      del.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>';
+      del.disabled = isUsed;
+      if (!isUsed) {
+        del.onclick = (e) => { e.preventDefault(); removePort(port); };
       }
 
-      portTag.appendChild(portText);
-      portTag.appendChild(deleteBtn);
-      portsList.appendChild(portTag);
+      tag.appendChild(label);
+      tag.appendChild(del);
+      portsList.appendChild(tag);
     });
   }
 
-  // Add port function
   function addPort(input) {
-    // Check if it's a range (e.g., 25565-25570)
     if (input.includes('-')) {
       const [start, end] = input.split('-').map(p => parseInt(p.trim()));
       if (isNaN(start) || isNaN(end) || start >= end || start < 1024 || end > 65535) {
-        showToast('Invalid port range. Format should be start-end (e.g., 25565-25570) with ports between 1024 and 65535.', 'error');
+        showToast('Invalid port range. Use start-end between 1024 and 65535.', 'error');
         return;
       }
-
-      // Add each port in the range
-      for (let port = start; port <= end; port++) {
-        if (!allocatedPorts.includes(port)) {
-          allocatedPorts.push(port);
-        }
+      for (let p = start; p <= end; p++) {
+        if (!allocatedPorts.includes(p)) allocatedPorts.push(p);
       }
     } else {
-      // Single port
       const port = parseInt(input.trim());
       if (isNaN(port) || port < 1024 || port > 65535) {
-        showToast('Invalid port. Port must be between 1024 and 65535.', 'error');
+        showToast('Invalid port. Must be between 1024 and 65535.', 'error');
         return;
       }
-
-      if (!allocatedPorts.includes(port)) {
-        allocatedPorts.push(port);
-      }
+      if (!allocatedPorts.includes(port)) allocatedPorts.push(port);
     }
-
-    // Sort ports numerically
     allocatedPorts.sort((a, b) => a - b);
     renderAllocatedPorts();
   }
 
-  // Remove port function
   function removePort(port) {
-    // Check if port is in use
     const usedPorts = getUsedPorts();
     if (usedPorts.has(port)) {
-      showToast('Cannot remove port that is in use by a server', 'error');
+      showToast('Cannot remove a port in use by a server.', 'error');
       return;
     }
-
     allocatedPorts = allocatedPorts.filter(p => p !== port);
     renderAllocatedPorts();
   }
 
-  // Add port button click handler
   document.getElementById('addPortBtn').addEventListener('click', () => {
-    const input = document.getElementById('newPortInput').value.trim();
-    if (input) {
-      addPort(input);
-      document.getElementById('newPortInput').value = '';
-    }
+    const val = document.getElementById('newPortInput').value.trim();
+    if (val) { addPort(val); document.getElementById('newPortInput').value = ''; }
   });
 
-  // Enter key in input field
   document.getElementById('newPortInput').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      const input = e.target.value.trim();
-      if (input) {
-        addPort(input);
-        e.target.value = '';
-      }
+      const val = e.target.value.trim();
+      if (val) { addPort(val); e.target.value = ''; }
     }
   });
 
-  // Update node button click handler
   document.getElementById('updateNodeBtn').addEventListener('click', async () => {
     const nodeData = {
       name: document.getElementById('nodeName').value,
@@ -252,11 +217,8 @@
       });
 
       if (response.ok) {
-        console.log('Node updated:', await response.json());
         showToast('Node updated successfully', 'success');
-        setTimeout(() => {
-          window.location.href = '/admin/nodes?err=none';
-        }, 1000);
+        setTimeout(() => { window.location.href = '/admin/nodes?err=none'; }, 1000);
       } else {
         throw new Error('Failed to update node');
       }
@@ -265,11 +227,6 @@
     }
   });
 
-  // Initialize the UI
-  renderAllocatedPorts();
-</script>
-
-<%- include('../../components/footer') %>e UI
   renderAllocatedPorts();
 </script>
 
