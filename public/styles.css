@@ -777,6 +777,9 @@
   .h-10 {
     height: calc(var(--spacing) * 10);
   }
+  .h-11 {
+    height: calc(var(--spacing) * 11);
+  }
   .h-12 {
     height: calc(var(--spacing) * 12);
   }
@@ -2103,6 +2106,9 @@
   .pb-5 {
     padding-bottom: calc(var(--spacing) * 5);
   }
+  .pb-6 {
+    padding-bottom: calc(var(--spacing) * 6);
+  }
   .pb-8 {
     padding-bottom: calc(var(--spacing) * 8);
   }
@@ -2674,6 +2680,13 @@
     &:is(:where(.group):hover *) {
       @media (hover: hover) {
         color: var(--color-neutral-800);
+      }
+    }
+  }
+  .group-hover\:underline {
+    &:is(:where(.group):hover *) {
+      @media (hover: hover) {
+        text-decoration-line: underline;
       }
     }
   }
@@ -4197,6 +4210,11 @@
       @supports (color: color-mix(in lab, red, red)) {
         border-color: color-mix(in oklab, var(--color-neutral-800) 40%, transparent);
       }
+    }
+  }
+  .dark\:border-neutral-900 {
+    &:where(.dark, .dark *) {
+      border-color: var(--color-neutral-900);
     }
   }
   .dark\:border-red-500\/20 {

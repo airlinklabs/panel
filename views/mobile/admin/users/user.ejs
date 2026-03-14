@@ -20,6 +20,13 @@
        <div class="px-4 mt-5">
          <!-- User details will be displayed here -->
          <div class="bg-white dark:bg-neutral-800/50 rounded-xl p-6 shadow-lg border border-neutral-200 dark:border-neutral-700/30">
+           <div class="flex items-center gap-4 mb-5 pb-5 border-b border-neutral-200 dark:border-neutral-700/30">
+             <img class="h-14 w-14 rounded-xl object-cover shrink-0 border border-neutral-200 dark:border-neutral-700/30" src="<%= dataUser.avatar ? dataUser.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(dataUser.username) %>" alt="">
+             <div>
+               <p class="text-sm font-semibold text-neutral-800 dark:text-white"><%= dataUser.username %></p>
+               <p class="text-xs text-neutral-500 dark:text-neutral-400"><%= dataUser.email %></p>
+             </div>
+           </div>
            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
              <div>
                <h2 class="text-lg font-medium text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-700/30 pb-2 mb-4">

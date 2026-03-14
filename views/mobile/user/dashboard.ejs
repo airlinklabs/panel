@@ -86,7 +86,7 @@
               <% } %>
             </div>
             <div class="flex items-center gap-1.5">
-              <img class="h-4 w-4 rounded-full shrink-0" src="https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="">
+              <img class="h-4 w-4 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="">
               <span class="text-xs text-neutral-500 dark:text-neutral-400 truncate flex-1"><%= server.owner ? server.owner.username : 'Unknown' %></span>
               <% if (server.node) { %>
               <span class="text-xs text-neutral-400 dark:text-neutral-500 shrink-0 truncate max-w-[6rem]"><%= server.node.name || server.node.address %></span>

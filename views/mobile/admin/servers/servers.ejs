@@ -62,7 +62,10 @@
           <div class="flex gap-3 mb-3">
             <div class="flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg px-2.5 py-2">
               <p class="text-[10px] text-neutral-500 mb-0.5">Owner</p>
-              <a href="/admin/users/view/<%= server.owner.id %>" class="text-xs font-medium text-blue-600 dark:text-blue-400 truncate block"><%= server.owner.username %></a>
+              <a href="/admin/users/view/<%= server.owner.id %>" class="flex items-center gap-1.5">
+                <img class="h-4 w-4 rounded object-cover shrink-0" src="<%= server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner.username) %>" alt="">
+                <span class="text-xs font-medium text-blue-600 dark:text-blue-400 truncate"><%= server.owner.username %></span>
+              </a>
             </div>
             <div class="flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg px-2.5 py-2">
               <p class="text-[10px] text-neutral-500 mb-0.5">Node</p>
