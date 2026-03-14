@@ -19,7 +19,7 @@
         <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5 flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command</p>
-            <p class="text-xs text-neutral-500 mt-0.5">Customize the command used to start your server.</p>
+            <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.startupCommandDesc || 'Customize the command used to start your server.' %></p>
           </div>
           <%
             var isStartupEditAllowed = false;
@@ -52,7 +52,7 @@
           <div class="px-4 py-3 bg-neutral-100 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-white/5">
             <button type="submit"
               class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 transition <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>"
-              <%= !isStartupEditAllowed ? 'disabled' : '' %>>Save Command</button>
+              <%= !isStartupEditAllowed ? 'disabled' : '' %>><%= req.translations.saveCommand || 'Save Command' %></button>
           </div>
         </form>
       </div>
@@ -62,7 +62,7 @@
         <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5 flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-neutral-800 dark:text-white">Docker Image</p>
-            <p class="text-xs text-neutral-500 mt-0.5">Change the Docker image used by your server.</p>
+            <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.dockerImageDesc || 'Change the Docker image used by your server.' %></p>
           </div>
           <span class="inline-flex items-center rounded-md bg-blue-50 dark:bg-blue-900/20 px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-600/20 shrink-0 ml-3">
             Requires restart
@@ -112,7 +112,7 @@
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
         <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
           <p class="text-sm font-medium text-neutral-800 dark:text-white">Server Variables</p>
-          <p class="text-xs text-neutral-500 mt-0.5">Configure environment variables for your server.</p>
+          <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.serverVariablesDesc || 'Configure environment variables for your server.' %></p>
         </div>
         <form id="variablesForm" action="/server/<%= server.UUID %>/startup/variables" method="POST" enctype="application/x-www-form-urlencoded">
           <%- include('../../components/csrf') %>
@@ -146,11 +146,11 @@
               </div>
               <% }); %>
             <% } else { %>
-              <p class="text-xs text-neutral-500">No variables available for this server.</p>
+              <p class="text-xs text-neutral-500"><%= req.translations.noVariables || 'No variables available for this server.' %></p>
             <% } %>
           </div>
           <div class="px-4 py-3 bg-neutral-100 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-white/5">
-            <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 transition">Save Variables</button>
+            <button type="submit" class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 transition"><%= req.translations.saveVariables || 'Save Variables' %></button>
           </div>
         </form>
       </div>

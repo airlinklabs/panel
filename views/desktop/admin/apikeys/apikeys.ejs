@@ -29,8 +29,8 @@
     <div class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">API Keys Management</h1>
-          <p class="mt-1 tracking-tight text-sm text-neutral-500">Create and manage API keys with specific permissions</p>
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.apiKeysManagement || 'API Keys Management' %></h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.apiKeysDesc || 'Create and manage API keys with specific permissions' %></p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <div class="flex gap-2">
@@ -47,8 +47,8 @@
         <div class="rounded-xl bg-neutral-700/10 dark:bg-neutral-900 p-6">
           <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-              <h1 class="text-base font-semibold leading-6 text-neutral-800 dark:text-white">API Keys</h1>
-              <p class="mt-2 text-sm text-neutral-500">A list of all API keys in your panel.</p>
+              <h1 class="text-base font-semibold leading-6 text-neutral-800 dark:text-white"><%= req.translations.navApiKeys || 'API Keys' %></h1>
+              <p class="mt-2 text-sm text-neutral-500"><%= req.translations.apiKeysList || 'A list of all API keys in your panel.' %></p>
             </div>
           </div>
           <div class="mt-8 flow-root">
@@ -57,11 +57,11 @@
                 <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-800">
                   <thead>
                     <tr>
-                      <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-neutral-800 dark:text-white sm:pl-0">Name</th>
-                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white">Key</th>
-                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white">Created By</th>
-                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white">Status</th>
-                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white">Created</th>
+                      <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-neutral-800 dark:text-white sm:pl-0"><%= req.translations.apiKeyName || 'Name' %></th>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white"><%= req.translations.apiKeyKey || 'Key' %></th>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white"><%= req.translations.apiKeyCreatedBy || 'Created By' %></th>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white"><%= req.translations.apiKeyStatus || 'Status' %></th>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white"><%= req.translations.apiKeyCreated || 'Created' %></th>
                       <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
                         <span class="sr-only">Actions</span>
                       </th>
@@ -70,7 +70,7 @@
                   <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800">
                     <% if (apiKeys.length === 0) { %>
                       <tr>
-                        <td colspan="6" class="py-4 pl-4 pr-3 text-sm text-center text-neutral-500 sm:pl-0">No API keys found</td>
+                        <td colspan="6" class="py-4 pl-4 pr-3 text-sm text-center text-neutral-500 sm:pl-0"><%= req.translations.noApiKeys || 'No API keys found' %></td>
                       </tr>
                     <% } else { %>
                       <% apiKeys.forEach(apiKey => { %>
@@ -100,9 +100,9 @@
                           </td>
                           <td class="whitespace-nowrap px-3 py-4 text-sm">
                             <% if (apiKey.active) { %>
-                              <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30">Active</span>
+                              <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30"><%= req.translations.apiKeyActive || 'Active' %></span>
                             <% } else { %>
-                              <span class="inline-flex items-center rounded-md bg-red-50 dark:bg-red-900/20 px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-600/20 dark:ring-red-500/30">Inactive</span>
+                              <span class="inline-flex items-center rounded-md bg-red-50 dark:bg-red-900/20 px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-600/20 dark:ring-red-500/30"><%= req.translations.apiKeyInactive || 'Inactive' %></span>
                             <% } %>
                           </td>
                           <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-500">
@@ -162,7 +162,7 @@
 
 
       <div class="flex justify-between items-center border-b border-neutral-200 dark:border-neutral-700 pb-3 mb-3">
-        <h3 class="text-lg font-semibold text-neutral-900 dark:text-white">Create New API Key</h3>
+        <h3 class="text-lg font-semibold text-neutral-900 dark:text-white"><%= req.translations.createNewApiKey || 'Create New API Key' %></h3>
         <button type="button" onclick="hideCreateModal()" class="text-neutral-400 hover:text-neutral-500 focus:outline-none">
           <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -176,25 +176,25 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label for="name" class="block text-sm font-medium text-neutral-900 dark:text-white">Name</label>
-            <input type="text" name="name" id="name" required class="mt-1 block w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm" placeholder="My API Key">
+            <label for="name" class="block text-sm font-medium text-neutral-900 dark:text-white"><%= req.translations.apiKeyName || 'Name' %></label>
+            <input type="text" name="name" id="name" required class="mt-1 block w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm" placeholder="<%= req.translations.apiKeyNamePlaceholder || 'My API Key' %>">
           </div>
           <div>
-            <label for="description" class="block text-sm font-medium text-neutral-900 dark:text-white">Description</label>
-            <textarea name="description" id="description" rows="1" class="mt-1 block w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm" placeholder="Used for server management"></textarea>
+            <label for="description" class="block text-sm font-medium text-neutral-900 dark:text-white"><%= req.translations.apiKeyDescriptionLabel || 'Description' %></label>
+            <textarea name="description" id="description" rows="1" class="mt-1 block w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm" placeholder="<%= req.translations.apiKeyDescriptionPlaceholder || 'Used for server management' %>"></textarea>
           </div>
         </div>
 
 
         <div class="flex flex-wrap gap-2">
-          <button type="button" id="selectAllBtn" class="px-3 py-1 text-sm rounded-lg bg-neutral-100 dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition">Select All</button>
-          <button type="button" id="selectNoneBtn" class="px-3 py-1 text-sm rounded-lg bg-neutral-100 dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition">Clear All</button>
-          <button type="button" id="selectReadOnlyBtn" class="px-3 py-1 text-sm rounded-lg bg-neutral-100 dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition">Read-Only Access</button>
+          <button type="button" id="selectAllBtn" class="px-3 py-1 text-sm rounded-lg bg-neutral-100 dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition"><%= req.translations.selectAll || 'Select All' %></button>
+          <button type="button" id="selectNoneBtn" class="px-3 py-1 text-sm rounded-lg bg-neutral-100 dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition"><%= req.translations.clearAll || 'Clear All' %></button>
+          <button type="button" id="selectReadOnlyBtn" class="px-3 py-1 text-sm rounded-lg bg-neutral-100 dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition"><%= req.translations.readOnlyAccess || 'Read-Only Access' %></button>
         </div>
 
 
         <div class="bg-neutral-50 dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700">
-          <h4 class="text-sm font-semibold text-neutral-900 dark:text-white mb-3">Permissions</h4>
+          <h4 class="text-sm font-semibold text-neutral-900 dark:text-white mb-3"><%= req.translations.permissions || 'Permissions' %></h4>
           <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
             <% ['servers', 'users', 'nodes', 'settings'].forEach(category => { %>
               <div class="permission-category border rounded-lg border-neutral-200 dark:border-neutral-700">
@@ -256,8 +256,8 @@
 
 
         <div class="pt-4 flex justify-end space-x-3 border-t border-neutral-200 dark:border-neutral-700">
-          <button type="button" onclick="hideCreateModal()" class="rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700">Cancel</button>
-          <button type="submit" class="rounded-xl bg-neutral-950 dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200">Create</button>
+          <button type="button" onclick="hideCreateModal()" class="rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700"><%= req.translations.cancel || 'Cancel' %></button>
+          <button type="submit" class="rounded-xl bg-neutral-950 dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200"><%= req.translations.create || 'Create' %></button>
         </div>
 
       </form>
@@ -270,38 +270,38 @@
   <div class="flex min-h-full items-center justify-center p-4 text-center">
     <div class="relative transform overflow-hidden rounded-xl bg-white dark:bg-neutral-800 px-5 py-5 text-left shadow-2xl transition-all w-full max-w-3xl border border-neutral-200 dark:border-neutral-700 animate-fadeIn">
       <div class="flex justify-between items-center border-b border-neutral-200 dark:border-neutral-700 pb-3 mb-4">
-        <h3 class="text-lg font-medium leading-6 text-neutral-900 dark:text-white">Edit API Key</h3>
+        <h3 class="text-lg font-medium leading-6 text-neutral-900 dark:text-white"><%= req.translations.editApiKey || 'Edit API Key' %></h3>
         <button type="button" onclick="hideEditModal()" class="text-neutral-400 hover:text-neutral-500 focus:outline-none">
           <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
-      <p class="text-sm text-neutral-500 mb-4">Update API key details and permissions.</p>
+      <p class="text-sm text-neutral-500 mb-4"><%= req.translations.updateApiKeyDesc || 'Update API key details and permissions.' %></p>
       <form id="editApiKeyForm" action="/admin/apikeys/edit/0" method="POST">
          <%- include('../../components/csrf') %>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           <div class="md:col-span-1 space-y-4">
             <div class="bg-neutral-50 dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700">
-              <h4 class="text-sm font-medium text-neutral-900 dark:text-white mb-3 border-b border-neutral-200 dark:border-neutral-700 pb-2">Key Information</h4>
+              <h4 class="text-sm font-medium text-neutral-900 dark:text-white mb-3 border-b border-neutral-200 dark:border-neutral-700 pb-2"><%= req.translations.keyInformation || 'Key Information' %></h4>
               <div class="space-y-3">
                 <div>
-                  <label for="edit-name" class="block text-sm font-medium text-neutral-900 dark:text-white">Name</label>
+                  <label for="edit-name" class="block text-sm font-medium text-neutral-900 dark:text-white"><%= req.translations.apiKeyName || 'Name' %></label>
                   <div class="mt-1">
-                    <input type="text" name="name" id="edit-name" required class="block w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm" placeholder="My API Key">
+                    <input type="text" name="name" id="edit-name" required class="block w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm" placeholder="<%= req.translations.apiKeyNamePlaceholder || 'My API Key' %>">
                   </div>
                 </div>
                 <div>
-                  <label for="edit-description" class="block text-sm font-medium text-neutral-900 dark:text-white">Description</label>
+                  <label for="edit-description" class="block text-sm font-medium text-neutral-900 dark:text-white"><%= req.translations.apiKeyDescriptionLabel || 'Description' %></label>
                   <div class="mt-1">
-                    <textarea name="description" id="edit-description" rows="3" class="block w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm" placeholder="Used for server management"></textarea>
+                    <textarea name="description" id="edit-description" rows="3" class="block w-full rounded-xl border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm" placeholder="<%= req.translations.apiKeyDescriptionPlaceholder || 'Used for server management' %>"></textarea>
                   </div>
                 </div>
               </div>
             </div>
             <div class="bg-neutral-50 dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700">
-              <h4 class="text-sm font-medium text-neutral-900 dark:text-white mb-3 border-b border-neutral-200 dark:border-neutral-700 pb-2">Quick Select</h4>
+              <h4 class="text-sm font-medium text-neutral-900 dark:text-white mb-3 border-b border-neutral-200 dark:border-neutral-700 pb-2"><%= req.translations.quickSelect || 'Quick Select' %></h4>
               <div class="space-y-2">
                 <button type="button" id="editSelectAllBtn" class="w-full text-left px-3 py-2 text-sm rounded-lg bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
                   Select All Permissions
@@ -319,7 +319,7 @@
 
           <div class="md:col-span-2">
             <div class="bg-neutral-50 dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700">
-              <h4 class="text-sm font-medium text-neutral-900 dark:text-white mb-3 border-b border-neutral-200 dark:border-neutral-700 pb-2">Permissions</h4>
+              <h4 class="text-sm font-medium text-neutral-900 dark:text-white mb-3 border-b border-neutral-200 dark:border-neutral-700 pb-2"><%= req.translations.permissions || 'Permissions' %></h4>
 
               <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
 
@@ -489,7 +489,7 @@
         </div>
 
         <div class="mt-6 flex justify-end space-x-3 border-t border-neutral-200 dark:border-neutral-700 pt-4">
-          <button type="button" onclick="hideEditModal()" class="inline-flex justify-center rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 shadow-sm hover:bg-neutral-50 dark:hover:bg-neutral-700 focus:outline-none">Cancel</button>
+          <button type="button" onclick="hideEditModal()" class="inline-flex justify-center rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 shadow-sm hover:bg-neutral-50 dark:hover:bg-neutral-700 focus:outline-none"><%= req.translations.cancel || 'Cancel' %></button>
           <button type="submit" class="inline-flex justify-center rounded-xl bg-neutral-950 dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-neutral-900 shadow-sm hover:bg-neutral-700 dark:hover:bg-neutral-200 focus:outline-none">Update</button>
         </div>
       </form>
