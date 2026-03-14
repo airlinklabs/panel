@@ -5,6 +5,35 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { getUser } from '../../handlers/utils/user/user';
 import bcrypt from 'bcrypt';
 import logger from '../../handlers/logger';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+
+const avatarStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    const dir = path.join(process.cwd(), 'public', 'uploads', 'avatars');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const userId = (req as any).session?.user?.id;
+    const ext = path.extname(file.originalname);
+    cb(null, `avatar-${userId}${ext}`);
+  },
+});
+
+const avatarUpload = multer({
+  storage: avatarStorage,
+  fileFilter: (_req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed.'));
+    }
+  },
+  limits: { fileSize: 2 * 1024 * 1024 },
+});
 
 
 interface ErrorMessage {
@@ -343,6 +372,59 @@ const accountModule: Module = {
         } catch (error) {
           logger.error('Error setting language preference:', error);
           res.status(500).send('Internal Server Error');
+        }
+      },
+    );
+
+    router.post(
+      '/upload-avatar',
+      isAuthenticated(),
+      avatarUpload.single('avatar'),
+      async (req: Request, res: Response) => {
+        if (!req.file) {
+          res.status(400).json({ message: 'No file uploaded.' });
+          return;
+        }
+
+        try {
+          const userId = req.session?.user?.id;
+          const avatarPath = `/uploads/avatars/${req.file.filename}`;
+
+          await prisma.users.update({
+            where: { id: userId },
+            data: { avatar: avatarPath },
+          });
+
+          res.status(200).json({ message: 'Avatar updated.', avatar: avatarPath });
+        } catch (error) {
+          logger.error('Error uploading avatar:', error);
+          res.status(500).json({ message: 'Internal Server Error' });
+        }
+      },
+    );
+
+    router.post(
+      '/remove-avatar',
+      isAuthenticated(),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+
+          if (user?.avatar) {
+            const filePath = path.join(process.cwd(), 'public', user.avatar);
+            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+          }
+
+          await prisma.users.update({
+            where: { id: userId },
+            data: { avatar: null },
+          });
+
+          res.status(200).json({ message: 'Avatar removed.' });
+        } catch (error) {
+          logger.error('Error removing avatar:', error);
+          res.status(500).json({ message: 'Internal Server Error' });
         }
       },
     );

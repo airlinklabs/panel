@@ -1,0 +1,46 @@
+/*
+ * Solarized Light
+ * Built-in theme — do not remove this file
+ */
+
+:root {
+  --theme-bg: #fdf6e3;
+  --theme-bg-secondary: #eee8d5;
+  --theme-bg-tertiary: #e8e0cc;
+  --theme-border: #d3c9b1;
+  --theme-text: #657b83;
+  --theme-text-strong: #586e75;
+  --theme-text-muted: #93a1a1;
+  --theme-accent: #268bd2;
+}
+
+body {
+  background-color: var(--theme-bg) !important;
+  color: var(--theme-text) !important;
+}
+
+.bg-white,
+[class*="bg-neutral-50"],
+[class*="bg-neutral-100"] {
+  background-color: var(--theme-bg-secondary) !important;
+}
+
+[class*="dark:bg-"] {
+  background-color: var(--theme-bg-secondary) !important;
+}
+
+[class*="border-neutral"],
+[class*="dark:border-"] {
+  border-color: var(--theme-border) !important;
+}
+
+.text-neutral-800,
+.dark\:text-white {
+  color: var(--theme-text-strong) !important;
+}
+
+.text-neutral-500,
+.text-neutral-600,
+.dark\:text-neutral-400 {
+  color: var(--theme-text-muted) !important;
+}

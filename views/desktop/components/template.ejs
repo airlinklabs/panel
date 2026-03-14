@@ -12,7 +12,7 @@
 
           <!-- User info -->
           <div class="flex items-center space-x-4 py-4 px-4 border-y border-neutral-800/10 dark:border-white/5">
-              <img class="h-8 w-8 rounded-xl border border-neutral-700/10" src="https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(user.username) %>" alt="User avatar">
+              <img class="h-8 w-8 rounded-xl border border-neutral-700/10" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
               <div>
                   <p class="text-sm font-medium text-neutral-700 dark:text-white">
                       <span id="sidebar-username"><%= user.username %></span>

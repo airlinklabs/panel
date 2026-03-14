@@ -25,6 +25,34 @@
 
       <div class="px-4 sm:px-6 lg:px-8">
         <dl class="mt-5 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
+
+           <!-- Profile Picture Card -->
+           <div class="overflow-hidden rounded-xl bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-neutral-700/20 shadow-sm hover:shadow-md transition-all duration-300 p-6 sm:col-span-2">
+              <div class="flex items-center justify-between mb-4">
+                <dt class="truncate text-sm font-medium text-neutral-800 dark:text-white">Profile Picture</dt>
+                <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/20 p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                  </svg>
+                </div>
+              </div>
+              <div class="flex items-center gap-6">
+                <img id="avatar-preview" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="Avatar" class="h-20 w-20 rounded-2xl border border-neutral-200 dark:border-neutral-700/30 object-cover">
+                <div class="flex flex-col gap-3">
+                  <div>
+                    <label for="avatar-input" class="cursor-pointer inline-block rounded-xl bg-neutral-100 dark:bg-neutral-700/30 hover:bg-neutral-200 dark:hover:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/30 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 transition">
+                      Choose image
+                    </label>
+                    <input id="avatar-input" type="file" accept="image/*" class="hidden">
+                    <p class="mt-1.5 text-xs text-neutral-400">JPG, PNG, GIF or WebP — max 2 MB</p>
+                  </div>
+                  <% if (user.avatar) { %>
+                  <button id="remove-avatar-btn" type="button" class="text-xs text-red-500 hover:text-red-600 text-left transition">Remove current picture</button>
+                  <% } %>
+                </div>
+              </div>
+           </div>
+
            <!-- Account Settings Card -->
            <div class="overflow-hidden rounded-xl bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-neutral-700/20 shadow-sm hover:shadow-md transition-all duration-300 p-6">
               <div class="flex items-center justify-between mb-4">
@@ -146,6 +174,12 @@
                     <option class="text-black" value="en" <%= req.lang === 'en' ? 'selected' : '' %>>English</option>
                     <option class="text-black" value="fr" <%= req.lang === 'fr' ? 'selected' : '' %>>Français</option>
                     <option class="text-black" value="de" <%= req.lang === 'de' ? 'selected' : '' %>>Deutsch</option>
+                    <option class="text-black" value="es" <%= req.lang === 'es' ? 'selected' : '' %>>Español</option>
+                    <option class="text-black" value="pt" <%= req.lang === 'pt' ? 'selected' : '' %>>Português</option>
+                    <option class="text-black" value="it" <%= req.lang === 'it' ? 'selected' : '' %>>Italiano</option>
+                    <option class="text-black" value="ru" <%= req.lang === 'ru' ? 'selected' : '' %>>Русский</option>
+                    <option class="text-black" value="zh" <%= req.lang === 'zh' ? 'selected' : '' %>>中文</option>
+                    <option class="text-black" value="ja" <%= req.lang === 'ja' ? 'selected' : '' %>>日本語</option>
                   </select>
                   <button type="submit"
                     class="block rounded-xl bg-white hover:bg-neutral-200 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2">
@@ -441,16 +475,23 @@
 
         if (response.ok) {
           // Show message in the selected language
-          const successMessage = language === 'fr'
-            ? 'Préférence de langue enregistrée. Actualisation de la page...'
-            : 'Language preference saved. Refreshing page...';
+          const successMessages = {
+            fr: 'Préférence de langue enregistrée. Actualisation de la page...',
+            de: 'Spracheinstellung gespeichert. Seite wird aktualisiert...',
+            es: 'Preferencia de idioma guardada. Actualizando la página...',
+            pt: 'Preferência de idioma salva. Atualizando a página...',
+            it: 'Preferenza lingua salvata. Aggiornamento pagina...',
+            ru: 'Языковые настройки сохранены. Обновление страницы...',
+            zh: '语言偏好已保存，正在刷新页面...',
+            ja: '言語設定が保存されました。ページを更新中...',
+          };
+          const successMessage = successMessages[language] || 'Language preference saved. Refreshing page...';
 
           showToast(successMessage, 'success');
           setTimeout(() => window.location.reload(), 1500);
         } else {
           const errorText = await response.text();
-          const errorPrefix = language === 'fr' ? 'Erreur' : 'Error';
-          showToast(`${errorPrefix}: ${errorText}`, 'error');
+          showToast(`Error: ${errorText}`, 'error');
         }
       } catch (error) {
         const errorPrefix = language === 'fr' ? 'Erreur' : 'Error';
@@ -471,6 +512,62 @@
         </span>
       `;
     }
+
+    // Avatar upload
+    const avatarInput = document.getElementById('avatar-input');
+    const avatarPreview = document.getElementById('avatar-preview');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+    avatarInput?.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('Image must be under 2 MB.', 'error');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      try {
+        const response = await fetch('/upload-avatar', {
+          method: 'POST',
+          headers: { 'CSRF-Token': csrfToken },
+          body: formData,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          avatarPreview.src = data.avatar;
+          showToast('Profile picture updated.', 'success');
+        } else {
+          const err = await response.json().catch(() => ({}));
+          showToast(err.message || 'Failed to upload image.', 'error');
+        }
+      } catch (error) {
+        showToast('Failed to upload image.', 'error');
+      }
+    });
+
+    document.getElementById('remove-avatar-btn')?.addEventListener('click', async () => {
+      try {
+        const response = await fetch('/remove-avatar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+        });
+
+        if (response.ok) {
+          avatarPreview.src = 'https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(user.username) %>';
+          showToast('Profile picture removed.', 'success');
+          setTimeout(() => window.location.reload(), 1200);
+        } else {
+          showToast('Failed to remove picture.', 'error');
+        }
+      } catch {
+        showToast('Failed to remove picture.', 'error');
+      }
+    });
   });
   </script>
 <%- include('../components/footer') %>

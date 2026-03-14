@@ -1,0 +1,8 @@
+/* Example dark mode theme */
+:root {
+  --color-primary: #818cf8;
+}
+
+body {
+  /* Add your dark mode overrides here */
+}

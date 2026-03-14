@@ -1,0 +1,38 @@
+/*
+ * Solarized Dark
+ * Built-in theme — do not remove this file
+ */
+
+:root {
+  --theme-bg: #002b36;
+  --theme-bg-secondary: #073642;
+  --theme-bg-tertiary: #0d3c4a;
+  --theme-border: #1a4a56;
+  --theme-text: #839496;
+  --theme-text-strong: #93a1a1;
+  --theme-text-muted: #657b83;
+  --theme-accent: #268bd2;
+}
+
+html.dark body {
+  background-color: var(--theme-bg) !important;
+  color: var(--theme-text) !important;
+}
+
+html.dark .dark\:bg-\[#141414\],
+html.dark [class*="dark:bg-neutral"] {
+  background-color: var(--theme-bg-secondary) !important;
+}
+
+html.dark [class*="dark:border-"] {
+  border-color: var(--theme-border) !important;
+}
+
+html.dark .dark\:text-white {
+  color: var(--theme-text-strong) !important;
+}
+
+html.dark .dark\:text-neutral-400,
+html.dark .dark\:text-neutral-300 {
+  color: var(--theme-text-muted) !important;
+}

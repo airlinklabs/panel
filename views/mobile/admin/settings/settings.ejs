@@ -5,7 +5,6 @@
   <%- include('../../components/toast') %>
 
   <div class="px-4 py-5">
-
     <div class="mb-5">
       <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminSettingsTitle %></h1>
       <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminSettingsText %></p>
@@ -13,101 +12,160 @@
 
     <%- include('../../components/settingsTemplate') %>
 
-    <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
-      <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
-        <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.general || 'General Settings' %></p>
-      </div>
+    <form id="settingsForm" class="space-y-4" enctype="multipart/form-data">
 
-      <form id="settingsForm" class="p-4 space-y-4" enctype="multipart/form-data">
-
-        <div>
-          <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.siteTitle || 'Site Title' %></label>
-          <input type="text" name="title" placeholder="<%= settings.title %>" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition">
+      <!-- General -->
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.general || 'General' %></p>
         </div>
+        <div class="p-4 space-y-4">
 
-        <div>
-          <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.uploadLogo || 'Upload Logo' %></label>
-          <input type="file" name="logo" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm text-neutral-600 dark:text-neutral-400 focus:outline-none transition file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-700 file:text-neutral-700 dark:file:text-neutral-300">
-          <% if (settings.logo) { %>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.siteTitle || 'Site Title' %></label>
+            <input type="text" name="title" value="<%= settings.title %>" placeholder="<%= settings.title %>" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition">
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.uploadLogo || 'Upload Logo' %></label>
+            <input type="file" name="logo" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm text-neutral-600 dark:text-neutral-400 focus:outline-none transition file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-700 file:text-neutral-700 dark:file:text-neutral-300">
+            <% if (settings.logo) { %>
             <div class="mt-2 flex items-center gap-2">
               <p class="text-[10px] text-neutral-500">Current:</p>
-              <img src="<%= settings.logo %>" alt="Logo" class="h-6 object-contain">
+              <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-6 object-contain">
             </div>
-          <% } %>
-        </div>
+            <% } %>
+          </div>
 
-        <div>
-          <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.uploadFavicon || 'Upload Favicon' %></label>
-          <input type="file" name="favicon" accept=".ico,.png,.jpg,.jpeg" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm text-neutral-600 dark:text-neutral-400 focus:outline-none transition file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-700 file:text-neutral-700 dark:file:text-neutral-300">
-          <% if (settings.favicon) { %>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.uploadFavicon || 'Upload Favicon' %></label>
+            <input type="file" name="favicon" accept=".ico,.png,.jpg,.jpeg" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm text-neutral-600 dark:text-neutral-400 focus:outline-none transition file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-700 file:text-neutral-700 dark:file:text-neutral-300">
+            <% if (settings.favicon && settings.favicon.startsWith('/')) { %>
             <div class="mt-2 flex items-center gap-2">
               <p class="text-[10px] text-neutral-500">Current:</p>
               <img src="<%= settings.favicon %>" alt="Favicon" class="h-6 object-contain">
             </div>
-          <% } %>
-          <p class="text-[10px] text-neutral-500 mt-1"><%= req.translations.faviconUploadHelp || 'Accepts .ico, .png, or .jpg. Converted to 32x32 .ico.' %></p>
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.theme || 'Theme' %></label>
-          <select name="theme" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
-            <option value="default" <%= settings.theme === 'default' ? 'selected' : '' %>>Default</option>
-            <option value="dark" <%= settings.theme === 'dark' ? 'selected' : '' %> disabled>Dark</option>
-            <option value="light" <%= settings.theme === 'light' ? 'selected' : '' %> disabled>Light</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.defaultLanguage || 'Default Language' %></label>
-          <select name="language" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
-            <option value="en" <%= settings.language === 'en' ? 'selected' : '' %>>English</option>
-            <option value="fr" <%= settings.language === 'fr' ? 'selected' : '' %>>Français</option>
-            <option value="de" <%= settings.language === 'de' ? 'selected' : '' %>>Deutsch</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.uploadLimit || 'Upload File Size Limit' %></label>
-          <div class="relative">
-            <input
-              type="number"
-              name="uploadLimit"
-              value="<%= settings.uploadLimit %>"
-              min="1"
-              max="10240"
-              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 pr-12 text-sm text-neutral-800 dark:text-white focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition"
-            >
-            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-400 pointer-events-none">MB</span>
+            <% } %>
+            <p class="text-[10px] text-neutral-500 mt-1">Accepts .ico, .png, or .jpg — converted to 32x32 .ico.</p>
           </div>
-          <p class="text-[10px] text-neutral-500 mt-1"><%= req.translations.uploadLimitHelp || 'Maximum file size users can upload to servers, in megabytes.' %></p>
-        </div>
 
-        <div>
-          <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2"><%= req.translations.allowRegistration || 'Allow Registration' %></label>
-          <label class="flex items-center gap-3 cursor-pointer">
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.uploadLimit || 'Upload File Size Limit' %></label>
             <div class="relative">
-              <input type="checkbox" name="allowRegistration" value="true" class="sr-only peer" <%= settings.allowRegistration ? 'checked' : '' %>>
-              <div class="w-10 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:bg-emerald-600 transition-colors duration-200">
-                <div class="absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform duration-200 peer-checked:translate-x-4"></div>
-              </div>
+              <input type="number" name="uploadLimit" value="<%= settings.uploadLimit %>" min="1" max="10240" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 pr-12 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-400 pointer-events-none">MB</span>
             </div>
-            <span class="text-xs text-neutral-600 dark:text-neutral-400"><%= req.translations.allowRegistrationDescription || 'Enable new user registration' %></span>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2"><%= req.translations.allowRegistration || 'Allow Registration' %></label>
+            <label class="flex items-center gap-3 cursor-pointer">
+              <div class="relative inline-flex items-center">
+                <input type="checkbox" name="allowRegistration" value="true" class="sr-only peer" <%= settings.allowRegistration ? 'checked' : '' %>>
+                <div class="w-10 h-6 bg-neutral-300 dark:bg-neutral-600 peer-checked:bg-blue-600 rounded-full transition-colors duration-200"></div>
+                <div class="absolute left-0.5 top-0.5 bg-white rounded-full h-5 w-5 transition-transform duration-200 peer-checked:translate-x-4"></div>
+              </div>
+              <span class="text-xs text-neutral-600 dark:text-neutral-400"><%= req.translations.allowRegistrationDescription || 'Enable new user registration' %></span>
+            </label>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Light Mode Theme -->
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">Light Mode Theme</p>
+          <p class="text-[10px] text-neutral-500 mt-0.5">Applied when the panel is in light mode.</p>
+        </div>
+        <div class="p-4 space-y-2">
+          <% const lightVal = settings.lightTheme || 'default'; %>
+          <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= lightVal === 'default' ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-700/40' %>">
+            <input type="radio" name="lightTheme" value="default" class="sr-only" <%= lightVal === 'default' ? 'checked' : '' %>>
+            <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === 'default' ? 'border-blue-500' : 'border-neutral-300' %>">
+              <% if (lightVal === 'default') { %><span class="w-2 h-2 rounded-full bg-blue-500"></span><% } %>
+            </span>
+            <span class="text-xs text-neutral-700 dark:text-neutral-300">Default</span>
+            <span class="ml-auto text-[10px] text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-1.5 py-0.5 rounded-full">built-in</span>
           </label>
-          <p class="text-[10px] text-neutral-500 mt-1.5"><%= req.translations.allowRegistrationHelp || 'When disabled, only the first user can register.' %></p>
+          <% allThemes.filter(t => t.name !== 'default').forEach(function(theme) { %>
+          <% const lightThemeVal = theme.lightPath || theme.path; %>
+          <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= lightVal === lightThemeVal ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-700/40' %>">
+            <input type="radio" name="lightTheme" value="<%= lightThemeVal %>" class="sr-only" <%= lightVal === lightThemeVal ? 'checked' : '' %>>
+            <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === lightThemeVal ? 'border-blue-500' : 'border-neutral-300' %>">
+              <% if (lightVal === lightThemeVal) { %><span class="w-2 h-2 rounded-full bg-blue-500"></span><% } %>
+            </span>
+            <div class="flex-1 min-w-0">
+              <span class="text-xs text-neutral-700 dark:text-neutral-300 capitalize block"><%= theme.name.replace(/-/g, ' ') %></span>
+              <% if (theme.author) { %><span class="text-[10px] text-neutral-400">by <%= theme.author %></span><% } %>
+            </div>
+            <span class="ml-auto text-[10px] text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-1.5 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
+          </label>
+          <% }); %>
         </div>
+      </div>
 
-        <div class="flex gap-2 pt-2 border-t border-neutral-200 dark:border-white/5">
-          <button type="button" id="resetButton" class="flex-1 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-4 py-2.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
-            <%= req.translations.resetToDefault || 'Reset' %>
-          </button>
-          <button type="submit" class="flex-1 rounded-xl bg-neutral-900 dark:bg-white px-4 py-2.5 text-xs font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
-            <%= req.translations.saveSettings || 'Save Settings' %>
-          </button>
+      <!-- Dark Mode Theme -->
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">Dark Mode Theme</p>
+          <p class="text-[10px] text-neutral-500 mt-0.5">Applied when the panel is in dark mode.</p>
         </div>
+        <div class="p-4 space-y-2">
+          <% const darkVal = settings.darkTheme || 'default'; %>
+          <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= darkVal === 'default' ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-700/40' %>">
+            <input type="radio" name="darkTheme" value="default" class="sr-only" <%= darkVal === 'default' ? 'checked' : '' %>>
+            <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === 'default' ? 'border-blue-500' : 'border-neutral-300' %>">
+              <% if (darkVal === 'default') { %><span class="w-2 h-2 rounded-full bg-blue-500"></span><% } %>
+            </span>
+            <span class="text-xs text-neutral-700 dark:text-neutral-300">Default</span>
+            <span class="ml-auto text-[10px] text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-1.5 py-0.5 rounded-full">built-in</span>
+          </label>
+          <% allThemes.filter(t => t.name !== 'default').forEach(function(theme) { %>
+          <% const darkThemeVal = theme.darkPath || theme.path; %>
+          <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= darkVal === darkThemeVal ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-700/40' %>">
+            <input type="radio" name="darkTheme" value="<%= darkThemeVal %>" class="sr-only" <%= darkVal === darkThemeVal ? 'checked' : '' %>>
+            <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === darkThemeVal ? 'border-blue-500' : 'border-neutral-300' %>">
+              <% if (darkVal === darkThemeVal) { %><span class="w-2 h-2 rounded-full bg-blue-500"></span><% } %>
+            </span>
+            <div class="flex-1 min-w-0">
+              <span class="text-xs text-neutral-700 dark:text-neutral-300 capitalize block"><%= theme.name.replace(/-/g, ' ') %></span>
+              <% if (theme.author) { %><span class="text-[10px] text-neutral-400">by <%= theme.author %></span><% } %>
+            </div>
+            <span class="ml-auto text-[10px] text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-1.5 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
+          </label>
+          <% }); %>
+        </div>
+      </div>
 
-      </form>
-    </div>
+      <!-- Upload custom theme -->
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-medium text-neutral-800 dark:text-white">Upload Custom Theme</p>
+            <a href="/admin/settings/example-theme" class="text-[10px] text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+              Example
+            </a>
+          </div>
+          <p class="text-[10px] text-neutral-500 mt-0.5">Upload a theme.zip with <code class="bg-neutral-100 dark:bg-neutral-700/40 px-0.5 rounded">info.json</code>, <code class="bg-neutral-100 dark:bg-neutral-700/40 px-0.5 rounded">light.css</code>, <code class="bg-neutral-100 dark:bg-neutral-700/40 px-0.5 rounded">dark.css</code>.</p>
+        </div>
+        <div class="p-4">
+          <input type="file" name="themeFile" accept=".zip" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm text-neutral-600 dark:text-neutral-400 focus:outline-none transition file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-700 file:text-neutral-700 dark:file:text-neutral-300">
+        </div>
+      </div>
 
+      <!-- Actions -->
+      <div class="flex gap-2">
+        <button type="button" id="resetButton" class="flex-1 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-4 py-2.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+          <%= req.translations.resetToDefault || 'Reset' %>
+        </button>
+        <button type="submit" class="flex-1 rounded-xl bg-neutral-900 dark:bg-white px-4 py-2.5 text-xs font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+          <%= req.translations.saveSettings || 'Save Settings' %>
+        </button>
+      </div>
+
+    </form>
   </div>
 </main>
 
@@ -133,23 +191,47 @@
           }, 'image/x-icon');
         };
         img.src = URL.createObjectURL(file);
-      } catch (err) {
+      } catch {
         showToast('Failed to convert image', 'error');
       }
+    });
+
+    form.querySelectorAll('input[type="radio"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        const group = form.querySelectorAll(`input[name="${radio.name}"]`);
+        group.forEach(r => {
+          const lbl = r.closest('label');
+          const ring = lbl.querySelector('span');
+          const dot = ring.querySelector('span');
+          if (r.checked) {
+            lbl.classList.add('border-blue-400', 'bg-blue-50', 'dark:bg-blue-500/10');
+            lbl.classList.remove('border-neutral-200', 'dark:border-neutral-700/40');
+            ring.classList.add('border-blue-500');
+            ring.classList.remove('border-neutral-300');
+            if (!dot) {
+              const d = document.createElement('span');
+              d.className = 'w-2 h-2 rounded-full bg-blue-500';
+              ring.appendChild(d);
+            }
+          } else {
+            lbl.classList.remove('border-blue-400', 'bg-blue-50', 'dark:bg-blue-500/10');
+            lbl.classList.add('border-neutral-200', 'dark:border-neutral-700/40');
+            ring.classList.remove('border-blue-500');
+            ring.classList.add('border-neutral-300');
+            if (dot) dot.remove();
+          }
+        });
+      });
     });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = form.querySelector('button[type="submit"]');
-      const originalText = btn.textContent;
+      const original = btn.textContent;
       btn.disabled = true;
       btn.textContent = 'Saving...';
       try {
-        const fd = new FormData(form);
-        if (!fd.get('title')) fd.set('title', '<%= settings.title %>');
-        if (!fd.get('theme')) fd.set('theme', '<%= settings.theme %>');
-        if (!fd.get('language')) fd.set('language', '<%= settings.language %>');
-        const response = await fetch('/admin/settings', { method: 'POST', body: fd });
+        const response = await fetch('/admin/settings', { method: 'POST', body: new FormData(form) });
         if (response.ok) {
           showToast('<%= req.translations.settingsSaved || "Settings saved" %>', 'success');
           setTimeout(() => window.location.reload(), 1200);
@@ -160,17 +242,23 @@
       } catch (err) {
         showToast(err.message, 'error');
         btn.disabled = false;
-        btn.textContent = originalText;
+        btn.textContent = original;
       }
     });
 
-    document.getElementById('resetButton').addEventListener('click', () => {
-      if (confirm('<%= req.translations.resetSettingsConfirm || "Reset all settings to default?" %>')) {
-        const tempForm = document.createElement('form');
-        tempForm.method = 'POST';
-        tempForm.action = '/admin/settings/reset';
-        document.body.appendChild(tempForm);
-        tempForm.submit();
+    document.getElementById('resetButton').addEventListener('click', async () => {
+      if (!confirm('<%= req.translations.resetSettingsConfirm || "Reset all settings to default?" %>')) return;
+      try {
+        const response = await fetch('/admin/settings/reset', { method: 'POST' });
+        if (response.ok) {
+          showToast('<%= req.translations.settingsReset || "Settings reset to default." %>', 'success');
+          setTimeout(() => window.location.reload(), 1200);
+        } else {
+          const err = await response.json().catch(() => ({}));
+          showToast(err.error || 'Failed to reset settings.', 'error');
+        }
+      } catch {
+        showToast('Failed to reset settings.', 'error');
       }
     });
   });
