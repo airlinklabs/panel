@@ -428,15 +428,37 @@
         }).then(r => r.json()).then(data => ({ id, data }))
       ));
 
-      const failed = allResults.filter(r => !r.data.success);
-      if (failed.length > 0) showToast(failed.length + ' scan(s) failed', 'error');
+      if (currentServerIds.length > 1) {
+        allResults.forEach(r => {
+          const name = radarServerNames[r.id] || r.id;
+          if (!r.data.success) {
+            showToast(name + ': scan failed', 'error');
+          } else {
+            const count = (r.data.results?.results || []).reduce((s, x) => s + (x.matches?.length || 0), 0);
+            showToast(name + ': ' + (count > 0 ? count + ' finding(s)' : 'clean'), count > 0 ? 'error' : 'success');
+          }
+        });
+        runButton.disabled = false;
+        runButton.classList.remove('opacity-70');
+        runButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          </svg>
+          Run Scan
+        `;
+        closeRadarScanModal();
+        return;
+      }
 
-      document.getElementById('radarPickerPhase').classList.add('hidden');
-      document.getElementById('radarResultsPhase').classList.remove('hidden');
-      document.getElementById('radarRescanBtn').classList.remove('hidden');
-
-      const succeeded = allResults.filter(r => r.data.success);
-      renderRadarResults(succeeded);
+      const single = allResults[0];
+      if (!single.data.success) {
+        showToast('Scan failed', 'error');
+      } else {
+        document.getElementById('radarPickerPhase').classList.add('hidden');
+        document.getElementById('radarResultsPhase').classList.remove('hidden');
+        document.getElementById('radarRescanBtn').classList.remove('hidden');
+        renderRadarResults([single]);
+      }
 
     } catch (error) {
       console.error('Error running radar scan:', error);
@@ -538,12 +560,11 @@
 
     let html = '<div class="space-y-3">';
     scanResults.results.forEach(result => {
-      const count = result.matches ? result.matches.length : 0;
-      const severity = count >= 10 ? 'high' : count >= 3 ? 'medium' : 'low';
-      const severityStyles = {
-        high:   'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400',
-        medium: 'bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400',
-        low:    'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400',
+    const severityStyles = {
+        critical: 'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400',
+        high:     'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
+        medium:   'bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400',
+        low:      'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400',
       };
 
       html += `<div class="rounded-lg border border-neutral-200 dark:border-neutral-700/50 overflow-hidden">`;
@@ -552,7 +573,12 @@
       html += `<p class="text-xs font-medium text-neutral-700 dark:text-neutral-200">${result.pattern.description}</p>`;
       html += `<p class="text-xs text-neutral-400 font-mono mt-0.5 truncate">${result.pattern.pattern}</p>`;
       html += `</div>`;
-      html += `<span class="ml-3 shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${severityStyles[severity]}">${count} match${count !== 1 ? 'es' : ''}</span>`;
+      const sev = result.severity || 'low';
+      const count = result.matches ? result.matches.length : 0;
+      html += `<div class="ml-3 shrink-0 flex items-center gap-1.5">`;
+      html += `<span class="text-xs font-medium px-2 py-0.5 rounded-full ${severityStyles[sev] || severityStyles.low}">${sev}</span>`;
+      html += `<span class="text-xs text-neutral-500">${count} match${count !== 1 ? 'es' : ''}</span>`;
+      html += `</div>`;
       html += `</div>`;
       html += `<ul class="divide-y divide-neutral-100 dark:divide-neutral-700/30">`;
       result.matches.forEach(match => {
