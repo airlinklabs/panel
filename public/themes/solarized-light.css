@@ -2,15 +2,15 @@
  * Solarized Light
  * Built-in theme — do not remove this file
  *
- * Palette reference (Ethan Schoonover's Solarized):
- *   base03  #002b36  darkest background
- *   base02  #073642  dark background highlights
- *   base01  #586e75  comments / secondary content (used as text in light)
- *   base00  #657b83  body text
- *   base0   #839496  comments in light mode
- *   base1   #93a1a1  emphasized in light (subtle)
- *   base2   #eee8d5  background highlights
- *   base3   #fdf6e3  main background
+ * Ethan Schoonover's Solarized palette:
+ *   base03  #002b36  darkest bg
+ *   base02  #073642  highlighted bg
+ *   base01  #586e75  comments / deemphasized (used as body text in light)
+ *   base00  #657b83  primary body text in light
+ *   base0   #839496  secondary text
+ *   base1   #93a1a1  deemphasized in light
+ *   base2   #eee8d5  highlighted bg in light
+ *   base3   #fdf6e3  main background in light
  *   yellow  #b58900
  *   orange  #cb4b16
  *   red     #dc322f
@@ -25,113 +25,171 @@
   /* --- Page backgrounds --- */
   --theme-bg:               #fdf6e3;
   --theme-bg-secondary:     #eee8d5;
-  --theme-bg-tertiary:      #e5dece;
-  --theme-bg-card:          #eee8d5;
-  --theme-bg-hover:         #e0d9c5;
-  --theme-bg-input:         #f5eed8;
-  --theme-bg-active-nav:    rgba(0, 0, 0, 0.06);
+  --theme-bg-tertiary:      #e6dece;
+  --theme-bg-card:          #f4edd5;
+  --theme-bg-hover:         #e8e0ca;
+  --theme-bg-input:         #f8f1dc;
+  --theme-bg-active-nav:    rgba(38, 139, 210, 0.08);
 
   /* --- Borders --- */
-  --theme-border:           #d3c9b1;
-  --theme-border-subtle:    rgba(0, 0, 0, 0.07);
-  --theme-border-input:     #c9bfa7;
+  --theme-border:           #d5ccb3;
+  --theme-border-subtle:    rgba(88, 110, 117, 0.12);
+  --theme-border-input:     #c8bfa6;
+  --theme-border-accent:    rgba(38, 139, 210, 0.25);
 
   /* --- Text --- */
   --theme-text:             #657b83;
-  --theme-text-strong:      #586e75;
+  --theme-text-strong:      #073642;
   --theme-text-muted:       #93a1a1;
   --theme-text-nav:         #839496;
-  --theme-text-nav-active:  #586e75;
-  --theme-text-placeholder: #aab5b7;
+  --theme-text-nav-active:  #073642;
+  --theme-text-placeholder: #b0babb;
+  --theme-text-code:        #2aa198;
+  --theme-text-link:        #268bd2;
 
   /* --- Accent / brand --- */
   --theme-accent:           #268bd2;
   --theme-accent-hover:     #1a7abf;
-  --theme-accent-text:      #ffffff;
+  --theme-accent-text:      #fdf6e3;
+  --theme-accent-subtle:    rgba(38, 139, 210, 0.10);
 
   /* --- Status colours --- */
-  --theme-success:          #859900;
-  --theme-warning:          #b58900;
+  --theme-success:          #739900;
+  --theme-success-bg:       rgba(133, 153, 0, 0.10);
+  --theme-warning:          #a07800;
+  --theme-warning-bg:       rgba(181, 137, 0, 0.10);
   --theme-danger:           #dc322f;
+  --theme-danger-bg:        rgba(220, 50, 47, 0.08);
   --theme-info:             #2aa198;
+  --theme-info-bg:          rgba(42, 161, 152, 0.10);
 
   /* --- Nav chrome (sidebar + mobile bars) --- */
   --theme-nav-bg:           #eee8d5;
-  --theme-nav-border:       #d3c9b1;
-  --theme-nav-text:         #839496;
-  --theme-nav-text-active:  #586e75;
-  --theme-nav-icon:         #93a1a1;
+  --theme-nav-border:       #d5ccb3;
+  --theme-nav-text:         #93a1a1;
+  --theme-nav-text-active:  #073642;
+  --theme-nav-icon:         #aab5b7;
+  --theme-nav-icon-active:  #268bd2;
+
+  /* --- Table --- */
+  --theme-table-header-bg:  #ede5cc;
+  --theme-table-row-hover:  rgba(38, 139, 210, 0.04);
+  --theme-table-divide:     #ddd5bc;
+
+  /* --- Badges / pills --- */
+  --theme-badge-neutral-bg:   rgba(88, 110, 117, 0.08);
+  --theme-badge-neutral-text: #586e75;
+  --theme-badge-blue-bg:      rgba(38, 139, 210, 0.10);
+  --theme-badge-blue-text:    #1a6fa0;
+
+  /* --- Buttons --- */
+  --theme-btn-secondary-bg:     #ede5cc;
+  --theme-btn-secondary-border: #d5ccb3;
+  --theme-btn-secondary-text:   #586e75;
+  --theme-btn-secondary-hover:  #e4dbc2;
 
   /* --- Toggle / switch --- */
-  --theme-toggle-track:     #c9bfa7;
+  --theme-toggle-track:     #c8bfa6;
   --theme-toggle-dot:       #fdf6e3;
 
   /* --- Search --- */
-  --theme-search-bg:        #f5eed8;
-  --theme-search-border:    #d3c9b1;
+  --theme-search-bg:        #f8f1dc;
+  --theme-search-border:    #d5ccb3;
   --theme-search-text:      #657b83;
   --theme-search-results:   #eee8d5;
 
   /* --- Scrollbar --- */
   --theme-scrollbar-track:  #fdf6e3;
-  --theme-scrollbar-thumb:  #d3c9b1;
+  --theme-scrollbar-thumb:  #d5ccb3;
 
   /* --- Logo background --- */
-  --theme-logo-bg:          rgba(0, 0, 0, 0.08);
+  --theme-logo-bg:          rgba(0, 43, 54, 0.06);
+
+  /* --- Code / terminal --- */
+  --theme-code-bg:          #f0e8d0;
+  --theme-code-text:        #2aa198;
+  --theme-code-border:      #d5ccb3;
 }
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                  */
+/* ------------------------------------------------------------------ */
 
 body {
   background-color: var(--theme-bg) !important;
   color: var(--theme-text) !important;
 }
 
-/* Page-level backgrounds */
+/* ------------------------------------------------------------------ */
+/* Backgrounds                                                           */
+/* ------------------------------------------------------------------ */
+
 .bg-white,
 [class*="bg-neutral-50"],
 [class*="bg-neutral-100"] {
   background-color: var(--theme-bg-secondary) !important;
 }
 
-/* Cards */
 [class*="bg-neutral-200"],
 [class*="dark:bg-neutral-8"] {
   background-color: var(--theme-bg-card) !important;
 }
 
-/* Inputs */
-[class*="bg-neutral-100"],
+[class*="bg-neutral-400\/10"],
 [class*="dark:bg-neutral-7\/20"],
 [class*="dark:bg-white\/5"] {
   background-color: var(--theme-bg-input) !important;
 }
 
-/* All borders */
+/* ------------------------------------------------------------------ */
+/* Borders                                                               */
+/* ------------------------------------------------------------------ */
+
 [class*="border-neutral"],
 [class*="dark:border-"] {
   border-color: var(--theme-border) !important;
 }
 
-/* Strong text */
+/* ------------------------------------------------------------------ */
+/* Text                                                                  */
+/* ------------------------------------------------------------------ */
+
 .text-neutral-800,
 .dark\:text-white,
 .text-neutral-900 {
   color: var(--theme-text-strong) !important;
 }
 
-/* Body text */
-.text-neutral-600,
-.text-neutral-700 {
+.text-neutral-700,
+.text-neutral-600 {
   color: var(--theme-text) !important;
 }
 
-/* Muted text */
 .text-neutral-500,
 .dark\:text-neutral-400,
 .dark\:text-neutral-300 {
   color: var(--theme-text-muted) !important;
 }
 
-/* Nav chrome — sidebar */
+/* Links */
+.dark\:text-blue-400,
+a[class*="text-blue"] {
+  color: var(--theme-text-link) !important;
+}
+
+/* Code elements */
+code,
+pre,
+.font-mono {
+  background-color: var(--theme-code-bg) !important;
+  color: var(--theme-code-text) !important;
+  border-color: var(--theme-code-border) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Nav chrome — sidebar                                                  */
+/* ------------------------------------------------------------------ */
+
 #pc-sidebar,
 #pc-sidebar2 {
   background-color: var(--theme-nav-bg) !important;
@@ -149,10 +207,22 @@ body {
 
 #active-background {
   background-color: var(--theme-bg-active-nav) !important;
-  border-color: var(--theme-border-subtle) !important;
+  border-color: var(--theme-border-accent) !important;
 }
 
-/* Nav chrome — mobile top bar and bottom nav */
+.nav-link svg {
+  color: var(--theme-nav-icon) !important;
+}
+
+.nav-link.active svg,
+.nav-link:hover svg {
+  color: var(--theme-nav-icon-active) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Nav chrome — mobile                                                   */
+/* ------------------------------------------------------------------ */
+
 .mobile-top-bar,
 .mobile-bottom-nav {
   background-color: var(--theme-nav-bg) !important;
@@ -172,18 +242,132 @@ body {
   border-color: var(--theme-nav-border) !important;
 }
 
-/* Search */
+/* ------------------------------------------------------------------ */
+/* Tables                                                                */
+/* ------------------------------------------------------------------ */
+
+thead,
+[class*="bg-neutral-50"] thead,
+[class*="dark:bg-neutral-8\/50"] {
+  background-color: var(--theme-table-header-bg) !important;
+}
+
+tbody tr:hover {
+  background-color: var(--theme-table-row-hover) !important;
+}
+
+[class*="divide-neutral-200"],
+[class*="divide-neutral-100"],
+[class*="dark:divide-white\/10"],
+[class*="dark:divide-white\/5"] {
+  border-color: var(--theme-table-divide) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Badges / status pills                                                 */
+/* ------------------------------------------------------------------ */
+
+/* Success */
+[class*="bg-emerald-600\/10"] {
+  background-color: var(--theme-success-bg) !important;
+}
+
+.text-emerald-600,
+[class*="dark:text-emerald-400"] {
+  color: var(--theme-success) !important;
+}
+
+/* Warning */
+[class*="bg-yellow-600\/10"] {
+  background-color: var(--theme-warning-bg) !important;
+}
+
+.text-yellow-600,
+[class*="dark:text-yellow-400"] {
+  color: var(--theme-warning) !important;
+}
+
+/* Info */
+[class*="bg-blue-600\/10"],
+[class*="bg-indigo-"] {
+  background-color: var(--theme-accent-subtle) !important;
+}
+
+/* Danger */
+.text-red-500,
+.text-red-600 {
+  color: var(--theme-danger) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Buttons                                                               */
+/* ------------------------------------------------------------------ */
+
+.bg-white[class*="border"],
+button.bg-white {
+  background-color: var(--theme-btn-secondary-bg) !important;
+  border-color: var(--theme-btn-secondary-border) !important;
+  color: var(--theme-btn-secondary-text) !important;
+}
+
+button.bg-white:hover,
+.hover\:bg-neutral-200:hover,
+.hover\:bg-neutral-300:hover {
+  background-color: var(--theme-btn-secondary-hover) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Search                                                                */
+/* ------------------------------------------------------------------ */
+
 #searchResults {
   background-color: var(--theme-search-results) !important;
   border-color: var(--theme-border) !important;
 }
 
-/* Theme toggle track */
+/* ------------------------------------------------------------------ */
+/* Toggle / theme switch                                                  */
+/* ------------------------------------------------------------------ */
+
 #theme-toggle {
   background-color: var(--theme-toggle-track) !important;
 }
 
-/* Logo background */
+/* ------------------------------------------------------------------ */
+/* Logo                                                                  */
+/* ------------------------------------------------------------------ */
+
 .logo-bg {
   background-color: var(--theme-logo-bg) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Addon cards                                                           */
+/* ------------------------------------------------------------------ */
+
+.a-card {
+  background: rgba(238, 232, 213, 0.7) !important;
+  border-color: var(--theme-border) !important;
+}
+
+.a-card:hover {
+  border-color: var(--theme-border-accent) !important;
+}
+
+.a-icon {
+  background: rgba(38, 139, 210, 0.08) !important;
+  border-color: rgba(38, 139, 210, 0.15) !important;
+}
+
+.a-icon svg {
+  color: #5a9dbf !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Stat cards on overview / users pages                                  */
+/* ------------------------------------------------------------------ */
+
+[class*="bg-neutral-50"][class*="rounded-xl"],
+[class*="dark:bg-neutral-8\/20"] {
+  background-color: var(--theme-bg-card) !important;
 }

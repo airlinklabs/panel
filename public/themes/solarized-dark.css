@@ -2,15 +2,15 @@
  * Solarized Dark
  * Built-in theme — do not remove this file
  *
- * Palette reference (Ethan Schoonover's Solarized):
- *   base03  #002b36  darkest background
- *   base02  #073642  dark background highlights
- *   base01  #586e75  comments / secondary content
- *   base00  #657b83  body text (light-on-dark)
- *   base0   #839496  body text
+ * Ethan Schoonover's Solarized palette:
+ *   base03  #002b36  darkest bg
+ *   base02  #073642  highlighted bg
+ *   base01  #586e75  comments / deemphasized
+ *   base00  #657b83  body text
+ *   base0   #839496  body text (primary)
  *   base1   #93a1a1  emphasized content
- *   base2   #eee8d5  background highlights (light mode)
- *   base3   #fdf6e3  lightest background (light mode)
+ *   base2   #eee8d5  light bg highlight
+ *   base3   #fdf6e3  lightest bg
  *   yellow  #b58900
  *   orange  #cb4b16
  *   red     #dc322f
@@ -25,16 +25,17 @@
   /* --- Page backgrounds --- */
   --theme-bg:               #002b36;
   --theme-bg-secondary:     #073642;
-  --theme-bg-tertiary:      #0d3c4a;
+  --theme-bg-tertiary:      #0a3d4a;
   --theme-bg-card:          #073642;
-  --theme-bg-hover:         #0d4050;
-  --theme-bg-input:         #04303d;
-  --theme-bg-active-nav:    rgba(255, 255, 255, 0.06);
+  --theme-bg-hover:         #0d4254;
+  --theme-bg-input:         #032831;
+  --theme-bg-active-nav:    rgba(38, 139, 210, 0.10);
 
   /* --- Borders --- */
-  --theme-border:           #1a4855;
-  --theme-border-subtle:    rgba(255, 255, 255, 0.05);
-  --theme-border-input:     #1e5060;
+  --theme-border:           #164450;
+  --theme-border-subtle:    rgba(131, 148, 150, 0.08);
+  --theme-border-input:     #1e5566;
+  --theme-border-accent:    rgba(38, 139, 210, 0.30);
 
   /* --- Text --- */
   --theme-text:             #839496;
@@ -42,86 +43,155 @@
   --theme-text-muted:       #586e75;
   --theme-text-nav:         #657b83;
   --theme-text-nav-active:  #93a1a1;
-  --theme-text-placeholder: #4a6670;
+  --theme-text-placeholder: #3d5f69;
+  --theme-text-code:        #2aa198;
+  --theme-text-link:        #268bd2;
 
   /* --- Accent / brand --- */
   --theme-accent:           #268bd2;
-  --theme-accent-hover:     #2f9de0;
-  --theme-accent-text:      #ffffff;
+  --theme-accent-hover:     #3a9fde;
+  --theme-accent-text:      #fdf6e3;
+  --theme-accent-subtle:    rgba(38, 139, 210, 0.12);
 
   /* --- Status colours --- */
   --theme-success:          #859900;
+  --theme-success-bg:       rgba(133, 153, 0, 0.12);
   --theme-warning:          #b58900;
+  --theme-warning-bg:       rgba(181, 137, 0, 0.12);
   --theme-danger:           #dc322f;
+  --theme-danger-bg:        rgba(220, 50, 47, 0.12);
   --theme-info:             #2aa198;
+  --theme-info-bg:          rgba(42, 161, 152, 0.12);
 
   /* --- Nav chrome (sidebar + mobile bars) --- */
-  --theme-nav-bg:           #002b36;
-  --theme-nav-border:       #1a4855;
-  --theme-nav-text:         #657b83;
-  --theme-nav-text-active:  #93a1a1;
-  --theme-nav-icon:         #586e75;
+  --theme-nav-bg:           #002030;
+  --theme-nav-border:       #0f3a47;
+  --theme-nav-text:         #586e75;
+  --theme-nav-text-active:  #839496;
+  --theme-nav-icon:         #4a6670;
+  --theme-nav-icon-active:  #268bd2;
+
+  /* --- Table --- */
+  --theme-table-header-bg:  #052e3a;
+  --theme-table-row-hover:  rgba(38, 139, 210, 0.05);
+  --theme-table-divide:     #0f3a47;
+
+  /* --- Badges / pills --- */
+  --theme-badge-neutral-bg: rgba(131, 148, 150, 0.10);
+  --theme-badge-neutral-text: #586e75;
+  --theme-badge-blue-bg:    rgba(38, 139, 210, 0.14);
+  --theme-badge-blue-text:  #5aafde;
+
+  /* --- Buttons --- */
+  --theme-btn-secondary-bg:     #0a3545;
+  --theme-btn-secondary-border: #164450;
+  --theme-btn-secondary-text:   #839496;
+  --theme-btn-secondary-hover:  #0d3f52;
 
   /* --- Toggle / switch --- */
-  --theme-toggle-track:     #1a4855;
-  --theme-toggle-dot:       #839496;
+  --theme-toggle-track:     #0f3a47;
+  --theme-toggle-dot:       #586e75;
 
   /* --- Search --- */
-  --theme-search-bg:        #04303d;
-  --theme-search-border:    #1a4855;
+  --theme-search-bg:        #032831;
+  --theme-search-border:    #164450;
   --theme-search-text:      #839496;
-  --theme-search-results:   #073642;
+  --theme-search-results:   #052e3a;
 
-  /* --- Scrollbar (for browsers that support it) --- */
+  /* --- Scrollbar --- */
   --theme-scrollbar-track:  #002b36;
-  --theme-scrollbar-thumb:  #1a4855;
+  --theme-scrollbar-thumb:  #164450;
 
   /* --- Logo background --- */
   --theme-logo-bg:          transparent;
+
+  /* --- Code / terminal --- */
+  --theme-code-bg:          #021e28;
+  --theme-code-text:        #2aa198;
+  --theme-code-border:      #0f3a47;
 }
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                  */
+/* ------------------------------------------------------------------ */
 
 html.dark body {
   background-color: var(--theme-bg) !important;
   color: var(--theme-text) !important;
 }
 
-/* Page-level backgrounds */
+/* ------------------------------------------------------------------ */
+/* Backgrounds                                                           */
+/* ------------------------------------------------------------------ */
+
 html.dark .dark\:bg-\[#141414\],
 html.dark [class*="dark:bg-neutral-9"],
 html.dark [class*="dark:bg-neutral-8"] {
   background-color: var(--theme-bg-secondary) !important;
 }
 
-/* Cards and raised surfaces */
 html.dark [class*="dark:bg-neutral-7"] {
   background-color: var(--theme-bg-card) !important;
 }
 
-/* Input fields */
 html.dark [class*="dark:bg-neutral-7\/20"],
 html.dark [class*="dark:bg-neutral-7\/10"],
 html.dark [class*="dark:bg-white\/5"] {
   background-color: var(--theme-bg-input) !important;
 }
 
-/* All borders */
+html.dark [class*="dark:hover:bg-white\/5"]:hover,
+html.dark [class*="dark:hover:bg-neutral"]:hover {
+  background-color: var(--theme-bg-hover) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Borders                                                               */
+/* ------------------------------------------------------------------ */
+
 html.dark [class*="dark:border-"] {
   border-color: var(--theme-border) !important;
 }
 
-/* Strong text (headings, labels) */
+/* ------------------------------------------------------------------ */
+/* Text                                                                  */
+/* ------------------------------------------------------------------ */
+
 html.dark .dark\:text-white {
   color: var(--theme-text-strong) !important;
 }
 
-/* Body / secondary text */
-html.dark .dark\:text-neutral-400,
-html.dark .dark\:text-neutral-300,
-html.dark .dark\:text-neutral-200 {
+html.dark .dark\:text-neutral-400 {
   color: var(--theme-text-muted) !important;
 }
 
-/* Nav chrome — sidebar */
+html.dark .dark\:text-neutral-300 {
+  color: var(--theme-text) !important;
+}
+
+html.dark .dark\:text-neutral-200 {
+  color: var(--theme-text-strong) !important;
+}
+
+/* Links */
+html.dark .dark\:text-blue-400,
+html.dark a[class*="dark:text-blue"] {
+  color: var(--theme-text-link) !important;
+}
+
+/* Code elements */
+html.dark code,
+html.dark pre,
+html.dark .font-mono {
+  background-color: var(--theme-code-bg) !important;
+  color: var(--theme-code-text) !important;
+  border-color: var(--theme-code-border) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Nav chrome — sidebar                                                  */
+/* ------------------------------------------------------------------ */
+
 html.dark #pc-sidebar,
 html.dark #pc-sidebar2 {
   background-color: var(--theme-nav-bg) !important;
@@ -139,10 +209,23 @@ html.dark .nav-link:hover {
 
 html.dark #active-background {
   background-color: var(--theme-bg-active-nav) !important;
-  border-color: var(--theme-border-subtle) !important;
+  border-color: var(--theme-border-accent) !important;
 }
 
-/* Nav chrome — mobile top bar and bottom nav */
+/* Nav icons */
+html.dark .nav-link svg {
+  color: var(--theme-nav-icon) !important;
+}
+
+html.dark .nav-link.active svg,
+html.dark .nav-link:hover svg {
+  color: var(--theme-nav-icon-active) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Nav chrome — mobile                                                   */
+/* ------------------------------------------------------------------ */
+
 html.dark .mobile-top-bar,
 html.dark .mobile-bottom-nav {
   background-color: var(--theme-nav-bg) !important;
@@ -162,30 +245,127 @@ html.dark .mobile-more-sheet {
   border-color: var(--theme-nav-border) !important;
 }
 
-/* Search */
-html.dark #searchResults {
-  background-color: var(--theme-search-results) !important;
-  border-color: var(--theme-border) !important;
+/* ------------------------------------------------------------------ */
+/* Tables                                                                */
+/* ------------------------------------------------------------------ */
+
+html.dark thead,
+html.dark [class*="dark:bg-neutral-8\/50"] {
+  background-color: var(--theme-table-header-bg) !important;
 }
 
-/* Theme toggle track */
-html.dark #theme-toggle {
-  background-color: var(--theme-toggle-track) !important;
+html.dark tbody tr:hover {
+  background-color: var(--theme-table-row-hover) !important;
 }
 
-/* Logo background */
-html.dark .logo-bg {
-  background-color: var(--theme-logo-bg) !important;
+html.dark [class*="dark:divide-white\/10"],
+html.dark [class*="dark:divide-white\/5"] {
+  border-color: var(--theme-table-divide) !important;
 }
 
-/* Accent buttons */
+/* ------------------------------------------------------------------ */
+/* Buttons                                                               */
+/* ------------------------------------------------------------------ */
+
 html.dark [class*="dark:bg-blue"],
 html.dark [class*="dark:bg-indigo"] {
   background-color: var(--theme-accent) !important;
 }
 
-/* Hover backgrounds in lists */
-html.dark [class*="dark:hover:bg-white\/5"]:hover,
-html.dark [class*="dark:hover:bg-neutral"]:hover {
-  background-color: var(--theme-bg-hover) !important;
+html.dark .dark\:bg-neutral-800 {
+  background-color: var(--theme-btn-secondary-bg) !important;
+}
+
+html.dark .dark\:hover\:bg-neutral-700:hover {
+  background-color: var(--theme-btn-secondary-hover) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Badges / status pills                                                 */
+/* ------------------------------------------------------------------ */
+
+html.dark [class*="bg-neutral-400\/10"],
+html.dark [class*="dark:text-neutral-300\/70"] {
+  background-color: var(--theme-badge-neutral-bg) !important;
+  color: var(--theme-badge-neutral-text) !important;
+}
+
+/* Success badges */
+html.dark [class*="bg-emerald-600\/10"] {
+  background-color: var(--theme-success-bg) !important;
+}
+
+html.dark [class*="dark:text-emerald-400"] {
+  color: var(--theme-success) !important;
+}
+
+/* Warning badges */
+html.dark [class*="bg-yellow-600\/10"] {
+  background-color: var(--theme-warning-bg) !important;
+}
+
+html.dark [class*="dark:text-yellow-400"] {
+  color: var(--theme-warning) !important;
+}
+
+/* Danger */
+html.dark [class*="text-red-"],
+html.dark [class*="dark:text-red-"] {
+  color: var(--theme-danger) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Search                                                                */
+/* ------------------------------------------------------------------ */
+
+html.dark #searchResults {
+  background-color: var(--theme-search-results) !important;
+  border-color: var(--theme-border) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Toggle / theme switch                                                  */
+/* ------------------------------------------------------------------ */
+
+html.dark #theme-toggle {
+  background-color: var(--theme-toggle-track) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Logo                                                                  */
+/* ------------------------------------------------------------------ */
+
+html.dark .logo-bg {
+  background-color: var(--theme-logo-bg) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Modals / sheets                                                       */
+/* ------------------------------------------------------------------ */
+
+html.dark [class*="dark:bg-neutral-8"][class*="rounded"] {
+  background-color: var(--theme-bg-card) !important;
+  border-color: var(--theme-border) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Addon cards (a-card class from addons page)                           */
+/* ------------------------------------------------------------------ */
+
+html.dark .a-card {
+  background: rgba(7, 54, 66, 0.6) !important;
+  border-color: var(--theme-border) !important;
+}
+
+html.dark .a-card:hover {
+  border-color: var(--theme-border-accent) !important;
+}
+
+html.dark .a-icon {
+  background: rgba(38, 139, 210, 0.08) !important;
+  border-color: rgba(38, 139, 210, 0.15) !important;
+}
+
+html.dark .a-icon svg {
+  color: #3d7a9e !important;
 }
