@@ -1223,33 +1223,14 @@ function openCreateFileModal() {
     closeRenameModal();
     const loader = showLoadingPopup('Renaming', 'Processing...');
 
-    const srcDir = filePath.includes('/') ? filePath.substring(0, filePath.lastIndexOf('/')) : '';
-    const dstDir = newPath.includes('/') ? newPath.substring(0, newPath.lastIndexOf('/')) : '';
-    const movingDir = srcDir !== dstDir && dstDir !== '';
-
     try {
-      if (movingDir) {
-        // Create a hidden keepfile inside the target dir to force the daemon
-        // to create all intermediate directories, then delete it
-        const keepPath = dstDir + '/.airlink_keep';
-        const keepEncoded = keepPath.split('/').map(s => encodeURIComponent(s)).join('/');
-        const mkRes = await fetch('/server/<%= server.UUID %>/files/' + keepEncoded, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content: '' }),
-        });
-        if (!mkRes.ok) { loader.close(); showToast('Failed to create target directory', 'error'); return; }
-
-        await fetch('/server/<%= server.UUID %>/files/rm/' + keepEncoded, { method: 'DELETE' });
-      }
-
-      const renameRes = await fetch('/server/<%= server.UUID %>/rename', {
+      const res = await fetch('/server/<%= server.UUID %>/rename', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: filePath, newName: newPath }),
       });
       loader.close();
-      if (renameRes.ok) {
+      if (res.ok) {
         showToast('Renamed successfully', 'success');
         setTimeout(() => location.reload(), 800);
       } else {
