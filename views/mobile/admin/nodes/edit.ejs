@@ -108,10 +108,59 @@
     return usedPorts;
   }
 
-  function renderAllocatedPorts() {
+  function buildPortTag(port, usedPorts) {
+    const isUsed = usedPorts.has(port);
+    const tag = document.createElement('div');
+    tag.dataset.port = port;
+    tag.className = `flex items-center justify-between rounded-lg px-3 py-2 text-sm ${
+      isUsed ? 'bg-amber-600/10' : 'bg-neutral-800/10 dark:bg-neutral-700/20'
+    }`;
+    tag.style.opacity = '0';
+    tag.style.transform = 'translateY(4px)';
+
+    const label = document.createElement('span');
+    label.className = isUsed ? 'text-amber-600 dark:text-amber-400 flex items-center gap-1.5' : 'text-neutral-800 dark:text-neutral-300';
+    if (isUsed) {
+      label.innerHTML = `${port} <span class="text-xs bg-amber-600/20 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded">In use</span>`;
+    } else {
+      label.textContent = port;
+    }
+
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'ml-2 text-neutral-400 hover:text-red-500 transition-colors' + (isUsed ? ' opacity-40 cursor-not-allowed' : '');
+    del.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>';
+    del.disabled = isUsed;
+    if (!isUsed) {
+      del.onclick = (e) => { e.preventDefault(); animatePortOut(tag, () => removePort(port)); };
+    }
+
+    tag.appendChild(label);
+    tag.appendChild(del);
+    return tag;
+  }
+
+  function animatePortIn(el) {
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        el.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+        setTimeout(function() { el.style.transition = ''; }, 200);
+      });
+    });
+  }
+
+  function animatePortOut(el, cb) {
+    el.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(-4px)';
+    setTimeout(cb, 160);
+  }
+
+  function renderPortsList(animate) {
     const portsList = document.getElementById('allocatedPortsList');
     portsList.innerHTML = '';
-
     if (allocatedPorts.length === 0) {
       const msg = document.createElement('p');
       msg.className = 'col-span-2 text-sm text-neutral-500 italic';
@@ -119,37 +168,16 @@
       portsList.appendChild(msg);
       return;
     }
-
     const usedPorts = getUsedPorts();
-
-    allocatedPorts.forEach(port => {
-      const isUsed = usedPorts.has(port);
-
-      const tag = document.createElement('div');
-      tag.className = `flex items-center justify-between rounded-lg px-3 py-2 text-sm ${
-        isUsed ? 'bg-amber-600/10' : 'bg-neutral-800/10 dark:bg-neutral-700/20'
-      }`;
-
-      const label = document.createElement('span');
-      label.className = isUsed ? 'text-amber-600 dark:text-amber-400 flex items-center gap-1.5' : 'text-neutral-800 dark:text-neutral-300';
-      if (isUsed) {
-        label.innerHTML = `${port} <span class="text-xs bg-amber-600/20 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded">In use</span>`;
-      } else {
-        label.textContent = port;
-      }
-
-      const del = document.createElement('button');
-      del.type = 'button';
-      del.className = 'ml-2 text-neutral-400 hover:text-red-500 transition-colors' + (isUsed ? ' opacity-40 cursor-not-allowed' : '');
-      del.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>';
-      del.disabled = isUsed;
-      if (!isUsed) {
-        del.onclick = (e) => { e.preventDefault(); removePort(port); };
-      }
-
-      tag.appendChild(label);
-      tag.appendChild(del);
+    allocatedPorts.forEach((port, i) => {
+      const tag = buildPortTag(port, usedPorts);
       portsList.appendChild(tag);
+      if (animate) {
+        setTimeout(() => animatePortIn(tag), i * 25);
+      } else {
+        tag.style.opacity = '1';
+        tag.style.transform = '';
+      }
     });
   }
 
@@ -172,7 +200,7 @@
       if (!allocatedPorts.includes(port)) allocatedPorts.push(port);
     }
     allocatedPorts.sort((a, b) => a - b);
-    renderAllocatedPorts();
+    renderPortsList(true);
   }
 
   function removePort(port) {
@@ -182,7 +210,7 @@
       return;
     }
     allocatedPorts = allocatedPorts.filter(p => p !== port);
-    renderAllocatedPorts();
+    renderPortsList(false);
   }
 
   document.getElementById('addPortBtn').addEventListener('click', () => {
@@ -227,7 +255,7 @@
     }
   });
 
-  renderAllocatedPorts();
+  renderPortsList(true);
 </script>
 
 <%- include('../../components/footer') %>

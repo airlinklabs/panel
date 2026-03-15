@@ -400,10 +400,40 @@
 
   createApiKeyBtn.addEventListener('click', () => {
     createApiKeyModal.classList.remove('hidden');
+    const panel = createApiKeyModal.querySelector('.relative');
+    if (panel) { panel.style.opacity = '0'; panel.style.transform = 'scale(0.97) translateY(6px)'; }
+    createApiKeyModal.style.opacity = '0';
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        createApiKeyModal.style.transition = 'opacity 0.18s ease';
+        createApiKeyModal.style.opacity = '1';
+        if (panel) {
+          panel.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+          panel.style.opacity = '1';
+          panel.style.transform = 'scale(1) translateY(0)';
+        }
+        setTimeout(function() {
+          createApiKeyModal.style.transition = ''; createApiKeyModal.style.opacity = '';
+          if (panel) { panel.style.transition = ''; panel.style.opacity = ''; panel.style.transform = ''; }
+        }, 200);
+      });
+    });
   });
 
   function hideCreateModal() {
-    createApiKeyModal.classList.add('hidden');
+    const panel = createApiKeyModal.querySelector('.relative');
+    createApiKeyModal.style.transition = 'opacity 0.15s ease';
+    createApiKeyModal.style.opacity = '0';
+    if (panel) {
+      panel.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+      panel.style.opacity = '0';
+      panel.style.transform = 'scale(0.97) translateY(6px)';
+    }
+    setTimeout(function() {
+      createApiKeyModal.classList.add('hidden');
+      createApiKeyModal.style.transition = ''; createApiKeyModal.style.opacity = '';
+      if (panel) { panel.style.transition = ''; panel.style.opacity = ''; panel.style.transform = ''; }
+    }, 160);
   }
 
   function toggleCategory(btn) {
@@ -622,4 +652,19 @@
       document.getElementById('deleteKeyForm_' + keyId).submit();
     });
   }
+
+  (function staggerRows() {
+    var rows = document.querySelectorAll('tbody tr');
+    rows.forEach(function(row, i) {
+      row.style.opacity = '0';
+      row.style.transform = 'translateY(5px)';
+      row.style.transition = 'none';
+      setTimeout(function() {
+        row.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+        row.style.opacity = '1';
+        row.style.transform = 'translateY(0)';
+        setTimeout(function() { row.style.transition = ''; row.style.opacity = ''; row.style.transform = ''; }, 200);
+      }, i * 30);
+    });
+  })();
 </script>

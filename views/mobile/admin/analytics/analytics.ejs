@@ -141,7 +141,18 @@
       el.classList.remove('bg-white', 'dark:bg-neutral-700', 'text-neutral-800', 'dark:text-white', 'shadow-sm');
       el.classList.add('text-neutral-500', 'dark:text-neutral-400');
     });
-    document.getElementById('content-' + name).classList.remove('hidden');
+    const target = document.getElementById('content-' + name);
+    target.classList.remove('hidden');
+    target.style.opacity = '0';
+    target.style.transform = 'translateY(5px)';
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        target.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+        target.style.opacity = '1';
+        target.style.transform = 'translateY(0)';
+        setTimeout(function() { target.style.transition = ''; target.style.opacity = ''; target.style.transform = ''; }, 200);
+      });
+    });
     const btn = document.getElementById('tab-' + name);
     btn.classList.remove('text-neutral-500', 'dark:text-neutral-400');
     btn.classList.add('bg-white', 'dark:bg-neutral-700', 'text-neutral-800', 'dark:text-white', 'shadow-sm');
@@ -194,18 +205,58 @@
       });
     }
     const modal = document.getElementById('serverDetailsModal');
+    const inner = modal.querySelector('div');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+    modal.style.opacity = '0';
+    if (inner) { inner.style.transform = 'scale(0.97) translateY(6px)'; inner.style.opacity = '0'; }
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        modal.style.transition = 'opacity 0.18s ease';
+        modal.style.opacity = '1';
+        if (inner) {
+          inner.style.transition = 'transform 0.18s ease, opacity 0.18s ease';
+          inner.style.transform = 'scale(1) translateY(0)';
+          inner.style.opacity = '1';
+        }
+        setTimeout(function() {
+          modal.style.transition = ''; modal.style.opacity = '';
+          if (inner) { inner.style.transition = ''; inner.style.transform = ''; inner.style.opacity = ''; }
+        }, 200);
+      });
+    });
   }
 
   document.getElementById('closeServerModal').addEventListener('click', () => {
     const modal = document.getElementById('serverDetailsModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+    const inner = modal.querySelector('div');
+    modal.style.transition = 'opacity 0.15s ease';
+    modal.style.opacity = '0';
+    if (inner) {
+      inner.style.transition = 'transform 0.15s ease, opacity 0.15s ease';
+      inner.style.transform = 'scale(0.97) translateY(6px)';
+      inner.style.opacity = '0';
+    }
+    setTimeout(function() {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      modal.style.transition = ''; modal.style.opacity = '';
+      if (inner) { inner.style.transition = ''; inner.style.transform = ''; inner.style.opacity = ''; }
+    }, 160);
   });
 
   document.getElementById('serverDetailsBtn').addEventListener('click', showServerModal);
-  document.getElementById('refreshBtn').addEventListener('click', fetchData);
+
+  document.getElementById('refreshBtn').addEventListener('click', function() {
+    const icon = this.querySelector('svg');
+    if (icon) {
+      icon.style.transition = 'transform 0.6s ease';
+      icon.style.transform = 'rotate(360deg)';
+      setTimeout(function() { icon.style.transition = ''; icon.style.transform = ''; }, 650);
+    }
+    fetchData();
+  });
+
   document.getElementById('refreshBtn').addEventListener('dblclick', async (e) => {
     e.preventDefault();
     try { await fetch('/api/admin/playerstats/collect', { method: 'POST' }); setTimeout(fetchData, 1000); } catch {}

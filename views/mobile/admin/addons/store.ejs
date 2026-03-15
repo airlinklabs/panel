@@ -442,8 +442,24 @@
       render(filtered());
     } catch (err) {
       hide('storeLoading');
-      document.getElementById('storeErrorMsg').textContent = err.message || 'Failed to load addon store.';
-      show('storeError');
+      const msg = err.message || '';
+      const isRateLimit = msg.toLowerCase().includes('rate') || msg.toLowerCase().includes('403') || msg.toLowerCase().includes('429');
+      const displayMsg = isRateLimit
+        ? 'GitHub rate limit reached. Wait a few minutes and try again.'
+        : (msg || 'Failed to load addon store.');
+      document.getElementById('storeErrorMsg').textContent = displayMsg;
+      const errorEl = document.getElementById('storeError');
+      errorEl.style.display = '';
+      errorEl.style.opacity = '0';
+      errorEl.style.transform = 'translateY(6px)';
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          errorEl.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+          errorEl.style.opacity = '1';
+          errorEl.style.transform = 'translateY(0)';
+          setTimeout(function() { errorEl.style.transition = ''; }, 220);
+        });
+      });
     }
   }
 
@@ -498,6 +514,8 @@
       const installed = INSTALLED.has(addon.id);
       const card      = document.createElement('div');
       card.className  = 's-card';
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(6px)';
 
       const tagsHtml = (addon.tags || []).slice(0, 3).map(t => `<span class="s-tag">${esc(t)}</span>`).join('');
       const badge    = installed ? 's-badge s-badge-installed' : badgeClass(addon.status);
@@ -528,6 +546,13 @@
 
       card.addEventListener('click', () => openModal(addon));
       grid.appendChild(card);
+      const i = grid.children.length - 1;
+      setTimeout(function() {
+        card.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+        setTimeout(function() { card.style.transition = ''; card.style.opacity = ''; card.style.transform = ''; }, 220);
+      }, i * 35);
     });
 
     showGrid('storeGrid');
