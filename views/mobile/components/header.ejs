@@ -22,6 +22,7 @@
     <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,300,600,400,700&display=swap" rel="stylesheet">
     <script src="/js/csrf.js"></script>
     <script src="/javascript/viewport-mode.js"></script>
+    <script src="/javascript/page-loader.js"></script>
     <style>
       html, body, * { scrollbar-width: none; -ms-overflow-style: none; }
       ::-webkit-scrollbar { display: none; }
@@ -29,6 +30,40 @@
     </style>
 </head>
 <body style="font-family: 'General Sans'" class="bg-white dark:bg-[#141414] text-neutral-800 dark:text-white overflow-x-hidden">
+
+<!-- Page loader overlay — rendered in HTML so it exists before any JS or paint -->
+<script>
+(function(){
+  var d=false;
+  try{var s=localStorage.getItem('theme');if(s==='dark')d=true;else if(!s)d=window.matchMedia('(prefers-color-scheme: dark)').matches;}catch(e){}
+  document.write('<style>#pl-overlay{background:'+(d?'#141414':'#ffffff')+'}</style>');
+})();
+</script>
+<div id="pl-overlay" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99998;display:none;align-items:center;justify-content:center;pointer-events:all;">
+  <div id="pl-inner" style="display:flex;flex-direction:column;align-items:center;gap:18px;">
+    <img src="/assets/logo.png" alt="" style="width:42px;height:42px;object-fit:contain;border-radius:10px;display:block;" onerror="this.style.display='none'">
+    <p style="margin:0;margin-top:-4px;font-family:'General Sans',sans-serif;font-size:14px;font-weight:600;letter-spacing:-0.015em;" id="pl-title"><%= settings.title %></p>
+    <div style="width:128px;height:1.5px;border-radius:2px;overflow:hidden;" id="pl-track">
+      <div id="pl-bar" style="height:100%;width:0%;border-radius:2px;transition:width 260ms cubic-bezier(0.4,0,0.2,1);"></div>
+    </div>
+    <p id="pl-msg" style="margin:0;margin-top:-4px;font-family:'General Sans',sans-serif;font-size:11px;color:#737373;letter-spacing:0.01em;transition:opacity 180ms ease;">Loading...</p>
+  </div>
+</div>
+<script>
+(function(){
+  var d=false;
+  try{var s=localStorage.getItem('theme');if(s==='dark')d=true;else if(!s)d=window.matchMedia('(prefers-color-scheme: dark)').matches;}catch(e){}
+  var fg=d?'#ffffff':'#171717';
+  var track=d?'#2a2a2a':'#e5e5e5';
+  var t=document.getElementById('pl-title');
+  var tr=document.getElementById('pl-track');
+  var b=document.getElementById('pl-bar');
+  if(t)t.style.color=fg;
+  if(tr)tr.style.background=track;
+  if(b)b.style.background=fg;
+})();
+</script>
+
 <style>
   body {
     /* Prevent page content from showing through the fixed bottom nav */
@@ -83,3 +118,5 @@
     if (btn) btn.addEventListener('click', toggleTheme);
   });
 </script>
+
+<%- include("./modal") %>

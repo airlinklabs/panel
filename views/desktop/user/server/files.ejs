@@ -253,7 +253,7 @@ function isImageFile(filename) {
 
    <!-- Floating Action Bar (only show when daemon is online) -->
    <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-   <div id="floatingActionBar" class="fixed bottom-0 w-full bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700 z-50 backdrop-blur text-neutral-800 dark:text-white py-4 px-6 transform transition-transform duration-300 ease-in-out flex justify-between items-center">
+   <div id="floatingActionBar" class="fixed bottom-0 w-full bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700 z-50 backdrop-blur text-neutral-800 dark:text-white py-4 px-6 transform transition-transform duration-300 ease-in-out flex justify-between items-center translate-y-full">
     <span id="selectedFilesCount">0 files selected</span>
     <div class="flex gap-4">
         <button id="massRenameBtn" class="w-full md:w-auto rounded-xl bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-800 dark:text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
@@ -269,14 +269,16 @@ function isImageFile(filename) {
 </div>
    <% } %>
  <!-- Mass Delete Confirmation Modal -->
- <div id="massDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-    <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
-       <h2 class="text-2xl font-medium mb-1 text-neutral-800">Confirm Mass Deletion</h2>
-       <p id="massDeleteMessage" class="mb-6 text-neutral-600"></p>
-       <div class="flex justify-end space-x-4">
-          <button onclick="closeMassDeleteModal()" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
-          <button id="confirmMassDelete" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Delete</button>
-       </div>
+ <div id="massDeleteModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-2xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-200">
+      <div class="px-5 pt-5 pb-4">
+        <p class="text-sm font-semibold text-neutral-800 dark:text-white">Confirm Mass Deletion</p>
+        <p id="massDeleteMessage" class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed"></p>
+      </div>
+      <div class="flex gap-2 px-5 pb-5 justify-end">
+        <button onclick="closeMassDeleteModal()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
+        <button id="confirmMassDelete" class="px-4 py-2 text-xs font-medium rounded-xl bg-red-600 hover:bg-red-500 text-white transition">Delete</button>
+      </div>
     </div>
  </div>
     <!-- Create file / folder modal -->
@@ -439,45 +441,13 @@ function isImageFile(filename) {
   }
 
   function deletefile(fileName, filePath) {
-    // Create confirmation modal
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300';
-    modal.id = 'deleteFileModal';
-
-    modal.innerHTML = `
-      <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
-        <h2 class="text-2xl font-medium mb-1 text-neutral-800">Confirm Deletion</h2>
-        <p class="mb-6 text-neutral-600">Are you sure you want to delete <strong>${fileName}</strong>? This action cannot be undone.</p>
-        <div class="flex justify-end space-x-4">
-          <button id="cancelDeleteBtn" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
-          <button id="confirmDeleteBtn" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Delete</button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    setTimeout(() => {
-      modal.classList.remove('opacity-0', 'pointer-events-none');
-      modal.querySelector('div').classList.remove('scale-95');
-      modal.querySelector('div').classList.add('scale-100');
-    }, 10);
-
-    document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
-      modal.classList.add('opacity-0', 'pointer-events-none');
-      modal.querySelector('div').classList.remove('scale-100');
-      modal.querySelector('div').classList.add('scale-95');
-      setTimeout(() => document.body.removeChild(modal), 300);
-    });
-
-    document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
-      modal.classList.add('opacity-0', 'pointer-events-none');
-      modal.querySelector('div').classList.remove('scale-100');
-      modal.querySelector('div').classList.add('scale-95');
-      setTimeout(() => document.body.removeChild(modal), 300);
-
+    window.modal.confirm({
+      title: 'Delete File',
+      body: `Are you sure you want to delete "${fileName}"? This cannot be undone.`,
+      danger: true,
+      confirmLabel: 'Delete',
+      onConfirm: () => {
       const loader = showLoadingPopup('Deleting File', 'Removing file from server...');
-
       fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(filePath), { method: 'DELETE' })
       .then(response => {
         loader.close();
@@ -493,6 +463,7 @@ function isImageFile(filename) {
         console.error('Error:', error);
         showToast('An error occurred while deleting the file', 'error');
       });
+      }
     });
   }
 
@@ -548,44 +519,12 @@ function isImageFile(filename) {
 
 document.getElementById('massArchiveBtn').addEventListener('click', () => {
     if (selectedFiles.length > 0) {
-        // Create archive confirmation modal
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300';
-        modal.id = 'archiveConfirmModal';
-
-        modal.innerHTML = `
-          <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
-            <h2 class="text-2xl font-medium mb-1 text-neutral-800">Confirm Archive</h2>
-            <p class="mb-6 text-neutral-600">Are you sure you want to archive ${selectedFiles.length} selected file${selectedFiles.length !== 1 ? 's' : ''}?</p>
-            <div class="flex justify-end space-x-4">
-              <button id="cancelArchiveBtn" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
-              <button id="confirmArchiveBtn" class="w-full md:w-auto rounded-xl bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Archive</button>
-            </div>
-          </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        setTimeout(() => {
-          modal.classList.remove('opacity-0', 'pointer-events-none');
-          modal.querySelector('div').classList.remove('scale-95');
-          modal.querySelector('div').classList.add('scale-100');
-        }, 10);
-
-        document.getElementById('cancelArchiveBtn').addEventListener('click', () => {
-          modal.classList.add('opacity-0', 'pointer-events-none');
-          modal.querySelector('div').classList.remove('scale-100');
-          modal.querySelector('div').classList.add('scale-95');
-          setTimeout(() => document.body.removeChild(modal), 300);
-        });
-
-        document.getElementById('confirmArchiveBtn').addEventListener('click', () => {
-          modal.classList.add('opacity-0', 'pointer-events-none');
-          modal.querySelector('div').classList.remove('scale-100');
-          modal.querySelector('div').classList.add('scale-95');
-          setTimeout(() => document.body.removeChild(modal), 300);
-
-          archiveFiles(selectedFiles);
+        window.modal.confirm({
+          title: 'Confirm Archive',
+          body: `Archive ${selectedFiles.length} selected file${selectedFiles.length !== 1 ? 's' : ''}?`,
+          danger: false,
+          confirmLabel: 'Archive',
+          onConfirm: () => archiveFiles(selectedFiles)
         });
     }
 });
