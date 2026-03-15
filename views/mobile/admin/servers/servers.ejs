@@ -151,15 +151,45 @@
 
     <!-- Script picker phase -->
     <div id="radarPickerPhase" class="px-5 py-4 shrink-0">
-      <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Script</label>
-      <select id="scriptSelect" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm text-neutral-800 dark:text-white mb-2 focus:outline-none"></select>
-      <p id="scriptDescription" class="text-xs text-neutral-500 italic mb-4 min-h-4"></p>
-      <button id="runScanButton" onclick="runRadarScan()" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/40 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-        </svg>
-        Run Scan
-      </button>
+
+      <!-- Scan mode toggle — only shown when VT key is configured -->
+      <div id="scanModeToggle" class="hidden mb-4">
+        <div class="flex gap-2">
+          <button type="button" id="modeBuiltin" onclick="setScanMode('builtin')" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border-2 border-neutral-800 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+            Built-in
+          </button>
+          <button type="button" id="modeVT" onclick="setScanMode('vt')" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-xs font-medium transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Z" /></svg>
+            VirusTotal
+          </button>
+        </div>
+      </div>
+
+      <!-- Built-in script picker -->
+      <div id="builtinPickerSection">
+        <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Script</label>
+        <select id="scriptSelect" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm text-neutral-800 dark:text-white mb-2 focus:outline-none"></select>
+        <p id="scriptDescription" class="text-xs text-neutral-500 italic mb-4 min-h-4"></p>
+        <button id="runScanButton" onclick="runRadarScan()" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/40 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+          Run Scan
+        </button>
+      </div>
+
+      <!-- VT file scan section -->
+      <div id="vtScanSection" class="hidden">
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700/40 p-4 mb-4 space-y-1.5 text-xs text-neutral-500">
+          <p>Zips <span class="font-mono text-neutral-700 dark:text-neutral-300">plugins/</span>, <span class="font-mono text-neutral-700 dark:text-neutral-300">mods/</span>, <span class="font-mono text-neutral-700 dark:text-neutral-300">config/</span>, <span class="font-mono text-neutral-700 dark:text-neutral-300">addons/</span>, <span class="font-mono text-neutral-700 dark:text-neutral-300">datapacks/</span> and uploads to VirusTotal.</p>
+          <p>Excludes world folders, logs, cache. Max 32 MB. Takes 30–120 seconds.</p>
+          <p class="text-amber-600 dark:text-amber-400">Free tier: 4 requests/min · 500/day.</p>
+        </div>
+        <button type="button" id="runVtScanButton" onclick="runVtFileScan()" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/40 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Z" /></svg>
+          Upload to VirusTotal
+        </button>
+      </div>
+
     </div>
 
     <!-- Results phase -->
@@ -185,11 +215,170 @@
   // --- VirusTotal ---
 
   let vtEnabled = false;
+  let scanMode = 'builtin';
 
   fetch('/admin/radar/virustotal-enabled')
     .then(r => r.json())
-    .then(d => { vtEnabled = d.enabled; })
+    .then(d => {
+      vtEnabled = d.enabled;
+      if (vtEnabled) document.getElementById('scanModeToggle').classList.remove('hidden');
+    })
     .catch(() => {});
+
+  function setScanMode(mode) {
+    scanMode = mode;
+    const builtinBtn = document.getElementById('modeBuiltin');
+    const vtBtn = document.getElementById('modeVT');
+    const active   = 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border-2 border-neutral-800 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition-all';
+    const inactive = 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-xs font-medium transition-all';
+    if (mode === 'builtin') {
+      builtinBtn.className = active;
+      vtBtn.className = inactive;
+      document.getElementById('builtinPickerSection').classList.remove('hidden');
+      document.getElementById('vtScanSection').classList.add('hidden');
+    } else {
+      vtBtn.className = active;
+      builtinBtn.className = inactive;
+      document.getElementById('vtScanSection').classList.remove('hidden');
+      document.getElementById('builtinPickerSection').classList.add('hidden');
+    }
+  }
+
+  async function runVtFileScan() {
+    if (currentServerIds.length === 0) return;
+    const serverId = currentServerIds[0];
+    const btn = document.getElementById('runVtScanButton');
+
+    btn.disabled = true;
+    btn.innerHTML = `
+      <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Starting...
+    `;
+
+    closeRadarScanModal();
+
+    const p = window.loadingPopupSystem;
+    p.open('VirusTotal Scan', 'default');
+    p.setProgress(5, 'Requesting file archive from node...');
+    p.addStep('Connecting to node');
+
+    const steps = [
+      { at: 3000,  pct: 12, msg: 'Node zipping plugins, mods and config...', step: 'Archiving server files' },
+      { at: 8000,  pct: 22, msg: 'Uploading archive to VirusTotal...',        step: 'Archive ready — uploading to VT' },
+      { at: 14000, pct: 35, msg: 'VirusTotal is queuing the analysis...',      step: 'Upload complete' },
+      { at: 22000, pct: 48, msg: 'Analysis in progress — checking signatures...', step: 'VT analysis started' },
+      { at: 35000, pct: 60, msg: 'Running 70+ antivirus engines...',           step: 'Scanning with multiple engines' },
+      { at: 50000, pct: 72, msg: 'Almost done — collecting results...',        step: 'Engines finishing up' },
+      { at: 65000, pct: 82, msg: 'Waiting for final verdicts...',              step: 'Collecting final results' },
+    ];
+    const timers = steps.map(s => setTimeout(() => { p.setProgress(s.pct, s.msg); p.addStep(s.step); }, s.at));
+
+    try {
+      const r = await fetch('/admin/radar/vtscan/' + serverId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await r.json();
+
+      timers.forEach(t => clearTimeout(t));
+
+      if (!data.success) {
+        p.setProgress(100, 'Scan failed');
+        p.addStep(data.error || 'VT scan failed', 'error');
+        p.setIcon('error');
+        showToast(data.error || 'VT scan failed', 'error');
+        setTimeout(() => p.close(), 3000);
+        return;
+      }
+
+      p.setProgress(100, 'Scan complete');
+      p.addStep('Analysis complete', 'done');
+      p.setIcon('done');
+
+      setTimeout(() => {
+        p.close();
+        document.getElementById('radarScanModalTitle').textContent = 'VirusTotal Scan: ' + (data.serverName || 'Server');
+        document.getElementById('radarPickerPhase').classList.add('hidden');
+        document.getElementById('radarResultsPhase').classList.remove('hidden');
+        const modal = document.getElementById('radarScanModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        renderVtFileScanResults(data);
+      }, 1000);
+
+    } catch (err) {
+      timers.forEach(t => clearTimeout(t));
+      p.setProgress(100, 'Request failed');
+      p.addStep('Network error', 'error');
+      p.setIcon('error');
+      showToast('VT file scan failed', 'error');
+      setTimeout(() => p.close(), 3000);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Z" /></svg>
+        Upload to VirusTotal
+      `;
+    }
+  }
+
+  function renderVtFileScanResults(data) {
+    const summaryEl = document.getElementById('radarSummaryBar');
+    const bodyEl    = document.getElementById('radarResultsBody');
+
+    if (data.pending) {
+      summaryEl.innerHTML = `<span class="text-sm text-amber-600 dark:text-amber-400 font-medium">Analysis still processing on VT</span>`;
+      bodyEl.innerHTML = `
+        <div class="py-6 text-center">
+          <p class="text-sm text-neutral-600 dark:text-neutral-300 mb-3">VT is still analysing. Check directly:</p>
+          <a href="${data.vtLink}" target="_blank" rel="noopener" class="text-sm text-blue-500 break-all">${data.vtLink}</a>
+        </div>`;
+      return;
+    }
+
+    const malCount = data.maliciousEngines?.length || 0;
+    const total    = data.totalEngines || 0;
+
+    if (malCount === 0) {
+      summaryEl.innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/></svg>
+            Clean — 0/${total} engines flagged
+          </span>
+          <a href="${data.vtLink}" target="_blank" rel="noopener" class="text-xs text-blue-500">Full report →</a>
+        </div>`;
+      bodyEl.innerHTML = `
+        <div class="py-8 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="w-8 h-8 mx-auto mb-3 text-emerald-400"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+          <p class="text-sm font-medium text-neutral-600 dark:text-neutral-300">No engines flagged anything</p>
+          <p class="text-xs text-neutral-400 mt-1">${total} engines scanned the zip</p>
+        </div>`;
+      return;
+    }
+
+    summaryEl.innerHTML = `
+      <div class="flex items-center justify-between">
+        <span class="inline-flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400 font-medium">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
+          ${malCount}/${total} engines flagged
+        </span>
+        <a href="${data.vtLink}" target="_blank" rel="noopener" class="text-xs text-blue-500">Full report →</a>
+      </div>`;
+
+    let html = '<div class="space-y-1">';
+    data.maliciousEngines.forEach(e => {
+      html += `<div class="flex items-center justify-between px-3 py-2 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20">`;
+      html += `<span class="text-xs font-medium text-neutral-700 dark:text-neutral-300">${e.engine}</span>`;
+      html += `<span class="text-xs text-red-600 dark:text-red-400 font-mono">${e.result || 'flagged'}</span>`;
+      html += `</div>`;
+    });
+    html += '</div>';
+    bodyEl.innerHTML = html;
+  }
 
   async function checkVirusTotal(hash, matchId) {
     const btn = document.querySelector('#' + matchId + ' .vt-btn');
