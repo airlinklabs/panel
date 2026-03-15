@@ -1401,6 +1401,13 @@ const dashboardModule: Module = {
         const relativePath = req.body.path;
         const newName = req.body.newName;
 
+        // Reject any path containing traversal sequences
+        const isSafe = (p: string) =>
+          typeof p === 'string' && !p.includes('..') && !p.startsWith('/');
+        if (!isSafe(relativePath) || !isSafe(newName)) {
+          res.status(400).json({ error: 'Invalid path' });
+          return;
+        }
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
