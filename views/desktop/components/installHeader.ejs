@@ -18,9 +18,6 @@
       <div class="flex-1 min-w-0">
         <p class="text-sm font-medium text-blue-700 dark:text-blue-300">Installing server</p>
         <p id="installStateText" class="text-xs text-blue-500 dark:text-blue-400/80 mt-0.5">Waiting for daemon...</p>
-        <div class="mt-2 w-full bg-blue-100 dark:bg-blue-900/40 rounded-full h-1 overflow-hidden">
-          <div id="installProgressBar" class="h-1 rounded-full bg-blue-500 transition-all duration-700 ease-out" style="width: 5%"></div>
-        </div>
         <div id="installSteps" class="mt-2 space-y-0.5"></div>
       </div>
     </div>
@@ -31,26 +28,24 @@
     const serverUUID = '<%= server.UUID %>';
     const banner = document.getElementById('installBanner');
     const stateText = document.getElementById('installStateText');
-    const progressBar = document.getElementById('installProgressBar');
     const stepsEl = document.getElementById('installSteps');
     const spinner = document.getElementById('installSpinner');
 
     const stateMessages = {
-      installing: { text: 'Downloading and configuring files...', pct: 40 },
-      installed:  { text: 'Installation complete.', pct: 100 },
-      failed:     { text: 'Installation failed.', pct: 100 },
+      installing: 'Downloading and configuring files...',
+      installed:  'Installation complete.',
+      failed:     'Installation failed.',
     };
 
     const steps = [
-      { threshold: 5,  label: 'Daemon acknowledged request' },
-      { threshold: 25, label: 'Pulling container image' },
-      { threshold: 40, label: 'Running install scripts' },
-      { threshold: 75, label: 'Configuring server files' },
-      { threshold: 100, label: null },
+      'Daemon acknowledged request',
+      'Pulling container image',
+      'Running install scripts',
+      'Configuring server files',
     ];
 
     let shownSteps = new Set();
-    let currentPct = 5;
+    let stepIndex = 0;
 
     function addStep(label) {
       if (!label || shownSteps.has(label)) return;
@@ -62,17 +57,9 @@
       requestAnimationFrame(() => row.classList.remove('opacity-0'));
     }
 
-    function setProgress(pct) {
-      currentPct = pct;
-      progressBar.style.width = pct + '%';
-      steps.forEach(s => {
-        if (pct >= s.threshold && s.label) addStep(s.label);
-      });
-    }
-
-    let smooth = setInterval(() => {
-      if (currentPct < 70) setProgress(Math.min(currentPct + 1, 70));
-    }, 800);
+    const stepTimer = setInterval(() => {
+      if (stepIndex < steps.length) addStep(steps[stepIndex++]);
+    }, 6000);
 
     let pollAttempts = 0;
 
@@ -82,15 +69,10 @@
         .then(data => {
           pollAttempts++;
           const state = data.state || (data.installed ? 'installed' : data.failed ? 'failed' : 'installing');
-          const info = stateMessages[state];
-
-          if (info) {
-            stateText.textContent = info.text;
-            setProgress(info.pct);
-          }
+          if (stateMessages[state]) stateText.textContent = stateMessages[state];
 
           if (state === 'installed') {
-            clearInterval(smooth);
+            clearInterval(stepTimer);
             clearInterval(poller);
             addStep('Server ready');
             spinner.classList.remove('animate-spin');
@@ -99,10 +81,8 @@
             banner.className = banner.className.replace(/blue/g, 'emerald');
             setTimeout(() => window.location.reload(), 2000);
           } else if (state === 'failed') {
-            clearInterval(smooth);
+            clearInterval(stepTimer);
             clearInterval(poller);
-            progressBar.classList.remove('bg-blue-500');
-            progressBar.classList.add('bg-red-500');
             spinner.classList.remove('animate-spin', 'text-blue-500');
             spinner.classList.add('text-red-500');
           }

@@ -46,7 +46,24 @@
 
     <!-- Page Header -->
     <div class="mb-4">
-      <%- include('../../components/serverHeader') %>
+      <div class="flex items-start justify-between gap-3">
+        <%- include('../../components/serverHeader') %>
+        <!-- Server meta: right side of header, 3 small lines -->
+        <div class="shrink-0 text-right mt-0.5 space-y-0.5">
+          <div class="flex items-center justify-end gap-1.5">
+            <span class="text-[10px] text-neutral-500 dark:text-neutral-400 truncate max-w-[110px]"><%= server.image.name %></span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-2.5 w-2.5 shrink-0 text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/></svg>
+          </div>
+          <div class="flex items-center justify-end gap-1.5">
+            <span class="text-[10px] text-neutral-500 dark:text-neutral-400 truncate max-w-[110px]"><%= server.node.name %></span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-2.5 w-2.5 shrink-0 text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M208,40H48A16,16,0,0,0,32,56v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40ZM180,92a12,12,0,1,1,12-12A12,12,0,0,1,180,92Z"/><path d="M208,136H48a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V152A16,16,0,0,0,208,136Zm-28,52a12,12,0,1,1,12-12A12,12,0,0,1,180,188Z"/></svg>
+          </div>
+          <div class="flex items-center justify-end gap-1.5">
+            <span class="text-[10px] font-mono text-neutral-500 dark:text-neutral-400"><%= server.UUID.split('-')[0] %></span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-2.5 w-2.5 shrink-0 text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M116.25,112h31.5l-8,32h-31.5ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48Zm-16,56a8,8,0,0,0-8-8H168.25l7.51-30.06a8,8,0,0,0-15.52-3.88L151.75,96h-31.5l7.51-30.06a8,8,0,0,0-15.52-3.88L103.75,96H64a8,8,0,0,0,0,16H99.75l-8,32H56a8,8,0,0,0,0,16H87.75l-7.51,30.06a8,8,0,0,0,5.82,9.7,8.13,8.13,0,0,0,2,.24,8,8,0,0,0,7.75-6.06L104.25,160h31.5l-7.51,30.06a8,8,0,0,0,5.82,9.7A8.13,8.13,0,0,0,136,200a8,8,0,0,0,7.75-6.06L152.25,160H192a8,8,0,0,0,0-16H156.25l8-32H200A8,8,0,0,0,208,104Z"/></svg>
+          </div>
+        </div>
+      </div>
 
       <%- include('../../components/installHeader') %>
 
@@ -104,61 +121,22 @@
 
     <%- include('../../components/serverTemplate') %>
 
-    <!-- Info Cards -->
-    <div class="mt-4 mb-4">
-      <dl class="grid grid-cols-2 gap-3">
-
-        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3">
-          <div class="flex items-center gap-2">
-            <div class="min-w-0 flex-1">
-              <dt class="text-[10px] font-medium text-neutral-500 truncate"><%= req.translations.addressIP %></dt>
-              <dd class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white truncate">
-                <%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.Port.split(':')[1]).pop() : '' %>
-              </dd>
-            </div>
-            <div class="rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-4 w-4 text-neutral-500 dark:text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M240,120a8,8,0,0,1-8,8H200v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H176a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H72v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H24a8,8,0,0,1,0-16h96V88h-8A16,16,0,0,1,96,72V40a16,16,0,0,1,16-16h32a16,16,0,0,1,16,16V72a16,16,0,0,1-16,16h-8v24h96A8,8,0,0,1,240,120Z"/></svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3">
-          <div class="flex items-center gap-2">
-            <div class="min-w-0 flex-1">
-              <dt class="text-[10px] font-medium text-neutral-500 truncate"><%= req.translations.Image %></dt>
-              <dd class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white truncate"><%= server.image.name %></dd>
-            </div>
-            <div class="rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-4 w-4 text-neutral-500 dark:text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/></svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3">
-          <div class="flex items-center gap-2">
-            <div class="min-w-0 flex-1">
-              <dt class="text-[10px] font-medium text-neutral-500 truncate"><%= req.translations.Node %></dt>
-              <dd class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white truncate"><%= server.node.name %></dd>
-            </div>
-            <div class="rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-4 w-4 text-neutral-500 dark:text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M208,40H48A16,16,0,0,0,32,56v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40ZM180,92a12,12,0,1,1,12-12A12,12,0,0,1,180,92Z"/><path d="M208,136H48a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V152A16,16,0,0,0,208,136Zm-28,52a12,12,0,1,1,12-12A12,12,0,0,1,180,188Z"/></svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3">
-          <div class="flex items-center gap-2">
-            <div class="min-w-0 flex-1">
-              <dt class="text-[10px] font-medium text-neutral-500 truncate"><%= req.translations.identifier %></dt>
-              <dd class="mt-0.5 text-xs font-medium text-neutral-800 dark:text-white font-mono"><%= server.UUID.split('-')[0] %></dd>
-            </div>
-            <div class="rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-4 w-4 text-neutral-500 dark:text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M116.25,112h31.5l-8,32h-31.5ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48Zm-16,56a8,8,0,0,0-8-8H168.25l7.51-30.06a8,8,0,0,0-15.52-3.88L151.75,96h-31.5l7.51-30.06a8,8,0,0,0-15.52-3.88L103.75,96H64a8,8,0,0,0,0,16H99.75l-8,32H56a8,8,0,0,0,0,16H87.75l-7.51,30.06a8,8,0,0,0,5.82,9.7,8.13,8.13,0,0,0,2,.24,8,8,0,0,0,7.75-6.06L104.25,160h31.5l-7.51,30.06a8,8,0,0,0,5.82,9.7A8.13,8.13,0,0,0,136,200a8,8,0,0,0,7.75-6.06L152.25,160H192a8,8,0,0,0,0-16H156.25l8-32H200A8,8,0,0,0,208,104Z"/></svg>
-            </div>
-          </div>
-        </div>
-
-      </dl>
+    <!-- IP Address -->
+    <div class="mt-3 mb-3">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-2.5 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-4 w-4 shrink-0 text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M240,120a8,8,0,0,1-8,8H200v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H176a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H72v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H24a8,8,0,0,1,0-16h96V88h-8A16,16,0,0,1,96,72V40a16,16,0,0,1,16-16h32a16,16,0,0,1,16,16V72a16,16,0,0,1-16,16h-8v24h96A8,8,0,0,1,240,120Z"/></svg>
+        <span class="text-[10px] font-medium text-neutral-500 shrink-0"><%= req.translations.addressIP %>:</span>
+        <span class="text-xs font-medium text-neutral-800 dark:text-white font-mono truncate flex-1" id="server-ip-text"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.Port.split(':')[1]).pop() : '' %></span>
+        <button id="copy-ip-btn" onclick="copyServerIP()" class="shrink-0 rounded-md p-1 bg-neutral-200 dark:bg-neutral-700/50 hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors">
+          <svg id="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 text-neutral-500">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <svg id="check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-3.5 w-3.5 text-emerald-500 hidden">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </button>
+      </div>
     </div>
 
       <!-- Terminal -->
@@ -166,24 +144,15 @@
         <div id="terminal-container" class="w-full">
           <div id="terminal"></div>
         </div>
+        <% if (typeof features !== 'undefined' && features && features.includes('auto-complete')) { %>
+        <div id="suggestion-bar" class="hidden border-t border-neutral-700 overflow-x-auto">
+          <div id="suggestion-list" class="flex items-center gap-1 px-3 py-1.5 min-w-0">
+          </div>
+        </div>
+        <% } %>
         <div class="relative border-t border-neutral-800">
           <input id="input" type="text" autocomplete="off" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
             class="w-full px-4 py-3 bg-neutral-800 text-white text-sm outline-none placeholder:text-neutral-500">
-          <% if (typeof features !== 'undefined' && features && features.includes('auto-complete')) { %>
-          <div id="settings-icon" class="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-500">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
-            </svg>
-          </div>
-          <div id="suggestions" class="absolute bottom-full left-0 right-0 bg-neutral-800 text-white border border-neutral-600 rounded-t-lg max-h-40 overflow-y-auto hidden">
-          </div>
-          <div id="settings-menu" class="absolute bottom-full right-0 bg-neutral-800 text-white p-3 rounded-lg hidden w-48 border border-neutral-700">
-            <label class="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" id="auto-complete-toggle" class="w-4 h-4" />
-              <span><%= req.translations.autoComplete || 'Auto-complete' %></span>
-            </label>
-          </div>
-          <% } %>
         </div>
       </div>
 
@@ -757,6 +726,7 @@ connectWebSocket();
 
     document.addEventListener('DOMContentLoaded', () => {
         const inputElement = document.getElementById('input');
+
         inputElement.addEventListener('keypress', function (event) {
             if (event.key === 'Enter') {
                 sendCommand();
@@ -764,7 +734,29 @@ connectWebSocket();
         });
 
         inputElement.addEventListener('keydown', handleKeyUp);
+
+        <% if (typeof features !== 'undefined' && features && features.includes('auto-complete')) { %>
+        inputElement.addEventListener('focus', function loadAutocomplete() {
+            inputElement.removeEventListener('focus', loadAutocomplete);
+            import('/js/mc-autocomplete.js').then(mod => {
+                mod.fetchPlayersIfNeeded('<%= server.UUID %>');
+                mod.initMobile(inputElement, '<%= server.UUID %>');
+            });
+        }, { once: true });
+        <% } %>
     });
+
+    function copyServerIP() {
+        const ipText = document.getElementById('server-ip-text').textContent.trim();
+        navigator.clipboard.writeText(ipText).then(() => {
+            document.getElementById('copy-icon').classList.add('hidden');
+            document.getElementById('check-icon').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('copy-icon').classList.remove('hidden');
+                document.getElementById('check-icon').classList.add('hidden');
+            }, 2000);
+        });
+    }
 
     let statsWs;
     let statsReconnectTimer;
@@ -901,15 +893,24 @@ connectWebSocket();
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     }
 
+    function getChartColors() {
+        const isDark = document.documentElement.classList.contains('dark');
+        return {
+            border: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.1)',
+            fill: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)',
+        };
+    }
+
     function createBackgroundChart(canvasId, type = 'line') {
-            return new Chart(document.getElementById(canvasId).getContext('2d'), {
+        const colors = getChartColors();
+        return new Chart(document.getElementById(canvasId).getContext('2d'), {
                 type: type,
                 data: {
                     labels: [],
                     datasets: [{
                         data: [],
-                        borderColor: 'rgba(255, 255, 255, 0.1)',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderColor: colors.border,
+                        backgroundColor: colors.fill,
                         borderWidth: 1,
                         pointRadius: 0,
                         fill: true,
@@ -1057,6 +1058,10 @@ connectWebSocket();
             chart.data.labels.shift();
             chart.data.datasets[0].data.shift();
         }
+
+        const colors = getChartColors();
+        chart.data.datasets[0].borderColor = colors.border;
+        chart.data.datasets[0].backgroundColor = colors.fill;
 
         chart.update();
     }
