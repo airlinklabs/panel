@@ -60,6 +60,18 @@
     color: #f87171;
   }
   .toggle-btn-disable:hover { background: rgba(239,68,68,0.14); }
+
+  .uninstall-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px; padding: 5px 10px;
+    font-size: 11px; font-weight: 500; cursor: pointer;
+    transition: background 0.12s, color 0.12s; border: 1px solid transparent;
+    white-space: nowrap;
+    background: rgba(239,68,68,0.06);
+    border-color: rgba(239,68,68,0.12);
+    color: #ef4444;
+  }
+  .uninstall-btn:hover { background: rgba(239,68,68,0.14); }
 </style>
 
 <main class="">
@@ -131,11 +143,16 @@
                 </div>
 
                 <!-- Action -->
-                <div style="margin-top:auto;">
+                <div style="margin-top:auto;display:flex;flex-direction:column;gap:6px;">
                   <button
                     onclick="toggleAddon('<%= addon.slug %>', <%= !addon.enabled %>)"
-                    class="toggle-btn toggle-btn w-full <%= addon.enabled ? 'toggle-btn-disable' : 'toggle-btn-enable' %>">
+                    class="toggle-btn w-full <%= addon.enabled ? 'toggle-btn-disable' : 'toggle-btn-enable' %>">
                     <%= addon.enabled ? 'Disable' : 'Enable' %>
+                  </button>
+                  <button
+                    onclick="confirmUninstall('<%= addon.slug %>', '<%= addon.name %>')"
+                    class="uninstall-btn w-full">
+                    Uninstall
                   </button>
                 </div>
 
@@ -215,6 +232,34 @@
   }
 
   window.toggleAddon = toggleAddon;
+
+  function confirmUninstall(slug, name) {
+    if (!confirm(`Uninstall "${name}"? This will delete the addon files and cannot be undone.`)) return;
+    uninstallAddon(slug);
+  }
+
+  function uninstallAddon(slug) {
+    showLoadingPopup('Uninstalling addon...', 'Removing files...');
+    fetch('/admin/addons/store/uninstall', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug }),
+    })
+    .then(r => r.json())
+    .then(data => {
+      hideLoadingPopup();
+      if (data.success) {
+        showToast('Addon uninstalled', 'success');
+        const card = document.querySelector(`[data-slug="${slug}"]`);
+        if (card) card.remove();
+      } else {
+        showToast(data.message || 'Failed to uninstall addon', 'error');
+      }
+    })
+    .catch(() => { hideLoadingPopup(); showToast('An error occurred', 'error'); });
+  }
+
+  window.confirmUninstall = confirmUninstall;
 
   document.getElementById('reloadBtn').addEventListener('click', () => {
     showLoadingPopup('Reloading addons...', 'Please wait...');
