@@ -154,6 +154,25 @@
       });
     }
   };
+
+  (function staggerRows() {
+    var rows = document.querySelectorAll('#userTable tbody tr');
+    rows.forEach(function(row, i) {
+      row.style.opacity = '0';
+      row.style.transform = 'translateY(5px)';
+      row.style.transition = 'none';
+      setTimeout(function() {
+        row.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+        row.style.opacity = '1';
+        row.style.transform = 'translateY(0)';
+        setTimeout(function() {
+          row.style.transition = '';
+          row.style.opacity = '';
+          row.style.transform = '';
+        }, 200);
+      }, i * 30);
+    });
+  })();
 </script>
 
 <%- include('../../components/footer') %>

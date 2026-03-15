@@ -410,4 +410,19 @@
       document.getElementById('deleteKeyForm_' + keyId).submit();
     });
   }
+
+  (function staggerCards() {
+    var cards = document.querySelectorAll('.space-y-2 > div');
+    cards.forEach(function(card, i) {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(6px)';
+      card.style.transition = 'none';
+      setTimeout(function() {
+        card.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+        setTimeout(function() { card.style.transition = ''; card.style.opacity = ''; card.style.transform = ''; }, 220);
+      }, i * 40);
+    });
+  })();
 </script>

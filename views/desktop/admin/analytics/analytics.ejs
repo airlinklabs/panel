@@ -512,39 +512,48 @@ function initializeChart() {
 
 // Tab switching functionality
 function switchTab(tabName) {
-    // Clear existing refresh interval
     if (refreshInterval) {
         clearInterval(refreshInterval);
         refreshInterval = null;
     }
 
-    // Hide all tab contents
+    const currentVisible = document.querySelector('.tab-content:not(.hidden)');
+
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.add('hidden');
     });
 
-    // Remove active state from all tabs
     document.querySelectorAll('.tab-button').forEach(tab => {
         tab.classList.remove('tab-button--active');
     });
 
-    // Show selected tab content
     const targetContent = document.getElementById(`content-${tabName}`);
     if (targetContent) {
         targetContent.classList.remove('hidden');
+        targetContent.style.opacity = '0';
+        targetContent.style.transform = 'translateY(6px)';
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() {
+            targetContent.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+            targetContent.style.opacity = '1';
+            targetContent.style.transform = 'translateY(0)';
+            setTimeout(function() {
+              targetContent.style.transition = '';
+              targetContent.style.opacity = '';
+              targetContent.style.transform = '';
+            }, 200);
+          });
+        });
     }
 
-    // Add active state to selected tab
     const activeTab = document.getElementById(`tab-${tabName}`);
     if (activeTab) {
         activeTab.classList.add('tab-button--active');
     }
 
-    // Load content based on tab
     switch (tabName) {
         case 'playerstats':
             fetchPlayerData();
-            // Set up auto-refresh every 5 minutes for player stats only
             refreshInterval = setInterval(fetchPlayerData, 300000);
             break;
         case 'performance':
@@ -778,7 +787,25 @@ function showServerDetailsModal() {
   const modal = document.getElementById('serverDetailsModal');
   if (modal) {
     modal.classList.remove('hidden');
-    // Refresh server data when modal opens
+    modal.style.opacity = '0';
+    const inner = modal.querySelector('.relative.transform');
+    if (inner) { inner.style.transform = 'scale(0.97) translateY(6px)'; inner.style.opacity = '0'; }
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        modal.style.transition = 'opacity 0.2s ease';
+        modal.style.opacity = '1';
+        if (inner) {
+          inner.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+          inner.style.transform = 'scale(1) translateY(0)';
+          inner.style.opacity = '1';
+        }
+        setTimeout(function() {
+          modal.style.transition = '';
+          modal.style.opacity = '';
+          if (inner) { inner.style.transition = ''; inner.style.transform = ''; inner.style.opacity = ''; }
+        }, 220);
+      });
+    });
     fetchPlayerData();
   }
 }
@@ -786,7 +813,20 @@ function showServerDetailsModal() {
 function hideServerDetailsModal() {
   const modal = document.getElementById('serverDetailsModal');
   if (modal) {
-    modal.classList.add('hidden');
+    const inner = modal.querySelector('.relative.transform');
+    modal.style.transition = 'opacity 0.15s ease';
+    modal.style.opacity = '0';
+    if (inner) {
+      inner.style.transition = 'transform 0.15s ease, opacity 0.15s ease';
+      inner.style.transform = 'scale(0.97) translateY(6px)';
+      inner.style.opacity = '0';
+    }
+    setTimeout(function() {
+      modal.classList.add('hidden');
+      modal.style.transition = '';
+      modal.style.opacity = '';
+      if (inner) { inner.style.transition = ''; inner.style.transform = ''; inner.style.opacity = ''; }
+    }, 160);
   }
 }
 
@@ -840,6 +880,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Single click - refresh current tab
         refreshBtn.addEventListener('click', () => {
             const activeTab = document.querySelector('.tab-button.tab-button--active');
+            const icon = refreshBtn.querySelector('svg');
+            if (icon) { icon.style.transition = 'transform 0.6s ease'; icon.style.transform = 'rotate(360deg)'; setTimeout(() => { icon.style.transition = ''; icon.style.transform = ''; }, 650); }
             if (activeTab) {
                 const tabId = activeTab.id.replace('tab-', '');
                 switch (tabId) {

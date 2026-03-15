@@ -145,8 +145,6 @@
       const data = await response.json();
       const updateBtn = document.getElementById('performUpdateBtn');
 
-      statusDiv.classList.remove('hidden');
-
       if (data.hasUpdate) {
         statusText.textContent = `Update available: v${data.latestVersion}`;
         statusText.className = 'text-xs text-amber-600 dark:text-amber-400';
@@ -158,10 +156,11 @@
         updateBtn.classList.add('hidden');
         updateBtn.classList.remove('flex');
       }
+      fadeInEl(statusDiv);
     } catch (err) {
-      statusDiv.classList.remove('hidden');
       statusText.textContent = 'Failed to check for updates.';
       statusText.className = 'text-xs text-red-500';
+      fadeInEl(statusDiv);
     } finally {
       btn.textContent = 'Check Updates';
       btn.disabled = false;
@@ -186,6 +185,20 @@
       showToast('Error performing update', 'error');
     }
   });
+
+  function fadeInEl(el) {
+    el.classList.remove('hidden');
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(4px)';
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        el.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+        setTimeout(function() { el.style.transition = ''; el.style.opacity = ''; el.style.transform = ''; }, 220);
+      });
+    });
+  }
 
   async function measureApiLatency() {
     try {

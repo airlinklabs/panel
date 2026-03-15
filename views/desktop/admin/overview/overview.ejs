@@ -159,19 +159,24 @@
 
       if (data.hasUpdate) {
         statusDiv.innerHTML = '<span class="text-amber-600 dark:text-amber-400">Update available — v' + data.latestVersion + '</span>';
+        fadeIn(statusDiv);
         updateBtn.classList.remove('hidden');
         updateBtn.classList.add('inline-flex');
+        fadeIn(updateBtn);
         if (data.updateInfo) {
           updateInfo.innerHTML = '<p class="text-xs text-neutral-500">' + data.updateInfo + '</p>';
           updateInfo.classList.remove('hidden');
+          fadeIn(updateInfo);
         }
       } else {
         statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400"><%= req.translations.runningLatestVersion %></span>';
+        fadeIn(statusDiv);
         updateBtn.classList.add('hidden');
         updateInfo.classList.add('hidden');
       }
     } catch (error) {
       statusDiv.innerHTML = '<span class="text-red-500">Failed to check for updates.</span>';
+      fadeIn(statusDiv);
     }
   });
 
@@ -179,18 +184,39 @@
     if (confirm('Perform the update? The server will restart.')) {
       const statusDiv = document.getElementById('updateStatus');
       statusDiv.innerHTML = '<span class="text-neutral-500">Installing...</span>';
+      fadeIn(statusDiv);
       try {
         const response = await fetch('/admin/perform-update', { method: 'POST' });
         const data = await response.json();
         showToast(data.message || 'Update complete. Restarting.', 'success');
         statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400">Update successful. Restarting...</span>';
+        fadeIn(statusDiv);
         setTimeout(() => window.location.reload(), 5000);
       } catch (error) {
         statusDiv.innerHTML = '<span class="text-red-500">Update failed.</span>';
+        fadeIn(statusDiv);
         showToast('Error performing update', 'error');
       }
     }
   });
+
+  function fadeIn(el) {
+    el.style.transition = 'none';
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(4px)';
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        el.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+        setTimeout(function() {
+          el.style.transition = '';
+          el.style.opacity = '';
+          el.style.transform = '';
+        }, 220);
+      });
+    });
+  }
 
   async function measureApiLatency() {
     try {

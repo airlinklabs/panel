@@ -187,6 +187,18 @@
   .view-toggle-btn.active { background: white; color: #171717; }
   .dark .view-toggle-btn { color: #a3a3a3; }
   .dark .view-toggle-btn.active { background: rgba(255,255,255,0.08); color: white; }
+
+  .view-panel {
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  .view-panel.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
 </style>
 
 <script>
@@ -198,29 +210,78 @@
 
     if (!gridView || !listView || !gridViewBtn || !listViewBtn) return;
 
-    const savedView = localStorage.getItem('serverViewPreference') || 'grid';
+    staggerChildren(gridView.querySelectorAll(':scope > a'));
 
+    const savedView = localStorage.getItem('serverViewPreference') || 'grid';
     if (savedView === 'list') {
-      gridView.classList.add('hidden');
-      listView.classList.remove('hidden');
-      gridViewBtn.classList.remove('active');
-      listViewBtn.classList.add('active');
+      showView('list');
     }
 
     gridViewBtn.addEventListener('click', function() {
-      gridView.classList.remove('hidden');
-      listView.classList.add('hidden');
-      gridViewBtn.classList.add('active');
-      listViewBtn.classList.remove('active');
+      showView('grid');
       localStorage.setItem('serverViewPreference', 'grid');
     });
 
     listViewBtn.addEventListener('click', function() {
-      gridView.classList.add('hidden');
-      listView.classList.remove('hidden');
-      gridViewBtn.classList.remove('active');
-      listViewBtn.classList.add('active');
+      showView('list');
       localStorage.setItem('serverViewPreference', 'list');
     });
+
+    function showView(which) {
+      const incoming = which === 'grid' ? gridView : listView;
+      const outgoing = which === 'grid' ? listView : gridView;
+      const inBtn    = which === 'grid' ? gridViewBtn : listViewBtn;
+      const outBtn   = which === 'grid' ? listViewBtn : gridViewBtn;
+
+      outgoing.style.opacity = '0';
+      outgoing.style.transform = 'translateY(4px)';
+
+      setTimeout(function() {
+        outgoing.classList.add('hidden');
+        outgoing.style.opacity = '';
+        outgoing.style.transform = '';
+
+        incoming.classList.remove('hidden');
+        incoming.style.opacity = '0';
+        incoming.style.transform = 'translateY(4px)';
+
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() {
+            incoming.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+            incoming.style.opacity = '1';
+            incoming.style.transform = 'translateY(0)';
+
+            setTimeout(function() {
+              incoming.style.transition = '';
+              incoming.style.opacity = '';
+              incoming.style.transform = '';
+            }, 200);
+          });
+        });
+
+        staggerChildren(incoming.querySelectorAll(which === 'grid' ? ':scope > a' : 'tbody tr'));
+      }, 120);
+
+      inBtn.classList.add('active');
+      outBtn.classList.remove('active');
+    }
+
+    function staggerChildren(items) {
+      items.forEach(function(el, i) {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(6px)';
+        el.style.transition = 'none';
+        setTimeout(function() {
+          el.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+          setTimeout(function() {
+            el.style.transition = '';
+            el.style.opacity = '';
+            el.style.transform = '';
+          }, 220);
+        }, i * 40);
+      });
+    }
   });
 </script>
