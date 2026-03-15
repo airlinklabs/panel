@@ -4,7 +4,12 @@
           <nav class="flex relative">
              <ul role="list" class="flex min-w-full mt-1.5 flex-none gap-x-2 text-sm font-normal leading-6 text-neutral-600 dark:text-neutral-400">
                 <%
-                const menuItems = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
+                const rawMenuItems = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
+                const isAdmin = (typeof user !== 'undefined' && user && user.isAdmin === true);
+                const menuItems = rawMenuItems.filter(item => {
+                  if (item.isAdminItem && !isAdmin) return false;
+                  return true;
+                });
                 if (!menuItems || menuItems.length === 0) {
                 %>
                 <li class="transition">
@@ -58,13 +63,26 @@
                    Settings
                 </a>
              </li>
+             <% if (req.session && req.session.user && req.session.user.isAdmin) { %>
+             <li class="transition">
+                <a href="/admin/overview" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 mb-0.5 inline-flex mr-1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25v13.5A2.25 2.25 0 0118.75 21H5.25A2.25 2.25 0 013 18.75V5.25z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 7.5h6M9 12h6M9 16.5h6" />
+                  </svg>
+                  Admin
+                </a>
+             </li>
+             <% } %>
              <% } else {
                 menuItems.forEach(item => {
                   if (item.feature && !features.includes(item.feature)) return;
-                  const url = item.url.replace(':uuid', server.UUID);
+                  const url = (item.url || '#')
+                    .replace(':uuid', server.UUID)
+                    .replace(':id', server.id);
              %>
-                <li class="transition">
-                  <a href="<%= url %>" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
+                <li class="transition flex-shrink-0">
+                  <a href="<%= url %>" class="nav-link2 whitespace-nowrap py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
                     <%- item.icon %>
                     <%= item.label %>
                   </a>
@@ -95,6 +113,7 @@
               let value = item.value;
 
               if (value.includes(':uuid')) value = value.replace(':uuid', server.UUID);
+              if (value.includes(':id')) value = value.replace(':id', server.id);
               if (value.includes(':address')) {
                 const primaryPort = server.Ports ? JSON.parse(server.Ports).find(p => p.primary) : null;
                 const portNumber = primaryPort ? primaryPort.Port.split(':')[1] : '';
