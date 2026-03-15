@@ -63,7 +63,15 @@ function isImageFile(filename) {
                 <path fill-rule="evenodd" d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875ZM12.75 12a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V18a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V12Z" clip-rule="evenodd" />
                 <path d="M14.25 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Z" />
               </svg>
-              Create File
+              New File
+          </button>
+
+          <button id="createFolder" onclick="openCreateFolderModal()" type="button"
+              class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2 mr-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 inline-flex mr-1 text-neutral-800 mb-0.5">
+                <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z" />
+              </svg>
+              New Folder
           </button>
 
           <button id="uploadFile" onclick="openUploadFileModal()" type="button"
@@ -209,53 +217,58 @@ function isImageFile(filename) {
                   <td class="px-6 py-4 text-sm text-neutral-700 dark:text-neutral-300">
                     <%= fileSize %>
                   </td>
-                  <td class="px-6 py-4 text-sm">
-                    <button onclick="toggleDropdown(event, '<%= file.name %>')" class="text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <td class="px-6 py-4 text-sm">
+                    <button onclick="toggleDropdown(event, '<%= file.name %>')" class="text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/10">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                       </svg>
                     </button>
 
-                    <div id="dropdown-<%= file.name %>" class="absolute right-0 mt-2 w-fit mr-20 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10 transform opacity-0 scale-95 transition-all duration-200 ease-out pointer-events-none">
-                      <div
-                        class="p-2 bg-neutral-900 dark:bg-white rounded-lg shadow-md"
-                        role="menu"
-                        aria-orientation="vertical"
-                        aria-labelledby="options-menu"
-                      >
-                        <button
-                          class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-neutral-800 dark:text-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-200 text-left"
-                          role="menuitem"
-                          onclick="rename('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')"
-                        >
+                    <div id="dropdown-<%= file.name %>" class="fixed w-44 rounded-xl shadow-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/60 z-50 transform opacity-0 scale-95 transition-all duration-150 ease-out pointer-events-none overflow-hidden">
+                      <div class="py-1" role="menu">
+                        <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
+                          onclick="rename('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-3.5 h-3.5 shrink-0">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z" />
+                          </svg>
                           Rename
                         </button>
 
+                        <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
+                          onclick="copyFilePath('<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-3.5 h-3.5 shrink-0">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
+                          </svg>
+                          Copy Path
+                        </button>
+
                         <% if (file.type !== 'directory') { %>
-                          <button
-                            class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-neutral-800 dark:text-neutral-900 hover:bg-red-50 dark:hover:bg-neutral-200 text-left"
-                            role="menuitem"
-                            onclick="downloadfile('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')"
-                          >
+                          <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
+                            onclick="downloadfile('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-3.5 h-3.5 shrink-0">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
                             Download
                           </button>
                         <% } %>
 
                         <% if (file.name.toLowerCase().endsWith('.zip')) { %>
-                        <button
-                            class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-neutral-800 dark:text-neutral-900 hover:bg-green-50 dark:hover:bg-neutral-200 text-left"
-                            role="menuitem"
-                            onclick="extractZip('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')"
-                        >
+                          <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
+                            onclick="extractZip('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-3.5 h-3.5 shrink-0">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15" />
+                            </svg>
                             Extract Here
-                        </button>
+                          </button>
                         <% } %>
 
-                        <button
-                          class="w-full transition-colors duration-200 rounded-lg block px-4 py-1 text-sm font-medium text-red-500 dark:text-red-600 hover:bg-red-50 dark:hover:bg-red-50 text-left"
-                          role="menuitem"
-                          onclick="deletefile('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')"
-                        >
+                        <div class="mx-2 my-1 border-t border-neutral-100 dark:border-neutral-700/60"></div>
+
+                        <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-left"
+                          onclick="deletefile('<%= file.name %>', '<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>')">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-3.5 h-3.5 shrink-0">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                          </svg>
                           Delete
                         </button>
                       </div>
@@ -298,20 +311,29 @@ function isImageFile(filename) {
        </div>
     </div>
  </div>
-  <!-- Create file -->
-  <div id="createFileModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-    <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
-        <h2 class="text-2xl font-medium mb-1 text-neutral-800">Create File</h2>
-        <p class="mb-6 text-neutral-600">Please choose a name for this file.</p>
-        <input type="text"
-        id="FileName"
-        class="w-full px-3 py-2 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition mb-4 text-neutral-800"
-        placeholder="<%= req.translations.enterFileName || 'Enter file name' %>"
-        onkeydown="handleFileNameKeyPress(event)">
-        <div class="flex justify-end space-x-4">
-          <button onclick="closeCreateFileModal()" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
-          <button onclick="confirmCreateFile()" class="w-full md:w-auto rounded-xl bg-neutral-800 dark:bg-neutral-950 hover:bg-neutral-700 dark:hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Create</button>
+    <!-- Create file / folder modal -->
+  <div id="createFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-white dark:bg-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-neutral-700/60 shadow-2xl transform scale-95 transition-transform duration-200 sm:mx-4">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
+        <div>
+          <h2 id="createModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white">New File</h2>
+          <p id="createModalHint" class="text-xs text-neutral-500 mt-0.5">Use / to create files inside new folders.</p>
         </div>
+        <button onclick="closeCreateFileModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="px-5 py-4">
+        <input type="text" id="FileName" data-mode="file"
+          class="w-full px-3 py-2.5 rounded-xl text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono transition"
+          placeholder="filename.txt or folder/filename.txt"
+          onkeydown="handleFileNameKeyPress(event)">
+        <p id="fileNamePreview" class="mt-2 text-xs font-mono hidden"></p>
+      </div>
+      <div class="flex gap-2 px-5 pb-5 justify-end">
+        <button onclick="closeCreateFileModal()" class="px-4 py-2 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition active:scale-95">Cancel</button>
+        <button onclick="confirmCreateFile()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition active:scale-95">Create</button>
+      </div>
     </div>
   </div>
 
@@ -363,16 +385,28 @@ function isImageFile(filename) {
 <%- include('../../components/imageViewer')%>
 
 <!-- Rename Modal -->
-<div id="renameModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-  <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
-    <h2 class="text-2xl font-medium mb-1 text-neutral-800">Rename File</h2>
-    <p class="mb-6 text-neutral-600">Please enter a new name for this file.</p>
-    <input type="text" id="newFileName" class="w-full px-3 py-2 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition mb-4 text-neutral-800" placeholder="<%= req.translations.enterNewName || 'Enter new name' %>">
+<div id="renameModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200">
+  <div class="bg-white dark:bg-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-neutral-700/60 shadow-2xl transform scale-95 transition-transform duration-200 sm:mx-4">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
+      <div>
+        <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Rename</h2>
+        <p class="text-xs text-neutral-500 mt-0.5">Use / to move the file into a different folder.</p>
+      </div>
+      <button onclick="closeRenameModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="px-5 py-4">
+      <input type="text" id="newFileName"
+        class="w-full px-3 py-2.5 rounded-xl text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono transition"
+        placeholder="new-name.txt or subfolder/new-name.txt">
+      <p id="renamePreview" class="mt-2 text-xs font-mono hidden"></p>
+    </div>
     <input type="hidden" id="currentFileName">
     <input type="hidden" id="currentFilePath">
-    <div class="flex justify-end space-x-4">
-      <button onclick="closeRenameModal()" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
-      <button onclick="confirmRename()" class="w-full md:w-auto rounded-xl bg-neutral-800 dark:bg-neutral-950 hover:bg-neutral-700 dark:hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Rename</button>700 dark:hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Rename</button>
+    <div class="flex gap-2 px-5 pb-5 justify-end">
+      <button onclick="closeRenameModal()" class="px-4 py-2 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition active:scale-95">Cancel</button>
+      <button onclick="confirmRename()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition active:scale-95">Rename</button>
     </div>
   </div>
 </div>
@@ -735,42 +769,7 @@ function openCreateFileModal() {
     modal.querySelector('div').classList.add('scale-95');
   }
 
-  async function confirmCreateFile() {
-    const FileName = document.getElementById('FileName').value.trim();
-    if (FileName) {
-      closeCreateFileModal();
-      const loader = showLoadingPopup('Creating File', 'Creating new file...');
-
-      try {
-        const encodedFileName = encodeURIComponent(FileName);
-        const createFile = await fetch(`/server/<%= server.UUID %>/files/<%= currentPath %>/${encodedFileName}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ content: '' }),
-        });
-
-        if (createFile.ok) {
-          loader.updateProgress(100, 'File created successfully!');
-          setTimeout(() => {
-            loader.close();
-            showToast(`File ${FileName} created successfully`, 'success');
-            setTimeout(() => location.reload(), 1000);
-          }, 500);
-        } else {
-          loader.close();
-          showToast('Failed to create file', 'error');
-        }
-      } catch (error) {
-        loader.close();
-        console.error('Error creating file:', error);
-        showToast('An error occurred while creating the file', 'error');
-      }
-    } else {
-      closeCreateFileModal();
-    }
-  }
+  async function confirmCreateFile() { /* overridden below */ }
 
   function openRenameModal(fileName, filePath) {
     const modal = document.getElementById('renameModal');
@@ -801,43 +800,7 @@ function openCreateFileModal() {
     modal.querySelector('div').classList.add('scale-95');
   }
 
-  function confirmRename() {
-    const newName = document.getElementById('newFileName').value.trim();
-    const fileName = document.getElementById('currentFileName').value;
-    const filePath = document.getElementById('currentFilePath').value;
-
-    if (newName && newName !== fileName) {
-      closeRenameModal();
-      const loader = showLoadingPopup('Renaming File', 'Processing rename request...');
-
-      fetch(`/server/<%= server.UUID %>/rename`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          path: filePath,
-          newName: newName
-        })
-      })
-      .then(response => {
-        loader.close();
-        if (response.ok) {
-          showToast(`File renamed to ${newName} successfully`, 'success');
-          setTimeout(() => location.reload(), 1000);
-        } else {
-          showToast('Failed to rename file', 'error');
-        }
-      })
-      .catch(error => {
-        loader.close();
-        console.error('Renaming failed:', error);
-        showToast('Failed to rename file', 'error');
-      });
-    } else {
-      closeRenameModal();
-    }
-  }
+  function confirmRename() { /* overridden below */ }
 
   // Add event listener for Enter key in rename modal
   document.getElementById('newFileName').addEventListener('keydown', function(event) {
@@ -1177,6 +1140,115 @@ function openCreateFileModal() {
     removeSelectedFile();
     console.log('File upload functionality initialized');
   });
+
+  // ── New Folder ─────────────────────────────────────────────────────────────
+  function openCreateFolderModal() {
+    document.getElementById('FileName').value = '';
+    document.getElementById('fileNamePreview').textContent = '';
+    document.getElementById('fileNamePreview').classList.add('hidden');
+    document.getElementById('createModalTitle').textContent = 'New Folder';
+    document.getElementById('createModalHint').textContent = 'Folder name. Use / to create nested folders.';
+    document.getElementById('FileName').setAttribute('data-mode', 'folder');
+    openCreateFileModal();
+  }
+
+  // ── Path preview for create & rename ──────────────────────────────────────
+  function updatePathPreview(inputEl, previewEl) {
+    const val = inputEl.value;
+    if (!val.includes('/')) {
+      previewEl.classList.add('hidden');
+      return;
+    }
+    const parts = val.split('/').filter(Boolean);
+    if (parts.length < 2) { previewEl.classList.add('hidden'); return; }
+    const folders = parts.slice(0, -1).join('/');
+    const file = parts[parts.length - 1];
+    previewEl.innerHTML = '<span class="text-neutral-400">Will create: </span>' +
+      '<span class="text-blue-500 dark:text-blue-400">' + folders + '/</span>' +
+      '<span class="text-neutral-700 dark:text-neutral-300">' + (file || '…') + '</span>';
+    previewEl.classList.remove('hidden');
+  }
+
+  document.getElementById('FileName').addEventListener('input', function() {
+    updatePathPreview(this, document.getElementById('fileNamePreview'));
+  });
+
+  document.getElementById('newFileName').addEventListener('input', function() {
+    updatePathPreview(this, document.getElementById('renamePreview'));
+  });
+
+  // ── confirmCreateFile: handle slash paths & folder mode ───────────────────
+  const _origConfirmCreateFile = confirmCreateFile;
+  async function confirmCreateFile() {
+    const raw = document.getElementById('FileName').value.trim();
+    const mode = document.getElementById('FileName').getAttribute('data-mode');
+    if (!raw) { closeCreateFileModal(); return; }
+
+    const base = '<%= currentPath %>';
+    let fullPath;
+    if (raw.startsWith('/')) {
+      fullPath = raw.replace(/^\/+/, '');
+    } else {
+      fullPath = base ? base.replace(/^\/+/, '') + '/' + raw : raw;
+    }
+
+    if (mode === 'folder') {
+      fullPath = fullPath.replace(/\/*$/, '') + '/.airlink_keep';
+    }
+
+    closeCreateFileModal();
+    const loader = showLoadingPopup('Creating', mode === 'folder' ? 'Creating folder...' : 'Creating file...');
+
+    try {
+      const res = await fetch('/server/<%= server.UUID %>/files/' + encodeURIComponent(fullPath), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: '' }),
+      });
+      if (res.ok) {
+        loader.updateProgress(100, 'Done!');
+        setTimeout(() => { loader.close(); showToast(raw + ' created', 'success'); setTimeout(() => location.reload(), 800); }, 400);
+      } else {
+        loader.close(); showToast('Failed to create', 'error');
+      }
+    } catch (e) {
+      loader.close(); showToast('Error creating', 'error');
+    }
+  }
+
+  // ── confirmRename: handle slash paths (move) ──────────────────────────────
+  const _origConfirmRename = confirmRename;
+  function confirmRename() {
+    const newName = document.getElementById('newFileName').value.trim();
+    const filePath = document.getElementById('currentFilePath').value;
+    if (!newName || newName === document.getElementById('currentFileName').value) { closeRenameModal(); return; }
+
+    let resolvedName = newName;
+    if (newName.includes('/') && !newName.startsWith('/')) {
+      const dir = filePath.substring(0, filePath.lastIndexOf('/') + 1);
+      resolvedName = dir + newName;
+    }
+
+    closeRenameModal();
+    const loader = showLoadingPopup('Renaming', 'Processing...');
+    fetch('/server/<%= server.UUID %>/rename', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: filePath, newName: resolvedName })
+    }).then(r => {
+      loader.close();
+      if (r.ok) { showToast('Renamed to ' + newName, 'success'); setTimeout(() => location.reload(), 800); }
+      else showToast('Failed to rename', 'error');
+    }).catch(() => { loader.close(); showToast('Failed to rename', 'error'); });
+  }
+
+  // ── Copy path ─────────────────────────────────────────────────────────────
+  function copyFilePath(path) {
+    navigator.clipboard.writeText(path).then(() => showToast('Path copied', 'success'));
+  }
+
+  // ── toggleDropdown: position fixed dropdown at click coords ───────────────
+
 </script>
 
 <%- include('../../components/footer') %>
