@@ -100,13 +100,15 @@
         <div class="bg-red-950/20 rounded-xl p-6 shadow-lg border border-red-800/20 mt-8">
           <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white"><%= req.translations.dangerZone || 'Danger Zone' %></h2>
 
+          <% if (user && user.isAdmin) { %>
           <div class="flex items-center justify-between mb-6">
             <div>
-              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300"><%= req.translations.restartServerLabel || 'Restart Server' %></h3>
-              <p class="text-sm text-neutral-600 dark:text-neutral-400"><%= req.translations.restartServerDesc || 'Force a restart of your server' %></p>
+              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300">Delete Server</h3>
+              <p class="text-sm text-neutral-600 dark:text-neutral-400">Permanently delete this server and all its data.</p>
             </div>
-            <button id="restartButton" type="button" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2"><%= req.translations.restart || 'Restart' %></button>
+            <button id="deleteServerButton" type="button" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Delete</button>
           </div>
+          <% } %>
 
           <div class="flex items-center justify-between">
             <div>
@@ -127,7 +129,6 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const serverSettingsForm = document.getElementById('serverSettingsForm');
-    const restartButton = document.getElementById('restartButton');
     const reinstallButton = document.getElementById('reinstallButton');
 
     serverSettingsForm.addEventListener('submit', function(e) {
@@ -165,25 +166,30 @@
       });
     });
 
-    restartButton.addEventListener('click', () => {
-      window.modal.confirm({
-        title: '<%= req.translations.confirmRestart || "Confirm Restart" %>',
-        body: 'Are you sure you want to restart the server? This will disconnect all users.',
-        danger: false,
-        confirmLabel: '<%= req.translations.restart || "Restart" %>',
-        onConfirm: () => {
-          const loader = showLoadingPopup('Restarting Server', 'Initiating server restart...');
-          fetch(`/server/<%= server.UUID %>/power/restart`, { method: 'POST' })
-            .then(r => r.json())
-            .then(data => {
-              loader.close();
-              if (data.success || data.message) showToast('Server restart initiated.', 'success');
-              else showToast('Failed to restart server: ' + (data.error || 'Unknown error'), 'error');
-            })
-            .catch(() => { loader.close(); showToast('An error occurred while restarting the server.', 'error'); });
-        }
+    const deleteServerButton = document.getElementById('deleteServerButton');
+    if (deleteServerButton) {
+      deleteServerButton.addEventListener('click', () => {
+        window.modal.confirm({
+          title: 'Delete Server',
+          body: 'This will permanently delete the server and all its data. This cannot be undone.',
+          danger: true,
+          confirmLabel: 'Delete Server',
+          onConfirm: () => {
+            window.modal.confirm({
+              title: 'Final Warning',
+              body: 'All server data will be permanently lost. Are you absolutely sure?',
+              danger: true,
+              confirmLabel: 'Yes, Delete',
+              onConfirm: () => {
+                const loader = showLoadingPopup('Deleting Server', 'Removing server and all data...');
+                loader.updateProgress(20, 'Contacting node...');
+                window.location.href = '/admin/server/delete/<%= server.id %>';
+              }
+            });
+          }
+        });
       });
-    });
+    }
 
     reinstallButton.addEventListener('click', () => {
       window.modal.confirm({

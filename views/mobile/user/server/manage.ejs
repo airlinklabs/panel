@@ -1080,7 +1080,7 @@ connectWebSocket();
         document.getElementById('ramUsage').textContent = `0% (0 Bytes / ${formatBytes(<%- server.Memory %> * 1024 * 1024 * 1024)})`;
 
         // Update CPU usage
-        document.getElementById('cpuUsage').textContent = `0% / ${<%- server.Cpu %>}%`;
+        document.getElementById('cpuUsage').textContent = `0% / ${<%- server.Cpu * 100 %>}%`;
 
         // Update disk usage
         document.getElementById('diskUsage').textContent = '0% (0 Bytes / 10 GB)';
