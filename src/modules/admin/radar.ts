@@ -374,22 +374,28 @@ const radarModule: Module = {
             return;
           }
 
-          // Wait 60s then check once. VT usually finishes in 30–90s for small zips.
-          // A single check uses 1 quota lookup instead of up to 24.
-          await new Promise(r => setTimeout(r, 60000));
+          // Poll VT up to 4 times, 30s apart (max ~2 min wait).
+          // VT typically finishes in 30–90s for small zips.
+          let analysisData: any = null;
+          for (let attempt = 0; attempt < 4; attempt++) {
+            await new Promise(r => setTimeout(r, 30000));
 
-          const pollResponse = await axios.get(
-            `https://www.virustotal.com/api/v3/analyses/${analysisId}`,
-            { headers: { 'x-apikey': apiKey }, timeout: 15000 }
-          );
+            const pollResponse = await axios.get(
+              `https://www.virustotal.com/api/v3/analyses/${analysisId}`,
+              { headers: { 'x-apikey': apiKey }, timeout: 15000 }
+            );
 
-          const status = pollResponse.data?.data?.attributes?.status;
-          if (status !== 'completed') {
-            res.json({ success: true, pending: true, analysisId, vtLink: `https://www.virustotal.com/gui/analysis/${analysisId}` });
-            return;
+            const status = pollResponse.data?.data?.attributes?.status;
+            if (status === 'completed') {
+              analysisData = pollResponse.data;
+              break;
+            }
           }
 
-          const analysisData = pollResponse.data;
+          if (!analysisData) {
+            res.json({ success: true, pending: true, analysisId, vtLink: `https://www.virustotal.com/gui/analyses/${analysisId}` });
+            return;
+          }
 
           const results = analysisData.data?.attributes?.results || {};
           const stats = analysisData.data?.attributes?.stats || {};
@@ -404,7 +410,7 @@ const radarModule: Module = {
             maliciousEngines,
             stats,
             totalEngines: Object.keys(results).length,
-            vtLink: `https://www.virustotal.com/gui/analysis/${analysisId}`,
+            vtLink: `https://www.virustotal.com/gui/analyses/${analysisId}`,
           });
         } catch (err: any) {
           logger.error('VT file scan error:', err?.message);
