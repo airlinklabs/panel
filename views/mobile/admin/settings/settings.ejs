@@ -155,6 +155,31 @@
         </div>
       </div>
 
+      <!-- Integrations -->
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">Integrations</p>
+        </div>
+        <div class="p-4">
+          <label class="block text-xs font-medium text-neutral-700 dark:text-white mb-1">VirusTotal API Key</label>
+          <p class="text-[10px] text-neutral-500 mb-2">Free tier: 4 lookups/min, 500/day. Get a key at <a href="https://www.virustotal.com" target="_blank" rel="noopener" class="text-blue-500">virustotal.com</a>.</p>
+          <div class="relative">
+            <input
+              type="password"
+              name="virusTotalApiKey"
+              value="<%= settings.virusTotalApiKey || '' %>"
+              placeholder="Paste your API key"
+              autocomplete="off"
+              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 pr-14 text-sm text-neutral-800 dark:text-white font-mono placeholder-neutral-400 focus:outline-none"
+            >
+            <button type="button" onclick="const i=this.previousElementSibling;i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'Show':'Hide';" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300">Show</button>
+          </div>
+          <% if (settings.virusTotalApiKey) { %>
+            <p class="mt-1.5 text-[10px] text-emerald-600 dark:text-emerald-400">Key is set. Leave blank to keep it.</p>
+          <% } %>
+        </div>
+      </div>
+
       <!-- Actions -->
       <div class="flex gap-2">
         <button type="button" id="resetButton" class="flex-1 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-4 py-2.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">

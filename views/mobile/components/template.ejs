@@ -153,3 +153,15 @@ document.addEventListener('DOMContentLoaded', function() {
   ws.addEventListener('error', function() {});
 });
 </script>
+<script>
+(function () {
+  var ov = document.getElementById('pl-overlay');
+  if (!ov) return;
+  // Top bar is h-14 = 56px, bottom nav is h-16 = 64px — fixed Tailwind values
+  ov.style.top    = '56px';
+  ov.style.left   = '0';
+  ov.style.right  = '0';
+  ov.style.bottom = '64px';
+  ov.style.display = 'flex';
+})();
+</script>

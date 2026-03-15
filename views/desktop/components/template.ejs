@@ -299,3 +299,15 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
   </div>
 </div>
+<script>
+(function () {
+  var ov = document.getElementById('pl-overlay');
+  if (!ov) return;
+  // Sidebar is w-56 = 224px, topbar is h-16 = 64px — both fixed values from Tailwind
+  ov.style.left   = '224px';
+  ov.style.top    = '64px';
+  ov.style.right  = '0';
+  ov.style.bottom = '0';
+  ov.style.display = 'flex';
+})();
+</script>

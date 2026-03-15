@@ -157,6 +157,7 @@ interface SettingsData {
   allowRegistration?: boolean;
   sftpPort?: number;
   uploadLimit?: number;
+  virusTotalApiKey?: string | null;
 }
 
 const adminModule: Module = {
@@ -273,6 +274,9 @@ const adminModule: Module = {
             allowRegistration: rawData.allowRegistration === 'true' || rawData.allowRegistration === true,
             sftpPort: rawData.sftpPort ? parseInt(rawData.sftpPort, 10) : undefined,
             uploadLimit: rawData.uploadLimit ? parseInt(rawData.uploadLimit, 10) : undefined,
+            virusTotalApiKey: typeof rawData.virusTotalApiKey === 'string'
+              ? (rawData.virusTotalApiKey.trim() || null)
+              : undefined,
           };
 
           if (files.logo && files.logo[0]) {

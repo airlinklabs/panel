@@ -170,29 +170,7 @@
   }
 
   function showConfirmModal(title, message, onConfirm) {
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200';
-    modal.innerHTML = `
-      <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-6 max-w-sm w-full mx-4 scale-95 transition-transform duration-200 shadow-2xl">
-        <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">${title}</h2>
-        <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-5">${message}</p>
-        <div class="flex gap-2 justify-end">
-          <button id="modalCancel" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
-          <button id="modalConfirm" class="px-4 py-2 text-xs font-medium rounded-xl bg-red-600 hover:bg-red-500 text-white transition">Delete</button>
-        </div>
-      </div>`;
-    document.body.appendChild(modal);
-    requestAnimationFrame(() => {
-      modal.classList.remove('opacity-0', 'pointer-events-none');
-      modal.querySelector('div').classList.remove('scale-95');
-      modal.querySelector('div').classList.add('scale-100');
-    });
-    const close = () => {
-      modal.classList.add('opacity-0');
-      setTimeout(() => document.body.removeChild(modal), 200);
-    };
-    modal.querySelector('#modalCancel').addEventListener('click', close);
-    modal.querySelector('#modalConfirm').addEventListener('click', () => { close(); onConfirm(); });
+    window.modal.confirm({ title, body: message, danger: true, confirmLabel: 'Delete', onConfirm });
   }
 
   async function deleteNode(nodeId) {
