@@ -67,13 +67,6 @@ function isImageFile(filename) {
               </svg>
               Upload
           </button>
-          <button id="createFolder" onclick="openCreateFolderModal()" type="button"
-              class="flex items-center gap-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
-                <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z" />
-              </svg>
-              Folder
-          </button>
           <%- include('../../components/sftp', { server: server }) %>
         </div>
         <% } %>
@@ -130,12 +123,13 @@ function isImageFile(filename) {
       <% } else { %>
         <!-- File Table -->
         <div class="mt-4">
-          <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
-            <table class="min-w-full bg-white dark:bg-neutral-800">
+          <div class="rounded-xl border border-neutral-200 dark:border-neutral-700/40 overflow-hidden">
+            <table class="min-w-full bg-white dark:bg-neutral-900/60">
 
                     <div class="p-2 overflow-hidden">
-        <h1 class="text-white text-sm">
-          <a class="text-neutral-300 hover:text-neutral-200 transition" href="./files">/app/data/</a>
+        <div class="flex items-center gap-1">
+        <h1 class="text-neutral-800 dark:text-white text-sm flex items-center flex-wrap">
+          <a class="text-neutral-500 dark:text-neutral-300 hover:text-neutral-700 dark:hover:text-neutral-200 transition" href="./files">/app/data/</a>
           <%
               if (req.query.path) {
                   const parts = req.query.path.split('/');
@@ -158,24 +152,27 @@ function isImageFile(filename) {
               }
           %>
         </h1>
+        <button onclick="copyCurrentPath()" class="shrink-0 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition p-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" /></svg>
+        </button>
+        </div>
        </div>
-            <thead class="text-neutral-800 dark:text-neutral-100">
+            <thead class="bg-neutral-50 dark:bg-neutral-800/60 border-b border-neutral-200 dark:border-neutral-700/40">
               <tr>
-                <th class="px-4 py-3 text-left">
-                  <input type="checkbox" id="selectAll" class="form-checkbox h-5 w-5 text-neutral-500 bg-white/10 border border-white/15 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox">
+                <th class="px-3 py-2.5 text-left w-9">
+                  <input type="checkbox" id="selectAll" class="form-checkbox h-4 w-4 text-neutral-500 bg-neutral-100 dark:bg-white/10 border border-neutral-300 dark:border-white/15 rounded transition file-checkbox">
                 </th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-600 dark:text-neutral-400">File Name</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-600 dark:text-neutral-400">Size</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-600 dark:text-neutral-400">&nbsp;</th>
+                <th class="px-3 py-2.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">Name</th>
+                <th class="px-3 py-2.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">Size</th>
               </tr>
             </thead>
             <tbody>
               <% files.forEach(file => { %>
-                <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700/30 cursor-pointer">
-                  <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-neutral-800 dark:text-white border-none">
-                    <input type="checkbox" class="form-checkbox h-5 w-5 text-neutral-500 bg-white/5 border border-white/10 rounded focus:ring-offset-neutral-800 focus:ring-neutral-700 transition focus:border-none file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>">
+                <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.02] border-b border-neutral-100 dark:border-neutral-700/30 last:border-0 cursor-pointer transition-colors">
+                  <td class="px-3 py-3 w-9">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-neutral-500 bg-white/5 border border-white/10 rounded transition file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>">
                   </td>
-                  <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-neutral-800 dark:text-white border-none">
+                  <td class="px-3 py-3">
                     <%
                       const isImage = file.type !== 'directory' && isImageFile(file.name);
                       const filePath = currentPath && currentPath !== '/'
@@ -197,16 +194,14 @@ function isImageFile(filename) {
                         return `${size.toFixed(2)} ${sizes[unitIndex]}`;
                       })();
                     %>
-                    <a href="<%= fileHref %>" class="flex items-center" <% if (isImage) { %>onclick="event.preventDefault(); showImageViewer('<%= file.name %>', '<%= filePath %>', '<%= fileSize %>', '<%= server.UUID %>');"<% } %>>
-                    <span class="mr-4">
-                      <%- getFileIcon(
-                          file.type === 'directory' ? 'Folder' : file.category || 'No Category'
-                        ) %>
-                    </span>
-                    <%= file.name %>
+                    <a href="<%= fileHref %>" class="flex items-center gap-2 text-sm font-medium text-neutral-800 dark:text-neutral-200 transition-colors" <% if (isImage) { %>onclick="event.preventDefault(); showImageViewer('<%= file.name %>', '<%= filePath %>', '<%= fileSize %>', '<%= server.UUID %>');"<% } %>>
+                      <span class="text-neutral-400 dark:text-neutral-500 shrink-0">
+                        <%- getFileIcon(file.type === 'directory' ? 'Folder' : file.category || 'No Category') %>
+                      </span>
+                      <span class="truncate"><%= file.name %></span>
                     </a>
                   </td>
-                  <td class="px-4 py-3 text-xs text-neutral-500">
+                  <td class="px-3 py-3 text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap">
                     <%= fileSize %>
                   </td>
                                     <td class="px-6 py-4 text-sm">
@@ -283,11 +278,14 @@ function isImageFile(filename) {
    <div id="floatingActionBar" class="fixed left-0 right-0 bg-neutral-900 dark:bg-neutral-800 z-40 text-white py-3 px-4 transition-all duration-300 ease-in-out flex justify-between items-center pointer-events-none" style="bottom: -80px;">
     <span id="selectedFilesCount">0 files selected</span>
     <div class="flex gap-4">
-        <button id="massDeleteBtn" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
-            Delete Selected
+        <button id="massRenameBtn" class="rounded-xl bg-neutral-700 dark:bg-neutral-600 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95">
+            Rename
         </button>
-        <button id="massArchiveBtn" class="w-full md:w-auto rounded-xl bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
-            Archive Selected
+        <button id="massArchiveBtn" class="rounded-xl bg-neutral-600 dark:bg-neutral-500 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95">
+            Archive
+        </button>
+        <button id="massDeleteBtn" class="rounded-xl bg-red-600 hover:bg-red-500 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95">
+            Delete
         </button>
     </div>
 </div>
@@ -1241,6 +1239,21 @@ function openCreateFileModal() {
 
   // ── toggleDropdown: position fixed dropdown at click coords ───────────────
 
+
+  function copyCurrentPath() {
+    const path = '<%= currentPath ? currentPath.replace(/^\/+/, "") : "" %>';
+    navigator.clipboard.writeText(path || '/').then(() => showToast('Path copied', 'success'));
+  }
+
+  document.getElementById('massRenameBtn').addEventListener('click', () => {
+    if (selectedFiles.length !== 1) {
+      showToast('Select exactly one file to rename', 'error');
+      return;
+    }
+    const fullPath = selectedFiles[0];
+    const name = fullPath.split('/').pop();
+    openRenameModal(name, fullPath);
+  });
 </script>
 
 <%- include('../../components/footer') %>
