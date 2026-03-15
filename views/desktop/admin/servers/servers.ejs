@@ -78,7 +78,7 @@
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.Node %></th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.connection %></th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.Status %></th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white">Jump</th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white"></th>
             </tr>
           </thead>
           <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
@@ -123,12 +123,18 @@
                   </div>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
-                  <a href="/server/<%= server.UUID %>" onclick="event.stopPropagation()" class="inline-flex items-center gap-1.5 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 px-2.5 py-1.5 text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                    </svg>
-                    Jump
-                  </a>
+                  <div class="flex items-center gap-1.5">
+                    <a href="/server/<%= server.UUID %>" onclick="event.stopPropagation()" title="Jump to server" class="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                      </svg>
+                    </a>
+                    <a href="/admin/servers/edit/<%= server.id %>" onclick="event.stopPropagation()" title="Edit server" class="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                      </svg>
+                    </a>
+                  </div>
                 </td>
               </tr>
             <% }); %>
@@ -175,38 +181,66 @@
 <div id="radarScanModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
   <div class="flex items-center justify-center min-h-screen p-4">
     <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" id="radarScanModalBackdrop"></div>
-    <div class="relative bg-white dark:bg-neutral-800 rounded-xl shadow-xl max-w-lg w-full p-6 overflow-hidden transform transition-all">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-medium text-neutral-800 dark:text-white" id="radarScanModalTitle">Run Radar Scan</h3>
-        <button type="button" class="text-neutral-400 hover:text-neutral-500" onclick="closeRadarScanModal()">
-          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div class="relative bg-white dark:bg-neutral-800 rounded-xl shadow-xl max-w-2xl w-full overflow-hidden transform transition-all">
+
+      <!-- Modal header -->
+      <div class="flex justify-between items-center px-6 py-4 border-b border-neutral-200 dark:border-neutral-700/50">
+        <div>
+          <h3 class="text-base font-medium text-neutral-800 dark:text-white" id="radarScanModalTitle">Radar Scan</h3>
+          <p class="text-xs text-neutral-500 mt-0.5" id="radarScanModalSubtitle">Pick a script and run a scan against the server volume</p>
+        </div>
+        <button type="button" class="text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition-colors" onclick="closeRadarScanModal()">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
-      <div class="mb-4">
-        <p class="text-sm text-neutral-500 mb-4">Select a radar script to scan the server volume:</p>
-        <div class="mb-4">
-          <label for="scriptSelect" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Script:</label>
-          <select id="scriptSelect" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5">
-            <option value="">Loading scripts...</option>
-          </select>
+
+      <!-- Script picker phase -->
+      <div id="radarPickerPhase" class="px-6 py-5">
+        <div class="flex gap-4 items-start">
+          <div class="flex-1">
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Script</label>
+            <select id="scriptSelect" class="w-full rounded-lg text-neutral-800 dark:text-white text-sm px-3 py-2 bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-700/50 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500">
+              <option value="">Loading scripts...</option>
+            </select>
+          </div>
+          <div class="pt-5">
+            <button type="button" id="runScanButton" onclick="runRadarScan()" class="inline-flex items-center gap-2 rounded-lg bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/30 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 dark:hover:bg-neutral-600 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              </svg>
+              Run Scan
+            </button>
+          </div>
         </div>
-        <div id="scriptDescription" class="text-sm text-neutral-500 italic mb-4"></div>
+        <p id="scriptDescription" class="mt-2 text-xs text-neutral-500 italic min-h-4"></p>
       </div>
-      <div id="scanResults" class="mb-4 max-h-60 overflow-y-auto hidden">
-        <h4 class="text-md font-medium text-neutral-800 dark:text-white mb-2">Scan Results</h4>
-        <div id="resultsContent" class="text-sm text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-700/50 rounded-lg p-3"></div>
+
+      <!-- Results phase — hidden until scan runs -->
+      <div id="radarResultsPhase" class="hidden">
+
+        <!-- Summary bar -->
+        <div id="radarSummaryBar" class="px-6 py-3 border-t border-neutral-200 dark:border-neutral-700/50 flex items-center gap-4 bg-neutral-50 dark:bg-neutral-800/60"></div>
+
+        <!-- Server tabs (only shown for multi-server scans) -->
+        <div id="radarServerTabs" class="hidden border-b border-neutral-200 dark:border-neutral-700/50 px-6 pt-3 flex gap-1 overflow-x-auto"></div>
+
+        <!-- Results body -->
+        <div id="radarResultsBody" class="px-6 py-4 max-h-80 overflow-y-auto"></div>
+
       </div>
-      <div class="flex justify-end gap-3">
-        <button type="button" class="rounded-xl bg-white border border-neutral-800/20 hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition" onclick="closeRadarScanModal()">Cancel</button>
-        <button type="button" id="runScanButton" class="rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/30 px-4 py-2 text-center text-sm font-medium text-neutral-300 shadow-lg hover:bg-neutral-800 dark:hover:bg-neutral-700 transition-all duration-200 flex items-center gap-2" onclick="runRadarScan()">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-          </svg>
-          Run Scan
+
+      <!-- Modal footer -->
+      <div class="px-6 py-4 border-t border-neutral-200 dark:border-neutral-700/50 flex justify-between items-center">
+        <button type="button" id="radarRescanBtn" class="hidden text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors" onclick="resetRadarToPickerPhase()">
+          ← Run another scan
         </button>
+        <div class="ml-auto">
+          <button type="button" onclick="closeRadarScanModal()" class="rounded-lg bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-600 text-neutral-700 dark:text-neutral-200 px-3 py-1.5 text-sm font-medium transition-colors">Close</button>
+        </div>
       </div>
+
     </div>
   </div>
 </div>
@@ -255,9 +289,13 @@
     const checked = getChecked();
     if (checked.length === 0) return;
     const ids = checked.map(cb => cb.value);
-    const label = checked.length === 1
-      ? checked[0].closest('.server-row').querySelector('.font-medium').textContent.trim()
-      : checked.length + ' servers';
+    const names = {};
+    checked.forEach(cb => {
+      const nameEl = cb.closest('.server-row').querySelector('.font-medium.text-neutral-800, .font-medium.dark\\:text-white');
+      names[cb.value] = nameEl ? nameEl.textContent.trim() : cb.value;
+    });
+    radarServerNames = names;
+    const label = checked.length === 1 ? names[ids[0]] : checked.length + ' servers';
     openRadarScanModal(ids, label);
   }
 
@@ -296,35 +334,49 @@
 
   let currentServerIds = [];
   let availableScripts = [];
+  let radarServerNames = {};
 
   function openRadarScanModal(serverId, serverName) {
     currentServerIds = Array.isArray(serverId) ? serverId : [serverId];
-    document.getElementById('radarScanModalTitle').textContent = 'Run Radar Scan: ' + serverName;
+    if (!Array.isArray(serverId)) radarServerNames = { [serverId]: serverName };
+    document.getElementById('radarScanModalTitle').textContent = currentServerIds.length === 1
+      ? 'Radar Scan: ' + serverName
+      : 'Radar Scan: ' + currentServerIds.length + ' servers';
+    document.getElementById('radarScanModalSubtitle').textContent = 'Pick a script and run a scan against the server volume';
+    document.getElementById('radarResultsPhase').classList.add('hidden');
+    document.getElementById('radarRescanBtn').classList.add('hidden');
+    document.getElementById('radarPickerPhase').classList.remove('hidden');
     document.getElementById('radarScanModal').classList.remove('hidden');
-    document.getElementById('scanResults').classList.add('hidden');
-    document.getElementById('resultsContent').innerHTML = '';
     fetchRadarScripts();
   }
 
   function closeRadarScanModal() {
     document.getElementById('radarScanModal').classList.add('hidden');
     currentServerIds = [];
+    radarServerNames = {};
+  }
+
+  function resetRadarToPickerPhase() {
+    document.getElementById('radarResultsPhase').classList.add('hidden');
+    document.getElementById('radarRescanBtn').classList.add('hidden');
+    document.getElementById('radarPickerPhase').classList.remove('hidden');
   }
 
   document.getElementById('radarScanModalBackdrop').addEventListener('click', closeRadarScanModal);
 
   async function fetchRadarScripts() {
+    const scriptSelect = document.getElementById('scriptSelect');
+    scriptSelect.innerHTML = '<option value="">Loading...</option>';
+    document.getElementById('runScanButton').disabled = true;
     try {
       const response = await fetch('/admin/radar/scripts');
       const data = await response.json();
       if (data.success && data.scripts) {
         availableScripts = data.scripts;
-        const scriptSelect = document.getElementById('scriptSelect');
         scriptSelect.innerHTML = '';
         if (availableScripts.length === 0) {
           scriptSelect.innerHTML = '<option value="">No scripts available</option>';
-          document.getElementById('scriptDescription').textContent = 'No radar scripts found in the storage/radar directory.';
-          document.getElementById('runScanButton').disabled = true;
+          document.getElementById('scriptDescription').textContent = 'No radar scripts found in storage/radar.';
         } else {
           availableScripts.forEach(script => {
             const option = document.createElement('option');
@@ -359,9 +411,8 @@
 
     const runButton = document.getElementById('runScanButton');
     runButton.disabled = true;
-    runButton.classList.add('opacity-70');
     runButton.innerHTML = `
-      <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
@@ -378,25 +429,22 @@
       ));
 
       const failed = allResults.filter(r => !r.data.success);
+      if (failed.length > 0) showToast(failed.length + ' scan(s) failed', 'error');
+
+      document.getElementById('radarPickerPhase').classList.add('hidden');
+      document.getElementById('radarResultsPhase').classList.remove('hidden');
+      document.getElementById('radarRescanBtn').classList.remove('hidden');
+
       const succeeded = allResults.filter(r => r.data.success);
+      renderRadarResults(succeeded);
 
-      if (failed.length > 0) {
-        showToast(`${failed.length} scan(s) failed`, 'error');
-      } else {
-        showToast('Radar scan completed', 'success');
-      }
-
-      if (succeeded.length > 0) {
-        displayScanResults(succeeded.length === 1 ? succeeded[0].data.results : succeeded);
-      }
     } catch (error) {
       console.error('Error running radar scan:', error);
       showToast('Failed to run radar scan', 'error');
     } finally {
       runButton.disabled = false;
-      runButton.classList.remove('opacity-70');
       runButton.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
           <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
         </svg>
         Run Scan
@@ -404,27 +452,119 @@
     }
   }
 
-  function displayScanResults(results) {
-    const resultsDiv = document.getElementById('resultsContent');
-    if (!results || !results.results || results.results.length === 0) {
-      resultsDiv.innerHTML = '<p>No suspicious files found.</p>';
-    } else {
-      let html = '<div class="space-y-3">';
-      results.results.forEach(result => {
-        html += `<div class="border-b border-neutral-200 dark:border-neutral-700 pb-2">`;
-        html += `<p class="font-medium">${result.pattern.description}</p>`;
-        html += `<p class="text-xs text-neutral-500">Pattern: ${result.pattern.pattern}</p>`;
-        html += `<ul class="mt-1 list-disc list-inside">`;
-        result.matches.forEach(match => {
-          const sizeStr = match.size ? ` (${formatFileSize(match.size)})` : '';
-          html += `<li class="text-xs">${match.path}${sizeStr}</li>`;
-        });
-        html += `</ul></div>`;
-      });
-      html += '</div>';
-      resultsDiv.innerHTML = html;
+  function renderRadarResults(results) {
+    const tabsEl = document.getElementById('radarServerTabs');
+    const bodyEl = document.getElementById('radarResultsBody');
+    const summaryEl = document.getElementById('radarSummaryBar');
+
+    if (results.length === 0) {
+      tabsEl.classList.add('hidden');
+      summaryEl.innerHTML = '<span class="text-sm text-neutral-500">All scans failed or returned no data.</span>';
+      bodyEl.innerHTML = '';
+      return;
     }
-    document.getElementById('scanResults').classList.remove('hidden');
+
+    if (results.length === 1) {
+      tabsEl.classList.add('hidden');
+      renderSingleServerResults(results[0].data.results, bodyEl, summaryEl);
+    } else {
+      tabsEl.classList.remove('hidden');
+      tabsEl.innerHTML = '';
+
+      results.forEach((r, i) => {
+        const name = radarServerNames[r.id] || ('Server ' + r.id);
+        const totalFindings = countFindings(r.data.results);
+        const tab = document.createElement('button');
+        tab.type = 'button';
+        tab.dataset.tabIndex = i;
+        tab.className = 'tab-btn shrink-0 px-3 py-1.5 text-xs font-medium rounded-t-lg border border-b-0 transition-colors ' +
+          (i === 0
+            ? 'bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700/50 text-neutral-800 dark:text-white'
+            : 'bg-neutral-50 dark:bg-neutral-800/40 border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300');
+        tab.innerHTML = name +
+          (totalFindings > 0
+            ? ` <span class="ml-1.5 px-1.5 py-0.5 rounded-full text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">${totalFindings}</span>`
+            : ` <span class="ml-1.5 px-1.5 py-0.5 rounded-full text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">clean</span>`);
+        tab.addEventListener('click', () => {
+          tabsEl.querySelectorAll('.tab-btn').forEach(t => {
+            t.className = 'tab-btn shrink-0 px-3 py-1.5 text-xs font-medium rounded-t-lg border border-b-0 transition-colors bg-neutral-50 dark:bg-neutral-800/40 border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300';
+          });
+          tab.className = 'tab-btn shrink-0 px-3 py-1.5 text-xs font-medium rounded-t-lg border border-b-0 transition-colors bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700/50 text-neutral-800 dark:text-white';
+          renderSingleServerResults(results[parseInt(tab.dataset.tabIndex)].data.results, bodyEl, summaryEl);
+        });
+        tabsEl.appendChild(tab);
+      });
+
+      const totalAll = results.reduce((sum, r) => sum + countFindings(r.data.results), 0);
+      summaryEl.innerHTML = buildSummaryHtml(totalAll, results[0].data.results);
+      renderSingleServerResults(results[0].data.results, bodyEl, summaryEl);
+    }
+  }
+
+  function countFindings(scanResults) {
+    if (!scanResults || !scanResults.results) return 0;
+    return scanResults.results.reduce((sum, r) => sum + (r.matches ? r.matches.length : 0), 0);
+  }
+
+  function buildSummaryHtml(totalFindings, scanResults) {
+    if (totalFindings === 0) {
+      return `<span class="inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/></svg>
+        No suspicious files found
+      </span>`;
+    }
+    const patternCount = scanResults && scanResults.results ? scanResults.results.length : 0;
+    return `<span class="inline-flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400 font-medium">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
+        ${totalFindings} finding${totalFindings !== 1 ? 's' : ''} across ${patternCount} pattern${patternCount !== 1 ? 's' : ''}
+      </span>`;
+  }
+
+  function renderSingleServerResults(scanResults, bodyEl, summaryEl) {
+    const total = countFindings(scanResults);
+    summaryEl.innerHTML = buildSummaryHtml(total, scanResults);
+
+    if (!scanResults || !scanResults.results || scanResults.results.length === 0) {
+      bodyEl.innerHTML = `
+        <div class="py-8 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="w-8 h-8 mx-auto mb-3 text-emerald-400">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+          </svg>
+          <p class="text-sm font-medium text-neutral-600 dark:text-neutral-300">All clear</p>
+          <p class="text-xs text-neutral-400 mt-1">No matches found for any pattern in this script</p>
+        </div>`;
+      return;
+    }
+
+    let html = '<div class="space-y-3">';
+    scanResults.results.forEach(result => {
+      const count = result.matches ? result.matches.length : 0;
+      const severity = count >= 10 ? 'high' : count >= 3 ? 'medium' : 'low';
+      const severityStyles = {
+        high:   'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400',
+        medium: 'bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400',
+        low:    'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400',
+      };
+
+      html += `<div class="rounded-lg border border-neutral-200 dark:border-neutral-700/50 overflow-hidden">`;
+      html += `<div class="flex items-center justify-between px-3 py-2 bg-neutral-50 dark:bg-neutral-800/60">`;
+      html += `<div class="min-w-0">`;
+      html += `<p class="text-xs font-medium text-neutral-700 dark:text-neutral-200">${result.pattern.description}</p>`;
+      html += `<p class="text-xs text-neutral-400 font-mono mt-0.5 truncate">${result.pattern.pattern}</p>`;
+      html += `</div>`;
+      html += `<span class="ml-3 shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${severityStyles[severity]}">${count} match${count !== 1 ? 'es' : ''}</span>`;
+      html += `</div>`;
+      html += `<ul class="divide-y divide-neutral-100 dark:divide-neutral-700/30">`;
+      result.matches.forEach(match => {
+        html += `<li class="flex items-center justify-between px-3 py-1.5 gap-4">`;
+        html += `<span class="text-xs font-mono text-neutral-600 dark:text-neutral-300 truncate">${match.path}</span>`;
+        if (match.size) html += `<span class="text-xs text-neutral-400 shrink-0">${formatFileSize(match.size)}</span>`;
+        html += `</li>`;
+      });
+      html += `</ul></div>`;
+    });
+    html += '</div>';
+    bodyEl.innerHTML = html;
   }
 
   function formatFileSize(bytes) {
