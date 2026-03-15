@@ -1419,19 +1419,9 @@ const dashboardModule: Module = {
           }
 
           try {
-            let newPath: string;
-
-            if (newName.includes('/')) {
-              // newName is a full path already — use it directly
-              newPath = newName;
-            } else {
-              // newName is just a filename — keep it in the original directory
-              const lastSlashIndex = relativePath.lastIndexOf('/');
-              const directoryPath = lastSlashIndex !== -1
-                ? relativePath.substring(0, lastSlashIndex)
-                : '';
-              newPath = directoryPath ? `${directoryPath}/${newName}` : newName;
-            }
+            // Pass newName directly as newPath — the daemon handles
+            // intermediate directory creation in afs.rename
+            const newPath = newName;
 
             const renameRequest = {
               method: 'POST',
