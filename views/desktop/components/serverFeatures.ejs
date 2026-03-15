@@ -2,23 +2,21 @@
 <!-- EULA Feature -->
 
 <% if (typeof features !== 'undefined' && features && features.includes('eula')) { %>
-        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur z-50">
-            <div class="bg-neutral-100 dark:bg-neutral-900/80 backdrop-blur py-8 px-8 rounded-2xl shadow-lg w-1/2 h-48 border border-neutral-200 dark:border-neutral-300/20">
-                <p class="text-neutral-800 dark:text-white text-lg font-medium">Do you accept Minecraft's EULA?</p>
-                <p class="text-sm text-neutral-600 dark:text-neutral-400">By pressing this button you agree to the <a class="text-neutral-800 dark:text-white underline" href="https://account.mojang.com/documents/minecraft_eula">Mojang EULA</a>.</p>
-                <button
-                onclick="fetch('/server/<%= req.params.id %>/feature/eula', { method: 'POST' })
-                    .then( () => {
-                            location.reload();
-                    })
-                    .catch(error => {
-                        console.error('There was an error!', error);
-                    });"
-                class="mt-8 bg-white text-sm font-sm text-neutral-800 px-4 font-medium transition py-2 rounded-xl hover:bg-neutral-100">
-                I agree
-                </button>
-            </div>
-        </div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    window.modal.confirm({
+      title: "Accept Minecraft's EULA",
+      body: "By clicking Accept you agree to the Mojang End User License Agreement (EULA). The server will not start until you accept.",
+      danger: false,
+      confirmLabel: 'Accept EULA',
+      onConfirm: () => {
+        fetch('/server/<%= req.params.id %>/feature/eula', { method: 'POST' })
+          .then(() => location.reload())
+          .catch(error => console.error('There was an error!', error));
+      }
+    });
+  });
+</script>
 <% } %>
 
 

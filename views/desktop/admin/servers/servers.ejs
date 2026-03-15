@@ -323,8 +323,27 @@
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      Uploading &amp; scanning — up to 2 min...
+      Starting...
     `;
+
+    closeRadarScanModal();
+
+    const p = window.loadingPopupSystem;
+    p.open('VirusTotal Scan', 'default');
+    p.setProgress(5, 'Requesting file archive from node...');
+    p.addStep('Connecting to node');
+
+    // Animate progress while waiting — VT takes 60–120s
+    const steps = [
+      { at: 3000,  pct: 12, msg: 'Node zipping plugins, mods and config...', step: 'Archiving server files' },
+      { at: 8000,  pct: 22, msg: 'Uploading archive to VirusTotal...', step: 'Archive ready — uploading to VT' },
+      { at: 14000, pct: 35, msg: 'VirusTotal is queuing the analysis...', step: 'Upload complete' },
+      { at: 22000, pct: 48, msg: 'Analysis in progress — checking signatures...', step: 'VT analysis started' },
+      { at: 35000, pct: 60, msg: 'Running 70+ antivirus engines...', step: 'Scanning with multiple engines' },
+      { at: 50000, pct: 72, msg: 'Almost done — collecting results...', step: 'Engines finishing up' },
+      { at: 65000, pct: 82, msg: 'Waiting for final verdicts...', step: 'Collecting final results' },
+    ];
+    const timers = steps.map(s => setTimeout(() => { p.setProgress(s.pct, s.msg); p.addStep(s.step); }, s.at));
 
     try {
       const r = await fetch('/admin/radar/vtscan/' + serverId, {
@@ -333,19 +352,40 @@
       });
       const data = await r.json();
 
+      timers.forEach(t => clearTimeout(t));
+
       if (!data.success) {
+        p.setProgress(100, 'Scan failed');
+        p.addStep(data.error || 'VT scan failed', 'error');
+        p.setIcon('error');
         showToast(data.error || 'VT scan failed', 'error');
+        setTimeout(() => p.close(), 3000);
         return;
       }
 
-      document.getElementById('radarPickerPhase').classList.add('hidden');
-      document.getElementById('radarResultsPhase').classList.remove('hidden');
-      document.getElementById('radarRescanBtn').classList.remove('hidden');
-      renderVtFileScanResults(data);
+      p.setProgress(100, 'Scan complete');
+      p.addStep('Analysis complete', 'done');
+      p.setIcon('done');
+
+      setTimeout(() => {
+        p.close();
+        // Reopen the radar modal in results phase
+        document.getElementById('radarScanModalTitle').textContent = 'VirusTotal Scan: ' + (data.serverName || 'Server');
+        document.getElementById('radarPickerPhase').classList.add('hidden');
+        document.getElementById('radarResultsPhase').classList.remove('hidden');
+        document.getElementById('radarRescanBtn').classList.remove('hidden');
+        document.getElementById('radarScanModal').classList.remove('hidden');
+        renderVtFileScanResults(data);
+      }, 1000);
 
     } catch (err) {
-      console.error('VT file scan error:', err);
+      timers.forEach(t => clearTimeout(t));
+      p.setProgress(100, 'Request failed');
+      p.addStep('Network error', 'error');
+      p.setIcon('error');
       showToast('VT file scan failed', 'error');
+      setTimeout(() => p.close(), 3000);
+      console.error('VT file scan error:', err);
     } finally {
       btn.disabled = false;
       btn.innerHTML = `
