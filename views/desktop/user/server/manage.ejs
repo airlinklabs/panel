@@ -45,9 +45,28 @@
     <!-- Content -->
     <div class="flex-1 min-w-0 p-6 overflow-y-auto pt-16">
       <!-- Page Header -->
-      <div class="sm:flex sm:items-center px-8 pt-4">
-        <%- include('../../components/serverHeader') %>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex gap-2.5">
+      <div class="sm:flex sm:items-start px-8 pt-4 gap-4">
+        <div class="flex-1 min-w-0">
+          <%- include('../../components/serverHeader') %>
+          <!-- Server meta: image · node · id — small, beside the title area -->
+          <div class="flex items-center gap-3 mt-1.5 flex-wrap">
+            <div class="flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-3 w-3 text-neutral-400 shrink-0"><rect width="256" height="256" fill="none"/><path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/></svg>
+              <span class="text-[11px] text-neutral-500 dark:text-neutral-400 truncate max-w-[140px]"><%= server.image.name %></span>
+            </div>
+            <span class="text-neutral-300 dark:text-neutral-600 text-[11px]">·</span>
+            <div class="flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-3 w-3 text-neutral-400 shrink-0"><rect width="256" height="256" fill="none"/><path d="M208,40H48A16,16,0,0,0,32,56v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40ZM180,92a12,12,0,1,1,12-12A12,12,0,0,1,180,92Z"/><path d="M208,136H48a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V152A16,16,0,0,0,208,136Zm-28,52a12,12,0,1,1,12-12A12,12,0,0,1,180,188Z"/></svg>
+              <span class="text-[11px] text-neutral-500 dark:text-neutral-400 truncate max-w-[100px]"><%= server.node.name %></span>
+            </div>
+            <span class="text-neutral-300 dark:text-neutral-600 text-[11px]">·</span>
+            <div class="flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-3 w-3 text-neutral-400 shrink-0"><rect width="256" height="256" fill="none"/><path d="M116.25,112h31.5l-8,32h-31.5ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48Zm-16,56a8,8,0,0,0-8-8H168.25l7.51-30.06a8,8,0,0,0-15.52-3.88L151.75,96h-31.5l7.51-30.06a8,8,0,0,0-15.52-3.88L103.75,96H64a8,8,0,0,0,0,16H99.75l-8,32H56a8,8,0,0,0,0,16H87.75l-7.51,30.06a8,8,0,0,0,5.82,9.7,8.13,8.13,0,0,0,2,.24,8,8,0,0,0,7.75-6.06L104.25,160h31.5l-7.51,30.06a8,8,0,0,0,5.82,9.7A8.13,8.13,0,0,0,136,200a8,8,0,0,0,7.75-6.06L152.25,160H192a8,8,0,0,0,0-16H156.25l8-32H200A8,8,0,0,0,208,104Z"/></svg>
+              <span class="text-[11px] font-mono text-neutral-500 dark:text-neutral-400"><%= server.UUID.split('-')[0] %></span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 sm:mt-0 sm:flex gap-2.5 shrink-0">
             <button id="startButton" type="button"
                 class="w-full md:w-auto rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2 <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
@@ -118,74 +137,6 @@
 
       <%- include('../../components/serverTemplate') %>
 
-
-    <!-- Info Cards -->
-    <div class="mt-6 ml-8 mb-4">
-      <dl class="grid grid-cols-1 gap-4 sm:grid-cols-4 mr-8">
-
-        <div class="overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group">
-          <div class="flex items-center">
-            <div class="flex-grow">
-              <dt class="truncate text-xs font-medium text-neutral-400 group-hover:text-neutral-300 transition-colors duration-300"><%= req.translations.addressIP %>:</dt>
-              <dd class="mt-0.5 text-base font-medium tracking-tight text-neutral-800 dark:text-white">
-                <span>
-                  <%= server.node.address %><span class="text-neutral-400">:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.Port.split(':')[1]).pop() : '' %></span>
-                </span>
-              </dd>
-            </div>
-            <div class="ml-3 shadow-md border border-neutral-200 dark:border-white/10 rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 group-hover:bg-neutral-200 dark:group-hover:bg-neutral-600/50 transition-all duration-300 transform group-hover:scale-110">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-5 w-5 text-neutral-400 dark:text-neutral-300 group-hover:text-neutral-800 dark:group-hover:text-white transition-colors duration-300"><rect width="256" height="256" fill="none"/><path d="M240,120a8,8,0,0,1-8,8H200v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H176a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H72v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H24a8,8,0,0,1,0-16h96V88h-8A16,16,0,0,1,96,72V40a16,16,0,0,1,16-16h32a16,16,0,0,1,16,16V72a16,16,0,0,1-16,16h-8v24h96A8,8,0,0,1,240,120Z"/></svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group">
-          <div class="flex items-center">
-            <div class="flex-grow">
-              <dt class="truncate text-xs font-medium text-neutral-400 group-hover:text-neutral-300 transition-colors duration-300"><%= req.translations.Image %>:</dt>
-              <dd class="mt-0.5 text-base font-medium tracking-tight text-neutral-800 dark:text-white">
-                <span>
-                  <%= server.image.name %>
-                </span>
-              </dd>
-            </div>
-            <div class="ml-3 shadow-md border border-neutral-200 dark:border-white/10 rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 group-hover:bg-neutral-200 dark:group-hover:bg-neutral-600/50 transition-all duration-300 transform group-hover:scale-110">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-5 w-5 text-neutral-400 dark:text-neutral-300 group-hover:text-neutral-800 dark:group-hover:text-white transition-colors duration-300"><rect width="256" height="256" fill="none"/><path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/></svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group">
-          <div class="flex items-center">
-            <div class="flex-grow">
-              <dt class="truncate text-xs font-medium text-neutral-400 group-hover:text-neutral-300 transition-colors duration-300"><%= req.translations.Node %>:</dt>
-              <dd class="mt-0.5 text-base font-medium tracking-tight text-neutral-800 dark:text-white">
-                <%= server.node.name %> <span class="text-neutral-500">(<%= server.node.address %>)</span>
-              </dd>
-            </div>
-            <div class="ml-3 shadow-md border border-neutral-200 dark:border-white/10 rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 group-hover:bg-neutral-200 dark:group-hover:bg-neutral-600/50 transition-all duration-300 transform group-hover:scale-110">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-5 w-5 text-neutral-400 dark:text-neutral-300 group-hover:text-neutral-800 dark:group-hover:text-white transition-colors duration-300"><rect width="256" height="256" fill="none"/><path d="M208,40H48A16,16,0,0,0,32,56v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40ZM180,92a12,12,0,1,1,12-12A12,12,0,0,1,180,92Z"/><path d="M208,136H48a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V152A16,16,0,0,0,208,136Zm-28,52a12,12,0,1,1,12-12A12,12,0,0,1,180,188Z"/></svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group">
-          <div class="flex items-center">
-            <div class="flex-grow">
-              <dt class="truncate text-xs font-medium text-neutral-400 group-hover:text-neutral-300 transition-colors duration-300"><%= req.translations.identifier %>:</dt>
-              <dd class="mt-0.5 text-base font-medium tracking-tight text-neutral-800 dark:text-white">
-                <%= server.UUID.split('-')[0] %>
-              </dd>
-            </div>
-            <div class="ml-3 shadow-md border border-neutral-200 dark:border-white/10 rounded-lg p-2 bg-neutral-100 dark:bg-neutral-700/50 group-hover:bg-neutral-200 dark:group-hover:bg-neutral-600/50 transition-all duration-300 transform group-hover:scale-110">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-5 w-5 text-neutral-400 dark:text-neutral-300 group-hover:text-neutral-800 dark:group-hover:text-white transition-colors duration-300"><rect width="256" height="256" fill="none"/><path d="M116.25,112h31.5l-8,32h-31.5ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48Zm-16,56a8,8,0,0,0-8-8H168.25l7.51-30.06a8,8,0,0,0-15.52-3.88L151.75,96h-31.5l7.51-30.06a8,8,0,0,0-15.52-3.88L103.75,96H64a8,8,0,0,0,0,16H99.75l-8,32H56a8,8,0,0,0,0,16H87.75l-7.51,30.06a8,8,0,0,0,5.82,9.7,8.13,8.13,0,0,0,2,.24,8,8,0,0,0,7.75-6.06L104.25,160h31.5l-7.51,30.06a8,8,0,0,0,5.82,9.7A8.13,8.13,0,0,0,136,200a8,8,0,0,0,7.75-6.06L152.25,160H192a8,8,0,0,0,0-16H156.25l8-32H200A8,8,0,0,0,208,104Z"/></svg>
-            </div>
-          </div>
-        </div>
-
-      </dl>
-    </div>
-
       <div class="flex flex-col lg:flex-row px-8">
 
 <!-- Left side: Console -->
@@ -194,31 +145,39 @@
         <div id="terminal"></div>
     </div>
     <div class="relative">
-        <input id="input" type="text" autocomplete="off" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
-            class="w-full px-4 py-3  bg-neutral-200 dark:bg-neutral-600/20 text-neutral-800 dark:text-white rounded-b-xl text-sm border-t border-neutral-600/20 select-none focus:ring-1  focus:ring-neutral-500/50 dark:focus:ring-neutral-100/20 focus:border-transparent placeholder:font-medium placeholder:text-neutral-600 dark:placeholder:text-neutral-500">
-
-            <% if (typeof features !== 'undefined' && features && features.includes('auto-complete')) { %>
-        <div id="settings-icon" class="absolute right-4 top-3 cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-neutral-600 dark:text-neutral-400">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
-            </svg>
+        <div class="relative">
+            <input id="input" type="text" autocomplete="off" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
+                class="w-full px-4 py-3 bg-neutral-200 dark:bg-neutral-600/20 text-neutral-800 dark:text-white rounded-b-xl text-sm border-t border-neutral-600/20 focus:ring-1 focus:ring-neutral-500/50 dark:focus:ring-neutral-100/20 focus:border-transparent placeholder:font-medium placeholder:text-neutral-600 dark:placeholder:text-neutral-500"
+                style="background: transparent; position: relative; z-index: 1;">
+            <div id="ghost-text-bg" class="absolute inset-0 px-4 py-3 text-sm pointer-events-none rounded-b-xl overflow-hidden bg-neutral-200 dark:bg-neutral-600/20 border-t border-neutral-600/20" style="z-index: 0;">
+                <span id="ghost-typed" class="invisible"></span><span id="ghost-suggestion" class="text-neutral-400 dark:text-neutral-500"></span>
+            </div>
         </div>
-
-        <div id="suggestions" class="absolute bg-white dark:bg-neutral-800 text-neutral-800 dark:text-white border border-neutral-200 dark:border-neutral-600 rounded-b-lg w-full max-h-40 overflow-y-auto hidden -mt-2">
-            <!-- Auto Complete thingys come here -->
-        </div>
-        <div id="settings-menu" class="absolute bg-white dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-200 dark:border-transparent p-4 rounded-lg hidden mt-10 right-0 w-48">
-            <label class="flex items-center space-x-2">
-                <input type="checkbox" id="auto-complete-toggle" class="form-checkbox h-4 w-4 text-neutral-400" />
-                <span><%= req.translations.enableAutoCompletion || 'Enable Auto-Completion' %></span>
-            </label>
-        </div>
-        <% } %>
     </div>
 </div>
 
         <!-- Right side: Stats Cards -->
         <div class="w-full lg:w-1/3 mt-4 lg:mt-0 space-y-4 flex flex-col">
+
+            <!-- IP Address Card -->
+            <div class="overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group flex-1">
+                <div class="relative z-10 flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <h2 class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.addressIP %>:</h2>
+                        <p id="server-ip-text" class="mt-1 text-sm font-medium font-mono tracking-tight text-neutral-800 dark:text-white break-all"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.Port.split(':')[1]).pop() : '' %></p>
+                    </div>
+                    <button id="copy-ip-btn" onclick="copyServerIP()" title="Copy" class="shrink-0 mt-1 rounded-lg p-1.5 bg-neutral-100 dark:bg-neutral-700/50 hover:bg-neutral-200 dark:hover:bg-neutral-600/50 transition-colors">
+                        <svg id="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 text-neutral-500">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <svg id="check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-3.5 w-3.5 text-emerald-500 hidden">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
             <!-- Status Card -->
             <div class="overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group flex-1">
                 <canvas id="statusChart" class="absolute inset-0 w-full h-full"></canvas>
@@ -831,14 +790,50 @@ connectWebSocket();
 
     document.addEventListener('DOMContentLoaded', () => {
         const inputElement = document.getElementById('input');
+
         inputElement.addEventListener('keypress', function (event) {
             if (event.key === 'Enter') {
                 sendCommand();
+                clearGhostText();
             }
         });
 
-        inputElement.addEventListener('keydown', handleKeyUp);
+        inputElement.addEventListener('keydown', function(event) {
+            handleKeyUp(event);
+        });
+
+        <% if (typeof features !== 'undefined' && features && features.includes('auto-complete')) { %>
+        // Lazy-load the autocomplete module only after the page is idle.
+        // This keeps it off the critical path and away from parse/eval during load.
+        inputElement.addEventListener('focus', function loadAutocomplete() {
+            inputElement.removeEventListener('focus', loadAutocomplete);
+            import('/js/mc-autocomplete.js').then(mod => {
+                mod.fetchPlayersIfNeeded('<%= server.UUID %>');
+                mod.initDesktop(inputElement);
+            });
+        }, { once: true });
+        <% } %>
     });
+
+    // Stubs so the keydown handler doesn't throw before the module loads.
+    function clearGhostText() {
+        const ghostTyped = document.getElementById('ghost-typed');
+        const ghostSuggestion = document.getElementById('ghost-suggestion');
+        if (ghostTyped) ghostTyped.textContent = '';
+        if (ghostSuggestion) ghostSuggestion.textContent = '';
+    }
+
+    function copyServerIP() {
+        const ipText = document.getElementById('server-ip-text').textContent.trim();
+        navigator.clipboard.writeText(ipText).then(() => {
+            document.getElementById('copy-icon').classList.add('hidden');
+            document.getElementById('check-icon').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('copy-icon').classList.remove('hidden');
+                document.getElementById('check-icon').classList.add('hidden');
+            }, 2000);
+        });
+    }
 
     let statsWs;
     let statsReconnectTimer;
@@ -975,15 +970,24 @@ connectWebSocket();
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     }
 
+    function getChartColors() {
+        const isDark = document.documentElement.classList.contains('dark');
+        return {
+            border: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.1)',
+            fill: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)',
+        };
+    }
+
     function createBackgroundChart(canvasId, type = 'line') {
-            return new Chart(document.getElementById(canvasId).getContext('2d'), {
+        const colors = getChartColors();
+        return new Chart(document.getElementById(canvasId).getContext('2d'), {
                 type: type,
                 data: {
                     labels: [],
                     datasets: [{
                         data: [],
-                        borderColor: 'rgba(255, 255, 255, 0.1)',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderColor: colors.border,
+                        backgroundColor: colors.fill,
                         borderWidth: 1,
                         pointRadius: 0,
                         fill: true,
@@ -1092,6 +1096,10 @@ connectWebSocket();
             chart.data.labels.shift();
             chart.data.datasets[0].data.shift();
         }
+
+        const colors = getChartColors();
+        chart.data.datasets[0].borderColor = colors.border;
+        chart.data.datasets[0].backgroundColor = colors.fill;
 
         chart.update();
     }
