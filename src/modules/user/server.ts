@@ -1419,16 +1419,19 @@ const dashboardModule: Module = {
           }
 
           try {
-            let directoryPath = '';
+            let newPath: string;
 
-            const lastSlashIndex = relativePath.lastIndexOf('/');
-            if (lastSlashIndex !== -1) {
-              directoryPath = relativePath.substring(0, lastSlashIndex);
+            if (newName.includes('/')) {
+              // newName is a full path already — use it directly
+              newPath = newName;
+            } else {
+              // newName is just a filename — keep it in the original directory
+              const lastSlashIndex = relativePath.lastIndexOf('/');
+              const directoryPath = lastSlashIndex !== -1
+                ? relativePath.substring(0, lastSlashIndex)
+                : '';
+              newPath = directoryPath ? `${directoryPath}/${newName}` : newName;
             }
-
-            const newPath = directoryPath
-              ? `${directoryPath}/${newName}`
-              : newName;
 
             const renameRequest = {
               method: 'POST',
