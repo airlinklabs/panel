@@ -9,6 +9,13 @@ import axios from 'axios';
 import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 
 
+function deriveSeverity(matchCount: number): string {
+  if (matchCount >= 10) return 'critical';
+  if (matchCount >= 3) return 'high';
+  if (matchCount >= 1) return 'medium';
+  return 'low';
+}
+
 const radarModule: Module = {
   info: {
     name: 'Radar Module',
@@ -118,14 +125,36 @@ const radarModule: Module = {
               headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`
-              }
+              },
+              timeout: 60000
             }
           );
 
+          const scanData = response.data;
+
+          // Attach severity from the script pattern definitions to each result
+          // so the frontend can colour-code without having to re-derive it
+          if (scanData && Array.isArray(scanData.results)) {
+            const patternMap: Record<string, string> = {};
+            for (const p of script.patterns) {
+              const key = (p.description || '').toLowerCase();
+              if (p.severity) patternMap[key] = p.severity;
+            }
+
+            scanData.results = scanData.results.map((result: any) => {
+              const key = (result.pattern?.description || '').toLowerCase();
+              return {
+                ...result,
+                severity: patternMap[key] || deriveSeverity(result.matches?.length ?? 0)
+              };
+            });
+          }
+
           res.json({
             success: true,
-            message: 'Radar scan initiated',
-            results: response.data
+            serverName: server.name,
+            scriptName: script.name,
+            results: scanData
           });
         } catch (error: unknown) {
           logger.error('Error running radar scan:', error);
