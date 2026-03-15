@@ -1,0 +1,73 @@
+{
+  "name": "Plugin Audit",
+  "description": "Audits the plugins directory for suspicious, outdated, or potentially dangerous plugins in Minecraft and similar game server environments.",
+  "version": "1.0.0",
+  "patterns": [
+    {
+      "type": "filename",
+      "pattern": "(?i)(^|[/\\\\])plugins[/\\\\][^/\\\\]*(exploit|hack|cheat|grief|bypass|inject|steal|rat|spy|logger|grab|dump)[^/\\\\]*\\.jar$",
+      "severity": "critical",
+      "description": "Plugin JAR with a name indicating malicious intent"
+    },
+    {
+      "type": "extension",
+      "pattern": "\\.jar$",
+      "content": "(?i)(discord\\.com/api/webhooks|hooks\\.slack\\.com|api\\.telegram\\.org/bot|pastebin\\.com/raw|raw\\.githubusercontent\\.com.*download|transfer\\.sh)",
+      "severity": "critical",
+      "description": "Plugin making requests to external data exfiltration endpoints"
+    },
+    {
+      "type": "extension",
+      "pattern": "\\.jar$",
+      "content": "(?i)(getenv\\s*\\(\\s*\"(DB_PASSWORD|DATABASE_URL|SECRET|TOKEN|API_KEY|MYSQL_|POSTGRES_)\"|System\\.getenv.*password|System\\.getenv.*secret|System\\.getenv.*token)",
+      "severity": "critical",
+      "description": "Plugin reading sensitive environment variables — potential credential stealer"
+    },
+    {
+      "type": "extension",
+      "pattern": "\\.jar$",
+      "content": "(?i)(new\\s+URL\\s*\\([^)]*http[^)]*\\)\\.openConnection|HttpURLConnection|OkHttpClient|Unirest\\.get|Unirest\\.post)",
+      "size_less_than": 20000,
+      "severity": "high",
+      "description": "Very small plugin making HTTP calls — unexpected for its size"
+    },
+    {
+      "type": "filename",
+      "pattern": "(?i)(^|[/\\\\])plugins[/\\\\][^/\\\\]*\\.(php|py|sh|bat|exe|bin)$",
+      "severity": "high",
+      "description": "Non-JAR executable file in the plugins directory"
+    },
+    {
+      "type": "extension",
+      "pattern": "\\.jar$",
+      "content": "(?i)(String\\.fromCharCode|\\\\u00[0-9a-f]{2}\\\\u00|new\\s+byte\\[\\]\\s*\\{\\s*([0-9]|,|\\s)+\\}.*new\\s+String|Integer\\.parseInt.*char|XOR|xor.*decode)",
+      "severity": "high",
+      "description": "Plugin with obfuscated string construction — common in malicious plugins"
+    },
+    {
+      "type": "filename",
+      "pattern": "(?i)(^|[/\\\\])plugins[/\\\\]data[/\\\\][^/\\\\]*\\.(exe|dll|so|sh|bat|bin|elf)$",
+      "severity": "high",
+      "description": "Executable hidden inside plugin data folder"
+    },
+    {
+      "type": "extension",
+      "pattern": "\\.jar$",
+      "content": "(?i)(EssentialsX.*1\\.[0-9]\\.[0-9]|WorldEdit.*6\\.[0-9]|WorldGuard.*6\\.[0-9]|Vault.*1\\.[67]\\.[0-9]|ProtocolLib.*4\\.[0-7])",
+      "severity": "medium",
+      "description": "Plugin referencing an outdated version of a major plugin — check for known CVEs"
+    },
+    {
+      "type": "filename",
+      "pattern": "(?i)(^|[/\\\\])plugins[/\\\\][^/\\\\]*(copy|backup|old|bak|disabled|test|temp|tmp)[^/\\\\]*\\.jar$",
+      "severity": "low",
+      "description": "Plugin JAR that appears to be a leftover copy or disabled backup"
+    },
+    {
+      "type": "filename",
+      "pattern": "(?i)(^|[/\\\\])plugins[/\\\\][^/\\\\]{1,3}\\.jar$",
+      "severity": "low",
+      "description": "Plugin with an unusually short name — may be intentionally obscured"
+    }
+  ]
+}

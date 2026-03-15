@@ -1,53 +1,60 @@
 {
-  "name": "Cryptocurrency Miner Scanner",
-  "description": "Scans for potential cryptocurrency mining software",
-  "version": "1.0.0",
+  "name": "Crypto Miner Scanner",
+  "description": "Detects cryptocurrency mining software, pool configuration, and miner-related files planted in server volumes.",
+  "version": "2.0.0",
   "patterns": [
     {
       "type": "filename",
-      "pattern": "xmrig|ethminer|cgminer|cpuminer|minerd|bfgminer|easyminer|nicehash|minergate",
-      "description": "Known cryptocurrency miner software"
+      "pattern": "(?i)(xmrig|xmr-stak|xmr-node-proxy|ethminer|cgminer|cpuminer|minerd|bfgminer|sgminer|t-rex|gminer|lolminer|nbminer|teamredminer|phoenixminer|claymore|nanominer|srbminer)",
+      "severity": "critical",
+      "description": "Known cryptocurrency miner binary or executable"
     },
     {
       "type": "extension",
-      "pattern": "\\.sh$",
-      "content": "cryptonight|monero|ethereum|bitcoin|stratum\\+tcp|pool\\.minergate|xmr-stak|hashrate",
-      "description": "Shell script with cryptocurrency mining references"
+      "pattern": "\\.(json|conf|config|cfg|ini|yml|yaml)$",
+      "content": "(?i)(stratum\\+tcp://|stratum\\+ssl://|pool\\.supportxmr\\.com|pool\\.minexmr\\.com|xmrpool\\.eu|nanopool\\.org|dwarfpool\\.com|minergate\\.com|2miners\\.com|f2pool\\.com|antpool\\.com|\"algo\"\\s*:\\s*\"(cryptonight|randomx|kawpow|ethash|autolykos)\")",
+      "severity": "critical",
+      "description": "Mining pool configuration file with stratum or pool reference"
     },
     {
       "type": "extension",
-      "pattern": "\\.jar$",
-      "size_less_than": 100000,
-      "size_greater_than": 5000,
-      "content": "stratum\\+tcp|minergate|nanopool|dwarfpool|supportxmr|hashrate|cryptonight|monero|litecoin",
-      "description": "Suspicious JAR file with mining-related content"
-    },
-    {
-      "type": "filename",
-      "pattern": "^(?!.*libraries/).*miner.*\\.jar$",
-      "description": "JAR file with 'miner' in the name (excluding libraries directory)"
-    },
-    {
-      "type": "filename",
-      "pattern": "^(?!.*libraries/).*coin.*\\.jar$",
-      "description": "JAR file with 'coin' in the name (excluding libraries directory)"
-    },
-    {
-      "type": "filename",
-      "pattern": "^(?!.*libraries/).*crypto.*\\.jar$",
-      "description": "JAR file with 'crypto' in the name (excluding libraries directory)"
-    },
-    {
-      "type": "filename",
-      "pattern": "^(?!.*libraries/).*hash.*\\.jar$",
-      "description": "JAR file with 'hash' in the name (excluding libraries directory)"
+      "pattern": "\\.(sh|bash|bat|cmd|ps1)$",
+      "content": "(?i)(xmrig|stratum\\+tcp|stratum\\+ssl|cryptonight|randomx|monero|--donate-level|--pool|--wallet|hashrate|mining pool)",
+      "severity": "critical",
+      "description": "Script containing miner launch parameters or pool references"
     },
     {
       "type": "extension",
       "pattern": "\\.jar$",
-      "size_less_than": 50000,
-      "content": "java\\.lang\\.Runtime.*exec|ProcessBuilder.*start",
-      "description": "Small JAR file with process execution capabilities (potential backdoor)"
+      "content": "(?i)(stratum\\+tcp|stratum\\+ssl|cryptonight|randomx|nanopool|supportxmr|minergate|hashrate|getwork|submitwork)",
+      "severity": "critical",
+      "description": "JAR file with mining protocol references"
+    },
+    {
+      "type": "filename",
+      "pattern": "(?i)(^|[/\\\\])(miner|xmr|monero|ethereum|bitcoin|litecoin|zcash|ravencoin)[^/\\\\]*\\.(jar|exe|sh|bat|bin|elf)$",
+      "severity": "high",
+      "description": "File named after a cryptocurrency with an executable extension"
+    },
+    {
+      "type": "filename",
+      "pattern": "(?i)(config\\.json|settings\\.json|pools\\.json|wallet\\.json)$",
+      "content": "(?i)(stratum|pool_address|wallet_address|\"coin\"\\s*:|\"algo\"\\s*:)",
+      "severity": "high",
+      "description": "Generic config file containing mining-specific fields"
+    },
+    {
+      "type": "extension",
+      "pattern": "\\.(log|txt)$",
+      "content": "(?i)(accepted\\s+\\d+/\\d+|rejected\\s+\\d+/\\d+|hashrate|H/s|KH/s|MH/s|GH/s|shares submitted|pool connected)",
+      "severity": "medium",
+      "description": "Log or text file containing miner output — miner may have already run"
+    },
+    {
+      "type": "filename",
+      "pattern": "(?i)(^|[/\\\\])(start_miner|run_miner|mine|start_mining|install_miner)\\.(sh|bat|ps1|cmd)$",
+      "severity": "high",
+      "description": "Script with a name suggesting miner setup or launch"
     }
   ]
 }
