@@ -62,30 +62,6 @@
   </section>
 </main>
 
-<div id="deleteWorldModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-200">
-  <div class="bg-white dark:bg-neutral-800 rounded-xl p-5 w-full mx-4 transform scale-95 transition-transform duration-200 shadow-xl">
-    <div class="flex items-center gap-2 mb-3">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-      <h3 class="text-base font-medium text-neutral-900 dark:text-white">Delete World</h3>
-    </div>
-    <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-1">
-      Delete <span id="worldNameToDelete" class="font-semibold text-neutral-900 dark:text-white"></span>?
-    </p>
-    <p class="text-xs text-red-500 font-medium mb-5">This cannot be undone. All world data will be permanently lost.</p>
-    <div class="flex justify-end gap-2">
-      <button id="cancelDeleteBtn" class="px-4 py-2 rounded-lg bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white hover:bg-neutral-300 dark:hover:bg-neutral-600 text-sm transition">Cancel</button>
-      <button id="confirmDeleteBtn" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-500 text-sm font-medium transition flex items-center gap-1.5">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-        </svg>
-        Delete
-      </button>
-    </div>
-  </div>
-</div>
-
 <%- include('../../components/toast') %>
 <%- include('../../components/footer') %>
 
@@ -98,55 +74,30 @@
     });
   });
 
-  var deleteWorldModal = document.getElementById('deleteWorldModal');
-  var worldNameToDelete = document.getElementById('worldNameToDelete');
-  var cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-  var confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-  var currentWorldToDelete = '';
-
   function confirmDeleteWorld(worldName) {
-    currentWorldToDelete = worldName;
-    worldNameToDelete.textContent = worldName;
-    deleteWorldModal.classList.remove('opacity-0', 'pointer-events-none');
-    deleteWorldModal.querySelector('div').classList.remove('scale-95');
-    deleteWorldModal.querySelector('div').classList.add('scale-100');
+    window.modal.confirm({
+      title: 'Delete World',
+      body: `Delete "${worldName}"? All world data will be permanently lost and cannot be recovered.`,
+      danger: true,
+      confirmLabel: 'Delete World',
+      onConfirm: function() {
+        fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(worldName), { method: 'DELETE' })
+          .then(function(r) {
+            if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Failed'); });
+            return r.json();
+          })
+          .then(function(data) {
+            if (data.success) {
+              showToast('World deleted.', 'success');
+              setTimeout(function() { location.reload(); }, 800);
+            } else {
+              showToast(data.error || 'Failed to delete world.', 'error');
+            }
+          })
+          .catch(function(err) {
+            showToast(err.message || 'Failed to delete world.', 'error');
+          });
+      }
+    });
   }
-
-  function closeDeleteModal() {
-    deleteWorldModal.classList.add('opacity-0', 'pointer-events-none');
-    deleteWorldModal.querySelector('div').classList.remove('scale-100');
-    deleteWorldModal.querySelector('div').classList.add('scale-95');
-  }
-
-  deleteWorldModal.addEventListener('click', function(e) {
-    if (e.target === deleteWorldModal) closeDeleteModal();
-  });
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && !deleteWorldModal.classList.contains('opacity-0')) closeDeleteModal();
-  });
-  cancelDeleteBtn.addEventListener('click', closeDeleteModal);
-
-  confirmDeleteBtn.addEventListener('click', function() {
-    this.disabled = true;
-    var btn = this;
-    closeDeleteModal();
-    fetch('/server/<%= server.UUID %>/files/rm/' + encodeURIComponent(currentWorldToDelete), { method: 'DELETE' })
-      .then(function(r) {
-        if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Failed'); });
-        return r.json();
-      })
-      .then(function(data) {
-        if (data.success) {
-          showToast('World deleted.', 'success');
-          setTimeout(function() { location.reload(); }, 800);
-        } else {
-          showToast(data.error || 'Failed to delete world.', 'error');
-          btn.disabled = false;
-        }
-      })
-      .catch(function(err) {
-        showToast(err.message || 'Failed to delete world.', 'error');
-        btn.disabled = false;
-      });
-  });
 </script>

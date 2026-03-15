@@ -129,64 +129,25 @@
 </main>
 
 <%- include('../../components/toast') %>
-
-<!-- Loading Modal -->
-<div id="loading-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-  <div class="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-sm mx-4">
-    <div class="flex items-center">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
-      <div>
-        <h3 class="text-lg font-medium text-neutral-900 dark:text-white" id="loading-title">Creating backup...</h3>
-        <p class="text-sm text-neutral-500 dark:text-neutral-400" id="loading-message">Please wait while we create your backup.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Confirmation Modal -->
-<div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-  <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
-    <div class="flex items-center mb-4">
-      <div class="flex-shrink-0">
-        <svg id="confirmation-icon" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-        </svg>
-      </div>
-      <div>
-        <h2 class="text-2xl font-medium mb-1 text-neutral-800" id="confirmation-title">Confirm Action</h2>
-        <p class="mb-6 text-neutral-600" id="confirmation-message">Are you sure you want to proceed?</p>
-      </div>
-    </div>
-    <div class="flex justify-end space-x-3">
-      <button
-        id="confirmation-cancel"
-        class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition"
-      >
-        Cancel
-      </button>
-      <button
-        id="confirmation-confirm"
-        class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2""
-      >
-        Confirm
-      </button>
-    </div>
-  </div>
-</div>
+<%- include('../../components/loadingPopup') %>
 
 <!-- Create Backup Modal -->
 <div id="createBackupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-  <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
-    <h2 class="text-2xl font-medium mb-1 text-neutral-800">Create Backup</h2>
-    <p class="mb-6 text-neutral-600">Please choose a name for this backup.</p>
-    <input type="text"
-      id="backupName"
-      class="w-full px-3 py-2 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition mb-4 text-neutral-800 bg-white"
-      placeholder="<%= req.translations.enterBackupName || 'Enter backup name' %>"
-      onkeydown="handleBackupNameKeyPress(event)">
-    <div class="flex justify-end space-x-4">
-      <button onclick="closeCreateBackupModal()" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
-      <button onclick="confirmCreateBackup()" class="w-full md:w-auto rounded-xl bg-neutral-800 dark:bg-neutral-950 hover:bg-neutral-700 dark:hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">Create</button>
+  <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-2xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-200">
+    <div class="px-5 pt-5 pb-4 border-b border-neutral-200 dark:border-neutral-700/60">
+      <p class="text-sm font-semibold text-neutral-800 dark:text-white">Create Backup</p>
+      <p class="text-xs text-neutral-500 mt-0.5">Choose a name for this backup.</p>
+    </div>
+    <div class="px-5 py-4">
+      <input type="text"
+        id="backupName"
+        class="w-full px-3 py-2 text-sm rounded-xl border border-neutral-200 dark:border-neutral-700/50 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 transition"
+        placeholder="<%= req.translations.enterBackupName || 'Enter backup name' %>"
+        onkeydown="handleBackupNameKeyPress(event)">
+    </div>
+    <div class="flex gap-2 px-5 pb-5 justify-end">
+      <button onclick="closeCreateBackupModal()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
+      <button onclick="confirmCreateBackup()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-neutral-700 text-white hover:bg-neutral-800 dark:hover:bg-neutral-600 transition">Create</button>
     </div>
   </div>
 </div>
@@ -194,38 +155,16 @@
 <script>
 const serverUUID = '<%= server.UUID %>';
 
-// Show/hide loading modal
 function showLoading(title, message) {
-  document.getElementById('loading-title').textContent = title;
-  document.getElementById('loading-message').textContent = message;
-  document.getElementById('loading-modal').classList.remove('hidden');
-  document.getElementById('loading-modal').classList.add('flex');
+  showLoadingPopup(title, message);
 }
-
 function hideLoading() {
-  document.getElementById('loading-modal').classList.add('hidden');
-  document.getElementById('loading-modal').classList.remove('flex');
+  hideLoadingPopup();
 }
-
-// Show/hide confirmation modal
 function showConfirmation(title, message, onConfirm) {
-  document.getElementById('confirmation-title').textContent = title;
-  document.getElementById('confirmation-message').textContent = message;
-  document.getElementById('confirmation-modal').classList.remove('hidden');
-  document.getElementById('confirmation-modal').classList.add('flex');
-  
-  document.getElementById('confirmation-confirm').onclick = () => {
-    hideConfirmation();
-    onConfirm();
-  };
+  window.modal.confirm({ title, body: message, danger: true, confirmLabel: 'Confirm', onConfirm });
 }
-
-function hideConfirmation() {
-  document.getElementById('confirmation-modal').classList.add('hidden');
-  document.getElementById('confirmation-modal').classList.remove('flex');
-}
-
-document.getElementById('confirmation-cancel').onclick = hideConfirmation;
+document.getElementById('confirmation-cancel') && document.getElementById('confirmation-cancel').addEventListener && null;
 
 // Modal functions
 function openCreateBackupModal() {

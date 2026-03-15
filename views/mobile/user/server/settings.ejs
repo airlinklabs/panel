@@ -141,61 +141,55 @@
       .catch(function(err) { loader.close(); showToast('An error occurred.', 'error'); });
     });
 
-    function makeModal(title, body, confirmLabel, onConfirm) {
-      var modal = document.createElement('div');
-      modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200';
-      modal.innerHTML = '<div class="bg-white dark:bg-neutral-800 rounded-xl p-5 w-full mx-4 transform scale-95 transition-transform duration-200">' +
-        '<h2 class="text-base font-medium text-neutral-800 dark:text-white mb-1">' + title + '</h2>' +
-        '<p class="text-sm text-neutral-600 dark:text-neutral-400 mb-5">' + body + '</p>' +
-        '<div class="flex justify-end gap-2">' +
-          '<button class="cancel-btn px-4 py-2 rounded-xl bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white text-sm hover:bg-neutral-300 dark:hover:bg-neutral-600 transition">Cancel</button>' +
-          '<button class="confirm-btn rounded-xl bg-red-600 hover:bg-red-500 text-white px-4 py-2 text-sm font-medium transition">' + confirmLabel + '</button>' +
-        '</div></div>';
-      document.body.appendChild(modal);
-      setTimeout(function() {
-        modal.classList.remove('opacity-0', 'pointer-events-none');
-        modal.querySelector('div').classList.remove('scale-95');
-        modal.querySelector('div').classList.add('scale-100');
-      }, 10);
-      function close() {
-        modal.classList.add('opacity-0', 'pointer-events-none');
-        setTimeout(function() { document.body.removeChild(modal); }, 200);
-      }
-      modal.querySelector('.cancel-btn').addEventListener('click', close);
-      modal.querySelector('.confirm-btn').addEventListener('click', function() { close(); onConfirm(); });
-    }
-
     restartButton.addEventListener('click', function() {
-      makeModal('Confirm Restart', 'Are you sure you want to restart the server? This will disconnect all users.', 'Restart', function() {
-        var loader = showLoadingPopup('Restarting Server', 'Initiating server restart...');
-        fetch('/server/<%= server.UUID %>/power/restart', { method: 'POST' })
-          .then(function(r) { return r.json(); })
-          .then(function(data) {
-            loader.close();
-            if (data.success || data.message) { showToast('Restart initiated.', 'success'); }
-            else { showToast('Failed: ' + (data.error || 'Unknown error'), 'error'); }
-          })
-          .catch(function() { loader.close(); showToast('An error occurred.', 'error'); });
+      window.modal.confirm({
+        title: 'Confirm Restart',
+        body: 'Are you sure you want to restart the server? This will disconnect all users.',
+        danger: false,
+        confirmLabel: 'Restart',
+        onConfirm: function() {
+          var loader = showLoadingPopup('Restarting Server', 'Initiating server restart...');
+          fetch('/server/<%= server.UUID %>/power/restart', { method: 'POST' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              loader.close();
+              if (data.success || data.message) { showToast('Restart initiated.', 'success'); }
+              else { showToast('Failed: ' + (data.error || 'Unknown error'), 'error'); }
+            })
+            .catch(function() { loader.close(); showToast('An error occurred.', 'error'); });
+        }
       });
     });
 
     reinstallButton.addEventListener('click', function() {
-      makeModal('Confirm Reinstallation', 'WARNING: This will delete all data and reinstall from scratch. This cannot be undone.', 'Reinstall', function() {
-        makeModal('Final Warning', 'All server data will be permanently deleted. Proceed?', 'Proceed', function() {
-          var loader = showLoadingPopup('Reinstalling Server', 'Initiating server reinstallation...');
-          loader.updateProgress(10, 'Preparing...');
-          fetch('/server/<%= server.UUID %>/reinstall', { method: 'POST' })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-              loader.updateProgress(100, 'Reinstallation initiated!');
-              setTimeout(function() {
-                loader.close();
-                if (data.success) { showToast('Reinstallation started. This may take a few minutes.', 'success'); }
-                else { showToast('Failed: ' + (data.error || 'Unknown error'), 'error'); }
-              }, 1000);
-            })
-            .catch(function() { loader.close(); showToast('An error occurred.', 'error'); });
-        });
+      window.modal.confirm({
+        title: 'Confirm Reinstallation',
+        body: 'WARNING: This will delete all data and reinstall from scratch. This cannot be undone.',
+        danger: true,
+        confirmLabel: 'Reinstall',
+        onConfirm: function() {
+          window.modal.confirm({
+            title: 'Final Warning',
+            body: 'All server data will be permanently deleted. Proceed?',
+            danger: true,
+            confirmLabel: 'Proceed',
+            onConfirm: function() {
+              var loader = showLoadingPopup('Reinstalling Server', 'Initiating server reinstallation...');
+              loader.updateProgress(10, 'Preparing...');
+              fetch('/server/<%= server.UUID %>/reinstall', { method: 'POST' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                  loader.updateProgress(100, 'Reinstallation initiated!');
+                  setTimeout(function() {
+                    loader.close();
+                    if (data.success) { showToast('Reinstallation started. This may take a few minutes.', 'success'); }
+                    else { showToast('Failed: ' + (data.error || 'Unknown error'), 'error'); }
+                  }, 1000);
+                })
+                .catch(function() { loader.close(); showToast('An error occurred.', 'error'); });
+            }
+          });
+        }
       });
     });
   });
