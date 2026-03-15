@@ -1225,19 +1225,22 @@ function openCreateFileModal() {
 
     const srcDir = filePath.includes('/') ? filePath.substring(0, filePath.lastIndexOf('/')) : '';
     const dstDir = newPath.includes('/') ? newPath.substring(0, newPath.lastIndexOf('/')) : '';
-    const movingDir = srcDir !== dstDir;
+    const movingDir = srcDir !== dstDir && dstDir !== '';
 
     try {
       if (movingDir) {
-        const placeholderEncoded = newPath.split('/').map(s => encodeURIComponent(s)).join('/');
-        const mkRes = await fetch('/server/<%= server.UUID %>/files/' + placeholderEncoded, {
+        // Create a hidden keepfile inside the target dir to force the daemon
+        // to create all intermediate directories, then delete it
+        const keepPath = dstDir + '/.airlink_keep';
+        const keepEncoded = keepPath.split('/').map(s => encodeURIComponent(s)).join('/');
+        const mkRes = await fetch('/server/<%= server.UUID %>/files/' + keepEncoded, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ content: '' }),
         });
         if (!mkRes.ok) { loader.close(); showToast('Failed to create target directory', 'error'); return; }
 
-        await fetch('/server/<%= server.UUID %>/files/rm/' + placeholderEncoded, { method: 'DELETE' });
+        await fetch('/server/<%= server.UUID %>/files/rm/' + keepEncoded, { method: 'DELETE' });
       }
 
       const renameRes = await fetch('/server/<%= server.UUID %>/rename', {
