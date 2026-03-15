@@ -1215,22 +1215,44 @@ function openCreateFileModal() {
 
   // ── confirmRename: input is the full target path ──────────────────────────
   const _origConfirmRename = confirmRename;
-  function confirmRename() {
+  async function confirmRename() {
     const newPath = document.getElementById('newFileName').value.trim();
     const filePath = document.getElementById('currentFilePath').value;
     if (!newPath || newPath === filePath) { closeRenameModal(); return; }
 
     closeRenameModal();
     const loader = showLoadingPopup('Renaming', 'Processing...');
-    fetch('/server/<%= server.UUID %>/rename', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: filePath, newName: newPath })
-    }).then(r => {
+
+    const srcDir = filePath.includes('/') ? filePath.substring(0, filePath.lastIndexOf('/')) : '';
+    const dstDir = newPath.includes('/') ? newPath.substring(0, newPath.lastIndexOf('/')) : '';
+    const movingDir = srcDir !== dstDir;
+
+    try {
+      if (movingDir) {
+        const placeholderEncoded = newPath.split('/').map(s => encodeURIComponent(s)).join('/');
+        const mkRes = await fetch('/server/<%= server.UUID %>/files/' + placeholderEncoded, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: '' }),
+        });
+        if (!mkRes.ok) { loader.close(); showToast('Failed to create target directory', 'error'); return; }
+
+        await fetch('/server/<%= server.UUID %>/files/rm/' + placeholderEncoded, { method: 'DELETE' });
+      }
+
+      const renameRes = await fetch('/server/<%= server.UUID %>/rename', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: filePath, newName: newPath }),
+      });
       loader.close();
-      if (r.ok) { showToast('Renamed successfully', 'success'); setTimeout(() => location.reload(), 800); }
-      else showToast('Failed to rename', 'error');
-    }).catch(() => { loader.close(); showToast('Failed to rename', 'error'); });
+      if (renameRes.ok) {
+        showToast('Renamed successfully', 'success');
+        setTimeout(() => location.reload(), 800);
+      } else {
+        showToast('Failed to rename', 'error');
+      }
+    } catch { loader.close(); showToast('Failed to rename', 'error'); }
   }
 
   // ── Copy path ─────────────────────────────────────────────────────────────
