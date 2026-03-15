@@ -749,19 +749,19 @@ function openCreateFileModal() {
     document.getElementById('currentFileName').value = fileName;
     document.getElementById('currentFilePath').value = filePath;
 
-    input.value = fileName;
+    // Show the full path so the user can edit folder too
+    input.value = filePath;
 
     modal.classList.remove('opacity-0', 'pointer-events-none');
     modal.querySelector('div').classList.remove('scale-95');
     modal.querySelector('div').classList.add('scale-100');
 
-    // Select the filename part without the extension
-    const lastDotIndex = fileName.lastIndexOf('.');
-    if (lastDotIndex > 0) {
-      input.setSelectionRange(0, lastDotIndex);
-    } else {
-      input.select();
-    }
+    // Select only the filename part (after the last slash), excluding extension
+    const slashIndex = filePath.lastIndexOf('/');
+    const nameStart = slashIndex + 1;
+    const lastDotIndex = filePath.lastIndexOf('.');
+    const nameEnd = lastDotIndex > nameStart ? lastDotIndex : filePath.length;
+    input.setSelectionRange(nameStart, nameEnd);
     input.focus();
   }
 
@@ -1222,30 +1222,30 @@ function openCreateFileModal() {
     } catch { loader.close(); showToast('Error creating file', 'error'); }
   }
 
-  // ── confirmRename: handle slash paths (move) ──────────────────────────────
+  // ── confirmRename: input is the full target path ──────────────────────────
   const _origConfirmRename = confirmRename;
-  function confirmRename() {
-    const newName = document.getElementById('newFileName').value.trim();
+  async function confirmRename() {
+    const newPath = document.getElementById('newFileName').value.trim();
     const filePath = document.getElementById('currentFilePath').value;
-    if (!newName || newName === document.getElementById('currentFileName').value) { closeRenameModal(); return; }
-
-    let resolvedName = newName;
-    if (newName.includes('/') && !newName.startsWith('/')) {
-      const dir = filePath.substring(0, filePath.lastIndexOf('/') + 1);
-      resolvedName = dir + newName;
-    }
+    if (!newPath || newPath === filePath) { closeRenameModal(); return; }
 
     closeRenameModal();
     const loader = showLoadingPopup('Renaming', 'Processing...');
-    fetch('/server/<%= server.UUID %>/rename', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: filePath, newName: resolvedName })
-    }).then(r => {
+
+    try {
+      const res = await fetch('/server/<%= server.UUID %>/rename', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: filePath, newName: newPath }),
+      });
       loader.close();
-      if (r.ok) { showToast('Renamed to ' + newName, 'success'); setTimeout(() => location.reload(), 800); }
-      else showToast('Failed to rename', 'error');
-    }).catch(() => { loader.close(); showToast('Failed to rename', 'error'); });
+      if (res.ok) {
+        showToast('Renamed successfully', 'success');
+        setTimeout(() => location.reload(), 800);
+      } else {
+        showToast('Failed to rename', 'error');
+      }
+    } catch { loader.close(); showToast('Failed to rename', 'error'); }
   }
 
   // ── Copy path ─────────────────────────────────────────────────────────────
