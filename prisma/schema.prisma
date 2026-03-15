@@ -105,6 +105,7 @@ model settings {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   sftpPort  Int  @default(3003)
+  virusTotalApiKey String?
 }
 
 model ApiKey {
