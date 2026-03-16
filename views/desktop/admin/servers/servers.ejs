@@ -168,7 +168,7 @@
       <div id="radarPickerPhase" class="px-6 py-5">
 
         <!-- Scan mode toggle — VT option only shown when key is configured -->
-        <div id="scanModeToggle" class="hidden mb-5">
+        <div class="collapsible-row" id="scanModeToggleRow"><div><div id="scanModeToggle" class="hidden mb-5">
           <p class="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2">Scan method</p>
           <div class="flex gap-2">
             <button type="button" id="modeBuiltin" onclick="setScanMode('builtin')" class="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-neutral-800 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition-all">
@@ -185,6 +185,7 @@
             </button>
           </div>
         </div>
+        </div></div>
 
         <!-- Built-in: script picker -->
         <div id="builtinPickerSection">
@@ -262,7 +263,7 @@
     .then(r => r.json())
     .then(d => {
       vtEnabled = d.enabled;
-      if (vtEnabled) document.getElementById('scanModeToggle').classList.remove('hidden');
+      if (vtEnabled) document.getElementById('scanModeToggleRow').classList.add('open');
     })
     .catch(() => {});
 

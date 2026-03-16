@@ -134,13 +134,14 @@
               </div>
             </div>
 
-            <div id="variablesSection" style="display: none;">
+            <div class="collapsible-row" id="variablesSectionRow"><div><div id="variablesSection">
               <h2 class="text-neutral-700 dark:text-neutral-300 text-md font-semibold mb-4">Variables</h2>
 
               <div class="grid grid-cols-1 gap-4 mb-6" id="variablesContainer">
                 <!-- here come the variables -->
               </div>
             </div>
+            </div></div>
 
             <!-- Submit Button -->
             <div class="col-span-2">
@@ -288,10 +289,10 @@
       variablesContainer.innerHTML = '';
 
       if (variables.length === 0) {
-        variablesSection.style.display = 'none';
+        document.getElementById('variablesSectionRow').classList.remove('open');
         return;
       } else {
-        variablesSection.style.display = 'block';
+        document.getElementById('variablesSectionRow').classList.add('open');
       }
 
       variables.forEach(variable => {

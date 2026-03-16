@@ -118,7 +118,8 @@
       <% } %>
 
       <!-- Daemon Offline Warning -->
-      <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline) { %>
+      <div class="collapsible-row<% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline) { %> open<% } %>" id="daemonOfflineWarningRow">
+      <div>
       <div id="daemonOfflineWarning" class="mx-8 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center">
         <div class="flex-shrink-0 mr-3">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -133,7 +134,8 @@
           </button>
         </div>
       </div>
-      <% } %>
+      </div>
+      </div>
 
       <%- include('../../components/serverTemplate') %>
 
@@ -341,7 +343,7 @@ function connectWebSocket() {
             // Hide daemon offline warning if it exists
             const daemonOfflineWarning = document.getElementById('daemonOfflineWarning');
             if (daemonOfflineWarning) {
-                daemonOfflineWarning.classList.add('hidden');
+                document.getElementById('daemonOfflineWarningRow').classList.remove('open');
             }
         };
 
@@ -354,7 +356,7 @@ function connectWebSocket() {
             // Show daemon offline warning if it exists
             const daemonOfflineWarning = document.getElementById('daemonOfflineWarning');
             if (daemonOfflineWarning) {
-                daemonOfflineWarning.classList.remove('hidden');
+                document.getElementById('daemonOfflineWarningRow').classList.add('open');
             }
         };
 
@@ -426,7 +428,7 @@ connectWebSocket();
                 // Show daemon offline warning if it exists
                 const daemonOfflineWarning = document.getElementById('daemonOfflineWarning');
                 if (daemonOfflineWarning) {
-                    daemonOfflineWarning.classList.remove('hidden');
+                    document.getElementById('daemonOfflineWarningRow').classList.add('open');
                 }
             }
 
