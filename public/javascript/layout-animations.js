@@ -18,6 +18,7 @@
     if (cls.indexOf('animate-spin')      !== -1) return true;
     if (cls.indexOf('nav-link')          !== -1) return true;
     if (cls.indexOf('no-anim')           !== -1) return true;
+    if (cls.indexOf('collapsible-row')   !== -1) return true;
     var id = el.id;
     if (id === 'pl-overlay' || id === 'pl-bar' || id === 'active-background') return true;
     if (window.getComputedStyle(el).position === 'fixed') return true;

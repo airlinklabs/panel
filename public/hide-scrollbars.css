@@ -16,7 +16,7 @@
 }
 
 /* Ensure overflow still works properly */
-body, html, div {
+body, html {
   overflow-y: auto;
 }
 

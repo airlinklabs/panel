@@ -246,18 +246,21 @@ function isImageFile(filename) {
 
    <!-- Floating Action Bar (only show when daemon is online) -->
    <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-   <div id="floatingActionBar" class="fixed left-0 right-0 bg-neutral-900 dark:bg-neutral-800 z-40 text-white py-3 px-4 transition-all duration-300 ease-in-out flex justify-between items-center pointer-events-none" style="bottom: -80px;">
-    <span id="selectedFilesCount">0 files selected</span>
-    <div class="flex gap-4">
-        <button id="massRenameBtn" class="rounded-xl bg-neutral-700 dark:bg-neutral-600 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95">
+   <div id="floatingActionBar" class="fixed left-0 right-0 bg-neutral-900 dark:bg-neutral-800 z-40 text-white py-2.5 px-4 transition-all duration-300 ease-in-out flex items-center gap-2 pointer-events-none" style="bottom: -80px;">
+    <span id="selectedFilesCount" class="text-xs font-medium text-neutral-400 shrink-0">0 selected</span>
+    <div class="h-3.5 w-px bg-neutral-700 shrink-0 mx-0.5"></div>
+    <div class="flex gap-2 ml-auto">
+        <button id="massRenameBtn" class="rounded-xl bg-neutral-700 dark:bg-neutral-600 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95 shrink-0">
             Rename
         </button>
-        <button id="massArchiveBtn" class="rounded-xl bg-neutral-600 dark:bg-neutral-500 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95">
+        <button id="massArchiveBtn" class="rounded-xl bg-neutral-600 dark:bg-neutral-500 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95 shrink-0">
             Archive
         </button>
-        <button id="massDeleteBtn" class="rounded-xl bg-red-600 hover:bg-red-500 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95">
+        <button id="massDeleteBtn" class="rounded-xl bg-red-600 hover:bg-red-500 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95 shrink-0">
             Delete
         </button>
+    </div>
+</div>
     </div>
 </div>
    <% } %>

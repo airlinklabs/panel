@@ -255,16 +255,17 @@ function isImageFile(filename) {
 
    <!-- Floating Action Bar (only show when daemon is online) -->
    <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-   <div id="floatingActionBar" class="fixed bottom-0 w-full bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700 z-50 backdrop-blur text-neutral-800 dark:text-white py-4 px-6 transform transition-transform duration-300 ease-in-out flex justify-between items-center translate-y-full">
-    <span id="selectedFilesCount">0 files selected</span>
-    <div class="flex gap-4">
-        <button id="massRenameBtn" class="w-full md:w-auto rounded-xl bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-800 dark:text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+   <div id="floatingActionBar" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 z-50 backdrop-blur-sm text-neutral-800 dark:text-white py-3 px-4 transform transition-transform duration-300 ease-in-out flex items-center gap-3 translate-y-full">
+    <span id="selectedFilesCount" class="text-sm font-medium text-neutral-500 dark:text-neutral-400 shrink-0 mr-1">0 selected</span>
+    <div class="h-4 w-px bg-neutral-200 dark:bg-neutral-700 shrink-0"></div>
+    <div class="flex gap-2 ml-auto">
+        <button id="massRenameBtn" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700/40 px-3 py-1.5 text-xs font-medium transition shrink-0">
             Rename
         </button>
-        <button id="massArchiveBtn" class="w-full md:w-auto rounded-xl bg-neutral-700 dark:bg-neutral-600 hover:bg-neutral-600 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+        <button id="massArchiveBtn" class="rounded-xl bg-neutral-800 dark:bg-neutral-700 hover:bg-neutral-700 dark:hover:bg-neutral-600 text-white px-3 py-1.5 text-xs font-medium transition shrink-0">
             Archive
         </button>
-        <button id="massDeleteBtn" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+        <button id="massDeleteBtn" class="rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 text-xs font-medium transition shrink-0">
             Delete
         </button>
     </div>
