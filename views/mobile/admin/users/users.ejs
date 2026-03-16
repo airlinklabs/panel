@@ -91,17 +91,23 @@
 
 <script>
   function deleteUser(userId) {
-    if (confirm('<%= req.translations.areYouSureDeleteUser || "Are you sure you want to delete this user?" %>')) {
-      fetch(`/admin/users/delete/${userId}`, { method: 'DELETE' })
-        .then(response => {
-          if (response.ok) {
-            location.reload();
-          } else {
-            showToast('<%= req.translations.failedToDeleteUser || "Failed to delete user." %>', 'error');
-          }
-        })
-        .catch(err => console.error('Error deleting user:', err));
-    }
+    window.modal.confirm({
+      title: '<%= req.translations.deleteUser || "Delete User" %>',
+      body: '<%= req.translations.areYouSureDeleteUser || "Are you sure you want to delete this user?" %>',
+      danger: true,
+      confirmLabel: 'Delete',
+      onConfirm: () => {
+        fetch(`/admin/users/delete/${userId}`, { method: 'DELETE' })
+          .then(response => {
+            if (response.ok) {
+              location.reload();
+            } else {
+              showToast('Failed to delete user.', 'error');
+            }
+          })
+          .catch(() => showToast('Failed to delete user.', 'error'));
+      }
+    });
   }
 </script>
 

@@ -57,12 +57,12 @@
                 </svg>
                 Check Updates
               </button>
-              <div class="collapsible-row no-anim" id="performUpdateBtnRow"><div><button id="performUpdateBtn" class="hidden rounded-xl bg-neutral-200 dark:bg-neutral-700/60 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border border-neutral-300 dark:border-white/5 px-3 py-2 text-sm font-medium transition-colors items-center gap-1.5">
+              <button id="performUpdateBtn" class="hidden rounded-xl bg-neutral-200 dark:bg-neutral-700/60 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border border-neutral-300 dark:border-white/5 px-3 py-2 text-sm font-medium transition-colors items-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
                 <%= req.translations.update || 'Update' %>
-              </button></div></div>
+              </button>
             </div>
           </div>
 
@@ -80,11 +80,9 @@
             <div class="rounded-xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 p-4">
               <p class="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2">Update Status</p>
               <p class="text-xs text-neutral-500 mb-3"><%= req.translations.sysInfoText %> <span class="text-neutral-700 dark:text-neutral-300 font-medium" id="current-version-inline"></span></p>
-              <div class="collapsible-row no-anim" id="updateStatusRow"><div><div id="updateStatus" class="collapsible-target text-sm hidden rounded-lg p-3 bg-neutral-200/60 dark:bg-neutral-800/60"></div>
-              <div class="collapsible-row no-anim" id="updateInfoRow"><div><div id="updateInfo" class="mt-3 hidden"></div>
+              <div id="updateStatus" class="text-sm hidden rounded-lg p-3 bg-neutral-200/60 dark:bg-neutral-800/60"></div>
+              <div id="updateInfo" class="mt-3 hidden"></div>
             </div>
-      </div></div>
-      </div></div>
           </div>
         </div>
 
@@ -162,19 +160,19 @@
       if (data.hasUpdate) {
         statusDiv.innerHTML = '<span class="text-amber-600 dark:text-amber-400">Update available — v' + data.latestVersion + '</span>';
         fadeIn(statusDiv);
-        document.getElementById('performUpdateBtnRow').classList.add('open');
+        updateBtn.classList.remove('hidden');
         updateBtn.classList.add('inline-flex');
         fadeIn(updateBtn);
         if (data.updateInfo) {
           updateInfo.innerHTML = '<p class="text-xs text-neutral-500">' + data.updateInfo + '</p>';
-          document.getElementById('updateInfoRow').classList.add('open');
+          updateInfo.classList.remove('hidden');
           fadeIn(updateInfo);
         }
       } else {
         statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400"><%= req.translations.runningLatestVersion %></span>';
         fadeIn(statusDiv);
-        document.getElementById('performUpdateBtnRow').classList.remove('open');
-        document.getElementById('updateInfoRow').classList.remove('open');
+        updateBtn.classList.add('hidden');
+        updateInfo.classList.add('hidden');
       }
     } catch (error) {
       statusDiv.innerHTML = '<span class="text-red-500">Failed to check for updates.</span>';
@@ -183,23 +181,29 @@
   });
 
   document.getElementById('performUpdateBtn').addEventListener('click', async () => {
-    if (confirm('Perform the update? The server will restart.')) {
-      const statusDiv = document.getElementById('updateStatus');
-      statusDiv.innerHTML = '<span class="text-neutral-500">Installing...</span>';
-      fadeIn(statusDiv);
-      try {
-        const response = await fetch('/admin/perform-update', { method: 'POST' });
-        const data = await response.json();
-        showToast(data.message || 'Update complete. Restarting.', 'success');
-        statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400">Update successful. Restarting...</span>';
+    window.modal.confirm({
+      title: 'Install Update',
+      body: 'The panel will perform the update and restart the server.',
+      confirmLabel: 'Install',
+      danger: false,
+      onConfirm: async () => {
+        const statusDiv = document.getElementById('updateStatus');
+        statusDiv.innerHTML = '<span class="text-neutral-500">Installing...</span>';
         fadeIn(statusDiv);
-        setTimeout(() => window.location.reload(), 5000);
-      } catch (error) {
-        statusDiv.innerHTML = '<span class="text-red-500">Update failed.</span>';
-        fadeIn(statusDiv);
-        showToast('Error performing update', 'error');
+        try {
+          const response = await fetch('/admin/perform-update', { method: 'POST' });
+          const data = await response.json();
+          showToast(data.message || 'Update complete. Restarting.', 'success');
+          statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400">Update successful. Restarting...</span>';
+          fadeIn(statusDiv);
+          setTimeout(() => window.location.reload(), 5000);
+        } catch (error) {
+          statusDiv.innerHTML = '<span class="text-red-500">Update failed.</span>';
+          fadeIn(statusDiv);
+          showToast('Error performing update', 'error');
+        }
       }
-    }
+    });
   });
 
   function fadeIn(el) {

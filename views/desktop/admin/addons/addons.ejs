@@ -237,8 +237,13 @@
   window.toggleAddon = toggleAddon;
 
   function confirmUninstall(slug, name) {
-    if (!confirm(`Uninstall "${name}"? This will delete the addon files and cannot be undone.`)) return;
-    uninstallAddon(slug);
+    window.modal.confirm({
+      title: 'Uninstall Addon',
+      body: `Uninstall "${name}"? This will delete the addon files and cannot be undone.`,
+      danger: true,
+      confirmLabel: 'Uninstall',
+      onConfirm: () => uninstallAddon(slug)
+    });
   }
 
   function uninstallAddon(slug) {

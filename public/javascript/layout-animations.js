@@ -65,6 +65,9 @@
       if (m.type === 'attributes') {
         var el = m.target;
         if (shouldSkip(el)) return;
+        // Don't FLIP siblings when the changed element is inside a no-anim container —
+        // those elements manage their own animation (e.g. max-height transitions).
+        if (el.closest && el.closest('.no-anim')) return;
         var snap2 = snapSiblings(el.parentElement);
         requestAnimationFrame(function () { flipSiblings(snap2); });
       }

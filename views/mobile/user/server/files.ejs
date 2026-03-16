@@ -246,21 +246,18 @@ function isImageFile(filename) {
 
    <!-- Floating Action Bar (only show when daemon is online) -->
    <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-   <div id="floatingActionBar" class="fixed left-0 right-0 bg-neutral-900 dark:bg-neutral-800 z-40 text-white py-2.5 px-4 transition-all duration-300 ease-in-out flex items-center gap-2 pointer-events-none" style="bottom: -80px;">
-    <span id="selectedFilesCount" class="text-xs font-medium text-neutral-400 shrink-0">0 selected</span>
-    <div class="h-3.5 w-px bg-neutral-700 shrink-0 mx-0.5"></div>
-    <div class="flex gap-2 ml-auto">
-        <button id="massRenameBtn" class="rounded-xl bg-neutral-700 dark:bg-neutral-600 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95 shrink-0">
+   <div id="floatingActionBar" class="fixed left-0 right-0 bg-neutral-900 dark:bg-neutral-800 z-40 text-white py-3 px-4 transition-all duration-300 ease-in-out flex justify-between items-center pointer-events-none" style="bottom: -80px;">
+    <span id="selectedFilesCount">0 files selected</span>
+    <div class="flex gap-4">
+        <button id="massRenameBtn" class="rounded-xl bg-neutral-700 dark:bg-neutral-600 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95">
             Rename
         </button>
-        <button id="massArchiveBtn" class="rounded-xl bg-neutral-600 dark:bg-neutral-500 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95 shrink-0">
+        <button id="massArchiveBtn" class="rounded-xl bg-neutral-600 dark:bg-neutral-500 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95">
             Archive
         </button>
-        <button id="massDeleteBtn" class="rounded-xl bg-red-600 hover:bg-red-500 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95 shrink-0">
+        <button id="massDeleteBtn" class="rounded-xl bg-red-600 hover:bg-red-500 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95">
             Delete
         </button>
-    </div>
-</div>
     </div>
 </div>
    <% } %>
@@ -500,21 +497,14 @@ function isImageFile(filename) {
 
   let selectedFiles = [];
 
-  const pageContent = document.getElementById('page-content');
-  if (pageContent) {
-    pageContent.style.transition = 'padding-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-  }
-
   function updateSelectedFiles() {
     const selectedCount = selectedFiles.length;
     if (selectedFiles.length > 0) {
       floatingActionBar.style.bottom = '64px';
       floatingActionBar.classList.remove('pointer-events-none');
-      if (pageContent) pageContent.style.paddingBottom = '140px';
     } else {
       floatingActionBar.style.bottom = '-80px';
       floatingActionBar.classList.add('pointer-events-none');
-      if (pageContent) pageContent.style.paddingBottom = '';
     }
     document.getElementById('selectedFilesCount').innerText = `${selectedCount} file${selectedCount !== 1 ? 's' : ''} selected`;
 
@@ -544,6 +534,7 @@ function initializeSelectedFiles() {
 
 // Select All functionality
 selectAllCheckbox.addEventListener('change', event => {
+    if (window.animateCheckbox) window.animateCheckbox(selectAllCheckbox);
     const isChecked = event.target.checked;
 
     // Get all file checkboxes (excluding the select all checkbox itself)
@@ -551,6 +542,7 @@ selectAllCheckbox.addEventListener('change', event => {
 
     fileCheckboxes.forEach(checkbox => {
         checkbox.checked = isChecked;
+        if (window.animateCheckbox) window.animateCheckbox(checkbox);
         const fileName = checkbox.dataset.filename;
 
         if (isChecked) {
@@ -567,6 +559,7 @@ selectAllCheckbox.addEventListener('change', event => {
 
 document.querySelectorAll('.file-checkbox').forEach(checkbox => {
     checkbox.addEventListener('change', event => {
+        if (window.animateCheckbox) window.animateCheckbox(checkbox);
         const fileName = event.target.dataset.filename;
 
         if (event.target.checked) {

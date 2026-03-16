@@ -272,21 +272,27 @@
     });
 
     document.getElementById('resetButton').addEventListener('click', async () => {
-      if (!confirm('<%= req.translations.resetSettingsConfirm || "Reset all settings to default?" %>')) return;
-      try {
-        const response = await fetch('/admin/settings/reset', { method: 'POST' });
-        if (response.ok) {
-          showToast('<%= req.translations.settingsReset || "Settings reset to default." %>', 'success');
-          setTimeout(() => window.location.reload(), 1200);
-        } else {
-          const err = await response.json().catch(() => ({}));
-          showToast(err.error || 'Failed to reset settings.', 'error');
+      window.modal.confirm({
+        title: '<%= req.translations.resetSettings || "Reset Settings" %>',
+        body: '<%= req.translations.resetSettingsConfirm || "Reset all settings to default?" %>',
+        danger: true,
+        confirmLabel: 'Reset',
+        onConfirm: async () => {
+          try {
+            const response = await fetch('/admin/settings/reset', { method: 'POST' });
+            if (response.ok) {
+              showToast('<%= req.translations.settingsReset || "Settings reset to default." %>', 'success');
+              setTimeout(() => window.location.reload(), 1200);
+            } else {
+              const err = await response.json().catch(() => ({}));
+              showToast(err.error || 'Failed to reset settings.', 'error');
+            }
+          } catch {
+            showToast('Failed to reset settings.', 'error');
+          }
         }
-      } catch {
-        showToast('Failed to reset settings.', 'error');
-      }
+      });
     });
-  });
 </script>
 
 <%- include('../../components/footer') %>
