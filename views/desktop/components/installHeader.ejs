@@ -28,70 +28,73 @@
   <script>
   (function () {
     const serverUUID = '<%= server.UUID %>';
-    const banner = document.getElementById('installBanner');
+    const banner    = document.getElementById('installBanner');
     const stateText = document.getElementById('installStateText');
-    const stepsEl = document.getElementById('installSteps');
-    const spinner = document.getElementById('installSpinner');
+    const stepsEl   = document.getElementById('installSteps');
+    const spinner   = document.getElementById('installSpinner');
 
-    const stateMessages = {
-      installing: 'Downloading and configuring files...',
-      installed:  'Installation complete.',
-      failed:     'Installation failed.',
-    };
+    const shownSteps = new Set();
 
-    const steps = [
-      'Daemon acknowledged request',
-      'Pulling container image',
-      'Running install scripts',
-      'Configuring server files',
-    ];
-
-    let shownSteps = new Set();
-    let stepIndex = 0;
-
-    function addStep(label) {
+    function addStep(label, type) {
       if (!label || shownSteps.has(label)) return;
       shownSteps.add(label);
+      const isDone  = type === 'done';
+      const isError = type === 'error';
+      const glyph   = isDone ? '✓' : isError ? '✕' : '·';
+      const color   = isDone ? 'text-emerald-500' : isError ? 'text-red-400' : 'text-blue-400';
       const row = document.createElement('div');
       row.className = 'flex items-center gap-1.5';
-      row.style.cssText = 'overflow:hidden;max-height:0;opacity:0;transition:max-height 0.35s cubic-bezier(0.16,1,0.3,1),opacity 0.3s ease,margin 0.35s ease';
-      row.innerHTML = `<span class="text-[10px] text-emerald-500">✓</span><span class="text-[11px] text-blue-400 dark:text-blue-400/70">${label}</span>`;
+      row.style.cssText = 'overflow:hidden;max-height:0;opacity:0;transition:max-height 0.3s ease,opacity 0.25s ease';
+      row.innerHTML = `<span class="text-[10px] ${color}">${glyph}</span><span class="text-[11px] text-blue-400 dark:text-blue-400/70">${label}</span>`;
       stepsEl.appendChild(row);
       requestAnimationFrame(() => requestAnimationFrame(() => {
         row.style.maxHeight = '2rem';
-        row.style.opacity = '1';
+        row.style.opacity   = '1';
       }));
     }
 
-    const stepTimer = setInterval(() => {
-      if (stepIndex < steps.length) addStep(steps[stepIndex++]);
-    }, 6000);
+    // Connect to the daemon lifecycle event stream for this server
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const evtSock = new WebSocket(`${proto}://${location.host}/events/${serverUUID}`);
 
-    let pollAttempts = 0;
+    evtSock.onmessage = (msg) => {
+      let parsed;
+      try { parsed = JSON.parse(msg.data); } catch { return; }
+      if (parsed.event !== 'lifecycle') return;
+      const { type, message } = parsed.data;
+      if (type === 'error') {
+        stateText.textContent = message;
+        addStep(message, 'error');
+      } else {
+        stateText.textContent = message;
+        addStep(message);
+      }
+    };
+
+    function markDone() {
+      evtSock.close();
+      addStep('Installation complete', 'done');
+      spinner.classList.remove('animate-spin');
+      spinner.classList.add('text-emerald-500');
+      spinner.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>';
+      if (banner) banner.className = banner.className.replace(/blue/g, 'emerald');
+      setTimeout(() => window.location.reload(), 1800);
+    }
+
+    function markFailed() {
+      evtSock.close();
+      spinner.classList.remove('animate-spin', 'text-blue-500');
+      spinner.classList.add('text-red-500');
+      clearInterval(poller);
+    }
 
     function poll() {
       fetch(`/server/${serverUUID}/status`)
         .then(r => r.json())
         .then(data => {
-          pollAttempts++;
           const state = data.state || (data.installed ? 'installed' : data.failed ? 'failed' : 'installing');
-          if (stateMessages[state]) stateText.textContent = stateMessages[state];
-
-          if (state === 'installed') {
-            clearInterval(stepTimer);
-            clearInterval(poller);
-            addStep('Server ready');
-            spinner.classList.remove('animate-spin');
-            spinner.classList.add('text-emerald-500');
-            spinner.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>';
-            banner.className = banner.className.replace(/blue/g, 'emerald');
-            setTimeout(() => window.location.reload(), 2000);
-          } else if (state === 'failed') {
-            clearInterval(stepTimer);
-            clearInterval(poller);
-            spinner.classList.remove('animate-spin', 'text-blue-500');
-            spinner.classList.add('text-red-500');
-          }
+          if (state === 'installed') { clearInterval(poller); markDone(); }
+          else if (state === 'failed') { clearInterval(poller); markFailed(); }
         })
         .catch(() => {});
     }

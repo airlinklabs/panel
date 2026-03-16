@@ -22,6 +22,7 @@ interface AddonPackageJson {
   router?: string;
   enabled?: boolean;
   migrations?: MigrationTemplate[];
+  dontfuckinganimateme?: boolean;
 }
 
 export interface AddonAPI {
@@ -329,17 +330,24 @@ export async function loadAddons(app: Express | any) {
 
         try {
           const addonModule = require(mainFilePath);
+          const routerPath = packageJson.router || '/';
+          const animationsDisabled = packageJson.dontfuckinganimateme === true;
+
+          // Inject a flag into res.locals for every request handled by this addon
+          // so views can know whether to apply the global entrance animation
+          addonRouter.use((_req: any, res: any, next: any) => {
+            res.locals.addonAnimationsDisabled = animationsDisabled;
+            next();
+          });
 
           if (typeof addonModule === 'function') {
             addonModule(addonRouter, addonAPI);
-            const routerPath = packageJson.router || '/';
             Object.defineProperty(addonRouter, 'name', { value: `router_${folder}` });
             app.use(routerPath, addonRouter);
             loadedAddons.set(folder, { router: addonRouter, path: routerPath });
             logger.debug(`Loaded addon: ${packageJson.name}`);
           } else if (addonModule.default && typeof addonModule.default === 'function') {
             addonModule.default(addonRouter, addonAPI);
-            const routerPath = packageJson.router || '/';
             Object.defineProperty(addonRouter, 'name', { value: `router_${folder}` });
             app.use(routerPath, addonRouter);
             loadedAddons.set(folder, { router: addonRouter, path: routerPath });

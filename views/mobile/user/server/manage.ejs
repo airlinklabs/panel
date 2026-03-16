@@ -67,6 +67,9 @@
       </div>
 
       <%- include('../../components/installHeader') %>
+      <div class="px-0 mt-1">
+        <%- include('../../components/loadingPopup') %>
+      </div>
 
       <% if (server.Suspended) { %>
       <div class="mt-3 flex items-center gap-2.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-3 py-2.5">
@@ -208,7 +211,6 @@
 </main>
 
 <%- include('../../components/toast') %>
-<%- include('../../components/loadingPopup') %>
 
 <%- include('../../components/footer') %>
 
@@ -263,7 +265,6 @@ if (document.fonts && document.fonts.ready) {
 
 window.addEventListener('resize', () => requestAnimationFrame(fitTerminal));
 
-
     const maxCommands = 10;
     let commandHistory = [];
     let currentCommandIndex = -1;
@@ -281,10 +282,11 @@ let reconnectAttempts = 0;
 let maxReconnectAttempts = 10;
 let reconnectInterval = 2000;
 let reconnectTimer = null;
+let wsErrorCount = 0;
 
 function connectWebSocket() {
     if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN)) {
-        console.log("WebSocket is already connecting or open. Skipping new connection.");
+
         return;
     }
 
@@ -296,11 +298,11 @@ function connectWebSocket() {
     isReconnecting = true;
 
     if (socket) {
-        console.log("Closing existing WebSocket connection...");
+
         try {
             socket.close();
         } catch (e) {
-            console.error("Error closing socket:", e);
+
         }
     }
 
@@ -308,42 +310,32 @@ function connectWebSocket() {
         socket = new WebSocket(socketUrl);
 
         socket.onopen = () => {
-            console.log('WebSocket connection established');
-            writeConsole('system', 'system', 'WebSocket connection established');
+            writeConsole('system', 'system', 'Connected');
             isReconnecting = false;
             reconnectAttempts = 0;
             reconnectInterval = 2000;
-
-            // Hide daemon offline warning if it exists
-            const daemonOfflineWarning = document.getElementById('daemonOfflineWarning');
-            if (daemonOfflineWarning) {
-                daemonOfflineWarning.classList.add('hidden');
-            }
+            wsErrorCount = 0;
+            const warn = document.getElementById('daemonOfflineWarning');
+            if (warn) warn.classList.add('hidden');
         };
 
         socket.onmessage = handleWebSocketMessage;
 
-        socket.onerror = (error) => {
-            console.error('WebSocket Error:', error);
-            writeConsole('system', 'error', `WebSocket Error: Connection failed`);
-
-            // Show daemon offline warning if it exists
-            const daemonOfflineWarning = document.getElementById('daemonOfflineWarning');
-            if (daemonOfflineWarning) {
-                daemonOfflineWarning.classList.remove('hidden');
+        socket.onerror = () => {
+            wsErrorCount++;
+            if (wsErrorCount >= 3) {
+                writeConsole('system', 'error', 'Daemon connection lost');
+                const warn = document.getElementById('daemonOfflineWarning');
+                if (warn) warn.classList.remove('hidden');
             }
         };
 
-        socket.onclose = (event) => {
-            console.log(`WebSocket connection closed (${event.code}). Reconnecting...`);
-            writeConsole('system', 'system', 'WebSocket connection closed. Reconnecting...');
-
-            if (!isReconnecting) {
-                scheduleReconnect();
-            }
+        socket.onclose = () => {
+            writeConsole('system', 'system', 'Reconnecting...');
+            if (!isReconnecting) { scheduleReconnect(); }
         };
     } catch (error) {
-        console.error('Error creating WebSocket:', error);
+
         scheduleReconnect();
     }
 }
@@ -354,21 +346,18 @@ function scheduleReconnect() {
 
     const backoffTime = Math.min(30000, reconnectInterval * Math.pow(1.5, reconnectAttempts - 1));
 
-    console.log(`Scheduling reconnect attempt ${reconnectAttempts} in ${backoffTime}ms`);
-
     if (reconnectAttempts <= maxReconnectAttempts) {
         reconnectTimer = setTimeout(() => {
-            console.log(`Attempting reconnect ${reconnectAttempts} of ${maxReconnectAttempts}`);
+
             connectWebSocket();
         }, backoffTime);
     } else {
-        console.log('Maximum reconnect attempts reached. Please refresh the page.');
+
         writeConsole('system', 'error', 'Maximum reconnect attempts reached. Please refresh the page.');
     }
 }
 
 connectWebSocket();
-
 
     function handleWebSocketMessage(msg) {
         const lines = msg.data.split('\n');
@@ -398,12 +387,9 @@ connectWebSocket();
 
             if (trimmedLine.includes("airlinkd server appears to be down")) {
                 socket.close();
-
-                // Show daemon offline warning if it exists
-                const daemonOfflineWarning = document.getElementById('daemonOfflineWarning');
-                if (daemonOfflineWarning) {
-                    daemonOfflineWarning.classList.remove('hidden');
-                }
+                wsErrorCount = 3;
+                const warn = document.getElementById('daemonOfflineWarning');
+                if (warn) warn.classList.remove('hidden');
             }
 
             isFirstLine = false;
@@ -427,7 +413,7 @@ connectWebSocket();
 
     function restartWebSocket() {
         if (socket) {
-            console.log("Restarting WebSocket connection...");
+
             socket.close();
         }
         setTimeout(connectWebSocket, 500);
@@ -478,52 +464,50 @@ connectWebSocket();
     <% if (!server.Suspended) { %>
     startButton.addEventListener('click', () => {
         const serverUUID = '<%= server.UUID %>';
-        const p = window.loadingPopupSystem;
-        p.open('Starting Server', 'start');
-        p.setProgress(5, 'Sending start request...');
-        p.addStep('Start request dispatched');
+        const af = window.actionFeedback;
+        af.show('Sending start request');
+        setStatusText('Sending request', 'text-neutral-500 dark:text-neutral-400');
+
+        const evtSocketM = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
+        const stageLabelsM = { pulling: 'Pulling image', creating: 'Creating container', starting: 'Starting container', started: 'Starting server' };
+
+        evtSocketM.onmessage = (msg) => {
+            let parsed;
+            try { parsed = JSON.parse(msg.data); } catch { return; }
+            if (parsed.event !== 'lifecycle') return;
+            const { type, message } = parsed.data;
+            const label = stageLabelsM[type] || message;
+            af.show(label);
+            setStatusText(label, 'text-yellow-500');
+            if (type === 'error') { af.hide(); showToast(message, 'error'); }
+        };
 
         fetch(`/server/${serverUUID}/power/start`, { method: 'POST' })
             .then(r => r.json())
             .then(() => {
-                p.setProgress(15);
-                p.addStep('Panel received request');
-                const beats = [
-                    { delay: 800,  pct: 25, step: 'Removing old container' },
-                    { delay: 1800, pct: 35, step: 'Pulling Docker image' },
-                    { delay: 4500, pct: 50, step: 'Creating container' },
-                    { delay: 7000, pct: 65, step: 'Starting container process' },
-                    { delay: 10000, pct: 75, step: 'Waiting for server to come online' },
-                ];
-                beats.forEach(b => setTimeout(() => { p.setProgress(b.pct); p.addStep(b.step); }, b.delay));
-                let seenDockerStatus = '', attempts = 0;
+                let attempts = 0;
                 const poll = setInterval(() => {
                     attempts++;
                     fetch(`/server/${serverUUID}/status`).then(r => r.json()).then(data => {
-                        const ds = data.dockerStatus || data.status || '';
-                        if (ds && ds !== seenDockerStatus && ds !== 'unknown') { seenDockerStatus = ds; p.addStep(`Container status: ${ds}`); }
-                        if (data.starting) { p.setProgress(82, 'Server process starting up...'); }
-                        else if (data.online) {
+                        if (data.online) {
                             clearInterval(poll);
-                            p.setProgress(100, 'Server is online');
-                            p.addStep('Server is online', 'done');
-                            if (data.startedAt) { const ago = Math.round((Date.now() - new Date(data.startedAt)) / 1000); p.addStep(`Up for ${ago}s`, 'done'); }
-                            p.setIcon('done');
-                            showToast('Server started successfully', 'success');
+                            evtSocketM.close();
+                            setStatusText('Online', 'text-emerald-500');
+                            updateStatusChart('rgba(16,185,129,0.1)', 'rgba(16,185,129,0.2)');
+                            af.done('Server started');
+                            showToast('Server started', 'success');
                             restartWebSocket();
-                            setTimeout(() => p.close(), 3000);
                         } else if (attempts >= 28) {
                             clearInterval(poll);
-                            p.setProgress(100, 'Start sent — monitor console');
-                            p.setIcon('done');
+                            evtSocketM.close();
+                            af.done('Start sent');
                             showToast('Start command sent', 'success');
                             restartWebSocket();
-                            setTimeout(() => p.close(), 2000);
                         }
                     }).catch(() => {});
                 }, 2500);
             })
-            .catch(() => { p.setProgress(100); p.addStep('Failed to send start request', 'error'); p.setIcon('error'); showToast('Failed to start server', 'error'); });
+            .catch(() => { evtSocketM.close(); af.hide(); showToast('Failed to start server', 'error'); });
     });
     <% } else { %>
     startButton.addEventListener('click', () => {
@@ -543,99 +527,57 @@ connectWebSocket();
           confirmLabel: '<%= req.translations.restartServer || "Restart Server" %>',
           onConfirm: () => {
           const serverUUID = '<%= server.UUID %>';
-          const p = window.loadingPopupSystem;
-          p.open('Restarting Server', 'restart');
-          p.setProgress(5, 'Sending stop request...');
-          p.addStep('Restart initiated');
+          const af = window.actionFeedback;
+          af.show('Restarting server');
+          setStatusText('Restarting', 'text-amber-500');
+          updateStatusChart('rgba(245,158,11,0.1)', 'rgba(245,158,11,0.2)');
 
-          fetch(`/server/${serverUUID}/status`)
+          const evtSocketMR = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
+          const stagesMR = { stopping: 'Stopping container', stopped: 'Container stopped', pulling: 'Pulling image', creating: 'Creating container', starting: 'Starting container', started: 'Starting server' };
+
+          evtSocketMR.onmessage = (msg) => {
+              let parsed;
+              try { parsed = JSON.parse(msg.data); } catch { return; }
+              if (parsed.event !== 'lifecycle') return;
+              const { type, message } = parsed.data;
+              const label = stagesMR[type] || message;
+              af.show(label);
+              setStatusText(label, 'text-amber-500');
+              if (type === 'error') { af.hide(); showToast(message, 'error'); }
+          };
+
+          fetch(`/server/${serverUUID}/power/restart`, { method: 'POST' })
               .then(r => r.json())
-              .then(currentState => {
-                  const alreadyStopped = !currentState.online && !currentState.starting && !currentState.stopping;
-
-                  fetch(`/server/${serverUUID}/power/restart`, { method: 'POST' })
-                      .then(r => r.json())
-                      .then(() => {
-                          p.setProgress(10);
-                          p.addStep('Restart request accepted');
-
-                          let phase, seenDockerStatus = '', attempts = 0;
-                          const maxAttempts = 36;
-
-                          if (alreadyStopped) {
-                              phase = 'starting';
-                              p.setProgress(40);
-                              p.addStep('Server was already stopped');
-                              const startBeats = [
-                                  { delay: 400,  pct: 50, step: 'Pulling Docker image' },
-                                  { delay: 2500, pct: 62, step: 'Creating container' },
-                                  { delay: 5000, pct: 75, step: 'Starting container process' },
-                                  { delay: 8000, pct: 85, step: 'Waiting for server to come online' },
-                              ];
-                              startBeats.forEach(b => setTimeout(() => { p.setProgress(b.pct); p.addStep(b.step); }, b.delay));
-                          } else {
-                              phase = 'stopping';
-                              setTimeout(() => { p.setProgress(20); p.addStep('Sending stop command to container'); }, 600);
-                              setTimeout(() => { p.setProgress(30); p.addStep('Waiting for container to exit'); }, 2000);
-                          }
-
-                          const poll = setInterval(() => {
-                              attempts++;
-                              fetch(`/server/${serverUUID}/status`)
-                                  .then(r => r.json())
-                                  .then(data => {
-                                      const ds = data.dockerStatus || data.status || '';
-                                      if (ds && ds !== seenDockerStatus && ds !== 'unknown') {
-                                          seenDockerStatus = ds;
-                                          p.addStep(`Container status: ${ds}`);
-                                      }
-
-                                      if (phase === 'stopping' && !data.online && !data.starting && !data.stopping) {
-                                          phase = 'starting';
-                                          p.setProgress(48);
-                                          p.addStep('Container stopped', 'done');
-                                          const startBeats = [
-                                              { delay: 400,  pct: 55, step: 'Pulling Docker image' },
-                                              { delay: 2500, pct: 65, step: 'Creating new container' },
-                                              { delay: 5000, pct: 75, step: 'Starting container process' },
-                                              { delay: 8000, pct: 85, step: 'Waiting for server to come online' },
-                                          ];
-                                          startBeats.forEach(b => setTimeout(() => { p.setProgress(b.pct); p.addStep(b.step); }, b.delay));
-                                      } else if (phase === 'starting' && data.online) {
-                                          clearInterval(poll);
-                                          p.setProgress(100, 'Server is back online');
-                                          p.addStep('Server is online', 'done');
-                                          if (data.startedAt) {
-                                              const ago = Math.round((Date.now() - new Date(data.startedAt)) / 1000);
-                                              p.addStep(`Up for ${ago}s`, 'done');
-                                          }
-                                          p.setIcon('done');
-                                          showToast('Server restarted successfully', 'success');
-                                          restartWebSocket();
-                                          setTimeout(() => p.close(), 3000);
-                                      } else if (attempts >= maxAttempts) {
-                                          clearInterval(poll);
-                                          p.setProgress(100, 'Restart sent — monitor console');
-                                          p.setIcon('done');
-                                          showToast('Restart command sent', 'success');
-                                          restartWebSocket();
-                                          setTimeout(() => p.close(), 2000);
-                                      }
-                                  })
-                                  .catch(() => {});
-                          }, 2500);
-                      })
-                      .catch(() => {
-                          p.setProgress(100);
-                          p.addStep('Failed to restart server', 'error');
-                          p.setIcon('error');
-                          showToast('Failed to restart server', 'error');
-                      });
+              .then(() => {
+                  let attempts = 0;
+                  const maxAttempts = 36;
+                  const poll = setInterval(() => {
+                      attempts++;
+                      fetch(`/server/${serverUUID}/status`)
+                          .then(r => r.json())
+                          .then(data => {
+                              if (data.online) {
+                                  clearInterval(poll);
+                                  evtSocketMR.close();
+                                  setStatusText('Online', 'text-emerald-500');
+                                  updateStatusChart('rgba(16,185,129,0.1)', 'rgba(16,185,129,0.2)');
+                                  af.done('Server restarted');
+                                  showToast('Server restarted', 'success');
+                                  restartWebSocket();
+                              } else if (attempts >= maxAttempts) {
+                                  clearInterval(poll);
+                                  evtSocketMR.close();
+                                  af.done('Restart sent');
+                                  showToast('Restart command sent', 'success');
+                                  restartWebSocket();
+                              }
+                          })
+                          .catch(() => {});
+                  }, 2500);
               })
               .catch(() => {
-                  p.setProgress(100);
-                  p.addStep('Failed to check server state', 'error');
-                  p.setIcon('error');
+                  evtSocketMR.close();
+                  af.hide();
                   showToast('Failed to restart server', 'error');
               });
           }
@@ -658,67 +600,58 @@ connectWebSocket();
           danger: true,
           confirmLabel: '<%= req.translations.stopServer || "Stop Server" %>',
           onConfirm: () => {
-          const statusElement = document.getElementById('status');
-          statusElement.textContent = 'Stopping';
-          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-orange-500';
-          updateHeaderDot('stopping');
-          updateStatusChart('rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.2)');
-
           <% if (features.includes('players')) { %>
           const _pDecoStop = document.getElementById('players-deco');
           if (_pDecoStop) _pDecoStop.classList.add('translate-y-32');
           <% } %>
 
-          const p = window.loadingPopupSystem;
-          p.open('Stopping Server', 'stop');
-          p.setProgress(5, 'Sending stop command...');
-          p.addStep('Stop request dispatched');
+          const af = window.actionFeedback;
+          af.show('Stopping server');
+          setStatusText('Stopping', 'text-red-500');
+          updateStatusChart('rgba(239,68,68,0.1)', 'rgba(239,68,68,0.2)');
+
+          const evtSocketMS = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
+
+          evtSocketMS.onmessage = (msg) => {
+              let parsed;
+              try { parsed = JSON.parse(msg.data); } catch { return; }
+              if (parsed.event !== 'lifecycle') return;
+              const { type, message } = parsed.data;
+              if (type === 'stopping') { af.show('Stopping container'); setStatusText('Stopping', 'text-red-500'); }
+              if (type === 'stopped')  { af.show('Container stopped'); }
+              if (type === 'error')    { af.hide(); showToast(message, 'error'); }
+          };
 
           fetch(`/server/${serverUUID}/power/stop`, { method: 'POST' })
               .then(r => r.json())
               .then(() => {
-                  p.setProgress(20);
-                  p.addStep('Stop command accepted by panel');
-                  setTimeout(() => { p.setProgress(35); p.addStep('Sending stop signal to container'); }, 800);
-                  setTimeout(() => { p.setProgress(50); p.addStep('Waiting for process to exit'); }, 2500);
-                  let seenDockerStatus = '', attempts = 0;
+                  let attempts = 0;
                   const poll = setInterval(() => {
                       attempts++;
                       fetch(`/server/${serverUUID}/status`).then(r => r.json()).then(data => {
-                          const ds = data.dockerStatus || data.status || '';
-                          if (ds && ds !== seenDockerStatus && ds !== 'unknown' && ds !== 'running') { seenDockerStatus = ds; p.addStep(`Container status: ${ds}`); }
                           if (!data.online && !data.starting && !data.stopping) {
                               clearInterval(poll);
-                              p.setProgress(100, 'Server stopped');
-                              if (data.finishedAt) {
-                                  const ts = new Date(data.finishedAt).toLocaleTimeString();
-                                  p.addStep(`Container exited at ${ts}`, 'done');
-                              } else {
-                                  p.addStep('Container offline', 'done');
-                              }
-                              p.setIcon('done');
+                              evtSocketMS.close();
                               setAllStatsOffline();
+                              af.done('Server stopped');
                               showToast('Server stopped', 'success');
                               restartWebSocket();
-                              setTimeout(() => p.close(), 3000);
                           } else if (attempts >= 20) {
                               clearInterval(poll);
-                              p.setProgress(100, 'Stop sent — monitor console');
-                              p.setIcon('done');
+                              evtSocketMS.close();
+                              af.done('Stop sent');
                               showToast('Stop command sent', 'success');
                               restartWebSocket();
                               setAllStatsOffline();
-                              setTimeout(() => p.close(), 2000);
                           }
                       }).catch(() => {});
                   }, 2500);
               })
               .catch(() => {
-                  p.setProgress(100, 'Failed to stop server');
-                  p.setIcon('error');
-                  statusElement.textContent = 'Online';
-                  statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
-                  updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
+                  evtSocketMS.close();
+                  af.hide();
+                  setStatusText('Online', 'text-emerald-500');
+                  updateStatusChart('rgba(16,185,129,0.1)', 'rgba(16,185,129,0.2)');
                   showToast('Failed to stop server', 'error');
               });
           }
@@ -778,7 +711,7 @@ connectWebSocket();
         }
 
         if (statsWs && (statsWs.readyState === WebSocket.CONNECTING || statsWs.readyState === WebSocket.OPEN)) {
-            console.log("Stats WebSocket is already connecting or open. Skipping new connection.");
+
             return;
         }
 
@@ -788,7 +721,7 @@ connectWebSocket();
             try {
                 statsWs.close();
             } catch (e) {
-                console.error("Error closing stats socket:", e);
+
             }
         }
 
@@ -801,7 +734,7 @@ connectWebSocket();
                     if (stats.error) {
                         // Only log in development mode to reduce console spam
                         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                            console.error('Error fetching stats:', stats.error);
+
                         }
                         setAllStatsOffline();
                         return;
@@ -811,7 +744,7 @@ connectWebSocket();
                     if (stats.event === 'status' && stats.data && stats.data.running === false) {
                         // Only log in development mode
                         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                            console.log('Server is offline, updating all stats');
+
                         }
                         setAllStatsOffline();
                         return;
@@ -821,7 +754,7 @@ connectWebSocket();
                     if (stats.data && stats.data.memory && stats.data.memory.percentage === "NaN") {
                         // Only log in development mode
                         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                            console.log('Server appears to be offline (NaN memory usage), updating all stats');
+
                         }
                         setAllStatsOffline();
                         return;
@@ -833,13 +766,13 @@ connectWebSocket();
                     updateDiskUsage(stats);
                     updateStatus(stats);
                 } else {
-                    console.log('Received non-JSON data:', event.data);
+
                     setAllStatsOffline();
                 }
             };
 
             statsWs.onopen = () => {
-                console.log('WebSocket Stats connection established');
+
                 isStatsReconnecting = false;
                 statsReconnectAttempts = 0;
                 statsReconnectInterval = 2000;
@@ -847,13 +780,12 @@ connectWebSocket();
             };
 
             statsWs.onerror = (error) => {
-                console.error('Stats WebSocket Error:', error);
+
                 // Set all stats to offline on WebSocket error
                 setAllStatsOffline();
             };
 
             statsWs.onclose = (event) => {
-                console.log(`WebSocket Stats connection closed (${event.code}). Reconnecting...`);
 
                 // Set all stats to offline when connection is lost
                 setAllStatsOffline();
@@ -868,7 +800,7 @@ connectWebSocket();
                 }
             };
         } catch (error) {
-            console.error('Error creating Stats WebSocket:', error);
+
             scheduleStatsReconnect();
         }
     }
@@ -878,15 +810,13 @@ connectWebSocket();
         statsReconnectAttempts++;
         const backoffTime = Math.min(30000, statsReconnectInterval * Math.pow(1.5, statsReconnectAttempts - 1));
 
-        console.log(`Scheduling stats reconnect attempt ${statsReconnectAttempts} in ${backoffTime}ms`);
-
         if (statsReconnectAttempts <= maxStatsReconnectAttempts) {
             statsReconnectTimer = setTimeout(() => {
-                console.log(`Attempting stats reconnect ${statsReconnectAttempts} of ${maxStatsReconnectAttempts}`);
+
                 initStatsWebSocket();
             }, backoffTime);
         } else {
-            console.log('Maximum stats reconnect attempts reached. Please refresh the page.');
+
         }
     }
 
@@ -1072,6 +1002,13 @@ connectWebSocket();
         chart.update();
     }
 
+    function setStatusText(text, colorClass) {
+        const el = document.getElementById('status');
+        if (!el) return;
+        el.textContent = text;
+        el.className = 'mt-1 text-lg font-medium tracking-tight ' + colorClass;
+    }
+
     function updateStatusChart(backgroundColor, borderColor) {
         statusChart.data.datasets[0].backgroundColor = backgroundColor;
         statusChart.data.datasets[0].borderColor = borderColor;
@@ -1132,20 +1069,40 @@ connectWebSocket();
 
     initStatsWebSocket();
 
+    // Lifecycle event stream — drives the status card with real daemon states
+    (function () {
+        const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+        const lcSock = new WebSocket(`${proto}://${location.host}/events/<%= server.UUID %>`);
+        const stateMap = {
+            pulling:  { label: 'Pulling image',     color: 'text-blue-500' },
+            creating: { label: 'Creating container', color: 'text-blue-500' },
+            starting: { label: 'Starting container', color: 'text-yellow-500' },
+            started:  { label: 'Starting server',    color: 'text-yellow-500' },
+            stopping: { label: 'Stopping',           color: 'text-orange-500' },
+            stopped:  { label: 'Offline',            color: 'text-red-500' },
+            killed:   { label: 'Offline',            color: 'text-red-500' },
+        };
+        lcSock.onmessage = (msg) => {
+            let parsed;
+            try { parsed = JSON.parse(msg.data); } catch { return; }
+            if (parsed.event !== 'lifecycle') return;
+            const state = stateMap[parsed.data.type];
+            if (state) setStatusText(state.label, state.color);
+        };
+    })();
+
     // Create a global WebSocket for server status that can be shared
     // This will be used by both the page and the server header component
     if (!window.serverStatusWebSocket) {
       window.serverStatusWebSocket = new WebSocket(`${protocol}//${host}/ws/server/<%= server.UUID %>/status`);
 
       window.serverStatusWebSocket.onopen = function() {
-        console.log('Global server status WebSocket connection established');
 
         // Dispatch a custom event that other components can listen for
         window.dispatchEvent(new CustomEvent('serverStatusWebSocketOpen'));
       };
 
       window.serverStatusWebSocket.onclose = function() {
-        console.log('Global server status WebSocket connection closed');
 
         // Dispatch a custom event that other components can listen for
         window.dispatchEvent(new CustomEvent('serverStatusWebSocketClose'));
@@ -1155,7 +1112,7 @@ connectWebSocket();
       };
 
       window.serverStatusWebSocket.onerror = function(error) {
-        console.error('Global server status WebSocket error:', error);
+
         // No need to show daemon down message as it's been removed
 
         // Dispatch a custom event that other components can listen for
@@ -1167,7 +1124,6 @@ connectWebSocket();
     window.serverStatusWebSocket.addEventListener('message', function(event) {
       try {
         const data = JSON.parse(event.data);
-        console.log('Server status update received (manage page):', data);
 
         // Extract the actual status data, handling different message formats
         let statusData = data;
@@ -1179,7 +1135,6 @@ connectWebSocket();
         if (statusData.starting === true ||
             statusData.status === 'starting' ||
             data.status === 'starting') {
-          console.log('Server is starting, updating status');
 
           // Update status display
           const statusElement = document.getElementById('status');
@@ -1201,7 +1156,6 @@ connectWebSocket();
         else if (statusData.stopping === true ||
                 statusData.status === 'stopping' ||
                 data.status === 'stopping') {
-          console.log('Server is stopping, updating status');
 
           // Update status display
           const statusElement = document.getElementById('status');
@@ -1223,14 +1177,13 @@ connectWebSocket();
         else if (statusData.running === false ||
                 statusData.status === 'offline' ||
                 data.status === 'offline') {
-          console.log('Server is offline, updating all stats');
+
           setAllStatsOffline();
         }
         // Check for online status
         else if (statusData.running === true ||
                 statusData.status === 'online' ||
                 data.status === 'online') {
-          console.log('Server is online, updating status');
 
           // Update status display
           const statusElement = document.getElementById('status');
@@ -1246,13 +1199,12 @@ connectWebSocket();
           <% } %>
         }
       } catch (error) {
-        console.error('Error processing server status message:', error);
+
       }
     });
 
     // Listen for server start events
     document.getElementById('startButton').addEventListener('click', function() {
-      console.log('Start button clicked, setting up status polling');
 
       // Update status immediately to "Starting"
       const statusElement = document.getElementById('status');
@@ -1264,7 +1216,6 @@ connectWebSocket();
 
       // Set up initial status check after 5 seconds
       setTimeout(function() {
-        console.log('Performing initial server status check after start button click');
 
         // Create a variable to track if we've found the server online
         let serverFoundOnline = false;
@@ -1274,7 +1225,6 @@ connectWebSocket();
           // Skip if we've already found the server online
           if (serverFoundOnline) return;
 
-          console.log('Checking server status (5-second interval)');
           fetch(`/server/<%= server.UUID %>/status`, {
             method: 'GET',
             headers: {
@@ -1283,10 +1233,9 @@ connectWebSocket();
           })
           .then(response => response.json())
           .then(data => {
-            console.log('Server startup status check:', data);
 
             if (data.online) {
-              console.log('Server is now online, updating display');
+
               serverFoundOnline = true;
               clearInterval(startupPoll);
 
@@ -1321,7 +1270,7 @@ connectWebSocket();
             }
           })
           .catch(error => {
-            console.error('Error checking server status during startup:', error);
+
           });
         }, 5000); // Check every 5 seconds
 
@@ -1334,7 +1283,6 @@ connectWebSocket();
         })
         .then(response => response.json())
         .then(data => {
-          console.log('Initial server status check:', data);
 
           if (data.online) {
             serverFoundOnline = true;
@@ -1352,13 +1300,13 @@ connectWebSocket();
           }
         })
         .catch(error => {
-          console.error('Error checking initial server status:', error);
+
         });
       }, 5000); // Wait 5 seconds before first check
 
       // Stop polling after 60 seconds to avoid resource waste
       setTimeout(function() {
-        console.log('Stopping startup polling after 60 seconds');
+
         if (typeof startupPoll !== 'undefined') {
           clearInterval(startupPoll);
         }
@@ -1409,11 +1357,9 @@ connectWebSocket();
       })
       .then(response => response.json())
       .then(data => {
-        console.log('Server status check:', data);
 
         // Handle starting state
         if (data.starting) {
-          console.log('Server is starting (from status check), updating status');
 
           // Update status display
           const statusElement = document.getElementById('status');
@@ -1433,7 +1379,6 @@ connectWebSocket();
         }
         // Handle stopping state
         else if (data.stopping) {
-          console.log('Server is stopping (from status check), updating status');
 
           // Update status display
           const statusElement = document.getElementById('status');
@@ -1453,7 +1398,6 @@ connectWebSocket();
         }
         // Handle online state
         else if (data.online) {
-          console.log('Server is online (from status check), updating status');
 
           // Update status display
           const statusElement = document.getElementById('status');
@@ -1498,7 +1442,7 @@ connectWebSocket();
         }
         // Handle offline state
         else if (data.status === 'offline' || !data.online) {
-          console.log('Server is offline (from status check), updating all stats');
+
           setAllStatsOffline();
 
           // Clear any uptime interval
@@ -1510,7 +1454,7 @@ connectWebSocket();
         }
       })
       .catch(error => {
-        console.error('Error checking server status:', error);
+
       });
     }, 5000); // Check every 5 seconds
 </script>

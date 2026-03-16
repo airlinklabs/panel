@@ -98,4 +98,34 @@
     setTimeout(init, 60);
   });
 
+  // Public API for addon views that don't set dontfuckinganimateme.
+  // Call window.airlinkAnimate(el) on any element to run the standard
+  // entrance animation: fade in + slight upward slide.
+  window.airlinkAnimate = function (el, options) {
+    if (!el || el.nodeType !== 1) return;
+    var duration = (options && options.duration) || 260;
+    var delay    = (options && options.delay)    || 0;
+    el.animate(
+      [
+        { opacity: 0, transform: 'translateY(8px)' },
+        { opacity: 1, transform: 'translateY(0)' }
+      ],
+      { duration: duration, delay: delay, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', fill: 'backwards' }
+    );
+  };
+
+  // Animate all direct children of a container element.
+  // Each child staggers by 40ms so they cascade rather than all pop at once.
+  window.airlinkAnimateChildren = function (container, options) {
+    if (!container || container.nodeType !== 1) return;
+    var baseDelay = (options && options.baseDelay) || 0;
+    var stagger   = (options && options.stagger)   || 40;
+    Array.from(container.children).forEach(function (child, i) {
+      window.airlinkAnimate(child, {
+        duration: (options && options.duration) || 260,
+        delay: baseDelay + i * stagger,
+      });
+    });
+  };
+
 })();

@@ -8,6 +8,7 @@ import logger from '../../handlers/logger';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import validator from 'validator';
 
 const avatarStorage = multer.diskStorage({
   destination: (req, _file, cb) => {
@@ -117,8 +118,9 @@ const accountModule: Module = {
           return;
         }
 
-        if (description.length > 255) {
-          res.status(400).send('Description must be less than 255 characters.');
+        const cleanDesc = validator.trim(String(description).slice(0, 255));
+        if (cleanDesc.length === 0) {
+          res.status(400).send('Description cannot be empty.');
           return;
         }
 
@@ -156,6 +158,13 @@ const accountModule: Module = {
 
         if (!newUsername) {
           res.status(400).send('New username parameters are required.');
+          return;
+        }
+
+        const cleanUsername = validator.trim(String(newUsername));
+        if (!validator.isAlphanumeric(cleanUsername, 'en-US', { ignore: '_-' }) ||
+            !validator.isLength(cleanUsername, { min: 3, max: 32 })) {
+          res.status(400).send('Username must be 3–32 characters and contain only letters, numbers, underscores, or hyphens.');
           return;
         }
 
@@ -318,6 +327,12 @@ const accountModule: Module = {
 
         if (!email) {
           res.status(400).json({ message: 'Email is required.' });
+          return;
+        }
+
+        const cleanEmail = validator.trim(String(email)).toLowerCase();
+        if (!validator.isEmail(cleanEmail)) {
+          res.status(400).json({ message: 'Invalid email address.' });
           return;
         }
 

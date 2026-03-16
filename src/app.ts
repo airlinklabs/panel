@@ -27,6 +27,7 @@ import {
   uiComponentStore,
 } from './handlers/uiComponentHandler';
 import { startPlayerStatsCollection } from './handlers/playerStatsCollector';
+import prisma from './db';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
@@ -133,10 +134,54 @@ app.use(
   }),
 );
 app.use(hpp());
+
+// IP ban middleware — checked before rate limiting
+app.use(async (req, res, next) => {
+  try {
+    const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+    if (!settings) return next();
+
+    let banned: string[] = [];
+    try {
+      banned = JSON.parse(settings.bannedIps || '[]');
+    } catch {
+      banned = [];
+    }
+
+    const clientIp = req.ip || req.socket.remoteAddress || '';
+    if (banned.includes(clientIp)) {
+      res.status(403).json({ error: 'Access denied' });
+      return;
+    }
+  } catch {
+    // DB not ready yet — allow through
+  }
+  next();
+});
+
+// Dynamic rate limiter — window and max read from DB on each request
 app.use(
   rateLimit({
-    windowMs: 1 * 60 * 1000,
-    max: 100,
+    windowMs: 60 * 1000,
+    max: async () => {
+      try {
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        if (!settings || !settings.rateLimitEnabled) return 0; // 0 = disabled in express-rate-limit
+        return settings.rateLimitRpm;
+      } catch {
+        return 100;
+      }
+    },
+    skip: async (req) => {
+      try {
+        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        return !settings?.rateLimitEnabled;
+      } catch {
+        return false;
+      }
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
   }),
 );
 

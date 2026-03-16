@@ -124,6 +124,23 @@ const wsServerConsoleModule: Module = {
       },
     );
 
+    router.ws(
+      '/events/:id',
+      isAuthenticatedForServerWS('id'),
+      async (ws: WebSocket, req: Request) => {
+        const userId = req.session?.user?.id;
+        if (!userId) {
+          ws.send(JSON.stringify({ error: 'User not authenticated' }));
+          ws.close();
+          return;
+        }
+        await proxyConsole(
+          ws, req, userId,
+          (addr, port, id) => `ws://${addr}:${port}/containerevents/${id}`,
+        );
+      },
+    );
+
     return router;
   },
 };

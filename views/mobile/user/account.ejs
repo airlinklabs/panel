@@ -1,21 +1,24 @@
 <%- include('../components/header', { title: req.translations.userAccountTitle || 'Account' }) %>
 
-<div id="toast-container" class="fixed top-16 right-4 z-50 flex flex-col gap-2"></div>
-
 <main id="page-content" class="">
   <%- include('../components/template') %>
+  <%- include('../components/toast') %>
 
-  <div class="px-4 py-4 space-y-4">
-    <div class="mb-4">
-      <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.userAccountTitle %></h1>
-      <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.userAccountText %></p>
+  <div class="px-4 py-5 space-y-4">
+
+    <div class="mb-2">
+      <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.userAccountTitle || 'Account' %></h1>
+      <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.userAccountText || 'Manage your profile and preferences.' %></p>
     </div>
 
-    <!-- Profile Picture -->
-    <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
-      <h2 class="text-sm font-medium text-neutral-800 dark:text-white mb-4">Profile Picture</h2>
+    <!-- Profile picture -->
+    <div class="rounded-2xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3">Profile picture</p>
       <div class="flex items-center gap-4">
-        <img id="avatar-preview" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="Avatar" class="h-16 w-16 rounded-xl border border-neutral-200 dark:border-neutral-700/30 object-cover shrink-0">
+        <img id="avatar-preview"
+          src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>"
+          alt="Avatar"
+          class="h-14 w-14 rounded-xl border border-neutral-200 dark:border-white/10 object-cover shrink-0">
         <div class="flex flex-col gap-2">
           <label for="avatar-input" class="cursor-pointer inline-block rounded-xl bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-neutral-600/30 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 transition active:scale-95">
             Choose image
@@ -29,446 +32,331 @@
       </div>
     </div>
 
-    <!-- Account settings -->
-    <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
-      <h2 class="text-sm font-medium text-neutral-800 dark:text-white mb-4"><%= req.translations.updateAccount %></h2>
+    <!-- Account details -->
+    <div class="rounded-2xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-4"><%= req.translations.updateAccount || 'Account details' %></p>
 
       <form id="change-username-form" action="/change-username" method="POST" class="mb-4">
         <%- include('../components/csrf') %>
-        <label class="block text-neutral-600 dark:text-neutral-400 text-xs font-medium mb-1.5"><%= req.translations.username %></label>
+        <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.username || 'Username' %></label>
         <div class="flex gap-2">
-          <input id="username" type="text" name="username"
-            class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-500 dark:placeholder-neutral-400 text-neutral-800 dark:text-white"
-            placeholder="<%= user.username %>" />
+          <input id="username" type="text" name="username" placeholder="<%= user.username %>"
+            class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white transition">
           <button type="submit" id="change-username-btn" disabled
-            class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
-            <%= req.translations.update %>
+            class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2.5 text-sm font-medium shrink-0 disabled:opacity-40 disabled:cursor-not-allowed transition">
+            <%= req.translations.update || 'Update' %>
           </button>
         </div>
-        <span id="username-feedback" class="mt-1.5 text-neutral-400 text-xs inline-block"><%= req.translations.checking %></span>
+        <span id="username-feedback" class="mt-1.5 text-xs text-neutral-400 inline-block"><%= req.translations.checking || 'Checking...' %></span>
       </form>
 
       <form id="change-email-form" class="mb-4">
         <%- include('../components/csrf') %>
-        <label class="block text-neutral-600 dark:text-neutral-400 text-xs font-medium mb-1.5"><%= req.translations.email %></label>
+        <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.email || 'Email' %></label>
         <div class="flex gap-2">
-          <input id="email" type="email" name="email"
-            class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-500 dark:placeholder-neutral-400 text-neutral-800 dark:text-white"
-            placeholder="<%= user.email %>" />
+          <input id="email" type="email" name="email" placeholder="<%= user.email %>"
+            class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white transition">
           <button type="submit"
-            class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium shrink-0">
-            <%= req.translations.update %>
+            class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2.5 text-sm font-medium shrink-0 transition">
+            <%= req.translations.update || 'Update' %>
           </button>
         </div>
       </form>
 
       <form id="change-description-form" class="p-3 rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5 mb-4">
         <%- include('../components/csrf') %>
-        <label class="block text-neutral-600 dark:text-neutral-400 text-xs font-medium mb-1.5"><%= req.translations.description %></label>
-        <textarea id="description" name="description"
-          class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-500 dark:placeholder-neutral-400 text-neutral-800 dark:text-white min-h-[70px]"
+        <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.description || 'Description' %></label>
+        <textarea id="description" name="description" rows="3"
+          class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white resize-none transition"
           placeholder="<%= user.description %>"><%= user.description %></textarea>
-        <button type="submit" class="mt-2 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium">
-          <%= req.translations.updateDescription %>
+        <button type="submit" class="mt-2 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium transition">
+          <%= req.translations.updateDescription || 'Update' %>
         </button>
       </form>
 
       <form id="change-password-form" class="p-3 rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5">
         <%- include('../components/csrf') %>
-        <h3 class="text-xs font-medium text-neutral-800 dark:text-white mb-3"><%= req.translations.changePassword || 'Change Password' %></h3>
-        <div id="current-password-feedback" class="text-neutral-400 text-xs mb-2"><%= req.translations.checking %></div>
-        <input id="currentPassword" type="password" name="currentPassword"
-          class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2 bg-neutral-100 dark:bg-neutral-700/20 text-neutral-800 dark:text-white mb-3"
-          placeholder="<%= req.translations.currentPasswordHide %>" />
-        <input id="newPassword" type="password" name="newPassword"
-          class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2 bg-neutral-100 dark:bg-neutral-700/20 text-neutral-800 dark:text-white mb-3"
-          placeholder="<%= req.translations.newPasswordHide %>" disabled />
-        <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium">
-          <%= req.translations.update_password %>
+        <p class="text-xs font-medium text-neutral-800 dark:text-white mb-3"><%= req.translations.changePassword || 'Change password' %></p>
+        <div id="current-password-feedback" class="text-xs text-neutral-400 mb-1.5"><%= req.translations.checking || 'Checking...' %></div>
+        <input id="currentPassword" type="password" name="currentPassword" placeholder="Current password"
+          class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white mb-3 transition">
+        <input id="newPassword" type="password" name="newPassword" placeholder="New password" disabled
+          class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white mb-3 disabled:opacity-40 transition">
+        <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium transition">
+          <%= req.translations.update_password || 'Update password' %>
         </button>
       </form>
     </div>
 
     <!-- Language -->
-    <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
-      <h2 class="text-sm font-medium text-neutral-800 dark:text-white mb-4"><%= req.translations.languagePreference || 'Language' %></h2>
-      <form id="language-preference-form" class="p-3 rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5">
+    <div class="rounded-2xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3"><%= req.translations.languagePreference || 'Language' %></p>
+      <form id="language-preference-form">
         <%- include('../components/csrf') %>
         <select id="language" name="language"
-          class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2 bg-neutral-100 dark:bg-neutral-700/20 text-neutral-800 dark:text-white mb-3">
-          <option class="text-black" value="en" <%= req.lang === 'en' ? 'selected' : '' %>>English</option>
-          <option class="text-black" value="fr" <%= req.lang === 'fr' ? 'selected' : '' %>>Français</option>
-          <option class="text-black" value="de" <%= req.lang === 'de' ? 'selected' : '' %>>Deutsch</option>
-          <option class="text-black" value="es" <%= req.lang === 'es' ? 'selected' : '' %>>Español</option>
-          <option class="text-black" value="pt" <%= req.lang === 'pt' ? 'selected' : '' %>>Português</option>
-          <option class="text-black" value="it" <%= req.lang === 'it' ? 'selected' : '' %>>Italiano</option>
-          <option class="text-black" value="ru" <%= req.lang === 'ru' ? 'selected' : '' %>>Русский</option>
-          <option class="text-black" value="zh" <%= req.lang === 'zh' ? 'selected' : '' %>>中文</option>
-          <option class="text-black" value="ja" <%= req.lang === 'ja' ? 'selected' : '' %>>日本語</option>
-          <option class="text-black" value="ta" <%= req.lang === 'ta' ? 'selected' : '' %>>தமிழ்</option>
+          class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-700/20 text-neutral-800 dark:text-white mb-3 transition">
+          <option value="en"  <%= req.lang === 'en'  ? 'selected' : '' %>>English</option>
+          <option value="fr"  <%= req.lang === 'fr'  ? 'selected' : '' %>>Français</option>
+          <option value="de"  <%= req.lang === 'de'  ? 'selected' : '' %>>Deutsch</option>
+          <option value="es"  <%= req.lang === 'es'  ? 'selected' : '' %>>Español</option>
+          <option value="pt"  <%= req.lang === 'pt'  ? 'selected' : '' %>>Português</option>
+          <option value="it"  <%= req.lang === 'it'  ? 'selected' : '' %>>Italiano</option>
+          <option value="ru"  <%= req.lang === 'ru'  ? 'selected' : '' %>>Русский</option>
+          <option value="zh"  <%= req.lang === 'zh'  ? 'selected' : '' %>>中文</option>
+          <option value="ja"  <%= req.lang === 'ja'  ? 'selected' : '' %>>日本語</option>
+          <option value="ta"  <%= req.lang === 'ta'  ? 'selected' : '' %>>தமிழ்</option>
         </select>
-        <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium">
+        <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium transition">
           <%= req.translations.saveLanguagePreference || 'Save' %>
         </button>
       </form>
     </div>
 
     <!-- Login history -->
-    <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
-      <h2 class="text-sm font-medium text-neutral-800 dark:text-white mb-4"><%= req.translations.loginHistory || 'Login History' %></h2>
+    <div class="rounded-2xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3"><%= req.translations.loginHistory || 'Login history' %></p>
       <div class="space-y-2">
         <% if (loginHistory && loginHistory.length > 0) { %>
           <% loginHistory.forEach(login => { %>
-            <div class="p-3 rounded-lg bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5">
-              <p class="text-xs font-medium text-neutral-800 dark:text-white"><%= new Date(login.timestamp).toLocaleString() %></p>
-              <p class="text-xs text-neutral-500 mt-0.5"><%= login.ipAddress || 'Unknown' %></p>
-              <p class="text-xs text-neutral-500 mt-0.5 truncate"><%= login.userAgent || 'Unknown' %></p>
-            </div>
-          <% }); %>
+          <div class="rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5 px-3 py-2.5">
+            <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300"><%= new Date(login.timestamp).toLocaleString() %></p>
+            <p class="text-[11px] text-neutral-500 font-mono mt-0.5"><%= login.ipAddress || 'Unknown IP' %></p>
+            <p class="text-[11px] text-neutral-400 truncate mt-0.5"><%= login.userAgent || 'Unknown device' %></p>
+          </div>
+          <% }) %>
         <% } else { %>
-          <p class="text-xs text-neutral-400"><%= req.translations.noLoginHistory || 'No login history' %></p>
+        <p class="text-sm text-neutral-400 text-center py-4"><%= req.translations.noLoginHistory || 'No login history available' %></p>
         <% } %>
       </div>
     </div>
-  </div>
 
   </div>
 </main>
 
-<%- include('../components/toast') %>
-
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const { showToast } = createToastSystem();
-    let isSubmitting = false;
+document.addEventListener('DOMContentLoaded', () => {
+  const { showToast } = createToastSystem();
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+  let submitting = false;
 
-    const getCSRF = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+  async function post(url, data) {
+    if (submitting) return { ok: false, text: 'Please wait' };
+    submitting = true;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+        body: JSON.stringify(data),
+      });
+      return { ok: res.ok, text: await res.text() };
+    } finally { submitting = false; }
+  }
 
-    const submitForm = async (endpoint, data, successMessage, redirectUrl = null) => {
-      if (isSubmitting) return;
-      isSubmitting = true;
+  document.getElementById('change-username-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const input = e.target.querySelector('#username');
+    const { ok, text } = await post('/update-username', { newUsername: input.value.trim() });
+    if (ok) { showToast('Username updated', 'success'); input.placeholder = input.value.trim(); } else showToast(text);
+  });
+
+  document.getElementById('change-email-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const { ok, text } = await post('/change-email', { email: e.target.querySelector('#email').value.trim() });
+    if (ok) showToast('Email updated', 'success'); else showToast(text);
+  });
+
+  document.getElementById('change-description-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const el = e.target.querySelector('#description');
+    const { ok, text } = await post('/update-description', { description: el.value.trim() });
+    if (ok) { showToast('Description updated', 'success'); el.placeholder = el.value.trim(); } else showToast(text);
+  });
+
+  document.getElementById('change-password-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const { ok, text } = await post('/change-password', {
+      currentPassword: e.target.querySelector('#currentPassword').value,
+      newPassword:     e.target.querySelector('#newPassword').value,
+    });
+    if (ok) { showToast('Password updated', 'success'); setTimeout(() => location.href = '/login?err=UpdatedCredentials', 1500); } else showToast(text);
+  });
+
+  const uInput = document.getElementById('username');
+  const uBtn   = document.getElementById('change-username-btn');
+  const uFb    = document.getElementById('username-feedback');
+  let uTimer;
+  uInput?.addEventListener('input', () => {
+    clearTimeout(uTimer);
+    uTimer = setTimeout(async () => {
+      const val = uInput.value.trim();
+      if (!val) { uFb.textContent = ''; uBtn.disabled = true; return; }
       try {
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'CSRF-Token': getCSRF() },
-          body: JSON.stringify(data)
-        });
-        const responseBody = await response.text();
-        if (response.ok) {
-          showToast(successMessage, 'success');
-          if (redirectUrl) setTimeout(() => window.location.href = redirectUrl, 1500);
-        } else {
-          showToast(responseBody);
-        }
-      } catch (error) {
-        showToast(`Error: ${error.message}`);
-      } finally {
-        isSubmitting = false;
+        const { exists } = await (await fetch(`/check-username?username=${encodeURIComponent(val)}`)).json();
+        uFb.textContent = exists ? '<%= req.translations.usernameTaken || "Taken" %>' : '<%= req.translations.usernameIsNotTaken || "Available" %>';
+        uBtn.disabled = exists;
+      } catch { uBtn.disabled = true; }
+    }, 500);
+  });
+
+  const cpInput = document.getElementById('currentPassword');
+  const npInput = document.getElementById('newPassword');
+  const cpFb    = document.getElementById('current-password-feedback');
+  let cpTimer;
+  cpInput?.addEventListener('input', () => {
+    clearTimeout(cpTimer);
+    const val = cpInput.value.trim();
+    if (!val) { cpFb.textContent = ''; npInput.disabled = true; npInput.value = ''; return; }
+    cpTimer = setTimeout(async () => {
+      try {
+        const res = await fetch('/validate-password', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken }, body: JSON.stringify({ currentPassword: val }) });
+        const { valid } = await res.json();
+        cpFb.textContent = valid ? '<%= req.translations.correctPassword || "Correct" %>' : '<%= req.translations.incorrectPassword || "Incorrect" %>';
+        npInput.disabled = !valid;
+      } catch { cpFb.textContent = 'Could not validate'; npInput.disabled = true; }
+    }, 500);
+  });
+
+  document.getElementById('language-preference-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const lang = e.target.querySelector('#language').value;
+    const res = await fetch('/set-language', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken }, body: JSON.stringify({ language: lang }) });
+    if (res.ok) { showToast('Language saved', 'success'); setTimeout(() => location.reload(), 1400); } else showToast('Failed', 'error');
+  });
+
+  const avatarInput   = document.getElementById('avatar-input');
+  const avatarPreview = document.getElementById('avatar-preview');
+
+  avatarInput?.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { showToast('Image must be under 2 MB', 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = evt => openCropPopup(evt.target.result, csrfToken);
+    reader.readAsDataURL(file);
+    avatarInput.value = '';
+  });
+
+  document.getElementById('remove-avatar-btn')?.addEventListener('click', async () => {
+    const res = await fetch('/remove-avatar', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken } });
+    if (res.ok) { avatarPreview.src = 'https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(user.username) %>'; showToast('Removed', 'success'); setTimeout(() => location.reload(), 1200); }
+    else showToast('Failed', 'error');
+  });
+
+  function openCropPopup(dataUrl, csrf) {
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 z-[9999] bg-black/70 flex items-end justify-center p-0';
+    overlay.innerHTML = `
+      <div class="bg-white dark:bg-neutral-900 rounded-t-2xl w-full overflow-hidden" style="max-height:90vh">
+        <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-neutral-100 dark:border-white/5">
+          <p class="text-sm font-semibold text-neutral-800 dark:text-white">Position photo</p>
+          <button id="crop-cancel" class="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="relative bg-neutral-950 select-none overflow-hidden" style="height:280px" id="crop-stage">
+          <img id="crop-img" src="${dataUrl}" draggable="false" style="position:absolute;top:0;left:0;user-select:none;max-width:none;touch-action:none"/>
+          <div id="crop-box" style="position:absolute;border:2px solid white;box-shadow:0 0 0 9999px rgba(0,0,0,0.55);cursor:move;box-sizing:border-box;touch-action:none">
+            <div class="crop-handle" data-dir="nw" style="position:absolute;top:-6px;left:-6px;width:12px;height:12px;background:white;border-radius:50%"></div>
+            <div class="crop-handle" data-dir="ne" style="position:absolute;top:-6px;right:-6px;width:12px;height:12px;background:white;border-radius:50%"></div>
+            <div class="crop-handle" data-dir="sw" style="position:absolute;bottom:-6px;left:-6px;width:12px;height:12px;background:white;border-radius:50%"></div>
+            <div class="crop-handle" data-dir="se" style="position:absolute;bottom:-6px;right:-6px;width:12px;height:12px;background:white;border-radius:50%"></div>
+          </div>
+        </div>
+        <div class="flex gap-3 px-4 py-4">
+          <button id="crop-cancel-btn" class="flex-1 rounded-xl border border-neutral-200 dark:border-white/5 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-300 transition">Cancel</button>
+          <button id="crop-save" class="flex-1 rounded-xl bg-neutral-950 dark:bg-white py-2.5 text-sm font-medium text-white dark:text-neutral-900 transition">Save photo</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    const stage = document.getElementById('crop-stage');
+    const img   = document.getElementById('crop-img');
+    const box   = document.getElementById('crop-box');
+    const stageW = stage.offsetWidth, stageH = stage.offsetHeight;
+
+    img.onload = () => {
+      const scale = Math.min(stageW / img.naturalWidth, stageH / img.naturalHeight);
+      const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
+      img.style.width = dw + 'px'; img.style.height = dh + 'px';
+      img.style.left = ((stageW - dw) / 2) + 'px'; img.style.top = ((stageH - dh) / 2) + 'px';
+      img._scale = scale; img._offX = (stageW - dw) / 2; img._offY = (stageH - dh) / 2;
+      const bs = Math.min(dw, dh, 180);
+      box.style.width = bs + 'px'; box.style.height = bs + 'px';
+      box.style.left = ((stageW - bs) / 2) + 'px'; box.style.top = ((stageH - bs) / 2) + 'px';
+    };
+    if (img.complete) img.onload();
+
+    let action = null, sx, sy, sb;
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const getXY = e => e.touches ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY };
+
+    const startDrag = (dir, e) => {
+      e.preventDefault();
+      action = dir;
+      const { x, y } = getXY(e);
+      sx = x; sy = y;
+      sb = { l: parseInt(box.style.left), t: parseInt(box.style.top), w: box.offsetWidth, h: box.offsetHeight };
+    };
+
+    box.addEventListener('mousedown',  e => { if (!e.target.classList.contains('crop-handle')) startDrag('move', e); });
+    box.addEventListener('touchstart', e => { if (!e.target.classList.contains('crop-handle')) startDrag('move', e); }, { passive: false });
+    box.querySelectorAll('.crop-handle').forEach(h => {
+      h.addEventListener('mousedown',  e => { e.stopPropagation(); startDrag(h.dataset.dir, e); });
+      h.addEventListener('touchstart', e => { e.stopPropagation(); startDrag(h.dataset.dir, e); }, { passive: false });
+    });
+
+    const onUp = () => action = null;
+    const onMove = e => {
+      if (!action) return;
+      const { x, y } = getXY(e);
+      const dx = x - sx, dy = y - sy, min = 50;
+      if (action === 'move') {
+        box.style.left = clamp(sb.l + dx, 0, stageW - sb.w) + 'px';
+        box.style.top  = clamp(sb.t + dy, 0, stageH - sb.h) + 'px';
+      } else {
+        let l = sb.l, t = sb.t, w = sb.w, h = sb.h;
+        if (action.includes('e')) w = Math.max(min, sb.w + dx);
+        if (action.includes('s')) h = Math.max(min, sb.h + dy);
+        if (action.includes('w')) { const nw = Math.max(min, sb.w - dx); l = sb.l + (sb.w - nw); w = nw; }
+        if (action.includes('n')) { const nh = Math.max(min, sb.h - dy); t = sb.t + (sb.h - nh); h = nh; }
+        l = clamp(l, 0, stageW - min); t = clamp(t, 0, stageH - min);
+        box.style.left = l + 'px'; box.style.top = t + 'px';
+        box.style.width = Math.min(w, stageW - l) + 'px'; box.style.height = Math.min(h, stageH - t) + 'px';
       }
     };
 
-    document.getElementById('change-username-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const usernameInput = e.target.querySelector('#username');
-      await submitForm('/update-username', { newUsername: usernameInput.value.trim() }, 'Username updated!');
-      usernameInput.placeholder = usernameInput.value.trim();
-    });
+    document.addEventListener('mousemove', onMove); document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchmove', onMove, { passive: false }); document.addEventListener('touchend', onUp);
 
-    document.getElementById('change-email-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = e.target.querySelector('#email').value.trim();
-      await submitForm('/change-email', { email }, 'Email updated!');
-    });
+    const close = () => {
+      document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onUp);
+      overlay.remove();
+    };
+    document.getElementById('crop-cancel').addEventListener('click', close);
+    document.getElementById('crop-cancel-btn').addEventListener('click', close);
 
-    document.getElementById('change-description-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const descEl = e.target.querySelector('#description');
-      await submitForm('/update-description', { description: descEl.value.trim() }, 'Description updated!');
-      descEl.placeholder = descEl.value.trim();
-    });
-
-    document.getElementById('change-password-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const form = e.target;
-      await submitForm('/change-password', {
-        currentPassword: form.querySelector('#currentPassword').value,
-        newPassword: form.querySelector('#newPassword').value
-      }, 'Password updated!', '/login?err=UpdatedCredentials');
-    });
-
-    const usernameInput = document.getElementById('username');
-    const changeUsernameBtn = document.getElementById('change-username-btn');
-    const usernameFeedback = document.getElementById('username-feedback');
-    let usernameTimer;
-
-    usernameInput?.addEventListener('input', () => {
-      clearTimeout(usernameTimer);
-      usernameTimer = setTimeout(async () => {
-        const username = usernameInput.value.trim().toLowerCase();
-        if (!username) { changeUsernameBtn.disabled = true; return; }
+    document.getElementById('crop-save').addEventListener('click', () => {
+      const scale = img._scale, offX = img._offX, offY = img._offY;
+      const canvas = document.createElement('canvas');
+      canvas.width = 256; canvas.height = 256;
+      canvas.getContext('2d').drawImage(img, (parseInt(box.style.left) - offX) / scale, (parseInt(box.style.top) - offY) / scale, box.offsetWidth / scale, box.offsetHeight / scale, 0, 0, 256, 256);
+      canvas.toBlob(async blob => {
+        const form = new FormData();
+        form.append('avatar', blob, 'avatar.png');
         try {
-          const res = await fetch(`/check-username?username=${encodeURIComponent(username)}`);
-          const data = await res.json();
-          usernameFeedback.textContent = data.exists ? '<%= req.translations.usernameTaken %>' : '<%= req.translations.usernameIsNotTaken %>';
-          changeUsernameBtn.disabled = data.exists;
-        } catch (e) {
-          changeUsernameBtn.disabled = true;
-        }
-      }, 500);
+          const res = await fetch('/upload-avatar', { method: 'POST', headers: { 'CSRF-Token': csrf }, body: form });
+          if (res.ok) {
+            const { avatar } = await res.json();
+            avatarPreview.src = avatar + '?t=' + Date.now();
+            showToast('Profile picture updated', 'success');
+            close();
+          } else showToast('Failed to upload', 'error');
+        } catch { showToast('Failed to upload', 'error'); }
+      }, 'image/png');
     });
-
-    const currentPasswordInput = document.getElementById('currentPassword');
-    const newPasswordInput = document.getElementById('newPassword');
-    const currentPasswordFeedback = document.getElementById('current-password-feedback');
-    let passwordTimer;
-
-    currentPasswordInput?.addEventListener('input', () => {
-      clearTimeout(passwordTimer);
-      passwordTimer = setTimeout(async () => {
-        const currentPassword = currentPasswordInput.value.trim();
-        if (!currentPassword) { newPasswordInput.disabled = true; return; }
-        try {
-          const res = await fetch('/validate-password', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'CSRF-Token': getCSRF() },
-            body: JSON.stringify({ currentPassword })
-          });
-          const data = await res.json();
-          currentPasswordFeedback.textContent = data.valid ? '<%= req.translations.correctPassword %>' : '<%= req.translations.incorrectPassword %>';
-          newPasswordInput.disabled = !data.valid;
-        } catch (e) {
-          newPasswordInput.disabled = true;
-        }
-      }, 500);
-    });
-
-    document.getElementById('language-preference-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const language = e.target.querySelector('#language').value;
-      try {
-        const res = await fetch('/set-language', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'CSRF-Token': getCSRF() },
-          body: JSON.stringify({ language })
-        });
-        if (res.ok) {
-          showToast('Language saved.', 'success');
-          setTimeout(() => window.location.reload(), 1500);
-        } else {
-          const body = await res.text();
-          showToast(body || 'Failed to save language.', 'error');
-        }
-      } catch (err) {
-        showToast(err.message || 'Failed to save language.', 'error');
-      }
-    });
-
-    // ── Avatar crop popup ────────────────────────────────────────────────────
-
-    const avatarInput = document.getElementById('avatar-input');
-    const avatarPreview = document.getElementById('avatar-preview');
-
-    avatarInput?.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      if (file.size > 2 * 1024 * 1024) {
-        showToast('Image must be under 2 MB.', 'error');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (evt) => openCropPopup(evt.target.result, getCSRF());
-      reader.readAsDataURL(file);
-
-      avatarInput.value = '';
-    });
-
-    document.getElementById('remove-avatar-btn')?.addEventListener('click', async () => {
-      try {
-        const response = await fetch('/remove-avatar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'CSRF-Token': getCSRF() },
-        });
-
-        if (response.ok) {
-          avatarPreview.src = 'https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(user.username) %>';
-          showToast('Profile picture removed.', 'success');
-          setTimeout(() => window.location.reload(), 1200);
-        } else {
-          showToast('Failed to remove picture.', 'error');
-        }
-      } catch {
-        showToast('Failed to remove picture.', 'error');
-      }
-    });
-
-    function openCropPopup(dataUrl, csrf) {
-      const overlay = document.createElement('div');
-      overlay.id = 'crop-overlay';
-      overlay.className = 'fixed inset-0 z-[9999] bg-black/80 flex items-end';
-      overlay.innerHTML = `
-        <div class="w-full bg-white dark:bg-neutral-900 rounded-t-2xl overflow-hidden border-t border-neutral-200 dark:border-white/10">
-          <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-neutral-100 dark:border-white/5">
-            <div>
-              <p class="text-sm font-semibold text-neutral-800 dark:text-white">Position your photo</p>
-              <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Drag and resize the box.</p>
-            </div>
-            <button id="crop-cancel" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-          <div id="crop-stage" class="relative bg-neutral-950 overflow-hidden select-none" style="height:300px;touch-action:none;">
-            <img id="crop-img" src="${dataUrl}" draggable="false" style="position:absolute;top:0;left:0;max-width:none;pointer-events:none;user-select:none;"/>
-            <div id="crop-box" style="position:absolute;border:2px solid white;box-shadow:0 0 0 9999px rgba(0,0,0,0.55);cursor:move;box-sizing:border-box;touch-action:none;">
-              <div class="ch" data-dir="nw" style="position:absolute;top:-6px;left:-6px;width:14px;height:14px;background:white;border-radius:50%;touch-action:none;"></div>
-              <div class="ch" data-dir="ne" style="position:absolute;top:-6px;right:-6px;width:14px;height:14px;background:white;border-radius:50%;touch-action:none;"></div>
-              <div class="ch" data-dir="sw" style="position:absolute;bottom:-6px;left:-6px;width:14px;height:14px;background:white;border-radius:50%;touch-action:none;"></div>
-              <div class="ch" data-dir="se" style="position:absolute;bottom:-6px;right:-6px;width:14px;height:14px;background:white;border-radius:50%;touch-action:none;"></div>
-            </div>
-          </div>
-          <div class="flex gap-2.5 px-4 py-3.5 border-t border-neutral-100 dark:border-white/5">
-            <button id="crop-cancel-btn" class="flex-1 rounded-xl border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-neutral-800 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">Cancel</button>
-            <button id="crop-save" class="flex-1 rounded-xl bg-neutral-950 dark:bg-white py-3 text-sm font-medium text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 transition">Save photo</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(overlay);
-
-      const stage = document.getElementById('crop-stage');
-      const img = document.getElementById('crop-img');
-      const box = document.getElementById('crop-box');
-      const stageW = stage.offsetWidth;
-      const stageH = stage.offsetHeight;
-
-      img.onload = () => {
-        const scale = Math.min(stageW / img.naturalWidth, stageH / img.naturalHeight);
-        const dispW = img.naturalWidth * scale;
-        const dispH = img.naturalHeight * scale;
-        img.style.width = dispW + 'px';
-        img.style.height = dispH + 'px';
-        img.style.left = ((stageW - dispW) / 2) + 'px';
-        img.style.top = ((stageH - dispH) / 2) + 'px';
-        img._scale = scale;
-        img._offX = (stageW - dispW) / 2;
-        img._offY = (stageH - dispH) / 2;
-
-        const boxSize = Math.min(dispW, dispH, 200);
-        box.style.width = boxSize + 'px';
-        box.style.height = boxSize + 'px';
-        box.style.left = ((stageW - boxSize) / 2) + 'px';
-        box.style.top = ((stageH - boxSize) / 2) + 'px';
-      };
-      if (img.complete) img.onload();
-
-      let action = null, startX, startY, startBox;
-      const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-
-      function getCoords(e) {
-        const t = e.touches ? e.touches[0] : e;
-        return { x: t.clientX, y: t.clientY };
-      }
-
-      function startAction(e, dir) {
-        e.preventDefault();
-        action = dir || 'move';
-        const c = getCoords(e);
-        startX = c.x; startY = c.y;
-        startBox = { l: parseInt(box.style.left), t: parseInt(box.style.top), w: box.offsetWidth, h: box.offsetHeight };
-      }
-
-      function doMove(e) {
-        if (!action) return;
-        e.preventDefault();
-        const c = getCoords(e);
-        const dx = c.x - startX;
-        const dy = c.y - startY;
-        const minSize = 50;
-
-        if (action === 'move') {
-          box.style.left = clamp(startBox.l + dx, 0, stageW - startBox.w) + 'px';
-          box.style.top  = clamp(startBox.t + dy, 0, stageH - startBox.h) + 'px';
-        } else {
-          let l = startBox.l, t = startBox.t, w = startBox.w, h = startBox.h;
-          if (action.includes('e')) w = Math.max(minSize, startBox.w + dx);
-          if (action.includes('s')) h = Math.max(minSize, startBox.h + dy);
-          if (action.includes('w')) { const nw = Math.max(minSize, startBox.w - dx); l = startBox.l + (startBox.w - nw); w = nw; }
-          if (action.includes('n')) { const nh = Math.max(minSize, startBox.h - dy); t = startBox.t + (startBox.h - nh); h = nh; }
-          l = clamp(l, 0, stageW - minSize);
-          t = clamp(t, 0, stageH - minSize);
-          w = Math.min(w, stageW - l);
-          h = Math.min(h, stageH - t);
-          box.style.left = l + 'px'; box.style.top = t + 'px';
-          box.style.width = w + 'px'; box.style.height = h + 'px';
-        }
-      }
-
-      function stopAction() { action = null; }
-
-      box.addEventListener('mousedown', (e) => { if (!e.target.classList.contains('ch')) startAction(e, 'move'); });
-      box.addEventListener('touchstart', (e) => { if (!e.target.classList.contains('ch')) startAction(e, 'move'); }, { passive: false });
-
-      box.querySelectorAll('.ch').forEach(h => {
-        h.addEventListener('mousedown', (e) => { e.stopPropagation(); startAction(e, h.dataset.dir); });
-        h.addEventListener('touchstart', (e) => { e.stopPropagation(); startAction(e, h.dataset.dir); }, { passive: false });
-      });
-
-      document.addEventListener('mousemove', doMove);
-      document.addEventListener('touchmove', doMove, { passive: false });
-      document.addEventListener('mouseup', stopAction);
-      document.addEventListener('touchend', stopAction);
-
-      const close = () => {
-        document.removeEventListener('mousemove', doMove);
-        document.removeEventListener('touchmove', doMove);
-        document.removeEventListener('mouseup', stopAction);
-        document.removeEventListener('touchend', stopAction);
-        overlay.remove();
-      };
-
-      document.getElementById('crop-cancel').addEventListener('click', close);
-      document.getElementById('crop-cancel-btn').addEventListener('click', close);
-
-      document.getElementById('crop-save').addEventListener('click', () => {
-        const scale = img._scale;
-        const srcX = (parseInt(box.style.left) - img._offX) / scale;
-        const srcY = (parseInt(box.style.top)  - img._offY) / scale;
-        const srcW = box.offsetWidth  / scale;
-        const srcH = box.offsetHeight / scale;
-
-        const canvas = document.createElement('canvas');
-        canvas.width = 256; canvas.height = 256;
-        canvas.getContext('2d').drawImage(img, srcX, srcY, srcW, srcH, 0, 0, 256, 256);
-
-        canvas.toBlob(async (blob) => {
-          const form = new FormData();
-          form.append('avatar', blob, 'avatar.png');
-
-          try {
-            const response = await fetch('/upload-avatar', {
-              method: 'POST',
-              headers: { 'CSRF-Token': csrf },
-              body: form,
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              avatarPreview.src = data.avatar + '?t=' + Date.now();
-              showToast('Profile picture updated.', 'success');
-              close();
-            } else {
-              const err = await response.json().catch(() => ({}));
-              showToast(err.message || 'Failed to upload.', 'error');
-            }
-          } catch {
-            showToast('Failed to upload.', 'error');
-          }
-        }, 'image/png');
-      });
-    }
-  });
+  }
+});
 </script>
 
 <%- include('../components/footer') %>

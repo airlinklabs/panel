@@ -106,6 +106,9 @@ model settings {
   updatedAt DateTime @updatedAt
   sftpPort  Int  @default(3003)
   virusTotalApiKey String?
+  rateLimitEnabled Boolean @default(true)
+  rateLimitRpm     Int     @default(100)
+  bannedIps        String  @default("[]")
 }
 
 model ApiKey {
