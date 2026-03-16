@@ -497,14 +497,21 @@ function isImageFile(filename) {
 
   let selectedFiles = [];
 
+  const pageContent = document.getElementById('page-content');
+  if (pageContent) {
+    pageContent.style.transition = 'padding-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+  }
+
   function updateSelectedFiles() {
     const selectedCount = selectedFiles.length;
     if (selectedFiles.length > 0) {
       floatingActionBar.style.bottom = '64px';
       floatingActionBar.classList.remove('pointer-events-none');
+      if (pageContent) pageContent.style.paddingBottom = '140px';
     } else {
       floatingActionBar.style.bottom = '-80px';
       floatingActionBar.classList.add('pointer-events-none');
+      if (pageContent) pageContent.style.paddingBottom = '';
     }
     document.getElementById('selectedFilesCount').innerText = `${selectedCount} file${selectedCount !== 1 ? 's' : ''} selected`;
 

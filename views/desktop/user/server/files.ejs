@@ -509,13 +509,20 @@ function isImageFile(filename) {
 
   let selectedFiles = [];
 
+  const pageContent = document.getElementById('page-content');
+  if (pageContent) {
+    pageContent.style.transition = 'padding-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+  }
+
   function updateSelectedFiles() {
     const selectedCount = selectedFiles.length;
     if (selectedFiles.length > 0) {
-    floatingActionBar.classList.remove('translate-y-full');
-  } else {
-    floatingActionBar.classList.add('translate-y-full');
-  }
+      floatingActionBar.classList.remove('translate-y-full');
+      if (pageContent) pageContent.style.paddingBottom = '80px';
+    } else {
+      floatingActionBar.classList.add('translate-y-full');
+      if (pageContent) pageContent.style.paddingBottom = '';
+    }
     document.getElementById('selectedFilesCount').innerText = `${selectedCount} file${selectedCount !== 1 ? 's' : ''} selected`;
 
     document.getElementById('massDeleteBtn').disabled = selectedCount === 0;
