@@ -26,65 +26,62 @@
   <script>
   (function () {
     const serverUUID = '<%= server.UUID %>';
-    const stateText = document.getElementById('installStateText');
-    const stepsEl = document.getElementById('installSteps');
-    const spinner = document.getElementById('installSpinner');
-    const banner = document.getElementById('installBanner');
+    const stateText  = document.getElementById('installStateText');
+    const stepsEl    = document.getElementById('installSteps');
+    const spinner    = document.getElementById('installSpinner');
+    const banner     = document.getElementById('installBanner');
+    const shownSteps = new Set();
 
-    const stateMessages = {
-      installing: 'Downloading and configuring files...',
-      installed:  'Installation complete.',
-      failed:     'Installation failed.',
-    };
-
-    const steps = [
-      'Daemon acknowledged request',
-      'Pulling container image',
-      'Running install scripts',
-      'Configuring server files',
-    ];
-
-    let shownSteps = new Set();
-    let stepIndex = 0;
-
-    function addStep(label) {
+    function addStep(label, type) {
       if (!label || shownSteps.has(label)) return;
       shownSteps.add(label);
+      const isDone  = type === 'done';
+      const isError = type === 'error';
+      const glyph = isDone ? '✓' : isError ? '✕' : '·';
+      const color = isDone ? 'text-emerald-500' : isError ? 'text-red-400' : 'text-blue-400';
       const row = document.createElement('div');
-      row.className = 'flex items-center gap-1.5';
-      row.style.cssText = 'overflow:hidden;max-height:0;opacity:0;transition:max-height 0.35s cubic-bezier(0.16,1,0.3,1),opacity 0.3s ease';
       row.className = 'flex items-center gap-1.5 opacity-0 transition-opacity duration-300';
-      row.innerHTML = `<span class="text-[10px] text-emerald-500">✓</span><span class="text-[10px] text-blue-400 dark:text-blue-400/70">${label}</span>`;
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        row.style.maxHeight = '2rem';
-        row.style.opacity = '1';
-      }));
+      row.innerHTML = `<span class="text-[10px] ${color}">${glyph}</span><span class="text-[10px] text-blue-400 dark:text-blue-400/70">${label}</span>`;
+      stepsEl.appendChild(row);
       requestAnimationFrame(() => row.classList.remove('opacity-0'));
     }
 
-    const stepTimer = setInterval(() => {
-      if (stepIndex < steps.length) addStep(steps[stepIndex++]);
-    }, 6000);
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const evtSock = new WebSocket(`${proto}://${location.host}/events/${serverUUID}`);
+
+    evtSock.onmessage = (msg) => {
+      let parsed;
+      try { parsed = JSON.parse(msg.data); } catch { return; }
+      if (parsed.event !== 'lifecycle') return;
+      const { type, message } = parsed.data;
+      stateText.textContent = message;
+      addStep(message, type === 'error' ? 'error' : undefined);
+    };
+
+    function markDone() {
+      evtSock.close();
+      addStep('Installation complete', 'done');
+      spinner.classList.remove('animate-spin');
+      spinner.classList.add('text-emerald-500');
+      if (banner) banner.className = banner.className.replace(/blue/g, 'emerald');
+      clearInterval(poller);
+      setTimeout(() => window.location.reload(), 1800);
+    }
+
+    function markFailed() {
+      evtSock.close();
+      clearInterval(poller);
+      spinner.classList.remove('animate-spin', 'text-blue-500');
+      spinner.classList.add('text-red-500');
+    }
 
     function poll() {
       fetch(`/server/${serverUUID}/status`)
         .then(r => r.json())
         .then(data => {
           const state = data.state || (data.installed ? 'installed' : data.failed ? 'failed' : 'installing');
-          if (stateMessages[state]) stateText.textContent = stateMessages[state];
-          if (state === 'installed') {
-            clearInterval(stepTimer);
-            clearInterval(poller);
-            addStep('Server ready');
-            spinner.classList.remove('animate-spin');
-            spinner.classList.add('text-emerald-500');
-            setTimeout(() => window.location.reload(), 2000);
-          } else if (state === 'failed') {
-            clearInterval(stepTimer);
-            clearInterval(poller);
-            spinner.classList.remove('animate-spin', 'text-blue-500');
-            spinner.classList.add('text-red-500');
-          }
+          if (state === 'installed') markDone();
+          else if (state === 'failed') markFailed();
         }).catch(() => {});
     }
 

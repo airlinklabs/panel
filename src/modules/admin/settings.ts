@@ -6,8 +6,8 @@ import logger from '../../handlers/logger';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { execSync } from 'child_process';
 import { randomUUID } from 'crypto';
+import AdmZip from 'adm-zip';
 
 
 const storage = multer.diskStorage({
@@ -75,7 +75,9 @@ function installThemeZip(zipPath: string): { success: boolean; error?: string } 
 
   try {
     fs.mkdirSync(tempDir, { recursive: true });
-    execSync(`unzip -q "${zipPath}" -d "${tempDir}"`);
+
+    const zip = new AdmZip(zipPath);
+    zip.extractAllTo(tempDir, true);
 
     const infoPath = path.join(tempDir, 'info.json');
     const lightPath = path.join(tempDir, 'light.css');
@@ -155,7 +157,6 @@ interface SettingsData {
   lightTheme?: string;
   darkTheme?: string;
   allowRegistration?: boolean;
-  sftpPort?: number;
   uploadLimit?: number;
   virusTotalApiKey?: string | null;
 }
@@ -216,10 +217,8 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const zipDir = path.join(process.cwd(), 'public', 'uploads', 'theme-zips');
+          fs.mkdirSync(zipDir, { recursive: true });
           const archivePath = path.join(zipDir, 'example-theme-' + Date.now() + '.zip');
-          const tempDir = path.join(zipDir, 'example-tmp-' + Date.now());
-
-          fs.mkdirSync(tempDir, { recursive: true });
 
           const info = {
             name: 'Example Theme',
@@ -230,12 +229,11 @@ const adminModule: Module = {
           const lightCss = `/* Example light mode theme */\n:root {\n  --color-primary: #4f46e5;\n}\n\nbody {\n  /* Add your light mode overrides here */\n}\n`;
           const darkCss = `/* Example dark mode theme */\n:root {\n  --color-primary: #818cf8;\n}\n\nbody {\n  /* Add your dark mode overrides here */\n}\n`;
 
-          fs.writeFileSync(path.join(tempDir, 'info.json'), JSON.stringify(info, null, 2));
-          fs.writeFileSync(path.join(tempDir, 'light.css'), lightCss);
-          fs.writeFileSync(path.join(tempDir, 'dark.css'), darkCss);
-
-          execSync(`cd "${tempDir}" && zip -q "${archivePath}" info.json light.css dark.css`);
-          fs.rmSync(tempDir, { recursive: true, force: true });
+          const zip = new AdmZip();
+          zip.addFile('info.json', Buffer.from(JSON.stringify(info, null, 2)));
+          zip.addFile('light.css', Buffer.from(lightCss));
+          zip.addFile('dark.css', Buffer.from(darkCss));
+          zip.writeZip(archivePath);
 
           res.download(archivePath, 'example-theme.zip', () => {
             fs.rmSync(archivePath, { force: true });
@@ -272,7 +270,6 @@ const adminModule: Module = {
             lightTheme: typeof rawData.lightTheme === 'string' ? rawData.lightTheme : undefined,
             darkTheme: typeof rawData.darkTheme === 'string' ? rawData.darkTheme : undefined,
             allowRegistration: rawData.allowRegistration === 'true' || rawData.allowRegistration === true,
-            sftpPort: rawData.sftpPort ? parseInt(rawData.sftpPort, 10) : undefined,
             uploadLimit: rawData.uploadLimit ? parseInt(rawData.uploadLimit, 10) : undefined,
             virusTotalApiKey: typeof rawData.virusTotalApiKey === 'string'
               ? (rawData.virusTotalApiKey.trim() || null)
@@ -338,6 +335,87 @@ const adminModule: Module = {
         } catch (error) {
           logger.error('Error resetting settings:', error);
           res.status(500).json({ success: false, error: 'Failed to reset settings' });
+        }
+      },
+    );
+
+    router.post(
+      '/admin/settings/security',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const rateLimitEnabled = req.body.rateLimitEnabled === 'true' || req.body.rateLimitEnabled === true;
+          const rateLimitRpm = parseInt(req.body.rateLimitRpm, 10);
+
+          if (isNaN(rateLimitRpm) || rateLimitRpm < 1 || rateLimitRpm > 10000) {
+            return res.status(400).json({ success: false, error: 'RPM must be between 1 and 10000.' });
+          }
+
+          await prisma.settings.update({
+            where: { id: 1 },
+            data: { rateLimitEnabled, rateLimitRpm },
+          });
+
+          res.json({ success: true });
+        } catch (error) {
+          logger.error('Error updating security settings:', error);
+          res.status(500).json({ success: false, error: 'Failed to update security settings.' });
+        }
+      },
+    );
+
+    router.post(
+      '/admin/settings/ban-ip',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const { ip } = req.body;
+          if (!ip || typeof ip !== 'string' || !/^[\d.:a-fA-F]+$/.test(ip)) {
+            return res.status(400).json({ success: false, error: 'Invalid IP address.' });
+          }
+
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          if (!settings) return res.status(500).json({ success: false, error: 'Settings not found.' });
+
+          let banned: string[] = [];
+          try { banned = JSON.parse(settings.bannedIps); } catch { banned = []; }
+
+          if (!banned.includes(ip)) {
+            banned.push(ip);
+            await prisma.settings.update({ where: { id: 1 }, data: { bannedIps: JSON.stringify(banned) } });
+          }
+
+          res.json({ success: true, banned });
+        } catch (error) {
+          logger.error('Error banning IP:', error);
+          res.status(500).json({ success: false, error: 'Failed to ban IP.' });
+        }
+      },
+    );
+
+    router.post(
+      '/admin/settings/unban-ip',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const { ip } = req.body;
+          if (!ip || typeof ip !== 'string') {
+            return res.status(400).json({ success: false, error: 'IP is required.' });
+          }
+
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          if (!settings) return res.status(500).json({ success: false, error: 'Settings not found.' });
+
+          let banned: string[] = [];
+          try { banned = JSON.parse(settings.bannedIps); } catch { banned = []; }
+
+          banned = banned.filter(b => b !== ip);
+          await prisma.settings.update({ where: { id: 1 }, data: { bannedIps: JSON.stringify(banned) } });
+
+          res.json({ success: true, banned });
+        } catch (error) {
+          logger.error('Error unbanning IP:', error);
+          res.status(500).json({ success: false, error: 'Failed to unban IP.' });
         }
       },
     );

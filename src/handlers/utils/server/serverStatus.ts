@@ -158,19 +158,26 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
     // Provide more detailed error information
     if (axios.isAxiosError(error)) {
       if (error.code === 'ECONNREFUSED') {
-        errorStatus.error = 'Connection refused - daemon may be offline';
-      } else if (error.code === 'ETIMEDOUT') {
+        errorStatus.error = 'Connection refused — daemon may be offline';
+        errorStatus.daemonOffline = true;
+      } else if (error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
         errorStatus.error = 'Connection timed out';
+        errorStatus.daemonOffline = true;
       } else if (error.code === 'ENOTFOUND') {
-        errorStatus.error = 'Host not found - check node address';
+        errorStatus.error = 'Host not found — check node address';
+        errorStatus.daemonOffline = true;
       } else if (error.response) {
-        errorStatus.error = `Server responded with ${error.response.status}: ${error.response.statusText}`;
+        // Daemon is reachable — it sent an HTTP error response.
+        // This is NOT a daemon-offline scenario.
+        errorStatus.error = `Daemon responded with ${error.response.status}`;
         errorStatus.daemonOffline = false;
       } else {
         errorStatus.error = 'Connection failed';
+        errorStatus.daemonOffline = true;
       }
     } else {
       errorStatus.error = 'An unexpected error occurred';
+      errorStatus.daemonOffline = true;
     }
 
     return errorStatus;

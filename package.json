@@ -1,6 +1,6 @@
 {
   "name": "airlink-panel",
-  "version": "1.0.0",
+  "version": "1.7.137",
   "description": "Airlink is a simple-to-use game server management panel",
   "repository": {
     "type": "git",
@@ -21,7 +21,10 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "adm-zip": "^0.5.16",
     "@formkit/auto-animate": "^0.8.2",
+    "validator": "^13.12.0",
+    "xss": "^1.0.15",
     "@prisma/client": "^6.19.2",
     "@tailwindcss/cli": "^4.1.17",
     "axios": "^1.7.9",
@@ -44,6 +47,8 @@
     "ws": "^8.14.2"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "@types/validator": "^13.12.0",
     "@eslint/js": "^9.15.0",
     "@tailwindcss/forms": "^0.5.11",
     "@types/bcrypt": "^5.0.2",
