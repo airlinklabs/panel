@@ -62,6 +62,11 @@ app.use(
   express.static(path.join(__dirname, '../node_modules', 'monaco-editor/min')),
 );
 
+app.use(
+  '/vendor',
+  express.static(path.join(__dirname, '../node_modules', '@formkit/auto-animate')),
+);
+
 // Load views
 const viewsPath = path.join(__dirname, '../views');
 app.set('views', viewsPath);

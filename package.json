@@ -21,6 +21,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@formkit/auto-animate": "^0.8.2",
     "@prisma/client": "^6.19.2",
     "@tailwindcss/cli": "^4.1.17",
     "axios": "^1.7.9",

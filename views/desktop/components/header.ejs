@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="h-full" lang="en">
+<html class="h-full js-loading" lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,10 +23,17 @@
     <script src="/js/csrf.js"></script>
     <script src="/javascript/viewport-mode.js"></script>
     <script src="/javascript/page-loader.js"></script>
+    <script src="/javascript/layout-animations.js"></script>
     <style>
       html, body, * { scrollbar-width: none; -ms-overflow-style: none; }
       ::-webkit-scrollbar { display: none; }
       html, body { transition: background-color 0.25s ease-in, color 0.25s ease-in; }
+      /* Pre-hide animatable content before JS runs so there's no flash-then-hide jitter */
+      .js-loading #page-content > *:not(.mobile-top-bar):not(.mobile-bottom-nav):not(.mobile-more-sheet):not([style*="position: fixed"]),
+      .js-loading #server-page-body > * {
+        opacity: 0;
+        transform: translateY(14px);
+      }
     </style>
 </head>
 <body style="font-family: 'General Sans'" class="bg-white dark:bg-[#141414] h-full text-neutral-800 dark:text-white">

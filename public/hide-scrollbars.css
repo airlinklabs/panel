@@ -30,3 +30,32 @@ body, html, div {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+
+/* Smooth layout shifts when banners / status elements appear or disappear.
+   Any element with these ids or classes gets a height transition so the
+   surrounding content pushes/pulls smoothly instead of jumping. */
+#installBanner,
+#daemonOfflineWarning,
+[data-server-status-container],
+[data-server-started-container] {
+  transition: max-height 0.28s cubic-bezier(0.4,0,0.2,1),
+              opacity    0.22s ease,
+              margin     0.28s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* When these elements are hidden (display:none via JS), wrap them
+   in a grid-row trick so height animates through 0 rather than snapping.
+   Works because grid-template-rows: 0fr / 1fr can be transitioned. */
+.collapsible-row {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s cubic-bezier(0.4,0,0.2,1);
+  overflow: hidden;
+}
+.collapsible-row.open {
+  grid-template-rows: 1fr;
+}
+.collapsible-row > * {
+  min-height: 0;
+  overflow: hidden;
+}

@@ -1,232 +1,343 @@
 (function () {
-  var SPRINT_MS   = 380;
-  var HOLD_MS     = 280;
-  var FADE_OUT_MS = 340;
 
-  var messages = [
-    'Loading...',
-    'Fetching data...',
-    'Setting things up...',
-    'Almost there...',
-    'One moment...',
-  ];
+  var NAV_FLAG    = 'al_nav';
+  var FADE_OUT_MS = 160;
+  var STAGGER_MS  = 65;
+  var CHILD_DUR   = 480;
+  var EASE_OUT    = 'cubic-bezier(0.4,0,1,1)';
+  var EASE_IN     = 'cubic-bezier(0.16,1,0.3,1)';
 
-  var barEl        = null;
-  var messageEl    = null;
-  var progInterval = null;
-  var msgInterval  = null;
-  var msgIndex     = 0;
-  var hiding       = false;
-  var showing      = false;
+  // ── Read nav flag before any paint ───────────────────────────────────────
+  var _fromNav = (function () {
+    try {
+      var v = sessionStorage.getItem(NAV_FLAG);
+      if (v) { sessionStorage.removeItem(NAV_FLAG); return true; }
+    } catch (_) {}
+    return false;
+  })();
+
+  if (_fromNav) {
+    document.documentElement.style.opacity = '0';
+    document.documentElement.style.pointerEvents = 'none';
+  }
+
+  // ── Utilities ─────────────────────────────────────────────────────────────
 
   function el(id) { return document.getElementById(id); }
 
-  // ── Progress bar ──────────────────────────────────────────────────────────
-  function setBar(pct) {
-    if (!barEl) barEl = el('pl-bar');
-    if (barEl) barEl.style.width = pct + '%';
+  function normalizePath(p) {
+    try { return new URL(p, window.location.origin).pathname.replace(/\/+$/, '') || '/'; }
+    catch (_) { return p; }
   }
 
-  function cycleMessage() {
-    if (!messageEl) messageEl = el('pl-msg');
-    if (!messageEl) return;
-    messageEl.style.opacity = '0';
-    setTimeout(function () {
-      if (!messageEl) return;
-      msgIndex = (msgIndex + 1) % messages.length;
-      messageEl.textContent = messages[msgIndex];
-      messageEl.style.opacity = '1';
-    }, 180);
+  function isNavLink(a) {
+    var href = a && a.getAttribute('href');
+    if (!href || href === '#' || href.startsWith('#')) return false;
+    if (href.startsWith('mailto:') || href.startsWith('tel:')) return false;
+    if (a.hasAttribute('download') || a.target === '_blank') return false;
+    if (href.startsWith('http') && !href.startsWith(window.location.origin)) return false;
+    return true;
   }
+
+  function markNavigation() {
+    try { sessionStorage.setItem(NAV_FLAG, '1'); } catch (_) {}
+  }
+
+  // ── Animated element ──────────────────────────────────────────────────────
+
+  function getAnimEl() {
+    return el('server-page-body') || el('page-content') || null;
+  }
+
+  // Returns the children of the container that should animate.
+  // Skips fixed-positioned chrome elements (mobile topbar, bottom nav, sheets).
+  function getAnimatableChildren(container) {
+    return Array.from(container.children).filter(function (child) {
+      var cls = child.className || '';
+      if (cls.indexOf('mobile-top-bar') !== -1) return false;
+      if (cls.indexOf('mobile-bottom-nav') !== -1) return false;
+      if (cls.indexOf('mobile-more-sheet') !== -1) return false;
+      // Skip any element whose computed position is fixed
+      var pos = window.getComputedStyle(child).position;
+      if (pos === 'fixed') return false;
+      return true;
+    });
+  }
+
+  // ── Content animation ─────────────────────────────────────────────────────
+
+  function animateOut(c) {
+    if (!c) return;
+    var children = getAnimatableChildren(c);
+    var targets  = children.length ? children : [c];
+    targets.forEach(function (t) {
+      t.style.transition = 'opacity ' + FADE_OUT_MS + 'ms ' + EASE_OUT + ', transform ' + FADE_OUT_MS + 'ms ' + EASE_OUT;
+      t.style.opacity    = '0';
+      t.style.transform  = 'translateY(6px)';
+    });
+  }
+
+  function animateIn(c) {
+    if (!c) return;
+
+    var children = getAnimatableChildren(c);
+
+    // Pin every child to its hidden start state with inline styles FIRST.
+    // This must happen before we remove js-loading, so the moment the CSS
+    // rule stops applying the inline style already holds the same value —
+    // no flash, no jitter.
+    children.forEach(function (child) {
+      child.style.transition = 'none';
+      child.style.opacity    = '0';
+      child.style.transform  = 'translateY(14px)';
+    });
+
+    // Now safe to drop the CSS pre-hide class — inline styles are holding.
+    document.documentElement.classList.remove('js-loading');
+
+    // Make sure the wrapper itself is fully visible.
+    c.style.transition = 'none';
+    c.style.opacity    = '1';
+    c.style.transform  = '';
+
+    if (!children.length) return;
+
+    // One reflow so the browser registers the pinned start state.
+    void c.offsetHeight;
+
+    children.forEach(function (child, i) {
+      var delay = i * STAGGER_MS;
+      child.style.transition =
+        'opacity ' + CHILD_DUR + 'ms ' + EASE_IN + ' ' + delay + 'ms, ' +
+        'transform ' + CHILD_DUR + 'ms ' + EASE_IN + ' ' + delay + 'ms';
+      child.style.opacity   = '1';
+      child.style.transform = 'translateY(0)';
+    });
+
+    var totalDur = (children.length - 1) * STAGGER_MS + CHILD_DUR + 40;
+    setTimeout(function () {
+      children.forEach(function (child) {
+        child.style.transition = '';
+        child.style.opacity    = '';
+        child.style.transform  = '';
+      });
+    }, totalDur);
+  }
+
+  function fadeContentOut() {
+    animateOut(getAnimEl());
+  }
+
+  function fadeContentIn() {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        animateIn(getAnimEl());
+      });
+    });
+  }
+
+  // ── Reveal after navigation ───────────────────────────────────────────────
+
+  function revealAfterNav() {
+    document.documentElement.style.opacity      = '';
+    document.documentElement.style.pointerEvents = '';
+    var ov = el('pl-overlay');
+    if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
+    barEl = null; hiding = false;
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        animateIn(getAnimEl());
+      });
+    });
+  }
+
+  // ── Desktop sidebar highlight ─────────────────────────────────────────────
+
+  function findDesktopActiveLink(path) {
+    var best = null, bestLen = 0;
+    document.querySelectorAll('.nav-link').forEach(function (link) {
+      var href        = normalizePath(link.getAttribute('href') || '');
+      var matchPrefix = link.getAttribute('data-match-prefix');
+      if (!href) return;
+      if (matchPrefix) {
+        if (path.startsWith(matchPrefix) && matchPrefix.length > bestLen) {
+          best = link; bestLen = matchPrefix.length;
+        }
+        return;
+      }
+      if (path === href) { best = link; bestLen = 9999; return; }
+      if (href === '/') {
+        if (path === '/' && 1 > bestLen) { best = link; bestLen = 1; }
+        return;
+      }
+      if (path.startsWith(href) && href.length > bestLen) { best = link; bestLen = href.length; }
+    });
+    return best;
+  }
+
+  function getPillTop(link) {
+    var ul = link.closest('ul');
+    if (!ul) return 0;
+    return link.getBoundingClientRect().top - ul.getBoundingClientRect().top + ul.scrollTop;
+  }
+
+  function setDesktopActiveLink(link) {
+    document.querySelectorAll('.nav-link').forEach(function (l) {
+      l.classList.remove('active', 'text-neutral-950', 'font-[405]', 'dark:text-white');
+    });
+    if (link) link.classList.add('active', 'text-neutral-950', 'font-[405]', 'dark:text-white');
+  }
+
+  function movePill(link, animate) {
+    var bg = el('active-background');
+    if (!bg || !link) return;
+    var top = getPillTop(link);
+    var h   = link.getBoundingClientRect().height;
+    bg.style.transition = animate
+      ? 'transform 0.22s cubic-bezier(0.4,0,0.2,1), height 0.18s ease, opacity 0.15s ease'
+      : 'none';
+    bg.style.height    = h + 'px';
+    bg.style.transform = 'translateY(' + top + 'px)';
+    bg.style.opacity   = '1';
+  }
+
+  function initDesktopHighlight(fromNav) {
+    var bg = el('active-background');
+    if (!bg) return;
+    var path   = normalizePath(window.location.pathname);
+    var active = findDesktopActiveLink(path);
+    setDesktopActiveLink(active);
+    if (!active) { bg.style.opacity = '0'; return; }
+    bg.style.transition = 'none';
+    movePill(active, false);
+    void bg.offsetHeight;
+    if (!fromNav) {
+      bg.style.transition = 'opacity 0.18s ease';
+      bg.style.opacity    = '1';
+    }
+    setTimeout(function () {
+      if (el('active-background')) {
+        el('active-background').style.transition =
+          'transform 0.22s cubic-bezier(0.4,0,0.2,1), height 0.18s ease, opacity 0.15s ease';
+      }
+    }, fromNav ? 0 : 200);
+  }
+
+  // ── Mobile nav highlight ──────────────────────────────────────────────────
+
+  function initMobileHighlight() {
+    var path = normalizePath(window.location.pathname);
+    document.querySelectorAll('.mobile-nav-link').forEach(function (link) {
+      var href     = normalizePath(link.getAttribute('href') || '');
+      var mPrefix  = link.getAttribute('data-match-prefix');
+      var mAlso    = link.getAttribute('data-match-prefix-also');
+      var mExact   = link.getAttribute('data-match-exact') === 'true';
+      var active   = false;
+      if (mPrefix)     active = path.startsWith(mPrefix);
+      else if (mExact) active = path === href;
+      else             active = path === href || (href !== '/' && path.startsWith(href));
+      if (!active && mAlso && path.startsWith(mAlso)) active = true;
+      link.classList.remove('text-neutral-500', 'dark:text-neutral-400', 'text-neutral-900', 'dark:text-white', 'active-mobile');
+      link.classList.add(active ? 'text-neutral-900' : 'text-neutral-500');
+      link.classList.add(active ? 'dark:text-white'  : 'dark:text-neutral-400');
+      if (active) link.classList.add('active-mobile');
+    });
+  }
+
+  // ── Initial overlay ───────────────────────────────────────────────────────
+
+  var SPRINT_MS = 340, HOLD_MS = 160, OV_FADE_MS = 240;
+  var barEl = null, hiding = false;
 
   function startProgress() {
-    barEl     = el('pl-bar');
-    messageEl = el('pl-msg');
+    barEl = el('pl-bar');
     var pct = 0;
-    progInterval = setInterval(function () {
-      if (hiding) { clearInterval(progInterval); return; }
-      var step = (82 - pct) * 0.065 + 1.2;
-      pct = Math.min(pct + step, 82);
-      setBar(pct);
+    var iv = setInterval(function () {
+      if (hiding) { clearInterval(iv); return; }
+      pct = Math.min(pct + (82 - pct) * 0.065 + 1.2, 82);
+      if (barEl) barEl.style.width = pct + '%';
     }, 90);
-    msgIndex = 0;
-    msgInterval = setInterval(cycleMessage, 2200);
   }
 
-  function stopProgress() {
-    clearInterval(progInterval);
-    clearInterval(msgInterval);
-    progInterval = null;
-    msgInterval  = null;
-  }
-
-  // ── Hide (smooth) ─────────────────────────────────────────────────────────
-  function hide() {
+  function hideOverlaySlow() {
     var ov = el('pl-overlay');
     if (!ov || hiding) return;
-    hiding  = true;
-    showing = false;
-    stopProgress();
-
+    hiding = true;
     if (!barEl) barEl = el('pl-bar');
     if (barEl) {
       barEl.style.transition = 'width ' + SPRINT_MS + 'ms cubic-bezier(0.16,1,0.3,1)';
-      setBar(100);
+      barEl.style.width = '100%';
     }
-
     setTimeout(function () {
       var ov2 = el('pl-overlay');
       if (!ov2) return;
-      ov2.style.transition = 'opacity ' + FADE_OUT_MS + 'ms cubic-bezier(0.4,0,1,1)';
+      ov2.style.transition = 'opacity ' + OV_FADE_MS + 'ms ease';
       ov2.style.opacity = '0';
-
       var inner = el('pl-inner');
       if (inner) {
-        inner.style.transition =
-          'transform ' + (FADE_OUT_MS - 40) + 'ms cubic-bezier(0.4,0,1,1),' +
-          'opacity '   + (FADE_OUT_MS - 40) + 'ms cubic-bezier(0.4,0,1,1)';
-        inner.style.transform = 'translateY(-8px)';
-        inner.style.opacity   = '0';
+        inner.style.transition = 'opacity ' + (OV_FADE_MS - 40) + 'ms ease';
+        inner.style.opacity = '0';
       }
-
       setTimeout(function () {
         var ov3 = el('pl-overlay');
         if (ov3 && ov3.parentNode) ov3.parentNode.removeChild(ov3);
-        barEl     = null;
-        messageEl = null;
-        hiding    = false;
-      }, FADE_OUT_MS);
+        barEl = null; hiding = false;
+      }, OV_FADE_MS);
     }, SPRINT_MS + HOLD_MS);
-  }
-
-  // ── Show (navigation between pages) ──────────────────────────────────────
-  // Chrome is already rendered when this runs, so we can read exact offsets.
-  function show() {
-    if (el('pl-overlay') || showing) return;
-    showing = true;
-    hiding  = false;
-
-    var dark = false;
-    try {
-      var stored = localStorage.getItem('theme');
-      if (stored === 'dark') dark = true;
-      else if (!stored) dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    } catch (e) {}
-
-    var bg    = dark ? '#141414' : '#ffffff';
-    var fg    = dark ? '#ffffff' : '#171717';
-    var muted = '#737373';
-    var track = dark ? '#2a2a2a' : '#e5e5e5';
-    var bar   = dark ? '#ffffff' : '#171717';
-
-    // Work out which chrome elements are present and get their exact rects
-    var top = 0, left = 0, bottom = 0;
-
-    var sidebar  = el('pc-sidebar');
-    var colcont  = el('colcont');
-    var topBarEl = document.querySelector('.mobile-top-bar');
-    var botNavEl = document.querySelector('.mobile-bottom-nav');
-
-    if (sidebar && colcont && window.innerWidth >= 1024) {
-      left = Math.round(sidebar.getBoundingClientRect().right);
-      var stickyBar = colcont.querySelector('.sticky');
-      if (stickyBar) top = Math.round(stickyBar.getBoundingClientRect().bottom);
-    } else {
-      if (topBarEl) top    = Math.round(topBarEl.getBoundingClientRect().bottom);
-      if (botNavEl) bottom = Math.round(window.innerHeight - botNavEl.getBoundingClientRect().top);
-    }
-
-    var ov = document.createElement('div');
-    ov.id = 'pl-overlay';
-    ov.style.cssText =
-      'position:fixed;' +
-      'top:'    + top    + 'px;' +
-      'left:'   + left   + 'px;' +
-      'right:0;' +
-      'bottom:' + bottom + 'px;' +
-      'z-index:99998;' +
-      'display:flex;align-items:center;justify-content:center;' +
-      'background:' + bg + ';opacity:1;pointer-events:all;';
-
-    var inner = document.createElement('div');
-    inner.id = 'pl-inner';
-    inner.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:18px;';
-
-    var logo = document.createElement('img');
-    logo.src = '/assets/logo.png';
-    logo.alt = '';
-    logo.style.cssText = 'width:42px;height:42px;object-fit:contain;border-radius:10px;display:block;';
-    logo.onerror = function () { logo.style.display = 'none'; };
-
-    var parts = document.title.split(' - ');
-    var titleEl = document.createElement('p');
-    titleEl.textContent = parts[0] || document.title;
-    titleEl.style.cssText =
-      'margin:0;margin-top:-4px;font-family:inherit;font-size:14px;font-weight:600;' +
-      'letter-spacing:-0.015em;color:' + fg + ';';
-
-    var trackEl = document.createElement('div');
-    trackEl.style.cssText =
-      'width:128px;height:1.5px;border-radius:2px;background:' + track + ';overflow:hidden;';
-
-    barEl = document.createElement('div');
-    barEl.id = 'pl-bar';
-    barEl.style.cssText =
-      'height:100%;width:0%;border-radius:2px;background:' + bar + ';' +
-      'transition:width 260ms cubic-bezier(0.4,0,0.2,1);';
-    trackEl.appendChild(barEl);
-
-    messageEl = document.createElement('p');
-    messageEl.id = 'pl-msg';
-    messageEl.textContent = messages[0];
-    messageEl.style.cssText =
-      'margin:0;margin-top:-4px;font-family:inherit;font-size:11px;' +
-      'color:' + muted + ';letter-spacing:0.01em;transition:opacity 180ms ease;';
-
-    inner.appendChild(logo);
-    inner.appendChild(titleEl);
-    inner.appendChild(trackEl);
-    inner.appendChild(messageEl);
-    ov.appendChild(inner);
-    document.body.insertBefore(ov, document.body.firstChild);
-
-    startProgress();
   }
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-  // Start progress once the server-rendered overlay is in the DOM
-  // (template.ejs has already positioned and shown it by this point)
   document.addEventListener('DOMContentLoaded', function () {
-    if (el('pl-overlay')) startProgress();
-  });
-
-  // Page fully loaded — fade out
-  window.addEventListener('load', function () {
-    hide();
-  });
-
-  // Back/forward cache
-  window.addEventListener('pageshow', function (e) {
-    if (e.persisted) {
-      show();
-      setTimeout(hide, 400);
+    initDesktopHighlight(_fromNav);
+    initMobileHighlight();
+    if (_fromNav) {
+      revealAfterNav();
+    } else {
+      if (el('pl-overlay')) startProgress();
     }
   });
 
-  // Navigate away — show overlay over content area instantly
+  window.addEventListener('load', function () {
+    if (!_fromNav) {
+      hideOverlaySlow();
+      fadeContentIn();
+    }
+  });
+
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) {
+      initDesktopHighlight(false);
+      initMobileHighlight();
+      fadeContentIn();
+    }
+  });
+
+  // ── Click interception ────────────────────────────────────────────────────
+
   document.addEventListener('click', function (e) {
-    var a = e.target && e.target.closest && e.target.closest('a[href]');
-    if (!a) return;
-    var href = a.getAttribute('href');
-    if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
-    if (a.hasAttribute('download') || a.target === '_blank') return;
-    if (href.startsWith('http') && !href.startsWith(window.location.origin)) return;
     if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) return;
-    show();
+    var a = e.target && e.target.closest && e.target.closest('a[href]');
+    if (!isNavLink(a)) return;
+    if (a.classList.contains('nav-link')) {
+      setDesktopActiveLink(a);
+      movePill(a, true);
+    }
+    if (a.classList.contains('mobile-nav-link')) {
+      document.querySelectorAll('.mobile-nav-link').forEach(function (l) {
+        l.classList.remove('text-neutral-900', 'dark:text-white', 'active-mobile');
+        l.classList.add('text-neutral-500', 'dark:text-neutral-400');
+      });
+      a.classList.remove('text-neutral-500', 'dark:text-neutral-400');
+      a.classList.add('text-neutral-900', 'dark:text-white', 'active-mobile');
+    }
+    markNavigation();
+    fadeContentOut();
   }, true);
 
   document.addEventListener('submit', function () {
-    show();
+    markNavigation();
+    fadeContentOut();
   }, true);
+
 })();

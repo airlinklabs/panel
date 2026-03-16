@@ -27,7 +27,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 
     <% if (!sidebarItems || sidebarItems.length === 0) { %>
       <li class="flex-1">
-        <a href="/" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400" data-match-exact="true">
+        <a href="/" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400" data-match-exact="true" data-match-prefix-also="/server">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
             <path d="M12.378 1.602a.75.75 0 0 0-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03ZM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 0 0 .372-.648V7.93ZM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 0 0 .372.648l8.628 5.033Z" />
           </svg>
@@ -104,54 +104,29 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 <% } %>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  var currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+(function () {
+  // Mobile nav active state is handled by page-loader.js.
+  // Keep sheet toggle and presence WebSocket here.
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof updateToggleDot === 'function') updateToggleDot();
 
-  document.querySelectorAll('.mobile-nav-link').forEach(function(link) {
-    var href = (link.getAttribute('href') || '').replace(/\/$/, '') || '/';
-    var matchPrefix = link.getAttribute('data-match-prefix');
-    var matchExact = link.getAttribute('data-match-exact') === 'true';
+    var moreBtn      = document.getElementById('more-nav-btn');
+    var moreSheet    = document.getElementById('more-sheet');
+    var moreBackdrop = document.getElementById('more-sheet-backdrop');
+    var moreClose    = document.getElementById('more-sheet-close');
 
-    var active = false;
-    if (matchPrefix) {
-      active = currentPath.startsWith(matchPrefix);
-    } else if (matchExact) {
-      active = href === currentPath;
-    } else {
-      active = href === currentPath;
-    }
+    function openSheet()  { if (moreSheet) { moreSheet.classList.remove('translate-y-full'); moreBackdrop.classList.remove('opacity-0', 'pointer-events-none'); } }
+    function closeSheet() { if (moreSheet) { moreSheet.classList.add('translate-y-full');    moreBackdrop.classList.add('opacity-0', 'pointer-events-none'); } }
 
-    if (active) {
-      link.classList.remove('text-neutral-500', 'dark:text-neutral-400');
-      link.classList.add('text-neutral-900', 'dark:text-white', 'active-mobile');
-    }
+    if (moreBtn)      moreBtn.addEventListener('click', openSheet);
+    if (moreClose)    moreClose.addEventListener('click', closeSheet);
+    if (moreBackdrop) moreBackdrop.addEventListener('click', closeSheet);
+
+    var wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    var ws = new WebSocket(wsProtocol + '//' + window.location.host + '/online-check');
+    ws.addEventListener('error', function () {});
   });
-
-  if (typeof updateToggleDot === 'function') updateToggleDot();
-
-  var moreBtn = document.getElementById('more-nav-btn');
-  var moreSheet = document.getElementById('more-sheet');
-  var moreBackdrop = document.getElementById('more-sheet-backdrop');
-  var moreClose = document.getElementById('more-sheet-close');
-
-  function openSheet() {
-    moreSheet.classList.remove('translate-y-full');
-    moreBackdrop.classList.remove('opacity-0', 'pointer-events-none');
-  }
-
-  function closeSheet() {
-    moreSheet.classList.add('translate-y-full');
-    moreBackdrop.classList.add('opacity-0', 'pointer-events-none');
-  }
-
-  if (moreBtn) moreBtn.addEventListener('click', openSheet);
-  if (moreClose) moreClose.addEventListener('click', closeSheet);
-  if (moreBackdrop) moreBackdrop.addEventListener('click', closeSheet);
-
-  var wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  var ws = new WebSocket(wsProtocol + '//' + window.location.host + '/online-check');
-  ws.addEventListener('error', function() {});
-});
+})();
 </script>
 <script>
 (function () {

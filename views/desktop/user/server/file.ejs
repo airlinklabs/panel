@@ -4,7 +4,7 @@
     <div class="w-60 h-full">
       <%- include('../../components/template') %>
     </div>
-    <div class="flex-1 p-6 overflow-y-auto pt-16">
+    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">
         <%- include('../../components/serverHeader') %>
       </div>
@@ -14,6 +14,8 @@
       <!-- Daemon down message removed as requested -->
 
       <%- include('../../components/serverTemplate') %>
+
+      <div id="server-page-body">
 
       <!-- Daemon Offline Warning -->
       <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
@@ -102,7 +104,10 @@
         </div>
       </div>
     </div>
-  </div>
+  
+      </div><!-- /server-page-body -->
+
+      </div>
 </main>
 
 <%- include('../../components/toast')%>
