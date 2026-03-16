@@ -49,11 +49,11 @@
       </div>
 
       <!-- Update status -->
-      <div class="collapsible-row no-anim" id="updateStatusRow"><div><div id="updateStatus" class="collapsible-target rounded-lg bg-neutral-100 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 mb-3 hidden">
+      <div id="updateStatus" class="rounded-lg bg-neutral-100 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 mb-3 hidden">
         <p id="updateStatusText" class="text-xs text-neutral-600 dark:text-neutral-300"></p>
       </div>
 
-      <div class="collapsible-row no-anim" id="updateInfoRow"><div><div id="updateInfo" class="hidden mb-3">
+      <div id="updateInfo" class="hidden mb-3">
         <p id="updateInfoText" class="text-xs text-neutral-500"></p>
       </div>
 
@@ -66,8 +66,6 @@
         <div class="h-1.5 w-full bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden">
           <div id="latencyBar" class="h-full bg-neutral-400 rounded-full transition-all duration-300" style="width: 0%"></div>
         </div>
-      </div></div>
-      </div></div>
       </div>
 
       <!-- Action buttons -->
@@ -75,9 +73,9 @@
         <button id="checkUpdateBtn" type="button" class="flex-1 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
           Check Updates
         </button>
-        <div class="collapsible-row no-anim" id="performUpdateBtnRow"><div><button id="performUpdateBtn" type="button" class="hidden flex-1 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-500 transition">
+        <button id="performUpdateBtn" type="button" class="hidden flex-1 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-500 transition">
           Install Update
-        </button></div></div>
+        </button>
       </div>
     </div>
 
@@ -150,12 +148,12 @@
       if (data.hasUpdate) {
         statusText.textContent = `Update available: v${data.latestVersion}`;
         statusText.className = 'text-xs text-amber-600 dark:text-amber-400';
-        document.getElementById('performUpdateBtnRow').classList.add('open');
+        updateBtn.classList.remove('hidden');
         updateBtn.classList.add('flex');
       } else {
         statusText.textContent = '<%= req.translations.runningLatestVersion || "You are running the latest version." %>';
         statusText.className = 'text-xs text-emerald-600 dark:text-emerald-400';
-        document.getElementById('performUpdateBtnRow').classList.remove('open');
+        updateBtn.classList.add('hidden');
         updateBtn.classList.remove('flex');
       }
       fadeInEl(statusDiv);
@@ -170,22 +168,29 @@
   });
 
   document.getElementById('performUpdateBtn').addEventListener('click', async () => {
-    if (!confirm('Install update? The server will restart.')) return;
-    const statusText = document.getElementById('updateStatusText');
-    statusText.textContent = 'Installing...';
-    statusText.className = 'text-xs text-blue-500';
-    try {
-      const response = await fetch('/admin/perform-update', { method: 'POST' });
-      const data = await response.json();
-      showToast(data.message || 'Update started. Restarting...', 'success');
-      statusText.textContent = 'Restarting...';
-      statusText.className = 'text-xs text-emerald-600 dark:text-emerald-400';
-      setTimeout(() => window.location.reload(), 5000);
-    } catch (err) {
-      statusText.textContent = 'Update failed.';
-      statusText.className = 'text-xs text-red-500';
-      showToast('Error performing update', 'error');
-    }
+    window.modal.confirm({
+      title: 'Install Update',
+      body: 'The panel will perform the update and restart the server.',
+      confirmLabel: 'Install',
+      danger: false,
+      onConfirm: async () => {
+        const statusText = document.getElementById('updateStatusText');
+        statusText.textContent = 'Installing...';
+        statusText.className = 'text-xs text-blue-500';
+        try {
+          const response = await fetch('/admin/perform-update', { method: 'POST' });
+          const data = await response.json();
+          showToast(data.message || 'Update started. Restarting...', 'success');
+          statusText.textContent = 'Restarting...';
+          statusText.className = 'text-xs text-emerald-600 dark:text-emerald-400';
+          setTimeout(() => window.location.reload(), 5000);
+        } catch (err) {
+          statusText.textContent = 'Update failed.';
+          statusText.className = 'text-xs text-red-500';
+          showToast('Error performing update', 'error');
+        }
+      }
+    });
   });
 
   function fadeInEl(el) {

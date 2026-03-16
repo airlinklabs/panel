@@ -59,3 +59,29 @@ body, html {
   min-height: 0;
   overflow: hidden;
 }
+/* Checkbox spring animation — applied via JS to any interactive checkbox */
+input[type="checkbox"].cb-anim {
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Consistent checkbox appearance across light/dark modes.
+   Only applies to visible checkboxes — sr-only ones are intentionally hidden. */
+input[type="checkbox"]:not(.sr-only) {
+  background-color: #ffffff;
+  border-color: #d1d5db;
+}
+
+.dark input[type="checkbox"]:not(.sr-only) {
+  background-color: #171717;
+  border-color: rgba(255,255,255,0.15);
+}
+
+input[type="checkbox"]:not(.sr-only):checked {
+  background-color: #404040;
+  border-color: #404040;
+}
+
+.dark input[type="checkbox"]:not(.sr-only):checked {
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
