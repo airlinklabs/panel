@@ -153,7 +153,7 @@
     <div id="radarPickerPhase" class="px-5 py-4 shrink-0">
 
       <!-- Scan mode toggle — only shown when VT key is configured -->
-      <div id="scanModeToggle" class="hidden mb-4">
+      <div class="collapsible-row" id="scanModeToggleRow"><div><div id="scanModeToggle" class="hidden mb-4">
         <div class="flex gap-2">
           <button type="button" id="modeBuiltin" onclick="setScanMode('builtin')" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border-2 border-neutral-800 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition-all">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
@@ -165,6 +165,7 @@
           </button>
         </div>
       </div>
+        </div></div>
 
       <!-- Built-in script picker -->
       <div id="builtinPickerSection">
@@ -221,7 +222,7 @@
     .then(r => r.json())
     .then(d => {
       vtEnabled = d.enabled;
-      if (vtEnabled) document.getElementById('scanModeToggle').classList.remove('hidden');
+      if (vtEnabled) document.getElementById('scanModeToggleRow').classList.add('open');
     })
     .catch(() => {});
 

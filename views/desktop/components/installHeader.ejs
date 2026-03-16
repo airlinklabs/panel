@@ -53,10 +53,14 @@
       if (!label || shownSteps.has(label)) return;
       shownSteps.add(label);
       const row = document.createElement('div');
-      row.className = 'flex items-center gap-1.5 opacity-0 transition-opacity duration-300';
+      row.className = 'flex items-center gap-1.5';
+      row.style.cssText = 'overflow:hidden;max-height:0;opacity:0;transition:max-height 0.35s cubic-bezier(0.16,1,0.3,1),opacity 0.3s ease,margin 0.35s ease';
       row.innerHTML = `<span class="text-[10px] text-emerald-500">✓</span><span class="text-[11px] text-blue-400 dark:text-blue-400/70">${label}</span>`;
       stepsEl.appendChild(row);
-      requestAnimationFrame(() => row.classList.remove('opacity-0'));
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        row.style.maxHeight = '2rem';
+        row.style.opacity = '1';
+      }));
     }
 
     const stepTimer = setInterval(() => {
