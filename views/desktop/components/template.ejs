@@ -34,7 +34,7 @@
                     if (!sidebarItems || sidebarItems.length === 0) {
                     %>
                       <li class="nav-item">
-                          <a href="/" class="nav-link mt-1 text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" data-search="container instances servers" data-subterm="jegli:/server/servername">
+                          <a href="/" class="nav-link mt-1 text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" data-search="container instances servers" data-subterm="jegli:/server/servername" data-match-prefix="/server">
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 mt-0.5">
                                   <path d="M12.378 1.602a.75.75 0 0 0-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03ZM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 0 0 .372-.648V7.93ZM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 0 0 .372.648l8.628 5.033Z" />
                               </svg>
@@ -48,15 +48,6 @@
                                   <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                               </svg>
                               <span><%= req.translations.navAccount || 'Account' %></span>
-                          </a>
-                      </li>
-                      <!-- SPA Test link -->
-                      <li class="nav-item">
-                          <a href="/test/spa" class="nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" data-search="spa test single page application">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mt-0.5">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 14.5M14.25 3.104c.251.023.501.05.75.082M19.8 14.5l-7.058 7.058a2.25 2.25 0 01-1.591.659H8.25a2.25 2.25 0 01-2.25-2.25V15.5a2.25 2.25 0 01.659-1.591L14.25 6.317z" />
-                              </svg>
-                              <span>SPA Test</span>
                           </a>
                       </li>
                     <% } else {
@@ -167,75 +158,13 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const navLinks = document.querySelectorAll('.nav-link');
-  const activeBackground = document.getElementById('active-background');
-  let isAnimating = false;
-  let currentActiveLink = null;
-
-  // Utility functions
-  const getCookie = name => {
-      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-      return match ? decodeURIComponent(match[2]) : null;
-  };
-
-  const setCookie = (name, value, days) => {
-      const date = new Date();
-      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-      document.cookie = `${name}=${encodeURIComponent(value)}; expires=${date.toUTCString()}; path=/; SameSite=Strict`;
-  };
-
-  const normalizePath = path => {
-      try {
-          const url = new URL(path, window.location.origin);
-          return url.pathname.replace(/\/+$/, '');
-      } catch (error) {
-          console.warn('Invalid path:', path);
-          return '';
-      }
-  };
-
-  // Initialize active state
-  const initializeActiveState = () => {
-      const currentPath = normalizePath(window.location.pathname);
-      const activeLink = Array.from(navLinks).find(link => {
-          const href = link.getAttribute('href');
-          return href && normalizePath(href) === currentPath;
-      });
-
-      if (activeLink) {
-          activeLink.classList.add('active', 'text-neutral-950', 'font-[405]', 'dark:text-white');
-
-          const linkRect = activeLink.getBoundingClientRect();
-          const navContainer = activeLink.closest('ul');
-          const navRect = navContainer.getBoundingClientRect();
-          const topOffset = linkRect.top - navRect.top + navContainer.scrollTop;
-
-          activeBackground.style.transition = 'none';
-          activeBackground.style.height = `${linkRect.height}px`;
-          activeBackground.style.transform = `translateY(${topOffset}px)`;
-
-          activeBackground.offsetHeight;
-
-          activeBackground.style.transition = 'opacity 0.2s ease-in-out';
-          activeBackground.style.opacity = '1';
-
-          setTimeout(() => {
-              activeBackground.style.transition = 'all 0.2s ease-in-out';
-          }, 0);
-
-          currentActiveLink = activeLink;
-      }
-  };
-
-  initializeActiveState();
-
-  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const ws = new WebSocket(`${wsProtocol}//${window.location.host}/online-check`);
-  ws.addEventListener('open', () => console.log('WebSocket connected'));
-  ws.addEventListener('error', console.error);
-});
-
+(function () {
+  // Highlight init is handled by page-loader.js which loads before this.
+  // Keep the presence WebSocket alive.
+  var wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  var ws = new WebSocket(wsProtocol + '//' + window.location.host + '/online-check');
+  ws.addEventListener('error', function () {});
+})();
 </script>
 <div id="colcont" class="lg:pl-56">
   <div class="backdrop-blur bg-opacity-50 absolute inset-0 z-30 h-16"></div>

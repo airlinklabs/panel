@@ -10,7 +10,7 @@
     </aside>
 
     <!-- Main Content -->
-    <section class="flex-1 p-6 overflow-y-auto pt-16">
+    <section id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
       <!-- Page Header -->
       <header class="sm:flex sm:items-center px-8 pt-4">
         <%- include('../../components/serverHeader') %>
@@ -29,6 +29,8 @@
 
       <!-- Server Template -->
       <%- include('../../components/serverTemplate') %>
+
+      <div id="server-page-body">
 
       <!-- Backups Management -->
       <div class="px-6">
@@ -125,7 +127,10 @@
           </div>
         </div>
     </section>
-  </div>
+  
+      </div><!-- /server-page-body -->
+
+      </div>
 </main>
 
 <%- include('../../components/toast') %>
