@@ -2507,9 +2507,6 @@
   .opacity-60 {
     opacity: 60%;
   }
-  .opacity-70 {
-    opacity: 70%;
-  }
   .opacity-75 {
     opacity: 75%;
   }
@@ -3302,13 +3299,6 @@
     &:hover {
       @media (hover: hover) {
         color: var(--color-neutral-400);
-      }
-    }
-  }
-  .hover\:text-neutral-500 {
-    &:hover {
-      @media (hover: hover) {
-        color: var(--color-neutral-500);
       }
     }
   }

@@ -57,7 +57,7 @@
                 </svg>
                 Check Updates
               </button>
-              <div class="collapsible-row" id="performUpdateBtnRow"><div><button id="performUpdateBtn" class="hidden rounded-xl bg-neutral-200 dark:bg-neutral-700/60 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border border-neutral-300 dark:border-white/5 px-3 py-2 text-sm font-medium transition-colors items-center gap-1.5">
+              <div class="collapsible-row no-anim" id="performUpdateBtnRow"><div><button id="performUpdateBtn" class="hidden rounded-xl bg-neutral-200 dark:bg-neutral-700/60 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border border-neutral-300 dark:border-white/5 px-3 py-2 text-sm font-medium transition-colors items-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
@@ -80,8 +80,8 @@
             <div class="rounded-xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 p-4">
               <p class="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2">Update Status</p>
               <p class="text-xs text-neutral-500 mb-3"><%= req.translations.sysInfoText %> <span class="text-neutral-700 dark:text-neutral-300 font-medium" id="current-version-inline"></span></p>
-              <div class="collapsible-row" id="updateStatusRow"><div><div id="updateStatus" class="collapsible-target text-sm hidden rounded-lg p-3 bg-neutral-200/60 dark:bg-neutral-800/60"></div>
-              <div class="collapsible-row" id="updateInfoRow"><div><div id="updateInfo" class="mt-3 hidden"></div>
+              <div class="collapsible-row no-anim" id="updateStatusRow"><div><div id="updateStatus" class="collapsible-target text-sm hidden rounded-lg p-3 bg-neutral-200/60 dark:bg-neutral-800/60"></div>
+              <div class="collapsible-row no-anim" id="updateInfoRow"><div><div id="updateInfo" class="mt-3 hidden"></div>
             </div>
       </div></div>
       </div></div>

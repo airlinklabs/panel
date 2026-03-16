@@ -1,66 +1,89 @@
-<%- include('../../components/header', { title: 'Dashboard' }) %>
+<%- include('../../components/header', { title: 'Servers' }) %>
 
 <main class="h-screen m-auto">
   <div class="flex h-screen">
-    <!-- Sidebar -->
     <div class="w-60 h-full">
       <%- include('../../components/template') %>
     </div>
-    <!-- Content -->
+
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
+
+      <!-- Page header -->
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
           <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminServersTitle %></h1>
           <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminServersText %></p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button id="createButton" onclick="location.href='/admin/servers/create';" type="button" class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300">
+          <button onclick="location.href='/admin/servers/create'" type="button"
+            class="border border-neutral-800/20 dark:border-white/10 block rounded-xl bg-white dark:bg-white/5 hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-800 dark:text-white px-3 py-2 text-center text-sm font-medium shadow-sm transition">
             <%= req.translations.createNewServer %>
           </button>
         </div>
       </div>
 
-      <!-- notifications -->
       <% if (req.query.err == "none") { %>
-        <div class="mt-6 ml-8 mr-8">
-          <div class="rounded-xl bg-emerald-600/20 dark:bg-emerald-800/10 px-4 py-6 shadow-lg border border-neutral-800/20">
-            <div class="flex">
-              <div class="flex-shrink-0 ml-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mt-2 text-emerald-400">
-                  <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-                </svg>
-              </div>
-              <div class="ml-5">
-                <h3 class="text-sm font-medium text-emerald-400"><%= req.translations.success %>!</h3>
-                <p class="text-sm text-emerald-400/50"><%= req.translations.actionCompleted %></p>
-              </div>
-            </div>
-          </div>
+      <div class="mt-6 mx-8">
+        <div class="rounded-xl bg-emerald-600/10 dark:bg-emerald-800/10 px-4 py-3 border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-emerald-500 shrink-0">
+            <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/>
+          </svg>
+          <p class="text-sm text-emerald-700 dark:text-emerald-400"><%= req.translations.actionCompleted %></p>
         </div>
+      </div>
       <% } %>
 
-      <!-- Bulk action toolbar — shown only when servers are selected -->
-      <div id="bulkToolbar" class="mx-8 mt-6 mb-0 overflow-hidden" style="max-height:0;opacity:0;transition:max-height 0.2s ease,opacity 0.15s ease">
-        <div class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700/40">
-          <span id="selectionCount" class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mr-2">0 selected</span>
+      <!-- Sentinel — watched to know when toolbar scrolls off screen -->
+      <div id="toolbarSentinel" class="h-px w-full mx-8" aria-hidden="true"></div>
+
+      <!-- Bulk toolbar — display:none by default, JS shows it when checkboxes checked -->
+      <div id="bulkToolbarRow" style="display:none;overflow:hidden;transition:max-height 0.38s cubic-bezier(0.16,1,0.3,1),opacity 0.28s ease;max-height:0;opacity:0">
+        <div class="mx-8 mt-4 mb-0">
+          <div class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700/40">
+            <span class="selection-count text-sm font-medium text-neutral-600 dark:text-neutral-300 mr-1">0 selected</span>
+            <div class="h-4 w-px bg-neutral-200 dark:bg-neutral-700 mx-1"></div>
+            <button type="button" onclick="bulkRadarScan()"
+              class="inline-flex items-center gap-1.5 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+              </svg>
+              Radar Scan
+            </button>
+            <button type="button" onclick="bulkDelete()"
+              class="inline-flex items-center gap-1.5 rounded-lg bg-red-600 hover:bg-red-500 border border-red-700/30 px-3 py-1.5 text-xs font-medium text-white transition-colors ml-auto">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
+              </svg>
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating pill — fixed below topbar when toolbar scrolls off screen -->
+      <div id="floatingToolbar"
+        style="position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:40;opacity:0;pointer-events:none;transition:opacity 0.22s ease,transform 0.22s cubic-bezier(0.16,1,0.3,1)">
+        <div class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-neutral-900 shadow-xl border border-neutral-200 dark:border-neutral-700/60">
+          <span class="selection-count text-sm font-medium text-neutral-600 dark:text-neutral-300 mr-1">0 selected</span>
           <div class="h-4 w-px bg-neutral-200 dark:bg-neutral-700 mx-1"></div>
-          <button type="button" onclick="bulkRadarScan()" class="inline-flex items-center gap-1.5 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+          <button type="button" onclick="bulkRadarScan()"
+            class="inline-flex items-center gap-1.5 rounded-lg bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
             </svg>
             Radar Scan
           </button>
-
-          <button type="button" onclick="bulkDelete()" class="inline-flex items-center gap-1.5 rounded-lg bg-red-600 hover:bg-red-500 border border-red-700/30 px-3 py-1.5 text-xs font-medium text-white transition-colors ml-auto">
+          <button type="button" onclick="bulkDelete()"
+            class="inline-flex items-center gap-1.5 rounded-lg bg-red-600 hover:bg-red-500 border border-red-700/30 px-3 py-1.5 text-xs font-medium text-white transition-colors ml-auto">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
             </svg>
             Delete
           </button>
         </div>
       </div>
 
-      <!-- Table of servers -->
+      <!-- Server table -->
       <div class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40" id="serverTable">
         <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
           <thead class="bg-neutral-50 dark:bg-neutral-800/50">
@@ -78,64 +101,74 @@
           </thead>
           <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
             <% servers.forEach(function(server) { %>
-              <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors server-row" data-id="<%= server.id %>" data-uuid="<%= server.UUID %>">
-                <td class="py-4 pl-4 pr-3 sm:pl-6 w-10">
-                  <input type="checkbox" class="server-checkbox rounded border-neutral-300 dark:border-neutral-600 text-neutral-800 dark:bg-neutral-700 cursor-pointer" value="<%= server.id %>" data-uuid="<%= server.UUID %>" data-edit-id="<%= server.id %>">
-                </td>
-                <td class="whitespace-nowrap py-4 pr-3 text-sm">
-                  <div class="flex items-center gap-3">
-                    <span class="shrink-0 relative flex h-2 w-2">
-                      <% if (server.Suspended) { %>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-neutral-400"></span>
-                      <% } else { %>
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                      <% } %>
-                    </span>
-                    <div>
-                      <div class="font-medium text-neutral-800 dark:text-white"><%= server.name %></div>
-                      <div class="text-xs text-neutral-400 dark:text-neutral-500 font-mono mt-0.5"><%= server.UUID %></div>
-                    </div>
+            <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.03] transition-colors cursor-pointer server-row" data-id="<%= server.id %>" data-uuid="<%= server.UUID %>">
+              <td class="py-4 pl-4 pr-3 sm:pl-6 w-10">
+                <input type="checkbox" class="server-checkbox rounded border-neutral-300 dark:border-neutral-600 text-neutral-800 dark:bg-neutral-700 cursor-pointer"
+                  value="<%= server.id %>" data-uuid="<%= server.UUID %>" data-edit-id="<%= server.id %>" data-name="<%= server.name %>">
+              </td>
+              <td class="whitespace-nowrap py-4 pr-3 text-sm">
+                <div class="flex items-center gap-3">
+                  <span class="shrink-0 relative flex h-2 w-2">
+                    <% if (server.Suspended) { %>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-neutral-400"></span>
+                    <% } else { %>
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    <% } %>
+                  </span>
+                  <div>
+                    <div class="font-medium text-neutral-800 dark:text-white"><%= server.name %></div>
+                    <div class="text-xs text-neutral-400 dark:text-neutral-500 font-mono mt-0.5"><%= server.UUID %></div>
                   </div>
-                </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm">
-                  <a href="/admin/users/view/<%= server.owner.id %>" class="flex items-center gap-2 group" onclick="event.stopPropagation()">
-                    <img class="h-6 w-6 rounded-md object-cover shrink-0" src="<%= server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner.username) %>" alt="">
-                    <span class="font-medium text-neutral-800 dark:text-blue-400 group-hover:underline"><%= server.owner.username %></span>
+                </div>
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm">
+                <a href="/admin/users/view/<%= server.owner.id %>" class="flex items-center gap-2 group" onclick="event.stopPropagation()">
+                  <img class="h-6 w-6 rounded-md object-cover shrink-0"
+                    src="<%= server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner.username) %>" alt="">
+                  <span class="font-medium text-neutral-800 dark:text-blue-400 group-hover:underline"><%= server.owner.username %></span>
+                </a>
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm">
+                <a href="/admin/node/<%= server.node.id %>/stats" class="font-medium text-neutral-800 dark:text-blue-400 hover:underline" onclick="event.stopPropagation()"><%= server.node.name %></a>
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400">
+                <%= server.node.address %>:<%= JSON.parse(server.Ports).filter(p => p.primary).map(p => p.Port.split(':')[1]).pop() %>
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm">
+                <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset
+                  <%= server.Suspended ? 'bg-amber-600/10 text-amber-600 dark:text-amber-400 ring-amber-600/20' : 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' %>">
+                  <%= server.Suspended ? 'Suspended' : 'Enabled' %>
+                </span>
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm">
+                <div class="flex items-center gap-1.5">
+                  <a href="/server/<%= server.UUID %>" onclick="event.stopPropagation()" title="Open console"
+                    class="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
+                    </svg>
                   </a>
-                </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm">
-                  <a href="/admin/node/<%= server.node.id %>/stats" class="font-medium text-neutral-800 dark:text-blue-400" onclick="event.stopPropagation()"><%= server.node.name %></a>
-                </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400">
-                  <%= server.node.address %>:<%= JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.Port.split(':')[1]).pop() %>
-                </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm">
-                  <div class="inline-flex items-center rounded-md
-                    <%= server.Suspended ? 'bg-yellow-600/10 text-yellow-600 dark:text-yellow-400 ring-yellow-600/20' : 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' %>
-                    px-2 py-1 text-xs font-medium ring-1 ring-inset">
-                    <%= server.Suspended ? 'Suspended' : 'Enabled' %>
-                  </div>
-                </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm">
-                  <div class="flex items-center gap-1.5">
-                    <a href="/server/<%= server.UUID %>" onclick="event.stopPropagation()" title="Open console" class="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                      </svg>
-                    </a>
-                    <a href="/admin/servers/edit/<%= server.id %>" onclick="event.stopPropagation()" title="Edit server" class="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                      </svg>
-                    </a>
-                  </div>
-                </td>
-              </tr>
+                  <a href="/admin/servers/edit/<%= server.id %>" onclick="event.stopPropagation()" title="Edit"
+                    class="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/>
+                    </svg>
+                  </a>
+                  <button type="button" onclick="event.stopPropagation(); openRadarScanModal('<%= server.id %>', '<%= server.name %>')" title="Radar scan"
+                    class="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
             <% }); %>
           </tbody>
         </table>
       </div>
+
     </div>
   </div>
 </main>
@@ -143,63 +176,63 @@
 <%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
 
-
-
-<!-- Radar Scan Modal -->
-<div id="radarScanModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+<!-- Radar scan modal -->
+<div id="radarScanModal" class="fixed inset-0 z-50 hidden">
   <div class="flex items-center justify-center min-h-screen p-4">
-    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" id="radarScanModalBackdrop"></div>
-    <div class="relative bg-white dark:bg-neutral-800 rounded-xl shadow-xl max-w-2xl w-full overflow-hidden transform transition-all">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" id="radarScanModalBackdrop"></div>
+    <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden">
 
-      <!-- Modal header -->
-      <div class="flex justify-between items-center px-6 py-4 border-b border-neutral-200 dark:border-neutral-700/50">
+      <div class="flex justify-between items-start px-6 py-4 border-b border-neutral-200 dark:border-neutral-700/50">
         <div>
-          <h3 class="text-base font-medium text-neutral-800 dark:text-white" id="radarScanModalTitle">Radar Scan</h3>
-          <p class="text-xs text-neutral-500 mt-0.5" id="radarScanModalSubtitle">Pick a script and run a scan against the server volume</p>
+          <h3 class="text-sm font-semibold text-neutral-800 dark:text-white" id="radarScanModalTitle">Radar Scan</h3>
+          <p class="text-xs text-neutral-500 mt-0.5" id="radarScanModalSubtitle">Pick a script and scan the server volume</p>
         </div>
-        <button type="button" class="text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition-colors" onclick="closeRadarScanModal()">
+        <button type="button" onclick="closeRadarScanModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition ml-4 mt-0.5">
           <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
       </div>
 
-      <!-- Script picker phase -->
+      <!-- Picker phase -->
       <div id="radarPickerPhase" class="px-6 py-5">
 
-        <!-- Scan mode toggle — VT option only shown when key is configured -->
-        <div class="collapsible-row" id="scanModeToggleRow"><div><div id="scanModeToggle" class="hidden mb-5">
+        <!-- Scan mode toggle — only shown when VT key configured -->
+        <div id="scanModeToggle" class="hidden mb-5">
           <p class="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2">Scan method</p>
           <div class="flex gap-2">
-            <button type="button" id="modeBuiltin" onclick="setScanMode('builtin')" class="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-neutral-800 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition-all">
+            <button type="button" id="modeBuiltin" onclick="setScanMode('builtin')"
+              class="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-neutral-800 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition-all">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
               </svg>
               Built-in patterns
             </button>
-            <button type="button" id="modeVT" onclick="setScanMode('vt')" class="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-xs font-medium transition-all hover:border-neutral-400 dark:hover:border-neutral-500">
+            <button type="button" id="modeVT" onclick="setScanMode('vt')"
+              class="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-xs font-medium transition-all hover:border-neutral-400 dark:hover:border-neutral-500">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 shrink-0">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Z"/>
               </svg>
               VirusTotal file scan
             </button>
           </div>
         </div>
-        </div></div>
 
-        <!-- Built-in: script picker -->
+        <!-- Built-in script picker -->
         <div id="builtinPickerSection">
           <div class="flex gap-4 items-start">
             <div class="flex-1">
               <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Script</label>
-              <select id="scriptSelect" class="w-full rounded-lg text-neutral-800 dark:text-white text-sm px-3 py-2 bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-700/50 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500">
+              <select id="scriptSelect"
+                class="w-full rounded-lg text-neutral-800 dark:text-white text-sm px-3 py-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/50 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500">
                 <option value="">Loading scripts...</option>
               </select>
             </div>
             <div class="pt-5">
-              <button type="button" id="runScanButton" onclick="runRadarScan()" class="inline-flex items-center gap-2 rounded-lg bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/30 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 dark:hover:bg-neutral-600 transition-colors">
+              <button type="button" id="runScanButton" onclick="runRadarScan()"
+                class="inline-flex items-center gap-2 rounded-lg bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/30 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 dark:hover:bg-neutral-600 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
                 </svg>
                 Run Scan
               </button>
@@ -208,16 +241,17 @@
           <p id="scriptDescription" class="mt-2 text-xs text-neutral-500 italic min-h-4"></p>
         </div>
 
-        <!-- VT file scan section -->
+        <!-- VT file scan -->
         <div id="vtScanSection" class="hidden">
           <div class="rounded-lg bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700/50 p-4 mb-4 text-xs text-neutral-500 space-y-1">
             <p>Zips <span class="font-mono text-neutral-700 dark:text-neutral-300">plugins/</span>, <span class="font-mono text-neutral-700 dark:text-neutral-300">mods/</span>, <span class="font-mono text-neutral-700 dark:text-neutral-300">config/</span>, <span class="font-mono text-neutral-700 dark:text-neutral-300">addons/</span>, <span class="font-mono text-neutral-700 dark:text-neutral-300">datapacks/</span> and uploads to VirusTotal.</p>
-            <p>Excludes world folders, logs, and cache. Max 32 MB zip. Takes 30–120 seconds.</p>
+            <p>Excludes world folders, logs, cache. Max 32 MB zip. Takes 30–120 seconds.</p>
             <p class="text-amber-600 dark:text-amber-400">Free tier: 4 requests/min · 500/day. Do not use for automated scanning.</p>
           </div>
-          <button type="button" id="runVtScanButton" onclick="runVtFileScan()" class="inline-flex items-center gap-2 rounded-lg bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/30 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 dark:hover:bg-neutral-600 transition-colors">
+          <button type="button" id="runVtScanButton" onclick="runVtFileScan()"
+            class="inline-flex items-center gap-2 rounded-lg bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/30 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 dark:hover:bg-neutral-600 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Z"/>
             </svg>
             Upload to VirusTotal
           </button>
@@ -225,27 +259,23 @@
 
       </div>
 
-      <!-- Results phase — hidden until scan runs -->
+      <!-- Results phase -->
       <div id="radarResultsPhase" class="hidden">
-
-        <!-- Summary bar -->
         <div id="radarSummaryBar" class="px-6 py-3 border-t border-neutral-200 dark:border-neutral-700/50 flex items-center gap-4 bg-neutral-50 dark:bg-neutral-800/60"></div>
-
-        <!-- Server tabs (only shown for multi-server scans) -->
         <div id="radarServerTabs" class="hidden border-b border-neutral-200 dark:border-neutral-700/50 px-6 pt-3 flex gap-1 overflow-x-auto"></div>
-
-        <!-- Results body -->
         <div id="radarResultsBody" class="px-6 py-4 max-h-80 overflow-y-auto"></div>
-
       </div>
 
-      <!-- Modal footer -->
+      <!-- Footer -->
       <div class="px-6 py-4 border-t border-neutral-200 dark:border-neutral-700/50 flex justify-between items-center">
         <button type="button" id="radarRescanBtn" class="hidden text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors" onclick="resetRadarToPickerPhase()">
           ← Run another scan
         </button>
         <div class="ml-auto">
-          <button type="button" onclick="closeRadarScanModal()" class="rounded-lg bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-600 text-neutral-700 dark:text-neutral-200 px-3 py-1.5 text-sm font-medium transition-colors">Close</button>
+          <button type="button" onclick="closeRadarScanModal()"
+            class="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 px-3 py-1.5 text-sm font-medium transition-colors">
+            Close
+          </button>
         </div>
       </div>
 
@@ -254,310 +284,186 @@
 </div>
 
 <script>
-  // --- VirusTotal ---
+(function () {
 
-  let vtEnabled = false;
-  let scanMode = 'builtin'; // 'builtin' | 'vt'
+  // ── State ──────────────────────────────────────────────────────────────────
+  var vtEnabled = false;
+  var scanMode = 'builtin';
+  var currentServerIds = [];
+  var radarServerNames = {};
+  var availableScripts = [];
 
-  fetch('/admin/radar/virustotal-enabled')
-    .then(r => r.json())
-    .then(d => {
-      vtEnabled = d.enabled;
-      if (vtEnabled) document.getElementById('scanModeToggleRow').classList.add('open');
-    })
-    .catch(() => {});
-
-  function setScanMode(mode) {
-    scanMode = mode;
-    const builtinBtn = document.getElementById('modeBuiltin');
-    const vtBtn = document.getElementById('modeVT');
-    const activeClass = 'flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-neutral-800 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition-all';
-    const inactiveClass = 'flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-xs font-medium transition-all hover:border-neutral-400 dark:hover:border-neutral-500';
-    if (mode === 'builtin') {
-      builtinBtn.className = activeClass;
-      vtBtn.className = inactiveClass;
-      document.getElementById('builtinPickerSection').classList.remove('hidden');
-      document.getElementById('vtScanSection').classList.add('hidden');
-    } else {
-      vtBtn.className = activeClass;
-      builtinBtn.className = inactiveClass;
-      document.getElementById('vtScanSection').classList.remove('hidden');
-      document.getElementById('builtinPickerSection').classList.add('hidden');
-    }
-  }
-
-  async function runVtFileScan() {
-    if (currentServerIds.length === 0) return;
-    const serverId = currentServerIds[0];
-    const btn = document.getElementById('runVtScanButton');
-
-    btn.disabled = true;
-    btn.innerHTML = `
-      <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      Starting...
-    `;
-
-    closeRadarScanModal();
-
-    const p = window.loadingPopupSystem;
-    p.open('VirusTotal Scan', 'default');
-    p.setProgress(5, 'Requesting file archive from node...');
-    p.addStep('Connecting to node');
-
-    // Animate progress while waiting — VT takes 60–120s
-    const steps = [
-      { at: 3000,  pct: 12, msg: 'Node zipping plugins, mods and config...', step: 'Archiving server files' },
-      { at: 8000,  pct: 22, msg: 'Uploading archive to VirusTotal...', step: 'Archive ready — uploading to VT' },
-      { at: 14000, pct: 35, msg: 'VirusTotal is queuing the analysis...', step: 'Upload complete' },
-      { at: 22000, pct: 48, msg: 'Analysis in progress — checking signatures...', step: 'VT analysis started' },
-      { at: 35000, pct: 60, msg: 'Running 70+ antivirus engines...', step: 'Scanning with multiple engines' },
-      { at: 50000, pct: 72, msg: 'Almost done — collecting results...', step: 'Engines finishing up' },
-      { at: 65000, pct: 82, msg: 'Waiting for final verdicts...', step: 'Collecting final results' },
-    ];
-    const timers = steps.map(s => setTimeout(() => { p.setProgress(s.pct, s.msg); p.addStep(s.step); }, s.at));
-
-    try {
-      const r = await fetch('/admin/radar/vtscan/' + serverId, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const data = await r.json();
-
-      timers.forEach(t => clearTimeout(t));
-
-      if (!data.success) {
-        p.setProgress(100, 'Scan failed');
-        p.addStep(data.error || 'VT scan failed', 'error');
-        p.setIcon('error');
-        showToast(data.error || 'VT scan failed', 'error');
-        setTimeout(() => p.close(), 3000);
-        return;
-      }
-
-      p.setProgress(100, 'Scan complete');
-      p.addStep('Analysis complete', 'done');
-      p.setIcon('done');
-
-      setTimeout(() => {
-        p.close();
-        // Reopen the radar modal in results phase
-        document.getElementById('radarScanModalTitle').textContent = 'VirusTotal Scan: ' + (data.serverName || 'Server');
-        document.getElementById('radarPickerPhase').classList.add('hidden');
-        document.getElementById('radarResultsPhase').classList.remove('hidden');
-        document.getElementById('radarRescanBtn').classList.remove('hidden');
-        document.getElementById('radarScanModal').classList.remove('hidden');
-        renderVtFileScanResults(data);
-      }, 1000);
-
-    } catch (err) {
-      timers.forEach(t => clearTimeout(t));
-      p.setProgress(100, 'Request failed');
-      p.addStep('Network error', 'error');
-      p.setIcon('error');
-      showToast('VT file scan failed', 'error');
-      setTimeout(() => p.close(), 3000);
-      console.error('VT file scan error:', err);
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Z" />
-        </svg>
-        Upload to VirusTotal
-      `;
-    }
-  }
-
-  function renderVtFileScanResults(data) {
-    const summaryEl = document.getElementById('radarSummaryBar');
-    const bodyEl = document.getElementById('radarResultsBody');
-    document.getElementById('radarServerTabs').classList.add('hidden');
-
-    if (data.pending) {
-      summaryEl.innerHTML = `<span class="text-sm text-amber-600 dark:text-amber-400 font-medium">Analysis still processing on VT</span>`;
-      bodyEl.innerHTML = `
-        <div class="py-6 text-center">
-          <p class="text-sm text-neutral-600 dark:text-neutral-300 mb-3">VT is still analysing the files. Check back directly:</p>
-          <a href="${data.vtLink}" target="_blank" rel="noopener" class="text-sm text-blue-500 hover:underline">${data.vtLink}</a>
-        </div>`;
-      return;
-    }
-
-    const malCount = data.maliciousEngines?.length || 0;
-    const total = data.totalEngines || 0;
-
-    if (malCount === 0) {
-      summaryEl.innerHTML = `
-        <span class="inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/></svg>
-          Clean — 0/${total} engines flagged
-        </span>
-        <a href="${data.vtLink}" target="_blank" rel="noopener" class="ml-auto text-xs text-blue-500 hover:underline">Full report →</a>`;
-      bodyEl.innerHTML = `
-        <div class="py-8 text-center">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="w-8 h-8 mx-auto mb-3 text-emerald-400">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-          </svg>
-          <p class="text-sm font-medium text-neutral-600 dark:text-neutral-300">No engines flagged anything</p>
-          <p class="text-xs text-neutral-400 mt-1">${total} engines scanned the zip</p>
-        </div>`;
-      return;
-    }
-
-    summaryEl.innerHTML = `
-      <span class="inline-flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400 font-medium">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
-        ${malCount}/${total} engines flagged content
-      </span>
-      <a href="${data.vtLink}" target="_blank" rel="noopener" class="ml-auto text-xs text-blue-500 hover:underline">Full report →</a>`;
-
-    let html = '<div class="space-y-1">';
-    data.maliciousEngines.forEach(e => {
-      html += `<div class="flex items-center justify-between px-3 py-2 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20">`;
-      html += `<span class="text-xs font-medium text-neutral-700 dark:text-neutral-300">${e.engine}</span>`;
-      html += `<span class="text-xs text-red-600 dark:text-red-400 font-mono">${e.result || 'flagged'}</span>`;
-      html += `</div>`;
-    });
-    html += '</div>';
-    bodyEl.innerHTML = html;
-  }
-
-  async function checkVirusTotal(hash, matchId) {
-    const btn = document.querySelector(`#${matchId} .vt-btn`);
-    const resultEl = document.querySelector(`.vt-result-${matchId}`);
-    if (!btn || !resultEl) return;
-
-    btn.disabled = true;
-    btn.textContent = '...';
-
-    try {
-      const r = await fetch('/admin/radar/virustotal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hash }),
-      });
-      const data = await r.json();
-
-      if (!data.success) {
-        resultEl.innerHTML = `<span class="text-xs text-red-500">VT error: ${data.error}</span>`;
-      } else if (!data.found) {
-        resultEl.innerHTML = `<span class="text-xs text-neutral-400">Not found in VirusTotal database</span>`;
-      } else {
-        const isMalicious = data.malicious > 0;
-        const colour = isMalicious ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400';
-        resultEl.innerHTML = `
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-xs font-medium ${colour}">${data.malicious}/${data.total} engines detected</span>
-            ${data.name ? `<span class="text-xs text-neutral-400">${data.name}</span>` : ''}
-            ${data.firstSeen ? `<span class="text-xs text-neutral-400">first seen ${data.firstSeen}</span>` : ''}
-            <a href="${data.vtLink}" target="_blank" rel="noopener" class="text-xs text-blue-500 hover:underline">View on VT →</a>
-          </div>`;
-        btn.remove();
-      }
-
-      resultEl.classList.remove('hidden');
-    } catch (err) {
-      resultEl.innerHTML = `<span class="text-xs text-red-500">Request failed</span>`;
-      resultEl.classList.remove('hidden');
-      btn.disabled = false;
-      btn.textContent = 'VT';
-    }
-  }
-
-  // --- Selection state ---
+  // ── Toolbar ────────────────────────────────────────────────────────────────
 
   function getChecked() {
     return Array.from(document.querySelectorAll('.server-checkbox:checked'));
   }
 
-  function updateToolbar() {
-    const checked = getChecked();
-    const toolbar = document.getElementById('bulkToolbar');
-    const count = document.getElementById('selectionCount');
-    count.textContent = checked.length + ' selected';
-    if (checked.length > 0) {
-      toolbar.style.maxHeight = '60px';
-      toolbar.style.opacity = '1';
+  var sentinelVisible = true;
+  var anyChecked = false;
+
+  function setFloatingVisible(show) {
+    var el = document.getElementById('floatingToolbar');
+    if (show) {
+      el.style.opacity = '1';
+      el.style.transform = 'translateX(-50%) translateY(0)';
+      el.style.pointerEvents = 'auto';
     } else {
-      toolbar.style.maxHeight = '0';
-      toolbar.style.opacity = '0';
+      el.style.opacity = '0';
+      el.style.transform = 'translateX(-50%) translateY(-10px)';
+      el.style.pointerEvents = 'none';
     }
   }
 
+  function showInlineToolbar() {
+    var row = document.getElementById('bulkToolbarRow');
+    row.style.display = 'block';
+    // Let display take effect before animating
+    requestAnimationFrame(function () {
+      row.style.maxHeight = '60px';
+      row.style.opacity = '1';
+    });
+  }
+
+  function hideInlineToolbar() {
+    var row = document.getElementById('bulkToolbarRow');
+    row.style.maxHeight = '0';
+    row.style.opacity = '0';
+    setTimeout(function () {
+      // Only actually hide if still no checkboxes checked
+      if (!anyChecked) row.style.display = 'none';
+    }, 400);
+  }
+
+  function updateToolbar() {
+    var checked = getChecked();
+    anyChecked = checked.length > 0;
+
+    document.querySelectorAll('.selection-count').forEach(function (el) {
+      el.textContent = checked.length + ' selected';
+    });
+
+    if (anyChecked) {
+      showInlineToolbar();
+      setFloatingVisible(!sentinelVisible);
+    } else {
+      hideInlineToolbar();
+      setFloatingVisible(false);
+    }
+  }
+
+  var observer = new IntersectionObserver(function (entries) {
+    sentinelVisible = entries[0].isIntersecting;
+    if (anyChecked) {
+      setFloatingVisible(!sentinelVisible);
+    }
+  }, { threshold: 0 });
+  observer.observe(document.getElementById('toolbarSentinel'));
+
+  // Animated checkbox: scale pop on check
+  function animateCheckbox(cb) {
+    cb.style.transition = 'transform 0.18s cubic-bezier(0.34,1.56,0.64,1)';
+    cb.style.transform = cb.checked ? 'scale(1.25)' : 'scale(0.85)';
+    setTimeout(function () {
+      cb.style.transform = 'scale(1)';
+      setTimeout(function () { cb.style.transition = ''; }, 200);
+    }, 160);
+  }
+
   document.getElementById('selectAll').addEventListener('change', function () {
-    document.querySelectorAll('.server-checkbox').forEach(cb => cb.checked = this.checked);
+    animateCheckbox(this);
+    document.querySelectorAll('.server-checkbox').forEach(function (cb) {
+      cb.checked = this.checked;
+      if (cb !== this) animateCheckbox(cb);
+    }, this);
     updateToolbar();
   });
 
-  document.querySelectorAll('.server-checkbox').forEach(cb => {
-    cb.addEventListener('change', updateToolbar);
-  });
-
-  // Clicking a row toggles its checkbox (but not on links/buttons inside)
-  document.querySelectorAll('.server-row').forEach(row => {
-    row.addEventListener('click', function (e) {
-      if (['A', 'BUTTON', 'INPUT'].includes(e.target.tagName) || e.target.closest('a, button')) return;
-      const cb = row.querySelector('.server-checkbox');
-      cb.checked = !cb.checked;
+  document.querySelectorAll('.server-checkbox').forEach(function (cb) {
+    cb.addEventListener('change', function () {
+      animateCheckbox(this);
       updateToolbar();
     });
   });
 
-  // --- Bulk actions ---
+  document.querySelectorAll('.server-row').forEach(function (row) {
+    row.addEventListener('click', function (e) {
+      if (['A', 'BUTTON', 'INPUT'].includes(e.target.tagName) || e.target.closest('a, button')) return;
+      var cb = row.querySelector('.server-checkbox');
+      cb.checked = !cb.checked;
+      animateCheckbox(cb);
+      updateToolbar();
+    });
+  });
+
+  // ── Bulk actions ───────────────────────────────────────────────────────────
 
   function bulkRadarScan() {
-    const checked = getChecked();
-    if (checked.length === 0) return;
-    const ids = checked.map(cb => cb.value);
-    const names = {};
-    checked.forEach(cb => {
-      const nameEl = cb.closest('.server-row').querySelector('.font-medium.text-neutral-800, .font-medium.dark\\:text-white');
-      names[cb.value] = nameEl ? nameEl.textContent.trim() : cb.value;
-    });
+    var checked = getChecked();
+    if (!checked.length) return;
+    var ids = checked.map(function (cb) { return cb.value; });
+    var names = {};
+    checked.forEach(function (cb) { names[cb.value] = cb.dataset.name || cb.value; });
     radarServerNames = names;
-    const label = checked.length === 1 ? names[ids[0]] : checked.length + ' servers';
+    var label = checked.length === 1 ? names[ids[0]] : checked.length + ' servers';
     openRadarScanModal(ids, label);
   }
 
-  function bulkEdit() {
-    const checked = getChecked();
-    if (checked.length === 0) return;
-    if (checked.length === 1) {
-      location.href = '/admin/servers/edit/' + checked[0].dataset.editId;
-      return;
-    }
-    checked.forEach(cb => window.open('/admin/servers/edit/' + cb.dataset.editId, '_blank'));
-  }
-
   function bulkDelete() {
-    const checked = getChecked();
-    if (checked.length === 0) return;
-    const msg = checked.length === 1
+    var checked = getChecked();
+    if (!checked.length) return;
+    var msg = checked.length === 1
       ? 'Delete this server? All data will be permanently removed.'
-      : `Delete ${checked.length} servers? All data will be permanently removed.`;
+      : 'Delete ' + checked.length + ' servers? All data will be permanently removed.';
     window.modal.confirm({
       title: checked.length === 1 ? 'Delete Server' : 'Delete ' + checked.length + ' Servers',
       body: msg,
       danger: true,
       confirmLabel: 'Delete',
-      onConfirm: () => {
-        checked.forEach(cb => { window.location.href = '/admin/server/delete/' + cb.value; });
+      onConfirm: function () {
+        checked.forEach(function (cb) { window.location.href = '/admin/server/delete/' + cb.value; });
       }
     });
   }
 
-  // --- Radar scan ---
+  // ── VT enabled check ───────────────────────────────────────────────────────
 
-  let currentServerIds = [];
-  let availableScripts = [];
-  let radarServerNames = {};
+  fetch('/admin/radar/virustotal-enabled')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      vtEnabled = d.enabled;
+      if (vtEnabled) document.getElementById('scanModeToggle').classList.remove('hidden');
+    })
+    .catch(function () {});
+
+  // ── Scan mode ──────────────────────────────────────────────────────────────
+
+  function setScanMode(mode) {
+    scanMode = mode;
+    var builtinBtn = document.getElementById('modeBuiltin');
+    var vtBtn = document.getElementById('modeVT');
+    var active   = 'flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-neutral-800 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition-all';
+    var inactive = 'flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-xs font-medium transition-all hover:border-neutral-400 dark:hover:border-neutral-500';
+    if (mode === 'builtin') {
+      builtinBtn.className = active;
+      vtBtn.className = inactive;
+      document.getElementById('builtinPickerSection').classList.remove('hidden');
+      document.getElementById('vtScanSection').classList.add('hidden');
+    } else {
+      vtBtn.className = active;
+      builtinBtn.className = inactive;
+      document.getElementById('vtScanSection').classList.remove('hidden');
+      document.getElementById('builtinPickerSection').classList.add('hidden');
+    }
+  }
+
+  // ── Radar modal open/close ─────────────────────────────────────────────────
 
   function openRadarScanModal(serverId, serverName) {
     currentServerIds = Array.isArray(serverId) ? serverId : [serverId];
-    if (!Array.isArray(serverId)) radarServerNames = { [serverId]: serverName };
+    if (!Array.isArray(serverId)) radarServerNames = {};
+    radarServerNames[Array.isArray(serverId) ? serverId[0] : serverId] = serverName;
+
     document.getElementById('radarScanModalTitle').textContent = currentServerIds.length === 1
       ? 'Radar Scan: ' + serverName
       : 'Radar Scan: ' + currentServerIds.length + ' servers';
@@ -585,124 +491,275 @@
 
   document.getElementById('radarScanModalBackdrop').addEventListener('click', closeRadarScanModal);
 
-  async function fetchRadarScripts() {
-    const scriptSelect = document.getElementById('scriptSelect');
-    scriptSelect.innerHTML = '<option value="">Loading...</option>';
-    document.getElementById('runScanButton').disabled = true;
-    try {
-      const response = await fetch('/admin/radar/scripts');
-      const data = await response.json();
-      if (data.success && data.scripts) {
-        availableScripts = data.scripts;
-        scriptSelect.innerHTML = '';
-        if (availableScripts.length === 0) {
-          scriptSelect.innerHTML = '<option value="">No scripts available</option>';
-          document.getElementById('scriptDescription').textContent = 'No radar scripts found in storage/radar.';
-        } else {
-          availableScripts.forEach(script => {
-            const option = document.createElement('option');
-            option.value = script.id;
-            option.textContent = script.name;
-            scriptSelect.appendChild(option);
-          });
-          updateScriptDescription();
-          document.getElementById('runScanButton').disabled = false;
+  // ── Script fetching ────────────────────────────────────────────────────────
+
+  function fetchRadarScripts() {
+    var select = document.getElementById('scriptSelect');
+    var runBtn = document.getElementById('runScanButton');
+    select.innerHTML = '<option value="">Loading...</option>';
+    runBtn.disabled = true;
+
+    fetch('/admin/radar/scripts')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.success) { showToast('Failed to fetch scripts', 'error'); return; }
+        availableScripts = data.scripts || [];
+        select.innerHTML = '';
+        if (!availableScripts.length) {
+          select.innerHTML = '<option value="">No scripts available</option>';
+          document.getElementById('scriptDescription').textContent = 'No radar scripts found in storage/radar/';
+          return;
         }
-      } else {
-        showToast('Failed to fetch radar scripts', 'error');
-      }
-    } catch (error) {
-      console.error('Error fetching radar scripts:', error);
-      showToast('Failed to fetch radar scripts', 'error');
-    }
+        availableScripts.forEach(function (s) {
+          var opt = document.createElement('option');
+          opt.value = s.id;
+          opt.textContent = s.name;
+          select.appendChild(opt);
+        });
+        updateScriptDescription();
+        runBtn.disabled = false;
+      })
+      .catch(function () { showToast('Failed to fetch scripts', 'error'); });
   }
 
   function updateScriptDescription() {
-    const scriptId = document.getElementById('scriptSelect').value;
-    const script = availableScripts.find(s => s.id === scriptId);
+    var id = document.getElementById('scriptSelect').value;
+    var script = availableScripts.find(function (s) { return s.id === id; });
     document.getElementById('scriptDescription').textContent = script ? script.description : '';
   }
 
   document.getElementById('scriptSelect').addEventListener('change', updateScriptDescription);
 
-  async function runRadarScan() {
-    if (currentServerIds.length === 0) return;
-    const scriptId = document.getElementById('scriptSelect').value;
-    if (!scriptId) { showToast('Please select a script', 'error'); return; }
+  // ── Built-in scan ──────────────────────────────────────────────────────────
 
-    const runButton = document.getElementById('runScanButton');
-    runButton.disabled = true;
-    runButton.innerHTML = `
-      <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      Scanning...
-    `;
+  function runRadarScan() {
+    if (!currentServerIds.length) return;
+    var scriptId = document.getElementById('scriptSelect').value;
+    if (!scriptId) { showToast('Select a script first', 'error'); return; }
 
-    try {
-      const allResults = await Promise.all(currentServerIds.map(id =>
-        fetch(`/admin/radar/scan/${id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ scriptId }),
-        }).then(r => r.json()).then(data => ({ id, data }))
-      ));
+    var btn = document.getElementById('runScanButton');
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Scanning...';
 
-      if (currentServerIds.length > 1) {
-        allResults.forEach(r => {
-          const name = radarServerNames[r.id] || r.id;
-          if (!r.data.success) {
-            showToast(name + ': scan failed', 'error');
-          } else {
-            const count = (r.data.results?.results || []).reduce((s, x) => s + (x.matches?.length || 0), 0);
-            showToast(name + ': ' + (count > 0 ? count + ' finding(s)' : 'clean'), count > 0 ? 'error' : 'success');
-          }
-        });
-        runButton.disabled = false;
-        runButton.classList.remove('opacity-70');
-        runButton.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-          </svg>
-          Run Scan
-        `;
-        closeRadarScanModal();
-        return;
-      }
+    Promise.all(currentServerIds.map(function (id) {
+      return fetch('/admin/radar/scan/' + id, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scriptId: scriptId }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) { return { id: id, data: data }; });
+    }))
+      .then(function (allResults) {
+        if (currentServerIds.length > 1) {
+          allResults.forEach(function (r) {
+            var name = radarServerNames[r.id] || r.id;
+            if (!r.data.success) {
+              showToast(name + ': scan failed', 'error');
+            } else {
+              var count = (r.data.results && r.data.results.results || []).reduce(function (s, x) { return s + (x.matches ? x.matches.length : 0); }, 0);
+              showToast(name + ': ' + (count > 0 ? count + ' finding(s)' : 'clean'), count > 0 ? 'error' : 'success');
+            }
+          });
+          closeRadarScanModal();
+          return;
+        }
 
-      const single = allResults[0];
-      if (!single.data.success) {
-        showToast('Scan failed', 'error');
-      } else {
-        document.getElementById('radarPickerPhase').classList.add('hidden');
-        document.getElementById('radarResultsPhase').classList.remove('hidden');
-        document.getElementById('radarRescanBtn').classList.remove('hidden');
-        renderRadarResults([single]);
-      }
+        var single = allResults[0];
+        if (!single.data.success) {
+          showToast('Scan failed: ' + (single.data.error || 'Unknown error'), 'error');
+        } else {
+          document.getElementById('radarPickerPhase').classList.add('hidden');
+          document.getElementById('radarResultsPhase').classList.remove('hidden');
+          document.getElementById('radarRescanBtn').classList.remove('hidden');
+          renderRadarResults(allResults);
+        }
+      })
+      .catch(function (err) {
+        console.error('Radar scan error:', err);
+        showToast('Failed to run radar scan', 'error');
+      })
+      .finally(function () {
+        btn.disabled = false;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg> Run Scan';
+      });
+  }
 
-    } catch (error) {
-      console.error('Error running radar scan:', error);
-      showToast('Failed to run radar scan', 'error');
-    } finally {
-      runButton.disabled = false;
-      runButton.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-        </svg>
-        Run Scan
-      `;
+  // ── VT file scan ───────────────────────────────────────────────────────────
+
+  function runVtFileScan() {
+    if (!currentServerIds.length) return;
+    var serverId = currentServerIds[0];
+    var btn = document.getElementById('runVtScanButton');
+
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Starting...';
+
+    closeRadarScanModal();
+
+    var p = window.loadingPopupSystem;
+    p.open('VirusTotal Scan', 'default');
+    p.setProgress(5, 'Requesting file archive from node...');
+    p.addStep('Connecting to node');
+
+    var steps = [
+      { at: 3000,  pct: 12, msg: 'Node zipping plugins, mods and config...',    step: 'Archiving server files' },
+      { at: 9000,  pct: 24, msg: 'Uploading archive to VirusTotal...',          step: 'Archive ready — uploading' },
+      { at: 16000, pct: 36, msg: 'VirusTotal queuing analysis...',               step: 'Upload complete' },
+      { at: 26000, pct: 48, msg: 'Analysis in progress — checking signatures...', step: 'VT analysis started' },
+      { at: 40000, pct: 60, msg: 'Running 70+ antivirus engines...',             step: 'Scanning with multiple engines' },
+      { at: 56000, pct: 72, msg: 'Collecting results...',                        step: 'Engines finishing up' },
+      { at: 75000, pct: 82, msg: 'Waiting for final verdicts...',                step: 'Collecting final results' },
+    ];
+    var timers = steps.map(function (s) {
+      return setTimeout(function () { p.setProgress(s.pct, s.msg); p.addStep(s.step); }, s.at);
+    });
+
+    fetch('/admin/radar/vtscan/' + serverId, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        timers.forEach(function (t) { clearTimeout(t); });
+
+        if (!data.success) {
+          p.setProgress(100, 'Scan failed');
+          p.addStep(data.error || 'VT scan failed', 'error');
+          p.setIcon('error');
+          showToast(data.error || 'VT scan failed', 'error');
+          setTimeout(function () { p.close(); }, 3000);
+          return;
+        }
+
+        p.setProgress(100, 'Scan complete');
+        p.addStep('Analysis complete', 'done');
+        p.setIcon('done');
+
+        setTimeout(function () {
+          p.close();
+          document.getElementById('radarScanModalTitle').textContent = 'VirusTotal Scan: ' + (data.serverName || 'Server');
+          document.getElementById('radarScanModalSubtitle').textContent = 'Results from VirusTotal analysis';
+          document.getElementById('radarPickerPhase').classList.add('hidden');
+          document.getElementById('radarResultsPhase').classList.remove('hidden');
+          document.getElementById('radarRescanBtn').classList.remove('hidden');
+          document.getElementById('radarScanModal').classList.remove('hidden');
+          renderVtFileScanResults(data);
+        }, 800);
+      })
+      .catch(function (err) {
+        timers.forEach(function (t) { clearTimeout(t); });
+        console.error('VT scan error:', err);
+        p.setProgress(100, 'Request failed');
+        p.addStep('Network error', 'error');
+        p.setIcon('error');
+        showToast('VT file scan failed', 'error');
+        setTimeout(function () { p.close(); }, 3000);
+      })
+      .finally(function () {
+        btn.disabled = false;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.25-8.25-3.286Z"/></svg> Upload to VirusTotal';
+      });
+  }
+
+  // ── VT hash check (per-file) ───────────────────────────────────────────────
+
+  function checkVirusTotal(hash, matchId) {
+    var btn = document.querySelector('#' + matchId + ' .vt-btn');
+    var resultEl = document.querySelector('.vt-result-' + matchId);
+    if (!btn || !resultEl) return;
+
+    btn.disabled = true;
+    btn.textContent = '...';
+
+    fetch('/admin/radar/virustotal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hash: hash }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.success) {
+          resultEl.innerHTML = '<span class="text-xs text-red-500">VT error: ' + escapeHtml(data.error) + '</span>';
+        } else if (!data.found) {
+          resultEl.innerHTML = '<span class="text-xs text-neutral-400">Not in VirusTotal database</span>';
+        } else {
+          var colour = data.malicious > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400';
+          resultEl.innerHTML =
+            '<div class="flex items-center gap-2 flex-wrap">' +
+            '<span class="text-xs font-medium ' + colour + '">' + data.malicious + '/' + data.total + ' engines detected</span>' +
+            (data.name ? '<span class="text-xs text-neutral-400">' + escapeHtml(data.name) + '</span>' : '') +
+            (data.firstSeen ? '<span class="text-xs text-neutral-400">first seen ' + data.firstSeen + '</span>' : '') +
+            '<a href="' + data.vtLink + '" target="_blank" rel="noopener" class="text-xs text-blue-500 hover:underline">View on VT →</a>' +
+            '</div>';
+          btn.remove();
+        }
+        resultEl.classList.remove('hidden');
+      })
+      .catch(function () {
+        resultEl.innerHTML = '<span class="text-xs text-red-500">Request failed</span>';
+        resultEl.classList.remove('hidden');
+        btn.disabled = false;
+        btn.textContent = 'VT';
+      });
+  }
+
+  // ── Result rendering ───────────────────────────────────────────────────────
+
+  function renderVtFileScanResults(data) {
+    var summaryEl = document.getElementById('radarSummaryBar');
+    var bodyEl = document.getElementById('radarResultsBody');
+    document.getElementById('radarServerTabs').classList.add('hidden');
+
+    if (data.pending) {
+      summaryEl.innerHTML = '<span class="text-sm text-amber-600 dark:text-amber-400 font-medium">Analysis still processing on VT</span>';
+      bodyEl.innerHTML = '<div class="py-6 text-center"><p class="text-sm text-neutral-600 dark:text-neutral-300 mb-3">VT is still analysing. Check directly:</p><a href="' + data.vtLink + '" target="_blank" rel="noopener" class="text-sm text-blue-500 hover:underline break-all">' + escapeHtml(data.vtLink) + '</a></div>';
+      return;
     }
+
+    var malCount = (data.maliciousEngines && data.maliciousEngines.length) || 0;
+    var total = data.totalEngines || 0;
+
+    if (malCount === 0) {
+      summaryEl.innerHTML =
+        '<span class="inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/></svg>' +
+        'Clean — 0/' + total + ' engines flagged</span>' +
+        '<a href="' + data.vtLink + '" target="_blank" rel="noopener" class="ml-auto text-xs text-blue-500 hover:underline">Full report →</a>';
+      bodyEl.innerHTML =
+        '<div class="py-8 text-center">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="w-8 h-8 mx-auto mb-3 text-emerald-400"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>' +
+        '<p class="text-sm font-medium text-neutral-600 dark:text-neutral-300">No engines flagged anything</p>' +
+        '<p class="text-xs text-neutral-400 mt-1">' + total + ' engines scanned the zip</p>' +
+        '</div>';
+      return;
+    }
+
+    summaryEl.innerHTML =
+      '<span class="inline-flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400 font-medium">' +
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>' +
+      malCount + '/' + total + ' engines flagged</span>' +
+      '<a href="' + data.vtLink + '" target="_blank" rel="noopener" class="ml-auto text-xs text-blue-500 hover:underline">Full report →</a>';
+
+    var html = '<div class="space-y-1">';
+    data.maliciousEngines.forEach(function (e) {
+      html += '<div class="flex items-center justify-between px-3 py-2 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20">';
+      html += '<span class="text-xs font-medium text-neutral-700 dark:text-neutral-300">' + escapeHtml(e.engine) + '</span>';
+      html += '<span class="text-xs text-red-600 dark:text-red-400 font-mono">' + escapeHtml(e.result || 'flagged') + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    bodyEl.innerHTML = html;
   }
 
   function renderRadarResults(results) {
-    const tabsEl = document.getElementById('radarServerTabs');
-    const bodyEl = document.getElementById('radarResultsBody');
-    const summaryEl = document.getElementById('radarSummaryBar');
+    var tabsEl = document.getElementById('radarServerTabs');
+    var bodyEl = document.getElementById('radarResultsBody');
+    var summaryEl = document.getElementById('radarSummaryBar');
 
-    if (results.length === 0) {
+    if (!results.length) {
       tabsEl.classList.add('hidden');
-      summaryEl.innerHTML = '<span class="text-sm text-neutral-500">All scans failed or returned no data.</span>';
+      summaryEl.innerHTML = '<span class="text-sm text-neutral-500">No results returned.</span>';
       bodyEl.innerHTML = '';
       return;
     }
@@ -713,23 +770,22 @@
     } else {
       tabsEl.classList.remove('hidden');
       tabsEl.innerHTML = '';
-
-      results.forEach((r, i) => {
-        const name = radarServerNames[r.id] || ('Server ' + r.id);
-        const totalFindings = countFindings(r.data.results);
-        const tab = document.createElement('button');
+      results.forEach(function (r, i) {
+        var name = radarServerNames[r.id] || ('Server ' + r.id);
+        var count = countFindings(r.data.results);
+        var tab = document.createElement('button');
         tab.type = 'button';
         tab.dataset.tabIndex = i;
         tab.className = 'tab-btn shrink-0 px-3 py-1.5 text-xs font-medium rounded-t-lg border border-b-0 transition-colors ' +
           (i === 0
             ? 'bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700/50 text-neutral-800 dark:text-white'
             : 'bg-neutral-50 dark:bg-neutral-800/40 border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300');
-        tab.innerHTML = name +
-          (totalFindings > 0
-            ? ` <span class="ml-1.5 px-1.5 py-0.5 rounded-full text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">${totalFindings}</span>`
-            : ` <span class="ml-1.5 px-1.5 py-0.5 rounded-full text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">clean</span>`);
-        tab.addEventListener('click', () => {
-          tabsEl.querySelectorAll('.tab-btn').forEach(t => {
+        tab.innerHTML = escapeHtml(name) +
+          (count > 0
+            ? ' <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">' + count + '</span>'
+            : ' <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">clean</span>');
+        tab.addEventListener('click', function () {
+          tabsEl.querySelectorAll('.tab-btn').forEach(function (t) {
             t.className = 'tab-btn shrink-0 px-3 py-1.5 text-xs font-medium rounded-t-lg border border-b-0 transition-colors bg-neutral-50 dark:bg-neutral-800/40 border-transparent text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300';
           });
           tab.className = 'tab-btn shrink-0 px-3 py-1.5 text-xs font-medium rounded-t-lg border border-b-0 transition-colors bg-white dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700/50 text-neutral-800 dark:text-white';
@@ -737,116 +793,124 @@
         });
         tabsEl.appendChild(tab);
       });
-
-      const totalAll = results.reduce((sum, r) => sum + countFindings(r.data.results), 0);
-      summaryEl.innerHTML = buildSummaryHtml(totalAll, results[0].data.results);
       renderSingleServerResults(results[0].data.results, bodyEl, summaryEl);
     }
   }
 
   function countFindings(scanResults) {
     if (!scanResults || !scanResults.results) return 0;
-    return scanResults.results.reduce((sum, r) => sum + (r.matches ? r.matches.length : 0), 0);
-  }
-
-  function buildSummaryHtml(totalFindings, scanResults) {
-    if (totalFindings === 0) {
-      return `<span class="inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/></svg>
-        No suspicious files found
-      </span>`;
-    }
-    const patternCount = scanResults && scanResults.results ? scanResults.results.length : 0;
-    return `<span class="inline-flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400 font-medium">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
-        ${totalFindings} finding${totalFindings !== 1 ? 's' : ''} across ${patternCount} pattern${patternCount !== 1 ? 's' : ''}
-      </span>`;
+    return scanResults.results.reduce(function (s, r) { return s + (r.matches ? r.matches.length : 0); }, 0);
   }
 
   function renderSingleServerResults(scanResults, bodyEl, summaryEl) {
-    const total = countFindings(scanResults);
-    summaryEl.innerHTML = buildSummaryHtml(total, scanResults);
+    var total = countFindings(scanResults);
+    var sevStyles = {
+      critical: 'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400',
+      high:     'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
+      medium:   'bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400',
+      low:      'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400',
+    };
 
-    if (!scanResults || !scanResults.results || scanResults.results.length === 0) {
-      bodyEl.innerHTML = `
-        <div class="py-8 text-center">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="w-8 h-8 mx-auto mb-3 text-emerald-400">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-          </svg>
-          <p class="text-sm font-medium text-neutral-600 dark:text-neutral-300">All clear</p>
-          <p class="text-xs text-neutral-400 mt-1">No matches found for any pattern in this script</p>
-        </div>`;
+    if (total === 0) {
+      summaryEl.innerHTML =
+        '<span class="inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 font-medium">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/></svg>' +
+        'No suspicious files found</span>';
+      bodyEl.innerHTML =
+        '<div class="py-8 text-center">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="w-8 h-8 mx-auto mb-3 text-emerald-400"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>' +
+        '<p class="text-sm font-medium text-neutral-600 dark:text-neutral-300">All clear</p>' +
+        '<p class="text-xs text-neutral-400 mt-1">No matches found for any pattern in this script</p>' +
+        '</div>';
       return;
     }
 
-    let html = '<div class="space-y-3">';
-    scanResults.results.forEach(result => {
-    const severityStyles = {
-        critical: 'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400',
-        high:     'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
-        medium:   'bg-amber-100 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400',
-        low:      'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400',
-      };
+    var patternCount = scanResults.results.length;
+    summaryEl.innerHTML =
+      '<span class="inline-flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400 font-medium">' +
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>' +
+      total + ' finding' + (total !== 1 ? 's' : '') + ' across ' + patternCount + ' pattern' + (patternCount !== 1 ? 's' : '') + '</span>';
 
-      html += `<div class="rounded-lg border border-neutral-200 dark:border-neutral-700/50 overflow-hidden">`;
-      html += `<div class="flex items-center justify-between px-3 py-2 bg-neutral-50 dark:bg-neutral-800/60">`;
-      html += `<div class="min-w-0">`;
-      html += `<p class="text-xs font-medium text-neutral-700 dark:text-neutral-200">${result.pattern.description}</p>`;
-      html += `<p class="text-xs text-neutral-400 font-mono mt-0.5 truncate">${result.pattern.pattern}</p>`;
-      html += `</div>`;
-      const sev = result.severity || 'low';
-      const count = result.matches ? result.matches.length : 0;
-      html += `<div class="ml-3 shrink-0 flex items-center gap-1.5">`;
-      html += `<span class="text-xs font-medium px-2 py-0.5 rounded-full ${severityStyles[sev] || severityStyles.low}">${sev}</span>`;
-      html += `<span class="text-xs text-neutral-500">${count} match${count !== 1 ? 'es' : ''}</span>`;
-      html += `</div>`;
-      html += `</div>`;
-      html += `<ul class="divide-y divide-neutral-100 dark:divide-neutral-700/30">`;
-      result.matches.forEach(match => {
-        const matchId = 'match-' + Math.random().toString(36).slice(2, 9);
-        html += `<li class="px-3 py-1.5 gap-2" id="${matchId}">`;
-        html += `<div class="flex items-center justify-between gap-4">`;
-        html += `<span class="text-xs font-mono text-neutral-600 dark:text-neutral-300 truncate">${match.path}</span>`;
-        html += `<div class="flex items-center gap-2 shrink-0">`;
-        if (match.size) html += `<span class="text-xs text-neutral-400">${formatFileSize(match.size)}</span>`;
+    var html = '<div class="space-y-3">';
+    scanResults.results.forEach(function (result) {
+      var sev = result.severity || 'low';
+      var count = result.matches ? result.matches.length : 0;
+      html += '<div class="rounded-lg border border-neutral-200 dark:border-neutral-700/50 overflow-hidden">';
+      html += '<div class="flex items-center justify-between px-3 py-2 bg-neutral-50 dark:bg-neutral-800/60">';
+      html += '<div class="min-w-0"><p class="text-xs font-medium text-neutral-700 dark:text-neutral-200">' + escapeHtml(result.pattern.description) + '</p>';
+      html += '<p class="text-xs text-neutral-400 font-mono mt-0.5 truncate">' + escapeHtml(result.pattern.pattern) + '</p></div>';
+      html += '<div class="ml-3 shrink-0 flex items-center gap-1.5">';
+      html += '<span class="text-xs font-medium px-2 py-0.5 rounded-full ' + (sevStyles[sev] || sevStyles.low) + '">' + sev + '</span>';
+      html += '<span class="text-xs text-neutral-500">' + count + ' match' + (count !== 1 ? 'es' : '') + '</span>';
+      html += '</div></div>';
+      html += '<ul class="divide-y divide-neutral-100 dark:divide-neutral-700/30">';
+      result.matches.forEach(function (match) {
+        var matchId = 'match-' + Math.random().toString(36).slice(2, 9);
+        html += '<li class="px-3 py-1.5" id="' + matchId + '">';
+        html += '<div class="flex items-center justify-between gap-4">';
+        html += '<span class="text-xs font-mono text-neutral-600 dark:text-neutral-300 truncate">' + escapeHtml(match.path) + '</span>';
+        html += '<div class="flex items-center gap-2 shrink-0">';
+        if (match.size) html += '<span class="text-xs text-neutral-400">' + formatBytes(match.size) + '</span>';
         if (match.hash && vtEnabled) {
-          html += `<button type="button" onclick="checkVirusTotal('${match.hash}', '${matchId}')" class="vt-btn text-xs px-2 py-0.5 rounded border border-neutral-200 dark:border-neutral-600 text-neutral-500 dark:text-neutral-400 hover:border-blue-400 hover:text-blue-500 transition-colors font-medium">VT</button>`;
+          html += '<button type="button" onclick="checkVirusTotal(\'' + escapeHtml(match.hash) + '\',\'' + matchId + '\')" class="vt-btn text-xs px-2 py-0.5 rounded border border-neutral-200 dark:border-neutral-600 text-neutral-500 dark:text-neutral-400 hover:border-blue-400 hover:text-blue-500 transition-colors font-medium">VT</button>';
         }
-        html += `</div></div>`;
-        html += `<div class="vt-result-${matchId} mt-1 hidden"></div>`;
-        html += `</li>`;
+        html += '</div></div>';
+        html += '<div class="vt-result-' + matchId + ' mt-1 hidden"></div>';
+        html += '</li>';
       });
-      html += `</ul></div>`;
+      html += '</ul></div>';
     });
     html += '</div>';
     bodyEl.innerHTML = html;
   }
 
-  function formatFileSize(bytes) {
+  // ── Utilities ──────────────────────────────────────────────────────────────
+
+  function formatBytes(bytes) {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
     if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
     return (bytes / 1073741824).toFixed(1) + ' GB';
   }
 
-  (function staggerRows() {
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // ── Row stagger on load ────────────────────────────────────────────────────
+
+  (function () {
     var rows = document.querySelectorAll('#serverTable tbody tr');
-    rows.forEach(function(row, i) {
+    rows.forEach(function (row, i) {
       row.style.opacity = '0';
-      row.style.transform = 'translateY(5px)';
+      row.style.transform = 'translateY(4px)';
       row.style.transition = 'none';
-      setTimeout(function() {
-        row.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+      setTimeout(function () {
+        row.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
         row.style.opacity = '1';
         row.style.transform = 'translateY(0)';
-        setTimeout(function() {
+        setTimeout(function () {
           row.style.transition = '';
           row.style.opacity = '';
           row.style.transform = '';
-        }, 200);
-      }, i * 30);
+        }, 240);
+      }, 60 + i * 28);
     });
   })();
+
+  // Expose for inline onclick handlers
+  window.openRadarScanModal = openRadarScanModal;
+  window.closeRadarScanModal = closeRadarScanModal;
+  window.resetRadarToPickerPhase = resetRadarToPickerPhase;
+  window.setScanMode = setScanMode;
+  window.runRadarScan = runRadarScan;
+  window.runVtFileScan = runVtFileScan;
+  window.checkVirusTotal = checkVirusTotal;
+  window.bulkRadarScan = bulkRadarScan;
+  window.bulkDelete = bulkDelete;
+
+})();
 </script>
 
 <%- include('../../components/footer') %>

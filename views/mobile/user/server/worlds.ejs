@@ -23,14 +23,14 @@
     </div>
     <% } %>
 
-    <div class="collapsible-row<% if (worlds.length === 0) { %> open<% } %>" id="noWorldsMessageRow"><div><div id="noWorldsMessage" data-collapsible="true" class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-8 text-center mb-4">
+    <div class="collapsible-row no-anim<% if (worlds.length === 0) { %> open<% } %>" id="noWorldsMessageRow"><div><div id="noWorldsMessage" data-collapsible="true" class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-8 text-center mb-4">
       <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">No worlds found</p>
       <p class="text-xs text-neutral-500 mt-1">Worlds appear here once they are created on the server.</p>
     </div>
 
     <%- include('../../components/serverTemplate', { features: ['players', 'worlds'] }) %>
 
-    <div class="collapsible-row<% if (worlds.length > 0) { %> open<% } %>" id="serverTableRow"><div><div class="space-y-2" id="serverTable">
+    <div class="collapsible-row no-anim<% if (worlds.length > 0) { %> open<% } %>" id="serverTableRow"><div><div class="space-y-2" id="serverTable">
       <% worlds.forEach(function(world) { %>
         <%
           var iconPath = '/assets/world_icons/overworld.png';

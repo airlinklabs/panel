@@ -57,6 +57,7 @@
       if (cls.indexOf('mobile-top-bar') !== -1) return false;
       if (cls.indexOf('mobile-bottom-nav') !== -1) return false;
       if (cls.indexOf('mobile-more-sheet') !== -1) return false;
+      if (cls.indexOf('mobile-server-chrome') !== -1) return false;
       // Skip any element whose computed position is fixed
       var pos = window.getComputedStyle(child).position;
       if (pos === 'fixed') return false;

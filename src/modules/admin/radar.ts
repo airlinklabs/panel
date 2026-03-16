@@ -362,9 +362,12 @@ const radarModule: Module = {
             form,
             {
               headers: { ...form.getHeaders(), 'x-apikey': apiKey },
-              timeout: 60000,
+              timeout: 90000,
               maxContentLength: Infinity,
               maxBodyLength: Infinity,
+              // Accept 409 — VT returns "Conflict" when the file was already uploaded
+              // recently. The response body still contains the analysis ID we need.
+              validateStatus: (s) => s === 200 || s === 409,
             }
           );
 
@@ -374,11 +377,11 @@ const radarModule: Module = {
             return;
           }
 
-          // Poll VT up to 4 times, 30s apart (max ~2 min wait).
-          // VT typically finishes in 30–90s for small zips.
+          // Poll VT up to 8 times, 20s apart (max ~2.7 min wait).
+          // VT typically finishes in 30–90s for small zips on free tier.
           let analysisData: any = null;
-          for (let attempt = 0; attempt < 4; attempt++) {
-            await new Promise(r => setTimeout(r, 30000));
+          for (let attempt = 0; attempt < 8; attempt++) {
+            await new Promise(r => setTimeout(r, 20000));
 
             const pollResponse = await axios.get(
               `https://www.virustotal.com/api/v3/analyses/${analysisId}`,
@@ -393,9 +396,19 @@ const radarModule: Module = {
           }
 
           if (!analysisData) {
-            res.json({ success: true, pending: true, analysisId, vtLink: `https://www.virustotal.com/gui/analyses/${analysisId}` });
+            // Still pending after max polls — give the user a direct analysis link
+            // Note: /gui/analyses/{id} doesn't exist as a GUI page; the file page is
+            // /gui/file/{sha256} but we don't have the sha256 yet, so link to the search.
+            res.json({ success: true, pending: true, analysisId, vtLink: `https://www.virustotal.com/gui/home/upload` });
             return;
           }
+
+          // The correct GUI URL needs the file's SHA256, not the analysis ID.
+          // VT returns it in the analysis response under meta.file_info.sha256.
+          const sha256 = analysisData.meta?.file_info?.sha256 as string | undefined;
+          const vtLink = sha256
+            ? `https://www.virustotal.com/gui/file/${sha256}`
+            : `https://www.virustotal.com/gui/home/upload`;
 
           const results = analysisData.data?.attributes?.results || {};
           const stats = analysisData.data?.attributes?.stats || {};
@@ -410,7 +423,7 @@ const radarModule: Module = {
             maliciousEngines,
             stats,
             totalEngines: Object.keys(results).length,
-            vtLink: `https://www.virustotal.com/gui/analyses/${analysisId}`,
+            vtLink,
           });
         } catch (err: any) {
           logger.error('VT file scan error:', err?.message);
