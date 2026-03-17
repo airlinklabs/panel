@@ -430,7 +430,15 @@
       danger: true,
       confirmLabel: 'Delete',
       onConfirm: function () {
-        checked.forEach(function (cb) { window.location.href = '/admin/server/delete/' + cb.value; });
+        var ids = checked.map(function (cb) { return cb.value; });
+        var chain = Promise.resolve();
+        ids.forEach(function (id) {
+          chain = chain.then(function () {
+            return fetch('/admin/server/delete/' + id, { method: 'GET' });
+          });
+        });
+        chain.then(function () { window.location.reload(); })
+             .catch(function () { window.location.reload(); });
       }
     });
   }

@@ -23,6 +23,10 @@
     #terminal {
         height: 300px;
         background: #141414;
+        /* Prevent the browser's pull-to-refresh gesture from firing when
+           the user drags down inside the terminal */
+        overscroll-behavior: contain;
+        touch-action: none;
     }
 
     #terminal .xterm {
@@ -30,8 +34,14 @@
         height: 100%;
     }
 
-    #terminal .xterm-viewport {
-        background: #141414 !important;
+    #terminal-container {
+        overscroll-behavior: contain;
+        animation: console-appear 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes console-appear {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0); }
     }
 
     #terminal .xterm-screen {
@@ -148,7 +158,21 @@
 
       <!-- Terminal -->
       <div class="rounded-xl bg-[#141414] border border-neutral-800 overflow-hidden">
-        <div id="terminal-container" class="w-full">
+        <!-- Chrome bar -->
+        <div class="flex items-center px-3 py-2 bg-[#1c1c1c] border-b border-neutral-800 shrink-0">
+          <span class="text-[11px] font-medium text-neutral-600 select-none tracking-wide">console</span>
+        </div>
+        <div id="terminal-container" class="w-full relative">
+          <!-- Offline placeholder -->
+          <div id="console-offline" class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#141414] z-10 transition-opacity duration-300 <% if (typeof serverStatus !== 'undefined' && serverStatus.online) { %>opacity-0 pointer-events-none<% } %>">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-neutral-700">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <path d="M8 21h8M12 17v4"/>
+              <path d="M6 8l3 3-3 3"/>
+              <path d="M12 14h4"/>
+            </svg>
+            <p class="text-xs font-medium text-neutral-600">Server offline</p>
+          </div>
           <div id="terminal"></div>
         </div>
         <% if (typeof features !== 'undefined' && features && features.includes('auto-complete')) { %>
@@ -172,6 +196,7 @@
           <div class="relative z-10">
             <p class="text-[10px] font-medium text-neutral-500"><%= req.translations.Status %></p>
             <p id="status" class="mt-0.5 text-base font-semibold text-neutral-800 dark:text-white leading-tight">—</p>
+            <p id="status-log-text" class="text-[10px] text-neutral-400 truncate hidden"></p>
           </div>
         </div>
 
@@ -263,6 +288,33 @@ if (document.fonts && document.fonts.ready) {
 
 window.addEventListener('resize', () => requestAnimationFrame(fitTerminal));
 
+// Intercept wheel and touch events on the terminal container so the user
+// scrolls the terminal buffer, not the page behind it.
+(function () {
+    const termEl = document.getElementById('terminal');
+    if (!termEl) return;
+
+    termEl.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const lines = e.deltaMode === 1 ? e.deltaY : Math.round(e.deltaY / 20);
+        term.scrollLines(lines);
+    }, { passive: false });
+
+    let touchStartY = 0;
+    termEl.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    termEl.addEventListener('touchmove', (e) => {
+        const dy = touchStartY - e.touches[0].clientY;
+        touchStartY = e.touches[0].clientY;
+        e.preventDefault();
+        e.stopPropagation();
+        term.scrollLines(Math.round(dy / 16));
+    }, { passive: false });
+})();
+
     const maxCommands = 10;
     let commandHistory = [];
     let currentCommandIndex = -1;
@@ -284,7 +336,6 @@ let wsErrorCount = 0;
 
 function connectWebSocket() {
     if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN)) {
-
         return;
     }
 
@@ -296,19 +347,14 @@ function connectWebSocket() {
     isReconnecting = true;
 
     if (socket) {
-
-        try {
-            socket.close();
-        } catch (e) {
-
-        }
+        try { socket.close(); } catch {}
+        socket = null;
     }
 
     try {
         socket = new WebSocket(socketUrl);
 
         socket.onopen = () => {
-            writeConsole('system', 'system', 'Connected');
             isReconnecting = false;
             reconnectAttempts = 0;
             reconnectInterval = 2000;
@@ -322,18 +368,17 @@ function connectWebSocket() {
         socket.onerror = () => {
             wsErrorCount++;
             if (wsErrorCount >= 3) {
-                writeConsole('system', 'error', 'Daemon connection lost');
                 const warn = document.getElementById('daemonOfflineWarning');
                 if (warn) warn.classList.remove('hidden');
             }
         };
 
         socket.onclose = () => {
-            writeConsole('system', 'system', 'Reconnecting...');
+            socket = null;
             if (!isReconnecting) { scheduleReconnect(); }
         };
-    } catch (error) {
-
+    } catch {
+        socket = null;
         scheduleReconnect();
     }
 }
@@ -357,42 +402,56 @@ function scheduleReconnect() {
 
 connectWebSocket();
 
+    function isDaemonInfraError(text) {
+        return text.includes('Failed to attach to container') ||
+               text.includes('no such container') ||
+               text.includes('No such container') ||
+               text.includes('container not available') ||
+               text.includes('Attach failed') ||
+               text.includes('HTTP code 404') ||
+               text.includes('HTTP code 500');
+    }
+
     function handleWebSocketMessage(msg) {
-        const lines = msg.data.split('\n');
-        let isFirstLine = true;
-        let previousLineWasEmpty = false;
+        if (msg.data instanceof Blob) {
+            msg.data.arrayBuffer().then(buf => {
+                const raw = new Uint8Array(buf);
+                const text = new TextDecoder().decode(raw);
+                if (isDaemonInfraError(text)) return;
+                if (text.includes('airlinkd server appears to be down')) {
+                    socket.close();
+                    wsErrorCount = 3;
+                    const warn = document.getElementById('daemonOfflineWarning');
+                    if (warn) warn.classList.remove('hidden');
+                    return;
+                }
+                if (text.includes('Working on')) {
+                    term.clear();
+                    socket.close();
+                    return;
+                }
+                hideConsolePlaceholder();
+                term.write(raw);
+            });
+            return;
+        }
 
-        lines.forEach(line => {
-            const trimmedLine = line.trim();
-
-            if (trimmedLine.includes("Failed to attach to container")) {
-                return;
-            }
-
-            if (trimmedLine === '' && previousLineWasEmpty) return;
-
-            if (!isFirstLine && !previousLineWasEmpty) {
-                term.write('\r\n');
-            }
-
-            term.write('\x1b[0m' + trimmedLine);
-
-            if (trimmedLine.includes("Working on")) {
-                term.write('\r\n\u001b[1m\u001b[33m[panel] \u001b[0mReconnecting socket, hold on...');
-                term.clear();
-                socket.close();
-            }
-
-            if (trimmedLine.includes("airlinkd server appears to be down")) {
-                socket.close();
-                wsErrorCount = 3;
-                const warn = document.getElementById('daemonOfflineWarning');
-                if (warn) warn.classList.remove('hidden');
-            }
-
-            isFirstLine = false;
-            previousLineWasEmpty = (trimmedLine === '');
-        });
+        const text = typeof msg.data === 'string' ? msg.data : String(msg.data);
+        if (isDaemonInfraError(text)) return;
+        if (text.includes('airlinkd server appears to be down')) {
+            socket.close();
+            wsErrorCount = 3;
+            const warn = document.getElementById('daemonOfflineWarning');
+            if (warn) warn.classList.remove('hidden');
+            return;
+        }
+        if (text.includes('Working on')) {
+            term.clear();
+            socket.close();
+            return;
+        }
+        hideConsolePlaceholder();
+        term.write(text);
     }
 
     function writeConsole(prefix, type, message) {
@@ -411,8 +470,8 @@ connectWebSocket();
 
     function restartWebSocket() {
         if (socket) {
-
-            socket.close();
+            try { socket.close(); } catch {}
+            socket = null;
         }
         setTimeout(connectWebSocket, 500);
     }
@@ -476,25 +535,21 @@ connectWebSocket();
     <% if (!server.Suspended) { %>
     startButton.addEventListener('click', () => {
         const serverUUID = '<%= server.UUID %>';
-        const af = window.actionFeedback;
-        af.show('Sending start request');
-        setStatusText('Sending request', 'text-neutral-500 dark:text-neutral-400');
+        setStatusText('Starting', 'text-yellow-500');
+        setStatusLog('Sending start request...', 'starting');
         lockInput('Starting container...');
 
         const evtSocketM = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
-        const stageLabelsM = { pulling: 'Pulling image', creating: 'Creating container', starting: 'Starting container', started: 'Starting server' };
 
         evtSocketM.onmessage = (msg) => {
             let parsed;
             try { parsed = JSON.parse(msg.data); } catch { return; }
             if (parsed.event !== 'lifecycle') return;
             const { type, message } = parsed.data;
-            const label = stageLabelsM[type] || message;
-            af.show(label);
-            setStatusText(label, 'text-yellow-500');
+            setStatusLog(message, type);
             writeConsole('daemon', 'info', message);
             if (type === 'started') { unlockInput(); }
-            if (type === 'error') { af.hide(); showToast(message, 'error'); unlockInput(); }
+            if (type === 'error') { setStatusLog(null); showToast(message, 'error'); unlockInput(); }
         };
 
         fetch(`/server/${serverUUID}/power/start`, { method: 'POST' })
@@ -508,21 +563,21 @@ connectWebSocket();
                             clearInterval(poll);
                             evtSocketM.close();
                             setStatusText('Online', 'text-emerald-500');
+                            setStatusLog(null);
                             updateStatusChart('rgba(16,185,129,0.1)', 'rgba(16,185,129,0.2)');
-                            af.done('Server started');
                             showToast('Server started', 'success');
                             restartWebSocket();
                         } else if (attempts >= 28) {
                             clearInterval(poll);
                             evtSocketM.close();
-                            af.done('Start sent');
+                            setStatusLog(null);
                             showToast('Start command sent', 'success');
                             restartWebSocket();
                         }
                     }).catch(() => {});
                 }, 2500);
             })
-            .catch(() => { evtSocketM.close(); af.hide(); showToast('Failed to start server', 'error'); });
+            .catch(() => { evtSocketM.close(); setStatusLog(null); showToast('Failed to start server', 'error'); });
     });
     <% } else { %>
     startButton.addEventListener('click', () => {
@@ -542,26 +597,22 @@ connectWebSocket();
           confirmLabel: '<%= req.translations.restartServer || "Restart Server" %>',
           onConfirm: () => {
           const serverUUID = '<%= server.UUID %>';
-          const af = window.actionFeedback;
-          af.show('Restarting server');
           setStatusText('Restarting', 'text-amber-500');
+          setStatusLog('Sending restart request...', 'stopping');
           updateStatusChart('rgba(245,158,11,0.1)', 'rgba(245,158,11,0.2)');
           lockInput('Restarting container...');
 
           const evtSocketMR = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
-          const stagesMR = { stopping: 'Stopping container', stopped: 'Container stopped', pulling: 'Pulling image', creating: 'Creating container', starting: 'Starting container', started: 'Starting server' };
 
           evtSocketMR.onmessage = (msg) => {
               let parsed;
               try { parsed = JSON.parse(msg.data); } catch { return; }
               if (parsed.event !== 'lifecycle') return;
               const { type, message } = parsed.data;
-              const label = stagesMR[type] || message;
-              af.show(label);
-              setStatusText(label, 'text-amber-500');
+              setStatusLog(message, type);
               writeConsole('daemon', 'info', message);
               if (type === 'started') { unlockInput(); }
-              if (type === 'error') { af.hide(); showToast(message, 'error'); unlockInput(); }
+              if (type === 'error') { setStatusLog(null); showToast(message, 'error'); unlockInput(); }
           };
 
           fetch(`/server/${serverUUID}/power/restart`, { method: 'POST' })
@@ -578,14 +629,14 @@ connectWebSocket();
                                   clearInterval(poll);
                                   evtSocketMR.close();
                                   setStatusText('Online', 'text-emerald-500');
+                                  setStatusLog(null);
                                   updateStatusChart('rgba(16,185,129,0.1)', 'rgba(16,185,129,0.2)');
-                                  af.done('Server restarted');
                                   showToast('Server restarted', 'success');
                                   restartWebSocket();
                               } else if (attempts >= maxAttempts) {
                                   clearInterval(poll);
                                   evtSocketMR.close();
-                                  af.done('Restart sent');
+                                  setStatusLog(null);
                                   showToast('Restart command sent', 'success');
                                   restartWebSocket();
                               }
@@ -595,7 +646,7 @@ connectWebSocket();
               })
               .catch(() => {
                   evtSocketMR.close();
-                  af.hide();
+                  setStatusLog(null);
                   showToast('Failed to restart server', 'error');
               });
           }
@@ -623,9 +674,7 @@ connectWebSocket();
           if (_pDecoStop) _pDecoStop.classList.add('translate-y-32');
           <% } %>
 
-          const af = window.actionFeedback;
-          af.show('Stopping server');
-          setStatusText('Stopping', 'text-red-500');
+          setStatusLog('Sending stop command...', 'stopping');
           updateStatusChart('rgba(239,68,68,0.1)', 'rgba(239,68,68,0.2)');
 
           const evtSocketMS = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
@@ -636,9 +685,8 @@ connectWebSocket();
               if (parsed.event !== 'lifecycle') return;
               const { type, message } = parsed.data;
               writeConsole('daemon', 'info', message);
-              if (type === 'stopping') { af.show('Stopping container'); setStatusText('Stopping', 'text-red-500'); }
-              if (type === 'stopped')  { af.show('Container stopped'); }
-              if (type === 'error')    { af.hide(); showToast(message, 'error'); }
+              setStatusLog(message, type);
+              if (type === 'error') { setStatusLog(null); showToast(message, 'error'); }
           };
 
           fetch(`/server/${serverUUID}/power/stop`, { method: 'POST' })
@@ -652,13 +700,13 @@ connectWebSocket();
                               clearInterval(poll);
                               evtSocketMS.close();
                               setAllStatsOffline();
-                              af.done('Server stopped');
+                              setStatusLog(null);
                               showToast('Server stopped', 'success');
                               restartWebSocket();
                           } else if (attempts >= 20) {
                               clearInterval(poll);
                               evtSocketMS.close();
-                              af.done('Stop sent');
+                              setStatusLog(null);
                               showToast('Stop command sent', 'success');
                               restartWebSocket();
                               setAllStatsOffline();
@@ -668,7 +716,7 @@ connectWebSocket();
               })
               .catch(() => {
                   evtSocketMS.close();
-                  af.hide();
+                  setStatusLog(null);
                   setStatusText('Online', 'text-emerald-500');
                   updateStatusChart('rgba(16,185,129,0.1)', 'rgba(16,185,129,0.2)');
                   showToast('Failed to stop server', 'error');
@@ -748,72 +796,33 @@ connectWebSocket();
             statsWs = new WebSocket(`${protocol}//${host}/status/<%= server.UUID %>`);
 
             statsWs.onmessage = event => {
-                if (isValidJson(event.data)) {
-                    const stats = JSON.parse(event.data);
-                    if (stats.error) {
-                        // Only log in development mode to reduce console spam
-                        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                if (!isValidJson(event.data)) { return; }
+                const stats = JSON.parse(event.data);
+                if (stats.error) { return; }
+                if (!stats.data) { return; }
 
-                        }
-                        setAllStatsOffline();
-                        return;
-                    }
-
-                    // Check if server is offline based on the event data
-                    if (stats.event === 'status' && stats.data && stats.data.running === false) {
-                        // Only log in development mode
-                        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-
-                        }
-                        setAllStatsOffline();
-                        return;
-                    }
-
-                    // Check if memory usage is NaN, which indicates server is offline
-                    if (stats.data && stats.data.memory && stats.data.memory.percentage === "NaN") {
-                        // Only log in development mode
-                        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-
-                        }
-                        setAllStatsOffline();
-                        return;
-                    }
-
-                    // Server is online, update all stats normally
-                    updateRamUsage(stats);
-                    updateCpuUsage(stats);
-                    updateDiskUsage(stats);
-                    updateStatus(stats);
-                } else {
-
-                    setAllStatsOffline();
+                if (stats.data.running === false) {
+                    if (!lifecycleActive) setAllStatsOffline();
+                    return;
                 }
+
+                updateRamUsage(stats);
+                updateCpuUsage(stats);
+                updateDiskUsage(stats);
+                updateStatus(stats);
             };
 
             statsWs.onopen = () => {
-
                 isStatsReconnecting = false;
                 statsReconnectAttempts = 0;
                 statsReconnectInterval = 2000;
-                // No need to hide daemon down message as it's been removed
             };
 
-            statsWs.onerror = (error) => {
-
-                // Set all stats to offline on WebSocket error
-                setAllStatsOffline();
+            statsWs.onerror = () => {
+                // Error — don't change status immediately, wait for reconnect result
             };
 
-            statsWs.onclose = (event) => {
-
-                // Set all stats to offline when connection is lost
-                setAllStatsOffline();
-
-                // Update status text to show connection lost
-                const statusElement = document.getElementById('status');
-                statusElement.textContent = 'Connection Lost!';
-                statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
-
+            statsWs.onclose = () => {
                 if (!isStatsReconnecting) {
                     scheduleStatsReconnect();
                 }
@@ -972,34 +981,35 @@ connectWebSocket();
     }
 
     function updateStatus(stats) {
+        if (lifecycleActive) return;
+
         <% if (features.includes('players')) { %>
         const playersDeco = document.getElementById('players-deco');
         <% } %>
         const statusElement = document.getElementById('status');
-        const ramUsageRaw = stats.data.memory.percentage;
 
         if (stats.data && stats.data.starting === true) {
             statusElement.textContent = 'Starting';
-            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
+            statusElement.className = 'mt-0.5 text-base font-semibold leading-tight text-yellow-500';
             updateHeaderDot('starting');
             <% if (features.includes('players')) { %>
-            playersDeco.classList.add('translate-y-32');
+            if (playersDeco) playersDeco.classList.add('translate-y-32');
             <% } %>
             updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
-        } else if (ramUsageRaw !== "NaN") {
+        } else if (stats.data && stats.data.running === true) {
             statusElement.textContent = 'Online';
-            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
+            statusElement.className = 'mt-0.5 text-base font-semibold leading-tight text-emerald-500';
             updateHeaderDot('online');
             <% if (features.includes('players')) { %>
-            playersDeco.classList.remove('translate-y-32');
+            if (playersDeco) playersDeco.classList.remove('translate-y-32');
             <% } %>
             updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
         } else {
             statusElement.textContent = 'Offline';
-            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
+            statusElement.className = 'mt-0.5 text-base font-semibold leading-tight text-red-500';
             updateHeaderDot('offline');
             <% if (features.includes('players')) { %>
-            playersDeco.classList.add('translate-y-32');
+            if (playersDeco) playersDeco.classList.add('translate-y-32');
             <% } %>
             updateStatusChart('rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.2)');
         }
@@ -1021,11 +1031,61 @@ connectWebSocket();
         chart.update();
     }
 
+    let lifecycleActive = false;
+    let statusMsgFadeTimer = null;
+
+    const statusColors = {
+        pulling:  'text-blue-500',
+        creating: 'text-blue-500',
+        starting: 'text-yellow-500',
+        started:  'text-yellow-500',
+        stopping: 'text-orange-500',
+        stopped:  'text-red-500',
+        killed:   'text-red-500',
+        error:    'text-red-400',
+    };
+
+    const statusCardLabels = {
+        pulling:  'Pulling image',
+        creating: 'Creating container',
+        starting: 'Starting container',
+        started:  'Starting server',
+        stopping: 'Stopping server',
+        stopped:  'Server stopped',
+        killed:   'Server stopped',
+        error:    'Error',
+    };
+
     function setStatusText(text, colorClass) {
         const el = document.getElementById('status');
         if (!el) return;
         el.textContent = text;
-        el.className = 'mt-1 text-lg font-medium tracking-tight ' + colorClass;
+        el.className = 'mt-0.5 text-base font-semibold leading-tight ' + colorClass;
+    }
+
+    function setStatusLog(msg, eventType) {
+        const logEl = document.getElementById('status-log-text');
+        if (!logEl) return;
+        if (statusMsgFadeTimer) { clearTimeout(statusMsgFadeTimer); statusMsgFadeTimer = null; }
+        if (msg === null) {
+            lifecycleActive = false;
+            logEl.textContent = '';
+            logEl.classList.add('hidden', 'opacity-0');
+        } else {
+            lifecycleActive = true;
+            hideConsolePlaceholder();
+            const label = statusCardLabels[eventType] || msg;
+            const color = statusColors[eventType] || 'text-neutral-400';
+            logEl.classList.add('opacity-0');
+            statusMsgFadeTimer = setTimeout(() => {
+                logEl.textContent = label;
+                logEl.className = `text-[10px] font-medium truncate transition-opacity duration-200 ${color}`;
+                logEl.classList.remove('hidden');
+                void logEl.offsetHeight;
+                logEl.classList.remove('opacity-0');
+                statusMsgFadeTimer = null;
+            }, 120);
+        }
     }
 
     function updateStatusChart(backgroundColor, borderColor) {
@@ -1036,7 +1096,20 @@ connectWebSocket();
         statusChart.update();
     }
 
+    function hideConsolePlaceholder() {
+        const el = document.getElementById('console-offline');
+        if (!el) return;
+        el.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function showConsolePlaceholder() {
+        const el = document.getElementById('console-offline');
+        if (!el) return;
+        el.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
     function setAllStatsOffline() {
+        showConsolePlaceholder();
         const statusElement = document.getElementById('status');
         statusElement.textContent = 'Offline';
         statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
@@ -1109,10 +1182,12 @@ connectWebSocket();
             const { type, message } = parsed.data;
             const state = stateMap[type];
             if (state) setStatusText(state.label, state.color);
+            setStatusLog(message, type);
             writeConsole('daemon', 'info', message);
             if (lockingStates.has(type)) { lockInput(state ? state.label + '...' : 'Waiting...'); }
-            if (type === 'started') { unlockInput(); }
-            if (type === 'error')   { unlockInput(); }
+            if (type === 'started') { unlockInput(); setStatusLog(null); }
+            if (type === 'stopped' || type === 'killed') { setStatusLog(null); }
+            if (type === 'error')   { unlockInput(); setStatusLog(null); }
         };
     })();
 

@@ -164,7 +164,7 @@
 
 <script>
   function handleRowClick(event, url) {
-    if (!['BUTTON', 'A'].includes(event.target.tagName)) {
+    if (!event.target.closest('button, a')) {
       window.location = url;
     }
   }
