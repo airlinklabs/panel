@@ -83,20 +83,18 @@
       </div>
       <% } %>
 
-      <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline) { %>
-      <div id="daemonOfflineWarning" class="mt-3 flex items-center gap-2.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-3 py-2.5">
+      <div id="daemonOfflineWarning" class="mt-3 flex items-center gap-2.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-3 py-2.5<% if (typeof serverStatus === 'undefined' || !serverStatus.daemonOffline) { %> hidden<% } %>">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0 text-red-500">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
         </svg>
         <div class="min-w-0 flex-1">
-          <p class="text-xs font-medium text-red-700 dark:text-red-400">Node offline</p>
-          <p class="text-[11px] text-red-500 dark:text-red-400/70 truncate"><%= serverStatus.error || 'Daemon is unreachable. Server controls unavailable.' %></p>
+          <p class="text-xs font-medium text-red-700 dark:text-red-400">Connection Error</p>
+          <p class="text-[11px] text-red-500 dark:text-red-400/70 truncate"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'The daemon appears to be offline. Server controls unavailable.' %></p>
         </div>
         <button onclick="window.location.reload()" class="shrink-0 px-2.5 py-1 bg-red-600 hover:bg-red-500 text-white text-[11px] font-medium rounded-lg transition">
           Retry
         </button>
       </div>
-      <% } %>
 
       <div class="flex gap-2 mt-3">
         <button id="startButton" type="button"
@@ -461,12 +459,27 @@ connectWebSocket();
     let id = 0;
 
     const startButton = document.getElementById('startButton');
+    const consoleInputM = document.getElementById('input');
+
+    function lockInput(reason) {
+        if (!consoleInputM) return;
+        consoleInputM.disabled = true;
+        consoleInputM.placeholder = reason || 'Waiting for container...';
+    }
+
+    function unlockInput() {
+        if (!consoleInputM) return;
+        consoleInputM.disabled = false;
+        consoleInputM.placeholder = '<%= req.translations.typeACommand || "Type a command..." %>';
+    }
+
     <% if (!server.Suspended) { %>
     startButton.addEventListener('click', () => {
         const serverUUID = '<%= server.UUID %>';
         const af = window.actionFeedback;
         af.show('Sending start request');
         setStatusText('Sending request', 'text-neutral-500 dark:text-neutral-400');
+        lockInput('Starting container...');
 
         const evtSocketM = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
         const stageLabelsM = { pulling: 'Pulling image', creating: 'Creating container', starting: 'Starting container', started: 'Starting server' };
@@ -479,7 +492,9 @@ connectWebSocket();
             const label = stageLabelsM[type] || message;
             af.show(label);
             setStatusText(label, 'text-yellow-500');
-            if (type === 'error') { af.hide(); showToast(message, 'error'); }
+            writeConsole('daemon', 'info', message);
+            if (type === 'started') { unlockInput(); }
+            if (type === 'error') { af.hide(); showToast(message, 'error'); unlockInput(); }
         };
 
         fetch(`/server/${serverUUID}/power/start`, { method: 'POST' })
@@ -531,6 +546,7 @@ connectWebSocket();
           af.show('Restarting server');
           setStatusText('Restarting', 'text-amber-500');
           updateStatusChart('rgba(245,158,11,0.1)', 'rgba(245,158,11,0.2)');
+          lockInput('Restarting container...');
 
           const evtSocketMR = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
           const stagesMR = { stopping: 'Stopping container', stopped: 'Container stopped', pulling: 'Pulling image', creating: 'Creating container', starting: 'Starting container', started: 'Starting server' };
@@ -543,7 +559,9 @@ connectWebSocket();
               const label = stagesMR[type] || message;
               af.show(label);
               setStatusText(label, 'text-amber-500');
-              if (type === 'error') { af.hide(); showToast(message, 'error'); }
+              writeConsole('daemon', 'info', message);
+              if (type === 'started') { unlockInput(); }
+              if (type === 'error') { af.hide(); showToast(message, 'error'); unlockInput(); }
           };
 
           fetch(`/server/${serverUUID}/power/restart`, { method: 'POST' })
@@ -617,6 +635,7 @@ connectWebSocket();
               try { parsed = JSON.parse(msg.data); } catch { return; }
               if (parsed.event !== 'lifecycle') return;
               const { type, message } = parsed.data;
+              writeConsole('daemon', 'info', message);
               if (type === 'stopping') { af.show('Stopping container'); setStatusText('Stopping', 'text-red-500'); }
               if (type === 'stopped')  { af.show('Container stopped'); }
               if (type === 'error')    { af.hide(); showToast(message, 'error'); }
@@ -1069,7 +1088,7 @@ connectWebSocket();
 
     initStatsWebSocket();
 
-    // Lifecycle event stream — drives the status card with real daemon states
+    // Passive lifecycle stream — receives daemon events, writes to console, manages input lock
     (function () {
         const proto = location.protocol === 'https:' ? 'wss' : 'ws';
         const lcSock = new WebSocket(`${proto}://${location.host}/events/<%= server.UUID %>`);
@@ -1082,12 +1101,18 @@ connectWebSocket();
             stopped:  { label: 'Offline',            color: 'text-red-500' },
             killed:   { label: 'Offline',            color: 'text-red-500' },
         };
+        const lockingStates = new Set(['pulling', 'creating', 'starting']);
         lcSock.onmessage = (msg) => {
             let parsed;
             try { parsed = JSON.parse(msg.data); } catch { return; }
             if (parsed.event !== 'lifecycle') return;
-            const state = stateMap[parsed.data.type];
+            const { type, message } = parsed.data;
+            const state = stateMap[type];
             if (state) setStatusText(state.label, state.color);
+            writeConsole('daemon', 'info', message);
+            if (lockingStates.has(type)) { lockInput(state ? state.label + '...' : 'Waiting...'); }
+            if (type === 'started') { unlockInput(); }
+            if (type === 'error')   { unlockInput(); }
         };
     })();
 

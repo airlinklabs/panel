@@ -169,9 +169,11 @@
   function updateNav(newPath) {
     var bg = document.getElementById('active-background');
     var best = null, bestLen = 0;
+    var isDark = document.documentElement.classList.contains('dark');
 
     document.querySelectorAll('.nav-link').forEach(function (link) {
-      link.classList.remove('active', 'text-neutral-950', 'font-[405]', 'dark:text-white');
+      link.classList.remove('active', 'font-medium');
+      link.style.color = '';
       var href = (link.getAttribute('href') || '').replace(/\/$/, '');
       if (!href) return;
       if (newPath === href) { best = link; bestLen = 9999; }
@@ -181,7 +183,8 @@
     });
 
     if (best) {
-      best.classList.add('active', 'text-neutral-950', 'font-[405]', 'dark:text-white');
+      best.classList.add('active', 'font-medium');
+      best.style.color = isDark ? '#ffffff' : '#0a0a0a';
       if (bg) {
         var r = best.getBoundingClientRect();
         var ul = best.closest('ul');
