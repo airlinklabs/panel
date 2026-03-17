@@ -183,10 +183,14 @@
   }
 
   function setDesktopActiveLink(link) {
+    var isDark = document.documentElement.classList.contains('dark');
     document.querySelectorAll('.nav-link').forEach(function (l) {
-      l.classList.remove('active', 'text-neutral-950', 'font-[405]', 'dark:text-white');
+      l.classList.remove('active', 'font-medium');
+      l.style.color = '';
     });
-    if (link) link.classList.add('active', 'text-neutral-950', 'font-[405]', 'dark:text-white');
+    if (!link) return;
+    link.classList.add('active', 'font-medium');
+    link.style.color = isDark ? '#ffffff' : '#0a0a0a';
   }
 
   function movePill(link, animate) {

@@ -44,103 +44,94 @@
 
     <!-- Content -->
     <div id="page-content" class="flex-1 min-w-0 p-6 overflow-y-auto pt-16">
-      <!-- Page Header -->
-      <div class="sm:flex sm:items-start px-8 pt-4 gap-4">
-        <div class="flex-1 min-w-0">
-          <%- include('../../components/serverHeader') %>
-          <!-- Server meta: image · node · id — small, beside the title area -->
-          <div class="flex items-center gap-3 mt-1.5 flex-wrap">
-            <div class="flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-3 w-3 text-neutral-400 shrink-0"><rect width="256" height="256" fill="none"/><path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/></svg>
-              <span class="text-[11px] text-neutral-500 dark:text-neutral-400 truncate max-w-[140px]"><%= server.image.name %></span>
-            </div>
-            <span class="text-neutral-300 dark:text-neutral-600 text-[11px]">·</span>
-            <div class="flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-3 w-3 text-neutral-400 shrink-0"><rect width="256" height="256" fill="none"/><path d="M208,40H48A16,16,0,0,0,32,56v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40ZM180,92a12,12,0,1,1,12-12A12,12,0,0,1,180,92Z"/><path d="M208,136H48a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V152A16,16,0,0,0,208,136Zm-28,52a12,12,0,1,1,12-12A12,12,0,0,1,180,188Z"/></svg>
-              <span class="text-[11px] text-neutral-500 dark:text-neutral-400 truncate max-w-[100px]"><%= server.node.name %></span>
-            </div>
-            <span class="text-neutral-300 dark:text-neutral-600 text-[11px]">·</span>
-            <div class="flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-3 w-3 text-neutral-400 shrink-0"><rect width="256" height="256" fill="none"/><path d="M116.25,112h31.5l-8,32h-31.5ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48Zm-16,56a8,8,0,0,0-8-8H168.25l7.51-30.06a8,8,0,0,0-15.52-3.88L151.75,96h-31.5l7.51-30.06a8,8,0,0,0-15.52-3.88L103.75,96H64a8,8,0,0,0,0,16H99.75l-8,32H56a8,8,0,0,0,0,16H87.75l-7.51,30.06a8,8,0,0,0,5.82,9.7,8.13,8.13,0,0,0,2,.24,8,8,0,0,0,7.75-6.06L104.25,160h31.5l-7.51,30.06a8,8,0,0,0,5.82,9.7A8.13,8.13,0,0,0,136,200a8,8,0,0,0,7.75-6.06L152.25,160H192a8,8,0,0,0,0-16H156.25l8-32H200A8,8,0,0,0,208,104Z"/></svg>
-              <span class="text-[11px] font-mono text-neutral-500 dark:text-neutral-400"><%= server.UUID.split('-')[0] %></span>
+      <!-- Page Header: title + meta left, buttons right -->
+      <div class="px-8 pt-4">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1 min-w-0">
+            <%- include('../../components/serverHeader') %>
+            <!-- Server meta: image · node · id -->
+            <div class="flex items-center gap-3 mt-1.5 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-3 w-3 text-neutral-400 shrink-0"><rect width="256" height="256" fill="none"/><path d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a8,8,0,0,0-8,8v92.69A15.86,15.86,0,0,0,36.69,144L136,243.31a16,16,0,0,0,22.63,0l84.68-84.68a16,16,0,0,0,0-22.63ZM84,96A12,12,0,1,1,96,84,12,12,0,0,1,84,96Z"/></svg>
+                <span class="text-[11px] text-neutral-500 dark:text-neutral-400 truncate max-w-[140px]"><%= server.image.name %></span>
+              </div>
+              <span class="text-neutral-300 dark:text-neutral-600 text-[11px]">·</span>
+              <div class="flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-3 w-3 text-neutral-400 shrink-0"><rect width="256" height="256" fill="none"/><path d="M208,40H48A16,16,0,0,0,32,56v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40ZM180,92a12,12,0,1,1,12-12A12,12,0,0,1,180,92Z"/><path d="M208,136H48a16,16,0,0,0-16,16v48a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V152A16,16,0,0,0,208,136Zm-28,52a12,12,0,1,1,12-12A12,12,0,0,1,180,188Z"/></svg>
+                <span class="text-[11px] text-neutral-500 dark:text-neutral-400 truncate max-w-[100px]"><%= server.node.name %></span>
+              </div>
+              <span class="text-neutral-300 dark:text-neutral-600 text-[11px]">·</span>
+              <div class="flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-3 w-3 text-neutral-400 shrink-0"><rect width="256" height="256" fill="none"/><path d="M116.25,112h31.5l-8,32h-31.5ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48Zm-16,56a8,8,0,0,0-8-8H168.25l7.51-30.06a8,8,0,0,0-15.52-3.88L151.75,96h-31.5l7.51-30.06a8,8,0,0,0-15.52-3.88L103.75,96H64a8,8,0,0,0,0,16H99.75l-8,32H56a8,8,0,0,0,0,16H87.75l-7.51,30.06a8,8,0,0,0,5.82,9.7,8.13,8.13,0,0,0,2,.24,8,8,0,0,0,7.75-6.06L104.25,160h31.5l-7.51,30.06a8,8,0,0,0,5.82,9.7A8.13,8.13,0,0,0,136,200a8,8,0,0,0,7.75-6.06L152.25,160H192a8,8,0,0,0,0-16H156.25l8-32H200A8,8,0,0,0,208,104Z"/></svg>
+                <span class="text-[11px] font-mono text-neutral-500 dark:text-neutral-400"><%= server.UUID.split('-')[0] %></span>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="mt-4 sm:mt-0 sm:flex gap-2.5 shrink-0">
+
+          <!-- Control buttons -->
+          <div class="flex gap-2 shrink-0">
             <button id="startButton" type="button"
-                class="w-full md:w-auto rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2 <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                    class="size-4 inline-flex mr-1 text-emerald-100 mb-0.5">
-                    <path fill-rule="evenodd"
-                        d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z"
-                        clip-rule="evenodd" />
-                </svg>
-                <%= req.translations.start %>
+              class="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 inline-flex mr-1 text-emerald-100 mb-0.5">
+                <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
+              </svg>
+              <%= req.translations.start %>
             </button>
             <button id="restartButton" type="button"
-                class="w-full md:w-auto rounded-xl bg-neutral-800 dark:bg-neutral-600 hover:bg-neutral-700 dark:hover:bg-neutral-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2 <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                    class="size-4 inline-flex mr-1 text-white mb-0.5">
-                    <path fill-rule="evenodd"
-                        d="M4.755 10.059a7.5 7.5 0 0 1 12.548-3.364l1.903 1.903h-3.183a.75.75 0 1 0 0 1.5h4.992a.75.75 0 0 0 .75-.75V4.356a.75.75 0 0 0-1.5 0v3.18l-1.9-1.9A9 9 0 0 0 3.306 9.67a.75.75 0 1 0 1.45.388Zm15.408 3.352a.75.75 0 0 0-.919.53 7.5 7.5 0 0 1-12.548 3.364l-1.902-1.903h3.183a.75.75 0 0 0 0-1.5H2.984a.75.75 0 0 0-.75.75v4.992a.75.75 0 0 0 1.5 0v-3.18l1.9 1.9a9 9 0 0 0 15.059-4.035.75.75 0 0 0-.53-.918Z"
-                        clip-rule="evenodd" />
-                </svg>
-                <%= req.translations.restart %>
+              class="rounded-xl bg-neutral-800 dark:bg-neutral-600 hover:bg-neutral-700 dark:hover:bg-neutral-500 text-white px-3 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 inline-flex mr-1 text-white mb-0.5">
+                <path fill-rule="evenodd" d="M4.755 10.059a7.5 7.5 0 0 1 12.548-3.364l1.903 1.903h-3.183a.75.75 0 1 0 0 1.5h4.992a.75.75 0 0 0 .75-.75V4.356a.75.75 0 0 0-1.5 0v3.18l-1.9-1.9A9 9 0 0 0 3.306 9.67a.75.75 0 1 0 1.45.388Zm15.408 3.352a.75.75 0 0 0-.919.53 7.5 7.5 0 0 1-12.548 3.364l-1.902-1.903h3.183a.75.75 0 0 0 0-1.5H2.984a.75.75 0 0 0-.75.75v4.992a.75.75 0 0 0 1.5 0v-3.18l1.9 1.9a9 9 0 0 0 15.059-4.035.75.75 0 0 0-.53-.918Z" clip-rule="evenodd" />
+              </svg>
+              <%= req.translations.restart %>
             </button>
             <button id="stopButton" type="button"
-                class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2 <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                    class="size-4 inline-flex mr-1 text-red-100 mb-0.5">
-                    <path fill-rule="evenodd"
-                        d="M4.5 7.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-9Z"
-                        clip-rule="evenodd" />
-                </svg>
-                <%= req.translations.stop %>
+              class="rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-sm transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 inline-flex mr-1 text-red-100 mb-0.5">
+                <path fill-rule="evenodd" d="M4.5 7.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-9Z" clip-rule="evenodd" />
+              </svg>
+              <%= req.translations.stop %>
             </button>
+          </div>
         </div>
-      </div>
 
-      <!-- Inline action feedback line -->
-      <div class="px-8 mt-2">
-        <%- include('../../components/loadingPopup') %>
-      </div>
+        <!-- Action feedback + alerts: between header and console -->
+        <div class="mt-3">
+          <%- include('../../components/loadingPopup') %>
+        </div>
 
-      <%- include('../../components/installHeader') %>
+        <%- include('../../components/installHeader') %>
 
-      <!-- Server Suspended Warning -->
-      <% if (server.Suspended) { %>
-      <div class="mx-8 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center">
-        <div class="flex-shrink-0 mr-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- Server Suspended Warning -->
+        <% if (server.Suspended) { %>
+        <div class="mt-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
+          <div>
+            <p class="text-sm font-medium text-red-500"><%= req.translations.serverSuspended || 'Server Suspended' %></p>
+            <p class="text-xs text-red-400"><%= req.translations.serverSuspendedDesc || 'This server has been suspended by an administrator.' %></p>
+          </div>
         </div>
-        <div>
-          <h3 class="text-sm font-medium text-red-500"><%= req.translations.serverSuspended || 'Server Suspended' %></h3>
-          <p class="text-xs text-red-400"><%= req.translations.serverSuspendedDesc || 'This server has been suspended by an administrator.' %></p>
-        </div>
-      </div>
-      <% } %>
+        <% } %>
 
-      <!-- Daemon Offline Warning -->
-      <div class="collapsible-row no-anim<% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline) { %> open<% } %>" id="daemonOfflineWarningRow">
-      <div>
-      <div id="daemonOfflineWarning" class="mx-8 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center">
-        <div class="flex-shrink-0 mr-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
+        <!-- Daemon Offline Warning — hidden by default, shown by JS when daemon unreachable -->
+        <div id="daemonOfflineWarningRow" class="<% if (typeof serverStatus === 'undefined' || !serverStatus.daemonOffline) { %>hidden<% } %> mt-3">
+          <div id="daemonOfflineWarning" class="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-red-500">Connection Error</p>
+              <p class="text-xs text-red-400"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'The daemon appears to be offline. Server information and controls are unavailable.' %></p>
+            </div>
+            <button onclick="window.location.reload()" class="shrink-0 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition">
+              Retry Connection
+            </button>
+          </div>
         </div>
-        <div>
-          <h3 class="text-sm font-medium text-red-500">Connection Error</h3>
-          <p class="text-xs text-red-400"><%= serverStatus.error || 'The daemon appears to be offline. Server information and controls are unavailable.' %></p>
-          <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors">
-            Retry Connection
-          </button>
-        </div>
       </div>
-      </div>
-      </div>
+
+
 
       <%- include('../../components/serverTemplate') %>
 
@@ -343,7 +334,7 @@ function connectWebSocket() {
             reconnectInterval = 2000;
             wsErrorCount = 0;
             const row = document.getElementById('daemonOfflineWarningRow');
-            if (row) row.classList.remove('open');
+            if (row) row.classList.add('hidden');
         };
 
         socket.onmessage = handleWebSocketMessage;
@@ -353,7 +344,7 @@ function connectWebSocket() {
             if (wsErrorCount >= 3) {
                 writeConsole('system', 'error', 'Daemon connection lost');
                 const row = document.getElementById('daemonOfflineWarningRow');
-                if (row) row.classList.add('open');
+                if (row) row.classList.remove('hidden');
             }
         };
 
@@ -417,9 +408,9 @@ connectWebSocket();
 
             if (trimmedLine.includes("airlinkd server appears to be down")) {
                 socket.close();
-                wsErrorCount = 3; // confirmed signal — skip the counter
+                wsErrorCount = 3;
                 const row = document.getElementById('daemonOfflineWarningRow');
-                if (row) row.classList.add('open');
+                if (row) row.classList.remove('hidden');
             }
 
             isFirstLine = false;
@@ -488,9 +479,21 @@ connectWebSocket();
         }
     }
 
-    let id = 0;
-
     const startButton = document.getElementById('startButton');
+    const consoleInput = document.getElementById('input');
+
+    function lockInput(reason) {
+        if (!consoleInput) return;
+        consoleInput.disabled = true;
+        consoleInput.placeholder = reason || 'Waiting for container...';
+    }
+
+    function unlockInput() {
+        if (!consoleInput) return;
+        consoleInput.disabled = false;
+        consoleInput.placeholder = '<%= req.translations.typeACommand || "Type a command..." %>';
+    }
+
     <% if (!server.Suspended) { %>
     startButton.addEventListener('click', () => {
         const serverUUID = '<%= server.UUID %>';
@@ -498,6 +501,7 @@ connectWebSocket();
 
         af.show('Sending start request');
         setStatusText('Sending request', 'text-neutral-500 dark:text-neutral-400');
+        lockInput('Starting container...');
 
         const evtSocket = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
 
@@ -516,7 +520,9 @@ connectWebSocket();
             const label = stageLabels[type] || message;
             af.show(label);
             setStatusText(label, 'text-yellow-500');
-            if (type === 'error') { af.hide(); showToast(message, 'error'); }
+            writeConsole('daemon', 'info', message);
+            if (type === 'started') { unlockInput(); }
+            if (type === 'error') { af.hide(); showToast(message, 'error'); unlockInput(); }
         };
 
         fetch(`/server/${serverUUID}/power/start`, { method: 'POST' })
@@ -575,6 +581,7 @@ connectWebSocket();
           af.show('Restarting server');
           setStatusText('Restarting', 'text-amber-500');
           updateStatusChart('rgba(245,158,11,0.1)', 'rgba(245,158,11,0.2)');
+          lockInput('Restarting container...');
 
           const evtSocketR = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/events/${serverUUID}`);
           const stageLabelsR = {
@@ -594,7 +601,9 @@ connectWebSocket();
               const label = stageLabelsR[type] || message;
               af.show(label);
               setStatusText(label, 'text-amber-500');
-              if (type === 'error') { af.hide(); showToast(message, 'error'); }
+              writeConsole('daemon', 'info', message);
+              if (type === 'started') { unlockInput(); }
+              if (type === 'error') { af.hide(); showToast(message, 'error'); unlockInput(); }
           };
 
           fetch(`/server/${serverUUID}/power/restart`, { method: 'POST' })
@@ -667,6 +676,7 @@ connectWebSocket();
               try { parsed = JSON.parse(msg.data); } catch { return; }
               if (parsed.event !== 'lifecycle') return;
               const { type, message } = parsed.data;
+              writeConsole('daemon', 'info', message);
               if (type === 'stopping') { af.show('Stopping container'); setStatusText('Stopping', 'text-red-500'); }
               if (type === 'stopped')  { af.show('Container stopped'); }
               if (type === 'error')    { af.hide(); showToast(message, 'error'); }
@@ -1102,8 +1112,8 @@ connectWebSocket();
 
     initStatsWebSocket();
 
-    // Lifecycle event stream — updates the status card with real daemon states
-    // (pulling, creating, starting, etc) without polling
+    // Passive lifecycle stream — receives daemon events for any operation in progress
+    // Writes them to the console terminal and manages input lock state
     (function () {
         const proto = location.protocol === 'https:' ? 'wss' : 'ws';
         const lcSock = new WebSocket(`${proto}://${location.host}/events/<%= server.UUID %>`);
@@ -1118,13 +1128,19 @@ connectWebSocket();
             killed:   { label: 'Offline',             color: 'text-red-500' },
         };
 
+        const lockingStates = new Set(['pulling', 'creating', 'starting']);
+
         lcSock.onmessage = (msg) => {
             let parsed;
             try { parsed = JSON.parse(msg.data); } catch { return; }
             if (parsed.event !== 'lifecycle') return;
-            const { type } = parsed.data;
+            const { type, message } = parsed.data;
             const state = stateMap[type];
             if (state) setStatusText(state.label, state.color);
+            writeConsole('daemon', 'info', message);
+            if (lockingStates.has(type)) { lockInput(state ? state.label + '...' : 'Waiting...'); }
+            if (type === 'started') { unlockInput(); }
+            if (type === 'error')   { unlockInput(); }
         };
     })();
 
