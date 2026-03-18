@@ -1,0 +1,124 @@
+<%- include('../../components/header', { title: 'Security' }) %>
+
+<main id="page-content" class="">
+  <%- include('../../components/template') %>
+  <%- include('../../components/toast') %>
+
+  <div class="px-4 py-5 pb-24 space-y-5">
+    <div class="mb-4">
+      <h1 class="text-base font-medium text-neutral-800 dark:text-white">Security</h1>
+      <p class="text-xs text-neutral-500 mt-0.5">Rate limiting, IP bans, and protection settings.</p>
+    </div>
+
+    <!-- Rate Limiting -->
+    <div class="bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
+      <div class="px-4 py-3.5 border-b border-neutral-200 dark:border-white/5">
+        <h2 class="text-sm font-medium text-neutral-800 dark:text-white">Rate Limiting</h2>
+        <p class="mt-0.5 text-xs text-neutral-500">Limit requests per IP per minute.</p>
+      </div>
+      <form id="form-rate-limit" class="px-4 py-4 space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Enable</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="rateLimitEnabled" name="rateLimitEnabled" class="sr-only peer" value="true" <%= settings && settings.rateLimitEnabled ? 'checked' : '' %>>
+            <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900 dark:peer-checked:bg-white"></div>
+          </label>
+        </div>
+        <div>
+          <label for="rateLimitRpm" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Requests / minute</label>
+          <input type="number" id="rateLimitRpm" name="rateLimitRpm" min="1" max="10000" value="<%= settings ? settings.rateLimitRpm : 100 %>"
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
+        </div>
+        <button type="submit" class="w-full py-2.5 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 transition">
+          Save
+        </button>
+      </form>
+    </div>
+
+    <!-- IP Bans -->
+    <div class="bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
+      <div class="px-4 py-3.5 border-b border-neutral-200 dark:border-white/5">
+        <h2 class="text-sm font-medium text-neutral-800 dark:text-white">Banned IPs</h2>
+        <p class="mt-0.5 text-xs text-neutral-500">Block specific IPs from the panel.</p>
+      </div>
+      <div class="px-4 py-4 space-y-3">
+        <div class="flex gap-2">
+          <input type="text" id="ban-ip-input" placeholder="192.168.1.100"
+            class="flex-1 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none transition">
+          <button id="ban-ip-btn" type="button"
+            class="px-4 py-2.5 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 transition whitespace-nowrap">
+            Ban
+          </button>
+        </div>
+        <% if (bannedIps && bannedIps.length > 0) { %>
+          <ul id="banned-list" class="space-y-1.5">
+            <% bannedIps.forEach(ip => { %>
+              <li class="flex items-center justify-between px-3 py-2 rounded-lg bg-white dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 text-sm" data-ip="<%= ip %>">
+                <span class="font-mono text-neutral-700 dark:text-neutral-300 text-xs"><%= ip %></span>
+                <button type="button" class="unban-btn text-xs text-red-500 hover:text-red-400 transition">Remove</button>
+              </li>
+            <% }); %>
+          </ul>
+        <% } else { %>
+          <p id="no-bans-msg" class="text-xs text-neutral-400">No IPs are currently banned.</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  document.getElementById('form-rate-limit').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const enabled = document.getElementById('rateLimitEnabled').checked;
+    const rpm = document.getElementById('rateLimitRpm').value;
+    try {
+      const r = await fetch('/admin/security/rate-limit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rateLimitEnabled: enabled, rateLimitRpm: rpm }),
+      });
+      const data = await r.json();
+      if (data.success) showToast('Settings saved.', 'success');
+      else showToast(data.error || 'Failed.', 'error');
+    } catch { showToast('An error occurred.', 'error'); }
+  });
+
+  document.getElementById('ban-ip-btn').addEventListener('click', async () => {
+    const ip = document.getElementById('ban-ip-input').value.trim();
+    if (!ip) return;
+    try {
+      const r = await fetch('/admin/security/ban-ip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ip }),
+      });
+      const data = await r.json();
+      if (data.success) { showToast(`${ip} banned.`, 'success'); setTimeout(() => location.reload(), 800); }
+      else showToast(data.error || 'Failed.', 'error');
+    } catch { showToast('An error occurred.', 'error'); }
+  });
+
+  document.querySelectorAll('.unban-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const li = btn.closest('li');
+      const ip = li.dataset.ip;
+      try {
+        const r = await fetch('/admin/security/unban-ip', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip }),
+        });
+        const data = await r.json();
+        if (data.success) {
+          li.remove();
+          showToast(`${ip} unbanned.`, 'success');
+        } else showToast(data.error || 'Failed.', 'error');
+      } catch { showToast('An error occurred.', 'error'); }
+    });
+  });
+</script>
+
+<%- include('../../components/footer') %>

@@ -197,7 +197,7 @@ const adminModule: Module = {
                 },
                 data: {
                   id: String(server.UUID),
-                  stopCmd: 'stop',
+                  stopCmd: server.image?.stop || 'stop',
                 },
               };
 
@@ -399,6 +399,19 @@ const adminModule: Module = {
             return;
           }
 
+          // Merge submitted variable values into the egg variable definitions
+          let imageVariables: Record<string, unknown>[] = [];
+          try { imageVariables = JSON.parse(image.variables || '[]'); } catch { /* keep empty */ }
+
+          const submittedVars = Array.isArray(variables) ? variables : [];
+          const mergedVariables = imageVariables.map((imgVar: Record<string, unknown>) => {
+            const envKey = String(imgVar.env_variable ?? imgVar.env ?? '');
+            const submitted = submittedVars.find(
+              (sv: Record<string, unknown>) => String(sv.env_variable ?? sv.env ?? '') === envKey,
+            );
+            return { ...imgVar, value: submitted?.value ?? imgVar.default_value ?? '' };
+          });
+
           // Create server
           const createdServer = await prisma.server.create({
             data: {
@@ -408,10 +421,10 @@ const adminModule: Module = {
               nodeId: parseInt(nodeId),
               imageId: parseInt(imageId),
               Ports: Port || '[{"Port": "25565:25565", "primary": true}]',
-              Memory: parseInt(Memory) || 4,
+              Memory: (parseInt(Memory) || 1024),
               Cpu: parseInt(Cpu) || 2,
               Storage: parseInt(Storage) || 20,
-              Variables: JSON.stringify(variables) || '[]',
+              Variables: JSON.stringify(mergedVariables),
               StartCommand,
               dockerImage: JSON.stringify(imageDocker),
             },
@@ -443,11 +456,24 @@ const adminModule: Module = {
               let ServerEnv;
               try {
                 ServerEnv = JSON.parse(server.Variables);
+
+                // Normalize variable shape — Pterodactyl uses env_variable, legacy uses env
+                ServerEnv = ServerEnv.map((v: Record<string, unknown>) => ({
+                  env: String(v.env_variable ?? v.env ?? ''),
+                  value: v.value ?? v.default_value ?? '',
+                }));
+
                 ServerEnv.push({
                   env: 'SERVER_PORT',
-                  name: 'Primary Port',
                   value: Ports.split(':')[0],
-                  type: 'text',
+                });
+                ServerEnv.push({
+                  env: 'SERVER_MEMORY',
+                  value: String(server.Memory),
+                });
+                ServerEnv.push({
+                  env: 'SERVER_CPU',
+                  value: String(server.Cpu),
                 });
               } catch (error: unknown) {
                 logger.error(`Error parsing Variables for server ID ${server.id}:`, error);
@@ -478,78 +504,86 @@ const adminModule: Module = {
                 {},
               );
 
+              const authHeader = `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`;
+              const daemonUrl = `http://${server.node.address}:${server.node.port}`;
+
               if (server.image?.scripts) {
-                let scripts;
+                let scripts: Record<string, unknown> = {};
                 try {
                   scripts = JSON.parse(server.image.scripts);
                 } catch (error: unknown) {
                   logger.error(`Error parsing scripts for server ID ${server.id}:`, error);
-                  await prisma.server.update({
-                    where: { id: server.id },
-                    data: { Queued: false },
-                  });
+                  await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
                   continue;
                 }
 
-                const requestBody = {
-                  id: server.UUID,
-                  env: env,
-                  scripts: scripts.install.map(
-                    (script: {
-                      url: string;
-                      fileName: string;
-                      onStart: boolean;
-                      ALVKT: boolean;
-                    }) => ({
-                      url: script.url,
-                      onStartup: script.onStart,
-                      ALVKT: script.ALVKT,
-                      fileName: script.fileName,
-                    }),
-                  ),
-                };
-
                 try {
-                  await axios.post(
-                    `http://${server.node.address}:${server.node.port}/container/install`,
-                    requestBody,
-                    {
-                      headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`,
-                      },
-                    },
-                  );
-
-                  if (scripts.native) {
-                    const requestBody2 = {
-                      id: server.UUID,
-                      env: env,
-                      script: scripts.native.CMD,
-                      container: scripts.native.container,
+                  // Pterodactyl egg format: scripts.installation has script, container, entrypoint
+                  if (scripts.installation && typeof scripts.installation === 'object') {
+                    const installation = scripts.installation as {
+                      script: string;
+                      container: string;
+                      entrypoint: string;
                     };
 
                     await axios.post(
-                      `http://${server.node.address}:${server.node.port}/container/installer`,
-                      requestBody2,
+                      `${daemonUrl}/container/installer`,
                       {
-                        headers: {
-                          'Content-Type': 'application/json',
-                          Authorization: `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`,
-                        },
+                        id: server.UUID,
+                        script: installation.script,
+                        container: installation.container,
+                        entrypoint: installation.entrypoint || 'bash',
+                        env,
                       },
+                      { headers: { 'Content-Type': 'application/json', Authorization: authHeader }, timeout: 600000 },
                     );
+
+                  // Legacy ALC format: scripts.install is an array of file downloads
+                  } else if (Array.isArray(scripts.install)) {
+                    // Resolve the docker image so the daemon pulls it during
+                    // install rather than on the first Start click.
+                    let dockerImageValue: string | undefined;
+                    try {
+                      const parsed = JSON.parse(server.dockerImage || '{}');
+                      dockerImageValue = Object.values(parsed)[0] as string | undefined;
+                    } catch { /* leave undefined */ }
+
+                    await axios.post(
+                      `${daemonUrl}/container/install`,
+                      {
+                        id: server.UUID,
+                        image: dockerImageValue,
+                        env,
+                        scripts: (scripts.install as any[]).map((s: any) => ({
+                          url: s.url,
+                          onStartup: s.onStart,
+                          ALVKT: s.ALVKT,
+                          fileName: s.fileName,
+                        })),
+                      },
+                      { headers: { 'Content-Type': 'application/json', Authorization: authHeader } },
+                    );
+
+                    if (scripts.native && typeof scripts.native === 'object') {
+                      const native = scripts.native as { CMD: string; container: string };
+                      await axios.post(
+                        `${daemonUrl}/container/installer`,
+                        { id: server.UUID, env, script: native.CMD, container: native.container, entrypoint: 'bash' },
+                        { headers: { 'Content-Type': 'application/json', Authorization: authHeader }, timeout: 600000 },
+                      );
+                    }
+                  } else {
+                    logger.info(`No install scripts for server ${server.id}, marking as installed`);
                   }
 
-                  await prisma.server.update({
-                    where: { id: server.id },
-                    data: { Queued: false },
-                  });
+                  await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
                 } catch (error: unknown) {
                   logger.error(`Error sending install request for server ID ${server.id}:`, error);
+                  await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
                 }
               } else {
-                logger.warn(`No scripts found for server ID ${server.id}. Skipping...`);
+                logger.warn(`No scripts found for server ID ${server.id}, marking as installed`);
+                await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
               }
             }
           });

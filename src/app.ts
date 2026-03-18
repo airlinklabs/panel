@@ -26,7 +26,9 @@ import {
   initializeDefaultUIComponents,
   uiComponentStore,
 } from './handlers/uiComponentHandler';
+import { installDaemonRequestInterceptor } from './handlers/utils/core/daemonRequest';
 import { startPlayerStatsCollection } from './handlers/playerStatsCollector';
+import { initEggCatalogue } from './handlers/eggCatalogueService';
 import prisma from './db';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -361,6 +363,8 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
   try {
     await databaseLoader();
     await settingsLoader();
+    // Install HMAC signing interceptor for all panel→daemon requests
+    installDaemonRequestInterceptor();
     // Initialize default UI components
     initializeDefaultUIComponents();
     await loadModules(app, airlinkVersion, Number(port));
@@ -371,6 +375,8 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
 
     const server = app.listen(port, () => {
       startPlayerStatsCollection();
+      // Clone/pull egg repos on startup; auto-refreshes every 2 days
+      initEggCatalogue().catch(err => logger.warn(`Store catalogue init failed: ${err?.message || err}`));
     });
 
     process.on('SIGINT', () => {

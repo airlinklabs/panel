@@ -9,8 +9,10 @@ type CheckInstallationResult = {
   error?: string;
 };
 
-const cache: Map<string, { data: string; timestamp: number }> = new Map();
-const CACHE_TTL = 10000;
+// In-memory cache so repeated calls within the same request cycle or across
+// rapid page navigations don't all hit the daemon independently.
+const cache = new Map<string, { data: string; timestamp: number }>();
+const CACHE_TTL_MS = 8000;
 
 export async function checkForServerInstallation(
   serverId: string,
@@ -25,14 +27,15 @@ export async function checkForServerInstallation(
       return { installed: false, error: 'Server not found.' };
     }
 
-    const nodeStatus = await checkNodeStatus(server.node);
-    if (nodeStatus.status === 'Offline') {
-      return { installed: false, state: 'offline' };
+    // Fast path: if the DB says it's not installing and not queued, trust it.
+    // Avoids an HTTP call to the daemon on every page render for already-running servers.
+    if (!server.Installing && !server.Queued) {
+      return { installed: true, state: 'installed' };
     }
 
     const now = Date.now();
     const cached = cache.get(serverId);
-    if (cached && now - cached.timestamp < CACHE_TTL) {
+    if (cached && now - cached.timestamp < CACHE_TTL_MS) {
       return {
         installed: cached.data === 'installed',
         state: cached.data,
@@ -40,12 +43,14 @@ export async function checkForServerInstallation(
       };
     }
 
+    const nodeStatus = await checkNodeStatus(server.node);
+    if (nodeStatus.status === 'Offline') {
+      return { installed: false, state: 'offline' };
+    }
+
     const response = await axios.get(
       `http://${server.node.address}:${server.node.port}/container/status/${server.UUID}`,
-      {
-        auth: { username: 'Airlink', password: server.node.key },
-        timeout: 5000,
-      },
+      { auth: { username: 'Airlink', password: server.node.key }, timeout: 4000 },
     );
 
     const state = response.data.state as string;
@@ -53,6 +58,7 @@ export async function checkForServerInstallation(
 
     cache.set(serverId, { data: state, timestamp: now });
 
+    // Keep the DB in sync so next page load hits the fast path above.
     await prisma.server.update({
       where: { UUID: serverId },
       data: { Installing: !isInstalled },
@@ -63,9 +69,6 @@ export async function checkForServerInstallation(
     if (error.response?.status === 404) {
       return { installed: false, state: 'not_found' };
     }
-    return {
-      installed: false,
-      error: 'An error occurred while checking the installation status.',
-    };
+    return { installed: false, error: 'Could not reach daemon.' };
   }
 }

@@ -1,170 +1,518 @@
 <%- include('../../components/header', { title: 'Edit Image' }) %>
 
-<main class="h-screen m-auto">
-  <div class="flex h-screen">
-    <!-- Sidebar -->
-    <div class="w-60 h-full">
+<main class="min-h-screen">
+  <div class="flex min-h-screen">
+    <div class="w-60 shrink-0">
       <%- include('../../components/template') %>
     </div>
-    <!-- Content -->
-    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
-      <div class="sm:flex sm:items-center px-8 pt-4">
-        <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">Edit Image: <%= image.name %></h1>
-          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-300">Edit the image configuration or export it as JSON.</p>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+
+      <div class="px-8 pt-5 flex items-start justify-between">
+        <div>
+          <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= image.name || 'Edit Image' %></h1>
+          <p class="mt-0.5 text-sm text-neutral-500">Edit egg configuration, variables, Docker images, and install scripts.</p>
         </div>
-        <!-- Action Buttons -->
-        <div class="mt-4 sm:mt-0 sm:ml-4 sm:flex-none">
-          <a href="/admin/images/export/<%= image.id %>" class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2">
-            Export JSON
+        <div class="flex gap-2 shrink-0 ml-4">
+          <a href="/admin/images/export/<%= image.id %>"
+            class="px-3 py-2 text-sm font-medium rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition">
+            Export
           </a>
-          <a href="/admin/images" class="border border-neutral-800/20 rounded-xl ml-2 bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2">
-            Back to Images
+          <a href="/admin/images"
+            class="px-3 py-2 text-sm font-medium rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition">
+            Back
           </a>
         </div>
       </div>
 
-      <!-- Success Message -->
       <% if (req.query.success) { %>
-        <div class="rounded-xl bg-green-800/10 px-6 py-4 mt-8 mx-8">
-          <div class="flex items-center">
-            <div class="flex-shrink-0">
-              <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-            </div>
-            <div class="ml-3">
-              <h3 class="text-sm font-medium text-green-400">Image updated successfully</h3>
-              <p class="text-sm text-green-400/50 mt-1">
-                Your changes have been saved.
-              </p>
-            </div>
-          </div>
+        <div class="mx-8 mt-5 px-4 py-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/30 text-sm text-green-700 dark:text-green-400">
+          Changes saved successfully.
         </div>
       <% } %>
 
-      <!-- Edit Form -->
-      <div class="mt-8 mx-8">
-        <div class="grid grid-cols-1 gap-6">
-          <!-- Basic Information -->
-          <div class="bg-white dark:bg-neutral-800 shadow-md rounded-xl p-6 border border-neutral-800/20">
-            <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-4">Basic Information</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="px-8 mt-6">
+        <!-- Tab nav -->
+        <div class="flex gap-0.5 mb-6 border-b border-neutral-200 dark:border-neutral-700/40">
+          <button type="button" data-tab="general" class="tab-btn px-4 py-2.5 text-sm font-medium transition-colors -mb-px border-b-2">General</button>
+          <button type="button" data-tab="docker" class="tab-btn px-4 py-2.5 text-sm font-medium transition-colors -mb-px border-b-2">Docker Images</button>
+          <button type="button" data-tab="variables" class="tab-btn px-4 py-2.5 text-sm font-medium transition-colors -mb-px border-b-2">Variables</button>
+          <button type="button" data-tab="install" class="tab-btn px-4 py-2.5 text-sm font-medium transition-colors -mb-px border-b-2">Install Script</button>
+          <button type="button" data-tab="raw" class="tab-btn px-4 py-2.5 text-sm font-medium transition-colors -mb-px border-b-2">Raw JSON</button>
+        </div>
+
+        <!-- General tab -->
+        <div data-tab-form="general" class="tab-form space-y-5">
+          <div class="flex flex-col bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Basics</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
               <div>
-                <label for="name" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Name</label>
-                <input type="text" id="name" name="name" value="<%= image.name %>" class="mt-1 block w-full rounded-md border-neutral-300 dark:border-neutral-700 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 dark:bg-neutral-700 dark:text-white sm:text-sm p-2">
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Name</label>
+                <input type="text" id="field-name" value="<%= image.name || '' %>"
+                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
               </div>
               <div>
-                <label for="author" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Author</label>
-                <input type="text" id="author" name="author" value="<%= image.author %>" class="mt-1 block w-full rounded-md border-neutral-300 dark:border-neutral-700 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 dark:bg-neutral-700 dark:text-white sm:text-sm p-2">
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Author</label>
+                <input type="text" id="field-author" value="<%= image.author || '' %>"
+                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
               </div>
-              <div>
-                <label for="authorName" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Author Name</label>
-                <input type="text" id="authorName" name="authorName" value="<%= image.authorName %>" class="mt-1 block w-full rounded-md border-neutral-300 dark:border-neutral-700 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 dark:bg-neutral-700 dark:text-white sm:text-sm p-2">
-              </div>
-              <div>
-                <label for="startup" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Startup Command</label>
-                <input type="text" id="startup" name="startup" value="<%= image.startup %>" class="mt-1 block w-full rounded-md border-neutral-300 dark:border-neutral-700 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 dark:bg-neutral-700 dark:text-white sm:text-sm p-2">
-              </div>
-              <div class="md:col-span-2">
-                <label for="description" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300">Description</label>
-                <textarea id="description" name="description" rows="3" class="mt-1 block w-full rounded-md border-neutral-300 dark:border-neutral-700 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 dark:bg-neutral-700 dark:text-white sm:text-sm p-2"><%= image.description %></textarea>
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Description</label>
+                <textarea id="field-description" rows="2"
+                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition resize-none"><%= image.description || '' %></textarea>
               </div>
             </div>
           </div>
 
-          <!-- JSON Editor -->
-          <div class="bg-white dark:bg-neutral-800 shadow-md rounded-xl p-6 border border-neutral-800/20">
-            <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-4">JSON Configuration</h2>
-            <p class="text-sm text-neutral-500 dark:text-neutral-400 mb-4">Edit the JSON configuration directly. Make sure to maintain valid JSON format.</p>
-            <div id="jsonEditor" class="w-full h-96 border border-neutral-300 dark:border-neutral-700 rounded-md"></div>
-            <div class="mt-4 flex justify-end">
-              <button id="saveButton" type="button" class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2">
-                Save Changes
-              </button>
+          <div class="flex flex-col bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Process</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Startup Command</label>
+                <input type="text" id="field-startup" value="<%= image.startup || '' %>" placeholder="e.g. java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}"
+                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                <p class="mt-1.5 text-xs text-neutral-400">Use <code class="font-mono bg-neutral-100 dark:bg-neutral-800 px-1 rounded">{{VARIABLE_NAME}}</code> to reference egg variables.</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Stop Command</label>
+                <input type="text" id="field-stop" value="<%= image.stop || 'stop' %>" placeholder="stop"
+                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                <p class="mt-1.5 text-xs text-neutral-400">Command sent to the container to stop it gracefully.</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Startup Done Signal</label>
+                <input type="text" id="field-startup-done" value="<%= image.startup_done || '' %>" placeholder="e.g. For help, type"
+                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                <p class="mt-1.5 text-xs text-neutral-400">String in the server output that means the server finished starting.</p>
+              </div>
             </div>
           </div>
+
+          <div class="flex justify-end">
+            <button type="button" id="save-general"
+              class="px-5 py-2.5 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+              Save Changes
+            </button>
+          </div>
         </div>
+
+        <!-- Docker Images tab -->
+        <div data-tab-form="docker" class="tab-form space-y-5 hidden">
+          <div class="flex flex-col bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5">
+            <div class="flex items-center justify-between px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">
+              <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white">Docker Images</h2>
+              <button type="button" id="add-docker-image"
+                class="px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition">
+                Add Image
+              </button>
+            </div>
+            <div class="px-5 py-4">
+              <p class="text-xs text-neutral-500 mb-4">Each entry maps a display label to a Docker image reference. The label is what users see in dropdowns.</p>
+              <div id="docker-images-list" class="space-y-2">
+                <!-- populated by JS -->
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button type="button" id="save-docker"
+              class="px-5 py-2.5 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+              Save Changes
+            </button>
+          </div>
+        </div>
+
+        <!-- Variables tab -->
+        <div data-tab-form="variables" class="tab-form space-y-5 hidden">
+          <div class="flex flex-col bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5">
+            <div class="flex items-center justify-between px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">
+              <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white">Egg Variables</h2>
+              <button type="button" id="add-variable"
+                class="px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition">
+                Add Variable
+              </button>
+            </div>
+            <div class="px-5 py-4">
+              <p class="text-xs text-neutral-500 mb-4">Variables are injected as environment variables into the container. <code class="font-mono bg-neutral-100 dark:bg-neutral-800 px-1 rounded">env_variable</code> is the name used in the startup command and Docker environment.</p>
+              <div id="variables-list" class="space-y-3">
+                <!-- populated by JS -->
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button type="button" id="save-variables"
+              class="px-5 py-2.5 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+              Save Changes
+            </button>
+          </div>
+        </div>
+
+        <!-- Install Script tab -->
+        <div data-tab-form="install" class="tab-form space-y-5 hidden">
+          <div class="flex flex-col bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Installation Script</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Container Image</label>
+                <input type="text" id="field-install-container" placeholder="e.g. eclipse-temurin:21-jdk-jammy"
+                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                <p class="mt-1.5 text-xs text-neutral-400">Docker image the install script runs inside.</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Entrypoint</label>
+                <input type="text" id="field-install-entrypoint" placeholder="bash"
+                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                <p class="mt-1.5 text-xs text-neutral-400">Shell that executes the script (usually <code class="font-mono">bash</code>).</p>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Script</label>
+                <textarea id="field-install-script" rows="16" placeholder="#!/bin/bash&#10;# Install script runs inside the container&#10;apt update && apt install -y curl"
+                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition resize-y"></textarea>
+                <p class="mt-1.5 text-xs text-neutral-400">Files are placed in <code class="font-mono bg-neutral-100 dark:bg-neutral-800 px-1 rounded">/mnt/server</code> inside the install container. The script runs as root.</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button type="button" id="save-install"
+              class="px-5 py-2.5 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+              Save Changes
+            </button>
+          </div>
+        </div>
+
+        <!-- Raw JSON tab -->
+        <div data-tab-form="raw" class="tab-form space-y-5 hidden">
+          <div class="flex flex-col bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Raw JSON</h2>
+            <div class="px-5 py-5">
+              <p class="text-xs text-neutral-500 mb-4">Edit the complete egg JSON directly. Must be valid JSON — the editor will warn on errors. Saving here overwrites all tab values.</p>
+              <div id="json-editor" class="w-full h-[480px] rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden"></div>
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button type="button" id="save-raw"
+              class="px-5 py-2.5 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+              Save Raw JSON
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 </main>
 
-<%- include('../../components/toast')%>
+<%- include('../../components/toast') %>
 
-<!-- Monaco Editor -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
 <script>
-  require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
-  require(['vs/editor/editor.main'], function() {
-    // Initialize the editor
-    const editor = monaco.editor.create(document.getElementById('jsonEditor'), {
-      value: `<%- imageJson.replace(/\n/g, '\\n').replace(/"/g, '\\"') %>`,
-      language: 'json',
-      theme: document.documentElement.classList.contains('dark') ? 'vs-dark' : 'vs',
-      automaticLayout: true,
-      minimap: { enabled: false },
-      scrollBeyondLastLine: false,
-      fontSize: 14,
-      tabSize: 2
+  // ── State ──────────────────────────────────────────────────────────────────
+  const imageId = <%= image.id %>;
+
+  let state = {
+    name: <%- JSON.stringify(image.name || '') %>,
+    description: <%- JSON.stringify(image.description || '') %>,
+    author: <%- JSON.stringify(image.author || '') %>,
+    startup: <%- JSON.stringify(image.startup || '') %>,
+    stop: <%- JSON.stringify(image.stop || 'stop') %>,
+    startup_done: <%- JSON.stringify(image.startup_done || '') %>,
+    docker_images: <%- JSON.stringify(image.dockerImages || {}) %>,
+    variables: <%- JSON.stringify(image.variables || []) %>,
+    scripts: <%- JSON.stringify(image.scripts || {}) %>,
+    info: <%- JSON.stringify(image.info || {}) %>,
+    meta: <%- JSON.stringify(image.meta || {}) %>,
+  };
+
+  // ── Tabs ───────────────────────────────────────────────────────────────────
+  function activateTab(name) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      const active = btn.dataset.tab === name;
+      btn.classList.toggle('border-neutral-800', active);
+      btn.classList.toggle('dark:border-white', active);
+      btn.classList.toggle('text-neutral-800', active);
+      btn.classList.toggle('dark:text-white', active);
+      btn.classList.toggle('border-transparent', !active);
+      btn.classList.toggle('text-neutral-500', !active);
+    });
+    document.querySelectorAll('.tab-form').forEach(form => {
+      form.classList.toggle('hidden', form.dataset.tabForm !== name);
+    });
+    if (name === 'raw') renderRawEditor();
+  }
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => activateTab(btn.dataset.tab));
+  });
+  activateTab('general');
+
+  // ── General tab ────────────────────────────────────────────────────────────
+  document.getElementById('field-name').value = state.name;
+  document.getElementById('field-description').value = state.description;
+  document.getElementById('field-author').value = state.author;
+  document.getElementById('field-startup').value = state.startup;
+  document.getElementById('field-stop').value = state.stop;
+  document.getElementById('field-startup-done').value = state.startup_done;
+
+  document.getElementById('save-general').addEventListener('click', async () => {
+    state.name = document.getElementById('field-name').value.trim();
+    state.description = document.getElementById('field-description').value;
+    state.author = document.getElementById('field-author').value.trim();
+    state.startup = document.getElementById('field-startup').value.trim();
+    state.stop = document.getElementById('field-stop').value.trim();
+    state.startup_done = document.getElementById('field-startup-done').value.trim();
+    await saveState();
+  });
+
+  // ── Docker Images tab ──────────────────────────────────────────────────────
+  function renderDockerImages() {
+    const list = document.getElementById('docker-images-list');
+    list.innerHTML = '';
+    const entries = Object.entries(state.docker_images);
+    if (entries.length === 0) {
+      list.innerHTML = '<p class="text-xs text-neutral-400">No Docker images configured. Click Add Image to add one.</p>';
+      return;
+    }
+    entries.forEach(([label, image], idx) => {
+      const row = document.createElement('div');
+      row.className = 'flex gap-2 items-center';
+      row.innerHTML = `
+        <input data-docker-label="${idx}" type="text" value="${escHtml(label)}" placeholder="Label (e.g. java 21)"
+          class="w-40 shrink-0 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-xs text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+        <input data-docker-image="${idx}" type="text" value="${escHtml(image)}" placeholder="Image ref (e.g. ghcr.io/ptero-eggs/yolks:java_21)"
+          class="flex-1 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-xs text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+        <button data-docker-remove="${idx}" type="button"
+          class="px-3 py-2 text-xs rounded-xl border border-red-200 dark:border-red-900/30 bg-white dark:bg-neutral-800 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition shrink-0">
+          Remove
+        </button>`;
+      list.appendChild(row);
     });
 
-    // Handle form submission
-    document.getElementById('saveButton').addEventListener('click', function() {
-      try {
-        // Get the JSON from the editor
-        const jsonValue = editor.getValue();
-        const parsedJson = JSON.parse(jsonValue);
-        
-        // Update form fields with values from JSON
-        document.getElementById('name').value = parsedJson.name || '';
-        document.getElementById('author').value = parsedJson.author || '';
-        document.getElementById('authorName').value = parsedJson.authorName || '';
-        document.getElementById('startup').value = parsedJson.startup || '';
-        document.getElementById('description').value = parsedJson.description || '';
-        
-        // Submit the JSON to the server
-        fetch('/admin/images/edit/<%= image.id %>', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: jsonValue
-        })
-        .then(response => {
-          if (response.ok) {
-            window.location.href = '/admin/images/edit/<%= image.id %>?success=true';
-          } else {
-            return response.json().then(data => {
-              throw new Error(data.error || 'Failed to update image');
-            });
-          }
-        })
-        .catch(error => {
-          showToast(error.message || 'Failed to update image', 'error');
-        });
-      } catch (error) {
-        showToast('Invalid JSON format: ' + error.message, 'error');
-      }
-    });
-
-    // Update JSON when form fields change
-    const formFields = ['name', 'author', 'authorName', 'startup', 'description'];
-    formFields.forEach(field => {
-      document.getElementById(field).addEventListener('change', function() {
-        try {
-          const jsonValue = editor.getValue();
-          const parsedJson = JSON.parse(jsonValue);
-          
-          parsedJson[field] = this.value;
-          
-          editor.setValue(JSON.stringify(parsedJson, null, 2));
-        } catch (error) {
-          showToast('Invalid JSON format: ' + error.message, 'error');
-        }
+    list.querySelectorAll('[data-docker-remove]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.dockerRemove);
+        const keys = Object.keys(state.docker_images);
+        delete state.docker_images[keys[idx]];
+        renderDockerImages();
       });
     });
+  }
+  renderDockerImages();
+
+  document.getElementById('add-docker-image').addEventListener('click', () => {
+    state.docker_images[''] = '';
+    renderDockerImages();
   });
+
+  document.getElementById('save-docker').addEventListener('click', async () => {
+    const newImages = {};
+    document.querySelectorAll('[data-docker-label]').forEach((labelInput, idx) => {
+      const imageInput = document.querySelector(`[data-docker-image="${idx}"]`);
+      const label = labelInput.value.trim();
+      const img = imageInput.value.trim();
+      if (label && img) newImages[label] = img;
+    });
+    state.docker_images = newImages;
+    await saveState();
+  });
+
+  // ── Variables tab ──────────────────────────────────────────────────────────
+  function renderVariables() {
+    const list = document.getElementById('variables-list');
+    list.innerHTML = '';
+    if (!state.variables.length) {
+      list.innerHTML = '<p class="text-xs text-neutral-400">No variables defined. Click Add Variable to add one.</p>';
+      return;
+    }
+    state.variables.forEach((v, idx) => {
+      const card = document.createElement('div');
+      card.className = 'bg-white dark:bg-neutral-800/60 rounded-xl border border-neutral-200 dark:border-white/5 p-4';
+      card.innerHTML = `
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-medium text-neutral-500">#${idx + 1}</span>
+          <button data-var-remove="${idx}" type="button"
+            class="text-xs text-red-500 hover:text-red-400 transition">Remove</button>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Name</label>
+            <input data-var-field="${idx}" data-field="name" type="text" value="${escHtml(v.name || '')}"
+              class="w-full rounded-lg border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-700/40 px-2.5 py-1.5 text-xs text-neutral-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Env Variable</label>
+            <input data-var-field="${idx}" data-field="env_variable" type="text" value="${escHtml(v.env_variable || '')}" placeholder="SERVER_JARFILE"
+              class="w-full rounded-lg border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-700/40 px-2.5 py-1.5 text-xs text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Default Value</label>
+            <input data-var-field="${idx}" data-field="default_value" type="text" value="${escHtml(v.default_value || '')}"
+              class="w-full rounded-lg border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-700/40 px-2.5 py-1.5 text-xs text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Field Type</label>
+            <select data-var-field="${idx}" data-field="field_type"
+              class="w-full rounded-lg border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-700/40 px-2.5 py-1.5 text-xs text-neutral-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+              <option value="text" ${(v.field_type || 'text') === 'text' ? 'selected' : ''}>text</option>
+              <option value="number" ${v.field_type === 'number' ? 'selected' : ''}>number</option>
+            </select>
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Description</label>
+            <input data-var-field="${idx}" data-field="description" type="text" value="${escHtml(v.description || '')}"
+              class="w-full rounded-lg border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-700/40 px-2.5 py-1.5 text-xs text-neutral-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Validation Rules</label>
+            <input data-var-field="${idx}" data-field="rules" type="text" value="${escHtml(v.rules || '')}" placeholder="required|string|between:3,15"
+              class="w-full rounded-lg border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-700/40 px-2.5 py-1.5 text-xs text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+          </div>
+          <div class="flex items-center gap-4">
+            <label class="flex items-center gap-2 text-xs text-neutral-600 dark:text-neutral-400 cursor-pointer">
+              <input data-var-field="${idx}" data-field="user_viewable" type="checkbox" ${v.user_viewable !== false ? 'checked' : ''}
+                class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-white focus:ring-0">
+              User viewable
+            </label>
+            <label class="flex items-center gap-2 text-xs text-neutral-600 dark:text-neutral-400 cursor-pointer">
+              <input data-var-field="${idx}" data-field="user_editable" type="checkbox" ${v.user_editable !== false ? 'checked' : ''}
+                class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-white focus:ring-0">
+              User editable
+            </label>
+          </div>
+        </div>`;
+      list.appendChild(card);
+    });
+
+    list.querySelectorAll('[data-var-remove]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.variables.splice(parseInt(btn.dataset.varRemove), 1);
+        renderVariables();
+      });
+    });
+  }
+  renderVariables();
+
+  document.getElementById('add-variable').addEventListener('click', () => {
+    state.variables.push({ name: '', description: '', env_variable: '', default_value: '', user_viewable: true, user_editable: true, rules: '', field_type: 'text' });
+    renderVariables();
+  });
+
+  document.getElementById('save-variables').addEventListener('click', async () => {
+    document.querySelectorAll('[data-var-field]').forEach(input => {
+      const idx = parseInt(input.dataset.varField);
+      const field = input.dataset.field;
+      if (!state.variables[idx]) return;
+      if (input.type === 'checkbox') {
+        state.variables[idx][field] = input.checked;
+      } else {
+        state.variables[idx][field] = input.value;
+      }
+    });
+    await saveState();
+  });
+
+  // ── Install Script tab ─────────────────────────────────────────────────────
+  const installScript = state.scripts.installation || {};
+  document.getElementById('field-install-container').value = installScript.container || '';
+  document.getElementById('field-install-entrypoint').value = installScript.entrypoint || 'bash';
+  document.getElementById('field-install-script').value = installScript.script || '';
+
+  document.getElementById('save-install').addEventListener('click', async () => {
+    state.scripts.installation = {
+      container: document.getElementById('field-install-container').value.trim(),
+      entrypoint: document.getElementById('field-install-entrypoint').value.trim() || 'bash',
+      script: document.getElementById('field-install-script').value,
+    };
+    await saveState();
+  });
+
+  // ── Raw JSON tab ───────────────────────────────────────────────────────────
+  let monacoEditor = null;
+
+  function renderRawEditor() {
+    if (monacoEditor) {
+      monacoEditor.setValue(buildExportJson());
+      return;
+    }
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' } });
+    require(['vs/editor/editor.main'], () => {
+      monacoEditor = monaco.editor.create(document.getElementById('json-editor'), {
+        value: buildExportJson(),
+        language: 'json',
+        theme: document.documentElement.classList.contains('dark') ? 'vs-dark' : 'vs',
+        automaticLayout: true,
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        fontSize: 13,
+        tabSize: 2,
+      });
+    });
+  }
+
+  document.getElementById('save-raw').addEventListener('click', async () => {
+    if (!monacoEditor) return;
+    let parsed;
+    try { parsed = JSON.parse(monacoEditor.getValue()); }
+    catch (e) { showToast('Invalid JSON: ' + e.message, 'error'); return; }
+    await savePayload(parsed);
+  });
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function buildExportJson() {
+    return JSON.stringify({
+      meta: { version: 'PTDL_v2', ...state.meta },
+      name: state.name,
+      description: state.description,
+      author: state.author,
+      startup: state.startup,
+      config: {
+        stop: state.stop,
+        startup: { done: state.startup_done },
+        files: {},
+        logs: {},
+      },
+      docker_images: state.docker_images,
+      variables: state.variables,
+      scripts: { installation: state.scripts.installation || null },
+    }, null, 2);
+  }
+
+  async function saveState() {
+    const payload = {
+      meta: { version: 'PTDL_v2', ...state.meta },
+      name: state.name,
+      description: state.description,
+      author: state.author,
+      startup: state.startup,
+      config: {
+        stop: state.stop,
+        startup: { done: state.startup_done },
+        files: {},
+        logs: {},
+      },
+      docker_images: state.docker_images,
+      variables: state.variables,
+      scripts: { installation: state.scripts.installation || null },
+      info: state.info,
+    };
+    await savePayload(payload);
+  }
+
+  async function savePayload(payload) {
+    try {
+      const r = await fetch(`/admin/images/edit/${imageId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await r.json();
+      if (data.success) showToast('Saved.', 'success');
+      else showToast(data.error || 'Failed to save.', 'error');
+    } catch {
+      showToast('Network error.', 'error');
+    }
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
 </script>
 
 <%- include('../../components/footer') %>

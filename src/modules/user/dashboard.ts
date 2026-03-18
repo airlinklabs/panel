@@ -83,6 +83,17 @@ const dashboardModule: Module = {
         }
 
         if (anyNodeOffline) {
+          const folders = await prisma.serverFolder.findMany({
+            where: { ownerId: user.id },
+            include: { members: true },
+            orderBy: { createdAt: 'asc' },
+          });
+          const settings2 = await prisma.settings.findUnique({ where: { id: 1 } });
+          const userServerLimit = user.serverLimit !== null && user.serverLimit !== undefined
+            ? user.serverLimit
+            : (settings2?.defaultServerLimit ?? 0);
+          const canCreateServer = !user.isAdmin && (settings2?.allowUserCreateServer ?? false) && userServerLimit > 0;
+
           return res.render('user/dashboard', {
             errorMessage: {
               message:
@@ -92,6 +103,9 @@ const dashboardModule: Module = {
             req,
             settings,
             servers,
+            allServers: servers,
+            folders,
+            canCreateServer,
             currentPage: 1,
             totalPages: 1,
             daemonOffline: true,
@@ -203,12 +217,27 @@ const dashboardModule: Module = {
 
         const paginatedServers = serversWithStats.slice(startIndex, endIndex);
 
+        const folders = await prisma.serverFolder.findMany({
+          where: { ownerId: user.id },
+          include: { members: true },
+          orderBy: { createdAt: 'asc' },
+        });
+
+        const settings2 = await prisma.settings.findUnique({ where: { id: 1 } });
+        const userServerLimit = user.serverLimit !== null && user.serverLimit !== undefined
+          ? user.serverLimit
+          : (settings2?.defaultServerLimit ?? 0);
+        const canCreateServer = !user.isAdmin && (settings2?.allowUserCreateServer ?? false) && userServerLimit > 0;
+
         res.render('user/dashboard', {
           errorMessage,
           user,
           req,
           settings,
           servers: paginatedServers,
+          allServers: serversWithStats,
+          folders,
+          canCreateServer,
           currentPage: page,
           totalPages: Math.ceil(servers.length / perPage),
           title: 'Servers',

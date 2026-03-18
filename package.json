@@ -16,7 +16,6 @@
     "build:css": "npx tailwindcss -i ./public/tw.css -o ./public/styles.css --watch",
     "migrate:dev": "npx prisma migrate dev --name init && npx prisma generate",
     "migrate:deploy": "npx prisma migrate deploy && npx prisma generate",
-    "seed": "ts-node src/handlers/cmd/seed.ts",
     "lint": "eslint src --fix",
     "format": "prettier --write src/"
   },

@@ -76,7 +76,6 @@
         </div>
       </div>
 
-      <%- include('../../components/installHeader') %>
       <div class="px-0 mt-1">
         <%- include('../../components/loadingPopup') %>
       </div>
@@ -135,6 +134,8 @@
 
   </div><!-- end .mobile-server-chrome -->
 
+  <%- include('../../components/installHeader') %>
+
   <!-- Page content — fades on navigation -->
   <div class="px-4 pb-5">
 
@@ -163,16 +164,6 @@
           <span class="text-[11px] font-medium text-neutral-600 select-none tracking-wide">console</span>
         </div>
         <div id="terminal-container" class="w-full relative">
-          <!-- Offline placeholder -->
-          <div id="console-offline" class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#141414] z-10 transition-opacity duration-300 <% if (typeof serverStatus !== 'undefined' && serverStatus.online) { %>opacity-0 pointer-events-none<% } %>">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-neutral-700">
-              <rect x="2" y="3" width="20" height="14" rx="2"/>
-              <path d="M8 21h8M12 17v4"/>
-              <path d="M6 8l3 3-3 3"/>
-              <path d="M12 14h4"/>
-            </svg>
-            <p class="text-xs font-medium text-neutral-600">Server offline</p>
-          </div>
           <div id="terminal"></div>
         </div>
         <% if (typeof features !== 'undefined' && features && features.includes('auto-complete')) { %>
@@ -191,7 +182,7 @@
       <div class="grid grid-cols-2 gap-3 mt-3">
 
         <!-- Status -->
-        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-20">
+        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-auto min-h-[5rem]" style="--i:0">
           <canvas id="statusChart"></canvas>
           <div class="relative z-10">
             <p class="text-[10px] font-medium text-neutral-500"><%= req.translations.Status %></p>
@@ -201,7 +192,7 @@
         </div>
 
         <!-- RAM -->
-        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-20">
+        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-auto min-h-[5rem]" style="--i:1">
           <canvas id="ramChart"></canvas>
           <div class="relative z-10">
             <p class="text-[10px] font-medium text-neutral-500"><%= req.translations.ramUsage %></p>
@@ -210,7 +201,7 @@
         </div>
 
         <!-- CPU -->
-        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-20">
+        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-auto min-h-[5rem]" style="--i:2">
           <canvas id="cpuChart"></canvas>
           <div class="relative z-10">
             <p class="text-[10px] font-medium text-neutral-500"><%= req.translations.cpuUsage %></p>
@@ -219,7 +210,7 @@
         </div>
 
         <!-- Disk -->
-        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-20">
+        <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-auto min-h-[5rem]" style="--i:3">
           <canvas id="diskChart" class="hidden"></canvas>
           <div class="relative z-10">
             <p class="text-[10px] font-medium text-neutral-500"><%= req.translations.diskUsage %></p>
@@ -412,11 +403,24 @@ connectWebSocket();
                text.includes('HTTP code 500');
     }
 
+    const ANSI_RE   = /\x1b(?:\[[0-9;]*[A-Za-z]|\][^\x07\x1b]*(?:\x07|\x1b\\)|[@-Z\\-_]|[\u0080-\u009F])/g;
+    const PROMPT_RE = /(?:container|root)@\S+?(?:[^$#\r\n]*?)[$#]\s*/g;
+
+    function maskPrompts(raw) {
+        const plain = raw.replace(ANSI_RE, '');
+        if (!PROMPT_RE.test(plain)) { PROMPT_RE.lastIndex = 0; return raw; }
+        PROMPT_RE.lastIndex = 0;
+        const stripped = plain.replace(/[\r\n]/g, '').trim();
+        const isOnlyPrompt = PROMPT_RE.test(stripped) && stripped.replace(PROMPT_RE, '').trim() === '';
+        PROMPT_RE.lastIndex = 0;
+        if (isOnlyPrompt) return '\r\nairlinkd~ ';
+        return plain.replace(PROMPT_RE, 'airlinkd~ ');
+    }
+
     function handleWebSocketMessage(msg) {
         if (msg.data instanceof Blob) {
             msg.data.arrayBuffer().then(buf => {
-                const raw = new Uint8Array(buf);
-                const text = new TextDecoder().decode(raw);
+                const text = new TextDecoder().decode(buf);
                 if (isDaemonInfraError(text)) return;
                 if (text.includes('airlinkd server appears to be down')) {
                     socket.close();
@@ -431,7 +435,7 @@ connectWebSocket();
                     return;
                 }
                 hideConsolePlaceholder();
-                term.write(raw);
+                term.write(maskPrompts(text));
             });
             return;
         }
@@ -451,7 +455,7 @@ connectWebSocket();
             return;
         }
         hideConsolePlaceholder();
-        term.write(text);
+        term.write(maskPrompts(text));
     }
 
     function writeConsole(prefix, type, message) {
@@ -491,9 +495,10 @@ connectWebSocket();
             }
             commandHistory.push(command);
             currentCommandIndex = commandHistory.length;
-
-            inputElement.value = '';
         }
+
+        inputElement.value = '';
+        inputElement.dispatchEvent(new Event('input'));
     }
 
     function handleKeyUp(event) {
@@ -857,6 +862,13 @@ connectWebSocket();
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     }
 
+    function formatRam(bytes, decimals = 1) {
+        if (bytes === 0) return '0 MB';
+        const mb = bytes / (1024 * 1024);
+        if (mb < 1024) return mb.toFixed(decimals) + ' MB';
+        return (mb / 1024).toFixed(decimals) + ' GB';
+    }
+
     function getChartColors() {
         const isDark = document.documentElement.classList.contains('dark');
         return {
@@ -903,7 +915,7 @@ connectWebSocket();
 
     function updateRamUsage(stats) {
     const ramStatsUsage = stats?.data?.memory?.usage || 0;
-    const ramStatsLimit = stats?.data?.memory?.limit || <%- server.Memory %> * 1024 * 1024 * 1024;
+    const ramStatsLimit = stats?.data?.memory?.limit || <%- server.Memory %> * 1024 * 1024;
     let ramUsagePercent = Number(stats?.data?.memory?.percentage) || 0;
     const ramUsageInMB = ramStatsUsage / 1024 / 1024;
     const ramLimitInMB = ramStatsLimit / 1024 / 1024;
@@ -912,7 +924,7 @@ connectWebSocket();
         ramUsagePercent = 0;
     }
 
-    const ramUsageText = `${ramUsagePercent.toFixed(1)}% (${formatBytes(ramStatsUsage)} / ${formatBytes(ramStatsLimit)})`;
+    const ramUsageText = `${ramUsagePercent.toFixed(1)}% (${formatRam(ramStatsUsage)} / ${formatRam(ramStatsLimit)})`;
     document.getElementById('ramUsage').textContent = ramUsageText;
 
     if (ramStatsUsage > 0) {
@@ -1096,17 +1108,8 @@ connectWebSocket();
         statusChart.update();
     }
 
-    function hideConsolePlaceholder() {
-        const el = document.getElementById('console-offline');
-        if (!el) return;
-        el.classList.add('opacity-0', 'pointer-events-none');
-    }
-
-    function showConsolePlaceholder() {
-        const el = document.getElementById('console-offline');
-        if (!el) return;
-        el.classList.remove('opacity-0', 'pointer-events-none');
-    }
+    function hideConsolePlaceholder() {}
+    function showConsolePlaceholder() {}
 
     function setAllStatsOffline() {
         showConsolePlaceholder();
@@ -1117,7 +1120,7 @@ connectWebSocket();
         updateStatusChart('rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.2)');
 
         // Update RAM usage
-        document.getElementById('ramUsage').textContent = `0% (0 Bytes / ${formatBytes(<%- server.Memory %> * 1024 * 1024 * 1024)})`;
+        document.getElementById('ramUsage').textContent = `0% (0 MB / ${formatRam(<%- server.Memory %> * 1024 * 1024)})`;
 
         // Update CPU usage
         document.getElementById('cpuUsage').textContent = `0% / ${<%- server.Cpu * 100 %>}%`;
@@ -1191,370 +1194,4 @@ connectWebSocket();
         };
     })();
 
-    // Create a global WebSocket for server status that can be shared
-    // This will be used by both the page and the server header component
-    if (!window.serverStatusWebSocket) {
-      window.serverStatusWebSocket = new WebSocket(`${protocol}//${host}/ws/server/<%= server.UUID %>/status`);
-
-      window.serverStatusWebSocket.onopen = function() {
-
-        // Dispatch a custom event that other components can listen for
-        window.dispatchEvent(new CustomEvent('serverStatusWebSocketOpen'));
-      };
-
-      window.serverStatusWebSocket.onclose = function() {
-
-        // Dispatch a custom event that other components can listen for
-        window.dispatchEvent(new CustomEvent('serverStatusWebSocketClose'));
-
-        // Clean up the global reference
-        window.serverStatusWebSocket = null;
-      };
-
-      window.serverStatusWebSocket.onerror = function(error) {
-
-        // No need to show daemon down message as it's been removed
-
-        // Dispatch a custom event that other components can listen for
-        window.dispatchEvent(new CustomEvent('serverStatusWebSocketError', { detail: error }));
-      };
-    }
-
-    // Set up message handler for the manage page
-    window.serverStatusWebSocket.addEventListener('message', function(event) {
-      try {
-        const data = JSON.parse(event.data);
-
-        // Extract the actual status data, handling different message formats
-        let statusData = data;
-        if (data.event === 'status' && data.data) {
-          statusData = data.data;
-        }
-
-        // Check for starting state
-        if (statusData.starting === true ||
-            statusData.status === 'starting' ||
-            data.status === 'starting') {
-
-          // Update status display
-          const statusElement = document.getElementById('status');
-          statusElement.textContent = 'Starting';
-          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
-
-          // Update status chart
-          updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
-
-          // No need to hide daemon down message as it's been removed
-
-          <% if (features.includes('players')) { %>
-          // Hide players decoration
-          const playersDeco = document.getElementById('players-deco');
-          playersDeco.classList.add('translate-y-32');
-          <% } %>
-        }
-        // Check for stopping state
-        else if (statusData.stopping === true ||
-                statusData.status === 'stopping' ||
-                data.status === 'stopping') {
-
-          // Update status display
-          const statusElement = document.getElementById('status');
-          statusElement.textContent = 'Stopping';
-          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-orange-500';
-
-          // Update status chart
-          updateStatusChart('rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.2)');
-
-          // No need to hide daemon down message as it's been removed
-
-          <% if (features.includes('players')) { %>
-          // Hide players decoration
-          const playersDeco = document.getElementById('players-deco');
-          playersDeco.classList.add('translate-y-32');
-          <% } %>
-        }
-        // Check for offline status
-        else if (statusData.running === false ||
-                statusData.status === 'offline' ||
-                data.status === 'offline') {
-
-          setAllStatsOffline();
-        }
-        // Check for online status
-        else if (statusData.running === true ||
-                statusData.status === 'online' ||
-                data.status === 'online') {
-
-          // Update status display
-          const statusElement = document.getElementById('status');
-          statusElement.textContent = 'Online';
-          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
-
-          // Update status chart
-          updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
-
-          <% if (features.includes('players')) { %>
-          const playersDeco = document.getElementById('players-deco');
-          playersDeco.classList.remove('translate-y-32');
-          <% } %>
-        }
-      } catch (error) {
-
-      }
-    });
-
-    // Listen for server start events
-    document.getElementById('startButton').addEventListener('click', function() {
-
-      // Update status immediately to "Starting"
-      const statusElement = document.getElementById('status');
-      statusElement.textContent = 'Starting';
-      statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
-      updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
-
-      // No need to hide daemon down message as it's been removed
-
-      // Set up initial status check after 5 seconds
-      setTimeout(function() {
-
-        // Create a variable to track if we've found the server online
-        let serverFoundOnline = false;
-
-        // Set up polling to detect when server is fully started (every 5 seconds)
-        const startupPoll = setInterval(function() {
-          // Skip if we've already found the server online
-          if (serverFoundOnline) return;
-
-          fetch(`/server/<%= server.UUID %>/status`, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json'
-            }
-          })
-          .then(response => response.json())
-          .then(data => {
-
-            if (data.online) {
-
-              serverFoundOnline = true;
-              clearInterval(startupPoll);
-
-              // Update status display
-              statusElement.textContent = 'Online';
-              statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
-              updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
-
-              <% if (features.includes('players')) { %>
-              const playersDeco = document.getElementById('players-deco');
-              playersDeco.classList.remove('translate-y-32');
-              <% } %>
-
-              // Start local uptime counter for smooth updates
-              if (data.startedAt) {
-                const startTime = new Date(data.startedAt).getTime();
-                const uptimeElement = document.getElementById('uptime');
-
-                if (uptimeElement) {
-                  // Initial update
-                  updateLocalUptime(startTime, uptimeElement);
-
-                  // Update every second
-                  const uptimeInterval = setInterval(function() {
-                    updateLocalUptime(startTime, uptimeElement);
-                  }, 1000);
-
-                  // Store the interval ID in a data attribute for cleanup
-                  uptimeElement.dataset.intervalId = uptimeInterval;
-                }
-              }
-            }
-          })
-          .catch(error => {
-
-          });
-        }, 5000); // Check every 5 seconds
-
-        // Do an initial check
-        fetch(`/server/<%= server.UUID %>/status`, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json'
-          }
-        })
-        .then(response => response.json())
-        .then(data => {
-
-          if (data.online) {
-            serverFoundOnline = true;
-            clearInterval(startupPoll);
-
-            // Update status display
-            statusElement.textContent = 'Online';
-            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
-            updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
-
-            <% if (features.includes('players')) { %>
-            const playersDeco = document.getElementById('players-deco');
-            playersDeco.classList.remove('translate-y-32');
-            <% } %>
-          }
-        })
-        .catch(error => {
-
-        });
-      }, 5000); // Wait 5 seconds before first check
-
-      // Stop polling after 60 seconds to avoid resource waste
-      setTimeout(function() {
-
-        if (typeof startupPoll !== 'undefined') {
-          clearInterval(startupPoll);
-        }
-      }, 60000);
-    });
-
-    // The stop button event listener is now defined above
-
-    // Function to update local uptime display
-    function updateLocalUptime(startTime, element) {
-      if (!startTime || !element) return;
-
-      const now = Date.now();
-      const uptimeSeconds = Math.floor((now - startTime) / 1000);
-      element.textContent = formatUptime(uptimeSeconds);
-    }
-
-    // Function to format uptime in a human-readable format
-    function formatUptime(seconds) {
-      if (typeof seconds !== 'number' || isNaN(seconds)) {
-        return '0s';
-      }
-
-      const days = Math.floor(seconds / 86400);
-      const hours = Math.floor((seconds % 86400) / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      const secs = Math.floor(seconds % 60);
-
-      if (days > 0) {
-        return `${days}d ${hours}h ${minutes}m`;
-      } else if (hours > 0) {
-        return `${hours}h ${minutes}m`;
-      } else if (minutes > 0) {
-        return `${minutes}m ${secs}s`;
-      } else {
-        return `${secs}s`;
-      }
-    }
-
-    // Check server status periodically (every 5 seconds)
-    setInterval(function() {
-      // Make a direct API call to check server status
-      fetch(`/server/<%= server.UUID %>/status`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json'
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-
-        // Handle starting state
-        if (data.starting) {
-
-          // Update status display
-          const statusElement = document.getElementById('status');
-          statusElement.textContent = 'Starting';
-          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
-
-          // Update status chart
-          updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
-
-          // No need to hide daemon down message as it's been removed
-
-          <% if (features.includes('players')) { %>
-          // Hide players decoration
-          const playersDeco = document.getElementById('players-deco');
-          playersDeco.classList.add('translate-y-32');
-          <% } %>
-        }
-        // Handle stopping state
-        else if (data.stopping) {
-
-          // Update status display
-          const statusElement = document.getElementById('status');
-          statusElement.textContent = 'Stopping';
-          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-orange-500';
-
-          // Update status chart
-          updateStatusChart('rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.2)');
-
-          // No need to hide daemon down message as it's been removed
-
-          <% if (features.includes('players')) { %>
-          // Hide players decoration
-          const playersDeco = document.getElementById('players-deco');
-          playersDeco.classList.add('translate-y-32');
-          <% } %>
-        }
-        // Handle online state
-        else if (data.online) {
-
-          // Update status display
-          const statusElement = document.getElementById('status');
-          statusElement.textContent = 'Online';
-          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
-
-          // Update status chart
-          updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
-
-          // No need to hide daemon down message as it's been removed
-
-          <% if (features.includes('players')) { %>
-          // Show players decoration
-          const playersDeco = document.getElementById('players-deco');
-          playersDeco.classList.remove('translate-y-32');
-          <% } %>
-
-          // Update uptime if we have a start time
-          if (data.startedAt) {
-            const startTime = new Date(data.startedAt).getTime();
-            const uptimeElement = document.getElementById('uptime');
-
-            if (uptimeElement) {
-              // Clear any existing interval
-              const existingInterval = uptimeElement.dataset.intervalId;
-              if (existingInterval) {
-                clearInterval(parseInt(existingInterval));
-              }
-
-              // Initial update
-              updateLocalUptime(startTime, uptimeElement);
-
-              // Update every second
-              const uptimeInterval = setInterval(function() {
-                updateLocalUptime(startTime, uptimeElement);
-              }, 1000);
-
-              // Store the interval ID for cleanup
-              uptimeElement.dataset.intervalId = uptimeInterval;
-            }
-          }
-        }
-        // Handle offline state
-        else if (data.status === 'offline' || !data.online) {
-
-          setAllStatsOffline();
-
-          // Clear any uptime interval
-          const uptimeElement = document.getElementById('uptime');
-          if (uptimeElement && uptimeElement.dataset.intervalId) {
-            clearInterval(parseInt(uptimeElement.dataset.intervalId));
-            delete uptimeElement.dataset.intervalId;
-          }
-        }
-      })
-      .catch(error => {
-
-      });
-    }, 5000); // Check every 5 seconds
 </script>

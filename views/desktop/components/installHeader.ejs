@@ -1,108 +1,98 @@
-<div class="collapsible-row no-anim open">
-  <div>
+<% if (typeof installed !== 'undefined') { %>
 <% if (installed.failed) { %>
-  <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start gap-3">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-0.5 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+<div class="mx-8 mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-center gap-3">
+  <div class="h-8 w-8 rounded-lg bg-red-100 dark:bg-red-500/10 flex items-center justify-center shrink-0">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
     </svg>
-    <div>
-      <p class="text-sm font-medium text-red-700 dark:text-red-400">Installation failed</p>
-      <p class="text-xs text-red-500 dark:text-red-400/70 mt-0.5">An error occurred during installation. Check logs or contact an administrator.</p>
-    </div>
   </div>
-<% } else if (!installed.installed && !installed.error) { %>
-  <div id="installBanner" class="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 p-4 ml-8 mr-8 mt-4 rounded-xl">
-    <div class="flex items-start gap-3">
-      <svg id="installSpinner" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-0.5 shrink-0 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-      </svg>
-      <div class="flex-1 min-w-0">
-        <p class="text-sm font-medium text-blue-700 dark:text-blue-300">Installing server</p>
-        <p id="installStateText" class="text-xs text-blue-500 dark:text-blue-400/80 mt-0.5">Waiting for daemon...</p>
-        <div id="installSteps" class="mt-2 space-y-0.5"></div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-  (function () {
-    const serverUUID = '<%= server.UUID %>';
-    const banner    = document.getElementById('installBanner');
-    const stateText = document.getElementById('installStateText');
-    const stepsEl   = document.getElementById('installSteps');
-    const spinner   = document.getElementById('installSpinner');
-
-    const shownSteps = new Set();
-
-    function addStep(label, type) {
-      if (!label || shownSteps.has(label)) return;
-      shownSteps.add(label);
-      const isDone  = type === 'done';
-      const isError = type === 'error';
-      const glyph   = isDone ? '✓' : isError ? '✕' : '·';
-      const color   = isDone ? 'text-emerald-500' : isError ? 'text-red-400' : 'text-blue-400';
-      const row = document.createElement('div');
-      row.className = 'flex items-center gap-1.5';
-      row.style.cssText = 'overflow:hidden;max-height:0;opacity:0;transition:max-height 0.3s ease,opacity 0.25s ease';
-      row.innerHTML = `<span class="text-[10px] ${color}">${glyph}</span><span class="text-[11px] text-blue-400 dark:text-blue-400/70">${label}</span>`;
-      stepsEl.appendChild(row);
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        row.style.maxHeight = '2rem';
-        row.style.opacity   = '1';
-      }));
-    }
-
-    // Connect to the daemon lifecycle event stream for this server
-    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    const evtSock = new WebSocket(`${proto}://${location.host}/events/${serverUUID}`);
-
-    evtSock.onmessage = (msg) => {
-      let parsed;
-      try { parsed = JSON.parse(msg.data); } catch { return; }
-      if (parsed.event !== 'lifecycle') return;
-      const { type, message } = parsed.data;
-      if (type === 'error') {
-        stateText.textContent = message;
-        addStep(message, 'error');
-      } else {
-        stateText.textContent = message;
-        addStep(message);
-      }
-    };
-
-    function markDone() {
-      evtSock.close();
-      addStep('Installation complete', 'done');
-      spinner.classList.remove('animate-spin');
-      spinner.classList.add('text-emerald-500');
-      spinner.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>';
-      if (banner) banner.className = banner.className.replace(/blue/g, 'emerald');
-      setTimeout(() => window.location.reload(), 1800);
-    }
-
-    function markFailed() {
-      evtSock.close();
-      spinner.classList.remove('animate-spin', 'text-blue-500');
-      spinner.classList.add('text-red-500');
-      clearInterval(poller);
-    }
-
-    function poll() {
-      fetch(`/server/${serverUUID}/status`)
-        .then(r => r.json())
-        .then(data => {
-          const state = data.state || (data.installed ? 'installed' : data.failed ? 'failed' : 'installing');
-          if (state === 'installed') { clearInterval(poller); markDone(); }
-          else if (state === 'failed') { clearInterval(poller); markFailed(); }
-        })
-        .catch(() => {});
-    }
-
-    const poller = setInterval(poll, 3000);
-    poll();
-  })();
-  </script>
-<% } %>
+  <div class="min-w-0">
+    <p class="text-sm font-medium text-neutral-800 dark:text-neutral-100">Installation failed</p>
+    <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Check the server logs or contact an administrator.</p>
   </div>
 </div>
+<% } else if (!installed.installed && !installed.error) { %>
+<div id="installBanner" class="mx-8 mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-center gap-3">
+  <div id="installIconWrap" class="h-8 w-8 rounded-lg bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center shrink-0">
+    <svg id="installSpinner" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500 dark:text-neutral-400 animate-spin" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+    </svg>
+  </div>
+  <div class="flex-1 min-w-0">
+    <div class="flex items-center gap-2">
+      <p class="text-sm font-medium text-neutral-800 dark:text-neutral-100 shrink-0">Installing server</p>
+      <span class="text-neutral-300 dark:text-neutral-600">·</span>
+      <p id="installStateText" class="text-xs text-neutral-500 dark:text-neutral-400 truncate">Waiting for daemon…</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var serverUUID = '<%= server.UUID %>';
+  var stateText  = document.getElementById('installStateText');
+  var spinnerEl  = document.getElementById('installSpinner');
+  var iconWrap   = document.getElementById('installIconWrap');
+  var banner     = document.getElementById('installBanner');
+
+  var proto   = location.protocol === 'https:' ? 'wss' : 'ws';
+  var evtSock = new WebSocket(proto + '://' + location.host + '/events/' + serverUUID);
+
+  evtSock.onmessage = function(msg) {
+    var parsed;
+    try { parsed = JSON.parse(msg.data); } catch(e) { return; }
+    if (parsed.event !== 'lifecycle') return;
+    if (parsed.data.message) stateText.textContent = parsed.data.message;
+  };
+
+  function markDone() {
+    evtSock.close();
+    clearInterval(poller);
+    stateText.textContent = 'Installation complete';
+    if (spinnerEl) {
+      spinnerEl.classList.remove('animate-spin', 'text-neutral-500');
+      spinnerEl.setAttribute('stroke', 'currentColor');
+      spinnerEl.setAttribute('stroke-width', '2');
+      spinnerEl.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>';
+      spinnerEl.classList.add('text-emerald-500');
+    }
+    if (iconWrap) {
+      iconWrap.className = 'h-8 w-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center shrink-0';
+    }
+    setTimeout(function() { window.location.reload(); }, 1600);
+  }
+
+  function markFailed() {
+    evtSock.close();
+    clearInterval(poller);
+    stateText.textContent = 'Installation failed';
+    if (spinnerEl) {
+      spinnerEl.classList.remove('animate-spin', 'text-neutral-500');
+      spinnerEl.setAttribute('stroke', 'currentColor');
+      spinnerEl.setAttribute('stroke-width', '2');
+      spinnerEl.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>';
+      spinnerEl.classList.add('text-red-500');
+    }
+    if (iconWrap) {
+      iconWrap.className = 'h-8 w-8 rounded-lg bg-red-50 dark:bg-red-500/10 flex items-center justify-center shrink-0';
+    }
+  }
+
+  function poll() {
+    fetch('/server/' + serverUUID + '/status')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var state = data.state || (data.installed ? 'installed' : data.failed ? 'failed' : 'installing');
+        if (state === 'installed') markDone();
+        else if (state === 'failed') markFailed();
+      })
+      .catch(function() {});
+  }
+
+  var poller = setInterval(poll, 3000);
+  poll();
+})();
+</script>
+<% } %>
+<% } %>

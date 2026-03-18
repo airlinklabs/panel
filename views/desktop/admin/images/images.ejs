@@ -1,328 +1,201 @@
-<%- include('../../components/header', { title: 'Manage Images' }) %>
+<%- include('../../components/header', { title: 'Images' }) %>
+<%- include('../../components/toast') %>
+
+<style>
+  ::-webkit-scrollbar { display: none; }
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal-box {
+    background: #fff; border: 1px solid #e5e5e5; border-radius: 12px;
+    width: 100%; max-width: 460px;
+    transform: scale(0.96); opacity: 0;
+    transition: transform 0.25s, opacity 0.25s;
+  }
+  html.dark .modal-box { background: #1c1c1c; border-color: rgba(255,255,255,0.08); }
+  .modal-overlay.open .modal-box { transform: scale(1); opacity: 1; }
+  .field-label { font-size: 11px; font-weight: 500; color: #737373; display: block; margin-bottom: 5px; }
+  html.dark .field-label { color: #a3a3a3; }
+  .field-input {
+    width: 100%; border-radius: 9px; border: 1px solid #e5e5e5;
+    background: #fafafa; padding: 8px 12px;
+    font-size: 13px; color: #171717; outline: none;
+    transition: border-color 0.15s; box-sizing: border-box; font-family: inherit;
+  }
+  html.dark .field-input { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); color: #e5e5e5; }
+  .field-input:focus { border-color: #a3a3a3; }
+  html.dark .field-input:focus { border-color: rgba(255,255,255,0.25); }
+  .field-input::placeholder { color: #a3a3a3; }
+  html.dark .field-input::placeholder { color: #525252; }
+  @media (max-width: 640px) { .col-hide { display: none; } }
+</style>
 
 <main class="h-screen m-auto">
   <div class="flex h-screen">
-    <!-- Sidebar -->
-    <div class="w-60 h-full">
-      <%- include('../../components/template') %>
-    </div>
-    <!-- Content -->
+    <div class="w-60 h-full"><%- include('../../components/template') %></div>
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
-      <div class="sm:flex sm:items-center px-8 pt-4">
-        <%- include('../../components/pageTitle', {
-          title: req.translations.adminImagesTitle,
-          description: req.translations.adminImagesText
-        }) %>
-        <!-- Action Buttons -->
-        <div class="mt-4 sm:mt-0 sm:ml-4 sm:flex-none">
 
-          <button
-            id="uploadimage"
-            class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
-          >
-            Upload Image
-          </button>
-          <button
-            onclick="openModal('createModal')"
-            class="border border-neutral-800/20 rounded-xl ml-2 bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
-          >
-            Create Image
-          </button>
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <%- include('../../components/pageTitle', { title: 'Images', description: 'Manage server images installed on this panel' }) %>
+        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-2 flex-wrap">
+          <button id="uploadBtn" type="button" class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Upload JSON</button>
+          <button onclick="openCreate()" type="button" class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">New Image</button>
+          <a href="/admin/images/store"><button type="button" class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Browse Store</button></a>
         </div>
       </div>
 
-      <!-- Images Table -->
-      <div class="overflow-hidden shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/20" id="imagesTable">
+      <div class="mx-8 mt-6 flex border-b border-neutral-200 dark:border-neutral-800">
+        <span class="px-1 py-2.5 mr-5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px">Installed <span class="ml-1 text-xs text-neutral-400"><%= images.length %></span></span>
+        <a href="/admin/images/store" class="px-1 py-2.5 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">Store</a>
+      </div>
+
+      <% if (images.length === 0) { %>
+      <div class="flex flex-col items-center justify-center py-24 text-center">
+        <p class="text-sm text-neutral-500">No images installed yet.</p>
+        <a href="/admin/images/store"><button type="button" class="mt-4 border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Browse Store</button></a>
+      </div>
+      <% } else { %>
+
+      <div class="mx-8 mt-5 mb-1">
+        <input id="searchInput" type="text" placeholder="Filter images…" class="w-56 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
+      </div>
+
+      <div class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40">
         <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
-          <thead class="bg-neutral-50 dark:bg-neutral-800/20">
+          <thead class="bg-neutral-50 dark:bg-neutral-800/50">
             <tr>
               <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Name</th>
-              <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Author</th>
-              <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Created At</th>
-              <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Actions</th>
+              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white col-hide">Author</th>
+              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white col-hide">Created</th>
+              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-transparent">
-            <% images.forEach(function(image) { %>
-              <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors">
-                <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-white"><%= image.name %></td>
-                <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-neutral-400"><%= image.author %></td>
-                <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-500"><%= new Date(image.createdAt).toLocaleDateString() %></td>
-                <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-white">
-                  <div class="flex gap-3">
-                    <a href="/admin/images/edit/<%= image.id %>" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">
-                      Edit
-                    </a>
-                    <a href="/admin/images/export/<%= image.id %>" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">
-                      Export
-                    </a>
-                    <button
-                      onclick="deleteImage('<%= image.id %>')"
-                      type="button"
-                      class="rounded-xl bg-red-600 hover:bg-red-500 px-3 py-2 text-center text-sm font-medium shadow-sm transition"
-                      aria-label="Delete image"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-white">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-              </tr>
+          <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20" id="tableBody">
+            <% let imgIdx = 0; images.forEach(function(image) { %>
+            <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer img-row"
+                style="--i:<%= imgIdx++ %>"
+                data-search="<%= (image.name + ' ' + (image.author||'')).toLowerCase() %>"
+                onclick="handleRowClick(event, '/admin/images/edit/<%= image.id %>')">
+              <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-white"><%= image.name %></td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400 col-hide"><%= image.author || '—' %></td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400 col-hide"><%= new Date(image.createdAt).toLocaleDateString() %></td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm">
+                <div class="flex gap-2">
+                  <a href="/admin/images/edit/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Edit</button></a>
+                  <a href="/admin/images/export/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Export</button></a>
+                  <button onclick="event.stopPropagation(); openDelete('<%= image.id %>', '<%= image.name %>')" type="button" class="rounded-xl bg-red-600 hover:bg-red-500 px-3 py-2 text-sm font-medium shadow-sm transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-white"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
             <% }); %>
           </tbody>
         </table>
+        <div id="noResults" class="hidden py-10 text-center text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-800/20">No images match your search.</div>
       </div>
+      <% } %>
     </div>
   </div>
 </main>
 
-      <div class="flex justify-end gap-2">
-        <button
-          type="button"
-          onclick="closeModal('uploadModal')"
-          class="px-4 py-2 text-sm font-medium text-neutral-800 bg-white border border-neutral-800 rounded-md hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          class="px-4 py-2 text-sm font-medium text-neutral-800 dark:text-white bg-neutral-100 dark:bg-neutral-800 rounded-md hover:bg-neutral-200 dark:hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-800 focus:ring-offset-2"
-        >
-          Upload
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-<div id="createModal" class="modal hidden fixed inset-0 z-50 bg-neutral-900/60 dark:bg-neutral-900/80 transition-opacity">
-  <div class="h-full w-full flex justify-center items-center p-4">
-  <div class="modal-content bg-white dark:bg-neutral-900 rounded-2xl w-full max-w-lg border border-neutral-200 dark:border-white/5 shadow-xl max-h-[90vh] overflow-y-auto">
-
-    <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-neutral-100 dark:border-white/5">
+<!-- Create modal -->
+<div class="modal-overlay" id="createOverlay">
+  <div class="modal-box">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5">
       <div>
-        <h2 class="text-base font-semibold text-neutral-800 dark:text-white">Create Image</h2>
-        <p class="text-xs text-neutral-500 mt-0.5">Fill in the basics — you can configure Docker images and variables after creation.</p>
+        <p class="text-sm font-semibold text-neutral-800 dark:text-white">New Image</p>
+        <p class="text-xs text-neutral-500 mt-0.5">Configure Docker images and variables after creation.</p>
       </div>
-      <button
-        type="button"
-        onclick="closeModal('createModal')"
-        class="rounded-lg p-1.5 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-        aria-label="Close"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-        </svg>
+      <button onclick="closeCreate()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
       </button>
     </div>
-
-    <form action="/admin/images/create" method="POST" class="px-6 py-5 space-y-4">
-
+    <form action="/admin/images/create" method="POST" class="p-5 flex flex-col gap-4">
       <div class="grid grid-cols-2 gap-3">
-        <div class="col-span-2 flex flex-col gap-1">
-          <label for="create-name" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-            Name <span class="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="create-name"
-            name="name"
-            placeholder="e.g. Minecraft Java"
-            required
-            class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition"
-          >
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <label for="create-author" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Author</label>
-          <input
-            type="text"
-            id="create-author"
-            name="author"
-            placeholder="e.g. github.com/you"
-            class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition"
-          >
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <label for="create-authorName" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Author Name</label>
-          <input
-            type="text"
-            id="create-authorName"
-            name="authorName"
-            placeholder="e.g. Your Name"
-            class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition"
-          >
-        </div>
-
-        <div class="col-span-2 flex flex-col gap-1">
-          <label for="create-startup" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-            Startup Command <span class="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="create-startup"
-            name="startup"
-            placeholder="e.g. java -Xms128M -jar server.jar"
-            required
-            class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition font-mono"
-          >
-          <p class="text-xs text-neutral-400 dark:text-neutral-500">Use <code class="px-1 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 font-mono">$ALVKT(VAR_NAME)</code> to reference variables.</p>
-        </div>
-
-        <div class="col-span-2 flex flex-col gap-1">
-          <label for="create-description" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Description</label>
-          <textarea
-            id="create-description"
-            name="description"
-            rows="2"
-            placeholder="What does this image run?"
-            class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition resize-none"
-          ></textarea>
-        </div>
+        <div class="col-span-2"><label class="field-label">Name <span class="text-red-500">*</span></label><input class="field-input" type="text" name="name" required placeholder="e.g. Minecraft Java"></div>
+        <div><label class="field-label">Author</label><input class="field-input" type="text" name="author" placeholder="e.g. github.com/you"></div>
+        <div><label class="field-label">Author Name</label><input class="field-input" type="text" name="authorName" placeholder="Your Name"></div>
+        <div class="col-span-2"><label class="field-label">Startup Command <span class="text-red-500">*</span></label><input class="field-input" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+        <div class="col-span-2"><label class="field-label">Description</label><textarea class="field-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
       </div>
-
-      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-4 py-3 flex items-start gap-3">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-neutral-400 shrink-0 mt-0.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
-        </svg>
-        <p class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">After creating the image you'll be taken directly to the editor where you can add Docker images, environment variables, and install scripts.</p>
-      </div>
-
-      <div class="flex gap-3 pt-1">
-        <button
-          type="button"
-          onclick="closeModal('createModal')"
-          class="flex-1 py-2.5 px-3 border border-neutral-200 dark:border-white/5 rounded-xl bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-white text-sm font-medium transition"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          class="flex-1 py-2.5 px-3 rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-100 text-white dark:text-neutral-900 text-sm font-medium shadow-sm transition"
-        >
-          Create &amp; Edit
-        </button>
+      <div class="flex gap-2 pt-1">
+        <button type="button" onclick="closeCreate()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition">Cancel</button>
+        <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 text-sm font-medium shadow-lg transition">Create & Edit</button>
       </div>
     </form>
-
-  </div>
   </div>
 </div>
 
-<%- include('../../components/toast')%>
-
-
+<!-- Delete modal -->
+<div class="modal-overlay" id="deleteOverlay">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="p-5">
+      <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Delete image?</p>
+      <p id="deleteMsg" class="text-xs text-neutral-500 mb-5"></p>
+      <div class="flex gap-2">
+        <button onclick="closeDelete()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition">Cancel</button>
+        <button id="deleteConfirm" class="flex-1 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-medium shadow-sm transition">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-  function openModal(id) {
-    document.getElementById(id).classList.remove('hidden');
-  }
+function handleRowClick(e, url) { if (!e.target.closest('button,a')) window.location = url; }
 
-  function closeModal(id) {
-    document.getElementById(id).classList.add('hidden');
-  }
+function openCreate() { document.getElementById('createOverlay').classList.add('open'); }
+function closeCreate() { document.getElementById('createOverlay').classList.remove('open'); }
+document.getElementById('createOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeCreate(); });
 
-  function showConfirmModal(title, message, onConfirm) {
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200';
-    modal.innerHTML = `
-      <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl p-6 max-w-sm w-full mx-4 scale-95 transition-transform duration-200 shadow-2xl">
-        <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">${title}</h2>
-        <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-5">${message}</p>
-        <div class="flex gap-2 justify-end">
-          <button id="modalCancel" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
-          <button id="modalConfirm" class="px-4 py-2 text-xs font-medium rounded-xl bg-red-600 hover:bg-red-500 text-white transition">Delete</button>
-        </div>
-      </div>`;
-    document.body.appendChild(modal);
-    requestAnimationFrame(() => {
-      modal.classList.remove('opacity-0', 'pointer-events-none');
-      modal.querySelector('div').classList.remove('scale-95');
-      modal.querySelector('div').classList.add('scale-100');
-    });
-    const close = () => { modal.classList.add('opacity-0'); setTimeout(() => document.body.removeChild(modal), 200); };
-    modal.querySelector('#modalCancel').addEventListener('click', close);
-    modal.querySelector('#modalConfirm').addEventListener('click', () => { close(); onConfirm(); });
-  }
+let _deleteId = null;
+function openDelete(id, name) {
+  _deleteId = id;
+  document.getElementById('deleteMsg').textContent = '"' + name + '" will be permanently removed.';
+  document.getElementById('deleteOverlay').classList.add('open');
+}
+function closeDelete() { document.getElementById('deleteOverlay').classList.remove('open'); _deleteId = null; }
+document.getElementById('deleteOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeDelete(); });
+document.getElementById('deleteConfirm').addEventListener('click', async function() {
+  if (!_deleteId) return;
+  this.textContent = 'Deleting…'; this.disabled = true;
+  const res = await fetch('/admin/images/delete/' + _deleteId, { method: 'DELETE' });
+  if (res.ok) { showToast('Image deleted.', 'success'); setTimeout(() => location.reload(), 700); }
+  else { showToast('Failed.', 'error'); this.textContent = 'Delete'; this.disabled = false; closeDelete(); }
+});
 
-  function deleteImage(imageId) {
-    showConfirmModal('Delete image', 'This will permanently remove the image and cannot be undone.', async () => {
-      try {
-        const response = await fetch(`/admin/images/delete/${imageId}`, { method: 'DELETE' });
-        if (response.ok) {
-          showToast('Image deleted', 'success');
-          setTimeout(() => location.reload(), 800);
-        } else {
-          const msg = await response.text();
-          showToast(msg || 'Failed to delete image', 'error');
-        }
-      } catch {
-        showToast('An error occurred', 'error');
-      }
-    });
-  }
+document.getElementById('searchInput')?.addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  let n = 0;
+  document.querySelectorAll('.img-row').forEach(r => {
+    const match = !q || r.dataset.search.includes(q);
+    r.style.display = match ? '' : 'none';
+    if (match) n++;
+  });
+  const el = document.getElementById('noResults');
+  if (el) el.classList.toggle('hidden', n > 0 || !q);
+});
 
-
+document.getElementById('uploadBtn').addEventListener('click', function() {
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.click();
+  inp.onchange = function() {
+    const f = this.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = function(e) {
+      try { JSON.parse(e.target.result); } catch { showToast('Invalid JSON.', 'error'); return; }
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/admin/images/upload', true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onload = () => xhr.status === 200 ? (showToast('Uploaded.', 'success'), setTimeout(() => location.reload(), 800)) : showToast('Upload failed.', 'error');
+      xhr.send(e.target.result);
+    };
+    r.readAsText(f);
+  };
+});
 </script>
-<script>
-    document.addEventListener("DOMContentLoaded", async function(event) {
-      var uploadBtn = document.getElementById('uploadimage');
-      uploadBtn.addEventListener('click', async function() {
-        var input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        input.click();
-        input.addEventListener('change', function(event) {
-          var file = event.target.files[0];
-          if (file && file.type === 'application/json') {
-            // Show loading toast
-            showToast('Uploading image...', 'info');
 
-            var reader = new FileReader();
-            reader.onload = function(event) {
-              try {
-                var jsonData = event.target.result;
-                // Validate JSON format
-                JSON.parse(jsonData);
-
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', '/admin/images/upload', true);
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.onload = function() {
-                  if (xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    showToast(response.message || 'Image uploaded successfully.', 'success');
-                    setTimeout(function() {
-                      window.location.reload();
-                    }, 1000);
-                  } else {
-                    try {
-                      var errorResponse = JSON.parse(xhr.responseText);
-                      if (errorResponse.details && Array.isArray(errorResponse.details)) {
-                        showToast(errorResponse.details.join(', '), 'error');
-                      } else {
-                        showToast(errorResponse.error || 'Error uploading image.', 'error');
-                      }
-                    } catch (e) {
-                      showToast('Error uploading image.', 'error');
-                    }
-                  }
-                };
-                xhr.onerror = function() {
-                  showToast('Network error.', 'error');
-                };
-                xhr.send(jsonData);
-              } catch (e) {
-                showToast('Invalid JSON format: ' + e.message, 'error');
-              }
-            };
-            reader.readAsText(file);
-          } else {
-            showToast('Please select a JSON file.', 'error');
-          }
-        });
-      });
-    });
-  </script>
 <%- include('../../components/footer') %>

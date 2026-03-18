@@ -1,1 +1,0 @@
-ALTER TABLE "Images" ADD COLUMN "stop" TEXT;

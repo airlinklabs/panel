@@ -8,18 +8,23 @@
   }
 
   model Users {
-    id          Int      @id @default(autoincrement())
-    email       String   @unique
-    username    String?  @unique
-    password    String
-    isAdmin     Boolean  @default(false)
-    description String?  @default("No About Me")
-    avatar      String?
-    servers     Server[]
-    permissions String?
-    loginHistory LoginHistory[]
-    apiKeys     ApiKey[]
-  }
+  id           Int            @id @default(autoincrement())
+  email        String         @unique
+  username     String?        @unique
+  password     String
+  isAdmin      Boolean        @default(false)
+  description  String?        @default("No About Me")
+  avatar       String?
+  servers      Server[]
+  permissions  String?
+  loginHistory LoginHistory[]
+  apiKeys      ApiKey[]
+  serverLimit  Int?
+  maxMemory    Int?
+  maxCpu       Int?
+  maxStorage   Int?
+  folders      ServerFolder[]
+}
 
   model Session {
     id         String   @id @default(cuid())
@@ -55,24 +60,28 @@
     owner     Users    @relation(fields: [ownerId], references: [id])
     image     Images   @relation(fields: [imageId], references: [id])
     backups   Backup[]
+    folder    ServerFolderMember?
   }
 
 model Images {
-  id          Int      @id @default(autoincrement())
-  UUID        String   @unique @default(uuid())
-  name        String?
-  description String?
-  author      String?
-  authorName  String?
-  createdAt   DateTime @default(now())
-  meta        String?
+  id           Int      @id @default(autoincrement())
+  UUID         String   @unique @default(uuid())
+  name         String?
+  description  String?
+  author       String?
+  authorName   String?
+  createdAt    DateTime @default(now())
+  meta         String?
   dockerImages String?
-  startup     String?
-  info        String?
-  scripts     String?
-  variables   String?
+  startup      String?
+  stop         String?
+  startup_done String?
+  config_files String?
+  info         String?
+  scripts      String?
+  variables    String?
 
-  servers     Server[]
+  servers      Server[]
 }
 
   model Node {
@@ -106,9 +115,34 @@ model settings {
   updatedAt DateTime @updatedAt
   sftpPort  Int  @default(3003)
   virusTotalApiKey String?
-  rateLimitEnabled Boolean @default(true)
-  rateLimitRpm     Int     @default(100)
-  bannedIps        String  @default("[]")
+  rateLimitEnabled         Boolean @default(true)
+  rateLimitRpm             Int     @default(100)
+  bannedIps                String  @default("[]")
+  allowUserCreateServer    Boolean @default(false)
+  allowUserDeleteServer    Boolean @default(false)
+  defaultServerLimit       Int     @default(0)
+  defaultMaxMemory         Int     @default(512)
+  defaultMaxCpu            Int     @default(100)
+  defaultMaxStorage        Int     @default(5)
+}
+
+model ServerFolder {
+  id        Int                  @id @default(autoincrement())
+  name      String
+  ownerId   Int
+  createdAt DateTime             @default(now())
+  owner     Users                @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  members   ServerFolderMember[]
+
+  @@index([ownerId])
+}
+
+model ServerFolderMember {
+  id         Int          @id @default(autoincrement())
+  folderId   Int
+  serverUUID String       @unique
+  folder     ServerFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  server     Server       @relation(fields: [serverUUID], references: [UUID], onDelete: Cascade)
 }
 
 model ApiKey {

@@ -134,6 +134,43 @@
               </div>
             </div>
 
+            <!-- Server limits -->
+            <div class="mt-5 pt-5 border-t border-neutral-200 dark:border-white/10">
+              <p class="text-sm font-medium text-neutral-800 dark:text-white mb-1">Server limits</p>
+              <p class="text-xs text-neutral-500 mb-3">Leave blank to use the global default from Admin &rarr; Settings.</p>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Server limit</label>
+                  <input type="number" id="serverLimit" name="serverLimit" min="0" max="100"
+                    value="<%= dataUser.serverLimit !== null && dataUser.serverLimit !== undefined ? dataUser.serverLimit : '' %>"
+                    placeholder="Use global default"
+                    class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none transition">
+                  <p class="mt-1 text-[11px] text-neutral-400">0 = cannot create servers.</p>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Max memory (MB)</label>
+                  <input type="number" id="maxMemory" name="maxMemory" min="128" max="65536"
+                    value="<%= dataUser.maxMemory !== null && dataUser.maxMemory !== undefined ? dataUser.maxMemory : '' %>"
+                    placeholder="Use global default"
+                    class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none transition">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Max CPU (%)</label>
+                  <input type="number" id="maxCpu" name="maxCpu" min="10" max="10000"
+                    value="<%= dataUser.maxCpu !== null && dataUser.maxCpu !== undefined ? dataUser.maxCpu : '' %>"
+                    placeholder="Use global default"
+                    class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none transition">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Max storage (GB)</label>
+                  <input type="number" id="maxStorage" name="maxStorage" min="1" max="10000"
+                    value="<%= dataUser.maxStorage !== null && dataUser.maxStorage !== undefined ? dataUser.maxStorage : '' %>"
+                    placeholder="Use global default"
+                    class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none transition">
+                </div>
+              </div>
+            </div>
+
             <!-- Submit Button -->
             <div class="mt-8 flex justify-end">
               <button
@@ -192,6 +229,18 @@
 
       // Handle checkbox value
       data.isAdmin = isAdminToggle.checked;
+
+      const serverLimitEl = document.getElementById('serverLimit');
+      data.serverLimit = serverLimitEl && serverLimitEl.value !== '' ? parseInt(serverLimitEl.value, 10) : null;
+
+      const maxMemoryEl = document.getElementById('maxMemory');
+      data.maxMemory = maxMemoryEl && maxMemoryEl.value !== '' ? parseInt(maxMemoryEl.value, 10) : null;
+
+      const maxCpuEl = document.getElementById('maxCpu');
+      data.maxCpu = maxCpuEl && maxCpuEl.value !== '' ? parseInt(maxCpuEl.value, 10) : null;
+
+      const maxStorageEl = document.getElementById('maxStorage');
+      data.maxStorage = maxStorageEl && maxStorageEl.value !== '' ? parseInt(maxStorageEl.value, 10) : null;
 
       // Show loading popup
       const loader = showLoadingPopup('<%= req.translations.updatingUser || "Updating User" %>', '<%= req.translations.processingUserUpdate || "Processing user update..." %>');

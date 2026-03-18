@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: req.translations.adminSettingsTitle || 'Settings' }) %>
+<%- include('../../components/header', { title: 'Settings' }) %>
 
 <main class="min-h-screen">
   <div class="flex min-h-screen">
@@ -7,28 +7,26 @@
     </div>
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
       <div class="px-8 pt-5">
-        <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminSettingsTitle || 'Settings' %></h1>
-        <p class="mt-0.5 text-sm text-neutral-500"><%= req.translations.adminSettingsText || 'Manage your panel configuration.' %></p>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white">Settings</h1>
+        <p class="mt-0.5 text-sm text-neutral-500">Manage your panel configuration.</p>
       </div>
 
       <div class="px-8 mt-5">
-        <!-- Tab nav -->
         <div class="flex gap-0.5 mb-6 border-b border-neutral-200 dark:border-neutral-700/40">
-          <button type="button" data-tab="appearance"
-            class="tab-btn px-4 py-2.5 text-sm font-medium transition-colors -mb-px border-b-2">Appearance</button>
-          <button type="button" data-tab="configuration"
-            class="tab-btn px-4 py-2.5 text-sm font-medium transition-colors -mb-px border-b-2">Configuration</button>
+          <button type="button" data-tab="appearance" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Appearance</button>
+          <button type="button" data-tab="general"    class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">General</button>
+          <button type="button" data-tab="servers"    class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Servers</button>
+          <button type="button" data-tab="security"   class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Security</button>
         </div>
 
-        <!-- ── Appearance tab ─────────────────────────────────────────────── -->
+        <!-- Appearance tab -->
         <form id="form-appearance" data-tab-form="appearance" class="tab-form space-y-5 hidden" enctype="multipart/form-data">
-
           <div class="flex flex-col bg-neutral-50 dark:bg-white/5 rounded-xl">
             <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">Branding</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 px-5 py-5">
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2"><%= req.translations.siteTitle || 'Site Title' %></label>
-                <input type="text" name="title" value="<%= settings.title %>" placeholder="<%= settings.title %>"
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Site title</label>
+                <input type="text" name="title" value="<%= settings.title %>"
                   class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/50 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
               </div>
               <div>
@@ -46,7 +44,7 @@
                 <% if (settings.favicon && settings.favicon.startsWith('/')) { %>
                 <img src="<%= settings.favicon %>" alt="Favicon" class="h-5 mt-2 object-contain">
                 <% } %>
-                <p class="text-xs text-neutral-400 mt-1">PNG or JPG auto-converted to 32×32 .ico</p>
+                <p class="text-xs text-neutral-400 mt-1">PNG or JPG auto-converted to 32x32 .ico</p>
               </div>
             </div>
           </div>
@@ -118,21 +116,19 @@
                 <p class="text-sm font-medium text-neutral-700 dark:text-white">Upload custom theme</p>
                 <a href="/admin/settings/example-theme" class="text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Download example</a>
               </div>
-              <p class="text-xs text-neutral-500 mb-3">A .zip containing <code class="bg-neutral-100 dark:bg-neutral-700/40 px-1 py-0.5 rounded text-xs">info.json</code>, <code class="bg-neutral-100 dark:bg-neutral-700/40 px-1 py-0.5 rounded text-xs">light.css</code>, <code class="bg-neutral-100 dark:bg-neutral-700/40 px-1 py-0.5 rounded text-xs">dark.css</code>.</p>
+              <p class="text-xs text-neutral-500 mb-3">A .zip containing info.json, light.css, dark.css.</p>
               <input type="file" name="themeFile" accept=".zip"
                 class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
             </div>
           </div>
 
-          <div class="flex justify-end gap-3">
+          <div class="flex justify-end">
             <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-6 py-2 text-sm font-medium shadow-sm transition">Save</button>
           </div>
         </form>
 
-        <!-- ── Configuration tab ──────────────────────────────────────────── -->
-        <div id="panel-configuration" data-tab-panel="configuration" class="tab-panel space-y-5 hidden">
-
-          <!-- General behaviour -->
+        <!-- General tab -->
+        <div id="panel-general" data-tab-panel="general" class="tab-panel space-y-5 hidden">
           <form id="form-general" class="flex flex-col bg-neutral-50 dark:bg-white/5 rounded-xl">
             <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">General</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 px-5 py-5">
@@ -152,8 +148,7 @@
                     class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/50 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 pr-16 text-neutral-800 dark:text-white placeholder-neutral-400 font-mono transition-colors">
                   <button type="button" onclick="const i=this.previousElementSibling;i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'Show':'Hide';" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Show</button>
                 </div>
-                <p class="mt-1 text-xs text-neutral-500">Used by Radar. Free tier: 4/min · 500/day. <a href="https://www.virustotal.com" target="_blank" rel="noopener" class="text-blue-500 hover:underline">virustotal.com</a></p>
-                <% if (settings.virusTotalApiKey) { %><p class="mt-1 text-xs text-emerald-600 dark:text-emerald-400">Key is set — leave blank to keep it.</p><% } %>
+                <% if (settings.virusTotalApiKey) { %><p class="mt-1 text-xs text-emerald-600 dark:text-emerald-400">Key is set.</p><% } %>
               </div>
             </div>
             <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex items-center gap-4">
@@ -166,8 +161,70 @@
               <button type="button" id="resetButton" class="rounded-xl border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white px-4 py-2 text-sm font-medium transition">Reset defaults</button>
             </div>
           </form>
+        </div>
 
-          <!-- Rate limiting -->
+        <!-- Servers tab -->
+        <div id="panel-servers" data-tab-panel="servers" class="tab-panel space-y-5 hidden">
+          <div class="flex flex-col bg-neutral-50 dark:bg-white/5 rounded-xl">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">User permissions</h2>
+            <div class="px-5 py-5 space-y-5">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow users to create servers</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Users can create their own servers up to their limit. Disabled by default.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="allowUserCreateServer" class="sr-only peer" <%= settings.allowUserCreateServer ? 'checked' : '' %>>
+                  <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow users to delete servers</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Users can delete servers they own. Disabled by default.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="allowUserDeleteServer" class="sr-only peer" <%= settings.allowUserDeleteServer ? 'checked' : '' %>>
+                  <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col bg-neutral-50 dark:bg-white/5 rounded-xl">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">Default limits</h2>
+            <p class="text-xs text-neutral-500 px-5 pt-3">Applied to all users unless overridden per-user in Admin &rarr; Users.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 px-5 py-5">
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Server limit</label>
+                <input type="number" id="defaultServerLimit" value="<%= settings.defaultServerLimit %>" min="0" max="100"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/50 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                <p class="mt-1 text-xs text-neutral-500">0 = cannot create. Admins unlimited.</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max memory <span class="text-neutral-400 font-normal">(MB)</span></label>
+                <input type="number" id="defaultMaxMemory" value="<%= settings.defaultMaxMemory %>" min="128" max="65536"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/50 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max CPU <span class="text-neutral-400 font-normal">(%)</span></label>
+                <input type="number" id="defaultMaxCpu" value="<%= settings.defaultMaxCpu %>" min="10" max="10000"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/50 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max storage <span class="text-neutral-400 font-normal">(GB)</span></label>
+                <input type="number" id="defaultMaxStorage" value="<%= settings.defaultMaxStorage %>" min="1" max="10000"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/50 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+              </div>
+            </div>
+            <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
+              <button type="button" id="saveServerPolicy" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-5 py-2 text-sm font-medium shadow-sm transition">Save</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security tab -->
+        <div id="panel-security" data-tab-panel="security" class="tab-panel space-y-5 hidden">
           <div class="flex flex-col bg-neutral-50 dark:bg-white/5 rounded-xl">
             <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">Rate limiting</h2>
             <div class="px-5 py-5 space-y-4">
@@ -178,7 +235,7 @@
                 </label>
                 <div>
                   <p class="text-sm font-medium text-neutral-700 dark:text-white">Enable rate limiting</p>
-                  <p class="text-xs text-neutral-500 mt-0.5">Caps HTTP requests per IP address per minute, panel-wide.</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Caps HTTP requests per IP per minute across the panel.</p>
                 </div>
               </div>
               <div class="flex items-center gap-4">
@@ -192,7 +249,6 @@
             </div>
           </div>
 
-          <!-- IP banning -->
           <div class="flex flex-col bg-neutral-50 dark:bg-white/5 rounded-xl">
             <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">Banned IPs</h2>
             <div class="px-5 py-5 space-y-3">
@@ -215,8 +271,7 @@
               </div>
             </div>
           </div>
-
-        </div><!-- end configuration panel -->
+        </div>
       </div>
     </div>
   </div>
@@ -226,7 +281,6 @@
 
 <script>
 (function () {
-  // ── Tab switching ─────────────────────────────────────────────────────────
   const tabBtns   = document.querySelectorAll('.tab-btn');
   const tabForms  = document.querySelectorAll('.tab-form');
   const tabPanels = document.querySelectorAll('.tab-panel');
@@ -234,13 +288,13 @@
   function activate(id) {
     tabBtns.forEach(btn => {
       const on = btn.dataset.tab === id;
-      btn.classList.toggle('border-neutral-800',           on);
-      btn.classList.toggle('dark:border-white',            on);
-      btn.classList.toggle('text-neutral-800',             on);
-      btn.classList.toggle('dark:text-white',              on);
-      btn.classList.toggle('border-transparent',           !on);
-      btn.classList.toggle('text-neutral-500',             !on);
-      btn.classList.toggle('dark:text-neutral-400',        !on);
+      btn.classList.toggle('border-neutral-800',    on);
+      btn.classList.toggle('dark:border-white',      on);
+      btn.classList.toggle('text-neutral-800',       on);
+      btn.classList.toggle('dark:text-white',        on);
+      btn.classList.toggle('border-transparent',    !on);
+      btn.classList.toggle('text-neutral-500',      !on);
+      btn.classList.toggle('dark:text-neutral-400', !on);
     });
     tabForms.forEach(f  => f.classList.toggle('hidden', f.dataset.tabForm  !== id));
     tabPanels.forEach(p => p.classList.toggle('hidden', p.dataset.tabPanel !== id));
@@ -252,7 +306,6 @@
   try { saved = localStorage.getItem('settings_tab'); } catch {}
   activate(saved || 'appearance');
 
-  // ── Radio highlight ───────────────────────────────────────────────────────
   document.querySelectorAll('input[type="radio"]').forEach(radio => {
     radio.addEventListener('change', () => {
       document.querySelectorAll(`input[name="${radio.name}"]`).forEach(r => {
@@ -276,28 +329,6 @@
     });
   });
 
-  // ── Favicon auto-convert ─────────────────────────────────────────────────
-  document.querySelector('input[name="favicon"]')?.addEventListener('change', async e => {
-    const file = e.target.files[0];
-    if (!file || file.name.toLowerCase().endsWith('.ico')) return;
-    try {
-      const canvas = document.createElement('canvas');
-      canvas.width = 32; canvas.height = 32;
-      const img = new Image();
-      img.onload = () => {
-        canvas.getContext('2d').drawImage(img, 0, 0, 32, 32);
-        canvas.toBlob(blob => {
-          const dt = new DataTransfer();
-          dt.items.add(new File([blob], 'favicon.ico', { type: 'image/x-icon' }));
-          e.target.files = dt.files;
-          showToast('Image converted to favicon format', 'success');
-        }, 'image/x-icon');
-      };
-      img.src = URL.createObjectURL(file);
-    } catch { showToast('Failed to convert image', 'error'); }
-  });
-
-  // ── Generic form submit ───────────────────────────────────────────────────
   function submitForm(form, url) {
     const btn = form.querySelector('button[type="submit"]');
     const orig = btn?.textContent || '';
@@ -314,7 +345,6 @@
   document.getElementById('form-appearance').addEventListener('submit', e => { e.preventDefault(); submitForm(e.target, '/admin/settings'); });
   document.getElementById('form-general').addEventListener('submit',    e => { e.preventDefault(); submitForm(e.target, '/admin/settings'); });
 
-  // ── Reset ─────────────────────────────────────────────────────────────────
   document.getElementById('resetButton').addEventListener('click', () => {
     window.modal.confirm({
       title: 'Reset settings',
@@ -333,7 +363,6 @@
     });
   });
 
-  // ── Rate limiting ─────────────────────────────────────────────────────────
   document.getElementById('saveRateLimit').addEventListener('click', function () {
     const btn = this;
     btn.disabled = true; btn.textContent = 'Saving...';
@@ -351,7 +380,27 @@
       .finally(() => { btn.disabled = false; btn.textContent = 'Save'; });
   });
 
-  // ── IP banning ────────────────────────────────────────────────────────────
+  document.getElementById('saveServerPolicy').addEventListener('click', function () {
+    const btn = this;
+    btn.disabled = true; btn.textContent = 'Saving...';
+    fetch('/admin/settings/server-policy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        allowUserCreateServer: document.getElementById('allowUserCreateServer').checked,
+        allowUserDeleteServer: document.getElementById('allowUserDeleteServer').checked,
+        defaultServerLimit:    parseInt(document.getElementById('defaultServerLimit').value, 10),
+        defaultMaxMemory:      parseInt(document.getElementById('defaultMaxMemory').value, 10),
+        defaultMaxCpu:         parseInt(document.getElementById('defaultMaxCpu').value, 10),
+        defaultMaxStorage:     parseInt(document.getElementById('defaultMaxStorage').value, 10),
+      }),
+    })
+      .then(r => r.json())
+      .then(d => { if (d.success) showToast('Server policy saved', 'success'); else showToast(d.error || 'Failed', 'error'); })
+      .catch(() => showToast('Failed', 'error'))
+      .finally(() => { btn.disabled = false; btn.textContent = 'Save'; });
+  });
+
   document.getElementById('banIpBtn').addEventListener('click', () => {
     const ip = document.getElementById('banIpInput').value.trim();
     if (!ip) { showToast('Enter an IP address', 'error'); return; }
@@ -364,6 +413,10 @@
         showToast(`${ip} banned`, 'success');
       })
       .catch(err => showToast(err.message, 'error'));
+  });
+
+  document.getElementById('banIpInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('banIpBtn').click();
   });
 
   function addBannedRow(ip) {

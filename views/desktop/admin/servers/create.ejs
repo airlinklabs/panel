@@ -74,8 +74,8 @@
               </div>
 
               <div>
-                <label for="serverMemory" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Memory (GB):</label>
-                <input id="serverMemory" name="Memory" type="number" min="1" max="128" value="4" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                <label for="serverMemory" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Memory (MB):</label>
+                <input id="serverMemory" name="Memory" type="number" min="128" max="131072" value="1024" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
               </div>
 
               <div>
@@ -288,110 +288,67 @@
     function updateVariables() {
       const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
       const variables = JSON.parse(selectedOption.getAttribute('data-variables')) || [];
-      const variablesSection = document.getElementById('variablesSection');
 
       variablesContainer.innerHTML = '';
 
       if (variables.length === 0) {
         document.getElementById('variablesSectionRow').classList.remove('open');
         return;
-      } else {
-        document.getElementById('variablesSectionRow').classList.add('open');
       }
+      document.getElementById('variablesSectionRow').classList.add('open');
 
       variables.forEach(variable => {
-        const variableDiv = document.createElement('div');
-        variableDiv.classList.add('mb-4', 'flex', 'items-center');
+        // Support both Pterodactyl egg shape (env_variable, field_type, default_value)
+        // and legacy shape (env, type, value)
+        const envKey = variable.env_variable || variable.env || '';
+        const fieldType = variable.field_type || variable.type || 'text';
+        const defaultVal = variable.default_value ?? variable.value ?? '';
+        const isRequired = variable.rules ? variable.rules.includes('required') : !!variable.required;
+
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('flex', 'flex-col', 'gap-1.5');
 
         const label = document.createElement('label');
-        label.setAttribute('for', variable.env);
-        label.classList.add('text-neutral-700', 'dark:text-neutral-400', 'text-sm', 'tracking-tight', 'mr-2');
-        label.textContent = variable.name + (variable.required ? ' *' : '');
+        label.setAttribute('for', envKey);
+        label.classList.add('text-neutral-700', 'dark:text-neutral-400', 'text-sm', 'tracking-tight');
+        label.textContent = variable.name + (isRequired ? ' *' : '');
+
+        if (variable.description) {
+          const desc = document.createElement('p');
+          desc.classList.add('text-xs', 'text-neutral-500');
+          desc.textContent = variable.description;
+          wrapper.appendChild(label);
+          wrapper.appendChild(desc);
+        } else {
+          wrapper.appendChild(label);
+        }
 
         let input;
-
-        switch (variable.type) {
-          case 'text':
-            input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = `Enter ${variable.name}`;
-            break;
-          case 'number':
-            input = document.createElement('input');
-            input.type = 'number';
-            input.placeholder = `Enter ${variable.name}`;
-            input.min = variable.min || 1;
-            input.max = variable.max || 1000;
-            break;
-          case 'boolean':
-            input = document.createElement('div');
-            input.classList.add('flex', 'items-center', 'space-x-2', 'mt-1');
-
-            const checkboxContainer = document.createElement('label');
-            checkboxContainer.setAttribute('for', variable.env);
-            checkboxContainer.classList.add('relative', 'inline-flex', 'items-center', 'cursor-pointer');
-
-            const checkboxInput = document.createElement('input');
-            checkboxInput.type = 'checkbox';
-            checkboxInput.id = variable.env;
-            checkboxInput.name = variable.env;
-            checkboxInput.classList.add('sr-only', 'peer');
-            checkboxInput.checked = variable.value || false;
-
-            const toggleTrack = document.createElement('div');
-            toggleTrack.classList.add('w-11', 'h-6', 'bg-neutral-300', 'dark:bg-neutral-700', 'peer-focus:ring-2', 'peer-focus:ring-blue-300', 'dark:peer-focus:ring-blue-800', 'rounded-full', 'peer', 'peer-checked:after:translate-x-full', 'rtl:peer-checked:after:-translate-x-full', 'peer-checked:after:border-white', 'after:content-[\'\']', 'after:absolute', 'after:top-[2px]', 'after:start-[2px]', 'after:bg-white', 'after:border-neutral-300', 'after:border', 'after:rounded-full', 'after:h-5', 'after:w-5', 'after:transition-all', 'peer-checked:bg-blue-600');
-
-            const toggleLabel = document.createElement('span');
-            toggleLabel.classList.add('ms-3', 'text-sm', 'font-medium', 'text-neutral-600', 'dark:text-neutral-300');
-            toggleLabel.textContent = checkboxInput.checked ? 'Enabled' : 'Disabled';
-
-            // Update label when toggle changes
-            checkboxInput.addEventListener('change', function() {
-              toggleLabel.textContent = this.checked ? 'Enabled' : 'Disabled';
-            });
-
-            checkboxContainer.appendChild(checkboxInput);
-            checkboxContainer.appendChild(toggleTrack);
-            checkboxContainer.appendChild(toggleLabel);
-            input.appendChild(checkboxContainer);
-            break;
-          default:
-            input = document.createElement('input');
-            input.type = 'text';
-            break;
+        if (fieldType === 'number') {
+          input = document.createElement('input');
+          input.type = 'number';
+          input.placeholder = defaultVal || `Enter ${variable.name}`;
+        } else {
+          input = document.createElement('input');
+          input.type = 'text';
+          input.placeholder = defaultVal || `Enter ${variable.name}`;
         }
 
-        if (variable.type !== 'boolean') {
-          input.classList.add(
-            'rounded-xl',
-            'focus:ring',
-            'focus:ring-neutral-800/10',
-            'focus:border-neutral-800/20',
-            'text-neutral-800',
-            'dark:text-white',
-            'text-sm',
-            'w-full',
-            'hover:bg-neutral-200',
-            'dark:hover:bg-white/5',
-            'px-4',
-            'py-2',
-            'bg-neutral-100',
-            'dark:bg-neutral-400/10',
-            'dark:bg-neutral-600/20',
-            'border',
-            'border-neutral-800/10',
-            'dark:border-white/5'
-          );
-        }
+        input.classList.add(
+          'rounded-xl', 'focus:ring', 'focus:ring-neutral-800/10',
+          'focus:border-neutral-800/20', 'text-neutral-800', 'dark:text-white',
+          'text-sm', 'w-full', 'hover:bg-neutral-200', 'dark:hover:bg-white/5',
+          'px-4', 'py-2', 'bg-neutral-100', 'dark:bg-neutral-600/20',
+          'border', 'border-neutral-800/10', 'dark:border-white/5'
+        );
 
-        input.id = variable.env;
-        input.name = variable.env;
-        input.value = variable.value || '';
-        input.required = variable.required;
+        input.id = envKey;
+        input.name = envKey;
+        input.value = defaultVal;
+        if (isRequired) input.required = true;
 
-        variableDiv.appendChild(label);
-        variableDiv.appendChild(input);
-        variablesContainer.appendChild(variableDiv);
+        wrapper.appendChild(input);
+        variablesContainer.appendChild(wrapper);
       });
     }
 
@@ -405,18 +362,17 @@
       const variables = JSON.parse(selectedOption.getAttribute('data-variables')) || [];
 
       variables.forEach(variable => {
-        let variableValue = formData.get(variable.env);
-        if (variable.type === 'boolean') {
-          variableValue = (variableValue === 'on') ? 1 : 0;
-        } else if (variable.type === 'number') {
-          variableValue = parseInt(variableValue);
-        }
-        if (variableValue !== null) {
+        const envKey = variable.env_variable || variable.env || '';
+        const fieldType = variable.field_type || variable.type || 'text';
+        let value = formData.get(envKey);
+        if (fieldType === 'number') value = parseInt(value);
+        if (value !== null) {
           variablesArray.push({
-            env: variable.env,
+            env_variable: envKey,
+            env: envKey,
             name: variable.name,
-            value: variableValue,
-            type: variable.type
+            value: value,
+            field_type: fieldType,
           });
         }
       });
