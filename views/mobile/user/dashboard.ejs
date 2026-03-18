@@ -162,11 +162,18 @@
   <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5 max-h-[70dvh] overflow-y-auto">
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-base font-medium text-neutral-800 dark:text-white" id="folderOverlayTitle">Folder</h2>
-      <button id="closeFolderOverlay" class="text-neutral-400 p-1">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
-          <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-        </svg>
-      </button>
+      <div class="flex items-center gap-1">
+        <button id="deleteFolderBtn" class="p-2 rounded-xl text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition active:scale-95">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-4 w-4">
+            <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+        <button id="closeFolderOverlay" class="text-neutral-400 p-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+            <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
     </div>
     <div id="folderOverlayContent" class="space-y-2"></div>
   </div>
@@ -185,7 +192,17 @@
   </div>
 </div>
 
-<!-- Move to folder dialog -->
+<!-- Delete folder confirm sheet -->
+<div id="deleteFolderSheet" class="hidden fixed inset-0 z-50 bg-black/40 flex items-end p-0">
+  <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5">
+    <p class="text-base font-medium text-neutral-800 dark:text-white mb-1">Delete folder?</p>
+    <p class="text-sm text-neutral-500 mb-4">Servers inside stay accessible — they just won't be in this folder.</p>
+    <div class="flex gap-2">
+      <button id="cancelDeleteFolder" class="flex-1 py-2.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-700/30 rounded-xl transition">Cancel</button>
+      <button id="confirmDeleteFolder" class="flex-1 py-2.5 text-sm font-medium text-white bg-red-600 rounded-xl transition active:scale-[0.98]">Delete</button>
+    </div>
+  </div>
+</div>
 <div id="addToFolderDialog" class="hidden fixed inset-0 z-50 bg-black/40 flex items-end p-0">
   <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5 max-h-[60dvh] overflow-y-auto">
     <h2 class="text-base font-medium text-neutral-800 dark:text-white mb-4">Move to folder</h2>
@@ -255,6 +272,7 @@
     card.addEventListener('click', () => {
       const memberUUIDs = JSON.parse(card.dataset.folderMembers || '[]');
       const folderName  = card.dataset.folderName;
+      activeFolderId    = card.dataset.folderId;
       const serversIn   = allServers.filter(s => memberUUIDs.includes(s.UUID));
 
       document.getElementById('folderOverlayTitle').textContent = folderName;
@@ -279,6 +297,29 @@
   });
 
   document.getElementById('closeFolderOverlay')?.addEventListener('click', () => document.getElementById('folderOverlay').classList.add('hidden'));
+
+  // Delete folder
+  let activeFolderId = null;
+
+  document.getElementById('deleteFolderBtn')?.addEventListener('click', () => {
+    document.getElementById('folderOverlay').classList.add('hidden');
+    document.getElementById('deleteFolderSheet').classList.remove('hidden');
+  });
+
+  document.getElementById('cancelDeleteFolder')?.addEventListener('click', () => {
+    document.getElementById('deleteFolderSheet').classList.add('hidden');
+  });
+
+  document.getElementById('confirmDeleteFolder')?.addEventListener('click', async () => {
+    if (!activeFolderId) return;
+    const btn = document.getElementById('confirmDeleteFolder');
+    btn.disabled = true;
+    const r = await fetch('/api/folders/' + activeFolderId, { method: 'DELETE' });
+    const d = await r.json();
+    btn.disabled = false;
+    document.getElementById('deleteFolderSheet').classList.add('hidden');
+    if (d.success) location.reload(); else showToast(d.error || 'Failed to delete folder', 'error');
+  });
 
   // Long-press on server cards
   let longPressTimer = null;
