@@ -1,0 +1,7 @@
+
+> airlink-panel@1.7.137 build
+> tsc && npx tailwindcss -i ./public/tw.css -o ./public/styles.css
+
+src/handlers/utils/core/daemonRequest.ts(52,5): error TS2322: Type 'AxiosRequestHeaders | {}' is not assignable to type 'AxiosRequestHeaders'.
+  Type '{}' is not assignable to type 'AxiosRequestHeaders'.
+    Type '{}' is missing the following properties from type 'AxiosHeaders': set, get, has, delete, and 24 more.

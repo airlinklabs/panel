@@ -3,63 +3,43 @@ import prisma from '../../db';
 import { Module } from '../../handlers/moduleInit';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
+import { getCatalogue, forceRefresh } from '../../handlers/eggCatalogueService';
+import {
+  isPterodactylEgg,
+  parseEgg,
+  normalizeEggForDb,
+  validateEggData,
+} from '../../handlers/utils/egg/eggParser';
 
-/**
- * Validates an image configuration
- * @param imageConfig The image configuration to validate
- * @returns An object with validation result and any error messages
- */
-export function validateImageConfig(imageConfig: any): { isValid: boolean; errors: string[] } {
-  const errors: string[] = [];
-
-  // Check required fields
-  if (!imageConfig.name) errors.push('Image name is required');
-  if (!imageConfig.meta) errors.push('Meta information is required');
-  if (!imageConfig.docker_images && !imageConfig.dockerImages) errors.push('Docker images are required');
-  if (!imageConfig.startup) errors.push('Startup command is required');
-
-  // Check if docker_images or dockerImages is an array
-  const dockerImages = imageConfig.docker_images || imageConfig.dockerImages;
-  if (dockerImages && !Array.isArray(dockerImages)) {
-    errors.push('Docker images must be an array');
+function normalizeImageData(raw: Record<string, unknown>) {
+  if (isPterodactylEgg(raw)) {
+    const egg = parseEgg(raw);
+    return normalizeEggForDb(egg);
   }
 
-  // Check if variables is an array if present
-  if (imageConfig.variables && !Array.isArray(imageConfig.variables)) {
-    errors.push('Variables must be an array');
-  }
+  const dockerImages = raw.docker_images || raw.dockerImages;
+  const dockerImagesArray = Array.isArray(dockerImages)
+    ? dockerImages
+    : typeof dockerImages === 'object' && dockerImages !== null
+      ? Object.entries(dockerImages as Record<string, string>).map(([k, v]) => ({ [k]: v }))
+      : [];
 
   return {
-    isValid: errors.length === 0,
-    errors
+    name: String(raw.name ?? ''),
+    description: String(raw.description ?? ''),
+    author: String(raw.author ?? ''),
+    authorName: String(raw.authorName ?? ''),
+    startup: String(raw.startup ?? ''),
+    stop: String((raw as any).stop ?? ''),
+    startup_done: String((raw as any).startup_done ?? ''),
+    config_files: String((raw as any).config_files ?? ''),
+    meta: JSON.stringify(raw.meta ?? {}),
+    dockerImages: JSON.stringify(dockerImagesArray),
+    info: JSON.stringify(raw.info ?? {}),
+    scripts: JSON.stringify(raw.scripts ?? {}),
+    variables: JSON.stringify(raw.variables ?? []),
   };
 }
-
-/**
- * Processes an image upload
- * @param imageData The image data to process
- * @returns The processed image data ready to be saved to the database
- */
-export function processImageUpload(imageData: any): any {
-  // Normalize field names (convert docker_images to dockerImages if needed)
-  const normalizedData = {
-    name: imageData.name,
-    description: imageData.description || '',
-    author: imageData.author || '',
-    authorName: imageData.authorName || '',
-    startup: imageData.startup || '',
-
-    // Handle JSON fields, ensuring they're properly stringified
-    meta: JSON.stringify(imageData.meta || {}),
-    dockerImages: JSON.stringify(imageData.docker_images || imageData.dockerImages || []),
-    info: JSON.stringify(imageData.info || {}),
-    scripts: JSON.stringify(imageData.scripts || {}),
-    variables: JSON.stringify(imageData.variables || [])
-  };
-
-  return normalizedData;
-}
-
 
 const adminModule: Module = {
   info: {
@@ -81,14 +61,10 @@ const adminModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
-            return res.redirect('/login');
-          }
+          if (!user) return res.redirect('/login');
 
           const images = await prisma.images.findMany();
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           res.render('admin/images/images', { user, req, settings, images });
         } catch (error) {
           logger.error('Error fetching images:', error);
@@ -97,72 +73,43 @@ const adminModule: Module = {
       },
     );
 
-    router.post('/admin/images/upload', isAuthenticated(true), async (req: Request, res: Response) => {
-      try {
-        // Validate the uploaded JSON data
-        const imageData = req.body;
+    router.post(
+      '/admin/images/upload',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const raw = req.body as Record<string, unknown>;
 
-        if (!imageData || Object.keys(imageData).length === 0) {
-          res.status(400).json({ success: false, error: 'No image data provided' });
-          return;
+          if (!raw || Object.keys(raw).length === 0) {
+            res.status(400).json({ success: false, error: 'No image data provided' });
+            return;
+          }
+
+          const { valid, errors } = validateEggData(raw);
+          if (!valid) {
+            res.status(400).json({ success: false, error: 'Invalid egg configuration', details: errors });
+            return;
+          }
+
+          const data = normalizeImageData(raw);
+
+          const existing = await prisma.images.findFirst({ where: { name: data.name } });
+
+          if (existing) {
+            await prisma.images.update({ where: { id: existing.id }, data });
+            logger.info(`Updated image: ${data.name}`);
+            res.status(200).json({ success: true, message: 'Image updated successfully', id: existing.id });
+          } else {
+            const created = await prisma.images.create({ data });
+            logger.info(`Created image: ${data.name}`);
+            res.status(200).json({ success: true, message: 'Image created successfully', id: created.id });
+          }
+        } catch (error) {
+          logger.error('Error processing image upload:', error);
+          res.status(500).json({ success: false, error: 'Failed to process the uploaded file' });
         }
-
-        // Validate the image configuration
-        const validation = validateImageConfig(imageData);
-        if (!validation.isValid) {
-          res.status(400).json({
-            success: false,
-            error: 'Invalid image configuration',
-            details: validation.errors
-          });
-          return;
-        }
-
-        // Process the image data
-        const processedData = processImageUpload(imageData);
-
-        // Save to database
-        const existingImage = await prisma.images.findFirst({
-          where: { name: processedData.name }
-        });
-
-        if (existingImage) {
-          // Update existing image
-          await prisma.images.update({
-            where: { id: existingImage.id },
-            data: processedData
-          });
-
-          logger.info(`Updated existing image: ${processedData.name}`);
-          res.status(200).json({
-            success: true,
-            message: 'Image updated successfully',
-            id: existingImage.id
-          });
-          return;
-        } else {
-          // Create new image
-          const newImage = await prisma.images.create({
-            data: processedData
-          });
-
-          logger.info(`Created new image: ${processedData.name}`);
-          res.status(200).json({
-            success: true,
-            message: 'Image created successfully',
-            id: newImage.id
-          });
-          return;
-        }
-      } catch (error) {
-        logger.error('Error processing image upload:', error);
-        res.status(500).json({
-          success: false,
-          error: 'Failed to process the uploaded file'
-        });
-        return;
-      }
-    });
+      },
+    );
 
     router.post(
       '/admin/images/create',
@@ -171,36 +118,184 @@ const adminModule: Module = {
         try {
           const { name, description, author, authorName, startup } = req.body;
 
-          // Basic validation
           if (!name || !startup) {
             res.status(400).json({ error: 'Name and startup command are required' });
             return;
           }
 
-          // Create a basic image structure
-          const imageData = {
+          const data = {
             name,
             description: description || '',
             author: author || '',
             authorName: authorName || '',
             startup,
+            stop: 'stop',
+            startup_done: '',
+            config_files: '',
             meta: JSON.stringify({ version: 'AL_V1' }),
             dockerImages: JSON.stringify([]),
             info: JSON.stringify({ features: [] }),
-            scripts: JSON.stringify({ install: [] }),
-            variables: JSON.stringify([])
+            scripts: JSON.stringify({}),
+            variables: JSON.stringify([]),
           };
 
-          // Save to database
-          const newImage = await prisma.images.create({
-            data: imageData
-          });
-
-          logger.info(`Created new basic image: ${name}`);
-          res.redirect(`/admin/images/edit/${newImage.id}?success=true`);
+          const image = await prisma.images.create({ data });
+          logger.info(`Created image: ${name}`);
+          res.redirect(`/admin/images/edit/${image.id}?success=true`);
         } catch (error) {
           logger.error('Error creating image:', error);
           res.status(500).send('Failed to create image.');
+        }
+      },
+    );
+
+    router.get(
+      '/admin/images/edit/:id',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) return res.redirect('/login');
+
+          const image = await prisma.images.findUnique({ where: { id: Number(req.params.id) } });
+          if (!image) return res.redirect('/admin/images?error=Image+not+found');
+
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+
+          let dockerImages: Record<string, string> = {};
+          try {
+            const parsed = JSON.parse(image.dockerImages || '[]');
+            if (Array.isArray(parsed)) {
+              for (const obj of parsed) {
+                if (typeof obj === 'object') Object.assign(dockerImages, obj);
+              }
+            } else if (typeof parsed === 'object') {
+              dockerImages = parsed;
+            }
+          } catch { /* keep empty */ }
+
+          let variables: unknown[] = [];
+          try { variables = JSON.parse(image.variables || '[]'); } catch { /* keep empty */ }
+
+          let scripts: Record<string, unknown> = {};
+          try { scripts = JSON.parse(image.scripts || '{}'); } catch { /* keep empty */ }
+
+          let info: Record<string, unknown> = {};
+          try { info = JSON.parse(image.info || '{}'); } catch { /* keep empty */ }
+
+          const parsedImage = {
+            ...image,
+            dockerImages,
+            variables,
+            scripts,
+            info,
+          };
+
+          res.render('admin/images/edit', {
+            user,
+            req,
+            settings,
+            image: parsedImage,
+            imageJson: JSON.stringify(parsedImage, null, 2),
+          });
+        } catch (error) {
+          logger.error('Error loading image for edit:', error);
+          return res.redirect('/admin/images?error=Failed+to+load+image');
+        }
+      },
+    );
+
+    router.post(
+      '/admin/images/edit/:id',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const raw = req.body as Record<string, unknown>;
+
+          const { valid, errors } = validateEggData(raw);
+          if (!valid) {
+            res.status(400).json({ success: false, error: 'Invalid image configuration', details: errors });
+            return;
+          }
+
+          const data = normalizeImageData(raw);
+
+          await prisma.images.update({
+            where: { id: Number(req.params.id) },
+            data,
+          });
+
+          logger.info(`Updated image ${req.params.id}: ${data.name}`);
+
+          if (req.headers['content-type']?.includes('application/json')) {
+            res.json({ success: true });
+          } else {
+            res.redirect(`/admin/images/edit/${req.params.id}?success=true`);
+          }
+        } catch (error) {
+          logger.error('Error updating image:', error);
+          res.status(500).json({ error: 'Failed to update image' });
+        }
+      },
+    );
+
+    router.get(
+      '/admin/images/export/:id',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const image = await prisma.images.findUnique({ where: { id: Number(req.params.id) } });
+          if (!image) {
+            res.status(404).json({ error: 'Image not found' });
+            return;
+          }
+
+          let dockerImagesRaw: Record<string, string> = {};
+          try {
+            const parsed = JSON.parse(image.dockerImages || '[]');
+            if (Array.isArray(parsed)) {
+              for (const obj of parsed) {
+                if (typeof obj === 'object') Object.assign(dockerImagesRaw, obj);
+              }
+            }
+          } catch { /* keep empty */ }
+
+          let meta: Record<string, unknown> = {};
+          try { meta = JSON.parse(image.meta || '{}'); } catch { /* keep empty */ }
+
+          const exported = {
+            _comment: 'DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY AIRLINK',
+            meta: { version: 'PTDL_v2', ...meta },
+            name: image.name,
+            description: image.description,
+            author: image.author,
+            startup: image.startup,
+            config: {
+              files: (() => { try { return JSON.parse((image as any).config_files || '{}'); } catch { return {}; } })(),
+              startup: { done: (image as any).startup_done || '' },
+              logs: {},
+              stop: (image as any).stop || 'stop',
+            },
+            docker_images: dockerImagesRaw,
+            variables: (() => { try { return JSON.parse(image.variables || '[]'); } catch { return []; } })(),
+            scripts: {
+              installation: (() => {
+                try {
+                  const s = JSON.parse(image.scripts || '{}');
+                  return s.installation || null;
+                } catch { return null; }
+              })(),
+            },
+          };
+
+          const filename = `${(image.name || 'image').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+          res.send(JSON.stringify(exported, null, 2));
+        } catch (error) {
+          logger.error('Error exporting image:', error);
+          res.status(500).json({ error: 'Failed to export image' });
         }
       },
     );
@@ -209,34 +304,22 @@ const adminModule: Module = {
       '/admin/images/delete/:id',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const { id } = req.params;
-
         try {
-          // Check if the image is being used by any servers
-          const serversUsingImage = await prisma.server.count({
-            where: { imageId: Number(id) },
-          });
+          const id = Number(req.params.id);
 
-          if (serversUsingImage > 0) {
-            res.status(400).send(
-              'This image is being used by one or more servers. Please delete those servers first.',
-            );
+          const serverCount = await prisma.server.count({ where: { imageId: id } });
+          if (serverCount > 0) {
+            res.status(400).send('This image is in use by one or more servers.');
             return;
           }
 
-          // Get image name for logging
-          const image = await prisma.images.findUnique({
-            where: { id: Number(id) },
-            select: { name: true }
-          });
-
+          const image = await prisma.images.findUnique({ where: { id }, select: { name: true } });
           if (!image) {
             res.status(404).send('Image not found.');
             return;
           }
 
-          // Delete the image
-          await prisma.images.delete({ where: { id: Number(id) } });
+          await prisma.images.delete({ where: { id } });
           logger.info(`Deleted image: ${image.name} (ID: ${id})`);
           res.status(200).send('Image deleted successfully.');
         } catch (error) {
@@ -246,143 +329,96 @@ const adminModule: Module = {
       },
     );
 
-    // Add route for editing images
+    // Store page shell — just renders the HTML, all data comes from /catalogue
     router.get(
-      '/admin/images/edit/:id',
+      '/admin/images/store',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
-          const { id } = req.params;
           const userId = req.session?.user?.id;
-
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
-            return res.redirect('/login');
-          }
-
-          const image = await prisma.images.findUnique({
-            where: { id: Number(id) },
-          });
-
-          if (!image) {
-            return res.redirect('/admin/images?error=Image+not+found');
-          }
-
-          // Parse JSON fields for editing
-          const parsedImage = {
-            ...image,
-            meta: JSON.parse(image.meta || '{}'),
-            dockerImages: JSON.parse(image.dockerImages || '[]'),
-            info: JSON.parse(image.info || '{}'),
-            scripts: JSON.parse(image.scripts || '{}'),
-            variables: JSON.parse(image.variables || '[]')
-          };
-
-          const settings = await prisma.settings.findUnique({
-            where: { id: 1 },
-          });
-
-          res.render('admin/images/edit', {
-            user,
-            req,
-            settings,
-            image: parsedImage,
-            imageJson: JSON.stringify(parsedImage, null, 2)
-          });
+          if (!user) return res.redirect('/login');
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          res.render('admin/images/store', { user, req, settings });
         } catch (error) {
-          logger.error('Error fetching image for editing:', error);
-          return res.redirect('/admin/images?error=Failed+to+load+image');
+          logger.error('Error rendering store:', error);
+          return res.redirect('/admin/images');
         }
-      }
+      },
     );
 
-    // Add route for updating images
-    router.post(
-      '/admin/images/edit/:id',
-      isAuthenticated(true),
-      async (req: Request, res: Response) => {
-        try {
-          const { id } = req.params;
-          const imageData = req.body;
-
-          // Validate the image data
-          const validation = validateImageConfig(imageData);
-          if (!validation.isValid) {
-            res.status(400).json({
-              success: false,
-              error: 'Invalid image configuration',
-              details: validation.errors
-            });
-            return;
-          }
-
-          // Process the image data
-          const processedData = processImageUpload(imageData);
-
-          // Update the image
-          await prisma.images.update({
-            where: { id: Number(id) },
-            data: processedData
-          });
-
-          logger.info(`Updated image: ${processedData.name} (ID: ${id})`);
-          res.redirect(`/admin/images/edit/${id}?success=true`);
-          return;
-        } catch (error) {
-          logger.error('Error updating image:', error);
-          res.status(500).json({ error: 'Failed to update image' });
-          return;
-        }
-      }
-    );
-
-    // Add route for exporting images as JSON
+    // Catalogue endpoint — reads from the in-memory catalogue built by
+    // eggCatalogueService (which cloned the repos on startup). Zero GitHub
+    // calls at request time.
     router.get(
-      '/admin/images/export/:id',
+      '/admin/images/store/catalogue',
+      isAuthenticated(true),
+      async (_req: Request, res: Response) => {
+        try {
+          const data = getCatalogue();
+          res.setHeader('Cache-Control', 'private, max-age=300');
+          res.status(200).json(data);
+        } catch (error) {
+          logger.error('Error serving store catalogue:', error);
+          res.status(500).json({ error: 'Failed to load store catalogue.' });
+        }
+      },
+    );
+
+    // Install an egg from the store — receives the egg data the browser already
+    // has in memory from the catalogue response, normalizes and saves it.
+    router.post(
+      '/admin/images/store/install',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
-          const { id } = req.params;
-
-          const image = await prisma.images.findUnique({
-            where: { id: Number(id) },
-          });
-
-          if (!image) {
-            res.status(404).json({ error: 'Image not found' });
+          const raw = req.body as Record<string, unknown>;
+          if (!raw || typeof raw !== 'object') {
+            res.status(400).json({ error: 'Invalid egg data.' });
             return;
           }
 
-          // Parse JSON fields
-          const exportedImage = {
-            meta: JSON.parse(image.meta || '{}'),
-            name: image.name,
-            description: image.description,
-            author: image.author,
-            authorName: image.authorName,
-            docker_images: JSON.parse(image.dockerImages || '[]'),
-            startup: image.startup,
-            info: JSON.parse(image.info || '{}'),
-            scripts: JSON.parse(image.scripts || '{}'),
-            variables: JSON.parse(image.variables || '[]')
-          };
+          const validated = validateEggData(raw);
+          if (!validated.valid) {
+            res.status(400).json({ error: 'Egg validation failed.', details: validated.errors });
+            return;
+          }
 
-          // Set headers for file download
-          res.setHeader('Content-Type', 'application/json');
-          res.setHeader('Content-Disposition', `attachment; filename="${image.name?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'image'}.json"`);
+          const normalized = normalizeImageData(raw);
 
-          // Send the JSON data
-          res.send(JSON.stringify(exportedImage, null, 2));
+          const existing = await prisma.images.findFirst({ where: { name: normalized.name } });
+          if (existing) {
+            res.status(409).json({ error: `An image named "${normalized.name}" already exists.` });
+            return;
+          }
+
+          const image = await prisma.images.create({ data: normalized });
+          logger.info(`Installed image from store: ${image.name} (ID: ${image.id})`);
+          res.status(200).json({ message: `"${image.name}" installed successfully.`, id: image.id });
         } catch (error) {
-          logger.error('Error exporting image:', error);
-          res.status(500).json({ error: 'Failed to export image' });
+          logger.error('Error installing image from store:', error);
+          res.status(500).json({ error: 'Failed to install image.' });
         }
-      }
+      },
+    );
+
+    // Force a git pull + catalogue rebuild
+    router.post(
+      '/admin/images/store/refresh',
+      isAuthenticated(true),
+      async (_req: Request, res: Response) => {
+        try {
+          // Don't await — let it run in background and return immediately
+          forceRefresh().catch(err => logger.warn(`Store force refresh failed: ${err?.message || err}`));
+          res.status(200).json({ message: 'Refresh started. The catalogue will update in the background.' });
+        } catch (error) {
+          res.status(500).json({ error: 'Failed to start refresh.' });
+        }
+      },
     );
 
     return router;
   },
 };
-
 
 export default adminModule;

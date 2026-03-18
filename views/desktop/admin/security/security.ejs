@@ -1,0 +1,165 @@
+<%- include('../../components/header', { title: 'Security' }) %>
+
+<main class="min-h-screen">
+  <div class="flex min-h-screen">
+    <div class="w-60 shrink-0">
+      <%- include('../../components/template') %>
+    </div>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <div class="px-8 pt-5">
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white">Security</h1>
+        <p class="mt-0.5 text-sm text-neutral-500">Manage panel security settings, rate limiting, and IP access controls.</p>
+      </div>
+
+      <div class="px-8 mt-6 space-y-6 max-w-3xl">
+
+        <!-- Rate Limiting -->
+        <div class="bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
+          <div class="px-5 py-4 border-b border-neutral-200 dark:border-white/5">
+            <h2 class="text-sm font-medium text-neutral-800 dark:text-white">Rate Limiting</h2>
+            <p class="mt-0.5 text-xs text-neutral-500">Limit how many requests a single IP can make per minute to the panel API.</p>
+          </div>
+          <form id="form-rate-limit" class="px-5 py-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Enable rate limiting</p>
+                <p class="text-xs text-neutral-500 mt-0.5">Block IPs that exceed the request threshold.</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="rateLimitEnabled" name="rateLimitEnabled" class="sr-only peer" value="true" <%= settings && settings.rateLimitEnabled ? 'checked' : '' %>>
+                <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900 dark:peer-checked:bg-white"></div>
+              </label>
+            </div>
+            <div>
+              <label for="rateLimitRpm" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Requests per minute</label>
+              <input type="number" id="rateLimitRpm" name="rateLimitRpm" min="1" max="10000" value="<%= settings ? settings.rateLimitRpm : 100 %>"
+                class="w-40 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+            </div>
+            <div class="pt-1">
+              <button type="submit" class="px-4 py-2 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- IP Bans -->
+        <div class="bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
+          <div class="px-5 py-4 border-b border-neutral-200 dark:border-white/5">
+            <h2 class="text-sm font-medium text-neutral-800 dark:text-white">Banned IPs</h2>
+            <p class="mt-0.5 text-xs text-neutral-500">IPs on this list are blocked from accessing the panel entirely.</p>
+          </div>
+          <div class="px-5 py-5 space-y-4">
+            <div class="flex gap-2">
+              <input type="text" id="ban-ip-input" placeholder="e.g. 192.168.1.100"
+                class="flex-1 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+              <button id="ban-ip-btn" type="button"
+                class="px-4 py-2 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition whitespace-nowrap">
+                Ban IP
+              </button>
+            </div>
+
+            <% if (bannedIps && bannedIps.length > 0) { %>
+              <ul id="banned-list" class="space-y-1.5">
+                <% bannedIps.forEach(ip => { %>
+                  <li class="flex items-center justify-between px-3 py-2 rounded-lg bg-white dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 text-sm" data-ip="<%= ip %>">
+                    <span class="font-mono text-neutral-700 dark:text-neutral-300 text-xs"><%= ip %></span>
+                    <button type="button" class="unban-btn text-xs text-red-500 hover:text-red-400 transition">Remove</button>
+                  </li>
+                <% }); %>
+              </ul>
+            <% } else { %>
+              <p id="no-bans-msg" class="text-xs text-neutral-400">No IPs are currently banned.</p>
+            <% } %>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast') %>
+
+<script>
+  // Rate limit form
+  document.getElementById('form-rate-limit').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const enabled = document.getElementById('rateLimitEnabled').checked;
+    const rpm = document.getElementById('rateLimitRpm').value;
+    try {
+      const r = await fetch('/admin/security/rate-limit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rateLimitEnabled: enabled, rateLimitRpm: rpm }),
+      });
+      const data = await r.json();
+      if (data.success) showToast('Rate limit settings saved.', 'success');
+      else showToast(data.error || 'Failed to save.', 'error');
+    } catch {
+      showToast('An error occurred.', 'error');
+    }
+  });
+
+  // Ban IP
+  document.getElementById('ban-ip-btn').addEventListener('click', async () => {
+    const ip = document.getElementById('ban-ip-input').value.trim();
+    if (!ip) return;
+    try {
+      const r = await fetch('/admin/security/ban-ip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ip }),
+      });
+      const data = await r.json();
+      if (data.success) {
+        document.getElementById('ban-ip-input').value = '';
+        showToast(`${ip} has been banned.`, 'success');
+        setTimeout(() => location.reload(), 800);
+      } else {
+        showToast(data.error || 'Failed to ban IP.', 'error');
+      }
+    } catch {
+      showToast('An error occurred.', 'error');
+    }
+  });
+
+  // Allow enter key in IP input
+  document.getElementById('ban-ip-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('ban-ip-btn').click();
+  });
+
+  // Unban IP
+  document.querySelectorAll('.unban-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const li = btn.closest('li');
+      const ip = li.dataset.ip;
+      try {
+        const r = await fetch('/admin/security/unban-ip', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip }),
+        });
+        const data = await r.json();
+        if (data.success) {
+          li.remove();
+          showToast(`${ip} has been unbanned.`, 'success');
+          if (document.querySelectorAll('#banned-list li').length === 0) {
+            const list = document.getElementById('banned-list');
+            if (list) {
+              list.insertAdjacentHTML('afterend', '<p id="no-bans-msg" class="text-xs text-neutral-400">No IPs are currently banned.</p>');
+              list.remove();
+            }
+          }
+        } else {
+          showToast(data.error || 'Failed to unban IP.', 'error');
+        }
+      } catch {
+        showToast('An error occurred.', 'error');
+      }
+    });
+  });
+</script>
+
+<%- include('../../components/footer') %>

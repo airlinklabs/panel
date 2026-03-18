@@ -420,6 +420,51 @@ const adminModule: Module = {
       },
     );
 
+    router.post(
+      '/admin/settings/server-policy',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const allowUserCreateServer = req.body.allowUserCreateServer === true || req.body.allowUserCreateServer === 'true';
+          const allowUserDeleteServer = req.body.allowUserDeleteServer === true || req.body.allowUserDeleteServer === 'true';
+          const defaultServerLimit = parseInt(req.body.defaultServerLimit, 10);
+          const defaultMaxMemory   = parseInt(req.body.defaultMaxMemory,   10);
+          const defaultMaxCpu      = parseInt(req.body.defaultMaxCpu,      10);
+          const defaultMaxStorage  = parseInt(req.body.defaultMaxStorage,  10);
+
+          if (isNaN(defaultServerLimit) || defaultServerLimit < 0) {
+            return res.status(400).json({ success: false, error: 'Server limit must be 0 or greater.' });
+          }
+          if (isNaN(defaultMaxMemory) || defaultMaxMemory < 128) {
+            return res.status(400).json({ success: false, error: 'Max memory must be at least 128 MB.' });
+          }
+          if (isNaN(defaultMaxCpu) || defaultMaxCpu < 10) {
+            return res.status(400).json({ success: false, error: 'Max CPU must be at least 10%.' });
+          }
+          if (isNaN(defaultMaxStorage) || defaultMaxStorage < 1) {
+            return res.status(400).json({ success: false, error: 'Max storage must be at least 1 GB.' });
+          }
+
+          await prisma.settings.update({
+            where: { id: 1 },
+            data: {
+              allowUserCreateServer,
+              allowUserDeleteServer,
+              defaultServerLimit,
+              defaultMaxMemory,
+              defaultMaxCpu,
+              defaultMaxStorage,
+            },
+          });
+
+          res.json({ success: true });
+        } catch (error) {
+          logger.error('Error updating server policy:', error);
+          res.status(500).json({ success: false, error: 'Failed to update server policy.' });
+        }
+      },
+    );
+
     return router;
   },
 };

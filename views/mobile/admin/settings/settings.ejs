@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: req.translations.adminSettingsTitle || 'Settings' }) %>
+<%- include('../../components/header', { title: 'Settings' }) %>
 
 <main id="page-content" class="">
   <%- include('../../components/template') %>
@@ -6,26 +6,27 @@
 
   <div class="px-4 py-5">
     <div class="mb-4">
-      <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminSettingsTitle || 'Settings' %></h1>
-      <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminSettingsText || 'Manage your panel configuration.' %></p>
+      <h1 class="text-base font-medium text-neutral-800 dark:text-white">Settings</h1>
+      <p class="text-xs text-neutral-500 mt-0.5">Manage your panel configuration.</p>
     </div>
-    <!-- Tab nav -->
-    <div class="flex overflow-x-auto border-b border-neutral-200 dark:border-neutral-700/40 mb-4 gap-0.5">
+
+    <div class="flex overflow-x-auto border-b border-neutral-200 dark:border-neutral-700/40 mb-4 gap-0.5 pb-px">
       <button type="button" data-tab="appearance" class="tab-btn shrink-0 px-3 py-2 text-xs font-medium -mb-px border-b-2 transition whitespace-nowrap">Appearance</button>
-      <button type="button" data-tab="configuration" class="tab-btn shrink-0 px-3 py-2 text-xs font-medium -mb-px border-b-2 transition whitespace-nowrap">Configuration</button>
+      <button type="button" data-tab="general"    class="tab-btn shrink-0 px-3 py-2 text-xs font-medium -mb-px border-b-2 transition whitespace-nowrap">General</button>
+      <button type="button" data-tab="servers"    class="tab-btn shrink-0 px-3 py-2 text-xs font-medium -mb-px border-b-2 transition whitespace-nowrap">Servers</button>
+      <button type="button" data-tab="security"   class="tab-btn shrink-0 px-3 py-2 text-xs font-medium -mb-px border-b-2 transition whitespace-nowrap">Security</button>
     </div>
 
-    <!-- ── Appearance tab ───────────────────────────────────────────────── -->
+    <!-- Appearance tab -->
     <form id="form-appearance" data-tab-form="appearance" class="tab-form space-y-4 hidden" enctype="multipart/form-data">
-
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
         <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
           <p class="text-sm font-medium text-neutral-800 dark:text-white">Branding</p>
         </div>
         <div class="p-4 space-y-4">
           <div>
-            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.siteTitle || 'Site Title' %></label>
-            <input type="text" name="title" value="<%= settings.title %>" placeholder="<%= settings.title %>"
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Site title</label>
+            <input type="text" name="title" value="<%= settings.title %>"
               class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition">
           </div>
           <div>
@@ -37,7 +38,7 @@
             <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Favicon</label>
             <input type="file" name="favicon" accept=".ico,.png,.jpg,.jpeg"
               class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm text-neutral-800 dark:text-white file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-700 file:text-neutral-700 dark:file:text-neutral-300">
-            <p class="text-[11px] text-neutral-400 mt-1">PNG or JPG auto-converted to 32×32 .ico</p>
+            <p class="text-[11px] text-neutral-400 mt-1">PNG or JPG auto-converted to 32x32 .ico</p>
           </div>
         </div>
       </div>
@@ -111,10 +112,8 @@
       </div>
     </form>
 
-    <!-- ── Configuration tab ─────────────────────────────────────────────── -->
-    <div id="panel-configuration" data-tab-panel="configuration" class="tab-panel space-y-4 hidden">
-
-      <!-- General -->
+    <!-- General tab -->
+    <div id="panel-general" data-tab-panel="general" class="tab-panel space-y-4 hidden">
       <form id="form-general" class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
         <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
           <p class="text-sm font-medium text-neutral-800 dark:text-white">General</p>
@@ -150,8 +149,74 @@
           <button type="button" id="resetButton" class="rounded-xl border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-400 px-4 py-2 text-sm font-medium transition">Reset defaults</button>
         </div>
       </form>
+    </div>
 
-      <!-- Rate limiting -->
+    <!-- Servers tab -->
+    <div id="panel-servers" data-tab-panel="servers" class="tab-panel space-y-4 hidden">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">User permissions</p>
+        </div>
+        <div class="p-4 space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow users to create servers</p>
+              <p class="text-xs text-neutral-500 mt-0.5">Off by default.</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="allowUserCreateServer" class="sr-only peer" <%= settings.allowUserCreateServer ? 'checked' : '' %>>
+              <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow users to delete servers</p>
+              <p class="text-xs text-neutral-500 mt-0.5">Off by default.</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="allowUserDeleteServer" class="sr-only peer" <%= settings.allowUserDeleteServer ? 'checked' : '' %>>
+              <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">Default limits</p>
+          <p class="text-xs text-neutral-500 mt-0.5">Per-user overrides in Admin &rarr; Users.</p>
+        </div>
+        <div class="p-4 space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Server limit per user</label>
+            <input type="number" id="defaultServerLimit" value="<%= settings.defaultServerLimit %>" min="0" max="100"
+              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
+            <p class="mt-1 text-[11px] text-neutral-400">0 = cannot create. Admins unlimited.</p>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Max memory (MB)</label>
+            <input type="number" id="defaultMaxMemory" value="<%= settings.defaultMaxMemory %>" min="128" max="65536"
+              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Max CPU (%)</label>
+            <input type="number" id="defaultMaxCpu" value="<%= settings.defaultMaxCpu %>" min="10" max="10000"
+              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Max storage (GB)</label>
+            <input type="number" id="defaultMaxStorage" value="<%= settings.defaultMaxStorage %>" min="1" max="10000"
+              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
+          </div>
+        </div>
+        <div class="px-4 pb-4 flex justify-end">
+          <button type="button" id="saveServerPolicy" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security tab -->
+    <div id="panel-security" data-tab-panel="security" class="tab-panel space-y-4 hidden">
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
         <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
           <p class="text-sm font-medium text-neutral-800 dark:text-white">Rate limiting</p>
@@ -178,7 +243,6 @@
         </div>
       </div>
 
-      <!-- Banned IPs -->
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
         <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
           <p class="text-sm font-medium text-neutral-800 dark:text-white">Banned IPs</p>
@@ -201,7 +265,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </main>
@@ -215,12 +278,12 @@
   function activate(id) {
     tabBtns.forEach(btn => {
       const on = btn.dataset.tab === id;
-      btn.classList.toggle('border-neutral-800', on);
-      btn.classList.toggle('dark:border-white', on);
-      btn.classList.toggle('text-neutral-800', on);
-      btn.classList.toggle('dark:text-white', on);
-      btn.classList.toggle('border-transparent', !on);
-      btn.classList.toggle('text-neutral-500', !on);
+      btn.classList.toggle('border-neutral-800',    on);
+      btn.classList.toggle('dark:border-white',      on);
+      btn.classList.toggle('text-neutral-800',       on);
+      btn.classList.toggle('dark:text-white',        on);
+      btn.classList.toggle('border-transparent',    !on);
+      btn.classList.toggle('text-neutral-500',      !on);
     });
     tabForms.forEach(f  => f.classList.toggle('hidden', f.dataset.tabForm  !== id));
     tabPanels.forEach(p => p.classList.toggle('hidden', p.dataset.tabPanel !== id));
@@ -281,6 +344,23 @@
       body: JSON.stringify({ rateLimitEnabled: document.getElementById('rateLimitEnabled').checked, rateLimitRpm: document.getElementById('rateLimitRpm').value }) })
       .then(r => r.json())
       .then(d => { if (d.success) showToast('Saved', 'success'); else showToast(d.error || 'Failed', 'error'); })
+      .catch(() => showToast('Failed', 'error'))
+      .finally(() => { btn.disabled = false; btn.textContent = 'Save'; });
+  });
+
+  document.getElementById('saveServerPolicy').addEventListener('click', function () {
+    const btn = this; btn.disabled = true; btn.textContent = 'Saving...';
+    fetch('/admin/settings/server-policy', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        allowUserCreateServer: document.getElementById('allowUserCreateServer').checked,
+        allowUserDeleteServer: document.getElementById('allowUserDeleteServer').checked,
+        defaultServerLimit:    parseInt(document.getElementById('defaultServerLimit').value, 10),
+        defaultMaxMemory:      parseInt(document.getElementById('defaultMaxMemory').value, 10),
+        defaultMaxCpu:         parseInt(document.getElementById('defaultMaxCpu').value, 10),
+        defaultMaxStorage:     parseInt(document.getElementById('defaultMaxStorage').value, 10),
+      }) })
+      .then(r => r.json())
+      .then(d => { if (d.success) showToast('Server policy saved', 'success'); else showToast(d.error || 'Failed', 'error'); })
       .catch(() => showToast('Failed', 'error'))
       .finally(() => { btn.disabled = false; btn.textContent = 'Save'; });
   });

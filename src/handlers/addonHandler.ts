@@ -226,13 +226,13 @@ export async function loadAddons(app: Express | any) {
             return path.join(__dirname, '../..', componentPath);
           },
           ui: {
-            addSidebarItem: (item: SidebarItem) => uiComponentStore.addSidebarItem(item),
+            addSidebarItem: (item: SidebarItem) => uiComponentStore.addSidebarItem(item, folder),
             removeSidebarItem: (id: string) => uiComponentStore.removeSidebarItem(id),
             getSidebarItems: (section?: string, isAdmin?: boolean) => uiComponentStore.getSidebarItems(section, isAdmin),
-            addServerMenuItem: (item: ServerMenuItem) => uiComponentStore.addServerMenuItem(item),
+            addServerMenuItem: (item: ServerMenuItem) => uiComponentStore.addServerMenuItem(item, folder),
             removeServerMenuItem: (id: string) => uiComponentStore.removeServerMenuItem(id),
             getServerMenuItems: (feature?: string) => uiComponentStore.getServerMenuItems(feature),
-            addServerSection: (section: ServerSection) => uiComponentStore.addServerSection(section),
+            addServerSection: (section: ServerSection) => uiComponentStore.addServerSection(section, folder),
             removeServerSection: (id: string) => uiComponentStore.removeServerSection(id),
             getServerSections: () => uiComponentStore.getServerSections(),
             addServerSectionItem: (sectionId: string, item: ServerSectionItem) => uiComponentStore.addServerSectionItem(sectionId, item),
@@ -541,6 +541,7 @@ function unloadAddon(app: Express | any, slug: string) {
       logger.info(`Unloaded addon: ${slug}`);
     }
 
+    uiComponentStore.clearAddonItems(slug);
     loadedAddons.delete(slug);
   }
 }

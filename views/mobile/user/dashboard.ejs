@@ -4,15 +4,21 @@
   <%- include('../components/template') %>
 
   <div class="px-4 py-5">
-    <!-- Page header -->
     <div class="flex items-center justify-between mb-4">
       <div>
         <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.userDashboardTitle %></h1>
         <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.userDashboardText %></p>
       </div>
+      <% if (canCreateServer) { %>
+      <a href="/create-server" class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition active:scale-95">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5">
+          <path fill-rule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
+        </svg>
+        New
+      </a>
+      <% } %>
     </div>
 
-    <!-- Errors -->
     <% if (req.query.err === "NOTACTIVEYET") { %>
       <div class="rounded-xl bg-amber-50 dark:bg-amber-800/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-4">
         <p class="text-sm font-medium text-amber-700 dark:text-amber-400"><%= req.translations.awaitingInstallation || 'Awaiting Installation' %></p>
@@ -28,8 +34,39 @@
       </div>
     <% } %>
 
-    <!-- Servers -->
-    <% if (servers.length === 0) { %>
+    <!-- Folders -->
+    <% if (folders && folders.length > 0) { %>
+    <div class="mb-5">
+      <div class="flex items-center justify-between mb-2.5">
+        <p class="text-[11px] font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Folders</p>
+        <button id="newFolderBtn" class="text-xs text-neutral-500">+ New folder</button>
+      </div>
+      <div class="grid grid-cols-2 gap-2.5">
+        <% let mFolderIdx = 0; folders.forEach(folder => { %>
+        <div class="folder-card flex items-center gap-2.5 bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 rounded-xl px-3 py-2.5 active:scale-[0.97] transition-transform"
+          style="--i:<%= mFolderIdx++ %>"
+          data-folder-id="<%= folder.id %>"
+          data-folder-name="<%= folder.name %>"
+          data-folder-members='<%= JSON.stringify(folder.members.map(m => m.serverUUID)) %>'>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-amber-500 shrink-0">
+            <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 12h-15a4.483 4.483 0 0 0-3 1.146Z" />
+          </svg>
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= folder.name %></p>
+            <p class="text-[10px] text-neutral-500"><%= folder.members.length %> server<%= folder.members.length !== 1 ? 's' : '' %></p>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+    </div>
+    <% } else { %>
+    <div class="flex items-center justify-between mb-3">
+      <p class="text-[11px] font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Servers</p>
+      <button id="newFolderBtn" class="text-xs text-neutral-500">+ New folder</button>
+    </div>
+    <% } %>
+
+    <% if (servers.length === 0 && (!folders || folders.length === 0)) { %>
       <div class="flex flex-col items-center justify-center mt-32 text-center px-4">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-20 w-20 text-neutral-300 dark:text-neutral-600 mb-4">
           <path fill-rule="evenodd" d="M11.622 1.602a.75.75 0 0 1 .756 0l2.25 1.313a.75.75 0 0 1-.756 1.295L12 3.118 10.128 4.21a.75.75 0 1 1-.756-1.295l2.25-1.313ZM5.898 5.81a.75.75 0 0 1-.27 1.025l-1.14.665 1.14.665a.75.75 0 1 1-.756 1.295L3.75 8.806v.944a.75.75 0 0 1-1.5 0V7.5a.75.75 0 0 1 .372-.648l2.25-1.312a.75.75 0 0 1 1.026.27Zm12.204 0a.75.75 0 0 1 1.026-.27l2.25 1.312a.75.75 0 0 1 .372.648v2.25a.75.75 0 0 1-1.5 0v-.944l-1.122.654a.75.75 0 1 1-.756-1.295l1.14-.665-1.14-.665a.75.75 0 0 1-.27-1.025Zm-9 5.25a.75.75 0 0 1 1.026-.27L12 11.882l1.872-1.092a.75.75 0 1 1 .756 1.295l-1.878 1.096V15a.75.75 0 0 1-1.5 0v-1.82l-1.878-1.095a.75.75 0 0 1-.27-1.025Z" clip-rule="evenodd" />
@@ -38,63 +75,73 @@
         <p class="text-sm text-neutral-500 mt-1">
           <% if (user.isAdmin) { %>
             <a href="/admin/servers/create" class="text-blue-500"><%= req.translations.createOneNow || 'Create one now' %></a>
+          <% } else if (canCreateServer) { %>
+            <a href="/create-server" class="text-blue-500">Create your first server</a>
           <% } else { %>
             An admin will assign one to you.
           <% } %>
         </p>
       </div>
     <% } else { %>
-      <div class="space-y-3">
-        <% servers.forEach(server => { %>
-          <a href="../server/<%= server.UUID %>" class="block bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 p-4 active:scale-[0.98] transition-transform duration-100">
-            <div class="flex items-start justify-between mb-2.5">
-              <div class="min-w-0 flex-1 mr-2">
-                <h3 class="text-sm font-medium text-neutral-900 dark:text-white truncate"><%= server.name %></h3>
-                <% if (server.description) { %>
-                  <p class="text-xs text-neutral-500 dark:text-neutral-400 truncate mt-0.5"><%= server.description %></p>
-                <% } else { %>
-                  <p class="text-xs text-neutral-400 italic truncate mt-0.5"><%= req.translations.noDescription || 'No description' %></p>
+      <div class="space-y-3" id="serverGrid">
+        <% let mServerIdx = 0; servers.forEach(server => { %>
+        <%
+          const inFolder = folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID));
+          if (inFolder) return;
+        %>
+          <div class="server-card relative bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 p-4 select-none touch-none"
+            data-server-uuid="<%= server.UUID %>"
+            data-server-name="<%= server.name %>"
+            style="--i:<%= mServerIdx++ %>;overscroll-behavior: none;">
+            <a href="../server/<%= server.UUID %>" class="block pointer-events-auto">
+              <div class="flex items-start justify-between mb-2.5">
+                <div class="min-w-0 flex-1 mr-2">
+                  <h3 class="text-sm font-medium text-neutral-900 dark:text-white truncate"><%= server.name %></h3>
+                  <% if (server.description) { %>
+                    <p class="text-xs text-neutral-500 dark:text-neutral-400 truncate mt-0.5"><%= server.description %></p>
+                  <% } else { %>
+                    <p class="text-xs text-neutral-400 italic truncate mt-0.5"><%= req.translations.noDescription || 'No description' %></p>
+                  <% } %>
+                </div>
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-md shrink-0
+                    <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' %>">
+                  <span class="relative flex h-1.5 w-1.5">
+                    <% if (server.status === 'running') { %>
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                    <% } else { %>
+                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500"></span>
+                    <% } %>
+                  </span>
+                  <%= server.status === 'running' ? 'Running' : 'Stopped' %>
+                </span>
+              </div>
+              <div class="flex gap-2 mb-3">
+                <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
+                  <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">RAM</p>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsage %>%</p>
+                </div>
+                <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
+                  <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">CPU</p>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.cpuUsage %>%</p>
+                </div>
+                <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
+                  <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">Used</p>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsed || '0MB' %></p>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <img class="h-4 w-4 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="">
+                <span class="text-xs text-neutral-500 dark:text-neutral-400 truncate flex-1"><%= server.owner ? server.owner.username : 'Unknown' %></span>
+                <% if (server.node) { %>
+                <span class="text-xs text-neutral-400 dark:text-neutral-500 shrink-0 truncate max-w-[6rem]"><%= server.node.name || server.node.address %></span>
                 <% } %>
               </div>
-              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-md shrink-0
-                  <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' %>">
-                <span class="relative flex h-1.5 w-1.5">
-                  <% if (server.status === 'running') { %>
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                  <% } else { %>
-                    <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500"></span>
-                  <% } %>
-                </span>
-                <%= server.status === 'running' ? 'Running' : 'Stopped' %>
-              </span>
-            </div>
-            <div class="flex gap-2 mb-3">
-              <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
-                <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">RAM</p>
-                <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsage %>%</p>
-              </div>
-              <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
-                <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">CPU</p>
-                <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.cpuUsage %>%</p>
-              </div>
-              <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
-                <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">Used</p>
-                <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsed || '0MB' %></p>
-              </div>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <img class="h-4 w-4 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="">
-              <span class="text-xs text-neutral-500 dark:text-neutral-400 truncate flex-1"><%= server.owner ? server.owner.username : 'Unknown' %></span>
-              <% if (server.node) { %>
-              <span class="text-xs text-neutral-400 dark:text-neutral-500 shrink-0 truncate max-w-[6rem]"><%= server.node.name || server.node.address %></span>
-              <% } %>
-            </div>
-          </a>
+            </a>
+          </div>
         <% }); %>
       </div>
 
-      <!-- Pagination -->
       <% if (totalPages > 1) { %>
         <div class="flex items-center justify-center gap-3 mt-6">
           <% if (currentPage > 1) { %>
@@ -108,29 +155,206 @@
       <% } %>
     <% } %>
   </div>
-
-  </div>
 </main>
 
-<%- include('../components/footer') %>
+<!-- Folder popup -->
+<div id="folderOverlay" class="hidden fixed inset-0 z-50 bg-black/40 flex items-end p-0">
+  <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5 max-h-[70dvh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-base font-medium text-neutral-800 dark:text-white" id="folderOverlayTitle">Folder</h2>
+      <button id="closeFolderOverlay" class="text-neutral-400 p-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+          <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+        </svg>
+      </button>
+    </div>
+    <div id="folderOverlayContent" class="space-y-2"></div>
+  </div>
+</div>
+
+<!-- New folder dialog -->
+<div id="newFolderDialog" class="hidden fixed inset-0 z-50 bg-black/40 flex items-end p-0">
+  <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5">
+    <h2 class="text-base font-medium text-neutral-800 dark:text-white mb-4">New folder</h2>
+    <input type="text" id="newFolderName" maxlength="64" placeholder="Folder name"
+      class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/30 px-4 py-3 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none mb-4">
+    <div class="flex gap-2">
+      <button id="cancelNewFolder" class="flex-1 py-2.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-700/30 rounded-xl transition">Cancel</button>
+      <button id="confirmNewFolder" class="flex-1 py-2.5 text-sm font-medium text-white dark:text-neutral-900 bg-neutral-900 dark:bg-white rounded-xl transition">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Move to folder dialog -->
+<div id="addToFolderDialog" class="hidden fixed inset-0 z-50 bg-black/40 flex items-end p-0">
+  <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5 max-h-[60dvh] overflow-y-auto">
+    <h2 class="text-base font-medium text-neutral-800 dark:text-white mb-4">Move to folder</h2>
+    <div id="folderPickList" class="space-y-2 mb-4"></div>
+    <button id="cancelAddToFolder" class="w-full py-2.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-700/30 rounded-xl transition">Cancel</button>
+  </div>
+</div>
+
+<!-- Long-press action sheet -->
+<div id="longPressSheet" class="hidden fixed inset-0 z-50 bg-black/40 flex items-end p-0">
+  <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5">
+    <p class="text-sm font-medium text-neutral-800 dark:text-white mb-1" id="longPressServerName"></p>
+    <p class="text-xs text-neutral-500 mb-4">Choose an action</p>
+    <div class="space-y-2">
+      <button id="lpMoveToFolder" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-neutral-50 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 text-sm text-neutral-800 dark:text-white text-left transition active:scale-[0.98]">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-amber-500 shrink-0">
+          <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 12h-15a4.483 4.483 0 0 0-3 1.146Z"/>
+        </svg>
+        Move to folder
+      </button>
+      <button id="lpRemoveFromFolder" class="hidden w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-neutral-50 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 text-sm text-neutral-800 dark:text-white text-left transition active:scale-[0.98]">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-neutral-400 shrink-0">
+          <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+        </svg>
+        Remove from folder
+      </button>
+      <button id="lpCancel" class="w-full py-2.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-700/30 rounded-xl transition">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  body { overscroll-behavior: none; }
+</style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var cards = document.querySelectorAll('.space-y-3 > a');
-    cards.forEach(function(card, i) {
-      card.style.opacity = '0';
-      card.style.transform = 'translateY(6px)';
-      card.style.transition = 'none';
-      setTimeout(function() {
-        card.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
-        card.style.opacity = '1';
-        card.style.transform = 'translateY(0)';
-        setTimeout(function() {
-          card.style.transition = '';
-          card.style.opacity = '';
-          card.style.transform = '';
-        }, 220);
-      }, i * 50);
+(function () {
+  // Disable context menu on mobile
+  document.addEventListener('contextmenu', e => e.preventDefault());
+
+  const allFolders = <%- JSON.stringify(folders || []) %>;
+  const allServers = <%- JSON.stringify((allServers || []).map(s => ({ UUID: s.UUID, name: s.name, status: s.status }))) %>;
+
+  // New folder
+  const newFolderBtn     = document.getElementById('newFolderBtn');
+  const newFolderDialog  = document.getElementById('newFolderDialog');
+  const newFolderName    = document.getElementById('newFolderName');
+  const cancelNewFolder  = document.getElementById('cancelNewFolder');
+  const confirmNewFolder = document.getElementById('confirmNewFolder');
+
+  newFolderBtn?.addEventListener('click', () => { newFolderName.value = ''; newFolderDialog.classList.remove('hidden'); setTimeout(() => newFolderName.focus(), 80); });
+  cancelNewFolder?.addEventListener('click', () => newFolderDialog.classList.add('hidden'));
+  newFolderName?.addEventListener('keydown', e => { if (e.key === 'Enter') confirmNewFolder.click(); });
+
+  confirmNewFolder?.addEventListener('click', async () => {
+    const name = newFolderName.value.trim();
+    if (!name) return;
+    confirmNewFolder.disabled = true;
+    const r = await fetch('/api/folders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
+    const d = await r.json();
+    confirmNewFolder.disabled = false;
+    if (d.success) location.reload(); else showToast(d.error || 'Failed', 'error');
+  });
+
+  // Open folder popup (tap folder card)
+  document.querySelectorAll('.folder-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const memberUUIDs = JSON.parse(card.dataset.folderMembers || '[]');
+      const folderName  = card.dataset.folderName;
+      const serversIn   = allServers.filter(s => memberUUIDs.includes(s.UUID));
+
+      document.getElementById('folderOverlayTitle').textContent = folderName;
+      const content = document.getElementById('folderOverlayContent');
+      content.innerHTML = '';
+
+      if (serversIn.length === 0) {
+        content.innerHTML = '<p class="text-sm text-neutral-500">No servers in this folder.</p>';
+      } else {
+        serversIn.forEach(s => {
+          const a = document.createElement('a');
+          a.href = '/server/' + s.UUID;
+          a.className = 'flex items-center justify-between bg-neutral-50 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 rounded-xl px-3 py-2.5 active:scale-[0.98] transition-transform';
+          const running = s.status === 'running';
+          a.innerHTML = `<span class="text-sm font-medium text-neutral-800 dark:text-white truncate">${s.name}</span><span class="text-[10px] font-medium px-2 py-0.5 rounded-md shrink-0 ml-2 ${running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400'}">${running ? 'Running' : 'Stopped'}</span>`;
+          content.appendChild(a);
+        });
+      }
+
+      document.getElementById('folderOverlay').classList.remove('hidden');
     });
   });
+
+  document.getElementById('closeFolderOverlay')?.addEventListener('click', () => document.getElementById('folderOverlay').classList.add('hidden'));
+
+  // Long-press on server cards
+  let longPressTimer = null;
+  let activeServerUUID = null;
+  let activeServerName = null;
+
+  function showLongPressSheet(uuid, name) {
+    activeServerUUID = uuid;
+    activeServerName = name;
+    document.getElementById('longPressServerName').textContent = name;
+
+    const inFolder = allFolders.some(f => f.members.some(m => m.serverUUID === uuid));
+    document.getElementById('lpRemoveFromFolder').classList.toggle('hidden', !inFolder);
+
+    document.getElementById('longPressSheet').classList.remove('hidden');
+  }
+
+  document.querySelectorAll('.server-card').forEach(card => {
+    const uuid = card.dataset.serverUuid;
+    const name = card.dataset.serverName;
+
+    card.addEventListener('touchstart', e => {
+      longPressTimer = setTimeout(() => {
+        longPressTimer = null;
+        showLongPressSheet(uuid, name);
+      }, 500);
+    }, { passive: true });
+
+    card.addEventListener('touchend', () => {
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    });
+
+    card.addEventListener('touchmove', () => {
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    });
+  });
+
+  document.getElementById('lpCancel')?.addEventListener('click', () => document.getElementById('longPressSheet').classList.add('hidden'));
+
+  // Move to folder from long press
+  document.getElementById('lpMoveToFolder')?.addEventListener('click', () => {
+    document.getElementById('longPressSheet').classList.add('hidden');
+    showFolderPickDialog(activeServerUUID);
+  });
+
+  // Remove from folder
+  document.getElementById('lpRemoveFromFolder')?.addEventListener('click', async () => {
+    document.getElementById('longPressSheet').classList.add('hidden');
+    const r = await fetch('/api/folders/servers/' + activeServerUUID, { method: 'DELETE' });
+    const d = await r.json();
+    if (d.success) location.reload(); else showToast(d.error || 'Failed', 'error');
+  });
+
+  function showFolderPickDialog(uuid) {
+    const list = document.getElementById('folderPickList');
+    list.innerHTML = '';
+    if (allFolders.length === 0) {
+      list.innerHTML = '<p class="text-sm text-neutral-500">No folders yet. Create one first.</p>';
+    } else {
+      allFolders.forEach(f => {
+        const b = document.createElement('button');
+        b.className = 'w-full flex items-center gap-2.5 px-3 py-3 rounded-xl bg-neutral-50 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 text-left active:scale-[0.98] transition-transform';
+        b.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-amber-500 shrink-0"><path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 12h-15a4.483 4.483 0 0 0-3 1.146Z"/></svg><span class="text-sm text-neutral-800 dark:text-white">${f.name}</span>`;
+        b.addEventListener('click', async () => {
+          const r = await fetch('/api/folders/' + f.id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: uuid }) });
+          const d = await r.json();
+          if (d.success) location.reload(); else showToast(d.error || 'Failed', 'error');
+        });
+        list.appendChild(b);
+      });
+    }
+    document.getElementById('addToFolderDialog').classList.remove('hidden');
+  }
+
+  document.getElementById('cancelAddToFolder')?.addEventListener('click', () => document.getElementById('addToFolderDialog').classList.add('hidden'));
+})();
 </script>
+
+<%- include('../components/footer') %>

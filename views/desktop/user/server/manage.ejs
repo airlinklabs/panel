@@ -103,8 +103,6 @@
           </div>
         </div>
 
-        <%- include('../../components/installHeader') %>
-
         <!-- Server Suspended Warning -->
         <% if (server.Suspended) { %>
         <div class="mt-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
@@ -139,7 +137,9 @@
 
       <%- include('../../components/serverTemplate') %>
 
-      <div id="server-page-body" class="flex flex-col lg:flex-row px-8">
+      <%- include('../../components/installHeader') %>
+
+      <div id="server-page-body" class="flex flex-col lg:flex-row px-8 mt-4">
 
 <!-- Left side: Console -->
 <div class="w-full lg:w-2/3 lg:pr-5 flex flex-col min-w-0">
@@ -149,17 +149,6 @@
             <span class="text-[11px] font-medium text-neutral-600 select-none tracking-wide">console</span>
         </div>
         <div class="bg-[#141414] flex-1 relative">
-            <!-- Shown when the server is offline and the terminal has no output -->
-            <div id="console-offline" class="absolute inset-0 flex flex-col items-center justify-center gap-2.5 bg-[#141414] z-10 transition-opacity duration-300 <% if (typeof serverStatus !== 'undefined' && serverStatus.online) { %>opacity-0 pointer-events-none<% } %>">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" class="w-9 h-9 text-neutral-700">
-                    <rect x="2" y="3" width="20" height="14" rx="2"/>
-                    <path d="M8 21h8M12 17v4"/>
-                    <path d="M6 8l3 3-3 3"/>
-                    <path d="M12 14h4"/>
-                </svg>
-                <p class="text-sm font-medium text-neutral-600">Server offline</p>
-                <p class="text-xs text-neutral-700">Start the server to stream logs</p>
-            </div>
             <div id="terminal"></div>
         </div>
     </div>
@@ -179,7 +168,7 @@
         <div class="w-full lg:w-1/3 mt-4 lg:mt-0 space-y-4 flex flex-col">
 
             <!-- IP Address Card -->
-            <div class="overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group flex-1">
+            <div class="stats-card overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-shadow duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group flex-1" style="--i:0">
                 <div class="relative z-10 flex items-start justify-between gap-2">
                     <div class="min-w-0">
                         <h2 class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.addressIP %>:</h2>
@@ -198,45 +187,26 @@
             </div>
 
             <!-- Status Card -->
-            <div class="overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group flex-1">
+            <div class="stats-card overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-shadow duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group flex-1" style="--i:1">
                 <canvas id="statusChart" class="absolute inset-0 w-full h-full"></canvas>
-                <div class="relative z-10 flex items-start justify-between">
-                  <div class="flex-1 min-w-0">
-                    <h2 class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.Status %>:</h2>
-                    <!-- Main status label — Online / Offline / Starting -->
-                    <p id="status" class="mt-1 text-lg font-medium tracking-tight text-neutral-800 dark:text-white leading-snug">-</p>
-                    <!-- Animated daemon message line — fades in during transitions -->
-                    <p id="status-msg" class="text-xs font-medium mt-0.5 leading-snug break-words max-w-[160px] transition-all duration-300 opacity-0 translate-y-1 pointer-events-none"></p>
-                  </div>
-                  <% if (typeof features !== 'undefined' && features && features.includes('players')) { %>
-                  <div id="players-deco" class="flex items-center ml-2 opacity-0 transition-opacity duration-700">
-                    <div class="relative inline-flex items-center">
-                      <div class="w-12 h-12 rounded-lg overflow-hidden border-2 border-neutral-200 dark:border-white/10 transform hover:-translate-y-2 transition-all duration-500 relative z-30 shadow-sm">
-                        <img src="https://mc-heads.net/avatar/privt" alt="" class="w-full h-full" />
-                      </div>
-                      <div class="w-12 h-12 rounded-lg overflow-hidden border-2 border-neutral-200 dark:border-white/10 transform -translate-y-1 hover:-translate-y-3 transition-all duration-700 -ml-3 relative z-20 shadow-sm">
-                        <img src="https://mc-heads.net/avatar/manu4dev" alt="" class="w-full h-full" />
-                      </div>
-                      <div class="w-12 h-12 rounded-lg overflow-hidden border-2 border-neutral-200 dark:border-white/10 transform hover:-translate-y-4 transition-all duration-500 -ml-3 relative z-10 shadow-sm">
-                        <img src="https://mc-heads.net/avatar/thavanish" alt="" class="w-full h-full" />
-                      </div>
-                    </div>
-                  </div>
-                  <% } %>
+                <div class="relative z-10">
+                  <h2 class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.Status %>:</h2>
+                  <p id="status" class="mt-1 text-lg font-medium tracking-tight text-neutral-800 dark:text-white leading-snug">-</p>
+                  <p id="status-msg" class="text-xs font-medium mt-0.5 leading-snug transition-all duration-300 opacity-0 translate-y-1 pointer-events-none"></p>
                 </div>
               </div>
 
             <!-- RAM Usage Card -->
-            <div class="overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group flex-1">
+            <div class="stats-card overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-shadow duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group flex-1" style="--i:2">
                 <canvas id="ramChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
                     <h2 class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.ramUsage %>:</h2>
-                    <p id="ramUsage" class="mt-1 text-lg font-medium tracking-tight text-neutral-800 dark:text-white">0% (0 Bytes / 0 Bytes)</p>
+                    <p id="ramUsage" class="mt-1 text-lg font-medium tracking-tight text-neutral-800 dark:text-white">0% (0 MB / 0 MB)</p>
                 </div>
             </div>
 
             <!-- CPU Usage Card -->
-            <div class="overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group flex-1">
+            <div class="stats-card overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-shadow duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group flex-1" style="--i:3">
                 <canvas id="cpuChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
                     <h2 class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.cpuUsage %>:</h2>
@@ -245,7 +215,7 @@
             </div>
 
             <!-- Disk Usage Card -->
-            <div class="overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group flex-1">
+            <div class="stats-card overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-shadow duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group flex-1" style="--i:4">
                 <canvas id="diskChart" class="absolute inset-0 w-full h-full hidden"></canvas>
                 <div class="relative z-10">
                     <h2 class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.diskUsage %>:</h2>
@@ -434,11 +404,68 @@ connectWebSocket();
                text.includes('HTTP code 500');
     }
 
+    // Replace any shell prompt variants that show the internal container
+    // hostname with the display name "airlinkd". This covers every form the
+    // prompt can take depending on shell, distro, and yolks image version:
+    //
+    //   container@<anything>:~$      -> airlinkd~
+    //   container@<anything>:~#      -> airlinkd~
+    //   container@<anything>:~       -> airlinkd~
+    //   [container@<anything> ~]$    -> airlinkd~
+    //   (container@<anything>)~$     -> airlinkd~
+    //   root@<anything>:~#           -> airlinkd~
+    //
+    // The regex matches:
+    //   (?:container|root)    - the username yolks creates or root
+    //   @[^\s:\])]           - @ followed by any hostname chars (no space/colon/bracket)
+    //   (?:[^$#\r\n]*?)      - optional path / tty info
+    //   [$#]?\s*             - optional prompt character and trailing space
+    // ANSI-aware prompt masking.
+    //
+    // The problem: Docker's TTY stream interleaves ANSI colour codes through
+    // the prompt text. The raw bytes look like:
+    //   \r\x1b[01;32mcontainer@petrodactyl\x1b[00m:\x1b[01;34m~\x1b[00m$\x20
+    // A plain-text regex won't match across those escape sequences.
+    //
+    // Solution: strip all ANSI escape codes from a copy of the chunk, run the
+    // plain-text regex against that, and if it hits, replace the *entire raw
+    // chunk* with "airlinkd~ " — because the chunk is the prompt line itself.
+    // If the chunk contains more than just the prompt (i.e. it includes server
+    // log output), fall back to replacing in the plain version and writing that.
+    //
+    // ANSI CSI escape: ESC [ <params> <final-byte>
+    // OSC escape:      ESC ] ... ST/BEL
+    // Other escapes:   ESC <single-char>
+    const ANSI_RE   = /\x1b(?:\[[0-9;]*[A-Za-z]|\][^\x07\x1b]*(?:\x07|\x1b\\)|[@-Z\\-_]|[\u0080-\u009F])/g;
+    const PROMPT_RE = /(?:container|root)@\S+?(?:[^$#\r\n]*?)[$#]\s*/g;
+
+    function maskPrompts(raw) {
+        const plain = raw.replace(ANSI_RE, '');
+        if (!PROMPT_RE.test(plain)) {
+            PROMPT_RE.lastIndex = 0;
+            return raw;  // no prompt in this chunk — pass through untouched
+        }
+        PROMPT_RE.lastIndex = 0;
+
+        // If the chunk is *only* the prompt (CR + colour codes + prompt chars),
+        // replace the whole thing cleanly.
+        const stripped = plain.replace(/[\r\n]/g, '').trim();
+        const isOnlyPrompt = PROMPT_RE.test(stripped) && stripped.replace(PROMPT_RE, '').trim() === '';
+        PROMPT_RE.lastIndex = 0;
+
+        if (isOnlyPrompt) {
+            return '\r\nairlinkd~ ';
+        }
+
+        // Mixed chunk — replace in plain text and write that (loses colour on
+        // the prompt line, but preserves all other output correctly).
+        return plain.replace(PROMPT_RE, 'airlinkd~ ');
+    }
+
     function handleWebSocketMessage(msg) {
         if (msg.data instanceof Blob) {
             msg.data.arrayBuffer().then(buf => {
-                const raw = new Uint8Array(buf);
-                const text = new TextDecoder().decode(raw);
+                const text = new TextDecoder().decode(buf);
                 if (isDaemonInfraError(text)) return;
                 if (text.includes('airlinkd server appears to be down')) {
                     socket.close();
@@ -453,7 +480,7 @@ connectWebSocket();
                     return;
                 }
                 hideConsolePlaceholder();
-                term.write(raw);
+                term.write(maskPrompts(text));
             });
             return;
         }
@@ -473,7 +500,7 @@ connectWebSocket();
             return;
         }
         hideConsolePlaceholder();
-        term.write(text);
+        term.write(maskPrompts(text));
     }
 
     function writeConsole(prefix, type, message) {
@@ -513,9 +540,13 @@ connectWebSocket();
             }
             commandHistory.push(command);
             currentCommandIndex = commandHistory.length;
-
-            inputElement.value = '';
         }
+
+        // Always clear the field and ghost text after Enter, even if the command
+        // was empty — so the user never has to manually clear a failed send.
+        inputElement.value = '';
+        inputElement.dispatchEvent(new Event('input'));
+        clearGhostText();
     }
 
     function handleKeyUp(event) {
@@ -696,10 +727,6 @@ connectWebSocket();
           danger: true,
           confirmLabel: '<%= req.translations.stopServer || "Stop Server" %>',
           onConfirm: () => {
-          <% if (features.includes('players')) { %>
-          const _pDecoStop = document.getElementById('players-deco');
-          if (_pDecoStop) _pDecoStop.classList.remove('opacity-100'); _pDecoStop.classList.add('opacity-0');
-          <% } %>
 
           setStatusText('Stopping', 'text-red-500');
           setStatusLog('Sending stop command...');
@@ -903,6 +930,13 @@ connectWebSocket();
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     }
 
+    function formatRam(bytes, decimals = 1) {
+        if (bytes === 0) return '0 MB';
+        const mb = bytes / (1024 * 1024);
+        if (mb < 1024) return mb.toFixed(decimals) + ' MB';
+        return (mb / 1024).toFixed(decimals) + ' GB';
+    }
+
     function getChartColors() {
         const isDark = document.documentElement.classList.contains('dark');
         return {
@@ -949,7 +983,7 @@ connectWebSocket();
 
     function updateRamUsage(stats) {
     const ramStatsUsage = stats?.data?.memory?.usage || 0;
-    const ramStatsLimit = stats?.data?.memory?.limit || <%- server.Memory %> * 1024 * 1024 * 1024;
+    const ramStatsLimit = stats?.data?.memory?.limit || <%- server.Memory %> * 1024 * 1024;
     let ramUsagePercent = Number(stats?.data?.memory?.percentage) || 0;
     const ramUsageInMB = ramStatsUsage / 1024 / 1024;
     const ramLimitInMB = ramStatsLimit / 1024 / 1024;
@@ -958,7 +992,7 @@ connectWebSocket();
         ramUsagePercent = 0;
     }
 
-    const ramUsageText = `${ramUsagePercent.toFixed(1)}% (${formatBytes(ramStatsUsage)} / ${formatBytes(ramStatsLimit)})`;
+    const ramUsageText = `${ramUsagePercent.toFixed(1)}% (${formatRam(ramStatsUsage)} / ${formatRam(ramStatsLimit)})`;
     document.getElementById('ramUsage').textContent = ramUsageText;
 
     if (ramStatsUsage > 0) {
@@ -989,33 +1023,19 @@ connectWebSocket();
 
     function updateStatus(stats) {
         if (lifecycleActive) return;
-
-        <% if (features.includes('players')) { %>
-        const playersDeco = document.getElementById('players-deco');
-        <% } %>
         const statusElement = document.getElementById('status');
 
         if (stats.data && stats.data.starting === true) {
             statusElement.textContent = 'Starting';
             statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500 leading-snug w-full';
-            <% if (features.includes('players')) { %>
-            if (playersDeco) playersDeco.classList.remove('opacity-100');
-            if (playersDeco) playersDeco.classList.add('opacity-0');
-            <% } %>
             updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
         } else if (stats.data && stats.data.running === true) {
             statusElement.textContent = 'Online';
             statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500 leading-snug w-full';
-            <% if (features.includes('players')) { %>
-            if (playersDeco) { playersDeco.classList.remove('opacity-0'); playersDeco.classList.add('opacity-100'); }
-            <% } %>
             updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
         } else {
             statusElement.textContent = 'Offline';
             statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500 leading-snug w-full';
-            <% if (features.includes('players')) { %>
-            if (playersDeco) { playersDeco.classList.remove('opacity-100'); playersDeco.classList.add('opacity-0'); }
-            <% } %>
             updateStatusChart('rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.2)');
         }
     }
@@ -1082,7 +1102,6 @@ connectWebSocket();
     // never raw layer-level daemon output. Pass msg=null to fade out and release.
     function setStatusLog(msg, eventType) {
         const msgEl = document.getElementById('status-msg');
-        const deco  = document.getElementById('players-deco');
         if (!msgEl) return;
 
         if (statusMsgFadeTimer) { clearTimeout(statusMsgFadeTimer); statusMsgFadeTimer = null; }
@@ -1091,14 +1110,12 @@ connectWebSocket();
             msgEl.classList.add('opacity-0', 'translate-y-1');
             statusMsgFadeTimer = setTimeout(() => {
                 msgEl.textContent = '';
-                msgEl.className = 'text-xs font-medium mt-0.5 leading-snug break-words max-w-[160px] transition-all duration-300 opacity-0 translate-y-1 pointer-events-none';
+                msgEl.className = 'text-xs font-medium mt-0.5 leading-snug transition-all duration-300 opacity-0 translate-y-1 pointer-events-none';
                 lifecycleActive = false;
                 statusMsgFadeTimer = null;
             }, 300);
-            if (deco) { deco.classList.remove('opacity-0'); deco.classList.add('opacity-100'); }
         } else {
             lifecycleActive = true;
-            if (deco) { deco.classList.remove('opacity-100'); deco.classList.add('opacity-0'); }
             hideConsolePlaceholder();
             // Use the clean label — never raw layer output in the status card
             const label = statusLabel(eventType) || msg;
@@ -1106,7 +1123,7 @@ connectWebSocket();
             msgEl.classList.add('opacity-0', 'translate-y-1');
             statusMsgFadeTimer = setTimeout(() => {
                 msgEl.textContent = label;
-                msgEl.className = `text-xs font-medium mt-0.5 leading-snug break-words max-w-[160px] transition-all duration-300 ${color}`;
+                msgEl.className = `text-xs font-medium mt-0.5 leading-snug transition-all duration-300 ${color}`;
                 void msgEl.offsetHeight;
                 msgEl.classList.remove('opacity-0', 'translate-y-1');
                 statusMsgFadeTimer = null;
@@ -1123,17 +1140,8 @@ connectWebSocket();
     }
 
     // Function to set all stats to offline state
-    function hideConsolePlaceholder() {
-        const el = document.getElementById('console-offline');
-        if (!el) return;
-        el.classList.add('opacity-0', 'pointer-events-none');
-    }
-
-    function showConsolePlaceholder() {
-        const el = document.getElementById('console-offline');
-        if (!el) return;
-        el.classList.remove('opacity-0', 'pointer-events-none');
-    }
+    function hideConsolePlaceholder() {}
+    function showConsolePlaceholder() {}
 
     function setAllStatsOffline() {
         showConsolePlaceholder();
@@ -1146,7 +1154,7 @@ connectWebSocket();
         updateStatusChart('rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.2)');
 
         // Update RAM usage
-        document.getElementById('ramUsage').textContent = `0% (0 Bytes / ${formatBytes(<%- server.Memory %> * 1024 * 1024 * 1024)})`;
+        document.getElementById('ramUsage').textContent = `0% (0 MB / ${formatRam(<%- server.Memory %> * 1024 * 1024)})`;
 
         // Update CPU usage
         document.getElementById('cpuUsage').textContent = `0% / ${<%- server.Cpu * 100 %>}%`;
@@ -1155,10 +1163,6 @@ connectWebSocket();
         document.getElementById('diskUsage').textContent = '0% (0 Bytes / 10 GB)';
 
         // Hide players decoration if it exists
-        <% if (features.includes('players')) { %>
-        const playersDeco = document.getElementById('players-deco');
-        playersDeco.classList.remove('opacity-100'); playersDeco.classList.add('opacity-0');
-        <% } %>
 
         // No need to show daemon down message as it's been removed
 
@@ -1222,370 +1226,4 @@ connectWebSocket();
         };
     })();
 
-    // Create a global WebSocket for server status that can be shared
-    // This will be used by both the page and the server header component
-    if (!window.serverStatusWebSocket) {
-      window.serverStatusWebSocket = new WebSocket(`${protocol}//${host}/ws/server/<%= server.UUID %>/status`);
-
-      window.serverStatusWebSocket.onopen = function() {
-
-        // Dispatch a custom event that other components can listen for
-        window.dispatchEvent(new CustomEvent('serverStatusWebSocketOpen'));
-      };
-
-      window.serverStatusWebSocket.onclose = function() {
-
-        // Dispatch a custom event that other components can listen for
-        window.dispatchEvent(new CustomEvent('serverStatusWebSocketClose'));
-
-        // Clean up the global reference
-        window.serverStatusWebSocket = null;
-      };
-
-      window.serverStatusWebSocket.onerror = function(error) {
-
-        // No need to show daemon down message as it's been removed
-
-        // Dispatch a custom event that other components can listen for
-        window.dispatchEvent(new CustomEvent('serverStatusWebSocketError', { detail: error }));
-      };
-    }
-
-    // Set up message handler for the manage page
-    window.serverStatusWebSocket.addEventListener('message', function(event) {
-      try {
-        const data = JSON.parse(event.data);
-
-        // Extract the actual status data, handling different message formats
-        let statusData = data;
-        if (data.event === 'status' && data.data) {
-          statusData = data.data;
-        }
-
-        // Check for starting state
-        if (statusData.starting === true ||
-            statusData.status === 'starting' ||
-            data.status === 'starting') {
-
-          // Update status display
-          const statusElement = document.getElementById('status');
-          statusElement.textContent = 'Starting';
-          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
-
-          // Update status chart
-          updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
-
-          // No need to hide daemon down message as it's been removed
-
-          <% if (features.includes('players')) { %>
-          // Hide players decoration
-          const playersDeco = document.getElementById('players-deco');
-          playersDeco.classList.remove('opacity-100'); playersDeco.classList.add('opacity-0');
-          <% } %>
-        }
-        // Check for stopping state
-        else if (statusData.stopping === true ||
-                statusData.status === 'stopping' ||
-                data.status === 'stopping') {
-
-          // Update status display
-          const statusElement = document.getElementById('status');
-          statusElement.textContent = 'Stopping';
-          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-orange-500';
-
-          // Update status chart
-          updateStatusChart('rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.2)');
-
-          // No need to hide daemon down message as it's been removed
-
-          <% if (features.includes('players')) { %>
-          // Hide players decoration
-          const playersDeco = document.getElementById('players-deco');
-          playersDeco.classList.remove('opacity-100'); playersDeco.classList.add('opacity-0');
-          <% } %>
-        }
-        // Check for offline status
-        else if (statusData.running === false ||
-                statusData.status === 'offline' ||
-                data.status === 'offline') {
-
-          setAllStatsOffline();
-        }
-        // Check for online status
-        else if (statusData.running === true ||
-                statusData.status === 'online' ||
-                data.status === 'online') {
-
-          // Update status display
-          const statusElement = document.getElementById('status');
-          statusElement.textContent = 'Online';
-          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
-
-          // Update status chart
-          updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
-
-          <% if (features.includes('players')) { %>
-          const playersDeco = document.getElementById('players-deco');
-          playersDeco.classList.remove('opacity-0'); playersDeco.classList.add('opacity-100');
-          <% } %>
-        }
-      } catch (error) {
-
-      }
-    });
-
-    // Listen for server start events
-    document.getElementById('startButton').addEventListener('click', function() {
-
-      // Update status immediately to "Starting"
-      const statusElement = document.getElementById('status');
-      statusElement.textContent = 'Starting';
-      statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
-      updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
-
-      // No need to hide daemon down message as it's been removed
-
-      // Set up initial status check after 5 seconds
-      setTimeout(function() {
-
-        // Create a variable to track if we've found the server online
-        let serverFoundOnline = false;
-
-        // Set up polling to detect when server is fully started (every 5 seconds)
-        const startupPoll = setInterval(function() {
-          // Skip if we've already found the server online
-          if (serverFoundOnline) return;
-
-          fetch(`/server/<%= server.UUID %>/status`, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json'
-            }
-          })
-          .then(response => response.json())
-          .then(data => {
-
-            if (data.online) {
-
-              serverFoundOnline = true;
-              clearInterval(startupPoll);
-
-              // Update status display
-              statusElement.textContent = 'Online';
-              statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
-              updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
-
-              <% if (features.includes('players')) { %>
-              const playersDeco = document.getElementById('players-deco');
-              playersDeco.classList.remove('opacity-0'); playersDeco.classList.add('opacity-100');
-              <% } %>
-
-              // Start local uptime counter for smooth updates
-              if (data.startedAt) {
-                const startTime = new Date(data.startedAt).getTime();
-                const uptimeElement = document.getElementById('uptime');
-
-                if (uptimeElement) {
-                  // Initial update
-                  updateLocalUptime(startTime, uptimeElement);
-
-                  // Update every second
-                  const uptimeInterval = setInterval(function() {
-                    updateLocalUptime(startTime, uptimeElement);
-                  }, 1000);
-
-                  // Store the interval ID in a data attribute for cleanup
-                  uptimeElement.dataset.intervalId = uptimeInterval;
-                }
-              }
-            }
-          })
-          .catch(error => {
-
-          });
-        }, 5000); // Check every 5 seconds
-
-        // Do an initial check
-        fetch(`/server/<%= server.UUID %>/status`, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json'
-          }
-        })
-        .then(response => response.json())
-        .then(data => {
-
-          if (data.online) {
-            serverFoundOnline = true;
-            clearInterval(startupPoll);
-
-            // Update status display
-            statusElement.textContent = 'Online';
-            statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
-            updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
-
-            <% if (features.includes('players')) { %>
-            const playersDeco = document.getElementById('players-deco');
-            playersDeco.classList.remove('opacity-0'); playersDeco.classList.add('opacity-100');
-            <% } %>
-          }
-        })
-        .catch(error => {
-
-        });
-      }, 5000); // Wait 5 seconds before first check
-
-      // Stop polling after 60 seconds to avoid resource waste
-      setTimeout(function() {
-
-        if (typeof startupPoll !== 'undefined') {
-          clearInterval(startupPoll);
-        }
-      }, 60000);
-    });
-
-    // The stop button event listener is now defined above
-
-    // Function to update local uptime display
-    function updateLocalUptime(startTime, element) {
-      if (!startTime || !element) return;
-
-      const now = Date.now();
-      const uptimeSeconds = Math.floor((now - startTime) / 1000);
-      element.textContent = formatUptime(uptimeSeconds);
-    }
-
-    // Function to format uptime in a human-readable format
-    function formatUptime(seconds) {
-      if (typeof seconds !== 'number' || isNaN(seconds)) {
-        return '0s';
-      }
-
-      const days = Math.floor(seconds / 86400);
-      const hours = Math.floor((seconds % 86400) / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      const secs = Math.floor(seconds % 60);
-
-      if (days > 0) {
-        return `${days}d ${hours}h ${minutes}m`;
-      } else if (hours > 0) {
-        return `${hours}h ${minutes}m`;
-      } else if (minutes > 0) {
-        return `${minutes}m ${secs}s`;
-      } else {
-        return `${secs}s`;
-      }
-    }
-
-    // Check server status periodically (every 5 seconds)
-    setInterval(function() {
-      // Make a direct API call to check server status
-      fetch(`/server/<%= server.UUID %>/status`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json'
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-
-        // Handle starting state
-        if (data.starting) {
-
-          // Update status display
-          const statusElement = document.getElementById('status');
-          statusElement.textContent = 'Starting';
-          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-yellow-500';
-
-          // Update status chart
-          updateStatusChart('rgba(234, 179, 8, 0.1)', 'rgba(234, 179, 8, 0.2)');
-
-          // No need to hide daemon down message as it's been removed
-
-          <% if (features.includes('players')) { %>
-          // Hide players decoration
-          const playersDeco = document.getElementById('players-deco');
-          playersDeco.classList.remove('opacity-100'); playersDeco.classList.add('opacity-0');
-          <% } %>
-        }
-        // Handle stopping state
-        else if (data.stopping) {
-
-          // Update status display
-          const statusElement = document.getElementById('status');
-          statusElement.textContent = 'Stopping';
-          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-orange-500';
-
-          // Update status chart
-          updateStatusChart('rgba(249, 115, 22, 0.1)', 'rgba(249, 115, 22, 0.2)');
-
-          // No need to hide daemon down message as it's been removed
-
-          <% if (features.includes('players')) { %>
-          // Hide players decoration
-          const playersDeco = document.getElementById('players-deco');
-          playersDeco.classList.remove('opacity-100'); playersDeco.classList.add('opacity-0');
-          <% } %>
-        }
-        // Handle online state
-        else if (data.online) {
-
-          // Update status display
-          const statusElement = document.getElementById('status');
-          statusElement.textContent = 'Online';
-          statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-emerald-500';
-
-          // Update status chart
-          updateStatusChart('rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)');
-
-          // No need to hide daemon down message as it's been removed
-
-          <% if (features.includes('players')) { %>
-          // Show players decoration
-          const playersDeco = document.getElementById('players-deco');
-          playersDeco.classList.remove('opacity-0'); playersDeco.classList.add('opacity-100');
-          <% } %>
-
-          // Update uptime if we have a start time
-          if (data.startedAt) {
-            const startTime = new Date(data.startedAt).getTime();
-            const uptimeElement = document.getElementById('uptime');
-
-            if (uptimeElement) {
-              // Clear any existing interval
-              const existingInterval = uptimeElement.dataset.intervalId;
-              if (existingInterval) {
-                clearInterval(parseInt(existingInterval));
-              }
-
-              // Initial update
-              updateLocalUptime(startTime, uptimeElement);
-
-              // Update every second
-              const uptimeInterval = setInterval(function() {
-                updateLocalUptime(startTime, uptimeElement);
-              }, 1000);
-
-              // Store the interval ID for cleanup
-              uptimeElement.dataset.intervalId = uptimeInterval;
-            }
-          }
-        }
-        // Handle offline state
-        else if (data.status === 'offline' || !data.online) {
-
-          setAllStatsOffline();
-
-          // Clear any uptime interval
-          const uptimeElement = document.getElementById('uptime');
-          if (uptimeElement && uptimeElement.dataset.intervalId) {
-            clearInterval(parseInt(uptimeElement.dataset.intervalId));
-            delete uptimeElement.dataset.intervalId;
-          }
-        }
-      })
-      .catch(error => {
-
-      });
-    }, 5000); // Check every 5 seconds
 </script>

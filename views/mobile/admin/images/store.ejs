@@ -1,0 +1,252 @@
+<%- include('../../components/header', { title: 'Image Store' }) %>
+
+<style>
+  .store-badge { display:inline-flex;align-items:center;padding:2px 8px;border-radius:9999px;font-size:10px;font-weight:500;white-space:nowrap; }
+  .cat-game        { background:#ede9fe; color:#6d28d9; }
+  .cat-application { background:#e0f2fe; color:#0369a1; }
+  .cat-generic     { background:#dcfce7; color:#15803d; }
+  .dark .cat-game        { background:rgba(139,92,246,0.15); color:#a78bfa; }
+  .dark .cat-application { background:rgba(14,165,233,0.15);  color:#38bdf8; }
+  .dark .cat-generic     { background:rgba(34,197,94,0.15);   color:#4ade80; }
+  .sk { border-radius:10px; animation:sk-pulse 1.4s ease-in-out infinite; }
+  html:not(.dark) .sk { background:#f0f0f0; }
+  html.dark .sk { background:rgba(255,255,255,0.05); }
+  @keyframes sk-pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  .cat-btn-active  { background:#171717 !important; color:#fff !important; border-color:transparent !important; }
+  .dark .cat-btn-active { background:#fff !important; color:#0a0a0a !important; }
+</style>
+
+<main id="page-content" class="">
+  <%- include('../../components/template') %>
+  <%- include('../../components/toast') %>
+
+  <div class="px-4 py-5">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white">Image Store</h1>
+        <p class="text-xs text-neutral-500 mt-0.5">Community images, cached server-side.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="refreshCatalogue()" title="Refresh" id="refreshBtn"
+          class="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>
+          </svg>
+        </button>
+        <a href="/admin/images" class="text-xs text-neutral-500 flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>Back
+        </a>
+      </div>
+    </div>
+
+    <div class="relative mb-3">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+      </svg>
+      <input id="searchInput" type="text" placeholder="Search images…"
+        class="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-neutral-200 dark:border-neutral-700/50
+               bg-white dark:bg-neutral-800/50 text-neutral-800 dark:text-white
+               placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+    </div>
+
+    <div id="catBar" class="flex gap-1.5 mb-2 overflow-x-auto pb-1">
+      <button data-cat="all"         class="cat-btn store-badge bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 border border-transparent cursor-pointer shrink-0">All</button>
+      <button data-cat="game"        class="cat-btn store-badge bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700/50 cursor-pointer shrink-0">Games</button>
+      <button data-cat="application" class="cat-btn store-badge bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700/50 cursor-pointer shrink-0">Apps</button>
+      <button data-cat="generic"     class="cat-btn store-badge bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700/50 cursor-pointer shrink-0">Generic</button>
+    </div>
+
+    <div id="groupBar" class="flex gap-1.5 mb-3 overflow-x-auto pb-1"></div>
+
+    <div class="flex items-center gap-2 mb-3 min-h-[20px]">
+      <span id="statusText" class="text-xs text-neutral-400">Loading catalogue…</span>
+      <span id="loadingDot" class="inline-block w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shrink-0"></span>
+    </div>
+
+    <div id="skeletons" class="space-y-2">
+      <% for (let i = 0; i < 6; i++) { %>
+      <div class="rounded-xl border border-neutral-200 dark:border-neutral-700/30 p-4 flex flex-col gap-2.5 bg-white dark:bg-neutral-800/20">
+        <div class="sk h-4 w-2/3"></div>
+        <div class="sk h-3 w-full"></div>
+        <div class="sk h-3 w-3/4"></div>
+      </div>
+      <% } %>
+    </div>
+
+    <div id="sections" class="hidden space-y-6"></div>
+
+    <div id="emptyState" class="hidden py-16 flex flex-col items-center text-center">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-9 h-9 text-neutral-300 dark:text-neutral-600 mb-2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+      </svg>
+      <p class="text-sm font-medium text-neutral-500">No images match</p>
+    </div>
+  </div>
+</main>
+
+<div id="installModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-end">
+  <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 rounded-t-2xl w-full p-5">
+    <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-0.5" id="modalTitle">Install image</h2>
+    <p class="text-xs text-neutral-500 mb-4" id="modalSubtitle">Add this image to your panel.</p>
+    <div id="modalError" class="hidden mb-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3">
+      <p class="text-xs text-red-600 dark:text-red-400" id="modalErrorText"></p>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="closeModal()" class="flex-1 py-2.5 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-white text-sm font-medium transition">Cancel</button>
+      <button id="confirmBtn" onclick="confirmInstall()" class="flex-1 py-2.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm font-medium transition">Install</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CAT_COLORS = { game:'cat-game', application:'cat-application', generic:'cat-generic' };
+const CAT_LABELS = { game:'Game', application:'App', generic:'Generic' };
+
+let allImages=[], activeCat='all', activeGroup='all', searchQuery='', pendingEgg=null;
+
+async function loadCatalogue() {
+  setStatus('Loading catalogue…', true);
+  try {
+    const res = await fetch('/admin/images/store/catalogue');
+    if (!res.ok) throw new Error(`${res.status}`);
+    const data = await res.json();
+    allImages = data.images || [];
+    const skel = document.getElementById('skeletons');
+    if (skel) skel.remove();
+    buildGroupBar(); render();
+    const age = data.builtAt ? Math.round((Date.now()-data.builtAt)/60000) : 0;
+    setStatus(`${allImages.length} images · ${age < 1 ? 'fresh' : age+'m old'}`, false);
+  } catch(err) { setStatus('Failed to load catalogue.', false); }
+}
+
+function buildGroupBar() {
+  const bar = document.getElementById('groupBar');
+  const groups = [...new Set(allImages.filter(i=>activeCat==='all'||i.category===activeCat).map(i=>i.group))].sort();
+  bar.innerHTML = '';
+  bar.appendChild(mkGroupBtn('all','All',activeGroup==='all'));
+  groups.forEach(g => bar.appendChild(mkGroupBtn(g,cap(g),activeGroup===g)));
+}
+
+function mkGroupBtn(val,label,active) {
+  const b = document.createElement('button');
+  b.dataset.group = val;
+  b.className = `store-badge cursor-pointer transition shrink-0 ${active ? 'bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 border border-transparent' : 'bg-white dark:bg-neutral-800/60 text-neutral-500 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700/40'}`;
+  b.textContent = label;
+  b.addEventListener('click',()=>{ activeGroup=val; buildGroupBar(); render(); });
+  return b;
+}
+
+function applyFilters() {
+  const q = searchQuery.trim().toLowerCase();
+  return allImages.filter(img => {
+    if (activeCat!=='all' && img.category!==activeCat) return false;
+    if (activeGroup!=='all' && img.group!==activeGroup) return false;
+    if (q) { const hay=`${img.name} ${img.description} ${img.readme} ${img.author} ${img.group}`.toLowerCase(); if(!hay.includes(q)) return false; }
+    return true;
+  });
+}
+
+function render() {
+  const visible = applyFilters();
+  const sections = document.getElementById('sections');
+  const empty = document.getElementById('emptyState');
+  sections.innerHTML = '';
+  if (visible.length===0 && allImages.length>0) { sections.classList.add('hidden'); empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden'); sections.classList.remove('hidden');
+  const isGrouped = !searchQuery.trim() && activeGroup==='all';
+  if (isGrouped) {
+    const grouped = new Map();
+    visible.forEach(img => { if(!grouped.has(img.group)) grouped.set(img.group,[]); grouped.get(img.group).push(img); });
+    [...grouped.entries()].sort((a,b)=>a[0].localeCompare(b[0])).forEach(([g,imgs])=>sections.appendChild(buildSection(cap(g),imgs)));
+  } else {
+    sections.appendChild(buildSection(null,visible));
+  }
+}
+
+function buildSection(title, images) {
+  const wrap = document.createElement('div');
+  if (title) {
+    const h = document.createElement('div');
+    h.className = 'flex items-center gap-2 mb-2';
+    h.innerHTML = `<h2 class="text-xs font-semibold text-neutral-600 dark:text-neutral-400 uppercase tracking-wider">${esc(title)}</h2><span class="text-xs text-neutral-400">${images.length}</span><div class="flex-1 h-px bg-neutral-100 dark:bg-neutral-800"></div>`;
+    wrap.appendChild(h);
+  }
+  const list = document.createElement('div');
+  list.className = 'space-y-2';
+  images.forEach(img => list.appendChild(buildCard(img)));
+  wrap.appendChild(list);
+  return wrap;
+}
+
+function buildCard(img) {
+  const color = CAT_COLORS[img.category]||'bg-neutral-100 text-neutral-600';
+  const label = CAT_LABELS[img.category]||img.category;
+  const desc = (img.readme&&img.readme.length>20?img.readme:img.description)||'';
+  const short = desc.length>90 ? desc.slice(0,88)+'…' : desc;
+  const el = document.createElement('div');
+  el.className = 'rounded-xl border border-neutral-200 dark:border-neutral-800/40 bg-white dark:bg-neutral-800/20 p-4 flex flex-col gap-2 transition hover:bg-neutral-50 dark:hover:bg-neutral-700/20';
+  el.innerHTML = `
+    <div class="flex items-start justify-between gap-2">
+      <p class="text-sm font-medium text-neutral-800 dark:text-white leading-snug">${esc(img.name)}</p>
+      <span class="store-badge ${color} shrink-0">${label}</span>
+    </div>
+    ${img.subGroup&&img.subGroup!==img.group?`<p class="text-[10px] text-neutral-400 font-mono">${esc(img.subGroup)}</p>`:''}
+    ${short?`<p class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">${esc(short)}</p>`:''}
+    <button class="install-btn mt-1 w-full py-2 rounded-xl border border-neutral-200 dark:border-neutral-800/40 bg-white dark:bg-neutral-800/20 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 text-neutral-700 dark:text-neutral-300 text-xs font-medium transition">Install</button>`;
+  el.querySelector('.install-btn').addEventListener('click',()=>openModal(img));
+  return el;
+}
+
+function setStatus(msg,loading) {
+  document.getElementById('statusText').textContent=msg;
+  const dot=document.getElementById('loadingDot');
+  if(dot) dot.style.display=loading?'':'none';
+}
+
+document.getElementById('searchInput').addEventListener('input',function(){ searchQuery=this.value; render(); });
+
+document.querySelectorAll('.cat-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    activeCat=btn.dataset.cat; activeGroup='all';
+    document.querySelectorAll('.cat-btn').forEach(b=>{
+      const on=b.dataset.cat===activeCat;
+      b.className=`cat-btn store-badge cursor-pointer transition shrink-0 ${on?'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 border border-transparent':'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700/50'}`;
+    });
+    buildGroupBar(); render();
+  });
+});
+
+function openModal(img) {
+  pendingEgg={name:img.name,egg:img.egg};
+  document.getElementById('modalTitle').textContent=`Install "${img.name}"`;
+  document.getElementById('modalSubtitle').textContent=img.subGroup?`from ${img.subGroup}`:'Add this image to your panel.';
+  document.getElementById('modalError').classList.add('hidden');
+  const btn=document.getElementById('confirmBtn'); btn.disabled=false; btn.textContent='Install';
+  document.getElementById('installModal').classList.remove('hidden');
+}
+function closeModal() { document.getElementById('installModal').classList.add('hidden'); pendingEgg=null; }
+document.getElementById('installModal').addEventListener('click',e=>{ if(e.target===document.getElementById('installModal')) closeModal(); });
+
+async function confirmInstall() {
+  if(!pendingEgg) return;
+  const btn=document.getElementById('confirmBtn'); btn.disabled=true; btn.textContent='Installing…';
+  document.getElementById('modalError').classList.add('hidden');
+  try {
+    const res=await fetch('/admin/images/store/install',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pendingEgg.egg)});
+    const body=await res.json();
+    if(!res.ok){ document.getElementById('modalErrorText').textContent=body.error||'Failed.'; document.getElementById('modalError').classList.remove('hidden'); btn.disabled=false; btn.textContent='Install'; return; }
+    closeModal(); showToast(`"${pendingEgg.name}" installed.`,'success');
+  } catch(err){ document.getElementById('modalErrorText').textContent=err.message||'Network error.'; document.getElementById('modalError').classList.remove('hidden'); btn.disabled=false; btn.textContent='Install'; }
+}
+
+async function refreshCatalogue() {
+  document.getElementById('refreshBtn').disabled=true; setStatus('Refreshing…',true);
+  try { await fetch('/admin/images/store/refresh',{method:'POST'}); allImages=[]; document.getElementById('sections').innerHTML=''; document.getElementById('groupBar').innerHTML=''; await loadCatalogue(); }
+  finally { document.getElementById('refreshBtn').disabled=false; }
+}
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function cap(s){ return s.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
+
+loadCatalogue();
+</script>

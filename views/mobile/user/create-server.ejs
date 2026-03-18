@@ -1,0 +1,174 @@
+<%- include('../components/header', { title: 'Create Server' }) %>
+
+<main id="page-content" class="">
+  <%- include('../components/template') %>
+
+  <div class="px-4 py-5">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white">Create a server</h1>
+        <p class="text-xs text-neutral-500 mt-0.5"><%= currentCount %> of <%= serverLimit %> used</p>
+      </div>
+      <a href="/" class="text-sm text-neutral-500">Cancel</a>
+    </div>
+
+    <div class="space-y-4">
+
+      <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">Details</p>
+        </div>
+        <div class="p-4 space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Name</label>
+            <input type="text" id="serverName" placeholder="My server" maxlength="64"
+              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Description <span class="text-neutral-400 font-normal">(optional)</span></label>
+            <input type="text" id="serverDescription" placeholder="What is this server for?" maxlength="128"
+              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none transition">
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">Node & image</p>
+        </div>
+        <div class="p-4 space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Node</label>
+            <select id="nodeId" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
+              <option value="">Select a node</option>
+              <% nodes.forEach(node => { %>
+              <option value="<%= node.id %>"><%= node.name %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Image</label>
+            <select id="imageId" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
+              <option value="">Select an image</option>
+              <% images.forEach(image => { %>
+              <option value="<%= image.id %>" data-docker='<%= image.dockerImages %>'><%= image.name %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Docker variant</label>
+            <select id="dockerImage" disabled class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition disabled:opacity-50">
+              <option value="">Select image first</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">Resources</p>
+        </div>
+        <div class="p-4 space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">RAM (MB) — max <%= resourceLimits.maxMemory %></label>
+            <input type="number" id="Memory" value="512" min="128" max="<%= resourceLimits.maxMemory %>"
+              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">CPU (%) — max <%= resourceLimits.maxCpu %></label>
+            <input type="number" id="Cpu" value="100" min="10" max="<%= resourceLimits.maxCpu %>"
+              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Storage (GB) — max <%= resourceLimits.maxStorage %></label>
+            <input type="number" id="Storage" value="5" min="1" max="<%= resourceLimits.maxStorage %>"
+              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
+          </div>
+        </div>
+      </div>
+
+      <div id="errorMsg" class="hidden rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3">
+        <p class="text-sm text-red-600 dark:text-red-400" id="errorText"></p>
+      </div>
+
+      <button type="button" id="createBtn"
+        class="w-full rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 py-3 text-sm font-medium transition active:scale-[0.98]">
+        Create server
+      </button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const imageSelect  = document.getElementById('imageId');
+  const dockerSelect = document.getElementById('dockerImage');
+
+  imageSelect.addEventListener('change', function () {
+    const opt = this.options[this.selectedIndex];
+    const raw = opt.dataset.docker;
+    dockerSelect.innerHTML = '<option value="">Select variant</option>';
+    dockerSelect.disabled = true;
+    if (!raw) return;
+    try {
+      const images = JSON.parse(raw);
+      images.forEach(obj => {
+        Object.keys(obj).forEach(key => {
+          const o = document.createElement('option');
+          o.value = key;
+          o.textContent = key;
+          dockerSelect.appendChild(o);
+        });
+      });
+      dockerSelect.disabled = false;
+    } catch {}
+  });
+
+  document.getElementById('createBtn').addEventListener('click', async function () {
+    const btn = this;
+    const errBox  = document.getElementById('errorMsg');
+    const errText = document.getElementById('errorText');
+    errBox.classList.add('hidden');
+
+    const name        = document.getElementById('serverName').value.trim();
+    const description = document.getElementById('serverDescription').value.trim();
+    const nodeId      = document.getElementById('nodeId').value;
+    const imageId     = document.getElementById('imageId').value;
+    const dockerImage = document.getElementById('dockerImage').value;
+    const Memory      = document.getElementById('Memory').value;
+    const Cpu         = document.getElementById('Cpu').value;
+    const Storage     = document.getElementById('Storage').value;
+
+    if (!name || !nodeId || !imageId || !dockerImage) {
+      errText.textContent = 'Fill in all required fields.';
+      errBox.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+
+    try {
+      const r = await fetch('/create-server', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, description, nodeId, imageId, dockerImage, Memory, Cpu, Storage }),
+      });
+      const d = await r.json();
+      if (d.success) {
+        window.location.href = '/server/' + d.serverUUID;
+      } else {
+        errText.textContent = d.error || 'Something went wrong.';
+        errBox.classList.remove('hidden');
+        btn.disabled = false;
+        btn.textContent = 'Create server';
+      }
+    } catch {
+      errText.textContent = 'Network error. Try again.';
+      errBox.classList.remove('hidden');
+      btn.disabled = false;
+      btn.textContent = 'Create server';
+    }
+  });
+</script>
+
+<%- include('../components/footer') %>

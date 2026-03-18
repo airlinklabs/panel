@@ -3,8 +3,8 @@
 
 <style>
   .s-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: #fff;
+    border: 1px solid #e5e5e5;
     border-radius: 12px;
     cursor: pointer;
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -13,48 +13,55 @@
     gap: 12px;
     padding: 16px;
   }
-  .s-card:hover {
-    border-color: rgba(255,255,255,0.1);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-  }
+  .s-card:hover { border-color: #d4d4d4; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .dark .s-card { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); }
+  .dark .s-card:hover { border-color: rgba(255,255,255,0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
 
   .s-icon {
     width: 36px; height: 36px;
     border-radius: 8px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.07);
+    background: #f5f5f5;
+    border: 1px solid #e5e5e5;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden; flex-shrink: 0;
   }
+  .dark .s-icon { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.07); }
   .s-icon img { width: 22px; height: 22px; object-fit: contain; display: block; }
-  .s-icon svg { width: 18px; height: 18px; color: #404040; }
+  .s-icon svg { width: 18px; height: 18px; color: #737373; }
+  .dark .s-icon svg { color: #404040; }
 
   .s-badge {
     font-size: 11px; font-weight: 500;
     padding: 2px 7px; border-radius: 99px;
     flex-shrink: 0;
   }
-  .s-badge-working { background: rgba(34,197,94,0.12); color: #4ade80; }
-  .s-badge-beta    { background: rgba(234,179,8,0.12);  color: #facc15; }
-  .s-badge-wip     { background: rgba(249,115,22,0.12); color: #fb923c; }
-  .s-badge-installed { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+  .s-badge-working { background: rgba(34,197,94,0.1); color: #15803d; }
+  .dark .s-badge-working { background: rgba(34,197,94,0.12); color: #4ade80; }
+  .s-badge-beta    { background: rgba(234,179,8,0.1);  color: #a16207; }
+  .dark .s-badge-beta { background: rgba(234,179,8,0.12); color: #facc15; }
+  .s-badge-wip     { background: rgba(249,115,22,0.1); color: #c2410c; }
+  .dark .s-badge-wip { background: rgba(249,115,22,0.12); color: #fb923c; }
+  .s-badge-installed { background: rgba(99,102,241,0.1); color: #4338ca; }
+  .dark .s-badge-installed { background: rgba(99,102,241,0.15); color: #a5b4fc; }
 
   .s-tag {
-    font-size: 11px; color: #525252;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
+    font-size: 11px; color: #737373;
+    background: #f5f5f5;
+    border: 1px solid #e5e5e5;
     border-radius: 99px;
     padding: 1px 7px;
   }
+  .dark .s-tag { color: #525252; background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.06); }
 
   .s-skeleton {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: #f5f5f5;
+    border: 1px solid #e5e5e5;
     border-radius: 12px;
     height: 140px;
     animation: s-pulse 1.6s ease-in-out infinite;
   }
   @keyframes s-pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  .dark .s-skeleton { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.05); }
 
   /* ── Modal ── */
   .m-overlay {
@@ -67,10 +74,11 @@
     transition: opacity 0.18s;
   }
   .m-overlay.open { opacity: 1; pointer-events: auto; }
+  .dark .m-dialog { background: #141414; border-color: rgba(255,255,255,0.08); }
 
   .m-dialog {
-    background: #141414;
-    border: 1px solid rgba(255,255,255,0.08);
+    background: #fff;
+    border: 1px solid #e5e5e5;
     border-radius: 14px;
     width: 100%; max-width: 600px;
     max-height: 88vh;
@@ -89,22 +97,26 @@
   .m-tabs {
     display: flex;
     padding: 0 18px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid #e5e5e5;
     margin-top: 14px;
     flex-shrink: 0;
   }
   .m-tab {
     padding: 9px 14px;
     font-size: 13px; font-weight: 500;
-    color: #525252;
+    color: #737373;
     background: none; border: none;
     border-bottom: 2px solid transparent;
     margin-bottom: -1px;
     cursor: pointer;
     transition: color 0.12s, border-color 0.12s;
   }
-  .m-tab.on { color: #e5e5e5; border-bottom-color: #e5e5e5; }
-  .m-tab:hover:not(.on) { color: #a3a3a3; }
+  .m-tab.on { color: #171717; border-bottom-color: #171717; }
+  .m-tab:hover:not(.on) { color: #525252; }
+  .dark .m-tabs { border-bottom-color: rgba(255,255,255,0.06); }
+  .dark .m-tab { color: #525252; }
+  .dark .m-tab.on { color: #e5e5e5; border-bottom-color: #e5e5e5; }
+  .dark .m-tab:hover:not(.on) { color: #a3a3a3; }
 
   .m-body {
     flex: 1; overflow-y: auto;
@@ -117,44 +129,50 @@
   .m-step { display: flex; gap: 12px; margin-bottom: 16px; }
   .m-step-n {
     width: 20px; height: 20px; border-radius: 50%;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.09);
+    background: #f5f5f5;
+    border: 1px solid #e5e5e5;
     font-size: 10px; font-weight: 600; color: #737373;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; margin-top: 2px;
   }
   .m-step-body { flex: 1; min-width: 0; }
-  .m-step-title { font-size: 13px; font-weight: 500; color: #d4d4d4; margin-bottom: 6px; }
+  .m-step-title { font-size: 13px; font-weight: 500; color: #171717; margin-bottom: 6px; }
+  .dark .m-step-title { color: #d4d4d4; }
+  .dark .m-step-n { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.09); }
   .m-code {
-    background: #0d0d0d;
-    border: 1px solid rgba(255,255,255,0.06);
+    background: #f9fafb;
+    border: 1px solid #e5e5e5;
     border-radius: 7px;
     padding: 8px 11px;
   }
   .m-code code {
     font-family: ui-monospace, 'Cascadia Code', 'SF Mono', monospace;
-    font-size: 12px; color: #737373;
+    font-size: 12px; color: #525252;
     display: block; line-height: 1.7;
   }
 
   /* Progress block shown while installing */
   .m-progress {
-    background: #0d0d0d;
-    border: 1px solid rgba(255,255,255,0.06);
+    background: #f9fafb;
+    border: 1px solid #e5e5e5;
     border-radius: 8px;
     padding: 14px;
     margin-bottom: 16px;
   }
   .m-prog-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .m-prog-label { font-size: 12px; font-weight: 500; color: #d4d4d4; }
+  .m-prog-label { font-size: 12px; font-weight: 500; color: #171717; }
+  .dark .m-prog-label { color: #d4d4d4; }
+  .dark .m-code { background: #0d0d0d; border-color: rgba(255,255,255,0.06); }
+  .dark .m-code code { color: #737373; }
+  .dark .m-progress { background: #0d0d0d; border-color: rgba(255,255,255,0.06); }
   .m-prog-pct   { font-size: 11px; color: #525252; font-family: ui-monospace, monospace; }
   .m-prog-track {
     height: 3px;
-    background: rgba(255,255,255,0.06);
+    background: #e5e5e5;
     border-radius: 99px; overflow: hidden;
   }
   .m-prog-fill {
-    height: 100%; background: #fff;
+    height: 100%; background: #171717;
     border-radius: 99px;
     transition: width 0.35s ease;
     width: 0%;
@@ -166,7 +184,7 @@
   }
   .m-log-line {
     font-family: ui-monospace, monospace;
-    font-size: 11px; color: #404040;
+    font-size: 11px; color: #737373;
     display: flex; gap: 5px;
   }
   .m-log-line.ok  { color: #4ade80; }
@@ -175,19 +193,19 @@
   /* Note box */
   .m-note {
     display: flex; gap: 8px; align-items: flex-start;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: #f9fafb;
+    border: 1px solid #e5e5e5;
     border-radius: 8px;
     padding: 10px 12px;
     margin-top: 12px;
-    font-size: 12px; color: #525252; line-height: 1.6;
+    font-size: 12px; color: #737373; line-height: 1.6;
   }
   .m-note svg { flex-shrink: 0; margin-top: 1px; }
 
   /* Action buttons inside modal */
   .m-btn-install {
     display: inline-flex; align-items: center; gap: 6px;
-    background: #fff; color: #0a0a0a;
+    background: #171717; color: #fff;
     border: none; border-radius: 9px;
     padding: 7px 14px;
     font-size: 13px; font-weight: 500;
@@ -224,6 +242,30 @@
 
   .feat-row { display: flex; gap: 8px; align-items: flex-start; padding: 3px 0; font-size: 13px; color: #737373; }
   .feat-dot { width: 4px; height: 4px; border-radius: 50%; background: #404040; flex-shrink: 0; margin-top: 7px; }
+
+  /* JS-injected card content classes */
+  .s-name { font-size: 13px; font-weight: 600; color: #171717; }
+  .dark .s-name { color: #e5e5e5; }
+  .s-meta { font-size: 11px; color: #737373; margin-top: 2px; }
+  .dark .s-meta { color: #525252; }
+  .s-desc { font-size: 12px; color: #737373; line-height: 1.65; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .dark .s-desc { color: #525252; }
+  .s-count { font-size: 11px; color: #737373; flex-shrink: 0; display: flex; align-items: center; gap: 3px; }
+  .dark .s-count { color: #404040; }
+  .s-count-icon { width: 12px; height: 12px; }
+  .s-note-icon { width: 14px; height: 14px; color: #737373; }
+  .dark .s-note-icon { color: #404040; }
+  .s-arrow { color: #737373; }
+  .dark .s-arrow { color: #525252; }
+  .s-icon-svg { width: 18px; height: 18px; color: #737373; }
+  .dark .s-icon-svg { color: #404040; }
+
+  /* Dark mode overrides for adaptive modal elements */
+  .dark .m-note { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); }
+  .dark .m-prog-track { background: rgba(255,255,255,0.06); }
+  .dark .m-prog-fill { background: #fff; }
+  .dark .m-log-line { color: #404040; }
+  .dark .m-btn-install { background: #fff; color: #0a0a0a; }
 </style>
 
 <main class="h-screen m-auto">
@@ -487,17 +529,17 @@
           </div>
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <span style="font-size:13px;font-weight:600;color:#e5e5e5;">${esc(a.name)}</span>
+              <span class="s-name">${esc(a.name)}</span>
               ${inst ? '<span class="s-badge s-badge-installed">Installed</span>' : ''}
               <span class="${badgeClass(a.status)}" style="margin-left:auto;">${esc(a.status||'working')}</span>
             </div>
-            <p style="font-size:11px;color:#525252;margin-top:2px;">by ${esc(a.author||'Unknown')} · ${esc(a.version||'')}</p>
+            <p class="s-meta">by ${esc(a.author||'Unknown')} · ${esc(a.version||'')}</p>
           </div>
         </div>
-        <p style="font-size:12px;color:#525252;line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${esc(a.description)}</p>
+        <p class="s-desc">${esc(a.description)}</p>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
           <div style="display:flex;gap:4px;flex-wrap:wrap;">${tags}</div>
-          ${count > 0 ? `<span style="font-size:11px;color:#404040;flex-shrink:0;display:flex;align-items:center;gap:3px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/></svg>${count}</span>` : ''}
+          ${count > 0 ? `<span class="s-count"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="s-count-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/></svg>${count}</span>` : ''}
         </div>
       </div>`;
     }).join('');
@@ -535,7 +577,7 @@
 
     // Icon
     const iconEl = document.getElementById('mIcon');
-    iconEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:18px;height:18px;color:#404040;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/></svg>';
+    iconEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="s-icon-svg"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/></svg>';
     if (addon.icon) {
       const img = new Image();
       img.style.cssText = 'width:22px;height:22px;object-fit:contain;display:block;';
@@ -586,7 +628,7 @@
     if (addon.installNote) {
       const note = document.createElement('div');
       note.className = 'm-note';
-      note.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:14px;height:14px;color:#404040;"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg><span>${esc(addon.installNote)}</span>`;
+      note.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="s-note-icon"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg><span>${esc(addon.installNote)}</span>`;
       stepsEl.appendChild(note);
     }
 
@@ -714,7 +756,7 @@
     function log(text, cls) {
       const line = document.createElement('div');
       line.className = `m-log-line ${cls || ''}`;
-      line.innerHTML = `<span style="color:#333;">›</span><span>${esc(text)}</span>`;
+      line.innerHTML = `<span class="s-arrow">›</span><span>${esc(text)}</span>`;
       logEl.appendChild(line);
       logEl.scrollTop = logEl.scrollHeight;
     }

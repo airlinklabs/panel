@@ -1,17 +1,41 @@
 <!-- Mobile top bar -->
-<div class="mobile-top-bar fixed top-0 left-0 right-0 z-50 h-14 flex items-center justify-between px-4 bg-white dark:bg-[#141414] border-b border-neutral-200 dark:border-white/5">
-  <a href="/" class="flex items-center gap-2 min-w-0 flex-1 mr-3">
-    <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="logo-bg h-8 w-8 rounded-lg bg-neutral-950/90 dark:bg-transparent p-0.5 shrink-0">
-    <span class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= settings.title %></span>
-  </a>
-  <div class="flex items-center gap-2.5">
-    <button id="theme-toggle" class="w-11 h-6 flex items-center bg-gray-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500">
-      <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
-    </button>
-    <a href="/account">
-      <img class="h-8 w-8 rounded-lg border border-neutral-200 dark:border-neutral-700" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="Avatar">
+<div class="mobile-top-bar fixed top-0 left-0 right-0 z-50 h-14 bg-white dark:bg-[#141414] border-b border-neutral-200 dark:border-white/5">
+  <div id="topbar-default" class="flex items-center justify-between h-14 px-4">
+    <a href="/" class="flex items-center gap-2 min-w-0 flex-1 mr-3">
+      <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="logo-bg h-8 w-8 rounded-lg bg-neutral-950/90 dark:bg-transparent p-0.5 shrink-0">
+      <span class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= settings.title %></span>
     </a>
+    <div class="flex items-center gap-2.5 shrink-0">
+      <button id="mobile-search-open" class="p-1.5 rounded-lg text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+          <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
+        </svg>
+      </button>
+      <button id="theme-toggle" class="w-11 h-6 flex items-center bg-gray-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500">
+        <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
+      </button>
+      <a href="/account">
+        <img class="h-8 w-8 rounded-lg border border-neutral-200 dark:border-neutral-700" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="Avatar">
+      </a>
+    </div>
   </div>
+  <div id="topbar-search" class="hidden items-center h-14 px-3 gap-2">
+    <button id="mobile-search-close" class="p-1.5 text-neutral-500 dark:text-neutral-400 shrink-0">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+        <path fill-rule="evenodd" d="M7.72 12.53a.75.75 0 0 1 0-1.06l7.5-7.5a.75.75 0 1 1 1.06 1.06L9.31 12l6.97 6.97a.75.75 0 1 1-1.06 1.06l-7.5-7.5Z" clip-rule="evenodd" />
+      </svg>
+    </button>
+    <div class="flex-1 flex items-center bg-neutral-100 dark:bg-neutral-800 rounded-xl px-3 py-2 gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-neutral-400 shrink-0">
+        <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
+      </svg>
+      <input id="mobileSearchInput" type="search" autocomplete="off" placeholder="Search navigation..."
+        class="flex-1 bg-transparent text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none">
+    </div>
+  </div>
+</div>
+
+<div id="mobileSearchResults" class="hidden fixed top-14 left-0 right-0 z-40 bg-white dark:bg-[#141414] border-b border-neutral-200 dark:border-white/5 max-h-[60dvh] overflow-y-auto shadow-lg">
 </div>
 
 <%
@@ -138,5 +162,81 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
   ov.style.right  = '0';
   ov.style.bottom = '64px';
   ov.style.display = 'flex';
+})();
+</script>
+<script>
+(function () {
+  var openBtn    = document.getElementById('mobile-search-open');
+  var closeBtn   = document.getElementById('mobile-search-close');
+  var defaultBar = document.getElementById('topbar-default');
+  var searchBar  = document.getElementById('topbar-search');
+  var input      = document.getElementById('mobileSearchInput');
+  var resultsEl  = document.getElementById('mobileSearchResults');
+
+  if (!openBtn || !input || !resultsEl) return;
+
+  function renderResults(term) {
+    resultsEl.innerHTML = '';
+    if (!term) { resultsEl.classList.add('hidden'); return; }
+
+    var links = Array.from(document.querySelectorAll('.mobile-nav-link, .nav-link'));
+    var lower = term.toLowerCase();
+
+    var matches = links.filter(function (link) {
+      var text = (link.textContent || '').toLowerCase();
+      var data = (link.getAttribute('data-search') || '').toLowerCase();
+      return text.includes(lower) || data.includes(lower);
+    });
+
+    if (matches.length === 0) {
+      var p = document.createElement('p');
+      p.className = 'px-4 py-3 text-sm text-neutral-400';
+      p.textContent = 'No results.';
+      resultsEl.appendChild(p);
+    } else {
+      matches.forEach(function (link) {
+        var a = document.createElement('a');
+        a.href = link.href || '#';
+        a.className = 'flex items-center gap-3 px-4 py-3 border-b border-neutral-100 dark:border-white/5 last:border-0 hover:bg-neutral-50 dark:hover:bg-white/5 transition';
+        var icon = link.querySelector('svg');
+        if (icon) { var ic = icon.cloneNode(true); ic.className = 'h-5 w-5 text-neutral-400 shrink-0'; a.appendChild(ic); }
+        var span = document.createElement('span');
+        span.className = 'text-sm text-neutral-800 dark:text-white';
+        span.textContent = link.textContent.trim();
+        a.appendChild(span);
+        resultsEl.appendChild(a);
+      });
+    }
+    resultsEl.classList.remove('hidden');
+  }
+
+  openBtn.addEventListener('click', function () {
+    defaultBar.classList.add('hidden');
+    searchBar.classList.remove('hidden');
+    searchBar.classList.add('flex');
+    input.value = '';
+    resultsEl.classList.add('hidden');
+    setTimeout(function () { input.focus(); }, 60);
+  });
+
+  function closeSearch() {
+    searchBar.classList.add('hidden');
+    searchBar.classList.remove('flex');
+    defaultBar.classList.remove('hidden');
+    resultsEl.classList.add('hidden');
+    input.value = '';
+  }
+
+  closeBtn.addEventListener('click', closeSearch);
+
+  var debounce;
+  input.addEventListener('input', function () {
+    clearTimeout(debounce);
+    debounce = setTimeout(function () { renderResults(input.value.trim()); }, 120);
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSearch();
+  });
 })();
 </script>

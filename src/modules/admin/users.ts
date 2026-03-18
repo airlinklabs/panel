@@ -269,7 +269,7 @@ const adminModule: Module = {
             return;
           }
 
-          const { email, username, description, isAdmin, password } = req.body;
+          const { email, username, description, isAdmin, password, serverLimit, maxMemory, maxCpu, maxStorage } = req.body;
 
           // Check if email or username is already taken by another user
           if (email && email !== targetUser.email) {
@@ -310,6 +310,20 @@ const adminModule: Module = {
           // Handle isAdmin field (convert to boolean)
           if (isAdmin !== undefined) {
             updateData.isAdmin = isAdmin === true || isAdmin === 'true';
+          }
+
+          // Handle optional resource limits — null means "use global default"
+          if (serverLimit !== undefined) {
+            updateData.serverLimit = serverLimit === '' || serverLimit === null ? null : parseInt(serverLimit, 10);
+          }
+          if (maxMemory !== undefined) {
+            updateData.maxMemory = maxMemory === '' || maxMemory === null ? null : parseInt(maxMemory, 10);
+          }
+          if (maxCpu !== undefined) {
+            updateData.maxCpu = maxCpu === '' || maxCpu === null ? null : parseInt(maxCpu, 10);
+          }
+          if (maxStorage !== undefined) {
+            updateData.maxStorage = maxStorage === '' || maxStorage === null ? null : parseInt(maxStorage, 10);
           }
 
           // Handle password update if provided

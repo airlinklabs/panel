@@ -16,9 +16,18 @@
 
 /* manage.ejs — daemon warning */
 #daemonOfflineWarning,
+#daemonOfflineWarningRow,
 
 /* manage.ejs — install banner */
 #installBanner,
+
+/* manage.ejs — server page body and stats cards */
+#server-page-body,
+.console-wrap,
+
+/* dashboard — folder popup, new folder dialog */
+.folder-popup-overlay .folder-popup,
+.dialog-overlay .dialog-box,
 
 /* overview.ejs — update check results */
 #updateStatus,
@@ -100,7 +109,12 @@
 /* Enter state — what the element looks like the instant it becomes visible */
 @starting-style {
   #daemonOfflineWarning,
+  #daemonOfflineWarningRow,
   #installBanner,
+  #server-page-body,
+  .console-wrap,
+  .folder-popup-overlay .folder-popup,
+  .dialog-overlay .dialog-box,
   #updateStatus,
   #performUpdateBtn,
   #updateInfo,
@@ -157,6 +171,39 @@
   transition:
     transform 0.36s cubic-bezier(0.4, 0, 0.2, 1),
     opacity   0.36s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Server & folder card load-in ─────────────────────────────────────────
+   Cards animate in on page load with a stagger driven by CSS custom
+   properties set inline. Each card gets --i: N where N is its index.
+*/
+.server-card,
+.folder-card {
+  animation: card-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Admin table rows load-in ─────────────────────────────────────────────*/
+.img-row,
+.addon-row {
+  animation: row-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 30ms);
+}
+
+@keyframes row-enter {
+  from { opacity: 0; transform: translateX(-4px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Stats cards load-in ──────────────────────────────────────────────────*/
+.stats-card {
+  animation: card-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
 }
 
 /* ── Never animate these ──────────────────────────────────────────────────*/

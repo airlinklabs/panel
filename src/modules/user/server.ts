@@ -47,23 +47,17 @@ function getImageFeatures(image: any): string[] {
   }
 }
 
-function buildEnvVariables(variables: string | null | ServerVariable[]): Record<string, string | number | boolean> {
+function buildEnvVariables(variables: string | null | ServerVariable[]): Record<string, string> {
   if (!variables) return {};
   try {
-    const vars = Array.isArray(variables) ? variables : JSON.parse(variables) as ServerVariable[];
-    const env: Record<string, string | number | boolean> = {};
+    const vars = Array.isArray(variables) ? variables : JSON.parse(variables) as any[];
+    const env: Record<string, string> = {};
     for (const v of vars) {
-      if (!v.env || v.value === undefined || !v.type) continue;
-      switch (v.type) {
-        case 'boolean':
-          env[v.env] = v.value === 1 || v.value === '1' ? 'true' : 'false';
-          break;
-        case 'number':
-          env[v.env] = Number(v.value);
-          break;
-        default:
-          env[v.env] = String(v.value);
-      }
+      // Support both Pterodactyl egg format (env_variable) and legacy format (env)
+      const key = v.env_variable || v.env;
+      if (!key) continue;
+      const raw = v.value !== undefined ? v.value : (v.default_value ?? '');
+      env[key] = String(raw);
     }
     return env;
   } catch {
@@ -168,7 +162,8 @@ const dashboardModule: Module = {
       },
     );
 
-    // Get server status
+    // Get server status — also includes install state so the install banner
+    // poller can detect completion without a separate endpoint.
     router.get(
       '/server/:id/status',
       isAuthenticatedForServer('id'),
@@ -182,28 +177,32 @@ const dashboardModule: Module = {
           });
 
           if (!server) {
-            res
-              .status(404)
-              .json({ status: 'error', message: 'Server not found' });
+            res.status(404).json({ status: 'error', message: 'Server not found' });
             return;
           }
 
-          const serverInfos = {
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            serverUUID: server.UUID,
-            nodeKey: server.node.key,
-          };
+          const { node } = server;
 
-          const serverStatus = await getServerStatus(serverInfos);
-          res.status(200).json(serverStatus);
+          // Run runtime status and install state checks in parallel so neither
+          // one blocks the other — total latency is max(A, B) not A + B.
+          const [serverStatus, installResult] = await Promise.all([
+            getServerStatus({
+              nodeAddress: node.address,
+              nodePort: node.port,
+              serverUUID: server.UUID,
+              nodeKey: node.key,
+            }),
+            axios.get(
+              `http://${node.address}:${node.port}/container/status/${server.UUID}`,
+              { auth: { username: 'Airlink', password: node.key }, timeout: 4000 }
+            ).then(r => r.data.state as string).catch(() => null),
+          ]);
+
+          res.status(200).json({ ...serverStatus, state: installResult });
           return;
         } catch (error) {
           logger.error('Error fetching server status:', error);
-          res.status(500).json({
-            status: 'error',
-            message: 'Failed to fetch server status',
-          });
+          res.status(500).json({ status: 'error', message: 'Failed to fetch server status' });
           return;
         }
       },
@@ -304,7 +303,7 @@ const dashboardModule: Module = {
                 },
                 data: {
                   id: String(serverId),
-                  stopCmd: 'stop',
+                  stopCmd: server.image?.stop || 'stop',
                 },
               };
 
@@ -359,6 +358,9 @@ const dashboardModule: Module = {
 
             const restartPorts = getPrimaryPort(server.Ports);
             const restartEnv = buildEnvVariables(server.Variables);
+            restartEnv['SERVER_PORT']   = String(restartPorts ?? '');
+            restartEnv['SERVER_MEMORY'] = String(server.Memory);
+            restartEnv['SERVER_CPU']    = String(server.Cpu);
 
             if (!server.dockerImage) {
               res.status(400).json({ error: 'Docker image not found.' });
@@ -376,7 +378,7 @@ const dashboardModule: Module = {
                 id: String(serverId),
                 image: String(restartImage),
                 ports: restartPorts,
-                Memory: server.Memory * 1024,
+                Memory: server.Memory,
                 Cpu: server.Cpu,
                 env: restartEnv,
                 StartCommand: server.StartCommand,
@@ -391,6 +393,9 @@ const dashboardModule: Module = {
           const ports = getPrimaryPort(server.Ports);
 
           const envVariables = buildEnvVariables(server.Variables);
+          envVariables['SERVER_PORT']   = String(ports ?? '');
+          envVariables['SERVER_MEMORY'] = String(server.Memory);
+          envVariables['SERVER_CPU']    = String(server.Cpu);
 
           if (!server.dockerImage) {
             res.status(400).json({ error: 'Docker image not found.' });
@@ -413,7 +418,7 @@ const dashboardModule: Module = {
               id: String(serverId),
               image: String(ServerImage),
               ports: ports,
-              Memory: server.Memory * 1024,
+              Memory: server.Memory,
               Cpu: server.Cpu,
               env: envVariables,
               StartCommand: server.StartCommand,
@@ -1767,7 +1772,7 @@ const dashboardModule: Module = {
 
           const server = await prisma.server.findUnique({
             where: { UUID: getParamAsString(serverId) },
-            include: { node: true },
+            include: { node: true, image: true },
           });
 
           if (!server) {
@@ -1839,7 +1844,7 @@ const dashboardModule: Module = {
                 },
                 data: {
                   id: String(serverId),
-                  stopCmd: 'stop',
+                  stopCmd: server.image?.stop || 'stop',
                 },
               };
 
@@ -1854,6 +1859,9 @@ const dashboardModule: Module = {
                 .pop();
 
               const envVariables = buildEnvVariables(server.Variables);
+              envVariables['SERVER_PORT']   = String(ports ?? '');
+              envVariables['SERVER_MEMORY'] = String(server.Memory);
+              envVariables['SERVER_CPU']    = String(server.Cpu);
 
               if (!server.dockerImage) {
                 res.status(400).json({ error: 'Docker image not found.' });
@@ -1878,7 +1886,7 @@ const dashboardModule: Module = {
                   id: String(serverId),
                   image: String(ServerImage),
                   ports: ports,
-                  Memory: server.Memory * 1024,
+                  Memory: server.Memory,
                   Cpu: server.Cpu,
                   env: envVariables,
                   StartCommand: startCommand,
@@ -2051,7 +2059,7 @@ const dashboardModule: Module = {
                 },
                 data: {
                   id: String(serverId),
-                  stopCmd: 'stop',
+                  stopCmd: server.image?.stop || 'stop',
                 },
               };
 
@@ -2068,6 +2076,9 @@ const dashboardModule: Module = {
                 .pop();
 
               const envVariables = buildEnvVariables(server.Variables);
+              envVariables['SERVER_PORT']   = String(ports ?? '');
+              envVariables['SERVER_MEMORY'] = String(server.Memory);
+              envVariables['SERVER_CPU']    = String(server.Cpu);
 
               const startRequestData = {
                 method: 'POST',
@@ -2083,7 +2094,7 @@ const dashboardModule: Module = {
                   id: String(serverId),
                   image: dockerImage,
                   ports: ports,
-                  Memory: server.Memory * 1024,
+                  Memory: server.Memory,
                   Cpu: server.Cpu,
                   env: envVariables,
                   StartCommand: server.StartCommand,
@@ -2234,7 +2245,7 @@ const dashboardModule: Module = {
 
           const server = await prisma.server.findUnique({
             where: { UUID: getParamAsString(serverId) },
-            include: { node: true },
+            include: { node: true, image: true },
           });
 
           if (!server) {
@@ -2279,7 +2290,7 @@ const dashboardModule: Module = {
                 },
                 data: {
                   id: String(serverId),
-                  stopCmd: 'stop',
+                  stopCmd: server.image?.stop || 'stop',
                 },
               };
 
@@ -2296,6 +2307,9 @@ const dashboardModule: Module = {
                 .pop();
 
               const envVariables = buildEnvVariables(variables);
+              envVariables['SERVER_PORT']   = String(ports ?? '');
+              envVariables['SERVER_MEMORY'] = String(server.Memory);
+              envVariables['SERVER_CPU']    = String(server.Cpu);
 
               if (!server.dockerImage) {
                 logger.error(
@@ -2324,7 +2338,7 @@ const dashboardModule: Module = {
                   id: String(serverId),
                   image: String(ServerImage),
                   ports: ports,
-                  Memory: server.Memory * 1024,
+                  Memory: server.Memory,
                   Cpu: server.Cpu,
                   env: envVariables,
                   StartCommand: server.StartCommand,
@@ -2482,7 +2496,7 @@ const dashboardModule: Module = {
 
           const server = await prisma.server.findUnique({
             where: { UUID: getParamAsString(serverId) },
-            include: { node: true },
+            include: { node: true, image: true },
           });
 
           if (!server) {
@@ -2502,7 +2516,7 @@ const dashboardModule: Module = {
             },
             data: {
               id: String(serverId),
-              stopCmd: 'stop',
+              stopCmd: server.image?.stop || 'stop',
             },
           };
 
@@ -2514,6 +2528,9 @@ const dashboardModule: Module = {
           const ports = getPrimaryPort(server.Ports);
 
           const envVariables = buildEnvVariables(server.Variables);
+          envVariables['SERVER_PORT']   = String(ports ?? '');
+          envVariables['SERVER_MEMORY'] = String(server.Memory);
+          envVariables['SERVER_CPU']    = String(server.Cpu);
 
           if (!server.dockerImage) {
             res.status(400).json({ error: 'Docker image not found.' });
@@ -2536,7 +2553,7 @@ const dashboardModule: Module = {
               id: String(serverId),
               image: String(ServerImage),
               ports: ports,
-              Memory: server.Memory * 1024,
+              Memory: server.Memory,
               Cpu: server.Cpu,
               env: envVariables,
               StartCommand: server.StartCommand,
@@ -2702,6 +2719,12 @@ const dashboardModule: Module = {
                     `Reinstalling server ${serverToReinstall.UUID} with environment variables: ${JSON.stringify(env)}`,
                   );
 
+                  let reinstallDockerImage: string | undefined;
+                  try {
+                    const parsed = JSON.parse(serverToReinstall.dockerImage || '{}');
+                    reinstallDockerImage = Object.values(parsed)[0] as string | undefined;
+                  } catch { /* leave undefined */ }
+
                   const installRequestData = {
                     method: 'POST',
                     url: `http://${serverToReinstall.node.address}:${serverToReinstall.node.port}/container/install`,
@@ -2714,6 +2737,7 @@ const dashboardModule: Module = {
                     },
                     data: {
                       id: serverToReinstall.UUID,
+                      image: reinstallDockerImage,
                       env: env,
                       scripts: scripts.install.map(
                         (script: {
