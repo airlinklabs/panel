@@ -61,7 +61,7 @@
       <% } else { %>
 
       <div class="mx-8 mt-5 mb-1">
-        <input id="searchInput" type="text" placeholder="Filter images…" class="w-56 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
+        <input id="imageFilterInput" type="text" placeholder="Filter images…" class="w-56 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
       </div>
 
       <div class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40">
@@ -168,7 +168,7 @@ document.getElementById('deleteConfirm').addEventListener('click', async functio
   else { showToast('Failed.', 'error'); this.textContent = 'Delete'; this.disabled = false; closeDelete(); }
 });
 
-document.getElementById('searchInput')?.addEventListener('input', function() {
+document.getElementById('imageFilterInput')?.addEventListener('input', function() {
   const q = this.value.toLowerCase().trim();
   let n = 0;
   document.querySelectorAll('.img-row').forEach(r => {

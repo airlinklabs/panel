@@ -32,13 +32,16 @@ export function installDaemonRequestInterceptor(): void {
 
     const method = (config.method || 'GET').toUpperCase();
 
-    // Derive the path from the URL — we only sign path + query, not host.
+    // Sign only the pathname — never include query string.
+    // axios serialises config.params into the query string AFTER the interceptor
+    // runs, so including parsed.search here would produce a different string than
+    // what actually goes over the wire, causing every parameterised GET to fail.
     let urlPath = '/';
     try {
       const parsed = new URL(config.url || '', 'http://localhost');
-      urlPath = parsed.pathname + parsed.search;
+      urlPath = parsed.pathname;
     } catch {
-      urlPath = config.url || '/';
+      urlPath = (config.url || '/').split('?')[0];
     }
 
     const body = config.data

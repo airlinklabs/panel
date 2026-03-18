@@ -122,7 +122,7 @@
       </div>
 
       <div class="mx-8 mt-5 flex items-center gap-3 flex-wrap mb-1">
-        <input id="searchInput" type="text" placeholder="Search addons…" class="w-52 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
+        <input id="addonStoreFilterInput" type="text" placeholder="Search addons…" class="w-52 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
         <div id="tagFilters" class="flex gap-2 flex-wrap"></div>
         <span id="statusText" class="text-xs text-neutral-400 dark:text-neutral-500 ml-auto whitespace-nowrap"></span>
       </div>
@@ -252,7 +252,7 @@
   }
 
   function filtered() {
-    const q = (document.getElementById('searchInput').value||'').toLowerCase().trim();
+    const q = (document.getElementById('addonStoreFilterInput').value||'').toLowerCase().trim();
     return allAddons.filter(a => {
       const mq = !q || (a.name||'').toLowerCase().includes(q) || (a.description||'').toLowerCase().includes(q);
       const mt = !activeTag || (a.tags||[]).includes(activeTag);
@@ -289,9 +289,9 @@
     show('tableWrap');
   }
 
-  document.getElementById('searchInput').addEventListener('input', () => render(filtered()));
+  document.getElementById('addonStoreFilterInput').addEventListener('input', () => render(filtered()));
   document.getElementById('clearSearch').addEventListener('click', () => {
-    document.getElementById('searchInput').value = ''; activeTag = null;
+    document.getElementById('addonStoreFilterInput').value = ''; activeTag = null;
     document.querySelectorAll('#tagFilters button').forEach(b => b.classList.remove('on'));
     render(filtered());
   });

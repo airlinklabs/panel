@@ -437,7 +437,7 @@ connectWebSocket();
     // OSC escape:      ESC ] ... ST/BEL
     // Other escapes:   ESC <single-char>
     const ANSI_RE   = /\x1b(?:\[[0-9;]*[A-Za-z]|\][^\x07\x1b]*(?:\x07|\x1b\\)|[@-Z\\-_]|[\u0080-\u009F])/g;
-    const PROMPT_RE = /(?:container|root)@\S+?(?:[^$#\r\n]*?)[$#]\s*/g;
+    const PROMPT_RE = /(?:[a-zA-Z0-9_-]+)@[^\s:#\])\r\n]+(?:[^$#\r\n]*?)[$#]\s*/g;
 
     function maskPrompts(raw) {
         const plain = raw.replace(ANSI_RE, '');
