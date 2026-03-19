@@ -71,10 +71,10 @@ cp example.env .env
 # Edit .env — set DATABASE_URL and APP_SECRET at minimum
 
 npm run build
-npm start
+npm run start
 ```
 
-`npm start` applies database migrations automatically before launch.
+`npm run start` applies database migrations automatically before launch.
 
 ### Running with pm2
 
