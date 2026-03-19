@@ -12,13 +12,15 @@
     width: 100%; max-width: 420px; flex-shrink: 0;
     display: flex; flex-direction: column; justify-content: center;
     padding: 48px 40px;
-    background: white;
-    border-right: 1px solid #e5e5e5;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-right: 1px solid rgba(0,0,0,0.08);
     position: relative; z-index: 1;
   }
   html.dark .auth-panel {
-    background: #141414;
-    border-right-color: rgba(255,255,255,0.06);
+    background: rgba(20,20,20,0.08);
+    border-right-color: rgba(255,255,255,0.08);
   }
   .auth-image {
     flex: 1;
@@ -43,13 +45,13 @@
     box-sizing: border-box; font-family: inherit;
   }
   html.dark .auth-input {
-    background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.09); color: #e5e5e5;
+    background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.08); color: #e5e5e5;
   }
   .auth-input:focus {
     border-color: #a3a3a3; box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
   }
   html.dark .auth-input:focus {
-    border-color: rgba(255,255,255,0.22); box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.08); box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
   }
   .auth-input::placeholder { color: #a3a3a3; }
   html.dark .auth-input::placeholder { color: #525252; }
@@ -89,7 +91,7 @@
 
   .spinner {
     width: 15px; height: 15px; flex-shrink: 0;
-    border: 2px solid rgba(255,255,255,0.35); border-top-color: white;
+    border: 2px solid rgba(255,255,255,0.08); border-top-color: white;
     border-radius: 50%; animation: spin 0.65s linear infinite; display: none;
   }
   html.dark .spinner { border-color: rgba(0,0,0,0.25); border-top-color: #0a0a0a; }
@@ -119,6 +121,7 @@
         <% if (req.query.err === 'missing_credentials') { %>Missing username or password.
         <% } else if (['invalid_credentials','incorrect_password','user_not_found'].includes(req.query.err)) { %>Incorrect username or password.
         <% } else if (req.query.err === 'database_error') { %>Server error — try again shortly.
+        <% } else if (req.query.err === 'account_locked') { %>Account temporarily locked. Try again in <%= req.query.wait || 'a few' %> minute<%= req.query.wait == 1 ? '' : 's' %>.
         <% } else { %>Something went wrong. Try again.<% } %>
       </p>
     </div>

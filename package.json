@@ -1,6 +1,6 @@
 {
-  "name": "airlink-panel",
-  "version": "1.7.137",
+  "name": "Airlink",
+  "version": "2.0.0-rc1",
   "description": "Airlink is a simple-to-use game server management panel",
   "repository": {
     "type": "git",
@@ -9,12 +9,12 @@
   "author": "AirlinkLabs",
   "license": "MIT",
   "scripts": {
-    "start": "node dist/app.js",
+    "start": "npx prisma db push --skip-generate && node dist/app.js",
     "start:dev": "concurrently \"npm run dev\"",
-    "dev": "npx prisma migrate dev --name init && npx prisma generate && nodemon",
+    "dev": "npx prisma migrate deploy && npx prisma generate && nodemon",
     "build": "tsc && npx tailwindcss -i ./public/tw.css -o ./public/styles.css",
     "build:css": "npx tailwindcss -i ./public/tw.css -o ./public/styles.css --watch",
-    "migrate:dev": "npx prisma migrate dev --name init && npx prisma generate",
+    "migrate:dev": "npx prisma migrate dev",
     "migrate:deploy": "npx prisma migrate deploy && npx prisma generate",
     "lint": "eslint src --fix",
     "format": "prettier --write src/"

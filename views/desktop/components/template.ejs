@@ -1,6 +1,6 @@
 <!-- Sidebar -->
 <div id="pc-sidebar" class="sidebar transition hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-56 lg:flex-col left-0">
-  <div id="pc-sidebar2" class="flex flex-col h-full bg-white dark:bg-transparent border border-neutral-800/10 dark:border-white/5">
+  <div id="pc-sidebar2" class="flex flex-col h-full bg-white/8 dark:bg-[#141414]/8 backdrop-blur-xl border-r border-neutral-200/30 dark:border-white/5">
 
     <!-- Static top: logo -->
     <div class="pl-6 pt-4 pb-4 flex min-w-0 shrink-0">
@@ -163,7 +163,7 @@
     if (account) {
       var onAccount = path === '/account' || path.startsWith('/account/');
       account.style.background = onAccount
-        ? (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)')
+        ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')
         : '';
     }
     if (logout) {
@@ -181,7 +181,7 @@
 </script>
 
 <div id="colcont" class="lg:pl-56">
-  <div class="fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-neutral-50/80 dark:bg-[#141414]/80 backdrop-blur-md border-b border-neutral-200/60 dark:border-white/5 px-4 sm:gap-x-6 sm:px-4 lg:px-4">
+  <div class="fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-white/8 dark:bg-[#141414]/8 backdrop-blur-xl border-b border-neutral-200/30 dark:border-white/5 px-4 sm:gap-x-6 sm:px-4 lg:px-4">
     <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
       <div class="relative flex flex-1 flex-col">
 

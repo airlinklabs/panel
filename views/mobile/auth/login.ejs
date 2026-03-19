@@ -1,6 +1,8 @@
 <%- include('../components/header', { title: 'Sign in' }) %>
 
 <style>
+  /* Auth pages are full-bleed — no topbar/bottomnav padding */
+  body { padding: 0 !important; }
   ::-webkit-scrollbar { display: none; }
   body, html { height: 100%; margin: 0; }
 
@@ -18,21 +20,37 @@
   }
   html.dark .auth-panel {
     background: #141414;
-    border-right-color: rgba(255,255,255,0.06);
+    border-right-color: rgba(255,255,255,0.08);
   }
   .auth-image {
     flex: 1;
     background: url('<%= settings.loginWallpaper || "https://i.imgur.com/j9BodUY.jpeg" %>') center/cover no-repeat;
   }
 
-  /* Mobile: full-screen centered card */
+  /* Mobile: wallpaper fills background, form sits on top */
   @media (max-width: 768px) {
-    .auth-split { display: block; min-height: 100vh; }
-    .auth-panel {
-      max-width: 100%; border-right: none; padding: 40px 24px;
-      min-height: 100vh; justify-content: center;
+    .auth-split { position: relative; display: block; min-height: 100vh; }
+    .auth-image {
+      position: fixed;
+      inset: 0;
+      display: block;
+      z-index: 0;
     }
-    .auth-image { display: none; }
+    .auth-panel {
+      position: relative;
+      z-index: 1;
+      max-width: 100%;
+      border-right: none;
+      padding: 40px 24px;
+      min-height: 100vh;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    html.dark .auth-panel {
+      background: rgba(20, 20, 20, 0.88);
+    }
   }
 
   .auth-input {
@@ -43,13 +61,13 @@
     box-sizing: border-box; font-family: inherit;
   }
   html.dark .auth-input {
-    background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.09); color: #e5e5e5;
+    background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.08); color: #e5e5e5;
   }
   .auth-input:focus {
     border-color: #a3a3a3; box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
   }
   html.dark .auth-input:focus {
-    border-color: rgba(255,255,255,0.22); box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.08); box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
   }
   .auth-input::placeholder { color: #a3a3a3; }
   html.dark .auth-input::placeholder { color: #525252; }
@@ -89,7 +107,7 @@
 
   .spinner {
     width: 15px; height: 15px; flex-shrink: 0;
-    border: 2px solid rgba(255,255,255,0.35); border-top-color: white;
+    border: 2px solid rgba(255,255,255,0.08); border-top-color: white;
     border-radius: 50%; animation: spin 0.65s linear infinite; display: none;
   }
   html.dark .spinner { border-color: rgba(0,0,0,0.25); border-top-color: #0a0a0a; }
@@ -119,6 +137,7 @@
         <% if (req.query.err === 'missing_credentials') { %>Missing username or password.
         <% } else if (['invalid_credentials','incorrect_password','user_not_found'].includes(req.query.err)) { %>Incorrect username or password.
         <% } else if (req.query.err === 'database_error') { %>Server error — try again shortly.
+        <% } else if (req.query.err === 'account_locked') { %>Account temporarily locked. Try again in <%= req.query.wait || 'a few' %> minute<%= req.query.wait == 1 ? '' : 's' %>.
         <% } else { %>Something went wrong. Try again.<% } %>
       </p>
     </div>

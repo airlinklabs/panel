@@ -452,6 +452,27 @@ const accountModule: Module = {
       },
     );
 
+
+    router.get(
+      '/credits',
+      isAuthenticated(),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const [user, settings] = await Promise.all([
+            prisma.users.findUnique({ where: { id: userId } }),
+            prisma.settings.findUnique({ where: { id: 1 } }),
+          ]);
+          if (!user) return res.redirect('/login');
+          const pkg = JSON.parse(require('fs').readFileSync(require('path').join(process.cwd(), 'package.json'), 'utf-8'));
+          res.render('user/credits', { user, req, settings, version: pkg.version });
+        } catch (error) {
+          logger.error('Error loading credits page:', error);
+          res.redirect('/');
+        }
+      },
+    );
+
     return router;
   },
 };

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { daemonSchemeSync } from '../core/daemonRequest';
 
 interface Node {
   address: string;
@@ -15,7 +16,7 @@ export async function checkNodeStatus(node: Node): Promise<Node> {
   try {
     const requestData = {
       method: 'get',
-      url: `http://${node.address}:${node.port}`,
+      url: `${daemonSchemeSync()}://${node.address}:${node.port}`,
       auth: {
         username: 'Airlink',
         password: node.key,

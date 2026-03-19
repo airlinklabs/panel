@@ -24,6 +24,8 @@
   maxCpu       Int?
   maxStorage   Int?
   folders      ServerFolder[]
+  loginAttempts  Int       @default(0)
+  lockedUntil    DateTime?
 }
 
   model Session {
@@ -126,6 +128,11 @@ model settings {
   defaultMaxStorage        Int     @default(5)
   loginWallpaper           String?
   registerWallpaper        String?
+  loginMaxAttempts         Int     @default(5)
+  loginLockoutMinutes      Int     @default(15)
+  enforceDaemonHttps       Boolean @default(false)
+  behindReverseProxy       Boolean @default(false)
+  hashApiKeys              Boolean @default(false)
 }
 
 model ServerFolder {

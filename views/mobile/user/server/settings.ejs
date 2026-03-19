@@ -81,7 +81,7 @@
       <div class="rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/20 p-4">
         <h2 class="text-sm font-medium text-red-700 dark:text-red-400 mb-3"><%= req.translations.dangerZone || 'Danger Zone' %></h2>
         <div class="space-y-3">
-          <% if (user && user.isAdmin) { %>
+          <% if (user && (user.isAdmin || settings?.allowUserDeleteServer)) { %>
           <div class="flex items-center justify-between gap-3">
             <div class="min-w-0">
               <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Delete Server</p>

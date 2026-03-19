@@ -7,6 +7,7 @@ import axios from 'axios';
 import { queueer } from '../../handlers/queueer';
 import { Buffer } from 'buffer';
 import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
+import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 
 const adminModule: Module = {
@@ -187,7 +188,7 @@ const adminModule: Module = {
 
               const stopRequestData = {
                 method: 'POST',
-                url: `http://${server.node.address}:${server.node.port}/container/stop`,
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -505,7 +506,7 @@ const adminModule: Module = {
               );
 
               const authHeader = `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`;
-              const daemonUrl = `http://${server.node.address}:${server.node.port}`;
+              const daemonUrl = `${daemonSchemeSync()}://${server.node.address}:${server.node.port}`;
 
               if (server.image?.scripts) {
                 let scripts: Record<string, unknown> = {};
@@ -631,7 +632,7 @@ const adminModule: Module = {
 
             try {
               const response = await axios.delete(
-                `http://${server.node.address}:${server.node.port}/container`,
+                `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container`,
                 {
                   auth: {
                     username: 'Airlink',

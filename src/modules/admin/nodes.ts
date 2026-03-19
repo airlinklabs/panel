@@ -7,6 +7,7 @@ import logger from '../../handlers/logger';
 import axios from 'axios';
 import { Buffer } from 'buffer';
 import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
+import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 
 function generateApiKey(length: number): string {
@@ -451,7 +452,7 @@ const adminModule: Module = {
 
         try {
           const response = await axios.get(
-            `http://${node.address}:${node.port}/stats`,
+            `${daemonSchemeSync()}://${node.address}:${node.port}/stats`,
             {
               headers: {
                 'Content-Type': 'application/json',

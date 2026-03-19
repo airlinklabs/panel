@@ -5,6 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { getUser } from '../../handlers/utils/user/user';
 import logger from '../../handlers/logger';
 import axios from 'axios';
+import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 
 interface ErrorMessage {
@@ -65,7 +66,7 @@ const dashboardModule: Module = {
             try {
               const nodeResponse = await axios({
                 method: 'GET',
-                url: `http://${server.node.address}:${server.node.port}`,
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}`,
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -132,7 +133,7 @@ const dashboardModule: Module = {
 
               const statusResponse = await axios({
                 method: 'GET',
-                url: `http://${server.node.address}:${server.node.port}/container/status`,
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status`,
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -150,7 +151,7 @@ const dashboardModule: Module = {
                 try {
                   const statsResponse = await axios({
                     method: 'GET',
-                    url: `http://${server.node.address}:${server.node.port}/container/stats`,
+                    url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stats`,
                     auth: {
                       username: 'Airlink',
                       password: server.node.key,
