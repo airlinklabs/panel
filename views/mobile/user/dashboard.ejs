@@ -283,12 +283,28 @@
         content.innerHTML = '<p class="text-sm text-neutral-500">No servers in this folder.</p>';
       } else {
         serversIn.forEach(s => {
-          const a = document.createElement('a');
-          a.href = '/server/' + s.UUID;
-          a.className = 'flex items-center justify-between bg-neutral-50 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 rounded-xl px-3 py-2.5 active:scale-[0.98] transition-transform';
+          const row = document.createElement('div');
+          row.className = 'flex items-center gap-2 bg-neutral-50 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 rounded-xl px-3 py-2.5';
           const running = s.status === 'running';
-          a.innerHTML = `<span class="text-sm font-medium text-neutral-800 dark:text-white truncate">${s.name}</span><span class="text-[10px] font-medium px-2 py-0.5 rounded-md shrink-0 ml-2 ${running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400'}">${running ? 'Running' : 'Stopped'}</span>`;
-          content.appendChild(a);
+          row.innerHTML = `
+            <a href="/server/${s.UUID}" class="flex items-center gap-2 flex-1 min-w-0 active:opacity-60">
+              <span class="text-sm font-medium text-neutral-800 dark:text-white truncate">${s.name}</span>
+              <span class="ml-auto shrink-0 text-[10px] font-medium px-2 py-0.5 rounded-md ${running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400'}">${running ? 'Running' : 'Stopped'}</span>
+            </a>
+            <button data-uuid="${s.UUID}" class="mob-remove-btn shrink-0 p-2 rounded-lg text-neutral-400 active:bg-red-50 dark:active:bg-red-500/10 active:text-red-500 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" width="14" height="14">
+                <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd"/>
+              </svg>
+            </button>`;
+          row.querySelector('.mob-remove-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const uuid = e.currentTarget.dataset.uuid;
+            const r = await fetch('/api/folders/servers/' + uuid, { method: 'DELETE' });
+            const d = await r.json();
+            if (d.success) { document.getElementById('folderOverlay').classList.add('hidden'); showToast('Removed.', 'success'); setTimeout(() => location.reload(), 600); }
+            else showToast(d.error || 'Failed', 'error');
+          });
+          content.appendChild(row);
         });
       }
 

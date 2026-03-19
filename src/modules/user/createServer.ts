@@ -140,8 +140,8 @@ const userCreateServerModule: Module = {
         if (isNaN(memory) || memory < 128 || memory > resourceLimits.maxMemory) {
           return res.status(400).json({ error: `Memory must be between 128 and ${resourceLimits.maxMemory} MB.` });
         }
-        if (isNaN(cpu) || cpu < 10 || cpu > resourceLimits.maxCpu) {
-          return res.status(400).json({ error: `CPU must be between 10 and ${resourceLimits.maxCpu}%.` });
+        if (isNaN(cpu) || cpu < 50 || cpu > resourceLimits.maxCpu) {
+          return res.status(400).json({ error: `CPU must be between 50 and ${resourceLimits.maxCpu}% (50% = half a core).` });
         }
         if (isNaN(storage) || storage < 1 || storage > resourceLimits.maxStorage) {
           return res.status(400).json({ error: `Storage must be between 1 and ${resourceLimits.maxStorage} GB.` });

@@ -124,6 +124,8 @@ model settings {
   defaultMaxMemory         Int     @default(512)
   defaultMaxCpu            Int     @default(100)
   defaultMaxStorage        Int     @default(5)
+  loginWallpaper           String?
+  registerWallpaper        String?
 }
 
 model ServerFolder {

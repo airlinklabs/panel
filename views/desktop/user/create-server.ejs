@@ -1,140 +1,401 @@
 <%- include('../components/header', { title: 'Create Server' }) %>
 
+<style>
+  ::-webkit-scrollbar { display: none; }
+
+  /* ── Custom select (same as admin/servers/create) ───────── */
+  .custom-select { position: relative; user-select: none; }
+  .cs-trigger {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; padding: 9px 14px; border-radius: 10px; cursor: pointer;
+    font-size: 14px; border: 1px solid #e5e5e5;
+    background: #f5f5f5; color: #171717;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .dark .cs-trigger { background: rgba(255,255,255,0.06); color: #e5e5e5; border-color: rgba(255,255,255,0.08); }
+  .cs-trigger:hover { background: #ebebeb; border-color: #d4d4d4; }
+  .dark .cs-trigger:hover { background: rgba(255,255,255,0.09); }
+  .cs-trigger.open { border-color: #a3a3a3; }
+  .dark .cs-trigger.open { border-color: rgba(255,255,255,0.2); }
+  .cs-trigger svg { width: 14px; height: 14px; opacity: 0.4; transition: transform 0.18s; flex-shrink: 0; }
+  .cs-trigger.open svg { transform: rotate(180deg); }
+  .cs-placeholder { opacity: 0.45; }
+  .cs-dropdown {
+    position: absolute; top: calc(100% + 5px); left: 0; right: 0; z-index: 200;
+    background: #fff; border: 1px solid #e5e5e5; border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1); overflow: hidden;
+    max-height: 200px; overflow-y: auto;
+    animation: cs-open 0.14s cubic-bezier(0.16,1,0.3,1);
+  }
+  .dark .cs-dropdown { background: #1e1e1e; border-color: rgba(255,255,255,0.08); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  @keyframes cs-open { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+  .cs-option { padding: 9px 14px; font-size: 13px; cursor: pointer; color: #171717; transition: background 0.1s; }
+  .dark .cs-option { color: #e5e5e5; }
+  .cs-option:hover { background: rgba(0,0,0,0.05); }
+  .dark .cs-option:hover { background: rgba(255,255,255,0.06); }
+  .cs-option.selected { background: rgba(0,0,0,0.06); font-weight: 500; }
+  .dark .cs-option.selected { background: rgba(255,255,255,0.08); }
+  .cs-option.disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+
+  /* ── Form field ──────────────────────────────────────────── */
+  .form-input {
+    width: 100%; padding: 9px 14px; border-radius: 10px;
+    border: 1px solid #e5e5e5; background: #f5f5f5;
+    font-size: 14px; color: #171717; outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box; font-family: inherit;
+  }
+  .dark .form-input { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); color: #e5e5e5; }
+  .form-input:focus { border-color: #a3a3a3; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+  .dark .form-input:focus { border-color: rgba(255,255,255,0.2); box-shadow: 0 0 0 3px rgba(255,255,255,0.04); }
+  .form-input::placeholder { color: #a3a3a3; }
+  .form-input.invalid { border-color: #f87171; }
+
+  .form-label { display: block; font-size: 13px; font-weight: 500; color: #525252; margin-bottom: 6px; }
+  .dark .form-label { color: #a3a3a3; }
+
+  /* ── Resource stepper ────────────────────────────────────── */
+  .stepper { display: flex; align-items: center; gap: 0; border: 1px solid #e5e5e5; border-radius: 10px; overflow: hidden; background: #f5f5f5; }
+  .dark .stepper { border-color: rgba(255,255,255,0.08); background: rgba(255,255,255,0.06); }
+  .stepper-btn {
+    padding: 9px 13px; background: none; border: none; cursor: pointer;
+    font-size: 16px; color: #525252; transition: background 0.1s;
+    flex-shrink: 0; line-height: 1;
+  }
+  .dark .stepper-btn { color: #a3a3a3; }
+  .stepper-btn:hover { background: rgba(0,0,0,0.06); }
+  .dark .stepper-btn:hover { background: rgba(255,255,255,0.07); }
+  .stepper-input {
+    flex: 1; text-align: center; border: none; background: none; outline: none;
+    font-size: 14px; font-weight: 500; color: #171717; padding: 9px 4px;
+    font-family: inherit; min-width: 0;
+  }
+  .dark .stepper-input { color: #e5e5e5; }
+
+  /* ── Confirm dialog ──────────────────────────────────────── */
+  .confirm-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .confirm-overlay.open { opacity: 1; pointer-events: auto; }
+  .confirm-box {
+    background: white; border: 1px solid #e5e5e5; border-radius: 14px;
+    width: 100%; max-width: 360px; padding: 22px;
+    transform: scale(0.96); opacity: 0;
+    transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), opacity 0.2s;
+  }
+  .dark .confirm-box { background: #1c1c1c; border-color: rgba(255,255,255,0.08); }
+  .confirm-overlay.open .confirm-box { transform: scale(1); opacity: 1; }
+</style>
+
 <main class="h-screen m-auto">
   <div class="flex h-screen">
-    <div class="w-60 h-full">
-      <%- include('../components/template') %>
-    </div>
+    <div class="w-60 h-full"><%- include('../components/template') %></div>
+
     <div id="page-content" class="flex-1 overflow-y-auto pt-16">
-      <div class="px-12 pt-6 pb-8 max-w-3xl">
-        <div class="flex items-center justify-between mb-6">
+      <div class="px-8 lg:px-12 pt-6 pb-12 max-w-5xl">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-7">
           <div>
-            <h1 class="text-base font-medium text-neutral-800 dark:text-white">Create a server</h1>
-            <p class="text-sm text-neutral-500 mt-0.5">You have <%= currentCount %> of <%= serverLimit %> servers.</p>
+            <h1 class="text-base font-semibold text-neutral-900 dark:text-white">Create a server</h1>
+            <p class="text-sm text-neutral-500 mt-0.5"><%= currentCount %> of <%= serverLimit %> servers used</p>
           </div>
-          <a href="/" class="text-sm text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Cancel</a>
+          <a href="/" class="text-sm text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-300 transition">Cancel</a>
         </div>
 
-        <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 p-6 space-y-6">
+        <div class="space-y-5">
 
-          <!-- Name & description -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Name</label>
-              <input type="text" id="serverName" placeholder="My server" maxlength="64"
-                class="w-full rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+          <!-- Top row: Details + Node & Image side by side on desktop -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+          <!-- Details -->
+          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
+              <p class="text-sm font-medium text-neutral-800 dark:text-white">Details</p>
             </div>
-            <div>
-              <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Description <span class="text-neutral-400 font-normal">(optional)</span></label>
-              <input type="text" id="serverDescription" placeholder="What is this server for?" maxlength="128"
-                class="w-full rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+            <div class="p-5 space-y-4">
+              <div>
+                <label class="form-label" for="serverName">Name</label>
+                <input id="serverName" type="text" placeholder="My server" maxlength="64" class="form-input">
+              </div>
+              <div>
+                <label class="form-label" for="serverDescription">Description <span class="text-neutral-400 font-normal">(optional)</span></label>
+                <input id="serverDescription" type="text" placeholder="What is this for?" maxlength="128" class="form-input">
+              </div>
             </div>
           </div>
 
-          <!-- Node selection -->
-          <div>
-            <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Node</label>
-            <select id="nodeId" class="w-full rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2.5 text-neutral-800 dark:text-white transition-colors">
-              <option value="">Select a node</option>
-              <% nodes.forEach(node => { %>
-              <option value="<%= node.id %>"><%= node.name %> (<%= node.address %>)</option>
-              <% }); %>
-            </select>
+          <!-- Node & Image -->
+          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
+              <p class="text-sm font-medium text-neutral-800 dark:text-white">Node & image</p>
+            </div>
+            <div class="p-5 space-y-4">
+              <div>
+                <label class="form-label">Node</label>
+                <select id="nodeId" class="hidden">
+                  <option value="" disabled selected>Select a node</option>
+                  <% nodes.forEach(node => { %>
+                  <option value="<%= node.id %>"><%= node.name %> — <%= node.address %></option>
+                  <% }); %>
+                </select>
+                <div class="custom-select" data-for="nodeId"></div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="form-label">Image</label>
+                  <select id="imageId" class="hidden">
+                    <option value="" disabled selected>Select an image</option>
+                    <% images.forEach(image => { %>
+                    <option value="<%= image.id %>" data-docker="<%= image.dockerImages %>"><%= image.name %></option>
+                    <% }); %>
+                  </select>
+                  <div class="custom-select" data-for="imageId"></div>
+                </div>
+                <div>
+                  <label class="form-label">Docker variant</label>
+                  <select id="dockerImage" class="hidden">
+                    <option value="" disabled selected>Select an image first</option>
+                  </select>
+                  <div class="custom-select" data-for="dockerImage"></div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- Image selection -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Image</label>
-              <select id="imageId" class="w-full rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2.5 text-neutral-800 dark:text-white transition-colors">
-                <option value="">Select an image</option>
-                <% images.forEach(image => { %>
-                <option value="<%= image.id %>" data-docker='<%= image.dockerImages %>'>
-                  <%= image.name %>
-                </option>
-                <% }); %>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Docker variant</label>
-              <select id="dockerImage" class="w-full rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2.5 text-neutral-800 dark:text-white transition-colors" disabled>
-                <option value="">Select an image first</option>
-              </select>
-            </div>
-          </div>
+          </div><!-- /top grid -->
 
           <!-- Resources -->
-          <div>
-            <p class="text-sm font-medium text-neutral-700 dark:text-white mb-3">Resources</p>
-            <div class="grid grid-cols-3 gap-4">
+          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
+              <p class="text-sm font-medium text-neutral-800 dark:text-white">Resources</p>
+            </div>
+            <div class="p-5 grid grid-cols-3 gap-4">
               <div>
-                <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5">RAM <span class="text-neutral-400">(MB)</span></label>
-                <input type="number" id="Memory" value="512" min="128" max="<%= resourceLimits.maxMemory %>"
-                  class="w-full rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2.5 text-neutral-800 dark:text-white transition-colors">
-                <p class="text-[11px] text-neutral-400 mt-1">Max <%= resourceLimits.maxMemory %> MB</p>
+                <label class="form-label">RAM <span class="text-neutral-400 font-normal">(MB)</span></label>
+                <div class="stepper">
+                  <button type="button" class="stepper-btn" data-action="dec" data-target="Memory">−</button>
+                  <input id="Memory" type="number" value="512" min="128" max="<%= resourceLimits.maxMemory %>" class="stepper-input">
+                  <button type="button" class="stepper-btn" data-action="inc" data-target="Memory" data-step="128" data-max="<%= resourceLimits.maxMemory %>">+</button>
+                </div>
+                <p class="text-[11px] text-neutral-400 mt-1.5">Max <%= resourceLimits.maxMemory %> MB</p>
               </div>
               <div>
-                <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5">CPU <span class="text-neutral-400">(%)</span></label>
-                <input type="number" id="Cpu" value="100" min="10" max="<%= resourceLimits.maxCpu %>"
-                  class="w-full rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2.5 text-neutral-800 dark:text-white transition-colors">
-                <p class="text-[11px] text-neutral-400 mt-1">Max <%= resourceLimits.maxCpu %>%</p>
+                <label class="form-label">CPU <span class="text-neutral-400 font-normal">(%)</span></label>
+                <div class="stepper">
+                  <button type="button" class="stepper-btn" data-action="dec" data-target="Cpu" data-step="50" data-min="50">−</button>
+                  <input id="Cpu" type="number" value="100" min="50" max="<%= resourceLimits.maxCpu %>" class="stepper-input">
+                  <button type="button" class="stepper-btn" data-action="inc" data-target="Cpu" data-step="50" data-max="<%= resourceLimits.maxCpu %>">+</button>
+                </div>
+                <p class="text-[11px] text-neutral-400 mt-1.5">50% = half a core. Max <%= resourceLimits.maxCpu %>%</p>
               </div>
               <div>
-                <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5">Storage <span class="text-neutral-400">(GB)</span></label>
-                <input type="number" id="Storage" value="5" min="1" max="<%= resourceLimits.maxStorage %>"
-                  class="w-full rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2.5 text-neutral-800 dark:text-white transition-colors">
-                <p class="text-[11px] text-neutral-400 mt-1">Max <%= resourceLimits.maxStorage %> GB</p>
+                <label class="form-label">Storage <span class="text-neutral-400 font-normal">(GB)</span></label>
+                <div class="stepper">
+                  <button type="button" class="stepper-btn" data-action="dec" data-target="Storage" data-step="1" data-min="1">−</button>
+                  <input id="Storage" type="number" value="5" min="1" max="<%= resourceLimits.maxStorage %>" class="stepper-input">
+                  <button type="button" class="stepper-btn" data-action="inc" data-target="Storage" data-step="1" data-max="<%= resourceLimits.maxStorage %>">+</button>
+                </div>
+                <p class="text-[11px] text-neutral-400 mt-1.5">Max <%= resourceLimits.maxStorage %> GB</p>
               </div>
             </div>
           </div>
 
+          <!-- Error -->
           <div id="errorMsg" class="hidden rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3">
             <p class="text-sm text-red-600 dark:text-red-400" id="errorText"></p>
           </div>
 
-          <div class="flex justify-end">
+          <!-- Submit -->
+          <div class="flex justify-end pt-1">
             <button type="button" id="createBtn"
-              class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-6 py-2.5 text-sm font-medium shadow-sm transition">
-              Create server
+              class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-6 py-2.5 text-sm font-medium shadow-sm transition flex items-center gap-2">
+              <span id="createBtnText">Create server</span>
+              <span id="createBtnSpinner" class="hidden w-4 h-4 border-2 border-white/30 dark:border-neutral-900/30 border-t-white dark:border-t-neutral-900 rounded-full animate-spin"></span>
             </button>
           </div>
+
         </div>
       </div>
     </div>
   </div>
 </main>
 
+<!-- Custom confirm dialog -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-1" id="confirmTitle"></p>
+    <p class="text-xs text-neutral-500 mb-4" id="confirmBody"></p>
+    <div class="flex gap-2 justify-end">
+      <button id="confirmCancel" class="px-4 py-2 rounded-lg text-sm font-medium border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">Cancel</button>
+      <button id="confirmOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">OK</button>
+    </div>
+  </div>
+</div>
+
 <%- include('../components/toast') %>
+<%- include('../components/loadingPopup') %>
 
 <script>
-  const imageSelect  = document.getElementById('imageId');
-  const dockerSelect = document.getElementById('dockerImage');
+(function () {
 
-  imageSelect.addEventListener('change', function () {
+  /* ── Custom select builder ──────────────────────────────── */
+  function buildCustomSelect(container) {
+    const select = document.getElementById(container.dataset.for);
+    if (!select) return;
+
+    const trigger  = document.createElement('div');
+    trigger.className = 'cs-trigger';
+    const label = document.createElement('span');
+    label.className = 'cs-label';
+    trigger.appendChild(label);
+
+    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    arrow.setAttribute('viewBox', '0 0 24 24'); arrow.setAttribute('fill', 'none');
+    arrow.setAttribute('stroke', 'currentColor'); arrow.setAttribute('stroke-width', '2');
+    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round');
+    p.setAttribute('d', 'M19 9l-7 7-7-7');
+    arrow.appendChild(p); trigger.appendChild(arrow);
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'cs-dropdown';
+    dropdown.style.display = 'none';
+
+    container.appendChild(trigger);
+    container.appendChild(dropdown);
+
+    function syncLabel() {
+      const sel = select.options[select.selectedIndex];
+      if (sel && !sel.disabled && sel.value) {
+        label.textContent = sel.text;
+        label.classList.remove('cs-placeholder');
+      } else {
+        const ph = Array.from(select.options).find(o => o.disabled && o.selected);
+        label.textContent = ph ? ph.text : 'Select…';
+        label.classList.add('cs-placeholder');
+      }
+      Array.from(dropdown.children).forEach(item => {
+        item.classList.toggle('selected', item.dataset.value === select.value);
+      });
+    }
+
+    function syncFromSelect() {
+      dropdown.innerHTML = '';
+      Array.from(select.options).forEach(opt => {
+        const item = document.createElement('div');
+        item.className = 'cs-option' + (opt.disabled ? ' disabled' : '');
+        item.textContent = opt.text;
+        item.dataset.value = opt.value;
+        if (!opt.disabled) {
+          item.addEventListener('click', e => {
+            e.stopPropagation();
+            select.value = opt.value;
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            syncLabel();
+            close();
+          });
+        }
+        dropdown.appendChild(item);
+      });
+      syncLabel();
+    }
+
+    function open() {
+      document.querySelectorAll('.cs-dropdown').forEach(d => {
+        if (d !== dropdown) { d.style.display = 'none'; d.parentElement.querySelector('.cs-trigger')?.classList.remove('open'); }
+      });
+      dropdown.style.display = 'block';
+      trigger.classList.add('open');
+      syncFromSelect();
+    }
+
+    function close() {
+      dropdown.style.display = 'none';
+      trigger.classList.remove('open');
+    }
+
+    trigger.addEventListener('click', e => {
+      e.stopPropagation();
+      dropdown.style.display === 'none' ? open() : close();
+    });
+
+    document.addEventListener('click', close);
+
+    const obs = new MutationObserver(syncFromSelect);
+    obs.observe(select, { childList: true, subtree: true, attributes: true });
+    select.addEventListener('change', syncLabel);
+    syncFromSelect();
+  }
+
+  document.querySelectorAll('.custom-select').forEach(buildCustomSelect);
+
+  /* ── Image → docker variant cascade ────────────────────── */
+  document.getElementById('imageId').addEventListener('change', function () {
     const opt = this.options[this.selectedIndex];
     const raw = opt.dataset.docker;
-    dockerSelect.innerHTML = '<option value="">Select variant</option>';
-    dockerSelect.disabled = true;
-    if (!raw) return;
-    try {
-      const images = JSON.parse(raw);
-      images.forEach(obj => {
-        Object.keys(obj).forEach(key => {
-          const o = document.createElement('option');
-          o.value = key;
-          o.textContent = key;
-          dockerSelect.appendChild(o);
+    const docker = document.getElementById('dockerImage');
+    docker.innerHTML = '';
+    const ph = document.createElement('option');
+    ph.value = ''; ph.textContent = 'Select variant'; ph.disabled = true; ph.selected = true;
+    docker.appendChild(ph);
+    if (raw) {
+      try {
+        JSON.parse(raw).forEach(obj => {
+          Object.keys(obj).forEach(key => {
+            const o = document.createElement('option');
+            o.value = key; o.textContent = key;
+            docker.appendChild(o);
+          });
         });
-      });
-      dockerSelect.disabled = false;
-    } catch {}
+      } catch {}
+    }
+    docker.dispatchEvent(new Event('change', { bubbles: true }));
   });
 
+  /* ── Stepper buttons ────────────────────────────────────── */
+  document.querySelectorAll('.stepper-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target);
+      const step  = parseInt(btn.dataset.step || '1');
+      const min   = parseInt(btn.dataset.min  || input.min  || '0');
+      const max   = parseInt(btn.dataset.max  || input.max  || '999999');
+      let val = parseInt(input.value) || 0;
+      val = btn.dataset.action === 'inc' ? Math.min(max, val + step) : Math.max(min, val - step);
+      input.value = val;
+    });
+  });
+
+  /* ── Confirm dialog ─────────────────────────────────────── */
+  const overlay      = document.getElementById('confirmOverlay');
+  const confirmTitle = document.getElementById('confirmTitle');
+  const confirmBody  = document.getElementById('confirmBody');
+  const confirmOk    = document.getElementById('confirmOk');
+  const confirmCancel = document.getElementById('confirmCancel');
+  let confirmResolve = null;
+
+  function showConfirm(title, body) {
+    return new Promise(resolve => {
+      confirmTitle.textContent = title;
+      confirmBody.textContent  = body;
+      overlay.classList.add('open');
+      confirmResolve = resolve;
+    });
+  }
+
+  confirmOk.addEventListener('click', () => { overlay.classList.remove('open'); if (confirmResolve) confirmResolve(true); });
+  confirmCancel.addEventListener('click', () => { overlay.classList.remove('open'); if (confirmResolve) confirmResolve(false); });
+  overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.classList.remove('open'); if (confirmResolve) confirmResolve(false); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { overlay.classList.remove('open'); if (confirmResolve) confirmResolve(false); } });
+
+  /* ── Create button ──────────────────────────────────────── */
   document.getElementById('createBtn').addEventListener('click', async function () {
-    const btn = this;
+    const btn     = this;
     const errBox  = document.getElementById('errorMsg');
     const errText = document.getElementById('errorText');
-
     errBox.classList.add('hidden');
 
     const name        = document.getElementById('serverName').value.trim();
@@ -142,18 +403,41 @@
     const nodeId      = document.getElementById('nodeId').value;
     const imageId     = document.getElementById('imageId').value;
     const dockerImage = document.getElementById('dockerImage').value;
-    const Memory      = document.getElementById('Memory').value;
-    const Cpu         = document.getElementById('Cpu').value;
-    const Storage     = document.getElementById('Storage').value;
+    const Memory      = parseInt(document.getElementById('Memory').value);
+    const Cpu         = parseInt(document.getElementById('Cpu').value);
+    const Storage     = parseInt(document.getElementById('Storage').value);
 
-    if (!name || !nodeId || !imageId || !dockerImage) {
-      errText.textContent = 'Fill in all required fields.';
+    // Client-side validation with custom dialog
+    if (!name) {
+      errText.textContent = 'Server name is required.';
+      errBox.classList.remove('hidden');
+      document.getElementById('serverName').focus();
+      return;
+    }
+    if (!nodeId) {
+      errText.textContent = 'Select a node.';
+      errBox.classList.remove('hidden');
+      return;
+    }
+    if (!imageId) {
+      errText.textContent = 'Select an image.';
+      errBox.classList.remove('hidden');
+      return;
+    }
+    if (!dockerImage) {
+      errText.textContent = 'Select a docker variant.';
       errBox.classList.remove('hidden');
       return;
     }
 
-    btn.disabled = true;
-    btn.textContent = 'Creating...';
+    const ok = await showConfirm(
+      'Create server?',
+      `"${name}" will be created and queued for installation. This may take a moment.`
+    );
+    if (!ok) return;
+
+    const loader = showLoadingPopup('Creating server', 'Setting everything up…');
+    loader.updateProgress(10, 'Sending request…');
 
     try {
       const r = await fetch('/create-server', {
@@ -163,20 +447,21 @@
       });
       const d = await r.json();
       if (d.success) {
-        window.location.href = '/server/' + d.serverUUID;
+        loader.updateProgress(100, 'Done!');
+        setTimeout(() => { loader.close(); window.location.href = '/server/' + d.serverUUID; }, 600);
       } else {
+        loader.close();
         errText.textContent = d.error || 'Something went wrong.';
         errBox.classList.remove('hidden');
-        btn.disabled = false;
-        btn.textContent = 'Create server';
       }
     } catch {
+      loader.close();
       errText.textContent = 'Network error. Try again.';
       errBox.classList.remove('hidden');
-      btn.disabled = false;
-      btn.textContent = 'Create server';
     }
   });
+
+})();
 </script>
 
 <%- include('../components/footer') %>

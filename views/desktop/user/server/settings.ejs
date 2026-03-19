@@ -102,7 +102,7 @@
         <div class="bg-red-950/20 rounded-xl p-6 shadow-lg border border-red-800/20 mt-8">
           <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white"><%= req.translations.dangerZone || 'Danger Zone' %></h2>
 
-          <% if (user && user.isAdmin) { %>
+          <% if (user && (user.isAdmin || settings?.allowUserDeleteServer)) { %>
           <div class="flex items-center justify-between mb-6">
             <div>
               <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300">Delete Server</h3>
@@ -188,7 +188,18 @@
               onConfirm: () => {
                 const loader = showLoadingPopup('Deleting Server', 'Removing server and all data...');
                 loader.updateProgress(20, 'Contacting node...');
+                <% if (user && user.isAdmin) { %>
                 window.location.href = '/admin/server/delete/<%= server.id %>';
+                <% } else { %>
+                fetch('/user/server/<%= server.UUID %>', { method: 'DELETE' })
+                  .then(r => r.json())
+                  .then(d => {
+                    loader.close();
+                    if (d.success) window.location.href = '/';
+                    else showToast(d.error || 'Failed to delete server.', 'error');
+                  })
+                  .catch(() => { loader.close(); showToast('An error occurred.', 'error'); });
+                <% } %>
               }
             });
           }

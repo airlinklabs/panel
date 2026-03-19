@@ -11,7 +11,7 @@
     </div>
 
     <!-- Static: user info — clicking goes to account page -->
-    <a href="/account" class="flex items-center space-x-4 py-4 px-4 border-y border-neutral-800/10 dark:border-white/5 shrink-0 hover:bg-neutral-50 dark:hover:bg-white/[0.03] transition-colors group">
+    <a href="/account" id="sidebar-account-link" class="sidebar-special-link flex items-center space-x-4 py-4 px-4 border-y border-neutral-800/10 dark:border-white/5 shrink-0 hover:bg-neutral-100 dark:hover:bg-white/[0.05] transition-colors group">
       <img class="h-8 w-8 rounded-xl border border-neutral-700/10 shrink-0" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
       <div class="min-w-0">
         <p class="text-sm font-medium text-neutral-700 dark:text-white truncate group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">
@@ -138,7 +138,7 @@
 
     <!-- Static bottom: logout -->
     <div class="shrink-0 border-t border-neutral-800/10 dark:border-white/5">
-      <a href="/logout" class="group flex gap-x-3 pl-6 py-4 text-sm font-medium leading-6 text-neutral-500 hover:text-red-700 dark:hover:text-red-500/80 hover:bg-red-500/5 dark:hover:bg-neutral-700/10 transition-colors duration-300">
+      <a href="/logout" id="sidebar-logout-link" class="sidebar-special-link group flex gap-x-3 pl-6 py-4 text-sm font-medium leading-6 text-neutral-500 hover:text-red-700 dark:hover:text-red-500/80 hover:bg-red-500/5 dark:hover:bg-neutral-700/10 transition-colors duration-300">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mt-0.5 shrink-0">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
         </svg>
@@ -154,11 +154,34 @@
   var wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   var ws = new WebSocket(wsProtocol + '//' + window.location.host + '/online-check');
   ws.addEventListener('error', function () {});
+
+  // Highlight account/logout when on those pages
+  function markSpecialLinks(path) {
+    var account = document.getElementById('sidebar-account-link');
+    var logout  = document.getElementById('sidebar-logout-link');
+    var isDark  = document.documentElement.classList.contains('dark');
+    if (account) {
+      var onAccount = path === '/account' || path.startsWith('/account/');
+      account.style.background = onAccount
+        ? (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)')
+        : '';
+    }
+    if (logout) {
+      logout.style.background = '';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    markSpecialLinks(window.location.pathname);
+  });
+  document.addEventListener('al:navigated', function () {
+    markSpecialLinks(window.location.pathname);
+  });
 })();
 </script>
 
 <div id="colcont" class="lg:pl-56">
-  <div class="fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-white/80 dark:bg-[#141414]/80 backdrop-blur-md border-b border-neutral-200/60 dark:border-white/5 px-4 sm:gap-x-6 sm:px-4 lg:px-4">
+  <div class="fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-neutral-50/80 dark:bg-[#141414]/80 backdrop-blur-md border-b border-neutral-200/60 dark:border-white/5 px-4 sm:gap-x-6 sm:px-4 lg:px-4">
     <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
       <div class="relative flex flex-1 flex-col">
 
@@ -182,7 +205,7 @@
           </div>
         </div>
 
-        <div id="searchResults" class="absolute bg-white dark:bg-neutral-800 w-[19.5rem] rounded-xl shadow-lg hidden mt-20 px-2 pb-2 border border-neutral-300 dark:border-neutral-700">
+        <div id="searchResults" class="absolute bg-neutral-50 dark:bg-neutral-900 w-[19.5rem] rounded-xl shadow-2xl shadow-neutral-200/80 dark:shadow-black/40 hidden mt-20 px-2 pb-2 border border-neutral-200 dark:border-neutral-700/60">
         </div>
       </div>
 

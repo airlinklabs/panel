@@ -182,65 +182,23 @@
       }
     });
 
-    // Also check the account link and logout (they sit outside .nav-link list)
-    var accountLink = document.querySelector('a[href="/account"]');
-    var logoutLink  = document.querySelector('a[href="/logout"]');
-
-    [accountLink, logoutLink].forEach(function (link) {
-      if (!link) return;
-      link.classList.remove('nav-extra-active');
-      link.style.background = '';
-    });
-
     if (best) {
       best.classList.add('active', 'font-medium');
       best.style.color = isDark ? '#ffffff' : '#0a0a0a';
       if (bg) {
-        var r   = best.getBoundingClientRect();
-        var ul  = best.closest('ul');
+        var r = best.getBoundingClientRect();
+        var ul = best.closest('ul');
         if (ul) {
           var top = r.top - ul.getBoundingClientRect().top + ul.scrollTop;
-          bg.style.transition = 'transform 0.38s cubic-bezier(0.16,1,0.3,1), height 0.2s ease, opacity 0.15s ease';
-          bg.style.height     = r.height + 'px';
-          bg.style.transform  = 'translateY(' + top + 'px)';
-          bg.style.opacity    = '1';
+          bg.style.transition = 'transform 0.2s cubic-bezier(0.4,0,0.2,1), height 0.15s ease, opacity 0.12s ease';
+          bg.style.height    = r.height + 'px';
+          bg.style.transform = 'translateY(' + top + 'px)';
+          bg.style.opacity   = '1';
         }
       }
-    } else {
-      // Check if account or logout page is active and move blob there
-      var specialMatch = null;
-      if (accountLink && (newPath === '/account' || newPath.startsWith('/account'))) specialMatch = accountLink;
-      else if (logoutLink && newPath.startsWith('/logout')) specialMatch = logoutLink;
-
-      if (specialMatch && bg) {
-        var r2 = specialMatch.getBoundingClientRect();
-        var sidebar = document.getElementById('pc-sidebar2');
-        if (sidebar) {
-          var sTop = r2.top - sidebar.getBoundingClientRect().top + sidebar.scrollTop;
-          bg.style.transition = 'transform 0.38s cubic-bezier(0.16,1,0.3,1), height 0.2s ease, opacity 0.15s ease';
-          bg.style.height     = r2.height + 'px';
-          bg.style.transform  = 'translateY(' + sTop + 'px)';
-          bg.style.opacity    = '1';
-          // Widen blob to full sidebar width for these full-width items
-          bg.style.left   = '0';
-          bg.style.width  = '100%';
-          bg.style.borderRadius = '0';
-        }
-      } else if (bg) {
-        // Reset width/shape in case we came from a special item
-        bg.style.left         = '';
-        bg.style.width        = '';
-        bg.style.borderRadius = '';
-        bg.style.transition = 'opacity 0.15s ease';
-        bg.style.opacity    = '0';
-      }
-    }
-
-    // Reset blob shape when on a normal nav link
-    if (best && bg) {
-      bg.style.left         = '';
-      bg.style.width        = '';
-      bg.style.borderRadius = '';
+    } else if (bg) {
+      bg.style.transition = 'opacity 0.12s ease';
+      bg.style.opacity = '0';
     }
 
     document.querySelectorAll('.nav-link2').forEach(function (link) {

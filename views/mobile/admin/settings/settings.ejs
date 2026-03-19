@@ -2,405 +2,472 @@
 
 <main id="page-content" class="">
   <%- include('../../components/template') %>
-  <%- include('../../components/toast') %>
-
-  <div class="px-4 py-5">
-    <div class="mb-4">
-      <h1 class="text-base font-medium text-neutral-800 dark:text-white">Settings</h1>
-      <p class="text-xs text-neutral-500 mt-0.5">Manage your panel configuration.</p>
-    </div>
-
-    <div class="flex overflow-x-auto border-b border-neutral-200 dark:border-neutral-700/40 mb-4 gap-0.5 pb-px">
-      <button type="button" data-tab="appearance" class="tab-btn shrink-0 px-3 py-2 text-xs font-medium -mb-px border-b-2 transition whitespace-nowrap">Appearance</button>
-      <button type="button" data-tab="general"    class="tab-btn shrink-0 px-3 py-2 text-xs font-medium -mb-px border-b-2 transition whitespace-nowrap">General</button>
-      <button type="button" data-tab="servers"    class="tab-btn shrink-0 px-3 py-2 text-xs font-medium -mb-px border-b-2 transition whitespace-nowrap">Servers</button>
-      <button type="button" data-tab="security"   class="tab-btn shrink-0 px-3 py-2 text-xs font-medium -mb-px border-b-2 transition whitespace-nowrap">Security</button>
-    </div>
-
-    <!-- Appearance tab -->
-    <form id="form-appearance" data-tab-form="appearance" class="tab-form space-y-4 hidden" enctype="multipart/form-data">
-      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
-        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white">Branding</p>
-        </div>
-        <div class="p-4 space-y-4">
-          <div>
-            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Site title</label>
-            <input type="text" name="title" value="<%= settings.title %>"
-              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Logo</label>
-            <input type="file" name="logo" accept="image/*"
-              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm text-neutral-800 dark:text-white file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-700 file:text-neutral-700 dark:file:text-neutral-300">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Favicon</label>
-            <input type="file" name="favicon" accept=".ico,.png,.jpg,.jpeg"
-              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm text-neutral-800 dark:text-white file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-700 file:text-neutral-700 dark:file:text-neutral-300">
-            <p class="text-[11px] text-neutral-400 mt-1">PNG or JPG auto-converted to 32x32 .ico</p>
-          </div>
-        </div>
+  <div class="px-4 pt-5 pb-20">
+      <div>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white">Settings</h1>
+        <p class="mt-0.5 text-sm text-neutral-500">Manage your panel configuration.</p>
       </div>
 
-      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
-        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white">Themes</p>
+      <div class="mt-4">
+
+        <!-- Tab bar -->
+        <div class="flex gap-0.5 mb-6 border-b border-neutral-200 dark:border-neutral-700/40">
+          <button type="button" data-tab="appearance" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Appearance</button>
+          <button type="button" data-tab="general"    class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">General</button>
+          <button type="button" data-tab="servers"    class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Servers</button>
+          <button type="button" data-tab="security"   class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Security</button>
         </div>
-        <div class="p-4 space-y-5">
-          <div>
-            <p class="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2">Light mode</p>
-            <div class="space-y-2">
-              <% const lightVal = settings.lightTheme || 'default'; %>
-              <label class="flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition <%= lightVal === 'default' ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-700/40' %>">
-                <input type="radio" name="lightTheme" value="default" class="sr-only" <%= lightVal === 'default' ? 'checked' : '' %>>
-                <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === 'default' ? 'border-blue-500' : 'border-neutral-300 dark:border-neutral-600' %>">
-                  <% if (lightVal === 'default') { %><span class="w-2 h-2 rounded-full bg-blue-500"></span><% } %>
-                </span>
-                <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1">Default</span>
-                <span class="text-xs text-neutral-400">built-in</span>
+
+        <!-- ── APPEARANCE ─────────────────────────────────────────────────── -->
+        <form id="form-appearance" data-tab-panel="appearance" class="tab-panel space-y-5 hidden" enctype="multipart/form-data">
+
+          <!-- Branding -->
+          <div class="bg-neutral-50 dark:bg-white/5 rounded-xl">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">Branding</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 px-5 py-5">
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Site title</label>
+                <input type="text" name="title" value="<%= settings.title %>"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Logo</label>
+                <input type="file" name="logo" accept="image/*"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                <% if (settings.logo) { %>
+                <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 mt-2 object-contain">
+                <% } %>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Favicon</label>
+                <input type="file" name="favicon" accept=".ico,.png,.jpg,.jpeg"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                <p class="text-xs text-neutral-400 mt-1">PNG or JPG auto-converted to .ico</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Themes -->
+          <div class="bg-neutral-50 dark:bg-white/5 rounded-xl">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">Themes</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-5 py-5">
+              <div>
+                <p class="text-sm font-medium text-neutral-700 dark:text-white mb-1">Light mode</p>
+                <p class="text-xs text-neutral-500 mb-3">Applied when the panel is in light mode.</p>
+                <div class="space-y-2">
+                  <% const lightVal = settings.lightTheme || 'default'; %>
+                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= lightVal === 'default' ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-600/30 hover:border-neutral-300' %>">
+                    <input type="radio" name="lightTheme" value="default" class="sr-only" <%= lightVal === 'default' ? 'checked' : '' %>>
+                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === 'default' ? 'border-blue-500' : 'border-neutral-300 dark:border-neutral-600' %>">
+                      <% if (lightVal === 'default') { %><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><% } %>
+                    </span>
+                    <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1">Default</span>
+                    <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full">built-in</span>
+                  </label>
+                  <% allThemes.filter(t => t.name !== 'default').forEach(function(theme) { %>
+                  <% const ltv = theme.lightPath || theme.path; %>
+                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= lightVal === ltv ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-600/30 hover:border-neutral-300' %>">
+                    <input type="radio" name="lightTheme" value="<%= ltv %>" class="sr-only" <%= lightVal === ltv ? 'checked' : '' %>>
+                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === ltv ? 'border-blue-500' : 'border-neutral-300 dark:border-neutral-600' %>">
+                      <% if (lightVal === ltv) { %><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><% } %>
+                    </span>
+                    <div class="flex-1 min-w-0">
+                      <span class="text-sm text-neutral-700 dark:text-neutral-300 capitalize block"><%= theme.name.replace(/-/g,' ') %></span>
+                      <% if (theme.author) { %><span class="text-xs text-neutral-400">by <%= theme.author %></span><% } %>
+                    </div>
+                    <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
+                  </label>
+                  <% }); %>
+                </div>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-neutral-700 dark:text-white mb-1">Dark mode</p>
+                <p class="text-xs text-neutral-500 mb-3">Applied when the panel is in dark mode.</p>
+                <div class="space-y-2">
+                  <% const darkVal = settings.darkTheme || 'default'; %>
+                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= darkVal === 'default' ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-600/30 hover:border-neutral-300' %>">
+                    <input type="radio" name="darkTheme" value="default" class="sr-only" <%= darkVal === 'default' ? 'checked' : '' %>>
+                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === 'default' ? 'border-blue-500' : 'border-neutral-300 dark:border-neutral-600' %>">
+                      <% if (darkVal === 'default') { %><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><% } %>
+                    </span>
+                    <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1">Default</span>
+                    <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full">built-in</span>
+                  </label>
+                  <% allThemes.filter(t => t.name !== 'default').forEach(function(theme) { %>
+                  <% const dtv = theme.darkPath || theme.path; %>
+                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= darkVal === dtv ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-600/30 hover:border-neutral-300' %>">
+                    <input type="radio" name="darkTheme" value="<%= dtv %>" class="sr-only" <%= darkVal === dtv ? 'checked' : '' %>>
+                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === dtv ? 'border-blue-500' : 'border-neutral-300 dark:border-neutral-600' %>">
+                      <% if (darkVal === dtv) { %><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><% } %>
+                    </span>
+                    <div class="flex-1 min-w-0">
+                      <span class="text-sm text-neutral-700 dark:text-neutral-300 capitalize block"><%= theme.name.replace(/-/g,' ') %></span>
+                      <% if (theme.author) { %><span class="text-xs text-neutral-400">by <%= theme.author %></span><% } %>
+                    </div>
+                    <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
+                  </label>
+                  <% }); %>
+                </div>
+              </div>
+            </div>
+            <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4">
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-sm font-medium text-neutral-700 dark:text-white">Upload custom theme</p>
+                <a href="/admin/settings/example-theme" class="text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Download example</a>
+              </div>
+              <p class="text-xs text-neutral-500 mb-3">A .zip containing info.json, light.css, dark.css.</p>
+              <input type="file" name="themeFile" accept=".zip"
+                class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+            </div>
+          </div>
+
+          <!-- Auth page wallpapers -->
+          <div class="bg-neutral-50 dark:bg-white/5 rounded-xl">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">Auth page wallpapers</h2>
+            <p class="text-xs text-neutral-500 px-5 pt-3 pb-1">Background image on the login and register pages. Upload a file or paste a URL. Leave both blank to use the default.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-5 py-5">
+              <div>
+                <p class="text-sm font-medium text-neutral-700 dark:text-white mb-3">Login page</p>
+                <% if (settings.loginWallpaper) { %>
+                <img src="<%= settings.loginWallpaper %>" alt="" class="h-20 w-full object-cover rounded-xl border border-neutral-200 dark:border-white/5 mb-3">
+                <% } %>
+                <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
+                <input type="file" name="loginWallpaperFile" accept="image/*"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
+                <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
+                <input type="text" name="loginWallpaperUrl" placeholder="https://…"
+                  value="<%= (settings.loginWallpaper && settings.loginWallpaper.startsWith('http')) ? settings.loginWallpaper : '' %>"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+              </div>
+              <div>
+                <p class="text-sm font-medium text-neutral-700 dark:text-white mb-3">Register page</p>
+                <% if (settings.registerWallpaper) { %>
+                <img src="<%= settings.registerWallpaper %>" alt="" class="h-20 w-full object-cover rounded-xl border border-neutral-200 dark:border-white/5 mb-3">
+                <% } %>
+                <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
+                <input type="file" name="registerWallpaperFile" accept="image/*"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
+                <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
+                <input type="text" name="registerWallpaperUrl" placeholder="https://…"
+                  value="<%= (settings.registerWallpaper && settings.registerWallpaper.startsWith('http')) ? settings.registerWallpaper : '' %>"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end">
+            <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-6 py-2 text-sm font-medium shadow-sm transition">Save appearance</button>
+          </div>
+        </form>
+
+        <!-- ── GENERAL ─────────────────────────────────────────────────────── -->
+        <div id="panel-general" data-tab-panel="general" class="tab-panel hidden">
+          <div class="bg-neutral-50 dark:bg-white/5 rounded-xl">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">General</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 px-5 py-5">
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Upload limit <span class="text-neutral-400 font-normal">(MB)</span></label>
+                <div class="relative">
+                  <input type="number" id="uploadLimitInput" value="<%= settings.uploadLimit %>" min="1" max="10000"
+                    class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 pr-12 text-neutral-800 dark:text-white transition-colors">
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-neutral-400 pointer-events-none">MB</span>
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">VirusTotal API key</label>
+                <div class="relative">
+                  <input type="password" id="vtKeyInput" value="<%= settings.virusTotalApiKey || '' %>" placeholder="Paste your key" autocomplete="off"
+                    class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 pr-16 text-neutral-800 dark:text-white placeholder-neutral-400 font-mono transition-colors">
+                  <button type="button" onclick="const i=this.previousElementSibling;i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'Show':'Hide';"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Show</button>
+                </div>
+                <% if (settings.virusTotalApiKey) { %><p class="mt-1 text-xs text-emerald-600 dark:text-emerald-400">Key is set.</p><% } %>
+              </div>
+            </div>
+            <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex items-center gap-4">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="allowRegistrationToggle" class="sr-only peer" <%= settings.allowRegistration ? 'checked' : '' %>>
+                <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <span class="ml-3 text-sm font-medium text-neutral-600 dark:text-neutral-400">Allow registration</span>
               </label>
-              <% allThemes.filter(t => t.name !== 'default').forEach(function(theme) { const ltv = theme.lightPath || theme.path; %>
-              <label class="flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition <%= lightVal === ltv ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-700/40' %>">
-                <input type="radio" name="lightTheme" value="<%= ltv %>" class="sr-only" <%= lightVal === ltv ? 'checked' : '' %>>
-                <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === ltv ? 'border-blue-500' : 'border-neutral-300 dark:border-neutral-600' %>">
-                  <% if (lightVal === ltv) { %><span class="w-2 h-2 rounded-full bg-blue-500"></span><% } %>
-                </span>
-                <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1 capitalize"><%= theme.name.replace(/-/g,' ') %></span>
-                <span class="text-xs text-neutral-400"><%= theme.builtin ? 'built-in' : 'custom' %></span>
-              </label>
-              <% }); %>
+              <button type="button" id="saveGeneralBtn" class="ml-auto rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-5 py-2 text-sm font-medium shadow-sm transition">Save</button>
+              <button type="button" id="resetButton" class="rounded-xl border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white px-4 py-2 text-sm font-medium transition">Reset defaults</button>
             </div>
-          </div>
-          <div>
-            <p class="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2">Dark mode</p>
-            <div class="space-y-2">
-              <% const darkVal = settings.darkTheme || 'default'; %>
-              <label class="flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition <%= darkVal === 'default' ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-700/40' %>">
-                <input type="radio" name="darkTheme" value="default" class="sr-only" <%= darkVal === 'default' ? 'checked' : '' %>>
-                <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === 'default' ? 'border-blue-500' : 'border-neutral-300 dark:border-neutral-600' %>">
-                  <% if (darkVal === 'default') { %><span class="w-2 h-2 rounded-full bg-blue-500"></span><% } %>
-                </span>
-                <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1">Default</span>
-                <span class="text-xs text-neutral-400">built-in</span>
-              </label>
-              <% allThemes.filter(t => t.name !== 'default').forEach(function(theme) { const dtv = theme.darkPath || theme.path; %>
-              <label class="flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition <%= darkVal === dtv ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-700/40' %>">
-                <input type="radio" name="darkTheme" value="<%= dtv %>" class="sr-only" <%= darkVal === dtv ? 'checked' : '' %>>
-                <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === dtv ? 'border-blue-500' : 'border-neutral-300 dark:border-neutral-600' %>">
-                  <% if (darkVal === dtv) { %><span class="w-2 h-2 rounded-full bg-blue-500"></span><% } %>
-                </span>
-                <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1 capitalize"><%= theme.name.replace(/-/g,' ') %></span>
-                <span class="text-xs text-neutral-400"><%= theme.builtin ? 'built-in' : 'custom' %></span>
-              </label>
-              <% }); %>
-            </div>
-          </div>
-          <div class="border-t border-neutral-200 dark:border-white/5 pt-4">
-            <div class="flex items-center justify-between mb-2">
-              <p class="text-xs font-medium text-neutral-600 dark:text-neutral-400">Upload theme</p>
-              <a href="/admin/settings/example-theme" class="text-xs text-neutral-500">Download example</a>
-            </div>
-            <input type="file" name="themeFile" accept=".zip"
-              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm text-neutral-800 dark:text-white file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-700 file:text-neutral-700 dark:file:text-neutral-300">
           </div>
         </div>
-      </div>
 
-      <div class="flex justify-end">
-        <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-5 py-2.5 text-sm font-medium transition">Save</button>
-      </div>
-    </form>
+        <!-- ── SERVERS ─────────────────────────────────────────────────────── -->
+        <div id="panel-servers" data-tab-panel="servers" class="tab-panel hidden space-y-5">
+          <div class="flex flex-col bg-neutral-50 dark:bg-white/5 rounded-xl">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">User permissions</h2>
+            <div class="px-5 py-5 space-y-5">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow users to create servers</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Users can create their own servers up to their limit.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="allowUserCreateServer" class="sr-only peer" <%= settings.allowUserCreateServer ? 'checked' : '' %>>
+                  <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow users to delete servers</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Users can delete servers they own.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="allowUserDeleteServer" class="sr-only peer" <%= settings.allowUserDeleteServer ? 'checked' : '' %>>
+                  <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>
 
-    <!-- General tab -->
-    <div id="panel-general" data-tab-panel="general" class="tab-panel space-y-4 hidden">
-      <form id="form-general" class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
-        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white">General</p>
-        </div>
-        <div class="p-4 space-y-4">
-          <div>
-            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file size limit</label>
-            <div class="relative">
-              <input type="number" name="uploadLimit" value="<%= settings.uploadLimit %>" min="1" max="10240"
-                class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 pr-12 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
-              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-400 pointer-events-none">MB</span>
+          <div class="flex flex-col bg-neutral-50 dark:bg-white/5 rounded-xl">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">Default limits</h2>
+            <p class="text-xs text-neutral-500 px-5 pt-3">Applied to all users unless overridden per-user.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 px-5 py-5">
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Server limit</label>
+                <input type="number" id="defaultServerLimit" value="<%= settings.defaultServerLimit %>" min="0" max="100"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                <p class="mt-1 text-xs text-neutral-500">0 = cannot create.</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max memory <span class="text-neutral-400 font-normal">(MB)</span></label>
+                <input type="number" id="defaultMaxMemory" value="<%= settings.defaultMaxMemory %>" min="128" max="65536"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max CPU <span class="text-neutral-400 font-normal">(%)</span></label>
+                <input type="number" id="defaultMaxCpu" value="<%= settings.defaultMaxCpu %>" min="50" max="10000"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max storage <span class="text-neutral-400 font-normal">(GB)</span></label>
+                <input type="number" id="defaultMaxStorage" value="<%= settings.defaultMaxStorage %>" min="1" max="10000"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+              </div>
+            </div>
+            <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
+              <button type="button" id="saveServerPolicy" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-5 py-2 text-sm font-medium shadow-sm transition">Save</button>
             </div>
           </div>
-          <div>
-            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">VirusTotal API key</label>
-            <div class="relative">
-              <input type="password" name="virusTotalApiKey" value="<%= settings.virusTotalApiKey || '' %>" placeholder="Paste your key" autocomplete="off"
-                class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 pr-14 text-sm font-mono text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none transition">
-              <button type="button" onclick="const i=this.previousElementSibling;i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'Show':'Hide';" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500">Show</button>
-            </div>
-            <% if (settings.virusTotalApiKey) { %><p class="mt-1 text-[11px] text-emerald-600 dark:text-emerald-400">Key is set — leave blank to keep it.</p><% } %>
-          </div>
-          <div class="flex items-center gap-3">
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" name="allowRegistration" value="true" class="sr-only peer" <%= settings.allowRegistration ? 'checked' : '' %>>
-              <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-            <span class="text-sm text-neutral-600 dark:text-neutral-400">Allow registration</span>
-          </div>
         </div>
-        <div class="px-4 pb-4 flex gap-2">
-          <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition">Save</button>
-          <button type="button" id="resetButton" class="rounded-xl border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-400 px-4 py-2 text-sm font-medium transition">Reset defaults</button>
-        </div>
-      </form>
-    </div>
 
-    <!-- Servers tab -->
-    <div id="panel-servers" data-tab-panel="servers" class="tab-panel space-y-4 hidden">
-      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
-        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white">User permissions</p>
-        </div>
-        <div class="p-4 space-y-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow users to create servers</p>
-              <p class="text-xs text-neutral-500 mt-0.5">Off by default.</p>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="allowUserCreateServer" class="sr-only peer" <%= settings.allowUserCreateServer ? 'checked' : '' %>>
-              <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow users to delete servers</p>
-              <p class="text-xs text-neutral-500 mt-0.5">Off by default.</p>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="allowUserDeleteServer" class="sr-only peer" <%= settings.allowUserDeleteServer ? 'checked' : '' %>>
-              <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-        </div>
-      </div>
+        <!-- ── SECURITY ────────────────────────────────────────────────────── -->
+        <div id="panel-security" data-tab-panel="security" class="tab-panel hidden space-y-5">
 
-      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
-        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white">Default limits</p>
-          <p class="text-xs text-neutral-500 mt-0.5">Per-user overrides in Admin &rarr; Users.</p>
-        </div>
-        <div class="p-4 space-y-3">
-          <div>
-            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Server limit per user</label>
-            <input type="number" id="defaultServerLimit" value="<%= settings.defaultServerLimit %>" min="0" max="100"
-              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
-            <p class="mt-1 text-[11px] text-neutral-400">0 = cannot create. Admins unlimited.</p>
+          <!-- Rate limiting -->
+          <div class="bg-neutral-50 dark:bg-white/5 rounded-xl">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">Rate limiting</h2>
+            <div class="px-5 py-5 space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-white">Enable rate limiting</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Limit requests per minute per IP.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="rateLimitEnabled" class="sr-only peer" <%= settings.rateLimitEnabled ? 'checked' : '' %>>
+                  <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Requests per minute</label>
+                <input type="number" id="rateLimitRpm" value="<%= settings.rateLimitRpm %>" min="1" max="10000"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-48 bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+              </div>
+            </div>
+            <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
+              <button type="button" id="saveRateLimit" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-5 py-2 text-sm font-medium shadow-sm transition">Save</button>
+            </div>
           </div>
-          <div>
-            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Max memory (MB)</label>
-            <input type="number" id="defaultMaxMemory" value="<%= settings.defaultMaxMemory %>" min="128" max="65536"
-              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Max CPU (%)</label>
-            <input type="number" id="defaultMaxCpu" value="<%= settings.defaultMaxCpu %>" min="10" max="10000"
-              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Max storage (GB)</label>
-            <input type="number" id="defaultMaxStorage" value="<%= settings.defaultMaxStorage %>" min="1" max="10000"
-              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
-          </div>
-        </div>
-        <div class="px-4 pb-4 flex justify-end">
-          <button type="button" id="saveServerPolicy" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition">Save</button>
-        </div>
-      </div>
-    </div>
 
-    <!-- Security tab -->
-    <div id="panel-security" data-tab-panel="security" class="tab-panel space-y-4 hidden">
-      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
-        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white">Rate limiting</p>
-        </div>
-        <div class="p-4 space-y-3">
-          <div class="flex items-start gap-3">
-            <label class="relative inline-flex items-center cursor-pointer mt-0.5 shrink-0">
-              <input type="checkbox" id="rateLimitEnabled" class="sr-only peer" <%= settings.rateLimitEnabled ? 'checked' : '' %>>
-              <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-            <div>
-              <p class="text-sm font-medium text-neutral-700 dark:text-white">Enable rate limiting</p>
-              <p class="text-xs text-neutral-500">Caps requests per IP per minute, panel-wide.</p>
+          <!-- IP ban -->
+          <div class="bg-neutral-50 dark:bg-white/5 rounded-xl">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">IP banning</h2>
+            <div class="px-5 py-5">
+              <div class="flex gap-3 mb-4">
+                <input type="text" id="banIpInput" placeholder="192.168.1.1"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors flex-1 max-w-xs">
+                <button type="button" id="banIpBtn" class="rounded-xl bg-red-600 hover:bg-red-500 text-white px-4 py-2 text-sm font-medium transition">Ban IP</button>
+              </div>
+              <div id="bannedIpList" class="space-y-2">
+                <% let banned = []; try { banned = JSON.parse(settings.bannedIps || '[]'); } catch {} %>
+                <% if (banned.length === 0) { %>
+                <p class="text-sm text-neutral-400">No banned IPs.</p>
+                <% } else { %>
+                <% banned.forEach(function(ip) { %>
+                <div class="flex items-center justify-between rounded-xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-4 py-2.5">
+                  <span class="text-sm font-mono text-neutral-700 dark:text-neutral-300"><%= ip %></span>
+                  <button type="button" class="unban-btn text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 transition" data-ip="<%= ip %>">Unban</button>
+                </div>
+                <% }); } %>
+              </div>
             </div>
           </div>
-          <div class="flex items-center gap-2">
-            <div class="relative flex-1 max-w-[160px]">
-              <input type="number" id="rateLimitRpm" value="<%= settings.rateLimitRpm || 100 %>" min="1" max="10000"
-                class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 pr-14 text-sm text-neutral-800 dark:text-white focus:outline-none transition">
-              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-neutral-400 pointer-events-none">req/min</span>
-            </div>
-            <button type="button" id="saveRateLimit" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition">Save</button>
-          </div>
         </div>
-      </div>
 
-      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
-        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white">Banned IPs</p>
-        </div>
-        <div class="p-4 space-y-3">
-          <div class="flex gap-2">
-            <input type="text" id="banIpInput" placeholder="1.2.3.4"
-              class="flex-1 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2.5 text-sm font-mono text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none transition">
-            <button type="button" id="banIpBtn" class="shrink-0 rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2.5 text-sm font-medium transition">Ban</button>
-          </div>
-          <div id="bannedIpList" class="space-y-1.5">
-            <% let banned = []; try { banned = JSON.parse(settings.bannedIps || '[]'); } catch(e) {} %>
-            <% if (banned.length === 0) { %><p class="text-xs text-neutral-400 italic">No IPs banned.</p><% } %>
-            <% banned.forEach(function(ip) { %>
-            <div class="flex items-center justify-between bg-neutral-100 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-3 py-2" data-banned-ip="<%= ip %>">
-              <span class="text-sm font-mono text-neutral-700 dark:text-neutral-300"><%= ip %></span>
-              <button type="button" class="unban-btn text-xs text-red-500 font-medium" data-ip="<%= ip %>">Unban</button>
-            </div>
-            <% }); %>
-          </div>
-        </div>
       </div>
-    </div>
   </div>
 </main>
 
+<%- include('../../components/toast') %>
+<%- include('../../components/modal') %>
+
 <script>
 (function () {
+  // ── Tab switching ─────────────────────────────────────────────────────────
   const tabBtns   = document.querySelectorAll('.tab-btn');
-  const tabForms  = document.querySelectorAll('.tab-form');
   const tabPanels = document.querySelectorAll('.tab-panel');
 
   function activate(id) {
     tabBtns.forEach(btn => {
       const on = btn.dataset.tab === id;
-      btn.classList.toggle('border-neutral-800',    on);
-      btn.classList.toggle('dark:border-white',      on);
-      btn.classList.toggle('text-neutral-800',       on);
-      btn.classList.toggle('dark:text-white',        on);
-      btn.classList.toggle('border-transparent',    !on);
-      btn.classList.toggle('text-neutral-500',      !on);
+      btn.classList.toggle('border-neutral-800', on);
+      btn.classList.toggle('dark:border-white',  on);
+      btn.classList.toggle('text-neutral-800',   on);
+      btn.classList.toggle('dark:text-white',    on);
+      btn.classList.toggle('border-transparent', !on);
+      btn.classList.toggle('text-neutral-500',   !on);
+      btn.classList.toggle('dark:text-neutral-400', !on);
     });
-    tabForms.forEach(f  => f.classList.toggle('hidden', f.dataset.tabForm  !== id));
     tabPanels.forEach(p => p.classList.toggle('hidden', p.dataset.tabPanel !== id));
     try { localStorage.setItem('settings_tab', id); } catch {}
   }
 
   tabBtns.forEach(btn => btn.addEventListener('click', () => activate(btn.dataset.tab)));
-  let saved = null; try { saved = localStorage.getItem('settings_tab'); } catch {}
+  let saved = null;
+  try { saved = localStorage.getItem('settings_tab'); } catch {}
   activate(saved || 'appearance');
 
-  document.querySelectorAll('input[type="radio"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-      document.querySelectorAll(`input[name="${radio.name}"]`).forEach(r => {
-        const label = r.closest('label');
-        const ring  = label?.querySelector('span');
-        const dot   = ring?.querySelector('span');
-        if (r.checked) {
-          label.classList.add('border-blue-400','bg-blue-50','dark:bg-blue-500/10');
-          label.classList.remove('border-neutral-200','dark:border-neutral-700/40');
-          ring?.classList.add('border-blue-500'); ring?.classList.remove('border-neutral-300','dark:border-neutral-600');
-          if (!dot && ring) { const d = document.createElement('span'); d.className = 'w-2 h-2 rounded-full bg-blue-500'; ring.appendChild(d); }
-        } else {
-          label.classList.remove('border-blue-400','bg-blue-50','dark:bg-blue-500/10');
-          label.classList.add('border-neutral-200','dark:border-neutral-700/40');
-          ring?.classList.remove('border-blue-500'); ring?.classList.add('border-neutral-300','dark:border-neutral-600');
-          dot?.remove();
-        }
-      });
-    });
-  });
-
-  function submitForm(form, url) {
-    const btn = form.querySelector('button[type="submit"]');
-    const orig = btn?.textContent || '';
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
-    fetch(url, { method: 'POST', body: new FormData(form) })
+  // ── Shared fetch helper ───────────────────────────────────────────────────
+  function post(url, body, btn) {
+    const orig = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+    return fetch(url, {
+      method:  'POST',
+      headers: body instanceof FormData ? undefined : { 'Content-Type': 'application/json' },
+      body:    body instanceof FormData ? body : JSON.stringify(body),
+    })
       .then(r => r.json())
       .then(d => {
-        if (d.success) { showToast('Settings saved', 'success'); setTimeout(() => location.reload(), 1400); }
-        else throw new Error(d.error || 'Failed');
+        if (!d.success) throw new Error(d.error || 'Failed');
+        showToast('Saved', 'success');
       })
-      .catch(err => { showToast(err.message, 'error'); if (btn) { btn.disabled = false; btn.textContent = orig; } });
+      .catch(err => showToast(err.message || 'Failed', 'error'))
+      .finally(() => { if (btn) { btn.disabled = false; btn.textContent = orig; } });
   }
 
-  document.getElementById('form-appearance').addEventListener('submit', e => { e.preventDefault(); submitForm(e.target, '/admin/settings'); });
-  document.getElementById('form-general').addEventListener('submit',    e => { e.preventDefault(); submitForm(e.target, '/admin/settings'); });
-
-  document.getElementById('resetButton').addEventListener('click', () => {
-    if (!confirm('Reset all settings to defaults?')) return;
-    fetch('/admin/settings/reset', { method: 'POST' })
-      .then(r => r.json())
-      .then(d => { if (d.success) { showToast('Reset', 'success'); setTimeout(() => location.reload(), 1200); } else showToast(d.error || 'Failed', 'error'); });
+  // ── Appearance form (multipart: logo, favicon, themes, wallpapers) ────────
+  document.getElementById('form-appearance').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const btn = this.querySelector('button[type="submit"]');
+    post('/admin/settings', new FormData(this), btn)
+      .then(() => setTimeout(() => location.reload(), 1200));
   });
 
-  document.getElementById('saveRateLimit').addEventListener('click', function () {
-    const btn = this; btn.disabled = true; btn.textContent = 'Saving...';
-    fetch('/admin/settings/security', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rateLimitEnabled: document.getElementById('rateLimitEnabled').checked, rateLimitRpm: document.getElementById('rateLimitRpm').value }) })
-      .then(r => r.json())
-      .then(d => { if (d.success) showToast('Saved', 'success'); else showToast(d.error || 'Failed', 'error'); })
-      .catch(() => showToast('Failed', 'error'))
-      .finally(() => { btn.disabled = false; btn.textContent = 'Save'; });
+  // ── General tab: allowRegistration + uploadLimit + VT key ─────────────────
+  document.getElementById('saveGeneralBtn').addEventListener('click', function () {
+    post('/admin/settings/general', {
+      allowRegistration: document.getElementById('allowRegistrationToggle').checked,
+      uploadLimit:       parseInt(document.getElementById('uploadLimitInput').value, 10) || 100,
+      virusTotalApiKey:  document.getElementById('vtKeyInput').value.trim() || null,
+    }, this);
   });
 
+  // ── Servers tab ───────────────────────────────────────────────────────────
   document.getElementById('saveServerPolicy').addEventListener('click', function () {
-    const btn = this; btn.disabled = true; btn.textContent = 'Saving...';
-    fetch('/admin/settings/server-policy', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        allowUserCreateServer: document.getElementById('allowUserCreateServer').checked,
-        allowUserDeleteServer: document.getElementById('allowUserDeleteServer').checked,
-        defaultServerLimit:    parseInt(document.getElementById('defaultServerLimit').value, 10),
-        defaultMaxMemory:      parseInt(document.getElementById('defaultMaxMemory').value, 10),
-        defaultMaxCpu:         parseInt(document.getElementById('defaultMaxCpu').value, 10),
-        defaultMaxStorage:     parseInt(document.getElementById('defaultMaxStorage').value, 10),
-      }) })
-      .then(r => r.json())
-      .then(d => { if (d.success) showToast('Server policy saved', 'success'); else showToast(d.error || 'Failed', 'error'); })
-      .catch(() => showToast('Failed', 'error'))
-      .finally(() => { btn.disabled = false; btn.textContent = 'Save'; });
+    post('/admin/settings/server-policy', {
+      allowUserCreateServer: document.getElementById('allowUserCreateServer').checked,
+      allowUserDeleteServer: document.getElementById('allowUserDeleteServer').checked,
+      defaultServerLimit:    parseInt(document.getElementById('defaultServerLimit').value, 10),
+      defaultMaxMemory:      parseInt(document.getElementById('defaultMaxMemory').value,   10),
+      defaultMaxCpu:         parseInt(document.getElementById('defaultMaxCpu').value,      10),
+      defaultMaxStorage:     parseInt(document.getElementById('defaultMaxStorage').value,  10),
+    }, this);
   });
 
-  document.getElementById('banIpBtn').addEventListener('click', () => {
+  // ── Security tab: rate limit ──────────────────────────────────────────────
+  document.getElementById('saveRateLimit').addEventListener('click', function () {
+    post('/admin/settings/security', {
+      rateLimitEnabled: document.getElementById('rateLimitEnabled').checked,
+      rateLimitRpm:     parseInt(document.getElementById('rateLimitRpm').value, 10),
+    }, this);
+  });
+
+  // ── IP banning ────────────────────────────────────────────────────────────
+  document.getElementById('banIpBtn').addEventListener('click', function () {
     const ip = document.getElementById('banIpInput').value.trim();
-    if (!ip) { showToast('Enter an IP', 'error'); return; }
+    if (!ip) return showToast('Enter an IP address', 'error');
     fetch('/admin/settings/ban-ip', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ip }) })
       .then(r => r.json())
       .then(d => {
         if (!d.success) throw new Error(d.error || 'Failed');
         document.getElementById('banIpInput').value = '';
-        const list = document.getElementById('bannedIpList');
-        list.querySelector('p')?.remove();
-        const row = document.createElement('div');
-        row.className = 'flex items-center justify-between bg-neutral-100 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-3 py-2';
-        row.dataset.bannedIp = ip;
-        row.innerHTML = `<span class="text-sm font-mono text-neutral-700 dark:text-neutral-300">${ip}</span><button type="button" class="unban-btn text-xs text-red-500 font-medium" data-ip="${ip}">Unban</button>`;
-        row.querySelector('.unban-btn').addEventListener('click', handleUnban);
-        list.appendChild(row);
-        showToast(`${ip} banned`, 'success');
+        showToast('IP banned', 'success');
+        setTimeout(() => location.reload(), 800);
       })
-      .catch(err => showToast(err.message, 'error'));
+      .catch(err => showToast(err.message || 'Failed', 'error'));
   });
 
-  function handleUnban() {
-    const ip = this.dataset.ip;
+  document.getElementById('bannedIpList').addEventListener('click', function (e) {
+    const btn = e.target.closest('.unban-btn');
+    if (!btn) return;
+    const ip = btn.dataset.ip;
     fetch('/admin/settings/unban-ip', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ip }) })
       .then(r => r.json())
       .then(d => {
         if (!d.success) throw new Error(d.error || 'Failed');
-        document.querySelector(`[data-banned-ip="${ip}"]`)?.remove();
-        const list = document.getElementById('bannedIpList');
-        if (!list.querySelector('[data-banned-ip]')) { const p = document.createElement('p'); p.className = 'text-xs text-neutral-400 italic'; p.textContent = 'No IPs banned.'; list.appendChild(p); }
-        showToast(`${ip} unbanned`, 'success');
+        showToast('IP unbanned', 'success');
+        setTimeout(() => location.reload(), 800);
       })
-      .catch(err => showToast(err.message, 'error'));
-  }
+      .catch(err => showToast(err.message || 'Failed', 'error'));
+  });
 
-  document.querySelectorAll('.unban-btn').forEach(btn => btn.addEventListener('click', handleUnban.bind(btn)));
+  // ── Reset defaults ────────────────────────────────────────────────────────
+  document.getElementById('resetButton').addEventListener('click', function () {
+    window.modal.confirm({
+      title: 'Reset settings',
+      body:  'Reset all settings to their defaults?',
+      danger: true,
+      confirmLabel: 'Reset',
+      onConfirm: () => {
+        fetch('/admin/settings/reset', { method: 'POST' })
+          .then(r => r.json())
+          .then(d => {
+            if (d.success) { showToast('Settings reset', 'success'); setTimeout(() => location.reload(), 1200); }
+            else showToast(d.error || 'Failed', 'error');
+          })
+          .catch(() => showToast('Failed', 'error'));
+      },
+    });
+  });
+
+  // ── Theme radio visual update ─────────────────────────────────────────────
+  document.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', function () {
+      const group = document.querySelectorAll(`input[name="${this.name}"]`);
+      group.forEach(r => {
+        const label = r.closest('label');
+        if (!label) return;
+        const ring = label.querySelector('.rounded-full.border-2');
+        const dot  = ring?.querySelector('.rounded-full.bg-blue-500');
+        if (r.checked) {
+          label.classList.add('border-blue-400', 'bg-blue-50', 'dark:bg-blue-500/10');
+          label.classList.remove('border-neutral-200', 'dark:border-neutral-600/30');
+          if (ring) { ring.classList.add('border-blue-500'); ring.classList.remove('border-neutral-300', 'dark:border-neutral-600'); }
+          if (!dot && ring) { const d = document.createElement('span'); d.className = 'w-2.5 h-2.5 rounded-full bg-blue-500'; ring.appendChild(d); }
+        } else {
+          label.classList.remove('border-blue-400', 'bg-blue-50', 'dark:bg-blue-500/10');
+          label.classList.add('border-neutral-200', 'dark:border-neutral-600/30');
+          if (ring) { ring.classList.remove('border-blue-500'); ring.classList.add('border-neutral-300', 'dark:border-neutral-600'); }
+          dot?.remove();
+        }
+      });
+    });
+  });
 })();
 </script>
 
