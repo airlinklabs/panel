@@ -1,7 +1,9 @@
 <div class="overflow-x-auto border-b border-neutral-200 dark:border-white/5 mb-4 -mx-4 px-4">
   <nav class="flex gap-1 min-w-max pb-1">
     <%
-    const menuItems = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
+    const rawMenuItems = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
+    const isAdmin = (typeof user !== 'undefined' && user && user.isAdmin === true);
+    const menuItems = rawMenuItems.filter(item => !(item.isAdminItem && !isAdmin));
     if (!menuItems || menuItems.length === 0) {
     %>
     <a href="/server/<%= server.UUID %>" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false">Console</a>

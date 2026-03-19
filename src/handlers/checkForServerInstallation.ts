@@ -1,6 +1,7 @@
 import axios from 'axios';
 import prisma from '../db';
 import { checkNodeStatus } from './utils/node/nodeStatus';
+import { daemonSchemeSync } from './utils/core/daemonRequest';
 
 type CheckInstallationResult = {
   installed: boolean;
@@ -49,7 +50,7 @@ export async function checkForServerInstallation(
     }
 
     const response = await axios.get(
-      `http://${server.node.address}:${server.node.port}/container/status/${server.UUID}`,
+      `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status/${server.UUID}`,
       { auth: { username: 'Airlink', password: server.node.key }, timeout: 4000 },
     );
 

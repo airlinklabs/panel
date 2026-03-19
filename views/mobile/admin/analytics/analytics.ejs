@@ -4,267 +4,249 @@
   <%- include('../../components/template') %>
   <%- include('../../components/toast') %>
 
-  <div class="px-4 py-5">
+  <div class="px-4 pt-5 pb-24">
 
-    <div class="flex items-start justify-between mb-5">
+    <div class="flex items-center justify-between mb-5">
       <div>
         <h1 class="text-base font-medium text-neutral-800 dark:text-white">Analytics</h1>
-        <p class="text-xs text-neutral-500 mt-0.5">Server performance and player activity</p>
+        <p class="text-xs text-neutral-500 mt-0.5">Live data from the panel and daemons.</p>
       </div>
-      <button id="refreshBtn" type="button" class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+      <button id="refreshBtn" type="button"
+        class="flex items-center gap-1.5 rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 transition shrink-0">
+        <svg id="refreshIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
         </svg>
         Refresh
       </button>
     </div>
 
-    <% if (errorMessage && errorMessage.message) { %>
-      <div class="rounded-xl bg-red-50 dark:bg-red-800/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-4 flex items-start gap-3">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-red-500 shrink-0 mt-0.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 3.014-1.874 2.148-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-        </svg>
-        <p class="text-xs text-red-600 dark:text-red-400"><%= errorMessage.message %></p>
-      </div>
-    <% } %>
-
-    <!-- Tab buttons -->
-    <div class="flex gap-1 p-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl mb-5">
-      <button onclick="switchTab('playerstats')" id="tab-playerstats" class="flex-1 rounded-lg py-2 text-xs font-medium transition tab-btn bg-white dark:bg-neutral-700 text-neutral-800 dark:text-white shadow-sm">Player Stats</button>
-      <button onclick="switchTab('performance')" id="tab-performance" class="flex-1 rounded-lg py-2 text-xs font-medium transition tab-btn text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200">Performance</button>
-      <button onclick="switchTab('usage')" id="tab-usage" class="flex-1 rounded-lg py-2 text-xs font-medium transition tab-btn text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200">Usage</button>
+    <!-- Scrollable tabs -->
+    <div class="flex gap-0.5 border-b border-neutral-200 dark:border-neutral-700/40 mb-5 -mx-4 px-4 overflow-x-auto">
+      <button type="button" data-tab="servers"  class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2 whitespace-nowrap">Servers</button>
+      <button type="button" data-tab="nodes"    class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2 whitespace-nowrap">Nodes</button>
+      <button type="button" data-tab="activity" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2 whitespace-nowrap">Activity</button>
     </div>
 
-    <!-- Player Stats tab -->
-    <div id="content-playerstats" class="tab-content">
-      <div class="grid grid-cols-2 gap-3 mb-5">
-        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
-          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Total Players</p>
-          <p id="totalPlayers" class="text-2xl font-semibold text-neutral-800 dark:text-white">0</p>
-          <p class="text-xs text-neutral-500 mt-1">Across all servers</p>
-        </div>
-        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
-          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Capacity</p>
-          <p id="maxCapacity" class="text-2xl font-semibold text-neutral-800 dark:text-white">0</p>
-          <p class="text-xs text-neutral-500 mt-1">Max slots</p>
-        </div>
-        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
-          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Online Servers</p>
-          <p id="onlineServers" class="text-2xl font-semibold text-neutral-800 dark:text-white">0</p>
-          <p class="text-xs text-neutral-500 mt-1">Currently up</p>
-        </div>
-        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
-          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Utilization</p>
-          <p id="utilization" class="text-2xl font-semibold text-neutral-800 dark:text-white">0%</p>
-          <p class="text-xs text-neutral-500 mt-1">Capacity used</p>
-        </div>
-      </div>
-
-      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4 mb-4">
-        <div class="flex items-center justify-between mb-3">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white">Player History</p>
-          <p class="text-[10px] text-neutral-500">Last 48 hours</p>
-        </div>
-        <div class="h-44">
-          <canvas id="playerChart" class="w-full h-full"></canvas>
-        </div>
-      </div>
-
-      <button id="serverDetailsBtn" type="button" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-4 py-2.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
-        View Server Details
-      </button>
+    <!-- Loading -->
+    <div id="loading-state" class="flex items-center gap-3 py-8 text-neutral-400">
+      <svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+      </svg>
+      <span class="text-sm">Loading analytics…</span>
     </div>
 
-    <!-- Performance tab -->
-    <div id="content-performance" class="tab-content hidden">
-      <div class="py-12 text-center">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 mx-auto mb-3 text-neutral-300 dark:text-neutral-700">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
-        </svg>
-        <p class="text-sm font-medium text-neutral-800 dark:text-white mb-1">Performance Metrics</p>
-        <p class="text-xs text-neutral-500">Coming in a future update</p>
+    <!-- SERVERS -->
+    <div data-tab-panel="servers" class="tab-panel hidden space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
+          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Total</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="sv-total">—</p>
+          <p class="text-xs mt-1" id="sv-suspended-label"></p>
+        </div>
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
+          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">RAM alloc</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="sv-ram">—</p>
+        </div>
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
+          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">CPU alloc</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="sv-cpu">—</p>
+        </div>
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
+          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Disk alloc</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="sv-storage">—</p>
+        </div>
+      </div>
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+        <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3">Images in use</p>
+        <div id="sv-images" class="space-y-2.5"></div>
+      </div>
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">Highest allocated</p>
+        </div>
+        <div id="sv-heavy" class="divide-y divide-neutral-100 dark:divide-white/5"></div>
       </div>
     </div>
 
-    <!-- Usage tab -->
-    <div id="content-usage" class="tab-content hidden">
-      <div class="py-12 text-center">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 mx-auto mb-3 text-neutral-300 dark:text-neutral-700">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-        </svg>
-        <p class="text-sm font-medium text-neutral-800 dark:text-white mb-1">Usage Analytics</p>
-        <p class="text-xs text-neutral-500">Coming in a future update</p>
+    <!-- NODES -->
+    <div data-tab-panel="nodes" class="tab-panel hidden space-y-4">
+      <div class="grid grid-cols-3 gap-3">
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3.5">
+          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Nodes</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="nd-total">—</p>
+        </div>
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3.5">
+          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Online</p>
+          <p class="text-xl font-semibold text-emerald-600 dark:text-emerald-400" id="nd-online">—</p>
+        </div>
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3.5">
+          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Offline</p>
+          <p class="text-xl font-semibold text-red-500 dark:text-red-400" id="nd-offline">—</p>
+        </div>
+      </div>
+      <div id="nd-list" class="space-y-3"></div>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div data-tab-panel="activity" class="tab-panel hidden space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
+          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Users</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="ac-users">—</p>
+          <p class="text-xs text-neutral-500 mt-1" id="ac-admins-label"></p>
+        </div>
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
+          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Images</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="ac-images">—</p>
+        </div>
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
+          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Logins (30d)</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="ac-logins">—</p>
+        </div>
+        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3.5">
+          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Avg/day</p>
+          <p class="text-xl font-semibold text-neutral-800 dark:text-white" id="ac-avg">—</p>
+        </div>
+      </div>
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+        <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3">Login activity — 30 days</p>
+        <div class="relative h-40">
+          <canvas id="loginChart"></canvas>
+        </div>
+      </div>
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">Recent logins</p>
+        </div>
+        <div id="ac-logins-list" class="divide-y divide-neutral-100 dark:divide-white/5"></div>
       </div>
     </div>
 
   </div>
 </main>
 
-<!-- Server details modal -->
-<div id="serverDetailsModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60">
-  <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-2xl p-5 w-full shadow-xl max-h-[80vh] flex flex-col">
-    <div class="flex items-center justify-between mb-4">
-      <p class="text-sm font-medium text-neutral-800 dark:text-white">Server Details</p>
-      <button id="closeServerModal" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-        </svg>
-      </button>
-    </div>
-    <div id="serverDetailsList" class="flex-1 overflow-y-auto space-y-2"></div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 <script>
-  let playerChart;
-  let refreshInterval;
-  let serverData = [];
+(function () {
+  const tabBtns   = document.querySelectorAll('.tab-btn');
+  const tabPanels = document.querySelectorAll('.tab-panel');
+  let loginChart  = null;
 
-  const ctx = document.getElementById('playerChart').getContext('2d');
-  playerChart = new Chart(ctx, {
-    type: 'line',
-    data: { labels: [], datasets: [{ label: 'Players', data: [], backgroundColor: 'rgba(163,163,163,0.1)', borderColor: 'rgba(163,163,163,0.8)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 2 }] },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: 'rgba(128,128,128,0.8)', maxRotation: 0 }, grid: { color: 'rgba(128,128,128,0.1)' } },
-        y: { beginAtZero: true, ticks: { color: 'rgba(128,128,128,0.8)' }, grid: { color: 'rgba(128,128,128,0.1)' } }
-      }
-    }
-  });
-
-  function switchTab(name) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-    document.querySelectorAll('.tab-btn').forEach(el => {
-      el.classList.remove('bg-white', 'dark:bg-neutral-700', 'text-neutral-800', 'dark:text-white', 'shadow-sm');
-      el.classList.add('text-neutral-500', 'dark:text-neutral-400');
+  function activateTab(id) {
+    tabBtns.forEach(btn => {
+      const on = btn.dataset.tab === id;
+      btn.classList.toggle('border-neutral-800', on);
+      btn.classList.toggle('dark:border-white', on);
+      btn.classList.toggle('text-neutral-800', on);
+      btn.classList.toggle('dark:text-white', on);
+      btn.classList.toggle('border-transparent', !on);
+      btn.classList.toggle('text-neutral-500', !on);
+      btn.classList.toggle('dark:text-neutral-400', !on);
     });
-    const target = document.getElementById('content-' + name);
-    target.classList.remove('hidden');
-    target.style.opacity = '0';
-    target.style.transform = 'translateY(5px)';
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        target.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
-        target.style.opacity = '1';
-        target.style.transform = 'translateY(0)';
-        setTimeout(function() { target.style.transition = ''; target.style.opacity = ''; target.style.transform = ''; }, 200);
-      });
-    });
-    const btn = document.getElementById('tab-' + name);
-    btn.classList.remove('text-neutral-500', 'dark:text-neutral-400');
-    btn.classList.add('bg-white', 'dark:bg-neutral-700', 'text-neutral-800', 'dark:text-white', 'shadow-sm');
-    if (name === 'playerstats') fetchData();
+    tabPanels.forEach(p => p.classList.toggle('hidden', p.dataset.tabPanel !== id));
   }
 
-  async function fetchData() {
-    try {
-      const response = await fetch('/admin/playerstats/data');
-      if (!response.ok) throw new Error('Request failed');
-      const data = await response.json();
-      if (data.error) throw new Error(data.error);
+  tabBtns.forEach(btn => btn.addEventListener('click', () => activateTab(btn.dataset.tab)));
+  activateTab('servers');
 
-      document.getElementById('totalPlayers').textContent = data.totalPlayers ?? 0;
-      document.getElementById('maxCapacity').textContent = data.totalMaxPlayers ?? 0;
-      document.getElementById('onlineServers').textContent = data.onlineServers ?? 0;
-      const pct = data.totalMaxPlayers > 0 ? Math.round((data.totalPlayers / data.totalMaxPlayers) * 100) : 0;
-      document.getElementById('utilization').textContent = `${pct}%`;
+  const isDark    = () => document.documentElement.classList.contains('dark');
+  const textColor = () => isDark() ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)';
+  const gridColor = () => isDark() ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+  const fmt       = n  => n.toLocaleString();
 
-      serverData = data.servers || [];
-
-      if (data.historicalData && data.historicalData.length > 0) {
-        playerChart.data.labels = data.historicalData.map(e => new Date(e.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-        playerChart.data.datasets[0].data = data.historicalData.map(e => e.totalPlayers);
-        playerChart.update('none');
-      }
-    } catch (err) {
-      console.error('Analytics fetch failed:', err);
-    }
+  function bar(label, value, max) {
+    const pct   = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
+    const color = pct >= 90 ? '#ef4444' : pct >= 70 ? '#f97316' : '#3b82f6';
+    return `<div><div class="flex justify-between text-xs text-neutral-600 dark:text-neutral-400 mb-1.5"><span class="truncate max-w-[55%] font-medium">${label}</span><span class="shrink-0 tabular-nums">${fmt(value)} (${max > 0 ? pct+'%' : '—'})</span></div><div class="h-1.5 rounded-full bg-neutral-200 dark:bg-white/5"><div class="h-1.5 rounded-full" style="width:${max>0?pct:0}%;background:${color}"></div></div></div>`;
   }
 
-  function showServerModal() {
-    const list = document.getElementById('serverDetailsList');
-    list.innerHTML = '';
-    if (serverData.length === 0) {
-      list.innerHTML = '<p class="text-xs text-neutral-500 text-center py-4">No servers found</p>';
-    } else {
-      serverData.forEach(s => {
-        const div = document.createElement('div');
-        div.className = 'rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 flex items-center gap-3';
-        div.innerHTML = `
-          <div class="w-2 h-2 rounded-full shrink-0 ${s.online ? 'bg-emerald-500' : 'bg-neutral-400'}"></div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-neutral-800 dark:text-white truncate">${s.serverName || 'Unknown'}</p>
-            <p class="text-xs text-neutral-500">${s.version || 'Unknown'}</p>
+  function render(data) {
+    const s = data.servers;
+    document.getElementById('sv-total').textContent   = fmt(s.total);
+    document.getElementById('sv-ram').textContent     = s.totalRamMb >= 1024 ? (s.totalRamMb/1024).toFixed(1)+' GB' : s.totalRamMb+' MB';
+    document.getElementById('sv-cpu').textContent     = s.totalCpuPct + '%';
+    document.getElementById('sv-storage').textContent = s.totalStorageGb + ' GB';
+    const sl = document.getElementById('sv-suspended-label');
+    sl.textContent = s.suspended > 0 ? s.suspended + ' suspended' : 'none suspended';
+    sl.className   = 'text-xs mt-1 ' + (s.suspended > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-neutral-500');
+
+    const imgEl = document.getElementById('sv-images');
+    imgEl.innerHTML = s.topImages.length
+      ? s.topImages.map(i => bar(i.name||'Unknown', i.count, s.topImages[0].count)).join('')
+      : '<p class="text-xs text-neutral-400">No servers yet.</p>';
+
+    document.getElementById('sv-heavy').innerHTML = s.topServers.map(sv =>
+      `<div class="flex items-center gap-3 px-4 py-3"><div class="min-w-0 flex-1"><p class="text-sm text-neutral-700 dark:text-neutral-300 truncate font-medium">${sv.name}</p><p class="text-xs text-neutral-400">${sv.owner}</p></div><div class="text-xs text-neutral-500 tabular-nums shrink-0">${fmt(sv.memory)} MB · ${sv.cpu}%</div></div>`
+    ).join('') || '<p class="px-4 py-4 text-sm text-neutral-400">No servers.</p>';
+
+    const nodes = data.nodes;
+    document.getElementById('nd-total').textContent  = fmt(nodes.length);
+    document.getElementById('nd-online').textContent  = fmt(nodes.filter(n=>n.online).length);
+    document.getElementById('nd-offline').textContent = fmt(nodes.filter(n=>!n.online).length);
+    document.getElementById('nd-list').innerHTML = nodes.map(n =>
+      `<div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="w-2 h-2 rounded-full shrink-0 ${n.online?'bg-emerald-500':'bg-red-500'}"></span>
+            <div class="min-w-0"><p class="text-sm font-medium text-neutral-800 dark:text-white truncate">${n.name}</p><p class="text-xs font-mono text-neutral-400">${n.address}:${n.port}</p></div>
           </div>
-          <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300 shrink-0">${s.playerCount ?? 0}/${s.maxPlayers ?? 0}</p>
-        `;
-        list.appendChild(div);
-      });
-    }
-    const modal = document.getElementById('serverDetailsModal');
-    const inner = modal.querySelector('div');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    modal.style.opacity = '0';
-    if (inner) { inner.style.transform = 'scale(0.97) translateY(6px)'; inner.style.opacity = '0'; }
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        modal.style.transition = 'opacity 0.18s ease';
-        modal.style.opacity = '1';
-        if (inner) {
-          inner.style.transition = 'transform 0.18s ease, opacity 0.18s ease';
-          inner.style.transform = 'scale(1) translateY(0)';
-          inner.style.opacity = '1';
-        }
-        setTimeout(function() {
-          modal.style.transition = ''; modal.style.opacity = '';
-          if (inner) { inner.style.transition = ''; inner.style.transform = ''; inner.style.opacity = ''; }
-        }, 200);
-      });
+          <span class="text-xs px-2 py-0.5 rounded-md font-medium shrink-0 ml-2 ${n.online?'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20':'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20'}">${n.online?'Online':'Offline'}</span>
+        </div>
+        <div class="flex gap-4 mt-3 pt-3 border-t border-neutral-200 dark:border-white/5 text-xs text-neutral-500">
+          <span>${n.serverCount} server${n.serverCount!==1?'s':''}</span>
+          ${n.ram>0?`<span>${n.ram>=1024?(n.ram/1024).toFixed(1)+' GB':n.ram+' MB'} RAM</span>`:''}
+          ${n.online&&n.versionRelease?`<span class="font-mono">${n.versionRelease}</span>`:''}
+        </div>
+      </div>`
+    ).join('') || '<p class="text-sm text-neutral-400">No nodes.</p>';
+
+    const a = data.activity;
+    const totalLogins = Object.values(a.loginsByDay).reduce((s,v)=>s+v,0);
+    document.getElementById('ac-users').textContent  = fmt(a.totalUsers);
+    document.getElementById('ac-images').textContent = fmt(a.totalImages);
+    document.getElementById('ac-logins').textContent = fmt(totalLogins);
+    document.getElementById('ac-avg').textContent    = fmt(Math.round(totalLogins/30));
+    document.getElementById('ac-admins-label').textContent = a.adminCount + ' admin' + (a.adminCount!==1?'s':'');
+
+    if (loginChart) loginChart.destroy();
+    loginChart = new Chart(document.getElementById('loginChart'), {
+      type: 'bar',
+      data: { labels: Object.keys(a.loginsByDay).map(d=>d.slice(5)), datasets: [{ data: Object.values(a.loginsByDay), backgroundColor: 'rgba(59,130,246,0.5)', borderColor: '#3b82f6', borderWidth: 1, borderRadius: 3 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: gridColor() }, ticks: { color: textColor(), maxTicksLimit: 7 } }, y: { grid: { color: gridColor() }, ticks: { color: textColor(), stepSize: 1 }, min: 0 } } }
     });
+
+    document.getElementById('ac-logins-list').innerHTML = (a.recentLogins||[]).map(l =>
+      `<div class="flex items-center gap-3 px-4 py-3"><span class="text-xs font-mono text-neutral-500 shrink-0">#${l.userId}</span><span class="text-xs font-mono text-neutral-600 dark:text-neutral-400 flex-1">${l.ipAddress||'Unknown'}</span><span class="text-xs text-neutral-400">${new Date(l.timestamp).toLocaleString()}</span></div>`
+    ).join('') || '<p class="px-4 py-4 text-sm text-neutral-400">No login history.</p>';
   }
 
-  document.getElementById('closeServerModal').addEventListener('click', () => {
-    const modal = document.getElementById('serverDetailsModal');
-    const inner = modal.querySelector('div');
-    modal.style.transition = 'opacity 0.15s ease';
-    modal.style.opacity = '0';
-    if (inner) {
-      inner.style.transition = 'transform 0.15s ease, opacity 0.15s ease';
-      inner.style.transform = 'scale(0.97) translateY(6px)';
-      inner.style.opacity = '0';
+  async function load() {
+    const icon    = document.getElementById('refreshIcon');
+    const loading = document.getElementById('loading-state');
+    icon.classList.add('animate-spin');
+    loading.classList.remove('hidden');
+    tabPanels.forEach(p => p.classList.add('hidden'));
+
+    try {
+      const res = await fetch('/api/admin/analytics/summary');
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      loading.classList.add('hidden');
+      activateTab('servers');
+      render(data);
+      showToast('Analytics refreshed', 'success');
+    } catch {
+      loading.classList.add('hidden');
+      showToast('Failed to load analytics', 'error');
+    } finally {
+      icon.classList.remove('animate-spin');
     }
-    setTimeout(function() {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      modal.style.transition = ''; modal.style.opacity = '';
-      if (inner) { inner.style.transition = ''; inner.style.transform = ''; inner.style.opacity = ''; }
-    }, 160);
-  });
+  }
 
-  document.getElementById('serverDetailsBtn').addEventListener('click', showServerModal);
-
-  document.getElementById('refreshBtn').addEventListener('click', function() {
-    const icon = this.querySelector('svg');
-    if (icon) {
-      icon.style.transition = 'transform 0.6s ease';
-      icon.style.transform = 'rotate(360deg)';
-      setTimeout(function() { icon.style.transition = ''; icon.style.transform = ''; }, 650);
-    }
-    fetchData();
-  });
-
-  document.getElementById('refreshBtn').addEventListener('dblclick', async (e) => {
-    e.preventDefault();
-    try { await fetch('/api/admin/playerstats/collect', { method: 'POST' }); setTimeout(fetchData, 1000); } catch {}
-  });
-
-  fetchData();
-  refreshInterval = setInterval(fetchData, 300000);
-  window.addEventListener('beforeunload', () => clearInterval(refreshInterval));
+  document.getElementById('refreshBtn').addEventListener('click', load);
+  load();
+})();
 </script>
 
 <%- include('../../components/footer') %>

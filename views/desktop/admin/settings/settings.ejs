@@ -15,17 +15,16 @@
         <!-- Tab bar -->
         <div class="flex gap-0.5 mb-6 border-b border-neutral-200 dark:border-neutral-700/40">
           <button type="button" data-tab="appearance" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Appearance</button>
-          <button type="button" data-tab="general"    class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">General</button>
           <button type="button" data-tab="servers"    class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Servers</button>
           <button type="button" data-tab="security"   class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Security</button>
         </div>
 
-        <!-- ── APPEARANCE ─────────────────────────────────────────────────── -->
+        <!-- ── APPEARANCE ──────────────────────────────────────────────────── -->
         <form id="form-appearance" data-tab-panel="appearance" class="tab-panel space-y-5 hidden" enctype="multipart/form-data">
 
           <!-- Branding -->
-          <div class="bg-neutral-50 dark:bg-white/5 rounded-xl">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">Branding</h2>
+          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Branding</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 px-5 py-5">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Site title</label>
@@ -49,9 +48,24 @@
             </div>
           </div>
 
+          <!-- Registration -->
+          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Registration</h2>
+            <div class="px-5 py-5 flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow public registration</p>
+                <p class="text-xs text-neutral-500 mt-0.5">When off, only admins can create new accounts.</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="allowRegistration" class="sr-only peer" <%= settings.allowRegistration ? 'checked' : '' %>>
+                <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          </div>
+
           <!-- Themes -->
-          <div class="bg-neutral-50 dark:bg-white/5 rounded-xl">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">Themes</h2>
+          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Themes</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-5 py-5">
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white mb-1">Light mode</p>
@@ -124,8 +138,8 @@
           </div>
 
           <!-- Auth page wallpapers -->
-          <div class="bg-neutral-50 dark:bg-white/5 rounded-xl">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">Auth page wallpapers</h2>
+          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Auth page wallpapers</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3 pb-1">Background image on the login and register pages. Upload a file or paste a URL. Leave both blank to use the default.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-5 py-5">
               <div>
@@ -157,51 +171,17 @@
             </div>
           </div>
 
-          <div class="flex justify-end">
+          <div class="flex justify-end gap-3">
+            <button type="button" id="resetButton" class="rounded-xl border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white px-4 py-2 text-sm font-medium transition">Reset defaults</button>
             <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-6 py-2 text-sm font-medium shadow-sm transition">Save appearance</button>
           </div>
         </form>
 
-        <!-- ── GENERAL ─────────────────────────────────────────────────────── -->
-        <div id="panel-general" data-tab-panel="general" class="tab-panel hidden">
-          <div class="bg-neutral-50 dark:bg-white/5 rounded-xl">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">General</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 px-5 py-5">
-              <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Upload limit <span class="text-neutral-400 font-normal">(MB)</span></label>
-                <div class="relative">
-                  <input type="number" id="uploadLimitInput" value="<%= settings.uploadLimit %>" min="1" max="10000"
-                    class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 pr-12 text-neutral-800 dark:text-white transition-colors">
-                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-neutral-400 pointer-events-none">MB</span>
-                </div>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">VirusTotal API key</label>
-                <div class="relative">
-                  <input type="password" id="vtKeyInput" value="<%= settings.virusTotalApiKey || '' %>" placeholder="Paste your key" autocomplete="off"
-                    class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 pr-16 text-neutral-800 dark:text-white placeholder-neutral-400 font-mono transition-colors">
-                  <button type="button" onclick="const i=this.previousElementSibling;i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'Show':'Hide';"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Show</button>
-                </div>
-                <% if (settings.virusTotalApiKey) { %><p class="mt-1 text-xs text-emerald-600 dark:text-emerald-400">Key is set.</p><% } %>
-              </div>
-            </div>
-            <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex items-center gap-4">
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="allowRegistrationToggle" class="sr-only peer" <%= settings.allowRegistration ? 'checked' : '' %>>
-                <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                <span class="ml-3 text-sm font-medium text-neutral-600 dark:text-neutral-400">Allow registration</span>
-              </label>
-              <button type="button" id="saveGeneralBtn" class="ml-auto rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-5 py-2 text-sm font-medium shadow-sm transition">Save</button>
-              <button type="button" id="resetButton" class="rounded-xl border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white px-4 py-2 text-sm font-medium transition">Reset defaults</button>
-            </div>
-          </div>
-        </div>
-
         <!-- ── SERVERS ─────────────────────────────────────────────────────── -->
         <div id="panel-servers" data-tab-panel="servers" class="tab-panel hidden space-y-5">
-          <div class="flex flex-col bg-neutral-50 dark:bg-white/5 rounded-xl">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">User permissions</h2>
+
+          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">User permissions</h2>
             <div class="px-5 py-5 space-y-5">
               <div class="flex items-center justify-between">
                 <div>
@@ -226,9 +206,22 @@
             </div>
           </div>
 
-          <div class="flex flex-col bg-neutral-50 dark:bg-white/5 rounded-xl">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">Default limits</h2>
-            <p class="text-xs text-neutral-500 px-5 pt-3">Applied to all users unless overridden per-user.</p>
+          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">File uploads</h2>
+            <div class="px-5 py-5">
+              <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Upload limit <span class="text-neutral-400 font-normal">(MB)</span></label>
+              <div class="relative max-w-xs">
+                <input type="number" id="uploadLimitInput" value="<%= settings.uploadLimit %>" min="1" max="10000"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 pr-12 text-neutral-800 dark:text-white transition-colors">
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-neutral-400 pointer-events-none">MB</span>
+              </div>
+              <p class="mt-1.5 text-xs text-neutral-500">Maximum file size users can upload via the file manager.</p>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Default limits</h2>
+            <p class="text-xs text-neutral-500 px-5 pt-3">Applied to new users unless overridden per-user.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 px-5 py-5">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Server limit</label>
@@ -261,14 +254,33 @@
         <!-- ── SECURITY ────────────────────────────────────────────────────── -->
         <div id="panel-security" data-tab-panel="security" class="tab-panel hidden space-y-5">
 
+          <!-- VirusTotal -->
+          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">VirusTotal</h2>
+            <div class="px-5 py-5">
+              <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">API key</label>
+              <div class="relative max-w-sm">
+                <input type="password" id="vtKeyInput" value="<%= settings.virusTotalApiKey || '' %>" placeholder="Paste your key" autocomplete="off"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 pr-16 text-neutral-800 dark:text-white placeholder-neutral-400 font-mono transition-colors">
+                <button type="button" onclick="const i=this.previousElementSibling;i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'Show':'Hide';"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Show</button>
+              </div>
+              <% if (settings.virusTotalApiKey) { %><p class="mt-1.5 text-xs text-emerald-600 dark:text-emerald-400">Key is set.</p><% } %>
+              <p class="mt-1.5 text-xs text-neutral-500">Used to scan uploaded files. Get a free key at <a href="https://www.virustotal.com" target="_blank" class="underline hover:text-neutral-700 dark:hover:text-neutral-300 transition">virustotal.com</a>.</p>
+            </div>
+            <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
+              <button type="button" id="saveVtKey" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-5 py-2 text-sm font-medium shadow-sm transition">Save</button>
+            </div>
+          </div>
+
           <!-- Rate limiting -->
-          <div class="bg-neutral-50 dark:bg-white/5 rounded-xl">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">Rate limiting</h2>
+          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Rate limiting</h2>
             <div class="px-5 py-5 space-y-4">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-neutral-700 dark:text-white">Enable rate limiting</p>
-                  <p class="text-xs text-neutral-500 mt-0.5">Limit requests per minute per IP.</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Limit requests per minute per IP address.</p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" id="rateLimitEnabled" class="sr-only peer" <%= settings.rateLimitEnabled ? 'checked' : '' %>>
@@ -281,14 +293,69 @@
                   class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-48 bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
               </div>
             </div>
-            <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
-              <button type="button" id="saveRateLimit" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-5 py-2 text-sm font-medium shadow-sm transition">Save</button>
+          </div>
+
+          <!-- Login protection -->
+          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Login protection</h2>
+            <p class="text-xs text-neutral-500 px-5 pt-3">After N failed attempts from a single account, that account is locked for the configured duration. Errors always say "invalid credentials" — the username is never revealed.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 px-5 py-5">
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max failed attempts before lockout</label>
+                <input type="number" id="loginMaxAttempts" value="<%= settings.loginMaxAttempts ?? 5 %>" min="1" max="100"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Lockout duration <span class="text-neutral-400 font-normal">(minutes)</span></label>
+                <input type="number" id="loginLockoutMinutes" value="<%= settings.loginLockoutMinutes ?? 15 %>" min="1" max="1440"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+              </div>
             </div>
           </div>
 
-          <!-- IP ban -->
-          <div class="bg-neutral-50 dark:bg-white/5 rounded-xl">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl">IP banning</h2>
+          <!-- Network -->
+          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Network</h2>
+            <div class="px-5 py-5 space-y-5">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-white">Behind a reverse proxy</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Enable if Nginx, Caddy, or another proxy sits in front. Makes <code class="text-xs bg-neutral-200 dark:bg-neutral-700 px-1 rounded">req.ip</code> use the forwarded header so rate limiting and IP bans target the real client.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
+                  <input type="checkbox" id="behindReverseProxy" class="sr-only peer" <%= settings.behindReverseProxy ? 'checked' : '' %>>
+                  <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-white">Enforce HTTPS for daemon connections</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Panel contacts daemons over <code class="text-xs bg-neutral-200 dark:bg-neutral-700 px-1 rounded">https://</code>. Only enable if your daemons have TLS configured.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
+                  <input type="checkbox" id="enforceDaemonHttps" class="sr-only peer" <%= settings.enforceDaemonHttps ? 'checked' : '' %>>
+                  <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-white">Hash API keys at rest</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Store API keys as SHA-256 hashes in the database. <strong class="text-amber-600 dark:text-amber-400">Enable before creating new keys — existing keys shown once.</strong></p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
+                  <input type="checkbox" id="hashApiKeys" class="sr-only peer" <%= settings.hashApiKeys ? 'checked' : '' %>>
+                  <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+            <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
+              <button type="button" id="saveRateLimit" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-5 py-2 text-sm font-medium shadow-sm transition">Save security settings</button>
+            </div>
+          </div>
+
+          <!-- IP banning -->
+          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">IP banning</h2>
             <div class="px-5 py-5">
               <div class="flex gap-3 mb-4">
                 <input type="text" id="banIpInput" placeholder="192.168.1.1"
@@ -321,7 +388,6 @@
 
 <script>
 (function () {
-  // ── Tab switching ─────────────────────────────────────────────────────────
   const tabBtns   = document.querySelectorAll('.tab-btn');
   const tabPanels = document.querySelectorAll('.tab-panel');
 
@@ -345,7 +411,6 @@
   try { saved = localStorage.getItem('settings_tab'); } catch {}
   activate(saved || 'appearance');
 
-  // ── Shared fetch helper ───────────────────────────────────────────────────
   function post(url, body, btn) {
     const orig = btn ? btn.textContent : '';
     if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
@@ -363,24 +428,18 @@
       .finally(() => { if (btn) { btn.disabled = false; btn.textContent = orig; } });
   }
 
-  // ── Appearance form (multipart: logo, favicon, themes, wallpapers) ────────
+  // Appearance form — includes allowRegistration as a checkbox
   document.getElementById('form-appearance').addEventListener('submit', function (e) {
     e.preventDefault();
     const btn = this.querySelector('button[type="submit"]');
-    post('/admin/settings', new FormData(this), btn)
-      .then(() => setTimeout(() => location.reload(), 1200));
+    const fd  = new FormData(this);
+    // Checkboxes not included in FormData when unchecked — add explicitly
+    const allowReg = this.querySelector('[name="allowRegistration"]');
+    if (allowReg && !allowReg.checked) fd.set('allowRegistration', 'false');
+    post('/admin/settings', fd, btn).then(() => setTimeout(() => location.reload(), 1200));
   });
 
-  // ── General tab: allowRegistration + uploadLimit + VT key ─────────────────
-  document.getElementById('saveGeneralBtn').addEventListener('click', function () {
-    post('/admin/settings/general', {
-      allowRegistration: document.getElementById('allowRegistrationToggle').checked,
-      uploadLimit:       parseInt(document.getElementById('uploadLimitInput').value, 10) || 100,
-      virusTotalApiKey:  document.getElementById('vtKeyInput').value.trim() || null,
-    }, this);
-  });
-
-  // ── Servers tab ───────────────────────────────────────────────────────────
+  // Servers tab
   document.getElementById('saveServerPolicy').addEventListener('click', function () {
     post('/admin/settings/server-policy', {
       allowUserCreateServer: document.getElementById('allowUserCreateServer').checked,
@@ -389,18 +448,39 @@
       defaultMaxMemory:      parseInt(document.getElementById('defaultMaxMemory').value,   10),
       defaultMaxCpu:         parseInt(document.getElementById('defaultMaxCpu').value,      10),
       defaultMaxStorage:     parseInt(document.getElementById('defaultMaxStorage').value,  10),
+      uploadLimit:           parseInt(document.getElementById('uploadLimitInput').value,   10) || 100,
     }, this);
   });
 
-  // ── Security tab: rate limit ──────────────────────────────────────────────
+  // VirusTotal key
+  document.getElementById('saveVtKey').addEventListener('click', function () {
+    post('/admin/settings/security', {
+      rateLimitEnabled:    document.getElementById('rateLimitEnabled').checked,
+      rateLimitRpm:        parseInt(document.getElementById('rateLimitRpm').value, 10),
+      loginMaxAttempts:    parseInt(document.getElementById('loginMaxAttempts').value, 10),
+      loginLockoutMinutes: parseInt(document.getElementById('loginLockoutMinutes').value, 10),
+      enforceDaemonHttps:  document.getElementById('enforceDaemonHttps').checked,
+      behindReverseProxy:  document.getElementById('behindReverseProxy').checked,
+      hashApiKeys:         document.getElementById('hashApiKeys').checked,
+      virusTotalApiKey:    document.getElementById('vtKeyInput').value.trim() || null,
+    }, this);
+  });
+
+  // Security tab save
   document.getElementById('saveRateLimit').addEventListener('click', function () {
     post('/admin/settings/security', {
-      rateLimitEnabled: document.getElementById('rateLimitEnabled').checked,
-      rateLimitRpm:     parseInt(document.getElementById('rateLimitRpm').value, 10),
+      rateLimitEnabled:    document.getElementById('rateLimitEnabled').checked,
+      rateLimitRpm:        parseInt(document.getElementById('rateLimitRpm').value, 10),
+      loginMaxAttempts:    parseInt(document.getElementById('loginMaxAttempts').value, 10),
+      loginLockoutMinutes: parseInt(document.getElementById('loginLockoutMinutes').value, 10),
+      enforceDaemonHttps:  document.getElementById('enforceDaemonHttps').checked,
+      behindReverseProxy:  document.getElementById('behindReverseProxy').checked,
+      hashApiKeys:         document.getElementById('hashApiKeys').checked,
+      virusTotalApiKey:    document.getElementById('vtKeyInput').value.trim() || null,
     }, this);
   });
 
-  // ── IP banning ────────────────────────────────────────────────────────────
+  // IP banning
   document.getElementById('banIpBtn').addEventListener('click', function () {
     const ip = document.getElementById('banIpInput').value.trim();
     if (!ip) return showToast('Enter an IP address', 'error');
@@ -418,8 +498,7 @@
   document.getElementById('bannedIpList').addEventListener('click', function (e) {
     const btn = e.target.closest('.unban-btn');
     if (!btn) return;
-    const ip = btn.dataset.ip;
-    fetch('/admin/settings/unban-ip', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ip }) })
+    fetch('/admin/settings/unban-ip', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ip: btn.dataset.ip }) })
       .then(r => r.json())
       .then(d => {
         if (!d.success) throw new Error(d.error || 'Failed');
@@ -429,11 +508,11 @@
       .catch(err => showToast(err.message || 'Failed', 'error'));
   });
 
-  // ── Reset defaults ────────────────────────────────────────────────────────
+  // Reset defaults
   document.getElementById('resetButton').addEventListener('click', function () {
     window.modal.confirm({
       title: 'Reset settings',
-      body:  'Reset all settings to their defaults?',
+      body:  'Reset all appearance settings to their defaults?',
       danger: true,
       confirmLabel: 'Reset',
       onConfirm: () => {
@@ -448,7 +527,7 @@
     });
   });
 
-  // ── Theme radio visual update ─────────────────────────────────────────────
+  // Theme radio visual update
   document.querySelectorAll('input[type="radio"]').forEach(radio => {
     radio.addEventListener('change', function () {
       const group = document.querySelectorAll(`input[name="${this.name}"]`);

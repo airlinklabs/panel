@@ -21,7 +21,7 @@
   .cs-trigger.open svg { transform: rotate(180deg); }
   .cs-placeholder { opacity: 0.45; }
   .cs-dropdown {
-    position: absolute; top: calc(100% + 5px); left: 0; right: 0; z-index: 200;
+    position: absolute; top: calc(100% + 5px); left: 0; right: 0; z-index: 9999;
     background: #fff; border: 1px solid #e5e5e5; border-radius: 10px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.1); overflow: hidden;
     max-height: 200px; overflow-y: auto;
@@ -112,7 +112,7 @@
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
           <!-- Details -->
-          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
+          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5">
             <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
               <p class="text-sm font-medium text-neutral-800 dark:text-white">Details</p>
             </div>
@@ -129,7 +129,7 @@
           </div>
 
           <!-- Node & Image -->
-          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
+          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5">
             <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
               <p class="text-sm font-medium text-neutral-800 dark:text-white">Node & image</p>
             </div>

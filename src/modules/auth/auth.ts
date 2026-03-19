@@ -37,7 +37,7 @@ const authModule: Module = {
       const isFirstUser = userCount === 0;
 
       // Check if registration is allowed
-      if (!isFirstUser && settings && !(settings as any).allowRegistration) {
+      if (!isFirstUser && settings && !settings.allowRegistration) {
         res.redirect('/login?err=registration_disabled');
         return;
       }

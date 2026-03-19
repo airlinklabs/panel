@@ -123,6 +123,11 @@ async function saveSettings(data: Record<string, any>) {
       defaultMaxMemory:      512,
       defaultMaxCpu:         100,
       defaultMaxStorage:     5,
+      loginMaxAttempts:      5,
+      loginLockoutMinutes:   15,
+      enforceDaemonHttps:    false,
+      behindReverseProxy:    false,
+      hashApiKeys:           false,
       ...data,
     },
   });
@@ -219,6 +224,9 @@ const adminModule: Module = {
           const data: Record<string, any> = {};
 
           if (typeof raw.title === 'string') data.title = raw.title;
+          if (typeof raw.allowRegistration !== 'undefined') {
+            data.allowRegistration = raw.allowRegistration === 'true' || raw.allowRegistration === true;
+          }
           if (typeof raw.lightTheme === 'string') data.lightTheme = raw.lightTheme;
           if (typeof raw.darkTheme  === 'string') data.darkTheme  = raw.darkTheme;
           if (raw.uploadLimit) data.uploadLimit = parseInt(raw.uploadLimit, 10) || 100;
@@ -288,12 +296,37 @@ const adminModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
-          const rateLimitEnabled = req.body.rateLimitEnabled === true || req.body.rateLimitEnabled === 'true';
-          const rateLimitRpm     = parseInt(req.body.rateLimitRpm, 10);
+          const rateLimitEnabled    = req.body.rateLimitEnabled === true || req.body.rateLimitEnabled === 'true';
+          const rateLimitRpm        = parseInt(req.body.rateLimitRpm, 10);
+          const loginMaxAttempts    = parseInt(req.body.loginMaxAttempts, 10);
+          const loginLockoutMinutes = parseInt(req.body.loginLockoutMinutes, 10);
+          const enforceDaemonHttps  = req.body.enforceDaemonHttps === true;
+          const behindReverseProxy  = req.body.behindReverseProxy  === true;
+          const hashApiKeys         = req.body.hashApiKeys          === true;
+
           if (isNaN(rateLimitRpm) || rateLimitRpm < 1 || rateLimitRpm > 10000) {
             return res.status(400).json({ success: false, error: 'RPM must be between 1 and 10000.' });
           }
-          await saveSettings({ rateLimitEnabled, rateLimitRpm });
+          if (isNaN(loginMaxAttempts) || loginMaxAttempts < 1 || loginMaxAttempts > 100) {
+            return res.status(400).json({ success: false, error: 'Max attempts must be between 1 and 100.' });
+          }
+          if (isNaN(loginLockoutMinutes) || loginLockoutMinutes < 1 || loginLockoutMinutes > 1440) {
+            return res.status(400).json({ success: false, error: 'Lockout must be between 1 and 1440 minutes.' });
+          }
+
+          const securityData: Record<string, any> = {
+            rateLimitEnabled,
+            rateLimitRpm,
+            loginMaxAttempts,
+            loginLockoutMinutes,
+            enforceDaemonHttps,
+            behindReverseProxy,
+            hashApiKeys,
+          };
+          if (typeof req.body.virusTotalApiKey === 'string') {
+            securityData.virusTotalApiKey = req.body.virusTotalApiKey.trim() || null;
+          }
+          await saveSettings(securityData);
           res.json({ success: true });
         } catch (error) {
           logger.error('Error saving security settings:', error);
@@ -324,14 +357,18 @@ const adminModule: Module = {
           if (isNaN(defaultMaxStorage) || defaultMaxStorage < 1)
             return res.status(400).json({ success: false, error: 'Max storage must be at least 1 GB.' });
 
-          await saveSettings({
+          const serverPolicyData: Record<string, any> = {
             allowUserCreateServer,
             allowUserDeleteServer,
             defaultServerLimit,
             defaultMaxMemory,
             defaultMaxCpu,
             defaultMaxStorage,
-          });
+          };
+          if (req.body.uploadLimit) {
+            serverPolicyData.uploadLimit = parseInt(req.body.uploadLimit, 10) || 100;
+          }
+          await saveSettings(serverPolicyData);
           res.json({ success: true });
         } catch (error) {
           logger.error('Error saving server policy:', error);

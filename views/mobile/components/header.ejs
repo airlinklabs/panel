@@ -44,10 +44,10 @@
 (function(){
   var d=false;
   try{var s=localStorage.getItem('theme');if(s==='dark')d=true;else if(!s)d=window.matchMedia('(prefers-color-scheme: dark)').matches;}catch(e){}
-  document.write('<style>#pl-overlay{background:'+(d?'#141414':'#ffffff')+'}</style>');
+  /* frosted glass overlay — background set via CSS class, not inline */
 })();
 </script>
-<div id="pl-overlay" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99998;display:none;align-items:center;justify-content:center;pointer-events:all;">
+<div id="pl-overlay" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99998;display:none;align-items:center;justify-content:center;pointer-events:all;background:rgba(249,250,251,0.08);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);">
   <div id="pl-inner" style="display:flex;flex-direction:column;align-items:center;gap:18px;">
     <img src="/assets/logo.png" alt="" style="width:42px;height:42px;object-fit:contain;border-radius:10px;display:block;" onerror="this.style.display='none'">
     <p style="margin:0;margin-top:-4px;font-family:'General Sans',sans-serif;font-size:14px;font-weight:600;letter-spacing:-0.015em;" id="pl-title"><%= settings.title %></p>
@@ -62,10 +62,12 @@
   var d=false;
   try{var s=localStorage.getItem('theme');if(s==='dark')d=true;else if(!s)d=window.matchMedia('(prefers-color-scheme: dark)').matches;}catch(e){}
   var fg=d?'#ffffff':'#171717';
-  var track=d?'#2a2a2a':'#e5e5e5';
+  var track=d?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.12)';
+  var ov=document.getElementById('pl-overlay');
   var t=document.getElementById('pl-title');
   var tr=document.getElementById('pl-track');
   var b=document.getElementById('pl-bar');
+  if(ov){ov.style.background=d?'rgba(14,14,14,0.08)':'rgba(249,250,251,0.08)';ov.style.backdropFilter='blur(28px) saturate(180%)';ov.style.webkitBackdropFilter='blur(28px) saturate(180%)';}
   if(t)t.style.color=fg;
   if(tr)tr.style.background=track;
   if(b)b.style.background=fg;

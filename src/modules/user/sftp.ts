@@ -5,6 +5,7 @@ import { getParamAsString } from '../../utils/typeHelpers';
 import prisma from '../../db';
 import axios from 'axios';
 import logger from '../../handlers/logger';
+import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 
 const sftpModule: Module = {
@@ -85,7 +86,7 @@ const sftpModule: Module = {
             try {
               await axios({
                 method: 'DELETE',
-                url: `http://${server.node.address}:${server.node.port}/sftp/credentials`,
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/sftp/credentials`,
                 data: { id: server.UUID },
                 auth: { username: 'Airlink', password: server.node.key },
                 timeout: 10000,
@@ -97,7 +98,7 @@ const sftpModule: Module = {
 
           const response = await axios({
             method: 'POST',
-            url: `http://${server.node.address}:${server.node.port}/sftp/credentials`,
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/sftp/credentials`,
             data: { id: server.UUID },
             auth: { username: 'Airlink', password: server.node.key },
             timeout: 15000,
@@ -149,7 +150,7 @@ const sftpModule: Module = {
 
           await axios({
             method: 'DELETE',
-            url: `http://${server.node.address}:${server.node.port}/sftp/credentials`,
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/sftp/credentials`,
             data: { id: server.UUID },
             auth: { username: 'Airlink', password: server.node.key },
             timeout: 10000,

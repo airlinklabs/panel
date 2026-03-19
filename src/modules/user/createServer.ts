@@ -6,6 +6,7 @@ import logger from '../../handlers/logger';
 import { queueer } from '../../handlers/queueer';
 import { Buffer } from 'buffer';
 import axios from 'axios';
+import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 function pickAvailablePort(allocatedPorts: number[], usedPorts: number[]): number | null {
   for (const port of allocatedPorts) {
@@ -242,7 +243,7 @@ const userCreateServerModule: Module = {
             }, {});
 
             const authHeader = `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`;
-            const daemonUrl = `http://${server.node.address}:${server.node.port}`;
+            const daemonUrl = `${daemonSchemeSync()}://${server.node.address}:${server.node.port}`;
 
             if (!server.image?.scripts) {
               await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
@@ -325,7 +326,7 @@ const userCreateServerModule: Module = {
         if (server.ownerId !== userId) return res.status(403).json({ error: 'This is not your server.' });
 
         try {
-          await axios.delete(`http://${server.node.address}:${server.node.port}/container`, {
+          await axios.delete(`${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container`, {
             auth: { username: 'Airlink', password: server.node.key },
             headers: { 'Content-Type': 'application/json' },
             data: { id: server.UUID, deleteCmd: 'delete' },

@@ -1,16 +1,7 @@
-import fs from 'fs';
-import path from 'path';
 import logger from './logger';
 import prisma from '../db';
 
 export const databaseLoader = async () => {
-  const dbPath = path.join(__dirname, '../../prisma/dev.db');
-
-  if (!fs.existsSync(dbPath)) {
-    logger.error('databaseLoader', `Database not found at location: ${dbPath}`);
-    throw new Error('Database file not found');
-  }
-
   try {
     await prisma.$connect();
     logger.info('Database connected');

@@ -54,6 +54,20 @@ const port = process.env.PORT || 3000;
 const name = process.env.NAME || 'AirLink';
 const airlinkVersion = config.meta.version;
 
+// Trust proxy when the panel is behind a reverse proxy (Nginx, Caddy, etc).
+// Reads from DB at startup — affects req.ip used by rate limiting and IP banning.
+// We set this before any middleware so the correct client IP flows through.
+(async () => {
+  try {
+    const s = await prisma.settings.findUnique({ where: { id: 1 } });
+    if (s?.behindReverseProxy) {
+      app.set('trust proxy', 1);
+    }
+  } catch {
+    // DB not ready yet — leave default (no trust proxy)
+  }
+})();
+
 // Load websocket
 expressWs(app);
 

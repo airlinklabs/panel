@@ -9,6 +9,7 @@ import path from 'path';
 import axios from 'axios';
 import FormData from 'form-data';
 import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
+import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 
 // In-memory rate limiter respecting VT free tier: 4/min, 500/day
@@ -228,7 +229,7 @@ const radarModule: Module = {
           const script = JSON.parse(scriptContent);
           
           const response = await axios.post(
-            `http://${server.node.address}:${server.node.port}/radar/scan`,
+            `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/radar/scan`,
             {
               id: server.UUID,
               script
@@ -323,7 +324,7 @@ const radarModule: Module = {
           // Folders included: plugins, mods, config, addons, datapacks
           // Folders excluded: world, world_nether, world_the_end, logs, cache, crash-reports
           const zipResponse = await axios.post(
-            `http://${server.node.address}:${server.node.port}/radar/zip`,
+            `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/radar/zip`,
             {
               id: server.UUID,
               include: ['plugins', 'mods', 'config', 'addons', 'datapacks'],

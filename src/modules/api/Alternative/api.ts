@@ -7,6 +7,7 @@ import { queueer } from '../../../handlers/queueer';
 import bcrypt from 'bcrypt';
 import { Buffer } from 'buffer';
 import { getParamAsString, getParamAsNumber } from "../../../utils/typeHelpers";
+import { daemonSchemeSync } from '../../../handlers/utils/core/daemonRequest';
 
 
 const coreModule: Module = {
@@ -258,7 +259,7 @@ const coreModule: Module = {
 
           if (!isFirstUser) {
             const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-            if (!settings || !(settings as any).allowRegistration) {
+            if (!settings || !settings.allowRegistration) {
               res.status(403).json({ error: 'Registration is disabled' });
               return;
             }
@@ -669,7 +670,7 @@ const coreModule: Module = {
 
                 try {
                   await axios.post(
-                    `http://${server.node.address}:${server.node.port}/container/install`,
+                    `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/install`,
                     requestBody,
                     {
                       headers: {

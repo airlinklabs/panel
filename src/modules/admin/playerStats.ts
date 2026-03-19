@@ -6,6 +6,7 @@ import logger from '../../handlers/logger';
 import axios from 'axios';
 import { registerPermission } from '../../handlers/permisions';
 import { collectPlayerStats } from '../../handlers/playerStatsCollector';
+import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 registerPermission('airlink.admin.playerstats.view');
 
@@ -96,7 +97,7 @@ const adminModule: Module = {
 
                       const response = await axios({
                   method: 'GET',
-                  url: `http://${server.node.address}:${server.node.port}/minecraft/players`,
+                  url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/minecraft/players`,
                   params: {
                     id: server.UUID,
                     host: server.node.address,

@@ -5,6 +5,20 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { registerPermission } from '../../handlers/permisions';
 import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
+import crypto from 'crypto';
+
+function sha256(value: string): string {
+  return crypto.createHash('sha256').update(value).digest('hex');
+}
+
+async function shouldHashKeys(): Promise<boolean> {
+  try {
+    const s = await prisma.settings.findUnique({ where: { id: 1 } });
+    return s?.hashApiKeys === true;
+  } catch {
+    return false;
+  }
+}
 
 registerPermission('airlink.admin.apikeys.view');
 registerPermission('airlink.admin.apikeys.create');
@@ -340,8 +354,10 @@ const coreModule: Module = {
             return;
           }
 
-          const key = generateApiKey(32);
+          const rawKey = generateApiKey(32);
           const userId = req.session.user?.id;
+          const useHash = await shouldHashKeys();
+          const storedKey = useHash ? sha256(rawKey) : rawKey;
 
           const permissionsArray = permissions ?
             (Array.isArray(permissions) ? permissions : [permissions]) :
@@ -350,7 +366,7 @@ const coreModule: Module = {
           await prisma.apiKey.create({
             data: {
               name,
-              key,
+              key: storedKey,
               description,
               permissions: JSON.stringify(permissionsArray),
               userId,
@@ -358,7 +374,11 @@ const coreModule: Module = {
             },
           });
 
-          res.redirect('/admin/apikeys');
+          if (useHash) {
+            res.redirect(`/admin/apikeys?created=${encodeURIComponent(rawKey)}`);
+          } else {
+            res.redirect('/admin/apikeys');
+          }
         } catch (error) {
           logger.error('Error creating API key:', error);
           res.status(500).json({ error: 'Failed to create API key' });

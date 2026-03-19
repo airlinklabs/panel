@@ -10,6 +10,7 @@ import { queueer } from '../../handlers/queueer';
 import { getServerStatus } from '../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../utils/typeHelpers';
 import prisma from '../../db';
+import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 declare global {
   var serverStoppingStates: { [key: string]: boolean };
@@ -193,7 +194,7 @@ const dashboardModule: Module = {
               nodeKey: node.key,
             }),
             axios.get(
-              `http://${node.address}:${node.port}/container/status/${server.UUID}`,
+              `${daemonSchemeSync()}://${node.address}:${node.port}/container/status/${server.UUID}`,
               { auth: { username: 'Airlink', password: node.key }, timeout: 4000 }
             ).then(r => r.data.state as string).catch(() => null),
           ]);
@@ -293,7 +294,7 @@ const dashboardModule: Module = {
 
                   const requestData = {
                 method: 'POST',
-                url: `http://${server.node.address}:${server.node.port}/container/stop`,
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -345,7 +346,7 @@ const dashboardModule: Module = {
             try {
               await axios({
                 method: 'POST',
-                url: `http://${server.node.address}:${server.node.port}/container/stop`,
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
                 auth: { username: 'Airlink', password: server.node.key },
                 headers: { 'Content-Type': 'application/json' },
                 data: { id: String(serverId), stopCmd: 'stop' },
@@ -371,7 +372,7 @@ const dashboardModule: Module = {
 
             await axios({
               method: 'POST',
-              url: `http://${server.node.address}:${server.node.port}/container/start`,
+              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
               auth: { username: 'Airlink', password: server.node.key },
               headers: { 'Content-Type': 'application/json' },
               data: {
@@ -406,7 +407,7 @@ const dashboardModule: Module = {
 
           const startRequestData = {
             method: 'POST',
-            url: `http://${server.node.address}:${server.node.port}/container/start`,
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
             auth: {
               username: 'Airlink',
               password: server.node.key,
@@ -478,7 +479,7 @@ const dashboardModule: Module = {
 
           const filesRequest = {
             method: 'GET',
-            url: `http://${server.node.address}:${server.node.port}/fs/list?id=${server.UUID}&path=${path}`,
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/list?id=${server.UUID}&path=${path}`,
             auth: {
               username: 'Airlink',
               password: server.node.key,
@@ -617,7 +618,7 @@ const dashboardModule: Module = {
 
           const response = await axios({
             method: 'GET',
-            url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/file/content`,
             responseType: 'text',
             params: { id: server.UUID, path: filePath },
             auth: {
@@ -743,7 +744,7 @@ const dashboardModule: Module = {
 
           await axios({
             method: 'POST',
-            url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/file/content`,
             data: {
               id: server.UUID,
               path: filePath,
@@ -814,7 +815,7 @@ const dashboardModule: Module = {
           try {
             await axios({
               method: 'DELETE',
-              url: `http://${server.node.address}:${server.node.port}/fs/rm`,
+              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/rm`,
               data: {
                 id: server.UUID,
                 path: filePath,
@@ -886,7 +887,7 @@ const dashboardModule: Module = {
 
           const response = await axios({
             method: 'GET',
-            url: `http://${server.node.address}:${server.node.port}/fs/download`,
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/download`,
             params: { id: server.UUID, path: filePath },
             auth: {
               username: 'Airlink',
@@ -946,7 +947,7 @@ const dashboardModule: Module = {
 
           const response: any = await axios({
             method: 'POST',
-            url: `http://${server.node.address}:${server.node.port}/fs/zip`,
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/zip`,
             auth: {
               username: 'Airlink',
               password: server.node.key,
@@ -1014,7 +1015,7 @@ const dashboardModule: Module = {
 
           const requestConfig = {
             method: 'POST',
-            url: `http://${server.node.address}:${server.node.port}/fs/unzip`,
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/unzip`,
             auth: {
               username: 'Airlink',
               password: server.node.key,
@@ -1089,7 +1090,7 @@ const dashboardModule: Module = {
         try {
           await axios({
             method: 'POST',
-            url: `http://${server.node.address}:${server.node.port}/fs/file/content`,
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/file/content`,
             data: {
               id: server.UUID,
               path: 'eula.txt',
@@ -1173,7 +1174,7 @@ const dashboardModule: Module = {
 
             const playersResponse = await axios({
               method: 'GET',
-              url: `http://${server.node.address}:${server.node.port}/minecraft/players`,
+              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/minecraft/players`,
               params: {
                 id: server.UUID,
                 host: server.node.address,
@@ -1297,7 +1298,7 @@ const dashboardModule: Module = {
           try {
             const worldsRequest = {
               method: 'GET',
-              url: `http://${server.node.address}:${server.node.port}/fs/list?id=${server.UUID}`,
+              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/list?id=${server.UUID}`,
               auth: {
                 username: 'Airlink',
                 password: server.node.key,
@@ -1437,7 +1438,7 @@ const dashboardModule: Module = {
 
             const renameRequest = {
               method: 'POST',
-              url: `http://${server.node.address}:${server.node.port}/fs/rename`,
+              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/rename`,
               auth: {
                 username: 'Airlink',
                 password: server.node.key,
@@ -1532,7 +1533,7 @@ const dashboardModule: Module = {
 
               const uploadRequest = {
                 method: 'POST',
-                url: `http://${server.node.address}:${server.node.port}/fs/upload`,
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/upload`,
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -1563,7 +1564,7 @@ const dashboardModule: Module = {
             } else {
               const createEmptyFileRequest = {
                 method: 'POST',
-                url: `http://${server.node.address}:${server.node.port}/fs/create-empty-file`,
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/create-empty-file`,
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -1591,7 +1592,7 @@ const dashboardModule: Module = {
 
                 const uploadChunkRequest = {
                   method: 'POST',
-                  url: `http://${server.node.address}:${server.node.port}/fs/append-file`,
+                  url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/append-file`,
                   auth: {
                     username: 'Airlink',
                     password: server.node.key,
@@ -1817,7 +1818,7 @@ const dashboardModule: Module = {
           try {
             const statusRequest = {
               method: 'GET',
-              url: `http://${server.node.address}:${server.node.port}/container/status`,
+              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status`,
               auth: {
                 username: 'Airlink',
                 password: server.node.key,
@@ -1834,7 +1835,7 @@ const dashboardModule: Module = {
             if (isRunning) {
               const restartRequestData = {
                 method: 'POST',
-                url: `http://${server.node.address}:${server.node.port}/container/stop`,
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -1874,7 +1875,7 @@ const dashboardModule: Module = {
 
               const startRequestData = {
                 method: 'POST',
-                url: `http://${server.node.address}:${server.node.port}/container/start`,
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -2032,7 +2033,7 @@ const dashboardModule: Module = {
           try {
             const statusRequest = {
               method: 'GET',
-              url: `http://${server.node.address}:${server.node.port}/container/status`,
+              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status`,
               auth: {
                 username: 'Airlink',
                 password: server.node.key,
@@ -2049,7 +2050,7 @@ const dashboardModule: Module = {
             if (isRunning) {
               const restartRequestData = {
                 method: 'POST',
-                url: `http://${server.node.address}:${server.node.port}/container/stop`,
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -2082,7 +2083,7 @@ const dashboardModule: Module = {
 
               const startRequestData = {
                 method: 'POST',
-                url: `http://${server.node.address}:${server.node.port}/container/start`,
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -2263,7 +2264,7 @@ const dashboardModule: Module = {
           try {
             const statusRequest = {
               method: 'GET',
-              url: `http://${server.node.address}:${server.node.port}/container/status`,
+              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status`,
               auth: {
                 username: 'Airlink',
                 password: server.node.key,
@@ -2280,7 +2281,7 @@ const dashboardModule: Module = {
             if (isRunning) {
               const restartRequestData = {
                 method: 'POST',
-                url: `http://${server.node.address}:${server.node.port}/container/stop`,
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -2326,7 +2327,7 @@ const dashboardModule: Module = {
 
               const startRequestData = {
                 method: 'POST',
-                url: `http://${server.node.address}:${server.node.port}/container/start`,
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -2506,7 +2507,7 @@ const dashboardModule: Module = {
 
           const stopRequestData = {
             method: 'POST',
-            url: `http://${server.node.address}:${server.node.port}/container/stop`,
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
             auth: {
               username: 'Airlink',
               password: server.node.key,
@@ -2541,7 +2542,7 @@ const dashboardModule: Module = {
 
           const startRequestData = {
             method: 'POST',
-            url: `http://${server.node.address}:${server.node.port}/container/start`,
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
             auth: {
               username: 'Airlink',
               password: server.node.key,
@@ -2607,7 +2608,7 @@ const dashboardModule: Module = {
 
           const deleteRequestData = {
             method: 'DELETE',
-            url: `http://${server.node.address}:${server.node.port}/container`,
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container`,
             auth: {
               username: 'Airlink',
               password: server.node.key,
@@ -2727,7 +2728,7 @@ const dashboardModule: Module = {
 
                   const installRequestData = {
                     method: 'POST',
-                    url: `http://${serverToReinstall.node.address}:${serverToReinstall.node.port}/container/install`,
+                    url: `${daemonSchemeSync()}://${serverToReinstall.node.address}:${serverToReinstall.node.port}/container/install`,
                     auth: {
                       username: 'Airlink',
                       password: serverToReinstall.node.key,
@@ -2893,7 +2894,7 @@ const dashboardModule: Module = {
           }
 
           const response = await axios.post(
-            `http://${server.node.address}:${server.node.port}/container/backup`,
+            `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
             {
               id: serverId,
               name: name.trim(),
@@ -2982,7 +2983,7 @@ const dashboardModule: Module = {
           }
 
           const response = await axios.post(
-            `http://${server.node.address}:${server.node.port}/container/restore`,
+            `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/restore`,
             {
               id: serverId,
               backupPath: backup.filePath,
@@ -3053,7 +3054,7 @@ const dashboardModule: Module = {
             return;
           }
 
-          const downloadUrl = `http://${server.node.address}:${server.node.port}/container/backup/download`;
+          const downloadUrl = `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup/download`;
           const response = await axios({
             method: 'GET',
             url: downloadUrl,
@@ -3124,7 +3125,7 @@ const dashboardModule: Module = {
 
           try {
             await axios.delete(
-              `http://${server.node.address}:${server.node.port}/container/backup`,
+              `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
               {
                 data: {
                   backupPath: backup.filePath,
