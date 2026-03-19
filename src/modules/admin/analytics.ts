@@ -162,12 +162,35 @@ const analyticsModule: Module = {
       isAuthenticated(true, 'airlink.admin.analytics.view'),
       async (req: Request, res: Response) => {
         try {
+          const [servers, nodes, images] = await Promise.all([
+            prisma.server.findMany({ include: { node: true, image: true } }),
+            prisma.node.findMany(),
+            prisma.images.findMany(),
+          ]);
+
+          const totalRamMb  = servers.reduce((s, srv) => s + (srv.Memory || 0), 0);
+          const totalCpuPct = servers.reduce((s, srv) => s + (srv.Cpu   || 0), 0);
+
+          const imageCounts: Record<string, number> = {};
+          servers.forEach(srv => {
+            const name = srv.image?.name || 'Unknown';
+            imageCounts[name] = (imageCounts[name] || 0) + 1;
+          });
+          const topImage = Object.entries(imageCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+
+          const nodeServerCounts: Record<number, { name: string; serverCount: number }> = {};
+          nodes.forEach(n => { nodeServerCounts[n.id] = { name: n.name, serverCount: 0 }; });
+          servers.forEach(srv => {
+            if (nodeServerCounts[srv.nodeId]) nodeServerCounts[srv.nodeId].serverCount++;
+          });
+
           res.json({
-            cpu: { usage: 0, cores: 0 },
-            memory: { used: 0, total: 0 },
-            disk: { used: 0, total: 0 },
-            network: { in: 0, out: 0, latency: 0 },
-            uptime: { current: 0, average: 0 },
+            nodeCount:    nodes.length,
+            imageCount:   images.length,
+            totalRamMb,
+            totalCpuPct,
+            topImage,
+            nodes: Object.values(nodeServerCounts).sort((a, b) => b.serverCount - a.serverCount),
           });
         } catch (error) {
           logger.error('Error fetching performance metrics:', error);
@@ -181,14 +204,40 @@ const analyticsModule: Module = {
       isAuthenticated(true, 'airlink.admin.analytics.view'),
       async (req: Request, res: Response) => {
         try {
-          const totalServers = await prisma.server.count();
-          const totalUsers = await prisma.users.count();
-          
+          const [servers, users, nodes, images] = await Promise.all([
+            prisma.server.findMany({ include: { node: true, image: true } }),
+            prisma.users.findMany({ select: { id: true, isAdmin: true } }),
+            prisma.node.findMany(),
+            prisma.images.findMany({ select: { id: true, name: true } }),
+          ]);
+
+          const totalStorageGb = servers.reduce((s, srv) => s + (srv.Storage || 0), 0);
+          const adminUsers     = users.filter(u => u.isAdmin).length;
+
+          const imageCounts: Record<string, { name: string; count: number }> = {};
+          images.forEach(img => { imageCounts[img.id] = { name: img.name, count: 0 }; });
+          servers.forEach(srv => {
+            if (imageCounts[srv.imageId]) imageCounts[srv.imageId].count++;
+          });
+          const byImage = Object.values(imageCounts)
+            .sort((a, b) => b.count - a.count)
+            .filter(i => i.count > 0)
+            .slice(0, 8);
+
+          const nodeCounts: Record<number, { name: string; count: number }> = {};
+          nodes.forEach(n => { nodeCounts[n.id] = { name: n.name, count: 0 }; });
+          servers.forEach(srv => {
+            if (nodeCounts[srv.nodeId]) nodeCounts[srv.nodeId].count++;
+          });
+          const byNode = Object.values(nodeCounts).sort((a, b) => b.count - a.count);
+
           res.json({
-            totalServers,
-            activeUsers: totalUsers, // This could be refined to show only active users
-            apiCalls: 0, // This would need to be tracked separately
-            storageUsed: 0 // This would need to be calculated from actual usage
+            totalServers: servers.length,
+            totalUsers:   users.length,
+            adminUsers,
+            totalStorageGb,
+            byImage,
+            byNode,
           });
         } catch (error) {
           logger.error('Error fetching usage analytics:', error);

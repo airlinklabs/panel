@@ -331,6 +331,7 @@
   }
 
   function closeDetail() { document.getElementById('detailOverlay').classList.remove('open'); document.body.style.overflow = ''; currentAddon = null; }
+  window.closeDetail = closeDetail;
   document.getElementById('detailOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeDetail(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
 

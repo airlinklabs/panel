@@ -105,6 +105,60 @@ const coreModule: Module = {
       }
     });
 
+    router.get('/api/search', async (req: Request, res: Response) => {
+      const userId = req.session?.user?.id;
+      if (!userId) return res.status(401).json({ results: [] });
+
+      const q = String(req.query.q || '').trim().toLowerCase();
+      if (!q || q.length < 1) return res.json({ results: [] });
+
+      try {
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) return res.status(401).json({ results: [] });
+
+        const results: { type: string; label: string; sub: string; url: string }[] = [];
+
+        const serverWhere = user.isAdmin
+          ? { OR: [{ name: { contains: q } }, { UUID: { contains: q } }] }
+          : { ownerId: userId, OR: [{ name: { contains: q } }, { UUID: { contains: q } }] };
+
+        const servers = await prisma.server.findMany({
+          where: serverWhere as any,
+          select: { UUID: true, name: true, description: true },
+          take: 8,
+        });
+
+        servers.forEach(s => {
+          results.push({ type: 'server', label: s.name, sub: s.description || s.UUID, url: `/server/${s.UUID}` });
+        });
+
+        if (user.isAdmin) {
+          const users = await prisma.users.findMany({
+            where: { OR: [{ username: { contains: q } }, { email: { contains: q } }] },
+            select: { id: true, username: true, email: true },
+            take: 5,
+          });
+          users.forEach(u => {
+            results.push({ type: 'user', label: u.username, sub: u.email, url: `/admin/users/view/${u.id}/` });
+          });
+
+          const nodes = await prisma.node.findMany({
+            where: { OR: [{ name: { contains: q } }, { address: { contains: q } }] },
+            select: { id: true, name: true, address: true },
+            take: 4,
+          });
+          nodes.forEach(n => {
+            results.push({ type: 'node', label: n.name, sub: n.address, url: `/admin/node/${n.id}/stats` });
+          });
+        }
+
+        res.json({ results });
+      } catch (err) {
+        logger.error('Search error:', err);
+        res.status(500).json({ results: [] });
+      }
+    });
+
     return router;
   },
 };

@@ -165,143 +165,109 @@
 
         <!-- Performance Tab -->
         <div id="content-performance" class="tab-content hidden">
-          <!-- Coming Soon Notice -->
-          <div class="text-center py-12">
-            <div class="mx-auto h-12 w-12 text-neutral-400 mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
-              </svg>
-            </div>
-            <h3 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.performanceComingSoon || 'Performance Metrics Coming Soon' %></h3>
-            <p class="text-neutral-500 dark:text-neutral-400 max-w-md mx-auto">
-              Detailed server performance monitoring including CPU, memory, disk usage, and network statistics will be available in a future update.
-            </p>
-          </div>
-
-          <!-- Placeholder Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-50">
-            <div class="overflow-hidden rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 px-6 py-5 shadow-sm dark:shadow-none">
-              <h3 class="text-lg font-medium text-neutral-800 dark:text-white mb-4 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 mr-2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
-                </svg>
+          <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+            <div class="rounded-xl bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 shadow-sm px-5 py-4">
+              <dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-3 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z"/></svg>
                 Server Load
-              </h3>
+              </dt>
               <div class="space-y-3">
-                <div class="flex justify-between">
-                  <span class="text-sm text-neutral-500 dark:text-neutral-400"><%= req.translations.cpuUsageLabel || 'CPU Usage' %></span>
-                  <span class="text-sm font-medium text-neutral-500">--</span>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">Running servers</span>
+                  <span id="perf-running" class="text-sm font-semibold text-neutral-800 dark:text-white">—</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-sm text-neutral-500 dark:text-neutral-400"><%= req.translations.memoryUsageLabel || 'Memory Usage' %></span>
-                  <span class="text-sm font-medium text-neutral-500">--</span>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">Stopped servers</span>
+                  <span id="perf-stopped" class="text-sm font-semibold text-neutral-800 dark:text-white">—</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-sm text-neutral-500 dark:text-neutral-400"><%= req.translations.diskUsageLabel || 'Disk Usage' %></span>
-                  <span class="text-sm font-medium text-neutral-500">--</span>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">Total RAM allocated</span>
+                  <span id="perf-ram" class="text-sm font-semibold text-neutral-800 dark:text-white">—</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">Total CPU allocated</span>
+                  <span id="perf-cpu" class="text-sm font-semibold text-neutral-800 dark:text-white">—</span>
                 </div>
               </div>
             </div>
 
-            <div class="overflow-hidden rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 px-6 py-5 shadow-sm dark:shadow-none">
-              <h3 class="text-lg font-medium text-neutral-800 dark:text-white mb-4 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 mr-2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
-                </svg>
-                Network
-              </h3>
+            <div class="rounded-xl bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 shadow-sm px-5 py-4">
+              <dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-3 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0 4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0-5.571 3-5.571-3"/></svg>
+                Nodes
+              </dt>
               <div class="space-y-3">
-                <div class="flex justify-between">
-                  <span class="text-sm text-neutral-500 dark:text-neutral-400"><%= req.translations.bandwidthIn || 'Bandwidth In' %></span>
-                  <span class="text-sm font-medium text-neutral-500">--</span>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">Total nodes</span>
+                  <span id="perf-nodes-total" class="text-sm font-semibold text-neutral-800 dark:text-white">—</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-sm text-neutral-500 dark:text-neutral-400"><%= req.translations.bandwidthOut || 'Bandwidth Out' %></span>
-                  <span class="text-sm font-medium text-neutral-500">--</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-sm text-neutral-500 dark:text-neutral-400"><%= req.translations.latency || 'Latency' %></span>
-                  <span class="text-sm font-medium text-neutral-500">--</span>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">Servers per node (avg)</span>
+                  <span id="perf-servers-per-node" class="text-sm font-semibold text-neutral-800 dark:text-white">—</span>
                 </div>
               </div>
             </div>
 
-            <div class="overflow-hidden rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 px-6 py-5 shadow-sm dark:shadow-none">
-              <h3 class="text-lg font-medium text-neutral-800 dark:text-white mb-4 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 mr-2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
-                Uptime
-              </h3>
+            <div class="rounded-xl bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 shadow-sm px-5 py-4">
+              <dt class="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-3 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                Images
+              </dt>
               <div class="space-y-3">
-                <div class="flex justify-between">
-                  <span class="text-sm text-neutral-500 dark:text-neutral-400"><%= req.translations.currentUptime || 'Current Uptime' %></span>
-                  <span class="text-sm font-medium text-neutral-500">--</span>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">Total images</span>
+                  <span id="perf-images" class="text-sm font-semibold text-neutral-800 dark:text-white">—</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-sm text-neutral-500 dark:text-neutral-400">30-day Average</span>
-                  <span class="text-sm font-medium text-neutral-500">--</span>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-neutral-500 dark:text-neutral-400">Most used image</span>
+                  <span id="perf-top-image" class="text-sm font-semibold text-neutral-800 dark:text-white truncate max-w-[120px]">—</span>
                 </div>
               </div>
+            </div>
+          </dl>
+
+          <!-- Per-node server distribution -->
+          <div class="bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 rounded-xl p-5 shadow-sm">
+            <h3 class="text-sm font-semibold text-neutral-800 dark:text-white mb-4">Servers per node</h3>
+            <div id="perf-node-list" class="space-y-3">
+              <p class="text-sm text-neutral-400">Loading…</p>
             </div>
           </div>
         </div>
 
         <!-- Usage Analytics Tab -->
         <div id="content-usage" class="tab-content hidden">
-          <!-- Coming Soon Notice -->
-          <div class="text-center py-12 mb-8">
-            <div class="mx-auto h-12 w-12 text-neutral-400 mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-              </svg>
+          <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+            <div class="rounded-xl bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 shadow-sm px-4 py-4 text-center">
+              <div class="text-3xl font-semibold text-neutral-800 dark:text-white" id="totalServersCount">—</div>
+              <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">Total Servers</div>
             </div>
-            <h3 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.usageAnalyticsComingSoon || 'Usage Analytics Coming Soon' %></h3>
-            <p class="text-neutral-500 dark:text-neutral-400 max-w-md mx-auto">
-              Comprehensive usage analytics including API calls, storage metrics, and user activity tracking will be available in a future update.
-            </p>
-          </div>
-
-          <!-- Placeholder Cards -->
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 opacity-50">
-            <div class="overflow-hidden rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 px-6 py-5 shadow-sm dark:shadow-none text-center">
-              <div class="mx-auto h-8 w-8 text-neutral-400 mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v.75a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25v-.75m19.5 0A2.25 2.25 0 0 0 21.75 15m-19.5 2.25A2.25 2.25 0 0 1 2.25 15m19.5 0v-3.75A2.25 2.25 0 0 0 19.5 9h-15a2.25 2.25 0 0 0-2.25 2.25V15m19.5 0h-19.5M5.625 12h.008v.008H5.625V12Zm3 0h.008v.008H8.625V12Zm3 0h.008v.008h-.008V12Z" />
-                </svg>
-              </div>
-              <div class="text-3xl font-bold text-neutral-500" id="totalServersCount">--</div>
-              <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-2"><%= req.translations.totalServersLabel || 'Total Servers' %></div>
+            <div class="rounded-xl bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 shadow-sm px-4 py-4 text-center">
+              <div class="text-3xl font-semibold text-neutral-800 dark:text-white" id="activeUsersCount">—</div>
+              <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">Total Users</div>
             </div>
-
-            <div class="overflow-hidden rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 px-6 py-5 shadow-sm dark:shadow-none text-center">
-              <div class="mx-auto h-8 w-8 text-neutral-400 mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                </svg>
-              </div>
-              <div class="text-3xl font-bold text-neutral-500" id="activeUsersCount">--</div>
-              <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-2"><%= req.translations.activeUsersLabel || 'Active Users' %></div>
+            <div class="rounded-xl bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 shadow-sm px-4 py-4 text-center">
+              <div class="text-3xl font-semibold text-neutral-800 dark:text-white" id="adminUsersCount">—</div>
+              <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">Admin Users</div>
             </div>
-
-            <div class="overflow-hidden rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 px-6 py-5 shadow-sm dark:shadow-none text-center">
-              <div class="mx-auto h-8 w-8 text-neutral-400 mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
-                </svg>
-              </div>
-              <div class="text-3xl font-bold text-neutral-500" id="apiCallsCount">--</div>
-              <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-2"><%= req.translations.apiCalls || 'API Calls' %></div>
+            <div class="rounded-xl bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 shadow-sm px-4 py-4 text-center">
+              <div class="text-3xl font-semibold text-neutral-800 dark:text-white" id="storageUsedCount">—</div>
+              <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">Storage Allocated</div>
             </div>
+          </dl>
 
-            <div class="overflow-hidden rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-800/20 px-6 py-5 shadow-sm dark:shadow-none text-center">
-              <div class="mx-auto h-8 w-8 text-neutral-400 mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
-                </svg>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 rounded-xl p-5 shadow-sm">
+              <h3 class="text-sm font-semibold text-neutral-800 dark:text-white mb-4">Servers by image</h3>
+              <div id="usage-image-list" class="space-y-2">
+                <p class="text-sm text-neutral-400">Loading…</p>
               </div>
-              <div class="text-3xl font-bold text-neutral-500" id="storageUsedCount">--</div>
-              <div class="text-sm text-neutral-500 dark:text-neutral-400 mt-2"><%= req.translations.storageUsed || 'Storage Used' %></div>
+            </div>
+            <div class="bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 rounded-xl p-5 shadow-sm">
+              <h3 class="text-sm font-semibold text-neutral-800 dark:text-white mb-4">Servers by node</h3>
+              <div id="usage-node-list" class="space-y-2">
+                <p class="text-sm text-neutral-400">Loading…</p>
+              </div>
             </div>
           </div>
         </div>
@@ -736,16 +702,103 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// Performance data loading (placeholder)
-function loadPerformanceData() {
-  console.log('Performance tab loaded - feature coming soon');
-  // Future implementation for performance metrics
+// Performance data loading
+async function loadPerformanceData() {
+  try {
+    const [perfRes, playerRes] = await Promise.all([
+      fetch('/api/admin/analytics/performance'),
+      fetch('/admin/playerstats/data'),
+    ]);
+    const perf   = await perfRes.json();
+    const player = await playerRes.json();
+
+    const running = (player.servers || []).filter(s => s.online).length;
+    const stopped = (player.totalServers || 0) - running;
+
+    document.getElementById('perf-running').textContent = running;
+    document.getElementById('perf-stopped').textContent = stopped;
+    document.getElementById('perf-nodes-total').textContent = perf.nodeCount ?? '—';
+    document.getElementById('perf-images').textContent    = perf.imageCount ?? '—';
+    document.getElementById('perf-ram').textContent       = perf.totalRamMb  ? perf.totalRamMb + ' MB'  : '—';
+    document.getElementById('perf-cpu').textContent       = perf.totalCpuPct ? perf.totalCpuPct + '%'   : '—';
+    document.getElementById('perf-top-image').textContent = perf.topImage    ?? '—';
+
+    const avgPerNode = perf.nodeCount > 0
+      ? ((player.totalServers || 0) / perf.nodeCount).toFixed(1)
+      : '—';
+    document.getElementById('perf-servers-per-node').textContent = avgPerNode;
+
+    const nodeList = document.getElementById('perf-node-list');
+    if (perf.nodes && perf.nodes.length > 0) {
+      nodeList.innerHTML = perf.nodes.map(n => {
+        const pct = player.totalServers > 0 ? Math.round((n.serverCount / player.totalServers) * 100) : 0;
+        return `<div class="flex items-center gap-3">
+          <span class="text-sm text-neutral-700 dark:text-neutral-300 w-32 truncate">${escapeHtml(n.name)}</span>
+          <div class="flex-1 bg-neutral-100 dark:bg-neutral-700/40 rounded-full h-1.5">
+            <div class="bg-neutral-400 dark:bg-neutral-400 h-1.5 rounded-full" style="width:${pct}%"></div>
+          </div>
+          <span class="text-xs text-neutral-500 w-16 text-right">${n.serverCount} server${n.serverCount !== 1 ? 's' : ''}</span>
+        </div>`;
+      }).join('');
+    } else {
+      nodeList.innerHTML = '<p class="text-sm text-neutral-400">No nodes found.</p>';
+    }
+  } catch (err) {
+    console.error('Error loading performance data:', err);
+    showToast('Failed to load performance data.', 'error');
+  }
 }
 
-// Usage data loading (placeholder)
-function loadUsageData() {
-  console.log('Usage analytics tab loaded - feature coming soon');
-  // Future implementation for usage analytics
+// Usage data loading
+async function loadUsageData() {
+  try {
+    const res  = await fetch('/api/admin/analytics/usage');
+    const data = await res.json();
+
+    document.getElementById('totalServersCount').textContent = data.totalServers ?? '—';
+    document.getElementById('activeUsersCount').textContent  = data.totalUsers   ?? '—';
+    document.getElementById('adminUsersCount').textContent   = data.adminUsers   ?? '—';
+    document.getElementById('storageUsedCount').textContent  = data.totalStorageGb != null
+      ? data.totalStorageGb + ' GB'
+      : '—';
+
+    const imgList = document.getElementById('usage-image-list');
+    if (data.byImage && data.byImage.length > 0) {
+      const max = data.byImage[0].count;
+      imgList.innerHTML = data.byImage.map(item => {
+        const pct = max > 0 ? Math.round((item.count / max) * 100) : 0;
+        return `<div class="flex items-center gap-3">
+          <span class="text-sm text-neutral-700 dark:text-neutral-300 w-28 truncate">${escapeHtml(item.name)}</span>
+          <div class="flex-1 bg-neutral-100 dark:bg-neutral-700/40 rounded-full h-1.5">
+            <div class="bg-neutral-400 dark:bg-neutral-400 h-1.5 rounded-full" style="width:${pct}%"></div>
+          </div>
+          <span class="text-xs text-neutral-500 w-8 text-right">${item.count}</span>
+        </div>`;
+      }).join('');
+    } else {
+      imgList.innerHTML = '<p class="text-sm text-neutral-400">No data.</p>';
+    }
+
+    const nodeList = document.getElementById('usage-node-list');
+    if (data.byNode && data.byNode.length > 0) {
+      const max = data.byNode[0].count;
+      nodeList.innerHTML = data.byNode.map(item => {
+        const pct = max > 0 ? Math.round((item.count / max) * 100) : 0;
+        return `<div class="flex items-center gap-3">
+          <span class="text-sm text-neutral-700 dark:text-neutral-300 w-28 truncate">${escapeHtml(item.name)}</span>
+          <div class="flex-1 bg-neutral-100 dark:bg-neutral-700/40 rounded-full h-1.5">
+            <div class="bg-neutral-400 dark:bg-neutral-400 h-1.5 rounded-full" style="width:${pct}%"></div>
+          </div>
+          <span class="text-xs text-neutral-500 w-8 text-right">${item.count}</span>
+        </div>`;
+      }).join('');
+    } else {
+      nodeList.innerHTML = '<p class="text-sm text-neutral-400">No data.</p>';
+    }
+  } catch (err) {
+    console.error('Error loading usage data:', err);
+    showToast('Failed to load usage data.', 'error');
+  }
 }
 
 // Manual data collection trigger

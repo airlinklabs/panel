@@ -463,15 +463,30 @@
         folderPopupContent.innerHTML = '<p class="text-sm text-neutral-400 col-span-2">No servers — drag a card here to add one.</p>';
       } else {
         serversIn.forEach(s => {
-          const a = document.createElement('a');
-          a.href = '/server/' + s.UUID;
-          a.className = 'flex items-center justify-between bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 rounded-xl px-3 py-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-700/40 transition';
+          const row = document.createElement('div');
+          row.className = 'flex items-center gap-2 bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 rounded-xl px-3 py-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-700/40 transition';
           const running = s.status === 'running';
-          a.innerHTML = `<span class="text-sm font-medium text-neutral-800 dark:text-white truncate">${s.name}</span>
-            <span class="ml-2 shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md ${running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'}">
-              ${running ? 'Running' : 'Stopped'}
-            </span>`;
-          folderPopupContent.appendChild(a);
+          row.innerHTML = `
+            <a href="/server/${s.UUID}" class="flex items-center gap-2 flex-1 min-w-0">
+              <span class="text-sm font-medium text-neutral-800 dark:text-white truncate">${s.name}</span>
+              <span class="ml-auto shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md ${running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'}">
+                ${running ? 'Running' : 'Stopped'}
+              </span>
+            </a>
+            <button data-uuid="${s.UUID}" class="remove-from-folder-btn shrink-0 p-1.5 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Remove from folder">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" width="12" height="12">
+                <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd"/>
+              </svg>
+            </button>`;
+          row.querySelector('.remove-from-folder-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const uuid = e.currentTarget.dataset.uuid;
+            const r = await fetch('/api/folders/servers/' + uuid, { method: 'DELETE' });
+            const d = await r.json();
+            if (d.success) { showToast('Removed from folder.', 'success'); setTimeout(() => location.reload(), 600); }
+            else showToast(d.error || 'Failed', 'error');
+          });
+          folderPopupContent.appendChild(row);
         });
       }
       folderPopupOverlay.classList.add('open');
@@ -530,7 +545,7 @@
       ghostName.textContent = dragName;
       ghost.style.display = 'flex';
       card.classList.add('dragging');
-      // Use a transparent 1×1 as the native drag image so only our ghost shows
+      card.dataset.dragging = '1';
       const blank = document.createElement('canvas');
       blank.width = blank.height = 1;
       e.dataTransfer.setDragImage(blank, 0, 0);
@@ -543,7 +558,14 @@
       card.classList.remove('dragging');
       document.querySelectorAll('.folder-card').forEach(f => f.classList.remove('drag-over'));
       document.removeEventListener('mousemove', moveMouse);
+      // Brief flag so the click event that fires after dragend doesn't navigate
+      setTimeout(() => { delete card.dataset.dragging; }, 50);
       dragUUID = null; dragName = null;
+    });
+
+    // Block link navigation when the card was being dragged
+    card.querySelector('a')?.addEventListener('click', e => {
+      if (card.dataset.dragging) e.preventDefault();
     });
 
     // Also support click → pick folder (for list view / touch users)

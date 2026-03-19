@@ -143,8 +143,8 @@
           <span id="statusText" class="text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap"></span>
         </div>
         <div class="vtog">
-          <button id="btnAll" class="active" onclick="setView('all')">All</button>
-          <button id="btnApp" onclick="setView('app')">By App</button>
+          <button id="btnAll" onclick="setView('all')">All</button>
+          <button id="btnApp" class="active" onclick="setView('app')">By App</button>
         </div>
       </div>
 
@@ -468,7 +468,7 @@ document.getElementById('imageFilterInput').addEventListener('input', function()
   render();
 });
 
-loadCatalogue();
+loadCatalogue().then(() => setView('app'));
 </script>
 
 <%- include('../../components/footer') %>

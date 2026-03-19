@@ -150,17 +150,13 @@ const authServiceModule: Module = {
     });
 
     router.get('/logout', (req: Request, res: Response) => {
+      res.clearCookie('connect.sid');
       if (req.session) {
-        req.session.destroy((err) => {
-          if (err) {
-            logger.error('Session destruction error', err);
-            return res.status(500).json({ error: 'logout_error' });
-          }
-          res.clearCookie('connect.sid');
-          res.redirect('/');
+        req.session.destroy(() => {
+          res.redirect('/login');
         });
       } else {
-        res.redirect('/');
+        res.redirect('/login');
       }
     });
 
