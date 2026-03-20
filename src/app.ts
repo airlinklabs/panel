@@ -393,14 +393,33 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
       initEggCatalogue().catch(err => logger.warn(`Store catalogue init failed: ${err?.message || err}`));
     });
 
-    process.on('SIGINT', () => {
-      logger.info('Shutting down...');
+    let shuttingDown = false;
+
+    async function shutdown(signal: string) {
+      if (shuttingDown) return;
+      shuttingDown = true;
+
+      logger.info(`Shutting down (${signal})...`);
+
       server.close(async () => {
-        const { default: prisma } = await import('./db');
-        await prisma.$disconnect();
+        try {
+          await prisma.$disconnect();
+        } catch {
+          // best effort
+        }
         logger.info('Server closed');
+        process.exit(0);
       });
-    });
+
+      // If server.close() doesn't finish within 10s, force exit
+      setTimeout(() => {
+        logger.warn('Forced exit after timeout');
+        process.exit(1);
+      }, 10_000).unref();
+    }
+
+    process.on('SIGINT', () => shutdown('SIGINT'));
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
   } catch (err) {
     logger.error('Failed to load modules or database:', err);
   }

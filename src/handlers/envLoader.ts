@@ -18,10 +18,14 @@ export function loadEnv() {
     const data = fs.readFileSync(envPath, 'utf8');
 
     data.split('\n').forEach((line) => {
-      const [key, value] = line.split('=');
+      const eqIndex = line.indexOf('=');
+      if (eqIndex === -1) return;
 
-      if (key && value) {
-        process.env[key.trim()] = value.trim().replace(/^["']|["']$/g, '');
+      const key = line.slice(0, eqIndex).trim();
+      const value = line.slice(eqIndex + 1).trim().replace(/^["']|["']$/g, '');
+
+      if (key) {
+        process.env[key] = value;
       }
     });
   } catch (error) {
