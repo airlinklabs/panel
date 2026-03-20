@@ -518,7 +518,7 @@ EOF
     npm run build || err "Build failed"
     ok "Panel build completed"
     
-    run_with_loading "Seeding database with images" npm run seed
+#    run_with_loading "Seeding database with images" npm run seed
 
     # Enable registration temporarily - FIXED VERSION
     info "Enabling registration for first admin user..."
