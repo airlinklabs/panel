@@ -75,8 +75,8 @@ export const loadModules = async (
 
     const mod = result.mod?.default;
     if (!mod || !mod.info || typeof mod.router !== 'function') {
-      if (isDebugMode) logger.warn(`Invalid module structure in ${result.file}`);
-      errors++;
+      if (isDebugMode) logger.warn(`Skipping non-module file: ${result.file}`);
+      skipped++;
       continue;
     }
 
