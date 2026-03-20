@@ -46,14 +46,48 @@ function isGitAvailable(): boolean {
   }
 }
 
-async function cloneOrPullRepo(repoUrl: string, targetDir: string): Promise<void> {
-  if (!fs.existsSync(targetDir)) {
-    logger.info(`Store: cloning ${repoUrl} → ${targetDir}`);
-    await execAsync(`git clone --depth=1 "${repoUrl}" "${targetDir}"`);
-  } else {
-    logger.info(`Store: pulling ${targetDir}`);
-    await execAsync(`git -C "${targetDir}" pull --ff-only`);
+// Returns true if the directory is a valid, non-shallow git repo with a
+// tracking branch we can pull from.
+function isHealthyRepo(dir: string): boolean {
+  try {
+    // Must be a git repo
+    execSync('git rev-parse --git-dir', { cwd: dir, stdio: 'ignore' });
+
+    // Must not be a shallow clone (shallow clones have no tracking branch,
+    // so `git pull --ff-only` fails with "Cannot fast-forward to multiple branches")
+    const shallowFile = path.join(dir, '.git', 'shallow');
+    if (fs.existsSync(shallowFile)) return false;
+
+    // Must have at least one remote tracking branch
+    const tracking = execSync('git rev-parse --abbrev-ref --symbolic-full-name @{u}', {
+      cwd: dir,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+
+    return tracking.length > 0;
+  } catch {
+    return false;
   }
+}
+
+async function cloneOrPullRepo(repoUrl: string, targetDir: string): Promise<void> {
+  // If the directory doesn't exist or is not a healthy repo, do a fresh clone.
+  // We never use --depth=1 because shallow clones produce detached HEADs with
+  // no tracking branch, causing `git pull --ff-only` to fail on the next run.
+  if (!fs.existsSync(targetDir) || !isHealthyRepo(targetDir)) {
+    if (fs.existsSync(targetDir)) {
+      logger.info(`Store: removing unhealthy repo at ${targetDir} and re-cloning`);
+      fs.rmSync(targetDir, { recursive: true, force: true });
+    }
+    logger.info(`Store: cloning ${repoUrl} → ${targetDir}`);
+    await execAsync(`git clone "${repoUrl}" "${targetDir}"`);
+    return;
+  }
+
+  // Healthy repo with a tracking branch — just pull
+  logger.info(`Store: pulling ${targetDir}`);
+  await execAsync(`git -C "${targetDir}" pull --ff-only`);
 }
 
 // ─── README parser ────────────────────────────────────────────────────────
@@ -73,7 +107,7 @@ function extractReadmeSummary(md: string): string {
     if (line.length < 15) continue;
     // Strip inline markdown: links, images, bold, italic, code
     const clean = line
-      .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
+      .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
       .replace(/[*_`~]/g, '')
       .replace(/<[^>]+>/g, '')
       .trim();
