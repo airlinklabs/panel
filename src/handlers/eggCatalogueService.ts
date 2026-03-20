@@ -6,7 +6,6 @@ import logger from './logger';
 
 const execAsync = promisify(exec);
 
-// Where the cloned repos live on disk, inside the panel's storage directory
 const EGGS_DIR = path.resolve('storage/eggs');
 
 const REPOS = [
@@ -20,9 +19,9 @@ const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
 export interface StoreImage {
   name: string;
   description: string;
-  readme: string;        // one-line summary
-  fullReadme: string;    // full README markdown for the popup
-  groupReadme: string;   // top-level group folder README
+  readme: string;
+  fullReadme: string;
+  groupReadme: string;
   author: string;
   group: string;
   subGroup: string;
@@ -30,12 +29,11 @@ export interface StoreImage {
   egg: Record<string, unknown>;
 }
 
-// In-memory catalogue rebuilt from disk on startup and after each auto-update
 let catalogue: StoreImage[] = [];
 let lastBuilt = 0;
 let updateTimer: NodeJS.Timeout | null = null;
 
-// ─── Git helpers ──────────────────────────────────────────────────────────
+// -- Git helpers --------------------------------------------------------------
 
 function isGitAvailable(): boolean {
   try {
@@ -46,54 +44,37 @@ function isGitAvailable(): boolean {
   }
 }
 
-// Returns true if the directory is a valid, non-shallow git repo with a
-// tracking branch we can pull from.
-function isHealthyRepo(dir: string): boolean {
+function isGitRepo(dir: string): boolean {
   try {
-    // Must be a git repo
     execSync('git rev-parse --git-dir', { cwd: dir, stdio: 'ignore' });
-
-    // Must not be a shallow clone (shallow clones have no tracking branch,
-    // so `git pull --ff-only` fails with "Cannot fast-forward to multiple branches")
-    const shallowFile = path.join(dir, '.git', 'shallow');
-    if (fs.existsSync(shallowFile)) return false;
-
-    // Must have at least one remote tracking branch
-    const tracking = execSync('git rev-parse --abbrev-ref --symbolic-full-name @{u}', {
-      cwd: dir,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-
-    return tracking.length > 0;
+    return true;
   } catch {
     return false;
   }
 }
 
 async function cloneOrPullRepo(repoUrl: string, targetDir: string): Promise<void> {
-  // If the directory doesn't exist or is not a healthy repo, do a fresh clone.
-  // We never use --depth=1 because shallow clones produce detached HEADs with
-  // no tracking branch, causing `git pull --ff-only` to fail on the next run.
-  if (!fs.existsSync(targetDir) || !isHealthyRepo(targetDir)) {
+  const env = {
+    ...process.env,
+    GIT_TERMINAL_PROMPT: '0',
+  };
+
+  if (!fs.existsSync(targetDir) || !isGitRepo(targetDir)) {
     if (fs.existsSync(targetDir)) {
-      logger.info(`Store: removing unhealthy repo at ${targetDir} and re-cloning`);
+      logger.info(`Store: removing broken directory at ${targetDir} before re-cloning`);
       fs.rmSync(targetDir, { recursive: true, force: true });
     }
-    logger.info(`Store: cloning ${repoUrl} → ${targetDir}`);
-    await execAsync(`git clone "${repoUrl}" "${targetDir}"`);
+    logger.info(`Store: cloning ${repoUrl}`);
+    await execAsync(`git clone "${repoUrl}" "${targetDir}"`, { env });
     return;
   }
 
-  // Healthy repo with a tracking branch — just pull
-  logger.info(`Store: pulling ${targetDir}`);
-  await execAsync(`git -C "${targetDir}" pull --ff-only`);
+  logger.info(`Store: pulling latest for ${path.basename(targetDir)}`);
+  await execAsync(`git -C "${targetDir}" pull`, { env });
 }
 
-// ─── README parser ────────────────────────────────────────────────────────
+// -- README parser ------------------------------------------------------------
 
-// Extract the first meaningful plain-text sentence from a Markdown README.
-// Strips headers, badges, code blocks, tables, and HTML tags.
 function extractReadmeSummary(md: string): string {
   const lines = md.split('\n').map(l => l.trim());
   for (const line of lines) {
@@ -105,7 +86,6 @@ function extractReadmeSummary(md: string): string {
     if (line.startsWith('---') || line.startsWith('===')) continue;
     if (line.startsWith('<')) continue;
     if (line.length < 15) continue;
-    // Strip inline markdown: links, images, bold, italic, code
     const clean = line
       .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
       .replace(/[*_`~]/g, '')
@@ -116,7 +96,7 @@ function extractReadmeSummary(md: string): string {
   return '';
 }
 
-// ─── Catalogue builder ────────────────────────────────────────────────────
+// -- Catalogue builder --------------------------------------------------------
 
 function buildCatalogueFromDisk(): StoreImage[] {
   const images: StoreImage[] = [];
@@ -125,7 +105,6 @@ function buildCatalogueFromDisk(): StoreImage[] {
     const repoDir = path.join(EGGS_DIR, repo.dir);
     if (!fs.existsSync(repoDir)) continue;
 
-    // Walk every file in the repo recursively
     function walk(dir: string) {
       let entries: fs.Dirent[];
       try {
@@ -134,7 +113,6 @@ function buildCatalogueFromDisk(): StoreImage[] {
         return;
       }
 
-      // Build a set of README content keyed by folder for this pass
       let readmeContent = '';
       const readmeFile = entries.find(
         e => e.isFile() && e.name.toLowerCase() === 'readme.md'
@@ -149,7 +127,6 @@ function buildCatalogueFromDisk(): StoreImage[] {
 
       for (const entry of entries) {
         if (entry.isDirectory()) {
-          // Skip hidden dirs and github workflow dirs
           if (!entry.name.startsWith('.')) walk(path.join(dir, entry.name));
           continue;
         }
@@ -167,7 +144,6 @@ function buildCatalogueFromDisk(): StoreImage[] {
 
         if (!raw.name) continue;
 
-        // Derive group/subGroup from the folder path relative to the repo root
         const relDir   = path.relative(repoDir, dir).replace(/\\/g, '/');
         const parts    = relDir.split('/').filter(Boolean);
         const group    = parts[0] || 'other';
@@ -190,7 +166,6 @@ function buildCatalogueFromDisk(): StoreImage[] {
 
     walk(repoDir);
 
-    // Build a map of group -> full README content from the top-level group folders
     const groupReadmeMap = new Map<string, string>();
     try {
       for (const entry of fs.readdirSync(repoDir, { withFileTypes: true })) {
@@ -204,7 +179,6 @@ function buildCatalogueFromDisk(): StoreImage[] {
       }
     } catch { /* skip */ }
 
-    // Attach group READMEs to each image
     for (const img of images) {
       if (img.category === repo.id && !img.groupReadme) {
         img.groupReadme = groupReadmeMap.get(img.group) || '';
@@ -215,11 +189,11 @@ function buildCatalogueFromDisk(): StoreImage[] {
   return images;
 }
 
-// ─── Update cycle ─────────────────────────────────────────────────────────
+// -- Update cycle -------------------------------------------------------------
 
 async function updateRepos(): Promise<void> {
   if (!isGitAvailable()) {
-    logger.warn('Store: git not found — cannot clone/pull egg repos. Falling back to bundled zips if available.');
+    logger.warn('Store: git not found -- cannot clone egg repos');
     return;
   }
 
@@ -233,7 +207,7 @@ async function updateRepos(): Promise<void> {
 
   results.forEach((r, i) => {
     if (r.status === 'rejected') {
-      logger.warn(`Store: ${REPOS[i].dir} git operation failed: ${r.reason?.message || r.reason}`);
+      logger.warn(`Store: ${REPOS[i].dir} failed: ${r.reason?.message || r.reason}`);
     }
   });
 }
@@ -241,32 +215,27 @@ async function updateRepos(): Promise<void> {
 function rebuildCatalogue(): void {
   catalogue = buildCatalogueFromDisk();
   lastBuilt = Date.now();
-  logger.info(`Store: catalogue built — ${catalogue.length} images`);
+  logger.info(`Store: catalogue built -- ${catalogue.length} images`);
 }
 
 function scheduleAutoUpdate(): void {
   if (updateTimer) clearInterval(updateTimer);
   updateTimer = setInterval(async () => {
-    logger.info('Store: auto-updating egg repos (2-day interval)');
+    logger.info('Store: auto-updating egg repos');
     await updateRepos();
     rebuildCatalogue();
   }, TWO_DAYS_MS);
-  // Don't keep Node alive just for this
   if (updateTimer.unref) updateTimer.unref();
 }
 
-// ─── Public API ───────────────────────────────────────────────────────────
+// -- Public API ---------------------------------------------------------------
 
-// Called once on panel startup. Clones repos, builds catalogue, starts the
-// 2-day refresh interval.
 export async function initEggCatalogue(): Promise<void> {
   await updateRepos();
   rebuildCatalogue();
   scheduleAutoUpdate();
 }
 
-// Returns the in-memory catalogue. If something went wrong during init and
-// the catalogue is empty, tries to build from whatever is on disk.
 export function getCatalogue(): { images: StoreImage[]; builtAt: number } {
   if (catalogue.length === 0 && lastBuilt === 0) {
     rebuildCatalogue();
@@ -274,7 +243,6 @@ export function getCatalogue(): { images: StoreImage[]; builtAt: number } {
   return { images: catalogue, builtAt: lastBuilt };
 }
 
-// Force a refresh — pulls latest from GitHub then rebuilds from disk.
 export async function forceRefresh(): Promise<void> {
   await updateRepos();
   rebuildCatalogue();
