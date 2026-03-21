@@ -108,8 +108,17 @@ NI_STEP=0
 NI_TOTAL=0
 
 ni_header() {
-    printf "\n${BOLD}  Airlink Installer${RESET} ${C_GRAY}v${VERSION}${RESET}\n"
-    printf "  ${C_GRAY}%s${RESET}\n\n" "$(date '+%Y-%m-%d %H:%M:%S')"
+    printf "\n"
+    printf "  /\$\$\$\$\$\$  /\$\$            /\$\$/\$\$         /\$\$      \n"
+    printf " /\$\$__  \$\$|\$\$           | \$\$|\$\$        | \$\$      \n"
+    printf "| \$\$  \\ \$\$|\$\$ /\$\$\$\$\$\$  | \$\$|\$\$/\$\$\$\$\$\$\$| \$\$   /\$\$\n"
+    printf "| \$\$\$\$\$\$\$\$|\$\$|\$\$__  \$\$| \$\$|\$\$| \$\$__  \$\$| \$\$  /\$\$/\n"
+    printf "| \$\$__  \$\$|\$\$| \$\$  \\ \$\$| \$\$|\$\$| \$\$  \\ \$\$| \$\$\$\$\$\$/ \n"
+    printf "| \$\$  | \$\$|\$\$| \$\$  | \$\$| \$\$|\$\$| \$\$  | \$\$| \$\$_  \$\$ \n"
+    printf "| \$\$  | \$\$|\$\$| \$\$  | \$\$| \$\$|\$\$| \$\$  | \$\$| \$\$ \\ \$\$\n"
+    printf "|__/  |__/|__/|__/  |__/|__/|__/|__/  |__/|__/  \__/\n"
+    printf "\n"
+    printf "  ${BOLD}Airlink Installer${RESET} ${C_GRAY}v${VERSION}${RESET}  ${C_GRAY}%s${RESET}\n\n" "$(date '+%Y-%m-%d %H:%M:%S')"
 }
 
 ni_start() {
@@ -123,27 +132,57 @@ ni_run() {
     local label="$1"; shift
     NI_STEP=$(( NI_STEP + 1 ))
     local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
-    local i=0
+    local fi=0
+    local outfile; outfile=$(mktemp /tmp/al-step-XXXXXX)
+    local out_lines=5
 
-    "$@" &>/dev/null &
+    "$@" >"$outfile" 2>&1 &
     local pid=$!
 
     while kill -0 "$pid" 2>/dev/null; do
-        printf "\r  ${C_GRAY}[%02d/%02d]${RESET} %-40s %s" "$NI_STEP" "$NI_TOTAL" "$label" "${frames[$i]}"
-        i=$(( (i+1) % ${#frames[@]} ))
-        sleep 0.08
+        printf "\r  ${C_GRAY}[%02d/%02d]${RESET} %-40s %s" "$NI_STEP" "$NI_TOTAL" "$label" "${frames[$fi]}"
+        fi=$(( (fi+1) % ${#frames[@]} ))
+
+        # stream last lines of output below the step label
+        local li=0
+        while IFS= read -r line; do
+            printf "\n    ${C_GRAY}%s${RESET}" "${line:0:72}"
+            li=$(( li + 1 ))
+        done < <(tail -n${out_lines} "$outfile" 2>/dev/null)
+        # blank unused output rows so stale lines don't linger
+        while [[ $li -lt $out_lines ]]; do
+            printf "\n%76s" ""
+            li=$(( li + 1 ))
+        done
+        # move cursor back up to the step label line
+        printf "\033[%dA\r" "$out_lines"
+
+        sleep 0.12
     done
 
     wait "$pid"
     local status=$?
+
+    # clear the output area
+    local li
+    for (( li=0; li<out_lines; li++ )); do
+        printf "\n%76s" ""
+    done
+    printf "\033[%dA\r" "$out_lines"
+
     if [[ $status -eq 0 ]]; then
         printf "\r  ${C_GRAY}[%02d/%02d]${RESET} %-40s ${C_GREEN}✓${RESET}\n" "$NI_STEP" "$NI_TOTAL" "$label"
         log "OK: $label"
     else
         printf "\r  ${C_GRAY}[%02d/%02d]${RESET} %-40s ${C_RED}✗${RESET}\n" "$NI_STEP" "$NI_TOTAL" "$label"
+        local err_tail; err_tail=$(tail -n20 "$outfile" 2>/dev/null || true)
+        rm -f "$outfile"
         log "ERROR: $label failed"
-        die "$label failed"
+        printf "\n${BOLD}  failed:${RESET} %s\n\n%s\n\n" "$label" "$err_tail"
+        exit 1
     fi
+
+    rm -f "$outfile"
 }
 
 # =============================================================================
@@ -610,9 +649,10 @@ tui_progress_step() {
     local spinner_row=$(( box_r + 3 + PROGRESS_CURRENT ))
     local spinner_col=$(( box_c + box_w - 4 ))
 
-    # output log area — 5 lines at the bottom of the terminal
-    local log_start=$(( TERM_ROWS - 5 ))
-    local log_w=$(( TERM_COLS - 4 ))
+    # output lines appear directly below the box
+    local out_row=$(( box_r + box_h + 1 ))
+    local out_lines=5
+    local out_w=$(( box_w - 2 ))
     local outfile; outfile=$(mktemp /tmp/al-step-XXXXXX)
 
     "$@" >"$outfile" 2>&1 &
@@ -621,22 +661,19 @@ tui_progress_step() {
     local fi=0
 
     while kill -0 "$pid" 2>/dev/null; do
-        # spinner
         move_to "$spinner_row" "$spinner_col"
         printf "%s" "${frames[$fi]}"
         fi=$(( (fi+1) % ${#frames[@]} ))
 
-        # last 5 lines of output
         local li=0
         while IFS= read -r line; do
-            move_to $(( log_start + li )) 2
-            printf "${DIM}%-${log_w}s${RESET}" "${line:0:$log_w}"
+            move_to $(( out_row + li )) $((box_c + 1))
+            printf "${DIM}%-${out_w}s${RESET}" "${line:0:${out_w}}"
             li=$(( li + 1 ))
-        done < <(tail -n5 "$outfile" 2>/dev/null)
-        # blank any unused rows
-        while [[ $li -lt 5 ]]; do
-            move_to $(( log_start + li )) 2
-            printf "%-${log_w}s" ""
+        done < <(tail -n${out_lines} "$outfile" 2>/dev/null)
+        while [[ $li -lt $out_lines ]]; do
+            move_to $(( out_row + li )) $((box_c + 1))
+            printf "%-${out_w}s" ""
             li=$(( li + 1 ))
         done
 
@@ -646,11 +683,11 @@ tui_progress_step() {
     wait "$pid"
     local status=$?
 
-    # clear output lines
+    # clear output area
     local li
-    for (( li=0; li<5; li++ )); do
-        move_to $(( log_start + li )) 2
-        printf "%-${log_w}s" ""
+    for (( li=0; li<out_lines; li++ )); do
+        move_to $(( out_row + li )) $((box_c + 1))
+        printf "%-${out_w}s" ""
     done
 
     move_to "$spinner_row" "$spinner_col"
@@ -659,13 +696,11 @@ tui_progress_step() {
         log "OK: $label"
         PROGRESS_CURRENT=$(( PROGRESS_CURRENT + 1 ))
     else
-        # show last 20 lines of output so user can see what went wrong
         local err_out; err_out=$(tail -n20 "$outfile" 2>/dev/null || true)
         rm -f "$outfile"
         log "ERROR: $label"
         tui_cleanup
-        printf "\n${BOLD}  %s failed${RESET}\n\n" "$label"
-        printf "%s\n\n" "$err_out"
+        printf "\n${BOLD}  %s failed${RESET}\n\n%s\n\n" "$label" "$err_out"
         exit 1
     fi
 
@@ -735,14 +770,15 @@ setup_node() {
 }
 
 setup_docker() {
-    command -v docker &>/dev/null && return
+    if command -v docker &>/dev/null; then return 0; fi
     case "$FAM" in
-        debian|redhat) curl -fsSL https://get.docker.com | sh &>/dev/null ;;
+        debian|redhat) curl -fsSL https://get.docker.com | sh ;;
         arch)   pkg_install docker ;;
         alpine) pkg_install docker; rc-update add docker boot &>/dev/null ;;
     esac
     systemctl enable --now docker &>/dev/null
     command -v docker &>/dev/null || die "Docker install failed"
+    return 0
 }
 
 # =============================================================================
@@ -761,12 +797,38 @@ get_addon_field() { echo "$1" | cut -d'|' -f"$2"; }
 
 phase_panel_clone() {
     mkdir -p /var/www
-    cd /var/www || die "Cannot access /var/www"
-    rm -rf panel
-    git clone "${PANEL_REPO}" panel || die "Failed to clone panel"
+    if [[ -d /var/www/panel ]]; then
+        echo "Existing panel found — updating source files in place"
+        cd /var/www/panel || die "Cannot access /var/www/panel"
+
+        # wipe source dirs only — preserve DB, .env, node_modules, uploads
+        rm -rf src public views routes controllers middleware services \
+               *.ts *.js tsconfig.json tailwind.config.* \
+               prisma/schema.prisma 2>/dev/null || true
+
+        # pull fresh source from a temp clone
+        local tmpdir; tmpdir=$(mktemp -d /tmp/al-panel-XXXXXX)
+        git clone "${PANEL_REPO}" "$tmpdir" || die "Failed to clone panel"
+
+        # copy everything except things we want to keep from the existing install
+        rsync -a --exclude='.env' --exclude='dev.db' --exclude='node_modules' \
+              --exclude='storage' "$tmpdir/" /var/www/panel/ || \
+            cp -r "$tmpdir"/. /var/www/panel/
+
+        # replace prisma schema and add fresh migrations dir
+        cp -r "$tmpdir/prisma" /var/www/panel/
+        rm -rf "$tmpdir"
+    else
+        cd /var/www || die "Cannot access /var/www"
+        git clone "${PANEL_REPO}" panel || die "Failed to clone panel"
+    fi
+
     chown -R www-data:www-data /var/www/panel
     chmod -R 755 /var/www/panel
-    cat > /var/www/panel/.env << ENVEOF
+
+    # write .env only if it doesn't exist (preserve existing secrets on update)
+    if [[ ! -f /var/www/panel/.env ]]; then
+        cat > /var/www/panel/.env << ENVEOF
 NAME=${PANEL_NAME}
 NODE_ENV="development"
 URL="http://localhost:${PANEL_PORT}"
@@ -774,6 +836,7 @@ PORT=${PANEL_PORT}
 DATABASE_URL="file:./dev.db"
 SESSION_SECRET=$(openssl rand -hex 32)
 ENVEOF
+    fi
 }
 
 phase_panel_deps() {
@@ -792,7 +855,12 @@ phase_panel_prisma() {
 
 phase_panel_migrate() {
     cd /var/www/panel || die "Panel directory missing"
-    CI=true npm run migrate:dev || die "DB migration failed"
+    if [[ -f dev.db ]]; then
+        # existing DB — apply pending migrations without creating new ones
+        npx prisma migrate deploy || die "DB migration failed"
+    else
+        CI=true npm run migrate:dev || die "DB migration failed"
+    fi
 }
 
 phase_panel_build() {
@@ -833,10 +901,29 @@ SVCEOF
 }
 
 phase_daemon_clone() {
-    cd /etc || die "Cannot access /etc"
-    rm -rf daemon
-    git clone "${DAEMON_REPO}" daemon || die "Failed to clone daemon"
-    cat > /etc/daemon/.env << ENVEOF
+    if [[ -d /etc/daemon ]]; then
+        echo "Existing daemon found — updating source files in place"
+        cd /etc/daemon || die "Cannot access /etc/daemon"
+
+        # wipe source dirs only — preserve .env and node_modules
+        rm -rf src dist libs *.ts *.js tsconfig.json 2>/dev/null || true
+
+        local tmpdir; tmpdir=$(mktemp -d /tmp/al-daemon-XXXXXX)
+        git clone "${DAEMON_REPO}" "$tmpdir" || die "Failed to clone daemon"
+
+        rsync -a --exclude='.env' --exclude='node_modules' \
+              "$tmpdir/" /etc/daemon/ || \
+            cp -r "$tmpdir"/. /etc/daemon/
+
+        rm -rf "$tmpdir"
+    else
+        cd /etc || die "Cannot access /etc"
+        git clone "${DAEMON_REPO}" daemon || die "Failed to clone daemon"
+    fi
+
+    # write .env only if it doesn't exist
+    if [[ ! -f /etc/daemon/.env ]]; then
+        cat > /etc/daemon/.env << ENVEOF
 remote="${PANEL_ADDRESS}"
 key="${DAEMON_KEY}"
 port=${DAEMON_PORT}
@@ -845,6 +932,7 @@ version=1.0.0
 environment=development
 STATS_INTERVAL=10000
 ENVEOF
+    fi
 }
 
 phase_daemon_deps() {
