@@ -117,46 +117,30 @@ ni_start() {
     NI_STEP=0
 }
 
-ni_step() {
-    NI_STEP=$((NI_STEP + 1))
-    local label="$1"
-    printf "  ${C_GRAY}[%02d/%02d]${RESET} %s " "$NI_STEP" "$NI_TOTAL" "$label"
-}
-
-ni_done() {
-    printf "${C_GREEN}done${RESET}\n"
-    log "OK: $*"
-}
-
-ni_warn() {
-    printf "warn\n"
-    log "WARN: $*"
-}
-
-ni_ok() {
-    printf "\n  ${C_GREEN}${BOLD}done.${RESET}\n\n"
-}
 
 # Spinner for non-interactive long-running commands
 ni_run() {
     local label="$1"; shift
-    ni_step "$label"
-    "$@" &>/dev/null &
-    local pid=$!
+    NI_STEP=$(( NI_STEP + 1 ))
     local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
     local i=0
+
+    "$@" &>/dev/null &
+    local pid=$!
+
     while kill -0 "$pid" 2>/dev/null; do
-        printf "\r  ${C_GRAY}[%02d/%02d]${RESET} %s %s " "$NI_STEP" "$NI_TOTAL" "$label" "${frames[$i]}"
+        printf "\r  ${C_GRAY}[%02d/%02d]${RESET} %-40s %s" "$NI_STEP" "$NI_TOTAL" "$label" "${frames[$i]}"
         i=$(( (i+1) % ${#frames[@]} ))
         sleep 0.08
     done
+
     wait "$pid"
     local status=$?
     if [[ $status -eq 0 ]]; then
-        printf "\r  ${C_GRAY}[%02d/%02d]${RESET} %s ${C_GREEN}✓${RESET}\n" "$NI_STEP" "$NI_TOTAL" "$label"
+        printf "\r  ${C_GRAY}[%02d/%02d]${RESET} %-40s ${C_GREEN}✓${RESET}\n" "$NI_STEP" "$NI_TOTAL" "$label"
         log "OK: $label"
     else
-        printf "\r  ${C_GRAY}[%02d/%02d]${RESET} %s ${C_RED}✗${RESET}\n" "$NI_STEP" "$NI_TOTAL" "$label"
+        printf "\r  ${C_GRAY}[%02d/%02d]${RESET} %-40s ${C_RED}✗${RESET}\n" "$NI_STEP" "$NI_TOTAL" "$label"
         log "ERROR: $label failed"
         die "$label failed"
     fi
