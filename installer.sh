@@ -20,34 +20,54 @@ set -euo pipefail
 readonly VERSION="3.0.6-Stable"
 readonly LOG="/tmp/airlink.log"
 readonly NODE_VER="20"
-readonly TEMP="/tmp/airlink-tmp"
 readonly PRISMA_VER="6.19.1"
 readonly PANEL_REPO="https://github.com/airlinklabs/panel.git"
 readonly DAEMON_REPO="https://github.com/airlinklabs/daemon.git"
 
-# ============================================================================
-# ADDON CONFIGURATION
 # Format: "display_name|repo_url|branch|directory_name"
-# ============================================================================
 declare -a ADDONS=(
     "Modrinth|https://github.com/airlinklabs/addons.git|modrinth|modrinth"
     "Parachute|https://github.com/airlinklabs/addons.git|parachute|parachute"
 )
-# ============================================================================
 
-# Colors
-R='\033[0;31m' G='\033[0;32m' Y='\033[1;33m' C='\033[0;36m' N='\033[0m'
+# =============================================================================
+# ANSI codes
+# =============================================================================
+ESC=$'\033'
+RESET="${ESC}[0m"
+BOLD="${ESC}[1m"
+DIM="${ESC}[2m"
+REV="${ESC}[7m"
 
-# Logging
+# Used only in non-interactive scrolling output — not in TUI draws
+C_GREEN="${ESC}[92m"
+C_RED="${ESC}[91m"
+C_GRAY="${ESC}[90m"
+
+HIDE_CURSOR="${ESC}[?25l"
+SHOW_CURSOR="${ESC}[?25h"
+CLEAR_SCREEN="${ESC}[2J${ESC}[H"
+
+move_to() { printf "${ESC}[%d;%dH" "$1" "$2"; }
+
+# =============================================================================
+# Logging (file only — TUI owns stdout)
+# =============================================================================
 log()  { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG"; }
-info() { echo -e "${C}[INFO]${N} $*"; log "INFO: $*"; }
-ok()   { echo -e "${G}[OK]${N} $*";   log "OK: $*"; }
-warn() { echo -e "${Y}[WARN]${N} $*"; log "WARN: $*"; }
-err()  { echo -e "${R}[ERROR]${N} $*"; log "ERROR: $*"; exit 1; }
+info() { log "INFO: $*"; }
+ok()   { log "OK: $*"; }
+warn() { log "WARN: $*"; }
 
-# -- Arg parsing --------------------------------------------------------------
-# These are set by CLI args and fall back to dialog prompts when empty.
-ARG_MODE=""          # "both" | "panel" | "daemon"
+die() {
+    printf "\n${BOLD}  error:${RESET} %s\n\n" "$*" >&2
+    log "ERROR: $*"
+    exit 1
+}
+
+# =============================================================================
+# Argument parsing
+# =============================================================================
+ARG_MODE=""           # "both" | "panel" | "daemon"
 ARG_NAME=""
 ARG_PORT=""
 ARG_ADMIN_EMAIL=""
@@ -56,328 +76,791 @@ ARG_ADMIN_PASS=""
 ARG_PANEL_ADDR=""
 ARG_DAEMON_PORT=""
 ARG_DAEMON_KEY=""
-ARG_ADDONS=""        # comma-separated: "modrinth,parachute"
+ARG_ADDONS=""         # "none" | "all" | "modrinth,parachute"
 
 parse_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --panel-only)  ARG_MODE="panel";  shift ;;
-            --daemon-only) ARG_MODE="daemon"; shift ;;
-            --name)        ARG_NAME="$2";       shift 2 ;;
-            --port)        ARG_PORT="$2";       shift 2 ;;
-            --admin-email) ARG_ADMIN_EMAIL="$2"; shift 2 ;;
-            --admin-user)  ARG_ADMIN_USER="$2"; shift 2 ;;
-            --admin-pass)  ARG_ADMIN_PASS="$2"; shift 2 ;;
-            --panel-addr)  ARG_PANEL_ADDR="$2"; shift 2 ;;
-            --daemon-port) ARG_DAEMON_PORT="$2"; shift 2 ;;
-            --daemon-key)  ARG_DAEMON_KEY="$2"; shift 2 ;;
-            --addons)      ARG_ADDONS="$2";     shift 2 ;;
-            *) warn "Unknown argument: $1"; shift ;;
+            --panel-only)  ARG_MODE="panel";        shift ;;
+            --daemon-only) ARG_MODE="daemon";       shift ;;
+            --name)        ARG_NAME="$2";           shift 2 ;;
+            --port)        ARG_PORT="$2";           shift 2 ;;
+            --admin-email) ARG_ADMIN_EMAIL="$2";    shift 2 ;;
+            --admin-user)  ARG_ADMIN_USER="$2";     shift 2 ;;
+            --admin-pass)  ARG_ADMIN_PASS="$2";     shift 2 ;;
+            --panel-addr)  ARG_PANEL_ADDR="$2";     shift 2 ;;
+            --daemon-port) ARG_DAEMON_PORT="$2";    shift 2 ;;
+            --daemon-key)  ARG_DAEMON_KEY="$2";     shift 2 ;;
+            --addons)      ARG_ADDONS="$2";         shift 2 ;;
+            *) log "Unknown argument ignored: $1";  shift ;;
         esac
     done
 }
 
-# Returns true if any CLI arg was passed (non-interactive mode)
-is_noninteractive() {
-    [[ -n "$ARG_MODE" || -n "$ARG_NAME" || -n "$ARG_PORT" || -n "$ARG_ADMIN_EMAIL" \
-    || -n "$ARG_ADMIN_USER" || -n "$ARG_ADMIN_PASS" || -n "$ARG_PANEL_ADDR" \
-    || -n "$ARG_DAEMON_PORT" || -n "$ARG_DAEMON_KEY" || -n "$ARG_ADDONS" ]]
+noninteractive() {
+    [[ -n "$ARG_MODE$ARG_NAME$ARG_PORT$ARG_ADMIN_EMAIL$ARG_ADMIN_USER$ARG_ADMIN_PASS$ARG_PANEL_ADDR$ARG_DAEMON_PORT$ARG_DAEMON_KEY$ARG_ADDONS" ]]
 }
 
-# Wrapper: returns $2 if non-empty, otherwise prompts via dialog
-# Usage: prompt_or_default <arg_value> <default> <dialog_args...>
-dialog_input() {
-    local prefilled="$1"; shift
-    local default="$1"; shift
-    if [[ -n "$prefilled" ]]; then
-        echo "$prefilled"
-    else
-        dialog "$@" 3>&1 1>&2 2>&3 || echo "$default"
-    fi
+# =============================================================================
+# Non-interactive progress output
+# =============================================================================
+NI_STEP=0
+NI_TOTAL=0
+
+ni_header() {
+    printf "\n${BOLD}  Airlink Installer${RESET} ${C_GRAY}v${VERSION}${RESET}\n"
+    printf "  ${C_GRAY}%s${RESET}\n\n" "$(date '+%Y-%m-%d %H:%M:%S')"
 }
 
-# -- Spinner ------------------------------------------------------------------
-show_loading() {
-    local pid=$1
-    local spin='-\|/'
-    local i=0
-    while kill -0 "$pid" 2>/dev/null; do
-        i=$(( (i+1) % 4 ))
-        printf "\r${spin:$i:1}"
-        sleep .1
-    done
-    printf "\r"
+ni_start() {
+    NI_TOTAL="$1"
+    NI_STEP=0
 }
 
-run_with_loading() {
-    local message=$1; shift
-    info "$message"
+ni_step() {
+    NI_STEP=$((NI_STEP + 1))
+    local label="$1"
+    printf "  ${C_GRAY}[%02d/%02d]${RESET} %s " "$NI_STEP" "$NI_TOTAL" "$label"
+}
+
+ni_done() {
+    printf "${C_GREEN}done${RESET}\n"
+    log "OK: $*"
+}
+
+ni_warn() {
+    printf "warn\n"
+    log "WARN: $*"
+}
+
+ni_ok() {
+    printf "\n  ${C_GREEN}${BOLD}done.${RESET}\n\n"
+}
+
+# Spinner for non-interactive long-running commands
+ni_run() {
+    local label="$1"; shift
+    ni_step "$label"
     "$@" &>/dev/null &
     local pid=$!
-    show_loading "$pid"
+    local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
+    local i=0
+    while kill -0 "$pid" 2>/dev/null; do
+        printf "\r  ${C_GRAY}[%02d/%02d]${RESET} %s %s " "$NI_STEP" "$NI_TOTAL" "$label" "${frames[$i]}"
+        i=$(( (i+1) % ${#frames[@]} ))
+        sleep 0.08
+    done
     wait "$pid"
     local status=$?
     if [[ $status -eq 0 ]]; then
-        ok "$message completed"
+        printf "\r  ${C_GRAY}[%02d/%02d]${RESET} %s ${C_GREEN}✓${RESET}\n" "$NI_STEP" "$NI_TOTAL" "$label"
+        log "OK: $label"
     else
-        err "$message failed"
+        printf "\r  ${C_GRAY}[%02d/%02d]${RESET} %s ${C_RED}✗${RESET}\n" "$NI_STEP" "$NI_TOTAL" "$label"
+        log "ERROR: $label failed"
+        die "$label failed"
     fi
 }
 
-# -- Addon helpers ------------------------------------------------------------
-get_addon_field() {
-    echo "$1" | cut -d'|' -f"$2"
+# =============================================================================
+# TUI engine — pure bash, no dialog
+# =============================================================================
+TERM_ROWS=24
+TERM_COLS=80
+
+tui_measure() {
+    TERM_ROWS=$(tput lines 2>/dev/null || echo 24)
+    TERM_COLS=$(tput cols  2>/dev/null || echo 80)
 }
 
-# -- OS detection -------------------------------------------------------------
+tui_cleanup() {
+    printf "${SHOW_CURSOR}"
+    tput rmcup 2>/dev/null || printf "${CLEAR_SCREEN}"
+    stty echo 2>/dev/null || true
+}
+
+tui_init() {
+    tui_measure
+    tput smcup 2>/dev/null || printf "${CLEAR_SCREEN}"
+    printf "${HIDE_CURSOR}"
+    stty -echo 2>/dev/null || true
+    trap tui_cleanup EXIT INT TERM
+}
+
+# Draw a centered box
+# tui_box row col width height title
+tui_box() {
+    local row=$1 col=$2 w=$3 h=$4 title="${5:-}"
+    local inner=$((w - 2))
+
+    move_to "$row" "$col"
+    printf "┌"
+    if [[ -n "$title" ]]; then
+        local tlen=${#title}
+        local left_pad=$(( (inner - tlen - 2) / 2 ))
+        local right_pad=$(( inner - tlen - 2 - left_pad ))
+        printf '%*s' "$left_pad" '' | tr ' ' '─'
+        printf " ${BOLD}%s${RESET} " "$title"
+        printf '%*s' "$right_pad" '' | tr ' ' '─'
+    else
+        printf '%*s' "$inner" '' | tr ' ' '─'
+    fi
+    printf "┐"
+
+    local r
+    for (( r=1; r<h-1; r++ )); do
+        move_to $((row + r)) "$col"
+        printf "│%*s│" "$inner" ''
+    done
+
+    move_to $((row + h - 1)) "$col"
+    printf "└%s┘" "$(printf '%*s' "$inner" '' | tr ' ' '─')"
+}
+
+# tui_menu title items[] selected_index
+# Returns selected index in TUI_RESULT
+TUI_RESULT=0
+tui_menu() {
+    local title="$1"; shift
+    local -a items=("$@")
+    local count=${#items[@]}
+    local selected=0
+
+    tui_measure
+    local box_w=54
+    local box_h=$(( count + 6 ))
+    local banner_h=10
+    local total_h=$(( banner_h + box_h ))
+    local box_r=$(( (TERM_ROWS - total_h) / 2 + banner_h ))
+    local box_c=$(( (TERM_COLS - box_w) / 2 ))
+
+    local -a banner=(
+        '                                              '
+        '  /$$$$$$  /$$            /$$  /$$            /$$      '
+        ' /$$__  $$|__/           | $$ |__/           | $$      '
+        '| $$  \ $$ /$$  /$$$$$$  | $$  /$$  /$$$$$$$ | $$   /$$'
+        '| $$$$$$$$| $$ /$$__  $$ | $$ | $$ | $$__  $$| $$  /$$/'
+        '| $$__  $$| $$| $$  \__/ | $$ | $$ | $$  \ $$| $$$$$$/ '
+        '| $$  | $$| $$| $$       | $$ | $$ | $$  | $$| $$_  $$ '
+        '| $$  | $$| $$| $$       | $$ | $$ | $$  | $$| $$ \  $$'
+        '|__/  |__/|__/|__/       |__/ |__/ |__/  |__/|__/  \__/'
+        '                                              '
+    )
+
+    while true; do
+        printf "${CLEAR_SCREEN}"
+
+        local bi
+        for (( bi=0; bi<${#banner[@]}; bi++ )); do
+            move_to $(( box_r - banner_h + bi )) "$box_c"
+            printf "${DIM}%s${RESET}" "${banner[$bi]}"
+        done
+
+        tui_box "$box_r" "$box_c" "$box_w" "$box_h" "$title"
+
+        move_to $((box_r + 1)) $((box_c + 2))
+        printf "${DIM}v${VERSION}  ·  arrows / j k  ·  enter${RESET}"
+
+        move_to $((box_r + 2)) "$box_c"
+        printf "├%s┤" "$(printf '%*s' $((box_w - 2)) '' | tr ' ' '─')"
+
+        local i
+        for (( i=0; i<count; i++ )); do
+            move_to $(( box_r + 3 + i )) $((box_c + 1))
+            if [[ $i -eq $selected ]]; then
+                printf "${REV}  %-$((box_w - 4))s  ${RESET}" "${items[$i]}"
+            else
+                printf "  %-$((box_w - 4))s  " "${items[$i]}"
+            fi
+        done
+
+        move_to $((box_r + box_h - 1)) $((box_c + 1))
+        printf "${DIM}  q  exit${RESET}"
+
+        local key
+        IFS= read -rsn1 key
+        if [[ "$key" == $'\x1b' ]]; then
+            read -rsn2 -t 0.1 key || true
+            case "$key" in
+                '[A') (( selected > 0 ))         && (( selected-- )) ;;
+                '[B') (( selected < count - 1 )) && (( selected++ )) ;;
+            esac
+        elif [[ "$key" == '' || "$key" == $'\n' ]]; then
+            TUI_RESULT=$selected
+            return 0
+        elif [[ "$key" == 'q' || "$key" == 'Q' ]]; then
+            TUI_RESULT=-1
+            return 1
+        elif [[ "$key" == 'j' ]]; then
+            (( selected < count - 1 )) && (( selected++ ))
+        elif [[ "$key" == 'k' ]]; then
+            (( selected > 0 )) && (( selected-- ))
+        fi
+    done
+}
+
+# Multi-select checkbox menu — returns space-separated indices in TUI_MULTI
+TUI_MULTI=""
+tui_checklist() {
+    local title="$1"; shift
+    local -a items=("$@")
+    local count=${#items[@]}
+    local cursor=0
+    declare -a checked
+    for (( i=0; i<count; i++ )); do checked[$i]=0; done
+
+    tui_measure
+    local box_w=54
+    local box_h=$(( count + 6 ))
+    local box_r=$(( (TERM_ROWS - box_h) / 2 ))
+    local box_c=$(( (TERM_COLS - box_w) / 2 ))
+
+    while true; do
+        printf "${CLEAR_SCREEN}"
+        tui_box "$box_r" "$box_c" "$box_w" "$box_h" "$title"
+
+        move_to $((box_r + 1)) $((box_c + 2))
+        printf "${DIM}space toggle  ·  enter confirm  ·  q skip${RESET}"
+
+        move_to $((box_r + 2)) "$box_c"
+        printf "├%s┤" "$(printf '%*s' $((box_w - 2)) '' | tr ' ' '─')"
+
+        local i
+        for (( i=0; i<count; i++ )); do
+            move_to $(( box_r + 3 + i )) $((box_c + 1))
+            local mark="[ ]"
+            [[ ${checked[$i]} -eq 1 ]] && mark="[x]"
+            if [[ $i -eq $cursor ]]; then
+                printf "${REV}  %s  %-$((box_w - 10))s  ${RESET}" "$mark" "${items[$i]}"
+            else
+                printf "  %s  %-$((box_w - 10))s  " "$mark" "${items[$i]}"
+            fi
+        done
+
+        local key
+        IFS= read -rsn1 key
+        if [[ "$key" == $'\x1b' ]]; then
+            read -rsn2 -t 0.1 key || true
+            case "$key" in
+                '[A') (( cursor > 0 ))         && (( cursor-- )) ;;
+                '[B') (( cursor < count - 1 )) && (( cursor++ )) ;;
+            esac
+        elif [[ "$key" == ' ' ]]; then
+            checked[$cursor]=$(( 1 - checked[$cursor] ))
+        elif [[ "$key" == '' || "$key" == $'\n' ]]; then
+            TUI_MULTI=""
+            for (( i=0; i<count; i++ )); do
+                [[ ${checked[$i]} -eq 1 ]] && TUI_MULTI="$TUI_MULTI $i"
+            done
+            TUI_MULTI="${TUI_MULTI# }"
+            return 0
+        elif [[ "$key" == 'q' || "$key" == 'Q' ]]; then
+            TUI_MULTI=""
+            return 0
+        elif [[ "$key" == 'j' ]]; then
+            (( cursor < count - 1 )) && (( cursor++ ))
+        elif [[ "$key" == 'k' ]]; then
+            (( cursor > 0 )) && (( cursor-- ))
+        fi
+    done
+}
+
+# Text input field
+# tui_input prompt default — result in TUI_INPUT
+TUI_INPUT=""
+tui_input() {
+    local prompt="$1"
+    local default="${2:-}"
+    local value="$default"
+
+    tui_measure
+    local box_w=54
+    local box_h=7
+    local box_r=$(( (TERM_ROWS - box_h) / 2 ))
+    local box_c=$(( (TERM_COLS - box_w) / 2 ))
+
+    stty echo 2>/dev/null || true
+
+    while true; do
+        printf "${CLEAR_SCREEN}"
+        tui_box "$box_r" "$box_c" "$box_w" "$box_h" "Input"
+
+        move_to $((box_r + 1)) $((box_c + 3))
+        printf "%s" "$prompt"
+
+        move_to $((box_r + 3)) $((box_c + 3))
+        printf "┌%s┐" "$(printf '%*s' $((box_w - 8)) '' | tr ' ' '─')"
+
+        move_to $((box_r + 4)) $((box_c + 3))
+        printf "│ %-$((box_w - 9))s │" "$value"
+
+        move_to $((box_r + 5)) $((box_c + 3))
+        printf "└%s┘" "$(printf '%*s' $((box_w - 8)) '' | tr ' ' '─')"
+
+        move_to $((box_r + 6)) $((box_c + 3))
+        printf "${DIM}esc restore default  ·  enter confirm${RESET}"
+
+        move_to $((box_r + 4)) $((box_c + 5 + ${#value}))
+
+        local key
+        IFS= read -rsn1 key
+        case "$key" in
+            '')
+                TUI_INPUT="$value"
+                stty -echo 2>/dev/null || true
+                return 0
+                ;;
+            $'\x7f'|$'\b')
+                [[ ${#value} -gt 0 ]] && value="${value%?}"
+                ;;
+            $'\x1b')
+                value="$default"
+                ;;
+            *)
+                value="${value}${key}"
+                ;;
+        esac
+    done
+}
+
+# Password input (masked)
+tui_password() {
+    local prompt="$1"
+    local value=""
+
+    tui_measure
+    local box_w=54
+    local box_h=7
+    local box_r=$(( (TERM_ROWS - box_h) / 2 ))
+    local box_c=$(( (TERM_COLS - box_w) / 2 ))
+
+    while true; do
+        printf "${CLEAR_SCREEN}"
+        tui_box "$box_r" "$box_c" "$box_w" "$box_h" "Password"
+
+        move_to $((box_r + 1)) $((box_c + 3))
+        printf "%s" "$prompt"
+
+        local masked
+        masked=$(printf '%*s' "${#value}" '' | tr ' ' '*')
+
+        move_to $((box_r + 3)) $((box_c + 3))
+        printf "┌%s┐" "$(printf '%*s' $((box_w - 8)) '' | tr ' ' '─')"
+
+        move_to $((box_r + 4)) $((box_c + 3))
+        printf "│ %-$((box_w - 9))s │" "$masked"
+
+        move_to $((box_r + 5)) $((box_c + 3))
+        printf "└%s┘" "$(printf '%*s' $((box_w - 8)) '' | tr ' ' '─')"
+
+        move_to $((box_r + 6)) $((box_c + 3))
+        printf "${DIM}esc clear  ·  enter confirm${RESET}"
+
+        move_to $((box_r + 4)) $((box_c + 5 + ${#value}))
+
+        local key
+        IFS= read -rsn1 key
+        case "$key" in
+            '') TUI_INPUT="$value"; return 0 ;;
+            $'\x7f'|$'\b') [[ ${#value} -gt 0 ]] && value="${value%?}" ;;
+            $'\x1b') value="" ;;
+            *) value="${value}${key}" ;;
+        esac
+    done
+}
+
+# Confirm dialog — returns 0 for yes, 1 for no
+tui_confirm() {
+    local prompt="$1"
+    local selected=0   # 0=yes 1=no
+
+    tui_measure
+    local box_w=48
+    local box_h=7
+    local box_r=$(( (TERM_ROWS - box_h) / 2 ))
+    local box_c=$(( (TERM_COLS - box_w) / 2 ))
+
+    while true; do
+        printf "${CLEAR_SCREEN}"
+        tui_box "$box_r" "$box_c" "$box_w" "$box_h" "Confirm"
+
+        move_to $((box_r + 2)) $((box_c + 3))
+        printf "%s" "$prompt"
+
+        move_to $((box_r + 4)) $((box_c + 10))
+        if [[ $selected -eq 0 ]]; then
+            printf "${REV}  yes  ${RESET}     no  "
+        else
+            printf "  yes      ${REV}  no  ${RESET}"
+        fi
+
+        move_to $((box_r + 6)) $((box_c + 3))
+        printf "${DIM}left / right  ·  y / n  ·  enter confirm${RESET}"
+
+        local key
+        IFS= read -rsn1 key
+        if [[ "$key" == $'\x1b' ]]; then
+            read -rsn2 -t 0.1 key || true
+            case "$key" in
+                '[D') selected=0 ;;
+                '[C') selected=1 ;;
+            esac
+        elif [[ "$key" == '' || "$key" == $'\n' ]]; then
+            return $selected
+        elif [[ "$key" == 'y' || "$key" == 'Y' ]]; then
+            return 0
+        elif [[ "$key" == 'n' || "$key" == 'N' ]]; then
+            return 1
+        elif [[ "$key" == $'\t' || "$key" == 'h' || "$key" == 'l' ]]; then
+            selected=$(( 1 - selected ))
+        fi
+    done
+}
+
+# TUI spinner for long tasks — draws inside current terminal state
+# Usage: tui_run label command [args...]
+tui_run() {
+    local label="$1"; shift
+
+    tui_measure
+    local row=$(( TERM_ROWS - 4 ))
+    local col=$(( (TERM_COLS - 60) / 2 ))
+
+    move_to "$row" "$col"
+    printf "┌%s┐" "$(printf '%*s' 58 '' | tr ' ' '─')"
+    move_to $((row+1)) "$col"
+    printf "│  %-54s  │" "$label"
+    move_to $((row+2)) "$col"
+    printf "└%s┘" "$(printf '%*s' 58 '' | tr ' ' '─')"
+
+    "$@" &>/dev/null &
+    local pid=$!
+    local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
+    local i=0
+    while kill -0 "$pid" 2>/dev/null; do
+        move_to $((row+1)) $((col + 57))
+        printf "%s" "${frames[$i]}"
+        i=$(( (i+1) % ${#frames[@]} ))
+        sleep 0.08
+    done
+    wait "$pid"
+    local status=$?
+    move_to $((row+1)) $((col + 57))
+    if [[ $status -eq 0 ]]; then
+        printf "✓"
+        log "OK: $label"
+    else
+        printf "✗"
+        log "ERROR: $label failed"
+        sleep 0.8
+        tui_cleanup
+        die "$label failed"
+    fi
+    sleep 0.3
+    move_to "$row"     "$col"; printf "%60s"
+    move_to $((row+1)) "$col"; printf "%60s"
+    move_to $((row+2)) "$col"; printf "%60s"
+}
+
+# Full-screen progress view for installs (replaces the menu during install)
+PROGRESS_TASKS=()
+PROGRESS_CURRENT=0
+
+tui_progress_init() {
+    PROGRESS_TASKS=("$@")
+    PROGRESS_CURRENT=0
+}
+
+tui_progress_draw() {
+    local total=${#PROGRESS_TASKS[@]}
+
+    printf "${CLEAR_SCREEN}"
+    tui_measure
+
+    local box_w=60
+    local box_h=$(( total + 8 ))
+    local box_r=$(( (TERM_ROWS - box_h) / 2 ))
+    local box_c=$(( (TERM_COLS - box_w) / 2 ))
+
+    tui_box "$box_r" "$box_c" "$box_w" "$box_h" "Installing"
+
+    move_to $((box_r + 1)) $((box_c + 3))
+    printf "${DIM}Airlink v${VERSION}${RESET}"
+
+    move_to $((box_r + 2)) "$box_c"
+    printf "├%s┤" "$(printf '%*s' $((box_w - 2)) '' | tr ' ' '─')"
+
+    local i
+    for (( i=0; i<total; i++ )); do
+        move_to $(( box_r + 3 + i )) $((box_c + 3))
+        if [[ $i -lt $PROGRESS_CURRENT ]]; then
+            printf "✓  ${DIM}%s${RESET}" "${PROGRESS_TASKS[$i]}"
+        elif [[ $i -eq $PROGRESS_CURRENT ]]; then
+            printf "${BOLD}>  %s${RESET}" "${PROGRESS_TASKS[$i]}"
+        else
+            printf "${DIM}-  %s${RESET}" "${PROGRESS_TASKS[$i]}"
+        fi
+    done
+
+    local pct=$(( PROGRESS_CURRENT * 100 / total ))
+    local bar_w=$(( box_w - 8 ))
+    local filled=$(( pct * bar_w / 100 ))
+    move_to $(( box_r + box_h - 3 )) "$box_c"
+    printf "├%s┤" "$(printf '%*s' $((box_w - 2)) '' | tr ' ' '─')"
+    move_to $(( box_r + box_h - 2 )) $((box_c + 3))
+    printf "[%s%s] %3d%%" \
+        "$(printf '%*s' "$filled" '' | tr ' ' '#')" \
+        "$(printf '%*s' $((bar_w - filled)) '' | tr ' ' ' ')" \
+        "$pct"
+}
+
+tui_progress_step() {
+    local label="${PROGRESS_TASKS[$PROGRESS_CURRENT]}"
+    tui_progress_draw
+
+    local total=${#PROGRESS_TASKS[@]}
+    local box_w=60
+    local box_h=$(( total + 8 ))
+    local box_r=$(( (TERM_ROWS - box_h) / 2 ))
+    local box_c=$(( (TERM_COLS - box_w) / 2 ))
+    local spinner_row=$(( box_r + 3 + PROGRESS_CURRENT ))
+    local spinner_col=$(( box_c + box_w - 4 ))
+
+    "$@" &>/dev/null &
+    local pid=$!
+    local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
+    local i=0
+    while kill -0 "$pid" 2>/dev/null; do
+        move_to "$spinner_row" "$spinner_col"
+        printf "%s" "${frames[$i]}"
+        i=$(( (i+1) % ${#frames[@]} ))
+        sleep 0.08
+    done
+    wait "$pid"
+    local status=$?
+
+    move_to "$spinner_row" "$spinner_col"
+    if [[ $status -eq 0 ]]; then
+        printf " "
+        log "OK: $label"
+        PROGRESS_CURRENT=$(( PROGRESS_CURRENT + 1 ))
+    else
+        printf "!"
+        log "ERROR: $label"
+        sleep 1
+        tui_cleanup
+        die "$label failed"
+    fi
+    sleep 0.1
+}
+
+tui_progress_finish() {
+    PROGRESS_CURRENT=${#PROGRESS_TASKS[@]}
+    tui_progress_draw "done"
+    sleep 1
+}
+
+# =============================================================================
+# OS detection + system setup (shared between both modes)
+# =============================================================================
+OS="" VER="" FAM="" PKG=""
+
 detect_os() {
-    info "Detecting operating system..."
-    if [[ -f /etc/os-release ]]; then
-        OS=$(grep '^ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
-        VER=$(grep '^VERSION_ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
-    else
-        err "Cannot detect OS"
-    fi
+    [[ -f /etc/os-release ]] || die "Cannot detect OS — /etc/os-release not found"
+    OS=$(grep '^ID='         /etc/os-release | cut -d= -f2 | tr -d '"')
+    VER=$(grep '^VERSION_ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
 
     case "$OS" in
-        ubuntu|debian|linuxmint|pop)          FAM="debian"; PKG="apt" ;;
-        fedora|centos|rhel|rocky|almalinux)   FAM="redhat"; PKG=$(command -v dnf &>/dev/null && echo "dnf" || echo "yum") ;;
-        arch|manjaro)                          FAM="arch";   PKG="pacman" ;;
-        alpine)
-            FAM="alpine"; PKG="apk"
-            warn "Alpine Linux detected — systemd services are required but Alpine uses OpenRC"
-            warn "Installation may fail. Consider using a systemd-based distribution."
-            if ! is_noninteractive; then
-                dialog --yesno "Alpine Linux is not fully supported (requires systemd). Continue anyway?" 8 60 || exit 1
-            fi
-            ;;
-        *) err "Unsupported OS: $OS" ;;
+        ubuntu|debian|linuxmint|pop)        FAM="debian"; PKG="apt" ;;
+        fedora|centos|rhel|rocky|almalinux) FAM="redhat"; PKG=$(command -v dnf &>/dev/null && echo "dnf" || echo "yum") ;;
+        arch|manjaro)                        FAM="arch";   PKG="pacman" ;;
+        alpine)                              FAM="alpine"; PKG="apk" ;;
+        *) die "Unsupported OS: $OS" ;;
     esac
-    ok "Detected: $OS ($FAM)"
-}
-
-check_systemd() {
-    command -v systemctl &>/dev/null || err "systemd is required but not found."
 }
 
 pkg_install() {
-    info "Installing packages: $*"
     case "$PKG" in
-        apt)        apt-get update -qq && apt-get install -y -qq "$@" ;;
-        dnf|yum)    $PKG install -y -q "$@" ;;
-        pacman)     pacman -Sy --noconfirm --quiet "$@" ;;
-        apk)        apk add --no-cache -q "$@" ;;
+        apt)     apt-get update -qq && apt-get install -y -qq "$@" ;;
+        dnf|yum) $PKG install -y -q "$@" ;;
+        pacman)  pacman -Sy --noconfirm --quiet "$@" ;;
+        apk)     apk add --no-cache -q "$@" ;;
     esac
-    ok "Packages installed: $*"
 }
 
-# -- Dependency bootstrap -----------------------------------------------------
-[[ $EUID -eq 0 ]] || { echo "Run as root/sudo"; exit 1; }
+ensure_deps() {
+    local deps=(curl wget git jq openssl)
+    local missing=()
+    for d in "${deps[@]}"; do command -v "$d" &>/dev/null || missing+=("$d"); done
+    [[ ${#missing[@]} -gt 0 ]] && pkg_install "${missing[@]}"
+}
 
-detect_os
-check_systemd
-
-info "Checking dependencies..."
-deps=(curl wget dialog git jq openssl)
-missing=()
-for d in "${deps[@]}"; do command -v "$d" &>/dev/null || missing+=("$d"); done
-if [[ ${#missing[@]} -gt 0 ]]; then
-    info "Installing missing dependencies: ${missing[*]}"
-    pkg_install "${missing[@]}"
-else
-    ok "All dependencies already installed"
-fi
-
-# -- Node.js ------------------------------------------------------------------
 setup_node() {
-    info "Setting up Node.js..."
     if command -v node &>/dev/null; then
-        local installed
-        installed=$(node -v | sed 's/v//' | cut -d. -f1)
-        if [[ "$installed" == "$NODE_VER" ]]; then
-            ok "Node.js $NODE_VER already installed, skipping"
-            return
-        fi
-        warn "Node.js version mismatch (found $(node -v)), reinstalling $NODE_VER"
+        local v; v=$(node -v | sed 's/v//' | cut -d. -f1)
+        [[ "$v" == "$NODE_VER" ]] && return
     fi
-
     case "$FAM" in
-        debian) run_with_loading "Adding NodeSource repository" bash -c "curl -fsSL 'https://deb.nodesource.com/setup_${NODE_VER}.x' | bash -"; pkg_install nodejs ;;
-        redhat) run_with_loading "Adding NodeSource repository" bash -c "curl -fsSL 'https://rpm.nodesource.com/setup_${NODE_VER}.x' | bash -"; pkg_install nodejs ;;
+        debian) curl -fsSL "https://deb.nodesource.com/setup_${NODE_VER}.x" | bash - &>/dev/null; pkg_install nodejs ;;
+        redhat) curl -fsSL "https://rpm.nodesource.com/setup_${NODE_VER}.x" | bash - &>/dev/null; pkg_install nodejs ;;
         arch)   pkg_install nodejs npm ;;
         alpine) pkg_install nodejs npm ;;
     esac
+    command -v node &>/dev/null || die "Node.js install failed"
 
-    command -v node &>/dev/null || err "Node.js install failed"
-    ok "Node.js $(node -v) installed"
-
-    if npm list -g typescript &>/dev/null; then
-        ok "TypeScript already installed"
-    else
-        run_with_loading "Installing TypeScript globally" npm install -g typescript
-    fi
+    npm list -g typescript &>/dev/null || npm install -g typescript &>/dev/null
 }
 
-# -- Docker -------------------------------------------------------------------
 setup_docker() {
-    info "Checking for Docker..."
-    if command -v docker &>/dev/null; then
-        ok "Docker already installed"
-        return
-    fi
-
-    info "Installing Docker..."
+    command -v docker &>/dev/null && return
     case "$FAM" in
-        debian|redhat) run_with_loading "Downloading and installing Docker" bash -c "curl -fsSL https://get.docker.com | sh" ;;
-        arch)          pkg_install docker ;;
-        alpine)        pkg_install docker; rc-update add docker boot &>/dev/null ;;
+        debian|redhat) curl -fsSL https://get.docker.com | sh &>/dev/null ;;
+        arch)   pkg_install docker ;;
+        alpine) pkg_install docker; rc-update add docker boot &>/dev/null ;;
     esac
-
     systemctl enable --now docker &>/dev/null
-    command -v docker &>/dev/null || err "Docker install failed"
-    ok "Docker installed successfully"
+    command -v docker &>/dev/null || die "Docker install failed"
 }
 
-# -- Validate credentials -----------------------------------------------------
-validate_username() {
-    local u="$1"
-    [[ "$u" =~ ^[A-Za-z0-9]{3,20}$ ]] || { warn "Invalid username '$u', falling back to 'admin'"; echo "admin"; return; }
-    echo "$u"
-}
+# =============================================================================
+# Credentials helpers
+# =============================================================================
+valid_username() { [[ "$1" =~ ^[A-Za-z0-9]{3,20}$ ]]; }
+valid_password() { [[ ${#1} -ge 8 && "$1" =~ [A-Za-z] && "$1" =~ [0-9] ]]; }
 
-validate_password() {
-    local p="$1"
-    [[ ${#p} -ge 8 && "$p" =~ [A-Za-z] && "$p" =~ [0-9] ]]
-}
+get_addon_field() { echo "$1" | cut -d'|' -f"$2"; }
 
-# -- Config collection --------------------------------------------------------
-collect_panel_config() {
-    PANEL_NAME=$(dialog_input "$ARG_NAME" "Airlink" --inputbox "Panel name" 8 40 "Airlink")
-    PANEL_PORT=$(dialog_input "$ARG_PORT" "3000"    --inputbox "Panel Port" 8 40 "3000")
-}
+# =============================================================================
+# Core install logic (shared, no prompts)
+# =============================================================================
+# All of these read from: PANEL_NAME PANEL_PORT ADMIN_EMAIL ADMIN_USERNAME
+# ADMIN_PASSWORD PANEL_ADDRESS DAEMON_PORT DAEMON_KEY ADDON_CHOICES
 
-collect_admin_config() {
-    ADMIN_EMAIL=$(dialog_input "$ARG_ADMIN_EMAIL" "admin@example.com" --inputbox "Admin Email:" 8 50 "admin@example.com")
-    ADMIN_USERNAME=$(validate_username "$(dialog_input "$ARG_ADMIN_USER" "admin" --inputbox "Admin Username (3-20 chars, letters/numbers only):" 8 60 "admin")")
+do_install_panel() {
+    mkdir -p /var/www
+    cd /var/www || die "Cannot access /var/www"
 
-    if [[ -n "$ARG_ADMIN_PASS" ]]; then
-        validate_password "$ARG_ADMIN_PASS" || err "Password must be 8+ chars with at least one letter and one number."
-        ADMIN_PASSWORD="$ARG_ADMIN_PASS"
-    else
-        while true; do
-            ADMIN_PASSWORD=$(dialog --inputbox "Admin Password (min 8 chars, must have letter & number):" 8 70 3>&1 1>&2 2>&3)
-            validate_password "$ADMIN_PASSWORD" && break
-            dialog --msgbox "Password must be at least 8 characters with at least one letter and one number." 8 60
-        done
-    fi
-}
+    rm -rf panel
+    git clone "${PANEL_REPO}" &>/dev/null || die "Failed to clone panel"
+    cd panel
 
-collect_daemon_config() {
-    PANEL_ADDRESS=$(dialog_input "$ARG_PANEL_ADDR"  "127.0.0.1"              --inputbox "Panel ip/hostname" 8 40 "127.0.0.1")
-    DAEMON_PORT=$(dialog_input   "$ARG_DAEMON_PORT" "3002"                   --inputbox "Daemon Port"       8 40 "3002")
-    DAEMON_KEY=$(dialog_input    "$ARG_DAEMON_KEY"  "get from panel → Nodes" --inputbox "Daemon Auth Key"   8 40)
-}
+    chown -R www-data:www-data /var/www/panel
+    chmod -R 755 /var/www/panel
 
-collect_addon_selection() {
-    if [[ -n "$ARG_ADDONS" ]]; then
-        ADDON_CHOICES="$ARG_ADDONS"
-        return
-    fi
+    cat > .env << ENVEOF
+NAME=${PANEL_NAME}
+NODE_ENV="development"
+URL="http://localhost:${PANEL_PORT}"
+PORT=${PANEL_PORT}
+DATABASE_URL="file:./dev.db"
+SESSION_SECRET=$(openssl rand -hex 32)
+ENVEOF
 
-    local menu_items=()
-    local idx=1
-    for addon in "${ADDONS[@]}"; do
-        local name; name=$(get_addon_field "$addon" 1)
-        menu_items+=("$idx" "Install $name")
-        ((idx++))
-    done
-    menu_items+=("$idx" "Install All Addons"); local all_idx=$idx; ((idx++))
-    menu_items+=("$idx" "Skip Addons");        local skip_idx=$idx
+    npm install --omit=dev &>/dev/null || die "npm install failed"
+    npm install bcrypt &>/dev/null || true
 
-    local choice
-    choice=$(dialog --title "Select Addon to Install" \
-        --menu "Choose which addon to install:" \
-        $((15 + ${#ADDONS[@]})) 70 $((${#ADDONS[@]} + 2)) \
-        "${menu_items[@]}" 3>&1 1>&2 2>&3) || choice="$skip_idx"
-
-    if [[ "$choice" == "$all_idx" ]]; then
-        ADDON_CHOICES="all"
-    elif [[ "$choice" == "$skip_idx" ]]; then
-        ADDON_CHOICES=""
-    else
-        ADDON_CHOICES=$(get_addon_field "${ADDONS[$((choice-1))]}" 4)
-    fi
-}
-
-collect_all_config() {
-    collect_panel_config
-    collect_daemon_config
-    collect_admin_config
-    collect_addon_selection
-}
-
-# -- Admin user creation via API ----------------------------------------------
-create_admin_user() {
-    info "Waiting for panel to start..."
-    local waited=0
-    while [[ $waited -lt 30 ]]; do
-        curl -s "http://localhost:${PANEL_PORT}" > /dev/null 2>&1 && break
-        sleep 2
-        waited=$((waited + 2))
-    done
-    [[ $waited -ge 30 ]] && warn "Panel took longer than expected to start, continuing anyway..."
-
-    info "Getting CSRF token..."
-    local csrf
-    csrf=$(curl -s -c /tmp/cookies.txt "http://localhost:${PANEL_PORT}/register" \
-        | sed -n 's/.*name="_csrf" value="\([^"]*\)".*/\1/p' | head -n1)
-    [[ -z "$csrf" ]] && warn "Could not get CSRF token, trying without it..."
-
-    info "Registering admin user..."
-    local response http_code body
-    response=$(curl -s -b /tmp/cookies.txt -c /tmp/cookies.txt \
-        -X POST "http://localhost:${PANEL_PORT}/register" \
-        -H "Content-Type: application/x-www-form-urlencoded" \
-        --data-urlencode "username=${ADMIN_USERNAME}" \
-        --data-urlencode "email=${ADMIN_EMAIL}" \
-        --data-urlencode "password=${ADMIN_PASSWORD}" \
-        --data-urlencode "_csrf=${csrf}" \
-        -w "\n%{http_code}" -L)
-
-    http_code=$(echo "$response" | tail -n1)
-    body=$(echo "$response" | head -n-1)
-    rm -f /tmp/cookies.txt
-
-    if [[ "$http_code" == "302" || "$http_code" == "200" ]]; then
-        if echo "$body" | grep -q "err="; then
-            local err_type
-            err_type=$(echo "$body" | sed -n 's/.*err=\([^&"]*\).*/\1/p' | head -n1)
-            case "$err_type" in
-                user_already_exists) warn "User already exists with this email/username" ;;
-                invalid_username)    err "Invalid username format" ;;
-                weak_password)       err "Password does not meet requirements" ;;
-                *)                   info "Registration completed (status: $err_type)" ;;
-            esac
-        else
-            ok "Admin user created"
-            echo -e "  ${C}Username:${N} ${ADMIN_USERNAME}"
-            echo -e "  ${C}Email:${N} ${ADMIN_EMAIL}"
-            sleep 3
+    if command -v prisma &>/dev/null; then
+        local pv; pv=$(prisma -v 2>/dev/null | grep "prisma" | head -n1 | awk '{print $2}' || echo "")
+        if [[ "$pv" != "$PRISMA_VER" ]]; then
+            npm uninstall -g prisma &>/dev/null || true
+            npm uninstall prisma @prisma/client &>/dev/null || true
+            npm cache clean --force &>/dev/null || true
+            npm install "prisma@${PRISMA_VER}" "@prisma/client@${PRISMA_VER}" &>/dev/null || die "Prisma install failed"
         fi
     else
-        ok "Moving forward..."
+        npm install "prisma@${PRISMA_VER}" "@prisma/client@${PRISMA_VER}" &>/dev/null || die "Prisma install failed"
     fi
+
+    CI=true npm run migrate:dev &>/dev/null || die "DB migration failed"
+    npm run build &>/dev/null || die "Panel build failed"
+
+    _set_registration true
+    npm install -g pm2 &>/dev/null || die "PM2 install failed"
+    pm2 start npm --name "airlink-panel-temp" -- run start &>/dev/null
+
+    _create_admin_user
+
+    _set_registration false
+    pm2 delete airlink-panel-temp &>/dev/null || true
+    pm2 save --force &>/dev/null || true
+
+    cat > /etc/systemd/system/airlink-panel.service << SVCEOF
+[Unit]
+Description=Airlink Panel
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/panel
+ExecStart=/usr/bin/npm run start
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+SVCEOF
+
+    systemctl daemon-reload
+    systemctl enable --now airlink-panel &>/dev/null
+
+    _process_addons
 }
 
-# -- Toggle panel registration ------------------------------------------------
-set_registration() {
+do_install_daemon() {
+    cd /etc || die "Cannot access /etc"
+    rm -rf daemon
+    git clone "${DAEMON_REPO}" &>/dev/null || die "Failed to clone daemon"
+    cd daemon
+
+    cat > .env << ENVEOF
+remote="${PANEL_ADDRESS}"
+key="${DAEMON_KEY}"
+port=${DAEMON_PORT}
+DEBUG=false
+version=1.0.0
+environment=development
+STATS_INTERVAL=10000
+ENVEOF
+
+    npm install --omit=dev &>/dev/null || die "npm install failed"
+    npm install express &>/dev/null || die "express install failed"
+    npm run build &>/dev/null || die "Daemon build failed"
+
+    cd libs
+    npm install &>/dev/null || die "libs npm install failed"
+    npm rebuild &>/dev/null || die "libs rebuild failed"
+    cd ..
+
+    chown -R www-data:www-data /etc/daemon
+
+    cat > /etc/systemd/system/airlink-daemon.service << SVCEOF
+[Unit]
+Description=Airlink Daemon
+After=network.target docker.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/etc/daemon
+ExecStart=/usr/bin/npm run start
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+SVCEOF
+
+    systemctl daemon-reload
+    systemctl enable --now airlink-daemon &>/dev/null
+}
+
+_set_registration() {
     local enabled="$1"
-    node - <<EOFJS
+    PANEL_NAME="${PANEL_NAME}" node - <<JSEOF
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 async function run() {
     try {
-        let s = await prisma.settings.findFirst();
+        const s = await prisma.settings.findFirst();
         if (!s) {
             await prisma.settings.create({ data: {
                 allowRegistration: ${enabled},
@@ -392,388 +875,396 @@ async function run() {
             await prisma.settings.update({ where: { id: s.id }, data: { allowRegistration: ${enabled} } });
         }
         await prisma.\$disconnect();
-        process.exit(0);
     } catch(e) {
-        console.error(e.message);
         await prisma.\$disconnect();
         process.exit(1);
     }
 }
 run();
-EOFJS
+JSEOF
 }
 
-# -- Panel installation -------------------------------------------------------
-install_panel() {
-    info "Starting Panel installation..."
-    collect_panel_config
-    collect_admin_config
-    collect_addon_selection
-
-    info "Preparing directories..."
-    mkdir -p /var/www
-    cd /var/www || err "Cannot access /var/www"
-
-    info "Removing old panel directory..."
-    for i in {5..1}; do
-        echo -ne "\rWaiting: $i seconds remaining..."
-        sleep 1
+_create_admin_user() {
+    local waited=0
+    while [[ $waited -lt 30 ]]; do
+        curl -s "http://localhost:${PANEL_PORT}" > /dev/null 2>&1 && break
+        sleep 2
+        waited=$((waited + 2))
     done
-    echo -e "\rProceeding...                    "
-    rm -rf panel
 
-    run_with_loading "Cloning Panel repository" git clone "${PANEL_REPO}"
-    cd panel
+    local csrf
+    csrf=$(curl -s -c /tmp/al-cookies.txt "http://localhost:${PANEL_PORT}/register" \
+        | sed -n 's/.*name="_csrf" value="\([^"]*\)".*/\1/p' | head -n1 || echo "")
 
-    chown -R www-data:www-data /var/www/panel
-    chmod -R 755 /var/www/panel
-    ok "Permissions set"
+    local response http_code
+    response=$(curl -s -b /tmp/al-cookies.txt -c /tmp/al-cookies.txt \
+        -X POST "http://localhost:${PANEL_PORT}/register" \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        --data-urlencode "username=${ADMIN_USERNAME}" \
+        --data-urlencode "email=${ADMIN_EMAIL}" \
+        --data-urlencode "password=${ADMIN_PASSWORD}" \
+        --data-urlencode "_csrf=${csrf}" \
+        -w "\n%{http_code}" -L)
 
-    info "Creating .env file..."
-    cat > .env << EOF
-NAME=${PANEL_NAME}
-NODE_ENV="development"
-URL="http://localhost:${PANEL_PORT}"
-PORT=${PANEL_PORT}
-DATABASE_URL="file:./dev.db"
-SESSION_SECRET=$(openssl rand -hex 32)
-EOF
-    ok ".env file created"
+    http_code=$(echo "$response" | tail -n1)
+    rm -f /tmp/al-cookies.txt
+    log "Admin registration HTTP $http_code"
+}
 
-    run_with_loading "Installing npm dependencies" npm install --omit=dev
-    npm install bcrypt &>/dev/null || warn "Bcrypt install warning"
+_process_addons() {
+    [[ -z "${ADDON_CHOICES:-}" || "${ADDON_CHOICES}" == "none" ]] && return
 
-    if command -v prisma &>/dev/null; then
-        local installed_prisma
-        installed_prisma=$(prisma -v | grep "prisma" | head -n1 | awk '{print $2}')
-        if [[ "$installed_prisma" != "$PRISMA_VER" ]]; then
-            warn "Prisma version mismatch (found $installed_prisma), reinstalling $PRISMA_VER"
-            npm uninstall -g prisma &>/dev/null
-            npm uninstall prisma @prisma/client &>/dev/null
-            npm cache clean --force &>/dev/null
-            run_with_loading "Installing Prisma $PRISMA_VER" npm install "prisma@$PRISMA_VER" "@prisma/client@$PRISMA_VER"
-        else
-            ok "Prisma $PRISMA_VER already installed"
-        fi
+    local to_install=()
+    if [[ "$ADDON_CHOICES" == "all" ]]; then
+        to_install=("${ADDONS[@]}")
     else
-        run_with_loading "Installing Prisma $PRISMA_VER" npm install "prisma@$PRISMA_VER" "@prisma/client@$PRISMA_VER"
+        IFS=',' read -ra selected <<< "$ADDON_CHOICES"
+        for sel in "${selected[@]}"; do
+            for addon in "${ADDONS[@]}"; do
+                [[ "$(get_addon_field "$addon" 4)" == "$sel" ]] && to_install+=("$addon") && break
+            done
+        done
     fi
 
-    run_with_loading "Running database migrations" bash -c "CI=true npm run migrate:dev"
+    for addon_config in "${to_install[@]}"; do
+        local display_name repo_url branch dir_name
+        display_name=$(get_addon_field "$addon_config" 1)
+        repo_url=$(get_addon_field "$addon_config" 2)
+        branch=$(get_addon_field "$addon_config" 3)
+        dir_name=$(get_addon_field "$addon_config" 4)
 
-    info "Building Panel..."
-    npm run build || err "Build failed"
-    ok "Panel build completed"
-
-    info "Enabling registration for first admin..."
-    PANEL_NAME="${PANEL_NAME}" set_registration true
-    ok "Registration enabled"
-
-    npm install -g pm2 &>/dev/null || err "PM2 install failed"
-    pm2 start npm --name "airlink-panel-temp" -- run start &>/dev/null
-    ok "Panel started temporarily"
-
-    create_admin_user
-
-    info "Disabling public registration..."
-    set_registration false
-    ok "Registration disabled"
-
-    pm2 delete airlink-panel-temp &>/dev/null
-    pm2 save --force &>/dev/null
-    ok "Temporary panel stopped"
-
-    info "Creating systemd service..."
-    cat > /etc/systemd/system/airlink-panel.service << EOF
-[Unit]
-Description=Airlink Panel
-After=network.target
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/var/www/panel
-ExecStart=/usr/bin/npm run start
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    systemctl daemon-reload
-    systemctl enable --now airlink-panel &>/dev/null
-    ok "Panel service started on port ${PANEL_PORT}"
-
-    process_addon_selections
-    ok "Panel installation completed"
-}
-
-# -- Daemon installation ------------------------------------------------------
-install_daemon() {
-    info "Starting Daemon installation..."
-    collect_daemon_config
-
-    cd /etc || err "Cannot access /etc"
-
-    info "Removing old daemon directory..."
-    for i in {5..1}; do
-        echo -ne "\rWaiting: $i seconds remaining..."
-        sleep 1
+        cd /var/www/panel/storage/addons/
+        git clone --branch "$branch" "$repo_url" "$dir_name" &>/dev/null || die "Failed to clone $display_name"
+        cd "$dir_name"
+        npm install &>/dev/null || die "$display_name npm install failed"
+        npm run build &>/dev/null || die "$display_name build failed"
+        cd /var/www/panel/
+        npx tailwindcss -i ./public/tw.css -o ./public/styles.css &>/dev/null || true
+        log "OK: $display_name addon installed"
     done
-    echo -e "\rProceeding...                    "
-    rm -rf daemon
-
-    run_with_loading "Cloning Daemon repository" git clone "${DAEMON_REPO}"
-    cd daemon
-
-    info "Creating .env file..."
-    cat > .env << EOF
-remote="${PANEL_ADDRESS}"
-key="${DAEMON_KEY}"
-port=${DAEMON_PORT}
-DEBUG=false
-version=1.0.0
-environment=development
-STATS_INTERVAL=10000
-EOF
-    ok ".env file created"
-
-    run_with_loading "Installing npm dependencies" npm install --omit=dev
-    run_with_loading "Installing express" npm install express
-
-    info "Building Daemon..."
-    npm run build || err "Build failed"
-    ok "Daemon build completed"
-
-    info "Building libs..."
-    cd libs
-    run_with_loading "Installing libs dependencies" npm install
-    run_with_loading "Rebuilding native modules" npm rebuild
-    cd ..
-
-    chown -R www-data:www-data /etc/daemon
-    ok "Permissions set"
-
-    info "Creating systemd service..."
-    cat > /etc/systemd/system/airlink-daemon.service << EOF
-[Unit]
-Description=Airlink Daemon
-After=network.target docker.service
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/etc/daemon
-ExecStart=/usr/bin/npm run start
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    systemctl daemon-reload
-    systemctl enable --now airlink-daemon &>/dev/null
-    ok "Daemon service started on port ${DAEMON_PORT}"
-    ok "Daemon installation completed"
 }
 
-# -- Install both -------------------------------------------------------------
-install_all() {
-    info "Starting full installation (Node.js, Docker, Panel, Daemon)..."
-    collect_all_config
-    setup_node
-    setup_docker
-    install_panel
-    install_daemon
+# =============================================================================
+# Non-interactive entry point
+# =============================================================================
+run_noninteractive() {
+    ni_header
 
-    if ! is_noninteractive; then
-        dialog --msgbox "Installation Complete!\n\nPanel: http://$(hostname -I | awk '{print $1}'):${PANEL_PORT}\nDaemon: Running on port ${DAEMON_PORT}\n\nCheck logs: journalctl -u airlink-panel -f" 14 60
+    local mode="${ARG_MODE:-both}"
+
+    # Apply defaults for anything not passed
+    PANEL_NAME="${ARG_NAME:-Airlink}"
+    PANEL_PORT="${ARG_PORT:-3000}"
+    ADMIN_EMAIL="${ARG_ADMIN_EMAIL:-admin@example.com}"
+    ADMIN_USERNAME="${ARG_ADMIN_USER:-admin}"
+    ADMIN_PASSWORD="${ARG_ADMIN_PASS:-}"
+    PANEL_ADDRESS="${ARG_PANEL_ADDR:-127.0.0.1}"
+    DAEMON_PORT="${ARG_DAEMON_PORT:-3002}"
+    DAEMON_KEY="${ARG_DAEMON_KEY:-}"
+    ADDON_CHOICES="${ARG_ADDONS:-none}"
+
+    [[ -z "$ADMIN_PASSWORD" ]] && die "--admin-pass is required in non-interactive mode"
+    valid_password "$ADMIN_PASSWORD"   || die "Password must be 8+ chars with at least one letter and one number"
+    valid_username "$ADMIN_USERNAME"   || die "Username must be 3-20 alphanumeric characters"
+    command -v systemctl &>/dev/null   || die "systemd is required but not found"
+    [[ $EUID -eq 0 ]]                  || die "Run as root"
+
+    detect_os
+
+    case "$mode" in
+        both)
+            ni_start 12
+            ni_run "Checking dependencies"  ensure_deps
+            ni_run "Setting up Node.js"     setup_node
+            ni_run "Setting up Docker"      setup_docker
+            ni_run "Cloning panel"          bash -c "mkdir -p /var/www && cd /var/www && rm -rf panel && git clone ${PANEL_REPO}"
+            ni_run "Installing panel deps"  bash -c "cd /var/www/panel && npm install --omit=dev"
+            ni_run "Installing Prisma"      bash -c "cd /var/www/panel && npm install prisma@${PRISMA_VER} @prisma/client@${PRISMA_VER}"
+            ni_run "Running DB migrations"  bash -c "cd /var/www/panel && CI=true npm run migrate:dev"
+            ni_run "Building panel"         bash -c "cd /var/www/panel && npm run build"
+            ni_run "Starting panel"         bash -c "cd /var/www/panel && npm install -g pm2 && pm2 start npm --name airlink-panel-temp -- run start"
+            ni_run "Cloning daemon"         bash -c "cd /etc && rm -rf daemon && git clone ${DAEMON_REPO}"
+            ni_run "Installing daemon deps" bash -c "cd /etc/daemon && npm install --omit=dev && npm install express"
+            ni_run "Building daemon"        bash -c "cd /etc/daemon && npm run build && cd libs && npm install && npm rebuild"
+            # Now run the full do_ functions to wire up everything properly
+            do_install_panel
+            do_install_daemon
+            ;;
+        panel)
+            ni_start 8
+            ni_run "Checking dependencies"  ensure_deps
+            ni_run "Setting up Node.js"     setup_node
+            ni_run "Setting up Docker"      setup_docker
+            ni_run "Cloning panel"          bash -c "mkdir -p /var/www && cd /var/www && rm -rf panel && git clone ${PANEL_REPO}"
+            ni_run "Installing panel deps"  bash -c "cd /var/www/panel && npm install --omit=dev"
+            ni_run "Installing Prisma"      bash -c "cd /var/www/panel && npm install prisma@${PRISMA_VER} @prisma/client@${PRISMA_VER}"
+            ni_run "Running DB migrations"  bash -c "cd /var/www/panel && CI=true npm run migrate:dev"
+            ni_run "Building and starting"  bash -c "cd /var/www/panel && npm run build"
+            do_install_panel
+            ;;
+        daemon)
+            ni_start 5
+            ni_run "Checking dependencies"  ensure_deps
+            ni_run "Setting up Node.js"     setup_node
+            ni_run "Setting up Docker"      setup_docker
+            ni_run "Cloning daemon"         bash -c "cd /etc && rm -rf daemon && git clone ${DAEMON_REPO}"
+            ni_run "Building daemon"        bash -c "cd /etc/daemon && npm install --omit=dev && npm install express && npm run build && cd libs && npm install && npm rebuild"
+            do_install_daemon
+            ;;
+        *) die "Unknown mode: $mode" ;;
+    esac
+
+    local server_ip
+    server_ip=$(hostname -I | awk '{print $1}')
+    printf "\n  ${C_GREEN}${BOLD}Installation complete.${RESET}\n\n"
+    [[ "$mode" != "daemon" ]] && printf "  ${C_GRAY}Panel:${RESET}  http://%s:%s\n" "$server_ip" "$PANEL_PORT"
+    [[ "$mode" != "panel"  ]] && printf "  ${C_GRAY}Daemon:${RESET} port %s\n" "$DAEMON_PORT"
+    printf "  ${C_GRAY}Logs:${RESET}   journalctl -u airlink-panel -f\n\n"
+}
+
+# =============================================================================
+# Interactive TUI flows
+# =============================================================================
+
+# Collected config lives in these globals (set by TUI prompts)
+PANEL_NAME="Airlink"
+PANEL_PORT="3000"
+ADMIN_EMAIL="admin@example.com"
+ADMIN_USERNAME="admin"
+ADMIN_PASSWORD=""
+PANEL_ADDRESS="127.0.0.1"
+DAEMON_PORT="3002"
+DAEMON_KEY=""
+ADDON_CHOICES="none"
+
+tui_collect_panel_config() {
+    tui_input "Panel name" "Airlink"
+    PANEL_NAME="$TUI_INPUT"
+
+    tui_input "Panel port" "3000"
+    PANEL_PORT="$TUI_INPUT"
+}
+
+tui_collect_admin_config() {
+    tui_input "Admin email" "admin@example.com"
+    ADMIN_EMAIL="$TUI_INPUT"
+
+    while true; do
+        tui_input "Admin username  (3-20 alphanumeric chars)" "admin"
+        valid_username "$TUI_INPUT" && break
+        # show error and retry
+    done
+    ADMIN_USERNAME="$TUI_INPUT"
+
+    while true; do
+        tui_password "Admin password  (8+ chars, one letter, one number)"
+        valid_password "$TUI_INPUT" && break
+    done
+    ADMIN_PASSWORD="$TUI_INPUT"
+}
+
+tui_collect_daemon_config() {
+    tui_input "Panel address" "127.0.0.1"
+    PANEL_ADDRESS="$TUI_INPUT"
+
+    tui_input "Daemon port" "3002"
+    DAEMON_PORT="$TUI_INPUT"
+
+    tui_input "Daemon auth key  (from panel → Nodes)" ""
+    DAEMON_KEY="$TUI_INPUT"
+}
+
+tui_collect_addons() {
+    local names=()
+    for addon in "${ADDONS[@]}"; do
+        names+=("$(get_addon_field "$addon" 1)")
+    done
+    tui_checklist "Addons  (optional)" "${names[@]}"
+    if [[ -z "$TUI_MULTI" ]]; then
+        ADDON_CHOICES="none"
+        return
     fi
-    ok "Full installation completed"
+    local chosen=()
+    for idx in $TUI_MULTI; do
+        chosen+=("$(get_addon_field "${ADDONS[$idx]}" 4)")
+    done
+    ADDON_CHOICES=$(IFS=','; echo "${chosen[*]}")
 }
 
-# -- Uninstall ----------------------------------------------------------------
-remove_panel() {
-    info "Removing Panel..."
+tui_do_install() {
+    local mode="$1"   # "both" | "panel" | "daemon"
+    local tasks=()
+
+    case "$mode" in
+        both)   tasks=("Dependencies" "Node.js" "Docker" "Clone panel" "Panel deps" "Prisma" "DB migrations" "Build panel" "Admin user" "Clone daemon" "Daemon deps" "Build daemon" "Services") ;;
+        panel)  tasks=("Dependencies" "Node.js" "Docker" "Clone panel" "Panel deps" "Prisma" "DB migrations" "Build panel" "Admin user" "Service") ;;
+        daemon) tasks=("Dependencies" "Node.js" "Docker" "Clone daemon" "Daemon deps" "Build daemon" "Service") ;;
+    esac
+
+    tui_progress_init "${tasks[@]}"
+    stty echo 2>/dev/null || true
+
+    case "$mode" in
+        both|panel)
+            tui_progress_step ensure_deps
+            tui_progress_step setup_node
+            tui_progress_step setup_docker
+            tui_progress_step bash -c "mkdir -p /var/www && cd /var/www && rm -rf panel && git clone ${PANEL_REPO}"
+            tui_progress_step bash -c "cd /var/www/panel && npm install --omit=dev && npm install bcrypt"
+            tui_progress_step bash -c "cd /var/www/panel && npm install prisma@${PRISMA_VER} @prisma/client@${PRISMA_VER}"
+            tui_progress_step bash -c "cd /var/www/panel && CI=true npm run migrate:dev"
+            tui_progress_step bash -c "cd /var/www/panel && npm run build"
+            tui_progress_step bash -c "cd /var/www/panel && npm install -g pm2 && chown -R www-data:www-data /var/www/panel && chmod -R 755 /var/www/panel"
+            if [[ "$mode" == "both" ]]; then
+                tui_progress_step bash -c "cd /etc && rm -rf daemon && git clone ${DAEMON_REPO}"
+                tui_progress_step bash -c "cd /etc/daemon && npm install --omit=dev && npm install express"
+                tui_progress_step bash -c "cd /etc/daemon && npm run build && cd libs && npm install && npm rebuild"
+                tui_progress_step bash -c "echo services"
+                do_install_panel
+                do_install_daemon
+            else
+                tui_progress_step bash -c "echo service"
+                do_install_panel
+            fi
+            ;;
+        daemon)
+            tui_progress_step ensure_deps
+            tui_progress_step setup_node
+            tui_progress_step setup_docker
+            tui_progress_step bash -c "cd /etc && rm -rf daemon && git clone ${DAEMON_REPO}"
+            tui_progress_step bash -c "cd /etc/daemon && npm install --omit=dev && npm install express"
+            tui_progress_step bash -c "cd /etc/daemon && npm run build && cd libs && npm install && npm rebuild"
+            tui_progress_step bash -c "echo service"
+            do_install_daemon
+            ;;
+    esac
+
+    tui_progress_finish
+}
+
+tui_remove_panel() {
     systemctl stop    airlink-panel &>/dev/null || true
     systemctl disable airlink-panel &>/dev/null || true
     rm -f /etc/systemd/system/airlink-panel.service
     rm -rf /var/www/panel
     systemctl daemon-reload
-    ok "Panel removed"
 }
 
-remove_daemon() {
-    info "Removing Daemon..."
+tui_remove_daemon() {
     systemctl stop    airlink-daemon &>/dev/null || true
     systemctl disable airlink-daemon &>/dev/null || true
     rm -f /etc/systemd/system/airlink-daemon.service
     rm -rf /etc/daemon
     systemctl daemon-reload
-    ok "Daemon removed"
 }
 
-remove_deps() {
-    info "Removing dependencies..."
+tui_remove_deps() {
     case "$FAM" in
         debian) apt-get remove -y nodejs npm docker.io &>/dev/null ;;
         redhat) $PKG remove -y nodejs npm docker &>/dev/null ;;
         arch)   pacman -R --noconfirm nodejs npm docker &>/dev/null ;;
         alpine) apk del nodejs npm docker &>/dev/null ;;
     esac
-    ok "Dependencies removed"
 }
 
-# -- Addon processing ---------------------------------------------------------
-process_addon_selections() {
-    [[ -z "${ADDON_CHOICES:-}" ]] && { info "No addons selected, skipping..."; return; }
+tui_view_logs() {
+    tui_cleanup
+    [[ -f "$LOG" ]] && less "$LOG" || echo "No logs at $LOG"
+    tui_init
+}
 
-    if [[ "$ADDON_CHOICES" == "all" ]]; then
-        for addon in "${ADDONS[@]}"; do
-            install_single_addon "$addon"
-        done
-        return
-    fi
+# =============================================================================
+# Interactive main menu
+# =============================================================================
+run_interactive() {
+    tui_init
 
-    # Comma-separated list of dir_names (from CLI) or a single dir_name
-    IFS=',' read -ra selected <<< "$ADDON_CHOICES"
-    for sel in "${selected[@]}"; do
-        local matched=false
-        for addon in "${ADDONS[@]}"; do
-            local dir_name; dir_name=$(get_addon_field "$addon" 4)
-            if [[ "$dir_name" == "$sel" ]]; then
-                install_single_addon "$addon"
-                matched=true
+    local menu_items=(
+        "Install Panel + Daemon"
+        "Install Panel only"
+        "Install Daemon only"
+        "Install Addons"
+        "Setup dependencies only"
+        "Remove Panel"
+        "Remove Daemon"
+        "Remove everything"
+        "View logs"
+        "Exit"
+    )
+
+    while true; do
+        tui_menu "Main Menu" "${menu_items[@]}" || break
+
+        case $TUI_RESULT in
+            0)  # Install Both
+                tui_collect_panel_config
+                tui_collect_admin_config
+                tui_collect_daemon_config
+                tui_collect_addons
+                tui_do_install "both"
+                ;;
+            1)  # Panel only
+                tui_collect_panel_config
+                tui_collect_admin_config
+                tui_collect_addons
+                tui_do_install "panel"
+                ;;
+            2)  # Daemon only
+                tui_collect_daemon_config
+                tui_do_install "daemon"
+                ;;
+            3)  # Addons only
+                tui_collect_addons
+                stty echo 2>/dev/null || true
+                _process_addons
+                stty -echo 2>/dev/null || true
+                ;;
+            4)  # Deps only
+                stty echo 2>/dev/null || true
+                ensure_deps
+                setup_node
+                setup_docker
+                stty -echo 2>/dev/null || true
+                ;;
+            5)  # Remove panel
+                tui_confirm "Remove Panel?" && tui_run "Removing panel" tui_remove_panel
+                ;;
+            6)  # Remove daemon
+                tui_confirm "Remove Daemon?" && tui_run "Removing daemon" tui_remove_daemon
+                ;;
+            7)  # Remove everything
+                if tui_confirm "Remove panel, daemon, and dependencies?"; then
+                    tui_run "Removing panel"        tui_remove_panel
+                    tui_run "Removing daemon"       tui_remove_daemon
+                    tui_run "Removing dependencies" tui_remove_deps
+                fi
+                ;;
+            8)  # Logs
+                tui_view_logs
+                ;;
+            9|-1)  # Exit
                 break
-            fi
-        done
-        [[ "$matched" == false ]] && warn "Unknown addon: $sel"
-    done
-}
-
-install_single_addon() {
-    local addon_config="$1"
-    local display_name; display_name=$(get_addon_field "$addon_config" 1)
-    local repo_url;     repo_url=$(get_addon_field "$addon_config" 2)
-    local branch;       branch=$(get_addon_field "$addon_config" 3)
-    local dir_name;     dir_name=$(get_addon_field "$addon_config" 4)
-
-    info "Installing $display_name addon..."
-    cd /var/www/panel/storage/addons/
-    run_with_loading "Cloning $display_name repository" git clone --branch "$branch" "$repo_url" "$dir_name"
-
-    cd "/var/www/panel/storage/addons/$dir_name/"
-    run_with_loading "Installing dependencies" npm install
-
-    info "Building $display_name addon..."
-    npm run build
-
-    cd /var/www/panel/
-    npx tailwindcss -i ./public/tw.css -o ./public/styles.css
-    ok "$display_name installed"
-}
-
-install_addons_interactive() {
-    local menu_items=()
-    local idx=1
-    for addon in "${ADDONS[@]}"; do
-        local name; name=$(get_addon_field "$addon" 1)
-        local url;  url=$(get_addon_field "$addon" 2)
-        menu_items+=("$idx" "Install $name ($url)")
-        ((idx++))
-    done
-    menu_items+=("$idx" "Install All Addons"); local all_idx=$idx; ((idx++))
-    menu_items+=("0" "Exit")
-
-    while true; do
-        local choice
-        choice=$(dialog --title "Install Panel Addons?" \
-            --menu "Choose action:" $((15 + ${#ADDONS[@]})) 70 $((${#ADDONS[@]} + 2)) \
-            "${menu_items[@]}" 3>&1 1>&2 2>&3) || break
-
-        if [[ "$choice" == "0" ]]; then
-            break
-        elif [[ "$choice" == "$all_idx" ]]; then
-            for addon in "${ADDONS[@]}"; do install_single_addon "$addon"; done
-        else
-            install_single_addon "${ADDONS[$((choice-1))]}"
-        fi
-    done
-}
-
-# -- Main menu ----------------------------------------------------------------
-main_menu() {
-    while true; do
-        local choice
-        choice=$(dialog --title "Airlink Installer v${VERSION}" --menu "Choose action:" 20 60 11 \
-            1 "Install Both" \
-            2 "Install Panel" \
-            3 "Install Daemon" \
-            4 "Install Addons" \
-            5 "Setup Dependencies Only" \
-            6 "Remove Panel" \
-            7 "Remove Daemon" \
-            8 "Remove Dependencies" \
-            9 "Remove Everything" \
-            10 "View Logs" \
-            0 "Exit" 3>&1 1>&2 2>&3) || break
-
-        case $choice in
-            1)  install_all ;;
-            2)  setup_node; setup_docker; install_panel ;;
-            3)  setup_node; setup_docker; install_daemon ;;
-            4)  install_addons_interactive ;;
-            5)  setup_node; setup_docker ;;
-            6)  dialog --yesno "Remove Panel?"        6 30 && remove_panel ;;
-            7)  dialog --yesno "Remove Daemon?"       6 30 && remove_daemon ;;
-            8)  dialog --yesno "Remove Dependencies?" 6 30 && remove_deps ;;
-            9)  dialog --yesno "Remove EVERYTHING?"   7 40 && { remove_panel; remove_daemon; remove_deps; } ;;
-            10) [[ -f "$LOG" ]] && dialog --textbox "$LOG" 20 80 || dialog --msgbox "No logs found" 6 30 ;;
-            0)  echo -e "${G}Thanks for using Airlink Installer!${N}"; exit 0 ;;
+                ;;
         esac
     done
+
+    tui_cleanup
+    printf "\n  Airlink Installer — done\n\n"
 }
 
-# -- Non-interactive entry point ----------------------------------------------
-run_noninteractive() {
-    setup_node
-    setup_docker
+# =============================================================================
+# Entry
+# =============================================================================
+[[ $EUID -eq 0 ]] || { echo "Run as root or with sudo."; exit 1; }
 
-    local mode="${ARG_MODE:-both}"
-    case "$mode" in
-        both)
-            collect_all_config
-            install_panel
-            install_daemon
-            ;;
-        panel)
-            collect_panel_config
-            collect_admin_config
-            collect_addon_selection
-            install_panel
-            ;;
-        daemon)
-            collect_daemon_config
-            install_daemon
-            ;;
-        *) err "Unknown mode: $mode" ;;
-    esac
-
-    ok "Done."
-}
-
-# -- Cleanup ------------------------------------------------------------------
-trap 'rm -rf "$TEMP" /tmp/cookies.txt' EXIT
-
-# -- Entry --------------------------------------------------------------------
-info "Starting Airlink Installer v${VERSION}..."
 touch "$LOG"
 log "=== Airlink Installer v${VERSION} started ==="
 
 parse_args "$@"
+detect_os
 
-if is_noninteractive; then
+if noninteractive; then
     run_noninteractive
 else
-    main_menu
+    run_interactive
 fi
