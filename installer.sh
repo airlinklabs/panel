@@ -670,19 +670,23 @@ pkg_install() {
         pacman)  pacman -Sy --noconfirm --quiet "$@" ;;
         apk)     apk add --no-cache -q "$@" ;;
     esac
+    return 0
 }
 
 ensure_deps() {
     local deps=(curl wget git jq openssl)
     local missing=()
     for d in "${deps[@]}"; do command -v "$d" &>/dev/null || missing+=("$d"); done
-    [[ ${#missing[@]} -gt 0 ]] && pkg_install "${missing[@]}"
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        pkg_install "${missing[@]}"
+    fi
+    return 0
 }
 
 setup_node() {
     if command -v node &>/dev/null; then
         local v; v=$(node -v | sed 's/v//' | cut -d. -f1)
-        [[ "$v" == "$NODE_VER" ]] && return
+        if [[ "$v" == "$NODE_VER" ]]; then return; fi
     fi
     case "$FAM" in
         debian) curl -fsSL "https://deb.nodesource.com/setup_${NODE_VER}.x" | bash - &>/dev/null; pkg_install nodejs ;;
@@ -896,7 +900,7 @@ _create_admin_user() {
 }
 
 _process_addons() {
-    [[ -z "${ADDON_CHOICES:-}" || "${ADDON_CHOICES}" == "none" ]] && return
+    if [[ -z "${ADDON_CHOICES:-}" || "${ADDON_CHOICES}" == "none" ]]; then return 0; fi
 
     local to_install=()
     if [[ "$ADDON_CHOICES" == "all" ]]; then
@@ -905,7 +909,7 @@ _process_addons() {
         IFS=',' read -ra selected <<< "$ADDON_CHOICES"
         for sel in "${selected[@]}"; do
             for addon in "${ADDONS[@]}"; do
-                [[ "$(get_addon_field "$addon" 4)" == "$sel" ]] && to_install+=("$addon") && break
+                if [[ "$(get_addon_field "$addon" 4)" == "$sel" ]]; then to_install+=("$addon"); break; fi
             done
         done
     fi
@@ -947,7 +951,7 @@ run_noninteractive() {
     DAEMON_KEY="${ARG_DAEMON_KEY:-}"
     ADDON_CHOICES="${ARG_ADDONS:-none}"
 
-    [[ -z "$ADMIN_PASSWORD" ]] && die "--admin-pass is required in non-interactive mode"
+    if [[ -z "$ADMIN_PASSWORD" ]]; then die "--admin-pass is required in non-interactive mode"; fi
     valid_password "$ADMIN_PASSWORD"   || die "Password must be 8+ chars with at least one letter and one number"
     valid_username "$ADMIN_USERNAME"   || die "Username must be 3-20 alphanumeric characters"
     command -v systemctl &>/dev/null   || die "systemd is required but not found"
@@ -1001,8 +1005,8 @@ run_noninteractive() {
     local server_ip
     server_ip=$(hostname -I | awk '{print $1}')
     printf "\n  ${C_GREEN}${BOLD}Installation complete.${RESET}\n\n"
-    [[ "$mode" != "daemon" ]] && printf "  ${C_GRAY}Panel:${RESET}  http://%s:%s\n" "$server_ip" "$PANEL_PORT"
-    [[ "$mode" != "panel"  ]] && printf "  ${C_GRAY}Daemon:${RESET} port %s\n" "$DAEMON_PORT"
+    if [[ "$mode" != "daemon" ]]; then printf "  ${C_GRAY}Panel:${RESET}  http://%s:%s\n" "$server_ip" "$PANEL_PORT"; fi
+    if [[ "$mode" != "panel"  ]]; then printf "  ${C_GRAY}Daemon:${RESET} port %s\n" "$DAEMON_PORT"; fi
     printf "  ${C_GRAY}Logs:${RESET}   journalctl -u airlink-panel -f\n\n"
 }
 
