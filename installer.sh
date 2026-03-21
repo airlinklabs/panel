@@ -610,18 +610,48 @@ tui_progress_step() {
     local spinner_row=$(( box_r + 3 + PROGRESS_CURRENT ))
     local spinner_col=$(( box_c + box_w - 4 ))
 
-    "$@" &>/dev/null &
+    # output log area — 5 lines at the bottom of the terminal
+    local log_start=$(( TERM_ROWS - 5 ))
+    local log_w=$(( TERM_COLS - 4 ))
+    local outfile; outfile=$(mktemp /tmp/al-step-XXXXXX)
+
+    "$@" >"$outfile" 2>&1 &
     local pid=$!
     local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
-    local i=0
+    local fi=0
+
     while kill -0 "$pid" 2>/dev/null; do
+        # spinner
         move_to "$spinner_row" "$spinner_col"
-        printf "%s" "${frames[$i]}"
-        i=$(( (i+1) % ${#frames[@]} ))
-        sleep 0.08
+        printf "%s" "${frames[$fi]}"
+        fi=$(( (fi+1) % ${#frames[@]} ))
+
+        # last 5 lines of output
+        local li=0
+        while IFS= read -r line; do
+            move_to $(( log_start + li )) 2
+            printf "${DIM}%-${log_w}s${RESET}" "${line:0:$log_w}"
+            li=$(( li + 1 ))
+        done < <(tail -n5 "$outfile" 2>/dev/null)
+        # blank any unused rows
+        while [[ $li -lt 5 ]]; do
+            move_to $(( log_start + li )) 2
+            printf "%-${log_w}s" ""
+            li=$(( li + 1 ))
+        done
+
+        sleep 0.12
     done
+
     wait "$pid"
     local status=$?
+
+    # clear output lines
+    local li
+    for (( li=0; li<5; li++ )); do
+        move_to $(( log_start + li )) 2
+        printf "%-${log_w}s" ""
+    done
 
     move_to "$spinner_row" "$spinner_col"
     if [[ $status -eq 0 ]]; then
@@ -629,12 +659,17 @@ tui_progress_step() {
         log "OK: $label"
         PROGRESS_CURRENT=$(( PROGRESS_CURRENT + 1 ))
     else
-        printf "!"
+        # show last 20 lines of output so user can see what went wrong
+        local err_out; err_out=$(tail -n20 "$outfile" 2>/dev/null || true)
+        rm -f "$outfile"
         log "ERROR: $label"
-        sleep 1
         tui_cleanup
-        die "$label failed"
+        printf "\n${BOLD}  %s failed${RESET}\n\n" "$label"
+        printf "%s\n\n" "$err_out"
+        exit 1
     fi
+
+    rm -f "$outfile"
     sleep 0.1
 }
 
@@ -724,18 +759,14 @@ get_addon_field() { echo "$1" | cut -d'|' -f"$2"; }
 # All of these read from: PANEL_NAME PANEL_PORT ADMIN_EMAIL ADMIN_USERNAME
 # ADMIN_PASSWORD PANEL_ADDRESS DAEMON_PORT DAEMON_KEY ADDON_CHOICES
 
-do_install_panel() {
+phase_panel_clone() {
     mkdir -p /var/www
     cd /var/www || die "Cannot access /var/www"
-
     rm -rf panel
-    git clone "${PANEL_REPO}" &>/dev/null || die "Failed to clone panel"
-    cd panel
-
+    git clone "${PANEL_REPO}" panel || die "Failed to clone panel"
     chown -R www-data:www-data /var/www/panel
     chmod -R 755 /var/www/panel
-
-    cat > .env << ENVEOF
+    cat > /var/www/panel/.env << ENVEOF
 NAME=${PANEL_NAME}
 NODE_ENV="development"
 URL="http://localhost:${PANEL_PORT}"
@@ -743,35 +774,44 @@ PORT=${PANEL_PORT}
 DATABASE_URL="file:./dev.db"
 SESSION_SECRET=$(openssl rand -hex 32)
 ENVEOF
+}
 
-    npm install --omit=dev &>/dev/null || die "npm install failed"
-    npm install bcrypt &>/dev/null || true
+phase_panel_deps() {
+    cd /var/www/panel || die "Panel directory missing"
+    npm install --omit=dev || die "npm install failed"
+    npm install bcrypt || true
+}
 
-    if command -v prisma &>/dev/null; then
-        local pv; pv=$(prisma -v 2>/dev/null | grep "prisma" | head -n1 | awk '{print $2}' || echo "")
-        if [[ "$pv" != "$PRISMA_VER" ]]; then
-            npm uninstall -g prisma &>/dev/null || true
-            npm uninstall prisma @prisma/client &>/dev/null || true
-            npm cache clean --force &>/dev/null || true
-            npm install "prisma@${PRISMA_VER}" "@prisma/client@${PRISMA_VER}" &>/dev/null || die "Prisma install failed"
-        fi
-    else
-        npm install "prisma@${PRISMA_VER}" "@prisma/client@${PRISMA_VER}" &>/dev/null || die "Prisma install failed"
-    fi
+phase_panel_prisma() {
+    cd /var/www/panel || die "Panel directory missing"
+    # always uninstall first to avoid version mismatch issues
+    npm uninstall prisma @prisma/client &>/dev/null || true
+    npm cache clean --force &>/dev/null || true
+    npm install "prisma@${PRISMA_VER}" "@prisma/client@${PRISMA_VER}" || die "Prisma install failed"
+}
 
-    CI=true npm run migrate:dev &>/dev/null || die "DB migration failed"
-    npm run build &>/dev/null || die "Panel build failed"
+phase_panel_migrate() {
+    cd /var/www/panel || die "Panel directory missing"
+    CI=true npm run migrate:dev || die "DB migration failed"
+}
 
+phase_panel_build() {
+    cd /var/www/panel || die "Panel directory missing"
+    npm run build || die "Panel build failed"
+}
+
+phase_panel_admin() {
+    cd /var/www/panel || die "Panel directory missing"
+    npm install -g pm2 || die "PM2 install failed"
     _set_registration true
-    npm install -g pm2 &>/dev/null || die "PM2 install failed"
-    pm2 start npm --name "airlink-panel-temp" -- run start &>/dev/null
-
+    pm2 start npm --name "airlink-panel-temp" -- run start
     _create_admin_user
-
     _set_registration false
     pm2 delete airlink-panel-temp &>/dev/null || true
     pm2 save --force &>/dev/null || true
+}
 
+phase_panel_service() {
     cat > /etc/systemd/system/airlink-panel.service << SVCEOF
 [Unit]
 Description=Airlink Panel
@@ -787,20 +827,16 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 SVCEOF
-
     systemctl daemon-reload
-    systemctl enable --now airlink-panel &>/dev/null
-
+    systemctl enable --now airlink-panel
     _process_addons
 }
 
-do_install_daemon() {
+phase_daemon_clone() {
     cd /etc || die "Cannot access /etc"
     rm -rf daemon
-    git clone "${DAEMON_REPO}" &>/dev/null || die "Failed to clone daemon"
-    cd daemon
-
-    cat > .env << ENVEOF
+    git clone "${DAEMON_REPO}" daemon || die "Failed to clone daemon"
+    cat > /etc/daemon/.env << ENVEOF
 remote="${PANEL_ADDRESS}"
 key="${DAEMON_KEY}"
 port=${DAEMON_PORT}
@@ -809,18 +845,25 @@ version=1.0.0
 environment=development
 STATS_INTERVAL=10000
 ENVEOF
+}
 
-    npm install --omit=dev &>/dev/null || die "npm install failed"
-    npm install express &>/dev/null || die "express install failed"
-    npm run build &>/dev/null || die "Daemon build failed"
+phase_daemon_deps() {
+    cd /etc/daemon || die "Daemon directory missing"
+    npm install --omit=dev || die "npm install failed"
+    npm install express || die "express install failed"
+}
 
+phase_daemon_build() {
+    cd /etc/daemon || die "Daemon directory missing"
+    npm run build || die "Daemon build failed"
     cd libs
-    npm install &>/dev/null || die "libs npm install failed"
-    npm rebuild &>/dev/null || die "libs rebuild failed"
+    npm install || die "libs npm install failed"
+    npm rebuild || die "libs rebuild failed"
     cd ..
-
     chown -R www-data:www-data /etc/daemon
+}
 
+phase_daemon_service() {
     cat > /etc/systemd/system/airlink-daemon.service << SVCEOF
 [Unit]
 Description=Airlink Daemon
@@ -836,9 +879,8 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 SVCEOF
-
     systemctl daemon-reload
-    systemctl enable --now airlink-daemon &>/dev/null
+    systemctl enable --now airlink-daemon
 }
 
 _set_registration() {
@@ -940,7 +982,6 @@ run_noninteractive() {
 
     local mode="${ARG_MODE:-both}"
 
-    # Apply defaults for anything not passed
     PANEL_NAME="${ARG_NAME:-Airlink}"
     PANEL_PORT="${ARG_PORT:-3000}"
     ADMIN_EMAIL="${ARG_ADMIN_EMAIL:-admin@example.com}"
@@ -952,52 +993,52 @@ run_noninteractive() {
     ADDON_CHOICES="${ARG_ADDONS:-none}"
 
     if [[ -z "$ADMIN_PASSWORD" ]]; then die "--admin-pass is required in non-interactive mode"; fi
-    valid_password "$ADMIN_PASSWORD"   || die "Password must be 8+ chars with at least one letter and one number"
-    valid_username "$ADMIN_USERNAME"   || die "Username must be 3-20 alphanumeric characters"
-    command -v systemctl &>/dev/null   || die "systemd is required but not found"
-    [[ $EUID -eq 0 ]]                  || die "Run as root"
+    valid_password "$ADMIN_PASSWORD" || die "Password must be 8+ chars with at least one letter and one number"
+    valid_username "$ADMIN_USERNAME" || die "Username must be 3-20 alphanumeric characters"
+    command -v systemctl &>/dev/null  || die "systemd is required but not found"
 
     detect_os
 
     case "$mode" in
         both)
-            ni_start 12
+            ni_start 14
             ni_run "Checking dependencies"  ensure_deps
             ni_run "Setting up Node.js"     setup_node
             ni_run "Setting up Docker"      setup_docker
-            ni_run "Cloning panel"          bash -c "mkdir -p /var/www && cd /var/www && rm -rf panel && git clone ${PANEL_REPO}"
-            ni_run "Installing panel deps"  bash -c "cd /var/www/panel && npm install --omit=dev"
-            ni_run "Installing Prisma"      bash -c "cd /var/www/panel && npm install prisma@${PRISMA_VER} @prisma/client@${PRISMA_VER}"
-            ni_run "Running DB migrations"  bash -c "cd /var/www/panel && CI=true npm run migrate:dev"
-            ni_run "Building panel"         bash -c "cd /var/www/panel && npm run build"
-            ni_run "Starting panel"         bash -c "cd /var/www/panel && npm install -g pm2 && pm2 start npm --name airlink-panel-temp -- run start"
-            ni_run "Cloning daemon"         bash -c "cd /etc && rm -rf daemon && git clone ${DAEMON_REPO}"
-            ni_run "Installing daemon deps" bash -c "cd /etc/daemon && npm install --omit=dev && npm install express"
-            ni_run "Building daemon"        bash -c "cd /etc/daemon && npm run build && cd libs && npm install && npm rebuild"
-            # Now run the full do_ functions to wire up everything properly
-            do_install_panel
-            do_install_daemon
+            ni_run "Cloning panel"          phase_panel_clone
+            ni_run "Installing panel deps"  phase_panel_deps
+            ni_run "Installing Prisma"      phase_panel_prisma
+            ni_run "Running DB migrations"  phase_panel_migrate
+            ni_run "Building panel"         phase_panel_build
+            ni_run "Creating admin user"    phase_panel_admin
+            ni_run "Starting panel service" phase_panel_service
+            ni_run "Cloning daemon"         phase_daemon_clone
+            ni_run "Installing daemon deps" phase_daemon_deps
+            ni_run "Building daemon"        phase_daemon_build
+            ni_run "Starting daemon service" phase_daemon_service
             ;;
         panel)
-            ni_start 8
+            ni_start 10
             ni_run "Checking dependencies"  ensure_deps
             ni_run "Setting up Node.js"     setup_node
             ni_run "Setting up Docker"      setup_docker
-            ni_run "Cloning panel"          bash -c "mkdir -p /var/www && cd /var/www && rm -rf panel && git clone ${PANEL_REPO}"
-            ni_run "Installing panel deps"  bash -c "cd /var/www/panel && npm install --omit=dev"
-            ni_run "Installing Prisma"      bash -c "cd /var/www/panel && npm install prisma@${PRISMA_VER} @prisma/client@${PRISMA_VER}"
-            ni_run "Running DB migrations"  bash -c "cd /var/www/panel && CI=true npm run migrate:dev"
-            ni_run "Building and starting"  bash -c "cd /var/www/panel && npm run build"
-            do_install_panel
+            ni_run "Cloning panel"          phase_panel_clone
+            ni_run "Installing panel deps"  phase_panel_deps
+            ni_run "Installing Prisma"      phase_panel_prisma
+            ni_run "Running DB migrations"  phase_panel_migrate
+            ni_run "Building panel"         phase_panel_build
+            ni_run "Creating admin user"    phase_panel_admin
+            ni_run "Starting panel service" phase_panel_service
             ;;
         daemon)
-            ni_start 5
+            ni_start 7
             ni_run "Checking dependencies"  ensure_deps
             ni_run "Setting up Node.js"     setup_node
             ni_run "Setting up Docker"      setup_docker
-            ni_run "Cloning daemon"         bash -c "cd /etc && rm -rf daemon && git clone ${DAEMON_REPO}"
-            ni_run "Building daemon"        bash -c "cd /etc/daemon && npm install --omit=dev && npm install express && npm run build && cd libs && npm install && npm rebuild"
-            do_install_daemon
+            ni_run "Cloning daemon"         phase_daemon_clone
+            ni_run "Installing daemon deps" phase_daemon_deps
+            ni_run "Building daemon"        phase_daemon_build
+            ni_run "Starting daemon service" phase_daemon_service
             ;;
         *) die "Unknown mode: $mode" ;;
     esac
@@ -1080,13 +1121,29 @@ tui_collect_addons() {
 }
 
 tui_do_install() {
-    local mode="$1"   # "both" | "panel" | "daemon"
+    local mode="$1"
     local tasks=()
 
     case "$mode" in
-        both)   tasks=("Dependencies" "Node.js" "Docker" "Clone panel" "Panel deps" "Prisma" "DB migrations" "Build panel" "Admin user" "Clone daemon" "Daemon deps" "Build daemon" "Services") ;;
-        panel)  tasks=("Dependencies" "Node.js" "Docker" "Clone panel" "Panel deps" "Prisma" "DB migrations" "Build panel" "Admin user" "Service") ;;
-        daemon) tasks=("Dependencies" "Node.js" "Docker" "Clone daemon" "Daemon deps" "Build daemon" "Service") ;;
+        both)
+            tasks=(
+                "Dependencies" "Node.js" "Docker"
+                "Clone panel" "Panel deps" "Prisma" "DB migrations" "Build panel" "Admin user" "Panel service"
+                "Clone daemon" "Daemon deps" "Build daemon" "Daemon service"
+            )
+            ;;
+        panel)
+            tasks=(
+                "Dependencies" "Node.js" "Docker"
+                "Clone panel" "Panel deps" "Prisma" "DB migrations" "Build panel" "Admin user" "Panel service"
+            )
+            ;;
+        daemon)
+            tasks=(
+                "Dependencies" "Node.js" "Docker"
+                "Clone daemon" "Daemon deps" "Build daemon" "Daemon service"
+            )
+            ;;
     esac
 
     tui_progress_init "${tasks[@]}"
@@ -1097,33 +1154,28 @@ tui_do_install() {
             tui_progress_step ensure_deps
             tui_progress_step setup_node
             tui_progress_step setup_docker
-            tui_progress_step bash -c "mkdir -p /var/www && cd /var/www && rm -rf panel && git clone ${PANEL_REPO}"
-            tui_progress_step bash -c "cd /var/www/panel && npm install --omit=dev && npm install bcrypt"
-            tui_progress_step bash -c "cd /var/www/panel && npm install prisma@${PRISMA_VER} @prisma/client@${PRISMA_VER}"
-            tui_progress_step bash -c "cd /var/www/panel && CI=true npm run migrate:dev"
-            tui_progress_step bash -c "cd /var/www/panel && npm run build"
-            tui_progress_step bash -c "cd /var/www/panel && npm install -g pm2 && chown -R www-data:www-data /var/www/panel && chmod -R 755 /var/www/panel"
+            tui_progress_step phase_panel_clone
+            tui_progress_step phase_panel_deps
+            tui_progress_step phase_panel_prisma
+            tui_progress_step phase_panel_migrate
+            tui_progress_step phase_panel_build
+            tui_progress_step phase_panel_admin
+            tui_progress_step phase_panel_service
             if [[ "$mode" == "both" ]]; then
-                tui_progress_step bash -c "cd /etc && rm -rf daemon && git clone ${DAEMON_REPO}"
-                tui_progress_step bash -c "cd /etc/daemon && npm install --omit=dev && npm install express"
-                tui_progress_step bash -c "cd /etc/daemon && npm run build && cd libs && npm install && npm rebuild"
-                tui_progress_step bash -c "echo services"
-                do_install_panel
-                do_install_daemon
-            else
-                tui_progress_step bash -c "echo service"
-                do_install_panel
+                tui_progress_step phase_daemon_clone
+                tui_progress_step phase_daemon_deps
+                tui_progress_step phase_daemon_build
+                tui_progress_step phase_daemon_service
             fi
             ;;
         daemon)
             tui_progress_step ensure_deps
             tui_progress_step setup_node
             tui_progress_step setup_docker
-            tui_progress_step bash -c "cd /etc && rm -rf daemon && git clone ${DAEMON_REPO}"
-            tui_progress_step bash -c "cd /etc/daemon && npm install --omit=dev && npm install express"
-            tui_progress_step bash -c "cd /etc/daemon && npm run build && cd libs && npm install && npm rebuild"
-            tui_progress_step bash -c "echo service"
-            do_install_daemon
+            tui_progress_step phase_daemon_clone
+            tui_progress_step phase_daemon_deps
+            tui_progress_step phase_daemon_build
+            tui_progress_step phase_daemon_service
             ;;
     esac
 
