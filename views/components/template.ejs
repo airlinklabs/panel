@@ -1,8 +1,144 @@
-<!-- Sidebar -->
+<%
+const allSidebarItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
+const mobileSidebarItems = allSidebarItems.filter(function(item) { return item.id !== 'account'; });
+const mobileMainNavItems = mobileSidebarItems.slice(0, 3);
+const mobileExtraItems = mobileSidebarItems.length > 3 ? mobileSidebarItems.slice(3) : [];
+%>
+
+<!-- ── Mobile chrome (hidden on lg+) ──────────────────────────────────────── -->
+
+<!-- Top bar -->
+<div class="mobile-top-bar lg:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-white/8 dark:bg-[#141414]/8 backdrop-blur-xl border-b border-neutral-200/30 dark:border-white/5">
+  <div id="topbar-default" class="flex items-center justify-between h-14 px-4">
+    <a href="/" class="flex items-center gap-2 min-w-0 flex-1 mr-3">
+      <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="logo-bg h-8 w-8 rounded-lg bg-neutral-950/90 dark:bg-transparent p-0.5 shrink-0">
+      <span class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= settings.title %></span>
+    </a>
+    <div class="flex items-center gap-2.5 shrink-0">
+      <button id="mobile-search-open" class="p-1.5 rounded-lg text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+          <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
+        </svg>
+      </button>
+      <button id="mobile-theme-toggle" class="w-11 h-6 flex items-center bg-gray-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500">
+        <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
+      </button>
+      <a href="/account">
+        <img class="h-8 w-8 rounded-lg border border-neutral-200 dark:border-neutral-700" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="Avatar">
+      </a>
+    </div>
+  </div>
+  <div id="topbar-search" class="hidden items-center h-14 px-3 gap-2">
+    <button id="mobile-search-close" class="p-1.5 text-neutral-500 dark:text-neutral-400 shrink-0">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+        <path fill-rule="evenodd" d="M7.72 12.53a.75.75 0 0 1 0-1.06l7.5-7.5a.75.75 0 1 1 1.06 1.06L9.31 12l6.97 6.97a.75.75 0 1 1-1.06 1.06l-7.5-7.5Z" clip-rule="evenodd" />
+      </svg>
+    </button>
+    <div class="flex-1 flex items-center bg-neutral-100 dark:bg-neutral-800 rounded-xl px-3 py-2 gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-neutral-400 shrink-0">
+        <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
+      </svg>
+      <input id="mobileSearchInput" type="search" autocomplete="off" placeholder="Search navigation..."
+        class="flex-1 bg-transparent text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none">
+    </div>
+  </div>
+</div>
+
+<div id="mobileSearchResults" class="lg:hidden hidden fixed top-14 left-0 right-0 z-40 bg-white/8 dark:bg-[#141414]/8 backdrop-blur-xl border-b border-neutral-200/30 dark:border-white/5 max-h-[60dvh] overflow-y-auto shadow-lg"></div>
+
+<!-- Bottom nav -->
+<nav class="mobile-bottom-nav lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/8 dark:bg-[#141414]/8 backdrop-blur-xl border-t border-neutral-200/30 dark:border-white/5">
+  <ul class="flex items-center justify-around h-16">
+
+    <% if (!mobileSidebarItems || mobileSidebarItems.length === 0) { %>
+      <li class="flex-1">
+        <a href="/" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400" data-match-exact="true" data-match-prefix-also="/server">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+            <path d="M12.378 1.602a.75.75 0 0 0-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03ZM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 0 0 .372-.648V7.93ZM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 0 0 .372.648l8.628 5.033Z" />
+          </svg>
+          <span class="text-[10px] font-medium"><%= req.translations.navServers || 'Servers' %></span>
+        </a>
+      </li>
+    <% } else { %>
+      <% mobileMainNavItems.forEach(function(item) { %>
+      <li class="flex-1">
+        <a href="<%= item.url %>" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400">
+          <div class="w-5 h-5 flex items-center justify-center [&>svg]:w-5 [&>svg]:h-5 [&>svg]:shrink-0"><%- item.icon %></div>
+          <span class="text-[10px] font-medium"><%= item.label %></span>
+        </a>
+      </li>
+      <% }); %>
+    <% } %>
+
+    <% if (mobileExtraItems.length > 0) { %>
+    <li class="flex-1">
+      <button id="more-nav-btn" class="flex flex-col items-center justify-center w-full h-16 gap-1 text-neutral-500 dark:text-neutral-400">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+        <span class="text-[10px] font-medium"><%= req.translations.navMore || 'More' %></span>
+      </button>
+    </li>
+    <% } %>
+
+    <% if (user.isAdmin === true) { %>
+    <li class="flex-1">
+      <a href="/admin/menu" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400" data-match-prefix="/admin">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+        </svg>
+        <span class="text-[10px] font-medium"><%= req.translations.navAdmin || 'Admin' %></span>
+      </a>
+    </li>
+    <% } %>
+
+    <li class="flex-1">
+      <a href="/logout" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+        </svg>
+        <span class="text-[10px] font-medium"><%= req.translations.navLogout || 'Logout' %></span>
+      </a>
+    </li>
+
+  </ul>
+</nav>
+
+<% if (mobileExtraItems.length > 0) { %>
+<div x-data="{ open: false }" @open-more-sheet.window="open = true" @keydown.escape.window="open = false">
+  <div class="lg:hidden fixed inset-0 z-40 bg-black/50 transition-opacity duration-200"
+    :class="open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'"
+    @click="open = false">
+  </div>
+  <div class="mobile-more-sheet lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/8 dark:bg-[#1c1c1c]/8 backdrop-blur-xl border-t border-neutral-200/30 dark:border-white/5 rounded-t-2xl transition-transform duration-300 ease-out"
+    :class="open ? 'translate-y-0' : 'translate-y-full'">
+    <div class="flex items-center justify-between px-4 pt-4 pb-2">
+      <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.navMore || 'More' %></p>
+      <button @click="open = false" class="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <div class="px-4 pb-8 space-y-1">
+      <% mobileExtraItems.forEach(function(item) { %>
+      <a href="<%= item.url %>" class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition">
+        <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 shrink-0 [&>svg]:w-4 [&>svg]:h-4 [&>svg]:shrink-0">
+          <%- item.icon %>
+        </div>
+        <span class="text-sm font-medium text-neutral-700 dark:text-neutral-200"><%= item.label %></span>
+      </a>
+      <% }); %>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<!-- ── Desktop sidebar (hidden below lg) ──────────────────────────────────── -->
+
 <div id="pc-sidebar" class="sidebar transition hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-56 lg:flex-col left-0">
   <div id="pc-sidebar2" class="flex flex-col h-full bg-white/8 dark:bg-[#141414]/8 backdrop-blur-xl border-r border-neutral-200/30 dark:border-white/5">
 
-    <!-- Static top: logo -->
     <div class="pl-6 pt-4 pb-4 flex min-w-0 shrink-0">
       <a href="/" class="flex items-center min-w-0">
         <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="logo-bg bg-neutral-950/90 p-1 dark:bg-transparent h-10 w-10 rounded-xl mr-3 shrink-0 inline-flex">
@@ -10,7 +146,6 @@
       </a>
     </div>
 
-    <!-- Static: user info — clicking goes to account page -->
     <a href="/account" id="sidebar-account-link" class="sidebar-special-link flex items-center space-x-4 py-4 px-4 border-y border-neutral-800/10 dark:border-white/5 shrink-0 hover:bg-neutral-100 dark:hover:bg-white/[0.05] transition-colors group">
       <img class="h-8 w-8 rounded-xl border border-neutral-700/10 shrink-0" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
       <div class="min-w-0">
@@ -24,7 +159,6 @@
       </div>
     </a>
 
-    <!-- Scrollable nav -->
     <nav class="flex-1 overflow-y-auto">
       <ul role="list" class="py-2">
         <li>
@@ -136,7 +270,6 @@
       </ul>
     </nav>
 
-    <!-- Static bottom: logout -->
     <div class="shrink-0 border-t border-neutral-800/10 dark:border-white/5">
       <a href="/logout" id="sidebar-logout-link" class="sidebar-special-link group flex gap-x-3 pl-6 py-4 text-sm font-medium leading-6 text-neutral-500 hover:text-red-700 dark:hover:text-red-500/80 hover:bg-red-500/5 dark:hover:bg-neutral-700/10 transition-colors duration-300">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mt-0.5 shrink-0">
@@ -149,42 +282,11 @@
   </div>
 </div>
 
-<script>
-(function () {
-  var wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  var ws = new WebSocket(wsProtocol + '//' + window.location.host + '/online-check');
-  ws.addEventListener('error', function () {});
-
-  // Highlight account/logout when on those pages
-  function markSpecialLinks(path) {
-    var account = document.getElementById('sidebar-account-link');
-    var logout  = document.getElementById('sidebar-logout-link');
-    var isDark  = document.documentElement.classList.contains('dark');
-    if (account) {
-      var onAccount = path === '/account' || path.startsWith('/account/');
-      account.style.background = onAccount
-        ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')
-        : '';
-    }
-    if (logout) {
-      logout.style.background = '';
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', function () {
-    markSpecialLinks(window.location.pathname);
-  });
-  document.addEventListener('al:navigated', function () {
-    markSpecialLinks(window.location.pathname);
-  });
-})();
-</script>
-
+<!-- Desktop top bar + content wrapper -->
 <div id="colcont" class="lg:pl-56">
-  <div class="fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-white/8 dark:bg-[#141414]/8 backdrop-blur-xl border-b border-neutral-200/30 dark:border-white/5 px-4 sm:gap-x-6 sm:px-4 lg:px-4">
+  <div class="fixed top-0 left-0 lg:left-56 right-0 z-40 hidden lg:flex h-16 shrink-0 items-center gap-x-4 bg-white/8 dark:bg-[#141414]/8 backdrop-blur-xl border-b border-neutral-200/30 dark:border-white/5 px-4 sm:gap-x-6 sm:px-4 lg:px-4">
     <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
       <div class="relative flex flex-1 flex-col">
-
         <div class="lg:-ml-2 flex items-center w-fit mt-3.5 px-4 py-2 h-10 rounded-xl border border-neutral-300 dark:border-white/5 active:scale-100 duration-200 hover:border-neutral-400 dark:hover:border-neutral-300/10 bg-transparent text-neutral-800 dark:text-white">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-neutral-400">
             <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
@@ -195,20 +297,13 @@
             type="search"
             name="search"
             autocomplete="off"
-            onclick="input.blur()"
             onfocus="showSearchResults()">
-          <div class="ml-2 px-1 py-0.5 text-[10px] w-[55px] font-medium text-neutral-700 dark:text-neutral-400 bg-neutral-200 dark:bg-neutral-800 rounded-md border border-neutral-300 dark:border-neutral-700
-            bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.2)_50%,transparent_75%,transparent_100%)]
-            bg-[length:250%_250%,100%_100%] bg-[position:-100%_0,0_0] bg-no-repeat transition-ease-out
-            hover:bg-[position:200%_0,0_0] hover:duration-[2s]">
+          <div class="ml-2 px-1 py-0.5 text-[10px] w-[55px] font-medium text-neutral-700 dark:text-neutral-400 bg-neutral-200 dark:bg-neutral-800 rounded-md border border-neutral-300 dark:border-neutral-700">
             CTRL + K
           </div>
         </div>
-
-        <div id="searchResults" class="absolute bg-neutral-50 dark:bg-neutral-900 w-[19.5rem] rounded-xl shadow-2xl shadow-neutral-200/80 dark:shadow-black/40 hidden mt-20 px-2 pb-2 border border-neutral-200 dark:border-neutral-700/60">
-        </div>
+        <div id="searchResults" class="absolute bg-neutral-50 dark:bg-neutral-900 w-[19.5rem] rounded-xl shadow-2xl shadow-neutral-200/80 dark:shadow-black/40 hidden mt-20 px-2 pb-2 border border-neutral-200 dark:border-neutral-700/60"></div>
       </div>
-
       <script>
         document.addEventListener('keydown', function(event) {
           if (event.ctrlKey && event.key === 'k') {
@@ -216,13 +311,10 @@
             document.getElementById('searchInput').focus();
           }
         });
-
         function showSearchResults() {
           document.getElementById('searchResults').classList.remove('hidden');
         }
-
         document.getElementById('searchInput').addEventListener('focus', showSearchResults);
-
         document.addEventListener('click', function(event) {
           var searchInput = document.getElementById('searchInput');
           var searchResults = document.getElementById('searchResults');
@@ -235,14 +327,129 @@
     </div>
   </div>
 </div>
+
+<!-- Page loader overlay positioning — mobile vs desktop -->
 <script>
 (function () {
   var ov = document.getElementById('pl-overlay');
   if (!ov) return;
-  ov.style.left   = '224px';
-  ov.style.top    = '64px';
-  ov.style.right  = '0';
-  ov.style.bottom = '0';
+  if (window.innerWidth >= 1024) {
+    ov.style.left   = '224px';
+    ov.style.top    = '64px';
+    ov.style.right  = '0';
+    ov.style.bottom = '0';
+  } else {
+    ov.style.top    = '56px';
+    ov.style.left   = '0';
+    ov.style.right  = '0';
+    ov.style.bottom = '64px';
+  }
   ov.style.display = 'flex';
+})();
+</script>
+
+<!-- Mobile nav JS — sheet toggle, search, presence websocket -->
+<script>
+(function () {
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof updateToggleDot === 'function') updateToggleDot();
+
+    var moreBtn = document.getElementById('more-nav-btn');
+    if (moreBtn) {
+      moreBtn.addEventListener('click', function() {
+        window.dispatchEvent(new CustomEvent('open-more-sheet'));
+      });
+    }
+
+    var wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    var ws = new WebSocket(wsProtocol + '//' + window.location.host + '/online-check');
+    ws.addEventListener('error', function () {});
+
+    var openBtn    = document.getElementById('mobile-search-open');
+    var closeBtn   = document.getElementById('mobile-search-close');
+    var defaultBar = document.getElementById('topbar-default');
+    var searchBar  = document.getElementById('topbar-search');
+    var input      = document.getElementById('mobileSearchInput');
+    var resultsEl  = document.getElementById('mobileSearchResults');
+
+    if (!openBtn || !input || !resultsEl) return;
+
+    function renderResults(term) {
+      resultsEl.innerHTML = '';
+      if (!term) { resultsEl.classList.add('hidden'); return; }
+      var links = Array.from(document.querySelectorAll('.mobile-nav-link, .nav-link'));
+      var lower = term.toLowerCase();
+      var matches = links.filter(function (link) {
+        var text = (link.textContent || '').toLowerCase();
+        var data = (link.getAttribute('data-search') || '').toLowerCase();
+        return text.includes(lower) || data.includes(lower);
+      });
+      if (matches.length === 0) {
+        var p = document.createElement('p');
+        p.className = 'px-4 py-3 text-sm text-neutral-400';
+        p.textContent = 'No results.';
+        resultsEl.appendChild(p);
+      } else {
+        matches.forEach(function (link) {
+          var a = document.createElement('a');
+          a.href = link.href || '#';
+          a.className = 'flex items-center gap-3 px-4 py-3 border-b border-neutral-100 dark:border-white/5 last:border-0 hover:bg-neutral-50 dark:hover:bg-white/5 transition';
+          var icon = link.querySelector('svg');
+          if (icon) { var ic = icon.cloneNode(true); ic.className = 'h-5 w-5 text-neutral-400 shrink-0'; a.appendChild(ic); }
+          var span = document.createElement('span');
+          span.className = 'text-sm text-neutral-800 dark:text-white';
+          span.textContent = link.textContent.trim();
+          a.appendChild(span);
+          resultsEl.appendChild(a);
+        });
+      }
+      resultsEl.classList.remove('hidden');
+    }
+
+    openBtn.addEventListener('click', function () {
+      defaultBar.classList.add('hidden');
+      searchBar.classList.remove('hidden');
+      searchBar.classList.add('flex');
+      input.value = '';
+      resultsEl.classList.add('hidden');
+      setTimeout(function () { input.focus(); }, 60);
+    });
+
+    function closeSearch() {
+      searchBar.classList.add('hidden');
+      searchBar.classList.remove('flex');
+      defaultBar.classList.remove('hidden');
+      resultsEl.classList.add('hidden');
+      input.value = '';
+    }
+
+    closeBtn.addEventListener('click', closeSearch);
+    var debounce;
+    input.addEventListener('input', function () {
+      clearTimeout(debounce);
+      debounce = setTimeout(function () { renderResults(input.value.trim()); }, 120);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeSearch();
+    });
+  });
+})();
+</script>
+
+<!-- Desktop sidebar — special link highlighting -->
+<script>
+(function () {
+  function markSpecialLinks(path) {
+    var account = document.getElementById('sidebar-account-link');
+    var isDark  = document.documentElement.classList.contains('dark');
+    if (account) {
+      var onAccount = path === '/account' || path.startsWith('/account/');
+      account.style.background = onAccount
+        ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')
+        : '';
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function () { markSpecialLinks(window.location.pathname); });
+  document.addEventListener('al:navigated', function () { markSpecialLinks(window.location.pathname); });
 })();
 </script>

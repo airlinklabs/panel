@@ -86,7 +86,34 @@
 
   .auth-panel { opacity: 0; transform: translateX(-12px); transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1); }
   .auth-panel.visible { opacity: 1; transform: translateX(0); }
-</style>
+
+    /* On small screens, background image stays fixed behind the frosted form panel */
+    @media (max-width: 1023px) {
+      body { padding: 0 !important; }
+      .auth-split { position: relative; display: block; min-height: 100vh; }
+      .auth-image {
+        position: fixed;
+        inset: 0;
+        display: block;
+        z-index: 0;
+      }
+      .auth-panel {
+        position: relative;
+        z-index: 1;
+        max-width: 100%;
+        border-right: none;
+        padding: 40px 24px;
+        min-height: 100vh;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.88);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      html.dark .auth-panel {
+        background: rgba(20, 20, 20, 0.88);
+      }
+    }
+  </style>
 
 <div class="auth-split">
   <div class="auth-panel" id="authPanel">

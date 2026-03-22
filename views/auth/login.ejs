@@ -1,8 +1,6 @@
 <%- include('../components/header', { title: 'Sign in' }) %>
 
 <style>
-  /* Auth pages are full-bleed — no topbar/bottomnav padding */
-  body { padding: 0 !important; }
   ::-webkit-scrollbar { display: none; }
   body, html { height: 100%; margin: 0; }
 
@@ -14,12 +12,14 @@
     width: 100%; max-width: 420px; flex-shrink: 0;
     display: flex; flex-direction: column; justify-content: center;
     padding: 48px 40px;
-    background: white;
-    border-right: 1px solid #e5e5e5;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-right: 1px solid rgba(0,0,0,0.08);
     position: relative; z-index: 1;
   }
   html.dark .auth-panel {
-    background: #141414;
+    background: rgba(20,20,20,0.08);
     border-right-color: rgba(255,255,255,0.08);
   }
   .auth-image {
@@ -27,30 +27,14 @@
     background: url('<%= settings.loginWallpaper || "https://i.imgur.com/j9BodUY.jpeg" %>') center/cover no-repeat;
   }
 
-  /* Mobile: wallpaper fills background, form sits on top */
+  /* Mobile: full-screen centered card */
   @media (max-width: 768px) {
-    .auth-split { position: relative; display: block; min-height: 100vh; }
-    .auth-image {
-      position: fixed;
-      inset: 0;
-      display: block;
-      z-index: 0;
-    }
+    .auth-split { display: block; min-height: 100vh; }
     .auth-panel {
-      position: relative;
-      z-index: 1;
-      max-width: 100%;
-      border-right: none;
-      padding: 40px 24px;
-      min-height: 100vh;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      max-width: 100%; border-right: none; padding: 40px 24px;
+      min-height: 100vh; justify-content: center;
     }
-    html.dark .auth-panel {
-      background: rgba(20, 20, 20, 0.88);
-    }
+    .auth-image { display: none; }
   }
 
   .auth-input {
@@ -118,7 +102,34 @@
   /* Entry animation for the panel */
   .auth-panel { opacity: 0; transform: translateX(-12px); transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1); }
   .auth-panel.visible { opacity: 1; transform: translateX(0); }
-</style>
+
+    /* On small screens, background image stays fixed behind the frosted form panel */
+    @media (max-width: 1023px) {
+      body { padding: 0 !important; }
+      .auth-split { position: relative; display: block; min-height: 100vh; }
+      .auth-image {
+        position: fixed;
+        inset: 0;
+        display: block;
+        z-index: 0;
+      }
+      .auth-panel {
+        position: relative;
+        z-index: 1;
+        max-width: 100%;
+        border-right: none;
+        padding: 40px 24px;
+        min-height: 100vh;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.88);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      html.dark .auth-panel {
+        background: rgba(20, 20, 20, 0.88);
+      }
+    }
+  </style>
 
 <div class="auth-split">
   <div class="auth-panel" id="authPanel">

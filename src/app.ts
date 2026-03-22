@@ -72,16 +72,28 @@ const airlinkVersion = config.meta.version;
 expressWs(app);
 
 // Load static files
+// styles.css and JS files are rebuilt on deploy — give them a long cache.
+// Themes, favicons, and uploads are user-controlled so they get a short cache.
+const LONG_CACHE  = { maxAge: '1y', immutable: true };
+const SHORT_CACHE = { maxAge: '1h' };
+
+app.use('/styles.css',          express.static(path.join(__dirname, '../public'), LONG_CACHE));
+app.use('/layout-animations.css', express.static(path.join(__dirname, '../public'), LONG_CACHE));
+app.use('/javascript',          express.static(path.join(__dirname, '../public/javascript'), LONG_CACHE));
+app.use('/js',                  express.static(path.join(__dirname, '../public/js'), LONG_CACHE));
+app.use('/themes',              express.static(path.join(__dirname, '../public/themes'), SHORT_CACHE));
+app.use('/assets',              express.static(path.join(__dirname, '../public/assets'), SHORT_CACHE));
+app.use('/uploads',             express.static(path.join(__dirname, '../public/uploads'), SHORT_CACHE));
 app.use(express.static(path.join(__dirname, '../public')));
 
 app.use(
   '/monaco',
-  express.static(path.join(__dirname, '../node_modules', 'monaco-editor/min')),
+  express.static(path.join(__dirname, '../node_modules', 'monaco-editor/min'), LONG_CACHE),
 );
 
 app.use(
   '/vendor',
-  express.static(path.join(__dirname, '../node_modules', '@formkit/auto-animate')),
+  express.static(path.join(__dirname, '../node_modules', '@formkit/auto-animate'), LONG_CACHE),
 );
 
 // Load views

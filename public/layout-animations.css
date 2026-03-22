@@ -227,3 +227,42 @@ svg,
 img {
   transition: none !important;
 }
+
+/* ── Collapsible rows ─────────────────────────────────────────────────────
+   Grid-row trick: animates height through 0fr → 1fr without needing a
+   fixed height. Used on servers/create.ejs, worlds.ejs.
+*/
+.collapsible-row {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+.collapsible-row.open {
+  grid-template-rows: 1fr;
+}
+.collapsible-row > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Checkbox appearance ─────────────────────────────────────────────────
+   Consistent cross-browser checkbox colours in light and dark mode.
+   Only targets visible checkboxes — sr-only ones are intentionally hidden.
+*/
+input[type="checkbox"]:not(.sr-only) {
+  background-color: #ffffff;
+  border-color: #d1d5db;
+}
+.dark input[type="checkbox"]:not(.sr-only) {
+  background-color: #171717;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+input[type="checkbox"]:not(.sr-only):checked {
+  background-color: #404040;
+  border-color: #404040;
+}
+.dark input[type="checkbox"]:not(.sr-only):checked {
+  background-color: #ffffff;
+  border-color: #ffffff;
+}

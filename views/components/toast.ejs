@@ -1,0 +1,70 @@
+<script>
+(function () {
+  function isMobile() {
+    return window.innerWidth < 1024;
+  }
+
+  var container = null;
+
+  function getContainer() {
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      document.body.appendChild(container);
+    }
+    container.className = isMobile()
+      ? 'fixed bottom-24 left-4 right-4 z-50 flex flex-col gap-2 items-stretch'
+      : 'fixed top-4 right-4 z-50 flex flex-col gap-2';
+    return container;
+  }
+
+  window.showToast = function (message, type, duration) {
+    var c     = getContainer();
+    var toast = document.createElement('div');
+    var dur   = duration || 3500;
+
+    var colors = {
+      success: 'bg-emerald-600',
+      error:   'bg-red-600',
+      warning: 'bg-amber-500',
+      info:    'bg-neutral-800 dark:bg-neutral-700'
+    };
+    var color = colors[type] || colors.info;
+
+    toast.className = 'flex items-start gap-3 px-4 py-3 rounded-xl shadow-lg text-white text-sm font-medium opacity-0 transition-opacity duration-200 ' + color;
+    if (!isMobile()) toast.style.minWidth = '260px';
+
+    var span = document.createElement('span');
+    span.className = 'flex-1';
+    span.textContent = message;
+
+    var progress = document.createElement('div');
+    progress.className = 'h-1 w-full bg-gray-200 dark:bg-neutral-700 rounded mt-2 overflow-hidden';
+    var bar = document.createElement('div');
+    bar.className = 'h-full rounded transition-all ease-linear ' + color;
+    bar.style.width = '100%';
+    progress.appendChild(bar);
+
+    var inner = document.createElement('div');
+    inner.className = 'flex-1';
+    inner.appendChild(span);
+    inner.appendChild(progress);
+
+    toast.appendChild(inner);
+    c.appendChild(toast);
+
+    requestAnimationFrame(function () {
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      bar.style.transitionDuration = dur + 'ms';
+      bar.style.width = '0%';
+    });
+
+    setTimeout(function () {
+      toast.classList.remove('opacity-100');
+      toast.classList.add('opacity-0');
+      setTimeout(function () { toast.remove(); }, 200);
+    }, dur);
+  };
+})();
+</script>
