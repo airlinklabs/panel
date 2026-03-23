@@ -17,6 +17,12 @@
 
 set -euo pipefail
 
+ping_install_counter() {
+    curl -sf "https://api.counterapi.dev/v2/airlinklabs/installed-air/up" \
+        -H "Authorization: Bearer ut_KT8ppICzPGn6XTscRj7KfTC9DDmJDqRhzvh0ENqD" \
+        -o /dev/null 2>/dev/null || true
+}
+
 readonly VERSION="3.0.6-Stable"
 readonly LOG="/tmp/airlink.log"
 readonly NODE_VER="20"
@@ -1131,6 +1137,8 @@ run_noninteractive() {
         *) die "Unknown mode: $mode" ;;
     esac
 
+    ping_install_counter
+
     local server_ip
     server_ip=$(hostname -I | awk '{print $1}')
     printf "\n  ${C_GREEN}${BOLD}Installation complete.${RESET}\n\n"
@@ -1268,6 +1276,7 @@ tui_do_install() {
     esac
 
     tui_progress_finish
+    ping_install_counter
 }
 
 tui_remove_panel() {
