@@ -6,7 +6,7 @@ import logger from '../../handlers/logger';
 import axios from 'axios';
 import { queueer } from '../../handlers/queueer';
 import { Buffer } from 'buffer';
-import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
+import { getParamAsString, getParamAsNumber } from '../../utils/typeHelpers';
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 
@@ -654,7 +654,7 @@ const adminModule: Module = {
 
               logger.info(`Successfully deleted container ${server.UUID} on daemon`);
             } catch (error: unknown) {
-              logger.error(`Error deleting container on daemon:`, error);
+              logger.error('Error deleting container on daemon:', error);
 
               const daemonError = error as any;
               const isNotFoundError =

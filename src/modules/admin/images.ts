@@ -251,7 +251,7 @@ const adminModule: Module = {
             return;
           }
 
-          let dockerImagesRaw: Record<string, string> = {};
+          const dockerImagesRaw: Record<string, string> = {};
           try {
             const parsed = JSON.parse(image.dockerImages || '[]');
             if (Array.isArray(parsed)) {

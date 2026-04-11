@@ -38,6 +38,29 @@ interface ServerVariable {
   value: string | number | boolean;
 }
 
+function normalizeServerVariable(
+  v: ServerVariable & {
+    env_variable?: string;
+    default_value?: string | number | boolean;
+    field_type?: string;
+  },
+): ServerVariable {
+  const normalizedType: ServerVariable['type'] =
+    v.type === 'boolean' || v.field_type === 'boolean'
+      ? 'boolean'
+      : v.type === 'number' || v.field_type === 'number'
+        ? 'number'
+        : 'text';
+
+  return {
+    name: v.name,
+    env: String(v.env ?? v.env_variable ?? ''),
+    value: v.value ?? v.default ?? v.default_value ?? '',
+    type: normalizedType,
+    default: v.default ?? v.default_value ?? '',
+  };
+}
+
 function getImageFeatures(image: any): string[] {
   if (!image) return [];
   try {
@@ -251,7 +274,7 @@ const dashboardModule: Module = {
           }
 
           if (powerAction === 'stop') {
-              try {
+            try {
               // Get current server status
               const serverInfos = {
                 nodeAddress: server.node.address,
@@ -269,12 +292,12 @@ const dashboardModule: Module = {
                 startedAt: null,
               };
 
-                  const cacheKey = `server_stopping_${serverId}`;
+              const cacheKey = `server_stopping_${serverId}`;
 
-                      global.serverStoppingStates = global.serverStoppingStates || {};
+              global.serverStoppingStates = global.serverStoppingStates || {};
               global.serverStoppingStates[cacheKey] = true;
 
-                  setTimeout(() => {
+              setTimeout(() => {
                 if (
                   global.serverStoppingStates &&
                   global.serverStoppingStates[cacheKey]
@@ -286,13 +309,13 @@ const dashboardModule: Module = {
                 }
               }, 120000); // 2 minutes
 
-                  res.status(200).json({
+              res.status(200).json({
                 success: true,
                 message: 'Server is stopping...',
                 status: stoppingStatus,
               });
 
-                  const requestData = {
+              const requestData = {
                 method: 'POST',
                 url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
                 auth: {
@@ -320,7 +343,7 @@ const dashboardModule: Module = {
                   'Container already stopped or not found: ' + serverId,
                 );
 
-                      const cacheKey = `server_stopping_${serverId}`;
+                const cacheKey = `server_stopping_${serverId}`;
                 if (
                   global.serverStoppingStates &&
                   global.serverStoppingStates[cacheKey]
@@ -1138,9 +1161,9 @@ const dashboardModule: Module = {
 
           const primaryPort = server.Ports
             ? JSON.parse(server.Ports)
-                .filter((Port: any) => Port.primary)
-                .map((Port: any) => Port.Port.split(':')[1])
-                .pop()
+              .filter((Port: any) => Port.primary)
+              .map((Port: any) => Port.Port.split(':')[1])
+              .pop()
             : '';
 
           const features = getImageFeatures(server.image);
@@ -1215,7 +1238,7 @@ const dashboardModule: Module = {
               hadFetchError = true;
             }
           } catch (error) {
-              if (axios.isAxiosError(error)) {
+            if (axios.isAxiosError(error)) {
               if (
                 error.code !== 'ECONNREFUSED' &&
                 error.code !== 'ETIMEDOUT' &&
@@ -1249,9 +1272,9 @@ const dashboardModule: Module = {
           return res.render('user/server/players', {
             errorMessage: hasError
               ? {
-                  message:
+                message:
                     'Unable to fetch players. The server may be offline or not responding.',
-                }
+              }
               : {},
             serverIsOnline,
             user,
@@ -1314,7 +1337,7 @@ const dashboardModule: Module = {
               serverUUID: server.UUID,
               nodeKey: server.node.key,
             };
-              const response = await axios(worldsRequest);
+            const response = await axios(worldsRequest);
             const Folders = response.data;
 
             const worlds = [];
@@ -1329,7 +1352,7 @@ const dashboardModule: Module = {
 
             const features = getImageFeatures(server.image);
 
-              const serverStatus = await getServerStatus(serverInfos);
+            const serverStatus = await getServerStatus(serverInfos);
 
             return res.render('user/server/worlds', {
               errorMessage: {},
@@ -1343,7 +1366,7 @@ const dashboardModule: Module = {
               settings,
             });
           } catch (fileRequestError) {
-              if (axios.isAxiosError(fileRequestError)) {
+            if (axios.isAxiosError(fileRequestError)) {
               if (
                 fileRequestError.code !== 'ECONNREFUSED' &&
                 fileRequestError.code !== 'ETIMEDOUT' &&
@@ -2644,9 +2667,15 @@ const dashboardModule: Module = {
               );
               if (serverToReinstall.Variables) {
                 try {
-                  ServerEnv = JSON.parse(
-                    serverToReinstall.Variables,
-                  ) as ServerVariable[];
+                  ServerEnv = (
+                    JSON.parse(serverToReinstall.Variables) as Array<
+                      ServerVariable & {
+                        env_variable?: string;
+                        default_value?: string | number | boolean;
+                        field_type?: string;
+                      }
+                    >
+                  ).map(normalizeServerVariable);
                   logger.info(`Parsed ServerEnv: ${JSON.stringify(ServerEnv)}`);
 
                   const ports = JSON.parse(serverToReinstall.Ports);
@@ -2681,21 +2710,21 @@ const dashboardModule: Module = {
                     // Process the value based on its type
                     let processedValue: string | number | boolean;
                     switch (curr.type) {
-                      case 'boolean':
-                        processedValue =
+                    case 'boolean':
+                      processedValue =
                           curr.value === 1 ||
                           curr.value === '1' ||
                           curr.value === true
                             ? 'true'
                             : 'false';
-                        break;
-                      case 'number':
-                        processedValue = Number(curr.value);
-                        break;
-                      case 'text':
-                      default:
-                        processedValue = String(curr.value);
-                        break;
+                      break;
+                    case 'number':
+                      processedValue = Number(curr.value);
+                      break;
+                    case 'text':
+                    default:
+                      processedValue = String(curr.value);
+                      break;
                     }
                     acc[curr.env] = processedValue;
                     logger.info(
@@ -2726,37 +2755,98 @@ const dashboardModule: Module = {
                     reinstallDockerImage = Object.values(parsed)[0] as string | undefined;
                   } catch { /* leave undefined */ }
 
-                  const installRequestData = {
-                    method: 'POST',
-                    url: `${daemonSchemeSync()}://${serverToReinstall.node.address}:${serverToReinstall.node.port}/container/install`,
-                    auth: {
-                      username: 'Airlink',
-                      password: serverToReinstall.node.key,
-                    },
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    data: {
-                      id: serverToReinstall.UUID,
-                      image: reinstallDockerImage,
-                      env: env,
-                      scripts: scripts.install.map(
-                        (script: {
-                          url: string;
-                          fileName: string;
-                          onStart: boolean;
-                          ALVKT: boolean;
-                        }) => ({
-                          url: script.url,
-                          onStartup: script.onStart,
-                          ALVKT: script.ALVKT,
-                          fileName: script.fileName,
-                        }),
-                      ),
-                    },
-                  };
+                  let installResponse;
 
-                  const installResponse = await axios(installRequestData);
+                  if (
+                    scripts.installation &&
+                    typeof scripts.installation === 'object'
+                  ) {
+                    const inst = scripts.installation as {
+                      script: string;
+                      container: string;
+                      entrypoint?: string;
+                    };
+
+                    installResponse = await axios({
+                      method: 'POST',
+                      url: `${daemonSchemeSync()}://${serverToReinstall.node.address}:${serverToReinstall.node.port}/container/installer`,
+                      auth: {
+                        username: 'Airlink',
+                        password: serverToReinstall.node.key,
+                      },
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      data: {
+                        id: serverToReinstall.UUID,
+                        script: inst.script,
+                        container: inst.container,
+                        entrypoint: inst.entrypoint || 'bash',
+                        env,
+                      },
+                    });
+                  } else if (Array.isArray(scripts.install)) {
+                    installResponse = await axios({
+                      method: 'POST',
+                      url: `${daemonSchemeSync()}://${serverToReinstall.node.address}:${serverToReinstall.node.port}/container/install`,
+                      auth: {
+                        username: 'Airlink',
+                        password: serverToReinstall.node.key,
+                      },
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      data: {
+                        id: serverToReinstall.UUID,
+                        image: reinstallDockerImage,
+                        env,
+                        scripts: scripts.install.map(
+                          (script: {
+                            url: string;
+                            fileName: string;
+                            onStart: boolean;
+                            ALVKT: boolean;
+                          }) => ({
+                            url: script.url,
+                            onStartup: script.onStart,
+                            ALVKT: script.ALVKT,
+                            fileName: script.fileName,
+                          }),
+                        ),
+                      },
+                    });
+
+                    if (scripts.native && typeof scripts.native === 'object') {
+                      const native = scripts.native as {
+                        CMD: string;
+                        container: string;
+                      };
+
+                      await axios({
+                        method: 'POST',
+                        url: `${daemonSchemeSync()}://${serverToReinstall.node.address}:${serverToReinstall.node.port}/container/installer`,
+                        auth: {
+                          username: 'Airlink',
+                          password: serverToReinstall.node.key,
+                        },
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        data: {
+                          id: serverToReinstall.UUID,
+                          env,
+                          script: native.CMD,
+                          container: native.container,
+                          entrypoint: 'bash',
+                        },
+                      });
+                    }
+                  } else {
+                    throw new Error(
+                      'No supported install scripts found for reinstallation',
+                    );
+                  }
+
                   logger.info(
                     `Installation scripts sent for server ${serverId}. Response status: ${installResponse.status}`,
                   );
@@ -2772,7 +2862,7 @@ const dashboardModule: Module = {
                   );
                   if (error.response) {
                     logger.error(`Response status: ${error.response.status}`);
-                    logger.error(`Response data:`, error.response.data);
+                    logger.error('Response data:', error.response.data);
                   }
                   await prisma.server.update({
                     where: { UUID: getParamAsString(serverId) },

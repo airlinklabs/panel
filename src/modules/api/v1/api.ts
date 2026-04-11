@@ -3,7 +3,7 @@ import { Module } from '../../../handlers/moduleInit';
 import prisma from '../../../db';
 import logger from '../../../handlers/logger';
 import { apiValidator } from '../../../handlers/utils/api/apiValidator';
-import { getParamAsString, getParamAsNumber } from "../../../utils/typeHelpers";
+import { getParamAsString, getParamAsNumber } from '../../../utils/typeHelpers';
 
 const coreModule: Module = {
   info: {

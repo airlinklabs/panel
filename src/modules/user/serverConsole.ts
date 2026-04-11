@@ -5,6 +5,11 @@ import { WebSocket } from 'ws';
 import { isAuthenticatedForServerWS } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
 import { getParamAsString } from '../../utils/typeHelpers';
+import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+
+function wsScheme(): 'ws' | 'wss' {
+  return daemonSchemeSync() === 'https' ? 'wss' : 'ws';
+}
 
 async function proxyConsole(
   ws: WebSocket,
@@ -86,7 +91,7 @@ const wsServerConsoleModule: Module = {
         }
         await proxyConsole(
           ws, req, userId,
-          (addr, port, id) => `ws://${addr}:${port}/container/${id}`,
+          (addr, port, id) => `${wsScheme()}://${addr}:${port}/container/${id}`,
         );
       },
     );
@@ -102,7 +107,7 @@ const wsServerConsoleModule: Module = {
         }
         await proxyConsole(
           ws, req, +req.query.userId,
-          (addr, port, id) => `ws://${addr}:${port}/container/${id}`,
+          (addr, port, id) => `${wsScheme()}://${addr}:${port}/container/${id}`,
         );
       },
     );
@@ -119,7 +124,7 @@ const wsServerConsoleModule: Module = {
         }
         await proxyConsole(
           ws, req, userId,
-          (addr, port, id) => `ws://${addr}:${port}/containerstatus/${id}`,
+          (addr, port, id) => `${wsScheme()}://${addr}:${port}/containerstatus/${id}`,
         );
       },
     );
@@ -136,7 +141,7 @@ const wsServerConsoleModule: Module = {
         }
         await proxyConsole(
           ws, req, userId,
-          (addr, port, id) => `ws://${addr}:${port}/containerevents/${id}`,
+          (addr, port, id) => `${wsScheme()}://${addr}:${port}/containerevents/${id}`,
         );
       },
     );

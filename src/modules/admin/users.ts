@@ -5,7 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { onlineUsers } from '../user/wsUsers';
 import logger from '../../handlers/logger';
 import bcrypt from 'bcrypt';
-import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
+import { getParamAsString, getParamAsNumber } from '../../utils/typeHelpers';
 
 
 async function listUsers(res: Response) {

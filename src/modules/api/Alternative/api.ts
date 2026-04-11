@@ -6,7 +6,7 @@ import axios from 'axios';
 import { queueer } from '../../../handlers/queueer';
 import bcrypt from 'bcrypt';
 import { Buffer } from 'buffer';
-import { getParamAsString, getParamAsNumber } from "../../../utils/typeHelpers";
+import { getParamAsString, getParamAsNumber } from '../../../utils/typeHelpers';
 import { daemonSchemeSync } from '../../../handlers/utils/core/daemonRequest';
 
 

@@ -8,7 +8,7 @@ import fsSync from 'fs';
 import path from 'path';
 import axios from 'axios';
 import FormData from 'form-data';
-import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
+import { getParamAsString, getParamAsNumber } from '../../utils/typeHelpers';
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 
@@ -400,7 +400,7 @@ const radarModule: Module = {
             // Still pending after max polls — give the user a direct analysis link
             // Note: /gui/analyses/{id} doesn't exist as a GUI page; the file page is
             // /gui/file/{sha256} but we don't have the sha256 yet, so link to the search.
-            res.json({ success: true, pending: true, analysisId, vtLink: `https://www.virustotal.com/gui/home/upload` });
+            res.json({ success: true, pending: true, analysisId, vtLink: 'https://www.virustotal.com/gui/home/upload' });
             return;
           }
 
@@ -409,7 +409,7 @@ const radarModule: Module = {
           const sha256 = analysisData.meta?.file_info?.sha256 as string | undefined;
           const vtLink = sha256
             ? `https://www.virustotal.com/gui/file/${sha256}`
-            : `https://www.virustotal.com/gui/home/upload`;
+            : 'https://www.virustotal.com/gui/home/upload';
 
           const results = analysisData.data?.attributes?.results || {};
           const stats = analysisData.data?.attributes?.stats || {};
