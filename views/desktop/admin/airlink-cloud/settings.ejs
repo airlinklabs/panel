@@ -1,0 +1,85 @@
+<%- include('../../components/header', { title: 'Airlink Cloud' }) %>
+
+<main class="min-h-screen">
+  <div class="flex min-h-screen">
+    <div class="w-60 shrink-0"><%- include('../../components/template') %></div>
+
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <div class="px-8 pt-5">
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white">Airlink Cloud</h1>
+        <p class="mt-0.5 text-sm text-neutral-500">Configure your Airlink Cloud integration.</p>
+      </div>
+
+      <div class="px-8 mt-5 space-y-6">
+        
+        <!-- API Configuration -->
+        <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+          <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">API Settings</h2>
+          <div class="px-5 py-5 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Airlink Cloud API Key</label>
+              <input type="password" id="airlinkCloudApiKey" value="<%= settings.airlinkCloudApiKey || '' %>" placeholder="YOUR_API_KEY_HERE"
+                class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+              <p class="mt-2 text-xs text-neutral-500">Get your API key from <a href="http://45.134.39.82:25607" target="_blank" class="text-blue-500 hover:underline">Airlink Cloud</a></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature Configuration -->
+        <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+          <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Features</h2>
+          <div class="px-5 py-5 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-neutral-700 dark:text-white">Enable Cloud Backups</p>
+              <p class="text-xs text-neutral-500 mt-0.5">When enabled, instance backups will be stored on Airlink Cloud instead of the local daemon.</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="airlinkCloudBackupEnabled" class="sr-only peer" <%= settings.airlinkCloudBackupEnabled ? 'checked' : '' %>>
+              <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button id="saveBtn" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-6 py-2 text-sm font-medium shadow-sm transition">
+            Save Settings
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  const apiKey = document.getElementById('airlinkCloudApiKey').value;
+  const backupEnabled = document.getElementById('airlinkCloudBackupEnabled').checked;
+
+  try {
+    const res = await fetch('/admin/airlink-cloud', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': '<%= req.csrfToken() %>'
+      },
+      body: JSON.stringify({
+        airlinkCloudApiKey: apiKey,
+        airlinkCloudBackupEnabled: backupEnabled
+      })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      showToast('Settings saved successfully!', 'success');
+    } else {
+      showToast(data.error || 'Failed to save settings.', 'error');
+    }
+  } catch (err) {
+    showToast('An error occurred while saving settings.', 'error');
+  }
+});
+</script>
+
+<%- include('../../components/footer') %>
+<%- include('../../components/toast') %>

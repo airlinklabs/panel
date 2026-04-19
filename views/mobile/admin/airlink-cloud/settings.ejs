@@ -1,0 +1,81 @@
+<%- include('../../components/header', { title: 'Airlink Cloud' }) %>
+
+<main class="min-h-screen pb-20">
+  <%- include('../../components/template') %>
+
+  <div class="px-4 py-6 space-y-6">
+    <div class="mb-2">
+      <h1 class="text-lg font-semibold text-neutral-800 dark:text-white">Airlink Cloud</h1>
+      <p class="text-sm text-neutral-500 mt-0.5">Cloud storage integration settings.</p>
+    </div>
+
+    <!-- API Configuration -->
+    <div class="bg-white dark:bg-neutral-800/50 rounded-2xl border border-neutral-200 dark:border-neutral-700/30 overflow-hidden shadow-sm">
+      <div class="px-5 py-4 bg-neutral-50/50 dark:bg-neutral-700/20 border-b border-neutral-200 dark:border-neutral-700/30">
+        <h2 class="text-sm font-semibold text-neutral-800 dark:text-white uppercase tracking-wider">API Settings</h2>
+      </div>
+      <div class="px-5 py-5 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-2">API Key</label>
+          <input type="password" id="airlinkCloudApiKey" value="<%= settings.airlinkCloudApiKey || '' %>" placeholder="YOUR_API_KEY_HERE"
+            class="w-full px-4 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-neutral-800 dark:text-white text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all">
+          <p class="mt-2 text-xs text-neutral-500 italic">Get your key from <a href="http://45.134.39.82:25607" target="_blank" class="text-blue-500">Airlink Cloud</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <div class="bg-white dark:bg-neutral-800/50 rounded-2xl border border-neutral-200 dark:border-neutral-700/30 overflow-hidden shadow-sm">
+      <div class="px-5 py-4 bg-neutral-50/50 dark:bg-neutral-700/20 border-b border-neutral-200 dark:border-neutral-700/30">
+        <h2 class="text-sm font-semibold text-neutral-800 dark:text-white uppercase tracking-wider">Features</h2>
+      </div>
+      <div class="px-5 py-5 flex items-center justify-between">
+        <div class="pr-4">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">Cloud Backups</p>
+          <p class="text-xs text-neutral-500 mt-1">Store backups on Airlink Cloud instead of the local daemon.</p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+          <input type="checkbox" id="airlinkCloudBackupEnabled" class="sr-only peer" <%= settings.airlinkCloudBackupEnabled ? 'checked' : '' %>>
+          <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 shadow-inner"></div>
+        </label>
+      </div>
+    </div>
+
+    <button id="saveBtn" class="w-full py-4 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 rounded-2xl font-semibold text-sm shadow-lg active:scale-[0.98] transition-all">
+      Save Settings
+    </button>
+  </div>
+</main>
+
+<script>
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  const apiKey = document.getElementById('airlinkCloudApiKey').value;
+  const backupEnabled = document.getElementById('airlinkCloudBackupEnabled').checked;
+
+  try {
+    const res = await fetch('/admin/airlink-cloud', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': '<%= req.csrfToken() %>'
+      },
+      body: JSON.stringify({
+        airlinkCloudApiKey: apiKey,
+        airlinkCloudBackupEnabled: backupEnabled
+      })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      showToast('Settings saved successfully!', 'success');
+    } else {
+      showToast(data.error || 'Failed to save settings.', 'error');
+    }
+  } catch (err) {
+    showToast('An error occurred.', 'error');
+  }
+});
+</script>
+
+<%- include('../../components/footer') %>
+<%- include('../../components/toast') %>

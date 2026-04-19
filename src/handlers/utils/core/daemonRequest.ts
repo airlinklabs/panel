@@ -62,6 +62,23 @@ function extractKeyFromAuth(auth: { username?: string; password?: string } | und
   return auth.password ?? null;
 }
 
+function serializeRequestBody(data: unknown): string {
+  if (data == null) return '';
+  if (typeof data === 'string') return data;
+  if (Buffer.isBuffer(data)) return '';
+
+  // Streams and socket-backed objects cannot be JSON-stringified safely.
+  if (typeof data === 'object' && data !== null && 'pipe' in (data as Record<string, unknown>)) {
+    return '';
+  }
+
+  try {
+    return JSON.stringify(data);
+  } catch {
+    return '';
+  }
+}
+
 // Install once at panel startup. After this, every axios request that carries
 // { auth: { username: 'Airlink', password: key } } automatically gets
 // X-Airlink-Timestamp and X-Airlink-Signature headers added.
@@ -84,9 +101,7 @@ export function installDaemonRequestInterceptor(): void {
       urlPath = (config.url || '/').split('?')[0];
     }
 
-    const body = config.data
-      ? typeof config.data === 'string' ? config.data : JSON.stringify(config.data)
-      : '';
+    const body = serializeRequestBody(config.data);
 
     const timestamp = Math.floor(Date.now() / 1000);
     const signature = hmacSign(key, method, urlPath, body, timestamp);
