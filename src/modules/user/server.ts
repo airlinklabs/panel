@@ -11,6 +11,7 @@ import { getServerStatus } from '../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../utils/typeHelpers';
 import prisma from '../../db';
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { AirlinkCloudClient } from '../../handlers/utils/core/airlinkCloud';
 
 declare global {
   var serverStoppingStates: { [key: string]: boolean };
@@ -2893,6 +2894,9 @@ const dashboardModule: Module = {
             return;
           }
 
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const isCloudBackupEnabled = settings?.airlinkCloudBackupEnabled && settings?.airlinkCloudApiKey;
+
           const response = await axios.post(
             `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
             {
@@ -2909,25 +2913,69 @@ const dashboardModule: Module = {
           );
 
           if (response.data.success) {
+            let airlinkCloudId = null;
+            let filePath = response.data.backup.filePath;
+
+            if (isCloudBackupEnabled) {
+              try {
+                const cloudClient = new AirlinkCloudClient(settings.airlinkCloudApiKey!);
+                
+                // Get the backup file from the daemon
+                const downloadResponse = await axios({
+                  method: 'GET',
+                  url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup/download`,
+                  params: { backupPath: filePath },
+                  auth: { username: 'Airlink', password: server.node.key },
+                  responseType: 'stream',
+                });
+
+                // Upload to Airlink Cloud
+                const uniqueCloudFileName = `${getParamAsString(serverId)}_${response.data.backup.uuid}_${Date.now()}.tar.gz`;
+                const uploadResult = await cloudClient.uploadFile(
+                  downloadResponse.data,
+                  uniqueCloudFileName
+                );
+
+                if (uploadResult && uploadResult.id) {
+                  airlinkCloudId = uploadResult.id;
+                  
+                  // Delete the local backup from the daemon
+                  await axios.delete(
+                    `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
+                    {
+                      data: { backupPath: filePath },
+                      auth: { username: 'Airlink', password: server.node.key },
+                    }
+                  ).catch(e => logger.warn(`Failed to delete temporary local backup: ${e}`));
+                  
+                  filePath = 'airlink-cloud'; // Marker for cloud backups
+                }
+              } catch (cloudError) {
+                logger.error('Failed to redirect backup to Airlink Cloud:', cloudError);
+                // We'll keep the local backup if cloud upload fails
+              }
+            }
+
             const backup = await prisma.backup.create({
               data: {
                 UUID: response.data.backup.uuid,
                 name: name.trim(),
                 serverId: getParamAsString(serverId),
-                filePath: response.data.backup.filePath,
+                filePath: filePath,
                 size: BigInt(response.data.backup.size),
+                airlinkCloudId: airlinkCloudId,
               },
             });
 
             res.json({
               success: true,
-              message: 'Backup created successfully',
+              message: isCloudBackupEnabled && airlinkCloudId ? 'Backup created and uploaded to Airlink Cloud' : 'Backup created successfully',
               backup: {
                 ...backup,
                 size: backup.size ? backup.size.toString() : '0',
                 UUID: response.data.backup.uuid,
                 name: name.trim(),
-                createdAt: 0,
+                createdAt: backup.createdAt,
               },
             });
           } else {
@@ -2982,11 +3030,56 @@ const dashboardModule: Module = {
             return;
           }
 
+          let backupPath = backup.filePath;
+
+          if (backup.airlinkCloudId) {
+            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            if (!settings?.airlinkCloudApiKey) {
+              res.status(500).json({ error: 'Airlink Cloud API key not configured' });
+              return;
+            }
+
+            try {
+              const cloudClient = new AirlinkCloudClient(settings.airlinkCloudApiKey);
+              const cloudDownloadResponse = await cloudClient.getDownloadStream(backup.airlinkCloudId);
+
+              // Upload to the daemon's temporary backup location
+              const uploadResponse = await axios({
+                method: 'POST',
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup/upload`,
+                params: {
+                  id: serverId,
+                  backupUuid: backup.UUID
+                },
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key
+                },
+                data: cloudDownloadResponse.data,
+                headers: {
+                  'Content-Type': 'application/octet-stream'
+                },
+                maxContentLength: Infinity,
+                maxBodyLength: Infinity
+              });
+
+              if (uploadResponse.data.success) {
+                backupPath = uploadResponse.data.filePath;
+              } else {
+                throw new Error('Failed to upload cloud backup to daemon');
+              }
+            } catch (err) {
+              logger.error('Failed to prepare Airlink Cloud backup for restore:', err);
+              res.status(500).json({ error: 'Failed to prepare cloud backup for restore' });
+              return;
+            }
+          }
+
           const response = await axios.post(
             `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/restore`,
             {
               id: serverId,
-              backupPath: backup.filePath,
+              backupPath: backupPath,
             },
             {
               auth: {
@@ -2996,6 +3089,17 @@ const dashboardModule: Module = {
               timeout: 300000,
             },
           );
+
+          // If it was a cloud backup, delete the temporary file from the daemon after restore
+          if (backup.airlinkCloudId && backupPath !== 'airlink-cloud') {
+            axios.delete(
+              `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
+              {
+                data: { backupPath: backupPath },
+                auth: { username: 'Airlink', password: server.node.key },
+              }
+            ).catch(e => logger.warn(`Failed to delete temporary restore file: ${e}`));
+          }
 
           if (response.data.success) {
             res.json({
@@ -3051,6 +3155,27 @@ const dashboardModule: Module = {
 
           if (!backup) {
             res.status(404).json({ error: 'Backup not found' });
+            return;
+          }
+
+          if (backup.airlinkCloudId) {
+            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            if (!settings?.airlinkCloudApiKey) {
+              res.status(500).json({ error: 'Airlink Cloud API key not configured' });
+              return;
+            }
+
+            const cloudClient = new AirlinkCloudClient(settings.airlinkCloudApiKey);
+            const downloadResponse = await cloudClient.getDownloadStream(backup.airlinkCloudId);
+
+            const fileName = `${backup.name}_${backup.createdAt.toISOString().split('T')[0]}.tar.gz`;
+            res.setHeader(
+              'Content-Disposition',
+              `attachment; filename="${fileName}"`,
+            );
+            res.setHeader('Content-Type', 'application/gzip');
+
+            downloadResponse.data.pipe(res);
             return;
           }
 
@@ -3123,21 +3248,29 @@ const dashboardModule: Module = {
             return;
           }
 
-          try {
-            await axios.delete(
-              `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
-              {
-                data: {
-                  backupPath: backup.filePath,
+          if (backup.airlinkCloudId) {
+            const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+            if (settings?.airlinkCloudApiKey) {
+              const cloudClient = new AirlinkCloudClient(settings.airlinkCloudApiKey);
+              await cloudClient.deleteFile(backup.airlinkCloudId).catch(e => logger.warn(`Failed to delete backup from Airlink Cloud: ${e}`));
+            }
+          } else {
+            try {
+              await axios.delete(
+                `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
+                {
+                  data: {
+                    backupPath: backup.filePath,
+                  },
+                  auth: {
+                    username: 'Airlink',
+                    password: server.node.key,
+                  },
                 },
-                auth: {
-                  username: 'Airlink',
-                  password: server.node.key,
-                },
-              },
-            );
-          } catch (daemonError) {
-            logger.warn('Failed to delete backup file from daemon');
+              );
+            } catch (daemonError) {
+              logger.warn('Failed to delete backup file from daemon');
+            }
           }
 
           await prisma.backup.delete({

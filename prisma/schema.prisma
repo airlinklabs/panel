@@ -133,6 +133,8 @@ model settings {
   enforceDaemonHttps       Boolean @default(false)
   behindReverseProxy       Boolean @default(false)
   hashApiKeys              Boolean @default(false)
+  airlinkCloudApiKey       String?
+  airlinkCloudBackupEnabled Boolean @default(false)
 }
 
 model ServerFolder {
@@ -209,6 +211,7 @@ model Backup {
   size        BigInt?
   createdAt   DateTime @default(now())
   server      Server   @relation(fields: [serverId], references: [UUID])
+  airlinkCloudId String?
 
   @@index([serverId])
   @@index([createdAt])
