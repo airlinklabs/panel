@@ -1,18 +1,22 @@
 #!/bin/bash
 ############################################################################
-# Copyright [2026] [thavanish]
+# Copyright (C) 2026 thavanish
 #
-#   Licensed under the Apache License, Version 2.0 (the "License");
-#   you may not use this file except in compliance with the License.
-#   You may obtain a copy of the License at
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; version 2 of the License only.
 #
-#       http://www.apache.org/licenses/LICENSE-2.0
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 #
-#   Unless required by applicable law or agreed to in writing, software
-#   distributed under the License is distributed on an "AS IS" BASIS,
-#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#   See the License for the specific language governing permissions and
-#   limitations under the License.
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to:
+#   Free Software Foundation, Inc.
+#   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# GNU General Public License v2 — All Rights Reserved
 ############################################################################
 
 # NOTE: Do NOT use set -e here — arithmetic like (( x++ )) returns 1 when
@@ -27,6 +31,11 @@ readonly LOG="/tmp/airlink.log"
 readonly PRISMA_VER="6.19.1"
 readonly PANEL_REPO="https://github.com/airlinklabs/panel.git"
 readonly DAEMON_REPO="https://github.com/airlinklabs/daemon.git"
+
+# resolved at runtime by select_npm_registry — pnpm uses this
+PNPM_REGISTRY="https://registry.npmjs.org"
+# path to pnpm once installed
+PNPM="pnpm"
 
 declare -a ADDONS=(
     "Modrinth|https://github.com/airlinklabs/addons.git|modrinth|modrinth"
@@ -138,7 +147,7 @@ ni_run() {
     NI_STEP=$(( NI_STEP + 1 ))
     local fi=0
     local outfile; outfile=$(mktemp /tmp/al-step-XXXXXX)
-    local out_lines=4
+    local out_lines=6
 
     "$@" >"$outfile" 2>&1 &
     local pid=$!
@@ -148,7 +157,17 @@ ni_run() {
         printf "\r  ${C_GRAY}[%02d/%02d]${RESET} %-42s ${spin}" "$NI_STEP" "$NI_TOTAL" "$label"
         fi=$(( (fi + 1) % 4 ))
 
-        # stream last few lines below
+        # status line — what's actually happening right now
+        local last_line raw_status
+        last_line=$(grep -v '^[[:space:]]*$' "$outfile" 2>/dev/null | tail -1)
+        raw_status=$(parse_status_line "$last_line")
+        if [[ -n "$raw_status" ]]; then
+            printf "\n    ${C_YELLOW}status:${RESET} ${C_GRAY}%-68.68s${RESET}" "$raw_status"
+        else
+            printf "\n%76s" ""
+        fi
+
+        # stream last few lines below status
         local li=0
         while IFS= read -r line; do
             printf "\n    ${C_GRAY}%-72.72s${RESET}" "$line"
@@ -158,19 +177,21 @@ ni_run() {
             printf "\n%76s" ""
             li=$(( li + 1 ))
         done
-        printf "\033[%dA\r" "$out_lines"
+        # move back up: status line + out_lines
+        printf "\033[%dA\r" $(( out_lines + 1 ))
         sleep 0.1
     done
 
     wait "$pid"
     local status=$?
 
-    # clear streaming area
+    # clear status + streaming area
     local li
+    printf "\n%76s" ""
     for (( li = 0; li < out_lines; li++ )); do
         printf "\n%76s" ""
     done
-    printf "\033[%dA\r" "$out_lines"
+    printf "\033[%dA\r" $(( out_lines + 1 ))
 
     if [[ $status -eq 0 ]]; then
         printf "\r  ${C_GRAY}[%02d/%02d]${RESET} %-42s ${C_GREEN}done${RESET}\n" "$NI_STEP" "$NI_TOTAL" "$label"
@@ -230,14 +251,18 @@ tui_box() {
     move_to "$row" "$col"
     if [[ -n "$title" ]]; then
         local tlen=${#title}
-        local left_pad=$(( (inner - tlen - 2) / 2 ))
-        local right_pad=$(( inner - tlen - 2 - left_pad ))
-        [[ $left_pad -lt 0 ]] && left_pad=0
-        [[ $right_pad -lt 0 ]] && right_pad=0
+        # clamp title so it fits: need 2 chars for corners, 2 for spaces around title
+        if [[ $(( tlen + 4 )) -gt $inner ]]; then
+            tlen=$(( inner - 4 ))
+            title="${title:0:$tlen}"
+        fi
+        local dashes=$(( inner - tlen - 2 ))
+        local left_pad=$(( dashes / 2 ))
+        local right_pad=$(( dashes - left_pad ))
         printf "+"
-        printf '%*s' "$left_pad" '' | tr ' ' '-'
+        [[ $left_pad -gt 0 ]] && printf '%*s' "$left_pad" '' | tr ' ' '-'
         printf " ${BOLD}%s${RESET} " "$title"
-        printf '%*s' "$right_pad" '' | tr ' ' '-'
+        [[ $right_pad -gt 0 ]] && printf '%*s' "$right_pad" '' | tr ' ' '-'
         printf "+"
     else
         printf "+"
@@ -300,6 +325,11 @@ read_key() {
 }
 
 # =============================================================================
+# Install state — set to 1 during active installs, blocks ESC-back navigation
+# =============================================================================
+_INSTALLING=0
+
+# =============================================================================
 # ASCII art banner lines — stored as array for centering
 # =============================================================================
 _BANNER=(
@@ -308,18 +338,25 @@ _BANNER=(
     "  / _ \\  | || |_) | |    | ||  \\| | ' / "
     " / ___ \\ | ||  _ <| |___ | || |\\  | . \\ "
     "/_/   \\_\\___|_| \\_\\_____|___|_| \\_|_|\\_\\\\"
+    ""
+    "  GNU General Public License v2 -- All Rights Reserved"
 )
 
 # Draw banner centered at given row
 draw_banner() {
     local start_row=$1
     local bi
+    # use longest line for centering (line 0 is the art, not the license line)
     local banner_w=${#_BANNER[0]}
     local bx=$(( (TERM_COLS - banner_w) / 2 ))
     [[ $bx -lt 1 ]] && bx=1
     for (( bi = 0; bi < ${#_BANNER[@]}; bi++ )); do
         move_to $(( start_row + bi )) "$bx"
-        printf "${DIM}%s${RESET}" "${_BANNER[$bi]}"
+        if [[ $bi -ge 6 ]]; then
+            printf "${DIM}${C_GRAY}%s${RESET}" "${_BANNER[$bi]}"
+        else
+            printf "${DIM}%s${RESET}" "${_BANNER[$bi]}"
+        fi
     done
 }
 
@@ -352,8 +389,8 @@ tui_menu() {
     [[ $box_w -lt 46 ]] && box_w=46
     [[ $box_w -gt $max_box_w ]] && box_w=$max_box_w
 
-    # banner is 5 lines, gap 1, then box
-    local banner_h=5
+    # banner is 7 lines now, gap 1, then box
+    local banner_h=7
     local gap=1
     local box_h=$(( count + 6 ))   # title row + hline + items + hint + bottom border + top border
     local total_h=$(( banner_h + gap + box_h ))
@@ -371,21 +408,20 @@ tui_menu() {
         # banner
         draw_banner $(( box_r - banner_h - gap ))
 
-        # box
+        # box — use full-width border characters properly
         tui_box "$box_r" "$box_c" "$box_w" "$box_h" "$title"
 
         # sub-header hint line
         move_to $(( box_r + 1 )) $(( box_c + 2 ))
-        printf "${DIM}%-${inner}s${RESET}" "arrows/jk move  enter select  number hotkey  q quit"
+        printf "${DIM}%-${inner}s${RESET}" "arrows/jk move  enter select  0-9 hotkey  esc/q quit"
 
         # separator
         tui_hline $(( box_r + 2 )) "$box_c" "$box_w"
 
-        # items
+        # items — numbered 0 through count-1
         for (( i = 0; i < count; i++ )); do
             move_to $(( box_r + 3 + i )) $(( box_c + 1 ))
-            local num=$(( i + 1 ))
-            local label="[${num}] ${items[$i]}"
+            local label="[${i}] ${items[$i]}"
             if [[ $i -eq $selected ]]; then
                 printf "${REV} %-${inner}s ${RESET}" "$label"
             else
@@ -414,14 +450,18 @@ tui_menu() {
                 TUI_RESULT=$selected
                 return 0
                 ;;
-            q|Q)
-                TUI_RESULT=-1
-                return 1
+            ESC|q|Q)
+                # ESC goes back to previous menu (or exits top-level)
+                # blocked during active installs
+                if [[ $_INSTALLING -eq 0 ]]; then
+                    TUI_RESULT=-1
+                    return 1
+                fi
                 ;;
             [0-9])
                 local num_pressed="${_KEY}"
-                if [[ $num_pressed -ge 1 && $num_pressed -le $count ]]; then
-                    TUI_RESULT=$(( num_pressed - 1 ))
+                if [[ $num_pressed -lt $count ]]; then
+                    TUI_RESULT=$num_pressed
                     return 0
                 fi
                 ;;
@@ -501,8 +541,8 @@ tui_checklist() {
                 ;;
             [0-9])
                 local np="${_KEY}"
-                if [[ $np -ge 1 && $np -le $count ]]; then
-                    local idx=$(( np - 1 ))
+                if [[ $np -lt $count ]]; then
+                    local idx=$np
                     if [[ ${checked[$idx]} -eq 1 ]]; then
                         checked[$idx]=0
                     else
@@ -519,9 +559,11 @@ tui_checklist() {
                 TUI_MULTI="${TUI_MULTI# }"
                 return 0
                 ;;
-            q|Q)
-                TUI_MULTI=""
-                return 0
+            ESC|q|Q)
+                if [[ $_INSTALLING -eq 0 ]]; then
+                    TUI_MULTI=""
+                    return 1
+                fi
                 ;;
         esac
     done
@@ -868,7 +910,7 @@ tui_progress_step() {
     local spinner_row=$(( _PBOX_R + 3 + PROGRESS_CURRENT ))
     local spinner_col=$(( _PBOX_C + _PBOX_W - 4 ))
     local out_row=$(( _PBOX_R + _PBOX_H + 1 ))
-    local out_lines=4
+    local out_lines=6
     local out_w=$(( _PBOX_W - 4 ))
     [[ $out_w -lt 20 ]] && out_w=20
 
@@ -882,6 +924,15 @@ tui_progress_step() {
         move_to "$spinner_row" "$spinner_col"
         printf "${C_CYAN}%s${RESET}" "${_NI_SPIN_CHARS[$fi]}"
         fi=$(( (fi + 1) % 4 ))
+
+        # status line — parse last meaningful line from output into human-readable string
+        local last_line raw_status
+        last_line=$(grep -v '^[[:space:]]*$' "$outfile" 2>/dev/null | tail -1)
+        raw_status=$(parse_status_line "$last_line")
+        if [[ $(( out_row - 1 )) -lt $TERM_ROWS && -n "$raw_status" ]]; then
+            move_to $(( out_row - 1 )) $(( _PBOX_C + 2 ))
+            printf "${C_YELLOW}status:${RESET} ${DIM}%-$(( out_w - 8 )).$(( out_w - 8 ))s${RESET}" "$raw_status"
+        fi
 
         local li=0
         while IFS= read -r line; do
@@ -905,7 +956,11 @@ tui_progress_step() {
     wait "$pid"
     local status=$?
 
-    # clear streaming area
+    # clear status line then streaming area
+    if [[ $(( out_row - 1 )) -lt $TERM_ROWS ]]; then
+        move_to $(( out_row - 1 )) $(( _PBOX_C + 2 ))
+        printf "%-${out_w}s" ""
+    fi
     local li
     for (( li = 0; li < out_lines; li++ )); do
         if [[ $(( out_row + li )) -lt $TERM_ROWS ]]; then
@@ -1038,23 +1093,209 @@ for r in data:
     fi
 }
 
+# =============================================================================
+# Registry selection — geolocate via ip-api.com, pick nearest mirror
+# Sets PNPM_REGISTRY to the fastest known registry for this region
+# =============================================================================
+select_npm_registry() {
+    local geo
+    geo=$(curl -fsSL --max-time 8 "http://ip-api.com/json/?fields=continentCode,countryCode" 2>/dev/null || echo "")
+
+    local continent country
+    continent=$(echo "$geo" | grep -o '"continentCode":"[^"]*"' | cut -d'"' -f4)
+    country=$(echo "$geo"   | grep -o '"countryCode":"[^"]*"'   | cut -d'"' -f4)
+
+    case "$continent" in
+        AS)
+            # Asia — Taobao mirror covers CN/IN/SG/JP well
+            # npmmirror.com is the current canonical Taobao-backed mirror
+            PNPM_REGISTRY="https://registry.npmmirror.com"
+            log "Registry: npmmirror.com (Asia)"
+            ;;
+        EU)
+            # Europe — Cloudflare npm proxy is geographically close for EU
+            PNPM_REGISTRY="https://registry.npmjs.org"
+            log "Registry: npmjs.org (EU — no dedicated EU mirror, CF edge is fast)"
+            ;;
+        OC)
+            PNPM_REGISTRY="https://registry.npmjs.org"
+            log "Registry: npmjs.org (Oceania)"
+            ;;
+        *)
+            # Americas and everything else — default npm CDN
+            PNPM_REGISTRY="https://registry.npmjs.org"
+            log "Registry: npmjs.org (default)"
+            ;;
+    esac
+
+    # sanity check — can we actually reach it?
+    if ! curl -fsSL --max-time 6 "${PNPM_REGISTRY}/npm" -o /dev/null 2>/dev/null; then
+        log "WARN: $PNPM_REGISTRY unreachable, falling back to registry.npmjs.org"
+        PNPM_REGISTRY="https://registry.npmjs.org"
+    fi
+}
+
+# =============================================================================
+# Status line parser — reads a raw output line, returns human-readable status
+# Used by tui_progress_step and ni_run to show what's happening underneath
+# =============================================================================
+parse_status_line() {
+    local line="$1"
+
+    # pnpm / npm package resolution and download
+    if [[ "$line" =~ "Packages:".*"installed" ]]; then
+        echo "pnpm: $(echo "$line" | grep -o '[0-9]* installed' | head -1) packages"
+        return
+    fi
+    if [[ "$line" =~ "Progress: resolved" ]]; then
+        # pnpm progress: resolved X, reused Y, downloaded Z
+        local resolved; resolved=$(echo "$line" | grep -o 'resolved [0-9]*' | grep -o '[0-9]*')
+        local downloaded; downloaded=$(echo "$line" | grep -o 'downloaded [0-9]*' | grep -o '[0-9]*')
+        echo "resolving packages — ${resolved:-?} resolved, ${downloaded:-0} downloaded"
+        return
+    fi
+    if [[ "$line" =~ " +[0-9]+ packages" && "$line" =~ "node_modules" ]]; then
+        echo "linking: $line" | sed 's/^ *//'
+        return
+    fi
+
+    # npm classic output
+    if [[ "$line" =~ ^"added "[0-9]+" packages" ]]; then
+        echo "${line}"
+        return
+    fi
+    if [[ "$line" =~ ^"npm warn" || "$line" =~ ^"npm WARN" ]]; then
+        echo "npm: $(echo "$line" | sed 's/^npm warn //I')"
+        return
+    fi
+
+    # git clone / fetch
+    if [[ "$line" =~ "Cloning into" ]]; then
+        local repo; repo=$(echo "$line" | grep -o "'.*/.*'" | tr -d "'")
+        echo "git: cloning ${repo:-repository}"
+        return
+    fi
+    if [[ "$line" =~ "Receiving objects:" ]]; then
+        local pct; pct=$(echo "$line" | grep -o '[0-9]*%' | head -1)
+        echo "git: receiving objects ${pct:-...}"
+        return
+    fi
+    if [[ "$line" =~ "Resolving deltas:" ]]; then
+        local pct; pct=$(echo "$line" | grep -o '[0-9]*%' | head -1)
+        echo "git: resolving deltas ${pct:-...}"
+        return
+    fi
+
+    # apt / pkg
+    if [[ "$line" =~ ^"Get:" ]]; then
+        local pkg; pkg=$(echo "$line" | awk '{print $4}')
+        echo "apt: fetching ${pkg:-package}"
+        return
+    fi
+    if [[ "$line" =~ ^"Unpacking" ]]; then
+        local pkg; pkg=$(echo "$line" | awk '{print $2}')
+        echo "apt: unpacking ${pkg:-package}"
+        return
+    fi
+    if [[ "$line" =~ ^"Setting up" ]]; then
+        local pkg; pkg=$(echo "$line" | awk '{print $3}')
+        echo "apt: setting up ${pkg:-package}"
+        return
+    fi
+
+    # typescript / tsc build
+    if [[ "$line" =~ "error TS" ]]; then
+        echo "tsc error: $(echo "$line" | grep -o 'error TS[^:]*:.*' | head -1 | cut -c1-60)"
+        return
+    fi
+    if [[ "$line" =~ ".ts(" ]]; then
+        local f; f=$(echo "$line" | grep -o '[^ ]*\.ts([0-9,]*)' | head -1)
+        echo "tsc: compiling ${f:-...}"
+        return
+    fi
+
+    # prisma
+    if [[ "$line" =~ "Applying migration" ]]; then
+        local mig; mig=$(echo "$line" | grep -o '`[^`]*`' | head -1 | tr -d '`')
+        echo "prisma: applying migration ${mig:-...}"
+        return
+    fi
+    if [[ "$line" =~ "Generated Prisma Client" ]]; then
+        echo "prisma: client generated"
+        return
+    fi
+
+    # systemctl
+    if [[ "$line" =~ "Created symlink" ]]; then
+        echo "systemd: service enabled"
+        return
+    fi
+
+    # docker
+    if [[ "$line" =~ "Pulling from" ]]; then
+        local img; img=$(echo "$line" | awk '{print $NF}')
+        echo "docker: pulling ${img:-image}"
+        return
+    fi
+
+    # nodesource setup script
+    if [[ "$line" =~ "Installing Node.js" ]]; then
+        echo "${line}" | sed 's/^ *//'
+        return
+    fi
+
+    # generic: strip leading whitespace, return if non-empty and printable
+    local stripped; stripped=$(echo "$line" | sed 's/^[[:space:]]*//' | tr -cd '[:print:]')
+    if [[ -n "$stripped" ]]; then
+        echo "${stripped}"
+    else
+        echo ""
+    fi
+}
+
 setup_node() {
     local desired_major
     desired_major=$(get_latest_node_lts)
     log "Latest Node.js LTS major: $desired_major"
 
-    # Check if already correct version
+    # check if already correct version
     if command -v node &>/dev/null; then
         local current_major
         current_major=$(node -e "console.log(process.versions.node.split('.')[0])" 2>/dev/null || echo "0")
         if [[ "$current_major" == "$desired_major" ]]; then
             log "Node.js $desired_major already installed ($(node -v))"
-            npm install -g typescript &>/dev/null || true
-            return 0
+        else
+            log "Node.js version mismatch: have $current_major, want $desired_major — upgrading"
+            _install_node "$desired_major"
         fi
-        log "Node.js version mismatch: have $current_major, want $desired_major — upgrading"
+    else
+        _install_node "$desired_major"
     fi
 
+    command -v node &>/dev/null || die "Node.js install failed"
+    log "Installed Node.js $(node -v)"
+
+    # pick nearest registry before installing anything else
+    select_npm_registry
+
+    # install pnpm via npm once — faster for all subsequent package installs
+    if ! command -v pnpm &>/dev/null; then
+        echo "Installing pnpm..."
+        npm install -g pnpm --registry "${PNPM_REGISTRY}" &>/dev/null \
+            || npm install -g pnpm &>/dev/null \
+            || die "pnpm install failed"
+    fi
+    PNPM=$(command -v pnpm)
+
+    # point pnpm at the selected registry globally
+    "$PNPM" config set registry "${PNPM_REGISTRY}" &>/dev/null || true
+
+    npm install -g typescript &>/dev/null || true
+    log "pnpm $("$PNPM" -v 2>/dev/null) ready, registry: ${PNPM_REGISTRY}"
+}
+
+_install_node() {
+    local desired_major="$1"
     case "$FAM" in
         debian)
             curl -fsSL "https://deb.nodesource.com/setup_${desired_major}.x" | bash -
@@ -1065,17 +1306,12 @@ setup_node() {
             $PKG install -y -q nodejs
             ;;
         arch)
-            # Arch ships latest via community repo
             pacman -Sy --noconfirm --needed nodejs npm
             ;;
         alpine)
             apk add --no-cache nodejs npm
             ;;
     esac
-
-    command -v node &>/dev/null || die "Node.js install failed"
-    log "Installed Node.js $(node -v)"
-    npm install -g typescript &>/dev/null || true
 }
 
 # =============================================================================
@@ -1190,15 +1426,20 @@ ENVEOF
 
 phase_panel_deps() {
     cd /var/www/panel || die "Panel directory missing"
-    npm ci --omit=dev 2>/dev/null || npm install --omit=dev
-    npm install bcrypt || true
+    # install everything — dev and prod — tsc needs devDeps at build time
+    # no --frozen-lockfile: repo may only have package-lock.json, not pnpm-lock.yaml
+    "$PNPM" install --no-frozen-lockfile \
+        --registry "${PNPM_REGISTRY}" \
+        || die "Panel dependency install failed"
+    "$PNPM" add bcrypt --registry "${PNPM_REGISTRY}" || true
 }
 
 phase_panel_prisma() {
     cd /var/www/panel || die "Panel directory missing"
-    npm uninstall prisma @prisma/client &>/dev/null || true
-    npm cache clean --force &>/dev/null || true
-    npm install "prisma@${PRISMA_VER}" "@prisma/client@${PRISMA_VER}"
+    "$PNPM" remove prisma @prisma/client &>/dev/null || true
+    "$PNPM" store prune &>/dev/null || true
+    "$PNPM" add "prisma@${PRISMA_VER}" "@prisma/client@${PRISMA_VER}" \
+        --registry "${PNPM_REGISTRY}"
 }
 
 phase_panel_migrate() {
@@ -1217,7 +1458,9 @@ phase_panel_build() {
 
 phase_panel_admin() {
     cd /var/www/panel || die "Panel directory missing"
-    npm install -g pm2 || die "PM2 install failed"
+    "$PNPM" add -g pm2 --registry "${PNPM_REGISTRY}" \
+        || npm install -g pm2 \
+        || die "PM2 install failed"
     _set_registration true
     pm2 start npm --name "airlink-panel-temp" -- run start
     _wait_for_panel
@@ -1292,19 +1535,23 @@ ENVEOF
 
 phase_daemon_deps() {
     cd /etc/daemon || die "Daemon directory missing"
-    npm ci --omit=dev 2>/dev/null || npm install --omit=dev
-    npm install express || die "express install failed"
+    "$PNPM" install --no-frozen-lockfile \
+        --registry "${PNPM_REGISTRY}" \
+        || die "Daemon dependency install failed"
+    "$PNPM" add express --registry "${PNPM_REGISTRY}" || die "express install failed"
+
+    # install native libs if present — must happen before build
+    if [[ -d /etc/daemon/libs ]]; then
+        cd /etc/daemon/libs || die "Cannot access /etc/daemon/libs"
+        "$PNPM" install --no-frozen-lockfile --registry "${PNPM_REGISTRY}"
+        npm rebuild
+        cd /etc/daemon || die "Cannot return to /etc/daemon"
+    fi
 }
 
 phase_daemon_build() {
     cd /etc/daemon || die "Daemon directory missing"
     npm run build || die "Daemon build failed"
-    if [[ -d libs ]]; then
-        cd libs
-        npm install
-        npm rebuild
-        cd ..
-    fi
     if id www-data &>/dev/null; then
         chown -R www-data:www-data /etc/daemon
     fi
@@ -1437,7 +1684,7 @@ _process_addons() {
             cd "$target"
         fi
 
-        npm install || die "$display_name npm install failed"
+        "$PNPM" install --registry "${PNPM_REGISTRY}" || die "$display_name install failed"
         npm run build || die "$display_name build failed"
         log "OK: $display_name addon installed"
     done
@@ -1611,6 +1858,7 @@ tui_do_install() {
 
     tui_progress_init "${tasks[@]}"
     stty echo 2>/dev/null || true
+    _INSTALLING=1
 
     tui_progress_step ensure_deps
     tui_progress_step setup_node
@@ -1634,6 +1882,7 @@ tui_do_install() {
     fi
 
     tui_progress_finish
+    _INSTALLING=0
     ping_install_counter
 }
 
