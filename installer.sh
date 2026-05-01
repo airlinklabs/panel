@@ -1289,6 +1289,8 @@ setup_node() {
 
     # point pnpm at the selected registry globally
     "$PNPM" config set registry "${PNPM_REGISTRY}" &>/dev/null || true
+    # also tell npm to use the same registry
+    npm config set registry "${PNPM_REGISTRY}" &>/dev/null || true
 
     npm install -g typescript &>/dev/null || true
     log "pnpm $("$PNPM" -v 2>/dev/null) ready, registry: ${PNPM_REGISTRY}"
@@ -1426,20 +1428,15 @@ ENVEOF
 
 phase_panel_deps() {
     cd /var/www/panel || die "Panel directory missing"
-    # install everything — dev and prod — tsc needs devDeps at build time
-    # no --frozen-lockfile: repo may only have package-lock.json, not pnpm-lock.yaml
-    "$PNPM" install --no-frozen-lockfile \
-        --registry "${PNPM_REGISTRY}" \
-        || die "Panel dependency install failed"
-    "$PNPM" add bcrypt --registry "${PNPM_REGISTRY}" || true
+    npm install --no-audit --no-fund || die "Panel dependency install failed"
+    npm install --no-audit --no-fund bcrypt || true
 }
 
 phase_panel_prisma() {
     cd /var/www/panel || die "Panel directory missing"
-    "$PNPM" remove prisma @prisma/client &>/dev/null || true
-    "$PNPM" store prune &>/dev/null || true
-    "$PNPM" add "prisma@${PRISMA_VER}" "@prisma/client@${PRISMA_VER}" \
-        --registry "${PNPM_REGISTRY}"
+    npm uninstall --no-audit prisma @prisma/client &>/dev/null || true
+    npm cache clean --force &>/dev/null || true
+    npm install --no-audit --no-fund "prisma@${PRISMA_VER}" "@prisma/client@${PRISMA_VER}"
 }
 
 phase_panel_migrate() {
@@ -1458,9 +1455,7 @@ phase_panel_build() {
 
 phase_panel_admin() {
     cd /var/www/panel || die "Panel directory missing"
-    "$PNPM" add -g pm2 --registry "${PNPM_REGISTRY}" \
-        || npm install -g pm2 \
-        || die "PM2 install failed"
+    npm install -g pm2 || die "PM2 install failed"
     _set_registration true
     pm2 start npm --name "airlink-panel-temp" -- run start
     _wait_for_panel
@@ -1535,15 +1530,13 @@ ENVEOF
 
 phase_daemon_deps() {
     cd /etc/daemon || die "Daemon directory missing"
-    "$PNPM" install --no-frozen-lockfile \
-        --registry "${PNPM_REGISTRY}" \
-        || die "Daemon dependency install failed"
-    "$PNPM" add express --registry "${PNPM_REGISTRY}" || die "express install failed"
+    npm install --no-audit --no-fund || die "Daemon dependency install failed"
+    npm install --no-audit --no-fund express || die "express install failed"
 
     # install native libs if present — must happen before build
     if [[ -d /etc/daemon/libs ]]; then
         cd /etc/daemon/libs || die "Cannot access /etc/daemon/libs"
-        "$PNPM" install --no-frozen-lockfile --registry "${PNPM_REGISTRY}"
+        npm install --no-audit --no-fund
         npm rebuild
         cd /etc/daemon || die "Cannot return to /etc/daemon"
     fi
@@ -1684,7 +1677,7 @@ _process_addons() {
             cd "$target"
         fi
 
-        "$PNPM" install --registry "${PNPM_REGISTRY}" || die "$display_name install failed"
+        npm install --no-audit --no-fund || die "$display_name install failed"
         npm run build || die "$display_name build failed"
         log "OK: $display_name addon installed"
     done
