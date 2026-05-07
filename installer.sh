@@ -1197,6 +1197,11 @@ phase_panel_deps() {
 
     # bcrypt needs native compilation — separate step so it doesn't poison the main install
     "$PNPM" add bcrypt --store-dir "$PNPM_STORE" || true
+
+    # chalk and form-data are imported in src/ but missing from package.json —
+    # pnpm will never install undeclared deps, so we have to add them explicitly
+    "$PNPM" add chalk form-data --store-dir "$PNPM_STORE" \
+        || die "chalk/form-data install failed"
 }
 phase_panel_build() {
     cd /var/www/panel || die "Panel directory missing"
