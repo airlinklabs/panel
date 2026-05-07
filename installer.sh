@@ -1196,9 +1196,33 @@ phase_panel_deps() {
     # bcrypt needs native compilation — separate step so it doesn't poison the main install
     "$PNPM" add bcrypt --store-dir "$PNPM_STORE" || true
 
-    # ensure prisma CLI and client are present — pnpm install may skip them if
-    # they're listed as devDependencies and NODE_ENV=production is set
-    "$PNPM" add prisma @prisma/client --store-dir "$PNPM_STORE" \
+    # read the exact prisma version pinned in package.json — never install latest
+    local prisma_ver
+    prisma_ver=$(node -e "
+const p = require('./package.json');
+const v = (p.dependencies && p.dependencies['prisma'])
+       || (p.devDependencies && p.devDependencies['prisma'])
+       || '';
+process.stdout.write(v.replace(/^[^0-9]*/, ''));
+" 2>/dev/null) || prisma_ver=""
+
+    local client_ver
+    client_ver=$(node -e "
+const p = require('./package.json');
+const v = (p.dependencies && p.dependencies['@prisma/client'])
+       || (p.devDependencies && p.devDependencies['@prisma/client'])
+       || '';
+process.stdout.write(v.replace(/^[^0-9]*/, ''));
+" 2>/dev/null) || client_ver=""
+
+    [[ -n "$prisma_ver" ]] || die "Could not read prisma version from package.json"
+    [[ -n "$client_ver" ]] || client_ver="$prisma_ver"   # they're always the same major
+    log "Prisma versions from package.json: prisma@${prisma_ver} @prisma/client@${client_ver}"
+
+    # ensure prisma CLI and client are present at the exact pinned version —
+    # pnpm install can skip devDependencies when NODE_ENV=production is set
+    "$PNPM" add "prisma@${prisma_ver}" "@prisma/client@${client_ver}" \
+        --store-dir "$PNPM_STORE" \
         || die "Prisma install failed"
 
     # generate the Prisma client so TypeScript can find PrismaClient / Prisma types
