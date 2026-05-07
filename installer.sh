@@ -1281,13 +1281,16 @@ phase_daemon_deps() {
     local lockflag="--no-frozen-lockfile"
     [[ -f pnpm-lock.yaml ]] && lockflag="--frozen-lockfile"
 
-    "$PNPM" install $lockflag \
+    NODE_ENV=development "$PNPM" install $lockflag \
         --store-dir "$PNPM_STORE" \
         --network-concurrency 16 \
         --prefer-offline \
         || die "Daemon dependency install failed"
 
     "$PNPM" add express --store-dir "$PNPM_STORE" || die "express install failed"
+
+    # @types/body-parser is missing from the daemon's package.json but imported in src/
+    "$PNPM" add @types/body-parser --store-dir "$PNPM_STORE" || die "@types/body-parser install failed"
 
     # native libs — need rebuild after install
     if [[ -d /etc/daemon/libs ]]; then
