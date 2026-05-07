@@ -1195,10 +1195,23 @@ phase_panel_deps() {
 
     # bcrypt needs native compilation — separate step so it doesn't poison the main install
     "$PNPM" add bcrypt --store-dir "$PNPM_STORE" || true
+
+    # ensure prisma CLI and client are present — pnpm install may skip them if
+    # they're listed as devDependencies and NODE_ENV=production is set
+    "$PNPM" add prisma @prisma/client --store-dir "$PNPM_STORE" \
+        || die "Prisma install failed"
+
+    # generate the Prisma client so TypeScript can find PrismaClient / Prisma types
+    npx prisma generate || die "Prisma client generation failed"
 }
 
 phase_panel_build() {
     cd /var/www/panel || die "Panel directory missing"
+
+    # run database migrations before building — Prisma types must be in sync
+    # with the schema or the TypeScript compiler will reject them
+    "$PNPM" run migrate:dev || die "Database migration failed"
+
     "$PNPM" run build || die "Panel build failed"
 }
 
