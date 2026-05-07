@@ -3,7 +3,7 @@ import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { getUser } from '../../handlers/utils/user/user';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import logger from '../../handlers/logger';
 import multer from 'multer';
 import path from 'path';

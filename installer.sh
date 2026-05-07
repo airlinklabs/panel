@@ -1165,15 +1165,22 @@ phase_panel_clone() {
     id www-data &>/dev/null && chown -R www-data:www-data /var/www/panel
     chmod -R 755 /var/www/panel
 
-    # only write .env on fresh installs — don't touch existing ones
+    # Write .env before any pnpm/prisma commands run — prisma refuses to
+    # work without DATABASE_URL present, even during install/generate.
+    # On re-installs we leave the existing .env untouched.
     if [[ ! -f /var/www/panel/.env ]]; then
         local secret; secret=$(openssl rand -hex 32)
+        # Detect the primary non-loopback IP so the panel is reachable
+        # from the network (not just localhost).
+        local server_ip
+        server_ip=$(hostname -I 2>/dev/null | awk '{print $1}') || server_ip="localhost"
+        [[ -z "$server_ip" ]] && server_ip="localhost"
         cat > /var/www/panel/.env <<ENVEOF
 NAME=${PANEL_NAME}
 NODE_ENV=production
-URL=http://localhost:${PANEL_PORT}
+URL=http://${server_ip}:${PANEL_PORT}
 PORT=${PANEL_PORT}
-DATABASE_URL=file:./dev.db
+DATABASE_URL=file:/var/www/panel/dev.db
 SESSION_SECRET=${secret}
 ENVEOF
     fi
@@ -1182,40 +1189,36 @@ ENVEOF
 phase_panel_deps() {
     cd /var/www/panel || die "Panel directory missing"
 
-    # use frozen lockfile if one exists, otherwise let pnpm figure it out
-    local lockflag="--no-frozen-lockfile"
-    [[ -f pnpm-lock.yaml ]] && lockflag="--frozen-lockfile"
-
     # NODE_ENV=production makes pnpm silently skip devDependencies — build-time
-    # packages like chalk, form-data, prisma, and typescript disappear.
+    # packages like prisma, typescript, and tailwind disappear.
     # Force development so pnpm installs everything listed in package.json.
-    NODE_ENV=development "$PNPM" install $lockflag \
+    # --allow-build pre-approves the Prisma and parcel/watcher postinstall scripts
+    # so we never hit the interactive "pnpm approve-builds" prompt.
+    NODE_ENV=development "$PNPM" install --no-frozen-lockfile \
         --store-dir "$PNPM_STORE" \
         --network-concurrency 16 \
-        --prefer-offline \
+        --allow-build=@parcel/watcher,@prisma/client,@prisma/engines,prisma \
         || die "Panel dependency install failed"
 
-    # bcrypt needs native compilation — separate step so it doesn't poison the main install
-    "$PNPM" add bcrypt --store-dir "$PNPM_STORE" || true
-
-    # chalk and form-data are imported in src/ but missing from package.json —
-    # pnpm will never install undeclared deps, so we have to add them explicitly
+    # chalk and form-data are imported in src/ but not declared in package.json —
+    # pnpm will never install undeclared deps so we add them explicitly.
     "$PNPM" add chalk form-data --store-dir "$PNPM_STORE" \
         || die "chalk/form-data install failed"
 }
 phase_panel_build() {
     cd /var/www/panel || die "Panel directory missing"
 
-    # migrate:deploy = "prisma migrate deploy && prisma generate" — non-interactive,
-    # safe for CI/automated installs. migrate:dev prompts for a migration name so
-    # it cannot be used in a non-interactive installer.
+    # migrate:deploy runs "prisma migrate deploy && prisma generate" —
+    # this is exactly what worked in testing. It applies the migration SQL,
+    # creates dev.db, and generates the Prisma client all in one step.
     "$PNPM" run migrate:deploy || die "Database migration failed"
 
     "$PNPM" run build || die "Panel build failed"
 }
 
 phase_panel_service() {
-    local npm_bin; npm_bin=$(command -v npm)
+    local pnpm_bin; pnpm_bin=$(command -v pnpm)
+    local node_bin_dir; node_bin_dir=$(dirname "$(command -v node)")
 
     cat > /etc/systemd/system/airlink-panel.service <<SVCEOF
 [Unit]
@@ -1226,11 +1229,12 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/var/www/panel
-ExecStart=${npm_bin} run start
+EnvironmentFile=/var/www/panel/.env
+ExecStart=${pnpm_bin} run start
 Restart=on-failure
 RestartSec=5
 Environment=NODE_ENV=production
-Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=PATH=${node_bin_dir}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 [Install]
 WantedBy=multi-user.target
@@ -1278,13 +1282,9 @@ ENVEOF
 phase_daemon_deps() {
     cd /etc/daemon || die "Daemon directory missing"
 
-    local lockflag="--no-frozen-lockfile"
-    [[ -f pnpm-lock.yaml ]] && lockflag="--frozen-lockfile"
-
-    NODE_ENV=development "$PNPM" install $lockflag \
+    NODE_ENV=development "$PNPM" install --no-frozen-lockfile \
         --store-dir "$PNPM_STORE" \
         --network-concurrency 16 \
-        --prefer-offline \
         || die "Daemon dependency install failed"
 
     "$PNPM" add express --store-dir "$PNPM_STORE" || die "express install failed"
@@ -1303,7 +1303,7 @@ phase_daemon_deps() {
     if [[ -d /etc/daemon/libs ]]; then
         cd /etc/daemon/libs || die "Cannot access /etc/daemon/libs"
         "$PNPM" install --no-frozen-lockfile --store-dir "$PNPM_STORE" || true
-        npm rebuild
+        "$PNPM" rebuild
         cd /etc/daemon
     fi
 }
@@ -1315,7 +1315,8 @@ phase_daemon_build() {
 }
 
 phase_daemon_service() {
-    local npm_bin; npm_bin=$(command -v npm)
+    local pnpm_bin; pnpm_bin=$(command -v pnpm)
+    local node_bin_dir; node_bin_dir=$(dirname "$(command -v node)")
 
     cat > /etc/systemd/system/airlink-daemon.service <<SVCEOF
 [Unit]
@@ -1326,11 +1327,12 @@ After=network.target docker.service
 Type=simple
 User=root
 WorkingDirectory=/etc/daemon
-ExecStart=${npm_bin} run start
+EnvironmentFile=/etc/daemon/.env
+ExecStart=${pnpm_bin} run start
 Restart=on-failure
 RestartSec=5
 Environment=NODE_ENV=production
-Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=PATH=${node_bin_dir}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 [Install]
 WantedBy=multi-user.target

@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import prisma from '../../db';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';

@@ -20,7 +20,6 @@ For full documentation, visit **[airlinklabs.github.io/home/docs/quickstart](htt
 
 ---
 
-
 ## Project leads
 
 | Handle | Role |
@@ -34,7 +33,7 @@ For full documentation, visit **[airlinklabs.github.io/home/docs/quickstart](htt
 ## Prerequisites
 
 - Node.js v18 or later
-- npm v9 or later
+- pnpm v8 or later (`npm install -g pnpm`)
 - Git
 
 ---
@@ -54,6 +53,7 @@ Manage with systemd:
 systemctl start airlink-panel
 systemctl stop airlink-panel
 systemctl restart airlink-panel
+journalctl -u airlink-panel -f
 ```
 
 ### Option 2 — Manual
@@ -63,27 +63,55 @@ cd /var/www/
 git clone https://github.com/AirlinkLabs/panel.git
 cd panel
 
-sudo chown -R www-data:www-data /var/www/panel
-sudo chmod -R 755 /var/www/panel
+chown -R www-data:www-data /var/www/panel
+chmod -R 755 /var/www/panel
 
-npm install --omit=dev
+# Install dependencies (pnpm auto-approves Prisma build scripts via package.json)
+pnpm install
+
+# Set up environment
 cp example.env .env
-# Edit .env — set DATABASE_URL and APP_SECRET at minimum
+# Edit .env — set PORT, URL, SESSION_SECRET, and DATABASE_URL at minimum
 
-npm run build
-npm run start
+# Run database migrations and generate Prisma client
+pnpm run migrate:deploy
+
+# Compile TypeScript and build CSS
+pnpm run build
+
+# Start the panel
+pnpm run start
 ```
 
-`npm run start` applies database migrations automatically before launch.
+`pnpm run start` applies any pending database schema changes automatically before launch.
 
 ### Running with pm2
 
 ```bash
 npm install -g pm2
-pm2 start dist/app.js --name airlink-panel
+pm2 start "pnpm run start" --name airlink-panel
 pm2 save
 pm2 startup
 ```
+
+### Environment variables
+
+Copy `example.env` to `.env` and fill in the required values:
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NAME` | No | Panel display name (default: Airlink) |
+| `NODE_ENV` | Yes | Set to `production` for live deployments |
+| `URL` | Yes | Full URL the panel is served from, e.g. `http://192.168.1.10:3000` |
+| `PORT` | Yes | Port to listen on |
+| `DATABASE_URL` | Yes | SQLite path, e.g. `file:/var/www/panel/dev.db` |
+| `SESSION_SECRET` | Yes | Random secret for session signing — use `openssl rand -hex 32` |
+
+> [!IMPORTANT]
+> `DATABASE_URL` must be an **absolute path** (e.g. `file:/var/www/panel/dev.db`), not a relative one like `file:./dev.db`. Relative paths break when the process is started from a different working directory (e.g. via systemd).
+
+> [!IMPORTANT]
+> `URL` should be set to the actual IP or hostname the panel is served from. Setting it to `http://localhost` will prevent the panel from being reachable over the network and causes CSP issues in the browser.
 
 ---
 
@@ -114,7 +142,7 @@ See [`storage/addons/README.md`](storage/addons/README.md) for structure and API
 3. Commit: `git commit -m 'feat: describe your change'`
 4. Push and open a pull request against `main`
 
-Run `npm run lint` before submitting. Follow TypeScript best practices and update documentation alongside code changes.
+Run `pnpm run lint` before submitting. Follow TypeScript best practices and update documentation alongside code changes.
 
 ---
 
@@ -124,7 +152,6 @@ Run `npm run lint` before submitting. Follow TypeScript best practices and updat
 - Docs: [airlinklabs.github.io/home/docs/quickstart](https://airlinklabs.github.io/home/docs/quickstart/)
 - Discord: [discord.gg/ujXyxwwMHc](https://discord.gg/ujXyxwwMHc)
 - GitHub: [github.com/airlinklabs/panel](https://github.com/airlinklabs/panel)
-
 
 ## License
 

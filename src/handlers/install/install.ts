@@ -1,7 +1,7 @@
 // install.ts
 
 import prisma from '../../db';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import logger from '../logger';
 
 

@@ -141,12 +141,31 @@ function getAddonDirs(): string[] {
 app.use(compression());
 
 // Security middleware
+const isHttps = process.env.URL?.startsWith('https://') ?? false;
+
 app.use(
   helmet({
     noSniff: true,
     frameguard: { action: 'deny' },
+    // Don't send HSTS header when not serving over HTTPS
+    hsts: isHttps ? undefined : false,
     contentSecurityPolicy:
-      process.env.NODE_ENV === 'production' ? undefined : false,
+      process.env.NODE_ENV === 'production'
+        ? {
+            directives: {
+              defaultSrc: ["'self'"],
+              scriptSrc: ["'self'", "'unsafe-inline'"],
+              styleSrc: ["'self'", "'unsafe-inline'"],
+              imgSrc: ["'self'", 'data:', 'https:', 'http:'],
+              fontSrc: ["'self'", 'data:'],
+              connectSrc: ["'self'", 'ws:', 'wss:'],
+              // Only tell browsers to upgrade HTTP->HTTPS when we actually serve HTTPS.
+              // Without this guard, helmet's default upgrade-insecure-requests directive
+              // causes browsers to rewrite all asset URLs to https://, breaking local HTTP setups.
+              ...(isHttps ? { upgradeInsecureRequests: [] } : { upgradeInsecureRequests: null }),
+            },
+          }
+        : false,
   }),
 );
 app.use(hpp());
@@ -203,8 +222,10 @@ app.use(
 
 // Load session with Prisma store
 const isProduction = process.env.NODE_ENV === 'production';
-const useSecureCookie =
-  isProduction || (process.env.URL?.startsWith('https://') ?? false);
+// Only mark cookies as secure when the server is actually serving over HTTPS.
+// Setting secure:true on a plain HTTP server causes browsers to silently drop
+// all session cookies, breaking login on local network setups.
+const useSecureCookie = process.env.URL?.startsWith('https://') ?? false;
 
 app.use(
   session({
