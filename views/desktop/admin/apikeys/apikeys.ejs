@@ -359,7 +359,7 @@
 
 
 
-<script>
+<script nonce="<%- nonce %>">
 
   function showToast(message, type = 'success') {
     const toast = document.createElement('div');
@@ -617,7 +617,7 @@
 
 <%- include('../../components/footer') %>
 
-<script>
+<script nonce="<%- nonce %>">
   function showConfirmModal(title, message, onConfirm) {
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200';

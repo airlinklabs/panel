@@ -157,7 +157,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="<%- nonce %>">
 (function () {
   var wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   var ws = new WebSocket(wsProtocol + '//' + window.location.host + '/online-check');
@@ -217,7 +217,7 @@
         </div>
       </div>
 
-      <script>
+      <script nonce="<%- nonce %>">
         document.addEventListener('keydown', function(event) {
           if (event.ctrlKey && event.key === 'k') {
             event.preventDefault();
@@ -239,11 +239,11 @@
           }
         });
       </script>
-      <script src="/javascript/search.js"></script>
+      <script nonce="<%- nonce %>" src="/javascript/search.js"></script>
     </div>
   </div>
 </div>
-<script>
+<script nonce="<%- nonce %>">
 (function () {
   var ov = document.getElementById('pl-overlay');
   if (!ov) return;

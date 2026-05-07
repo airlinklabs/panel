@@ -89,7 +89,7 @@
 
 <%- include('../../components/toast') %>
 
-<script>
+<script nonce="<%- nonce %>">
   let allocatedPorts = <%= node.allocatedPorts ? node.allocatedPorts : '[]' %>;
 
   function getUsedPorts() {

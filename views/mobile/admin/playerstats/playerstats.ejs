@@ -74,8 +74,8 @@
   </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
+<script nonce="<%- nonce %>" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script nonce="<%- nonce %>">
   let playerChart;
 
   const ctx = document.getElementById('playerChart').getContext('2d');

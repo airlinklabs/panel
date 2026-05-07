@@ -21,11 +21,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.fontshare.com">
     <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,300,600,400,700&display=swap" rel="stylesheet">
-    <script src="/js/csrf.js"></script>
-    <script src="/javascript/viewport-mode.js"></script>
-    <script src="/javascript/page-loader.js"></script>
-    <script src="/javascript/checkbox-anim.js"></script>
-    <script src="/javascript/layout-animations.js"></script>
+    <script nonce="<%- nonce %>" src="/js/csrf.js"></script>
+    <script nonce="<%- nonce %>" src="/javascript/viewport-mode.js"></script>
+    <script nonce="<%- nonce %>" src="/javascript/page-loader.js"></script>
+    <script nonce="<%- nonce %>" src="/javascript/checkbox-anim.js"></script>
+    <script nonce="<%- nonce %>" src="/javascript/layout-animations.js"></script>
     <style>
       html, body, * { scrollbar-width: none; -ms-overflow-style: none; }
       ::-webkit-scrollbar { display: none; }
@@ -41,7 +41,7 @@
 <body style="font-family: 'General Sans'" class="bg-neutral-50 dark:bg-[#141414] h-full text-neutral-800 dark:text-white">
 
 <!-- Page loader overlay — rendered in HTML so it exists before any JS or paint -->
-<script>
+<script nonce="<%- nonce %>">
 (function(){
   var d=false;
   try{var s=localStorage.getItem('theme');if(s==='dark')d=true;else if(!s)d=window.matchMedia('(prefers-color-scheme: dark)').matches;}catch(e){}
@@ -58,7 +58,7 @@
     <p id="pl-msg" style="margin:0;margin-top:-4px;font-family:'General Sans',sans-serif;font-size:11px;color:#737373;letter-spacing:0.01em;transition:opacity 180ms ease;">Loading...</p>
   </div>
 </div>
-<script>
+<script nonce="<%- nonce %>">
 (function(){
   var d=false;
   try{var s=localStorage.getItem('theme');if(s==='dark')d=true;else if(!s)d=window.matchMedia('(prefers-color-scheme: dark)').matches;}catch(e){}
@@ -78,7 +78,7 @@
 <button id="theme-toggle" class="fixed right-4 top-4 w-14 h-8 flex items-center bg-neutral-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500 z-50">
     <span class="dot bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
 </button>
-<script>
+<script nonce="<%- nonce %>">
 function initializeTheme() {
     const userPreference = localStorage.getItem('theme');
     const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches;

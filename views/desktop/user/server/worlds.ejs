@@ -120,7 +120,7 @@
 <%- include('../../components/toast') %>
 <%- include('../../components/footer') %>
 
-<script>
+<script nonce="<%- nonce %>">
   document.addEventListener('DOMContentLoaded', function() {
     // Hide loading indicator when worlds are loaded
     const loadingIndicator = document.getElementById('loadingIndicator');

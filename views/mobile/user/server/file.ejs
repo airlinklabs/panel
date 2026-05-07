@@ -105,7 +105,7 @@
 
 <%- include('../../components/toast')%>
 
-<script src="/monaco/vs/loader.js"></script>
+<script nonce="<%- nonce %>" src="/monaco/vs/loader.js"></script>
 <%
     const fileExtension = file.extension;
     const language = fileExtension === 'js' ? 'javascript'
@@ -129,7 +129,7 @@
                        : fileExtension === 'xml' ? 'xml'
                        : 'plaintext';
 %>
-<script>
+<script nonce="<%- nonce %>">
 require.config({
   paths: {
     'vs': '/monaco/vs'

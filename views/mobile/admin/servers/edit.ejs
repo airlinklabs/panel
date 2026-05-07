@@ -187,7 +187,7 @@
 <%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
 
-<script>
+<script nonce="<%- nonce %>">
   document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('editServerForm');
     const allowStartupEditToggle = document.getElementById('allowStartupEdit');

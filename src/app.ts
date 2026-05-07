@@ -29,7 +29,7 @@ import {
 import { installDaemonRequestInterceptor } from './handlers/utils/core/daemonRequest';
 import { startPlayerStatsCollection } from './handlers/playerStatsCollector';
 import { initEggCatalogue } from './handlers/eggCatalogueService';
-import prisma from './db';
+import crypto from 'crypto';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
@@ -140,34 +140,151 @@ function getAddonDirs(): string[] {
 // Load compression
 app.use(compression());
 
+// =============================================================================
 // Security middleware
+// =============================================================================
 const isHttps = process.env.URL?.startsWith('https://') ?? false;
+const isProduction = process.env.NODE_ENV === 'production';
 
-app.use(
+// ---------------------------------------------------------------------------
+// Nonce middleware — runs before helmet so the nonce is available when we
+// build the CSP header. A fresh cryptographically random nonce is generated
+// for every single HTTP response. It is exposed as:
+//   • res.locals.nonce  — used in EJS templates: <script nonce="<%- nonce %>">
+//   • req.nonce         — available anywhere downstream if needed
+// Every <script> block in the EJS templates MUST carry this nonce attribute.
+// Scripts without a matching nonce are blocked by the browser even if they
+// are served from 'self', which is exactly the XSS protection we want.
+// ---------------------------------------------------------------------------
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const nonce = crypto.randomBytes(16).toString('base64');
+  res.locals.nonce = nonce;
+  (req as any).nonce = nonce;
+  next();
+});
+
+// ---------------------------------------------------------------------------
+// Helmet — configured explicitly rather than using defaults so we control
+// every header precisely across both HTTP and HTTPS deployments.
+// ---------------------------------------------------------------------------
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const nonce = res.locals.nonce as string;
+
+  // External domains actually used by the templates:
+  //   fonts:   api.fontshare.com, cdn.fontshare.com, fonts.googleapis.com
+  //   scripts: cdn.jsdelivr.net, cdnjs.cloudflare.com
+  //   styles:  cdn.jsdelivr.net (xterm.css)
+  const cdnScripts = [
+    'https://cdn.jsdelivr.net',
+    'https://cdnjs.cloudflare.com',
+  ];
+  const cdnStyles = [
+    'https://cdn.jsdelivr.net',
+    'https://cdnjs.cloudflare.com',
+  ];
+  const cdnFonts = [
+    'https://api.fontshare.com',
+    'https://cdn.fontshare.com',
+    'https://fonts.googleapis.com',
+    'https://fonts.gstatic.com',
+  ];
+
   helmet({
+    // X-Content-Type-Options: nosniff
     noSniff: true,
+
+    // X-Frame-Options is superseded by frame-ancestors in the CSP below,
+    // but we keep it for legacy browsers that don't understand CSP.
     frameguard: { action: 'deny' },
-    // Don't send HSTS header when not serving over HTTPS
-    hsts: isHttps ? undefined : false,
-    contentSecurityPolicy:
-      process.env.NODE_ENV === 'production'
-        ? {
-            directives: {
-              defaultSrc: ["'self'"],
-              scriptSrc: ["'self'", "'unsafe-inline'"],
-              styleSrc: ["'self'", "'unsafe-inline'"],
-              imgSrc: ["'self'", 'data:', 'https:', 'http:'],
-              fontSrc: ["'self'", 'data:'],
-              connectSrc: ["'self'", 'ws:', 'wss:'],
-              // Only tell browsers to upgrade HTTP->HTTPS when we actually serve HTTPS.
-              // Without this guard, helmet's default upgrade-insecure-requests directive
-              // causes browsers to rewrite all asset URLs to https://, breaking local HTTP setups.
-              ...(isHttps ? { upgradeInsecureRequests: [] } : { upgradeInsecureRequests: null }),
-            },
-          }
-        : false,
-  }),
-);
+
+    // HSTS — only sent over HTTPS. Sending it on HTTP is meaningless and
+    // causes browsers to refuse future HTTP connections to the same host.
+    hsts: isHttps
+      ? { maxAge: 31536000, includeSubDomains: true, preload: true }
+      : false,
+
+    // Cross-Origin-Opener-Policy and Origin-Agent-Cluster are only meaningful
+    // (and only safe from a browser-warning perspective) on HTTPS origins.
+    crossOriginOpenerPolicy: isHttps ? { policy: 'same-origin' } : false,
+    originAgentCluster: isHttps ? undefined : false,
+
+    // Referrer-Policy — don't leak the full URL to third-party CDNs.
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+
+    // Permissions-Policy — deny all sensitive browser APIs we don't use.
+    permittedCrossDomainPolicies: { permittedPolicies: 'none' },
+
+    contentSecurityPolicy: isProduction
+      ? {
+          directives: {
+            // Fallback for any directive not listed explicitly.
+            defaultSrc: ["'self'"],
+
+            // Scripts:
+            //   'nonce-{nonce}' — allows only <script nonce="…"> blocks that
+            //                     carry the per-request nonce. Blocks all other
+            //                     inline scripts and eval().
+            //   'strict-dynamic' — lets nonce-carrying scripts load further
+            //                     scripts dynamically (needed by Monaco loader).
+            //                     When strict-dynamic is present, host allowlists
+            //                     are ignored by supporting browsers, so the CDN
+            //                     list here is a fallback for older browsers only.
+            scriptSrc: [
+              "'self'",
+              `'nonce-${nonce}'`,
+              "'strict-dynamic'",
+              ...cdnScripts,
+            ],
+
+            // Inline event handlers (onclick, onchange, etc.) cannot carry nonces.
+            // 'unsafe-inline' here is scoped only to attributes, not to <script>
+            // blocks (which are governed by scriptSrc above).
+            // This is the minimum needed to avoid rewriting 126+ EJS event handlers.
+            scriptSrcAttr: ["'unsafe-inline'"],
+
+            // Styles — allow inline (Tailwind utility classes are inline by nature)
+            // plus the exact external stylesheet CDNs used.
+            styleSrc: ["'self'", "'unsafe-inline'", ...cdnStyles, ...cdnFonts],
+
+            // Fonts — exact CDN origins only, plus data URIs for embedded icons.
+            fontSrc: ["'self'", 'data:', ...cdnFonts],
+
+            // Images — self + data URIs (avatars/favicons) + https for remote images.
+            // http: is intentionally excluded; image URLs served by the daemon
+            // should be proxied through the panel rather than loaded directly.
+            imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+
+            // WebSocket connections for the server console + same-origin API calls.
+            connectSrc: [
+              "'self'",
+              ...(isHttps ? ['wss:'] : ['ws:', 'wss:']),
+            ],
+
+            // Prevent the panel from being embedded in any frame anywhere.
+            // Supersedes X-Frame-Options for modern browsers.
+            frameAncestors: ["'none'"],
+
+            // Prevent any plugins (Flash, PDF, etc.) from being embedded.
+            objectSrc: ["'none'"],
+
+            // Lock down <base> tags — prevents base-tag hijacking attacks.
+            baseUri: ["'self'"],
+
+            // All form submissions must go to same origin.
+            formAction: ["'self'"],
+
+            // Only upgrade to HTTPS when we are actually serving HTTPS.
+            // Without this guard, helmet's default adds upgrade-insecure-requests
+            // which rewrites every asset URL to https://, breaking HTTP installs.
+            ...(isHttps
+              ? { upgradeInsecureRequests: [] }
+              : { upgradeInsecureRequests: null }),
+          },
+        }
+      : false,
+  })(req, res, next);
+});
+
 app.use(hpp());
 
 // IP ban middleware — checked before rate limiting
@@ -221,7 +338,6 @@ app.use(
 );
 
 // Load session with Prisma store
-const isProduction = process.env.NODE_ENV === 'production';
 // Only mark cookies as secure when the server is actually serving over HTTPS.
 // Setting secure:true on a plain HTTP server causes browsers to silently drop
 // all session cookies, breaking login on local network setups.

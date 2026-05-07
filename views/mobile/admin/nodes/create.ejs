@@ -62,7 +62,7 @@
 <%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
 
-<script>
+<script nonce="<%- nonce %>">
   document.getElementById('createNodeBtn').addEventListener('click', async () => {
     const nodeData = {
       name: document.getElementById('nodeName').value,

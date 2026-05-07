@@ -82,7 +82,7 @@
 
 <%- include('../../components/toast') %>
 
-<script>
+<script nonce="<%- nonce %>">
   // Rate limit form
   document.getElementById('form-rate-limit').addEventListener('submit', async (e) => {
     e.preventDefault();

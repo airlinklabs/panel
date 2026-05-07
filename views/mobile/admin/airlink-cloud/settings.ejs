@@ -47,7 +47,7 @@
   </div>
 </main>
 
-<script>
+<script nonce="<%- nonce %>">
 document.getElementById('saveBtn').addEventListener('click', async () => {
   const apiKey = document.getElementById('airlinkCloudApiKey').value;
   const backupEnabled = document.getElementById('airlinkCloudBackupEnabled').checked;

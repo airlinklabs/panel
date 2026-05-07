@@ -145,7 +145,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="<%- nonce %>">
 function handleRowClick(e, url) { if (!e.target.closest('button,a')) window.location = url; }
 
 function openCreate() { document.getElementById('createOverlay').classList.add('open'); }

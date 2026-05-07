@@ -202,8 +202,8 @@
 
 <%- include('../../components/toast') %>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
-<script>
+<script nonce="<%- nonce %>" src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+<script nonce="<%- nonce %>">
   // ── State ──────────────────────────────────────────────────────────────────
   const imageId = <%= image.id %>;
 

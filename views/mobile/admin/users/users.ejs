@@ -89,7 +89,7 @@
   </div>
 </main>
 
-<script>
+<script nonce="<%- nonce %>">
   function deleteUser(userId) {
     window.modal.confirm({
       title: '<%= req.translations.deleteUser || "Delete User" %>',

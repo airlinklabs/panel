@@ -65,7 +65,7 @@
 <%- include('../../components/toast') %>
 <%- include('../../components/footer') %>
 
-<script>
+<script nonce="<%- nonce %>">
   document.addEventListener('DOMContentLoaded', function() {
     var wsCheck = new WebSocket((window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host + '/ws/server/<%= server.UUID %>/status');
     wsCheck.onerror = function() {};

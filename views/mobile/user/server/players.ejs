@@ -94,7 +94,7 @@
     </div>
     <% } %>
 
-    <script>
+    <script nonce="<%- nonce %>">
       (function() {
         var hasError = <%= errorMessage && errorMessage.message ? 'true' : 'false' %>;
         var refreshInterval = hasError ? 60000 : 30000;

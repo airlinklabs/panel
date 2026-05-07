@@ -127,7 +127,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 </div>
 <% } %>
 
-<script>
+<script nonce="<%- nonce %>">
 (function () {
   // Mobile nav active state is handled by page-loader.js.
   // Keep sheet toggle and presence WebSocket here.
@@ -152,7 +152,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
   });
 })();
 </script>
-<script>
+<script nonce="<%- nonce %>">
 (function () {
   var ov = document.getElementById('pl-overlay');
   if (!ov) return;
@@ -164,7 +164,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
   ov.style.display = 'flex';
 })();
 </script>
-<script>
+<script nonce="<%- nonce %>">
 (function () {
   var openBtn    = document.getElementById('mobile-search-open');
   var closeBtn   = document.getElementById('mobile-search-close');
