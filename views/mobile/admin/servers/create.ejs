@@ -159,7 +159,7 @@
 <%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
 
-<script>
+<script nonce="<%- nonce %>">
   document.addEventListener('DOMContentLoaded', () => {
     const serverImageSelect = document.getElementById('serverImage');
     const dockerImageSelect = document.getElementById('dockerImage');
@@ -422,7 +422,7 @@
     });
   });
 </script>
-<script>
+<script nonce="<%- nonce %>">
 const listA = [
     "Charged", "Fiery", "Mystical", "Dark", "Angry", "Enchanted",
     "Blazing", "Cursed", "Frozen", "Swift", "Ancient", "Wicked",

@@ -129,7 +129,7 @@
   </div>
 </main>
 
-<script>
+<script nonce="<%- nonce %>">
   const currentVersion = '<%= airlinkVersion %>';
   document.querySelectorAll('.current-version').forEach(el => { el.textContent = currentVersion; });
 

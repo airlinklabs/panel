@@ -131,7 +131,7 @@
                       <%= (variable.value == true || variable.value === '1' || variable.value === 1) ? 'Enabled' : 'Disabled' %>
                     </span>
                   </label>
-                  <script>
+                  <script nonce="<%- nonce %>">
                     document.getElementById('toggle_<%= variable.env %>').addEventListener('change', function() {
                       document.getElementById('label_<%= variable.env %>').textContent = this.checked ? 'Enabled' : 'Disabled';
                     });
@@ -159,7 +159,7 @@
   </section>
 </main>
 
-<script>
+<script nonce="<%- nonce %>">
   document.addEventListener('DOMContentLoaded', function() {
     var urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('message')) {

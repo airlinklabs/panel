@@ -161,7 +161,7 @@
       </div>
 
       <!-- Auto-refresh script -->
-      <script>
+      <script nonce="<%- nonce %>">
         // Auto-refresh with exponential backoff if there are errors
         (function() {
           const hasError = <%= errorMessage && errorMessage.message ? 'true' : 'false' %>;

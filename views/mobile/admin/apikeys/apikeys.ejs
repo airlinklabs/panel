@@ -255,7 +255,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="<%- nonce %>">
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text)
       .then(() => showToast('API key copied', 'success'))
@@ -375,7 +375,7 @@
 
 <%- include('../../components/footer') %>
 
-<script>
+<script nonce="<%- nonce %>">
   function showConfirmModal(title, message, onConfirm) {
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-end justify-center opacity-0 pointer-events-none transition-opacity duration-200';

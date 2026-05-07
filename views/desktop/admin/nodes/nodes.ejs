@@ -162,7 +162,7 @@
 
 <%- include('../../components/toast') %>
 
-<script>
+<script nonce="<%- nonce %>">
   function handleRowClick(event, url) {
     if (!event.target.closest('button, a')) {
       window.location = url;

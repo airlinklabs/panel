@@ -69,7 +69,7 @@
   </div>
 </main>
 
-<script>
+<script nonce="<%- nonce %>">
   document.getElementById('form-rate-limit').addEventListener('submit', async (e) => {
     e.preventDefault();
     const enabled = document.getElementById('rateLimitEnabled').checked;

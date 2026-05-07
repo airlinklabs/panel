@@ -131,7 +131,7 @@
 <%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
 
-<script>
+<script nonce="<%- nonce %>">
   document.addEventListener('DOMContentLoaded', function() {
     const serverSettingsForm = document.getElementById('serverSettingsForm');
     const reinstallButton = document.getElementById('reinstallButton');

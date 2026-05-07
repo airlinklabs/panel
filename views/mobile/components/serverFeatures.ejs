@@ -2,7 +2,7 @@
 <!-- EULA Feature -->
 
 <% if (typeof features !== 'undefined' && features && features.includes('eula')) { %>
-<script>
+<script nonce="<%- nonce %>">
   document.addEventListener('DOMContentLoaded', function() {
     window.modal.confirm({
       title: "Accept Minecraft's EULA",
@@ -23,7 +23,7 @@
 <!-- AUTO-COMPLETE FEATURE -->
 
 <% if (typeof features !== 'undefined' && features && features.includes('auto-complete')) { %>
-    <script>
+    <script nonce="<%- nonce %>">
         document.addEventListener('DOMContentLoaded', () => {
             const inputField = document.getElementById('input');
             const suggestionsBox = document.getElementById('suggestions');

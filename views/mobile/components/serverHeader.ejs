@@ -80,7 +80,7 @@ function formatUptime(seconds) {
 %>
 
 <% if (typeof server !== 'undefined' && server.UUID) { %>
-<script>
+<script nonce="<%- nonce %>">
   document.addEventListener('DOMContentLoaded', function() {
     // Helper function to check if we should log (only in development and when daemon is online)
     const isDaemonOffline = <%= typeof serverStatus !== 'undefined' && serverStatus.daemonOffline ? 'true' : 'false' %>;

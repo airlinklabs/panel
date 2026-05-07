@@ -405,7 +405,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="<%- nonce %>">
 (function () {
   const INSTALLED = new Set(<%- JSON.stringify((addons || []).map(a => a.slug)) %>);
   let allAddons = [];

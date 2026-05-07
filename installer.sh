@@ -1165,9 +1165,23 @@ phase_panel_clone() {
     id www-data &>/dev/null && chown -R www-data:www-data /var/www/panel
     chmod -R 755 /var/www/panel
 
-    # Write .env before any pnpm/prisma commands run — prisma refuses to
-    # work without DATABASE_URL present, even during install/generate.
-    # On re-installs we leave the existing .env untouched.
+    # Patch package.json to pre-approve Prisma/parcel build scripts via the
+    # pnpm.onlyBuiltDependencies field — this means pnpm install runs them
+    # automatically and we never need the interactive approve-builds prompt.
+    if command -v python3 &>/dev/null; then
+        python3 - /var/www/panel/package.json <<'PYEOF'
+import json, sys
+f = sys.argv[1]
+with open(f) as fh:
+    d = json.load(fh)
+d.setdefault("pnpm", {})["onlyBuiltDependencies"] = [
+    "@parcel/watcher", "@prisma/client", "@prisma/engines", "prisma"
+]
+with open(f, "w") as fh:
+    json.dump(d, fh, indent=2)
+    fh.write("\n")
+PYEOF
+    fi
     if [[ ! -f /var/www/panel/.env ]]; then
         local secret; secret=$(openssl rand -hex 32)
         # Detect the primary non-loopback IP so the panel is reachable
@@ -1189,19 +1203,20 @@ ENVEOF
 phase_panel_deps() {
     cd /var/www/panel || die "Panel directory missing"
 
-    # NODE_ENV=production makes pnpm silently skip devDependencies — build-time
-    # packages like prisma, typescript, and tailwind disappear.
-    # Force development so pnpm installs everything listed in package.json.
-    # --allow-build pre-approves the Prisma and parcel/watcher postinstall scripts
-    # so we never hit the interactive "pnpm approve-builds" prompt.
+    # NODE_ENV=production silently skips devDependencies (typescript, prisma, tailwind).
+    # Force development so pnpm installs everything in package.json.
     NODE_ENV=development "$PNPM" install --no-frozen-lockfile \
         --store-dir "$PNPM_STORE" \
         --network-concurrency 16 \
-        --allow-build=@parcel/watcher,@prisma/client,@prisma/engines,prisma \
         || die "Panel dependency install failed"
 
-    # chalk and form-data are imported in src/ but not declared in package.json —
-    # pnpm will never install undeclared deps so we add them explicitly.
+    # Prisma/@parcel/watcher postinstall scripts are sandboxed by default in
+    # pnpm v10+. approve-builds --all unblocks them all non-interactively so
+    # the Prisma query-engine binary gets compiled before we try to run migrate.
+    "$PNPM" approve-builds --all || true
+
+    # chalk and form-data are imported in src/ but not in package.json —
+    # add them explicitly so the TypeScript build doesn't fail.
     "$PNPM" add chalk form-data --store-dir "$PNPM_STORE" \
         || die "chalk/form-data install failed"
 }
@@ -1309,6 +1324,7 @@ phase_daemon_deps() {
 }
 
 phase_daemon_build() {
+    pnpm add uuid
     cd /etc/daemon || die "Daemon directory missing"
     "$PNPM" run build || die "Daemon build failed"
     id www-data &>/dev/null && chown -R www-data:www-data /etc/daemon

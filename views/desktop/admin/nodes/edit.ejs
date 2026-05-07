@@ -85,7 +85,7 @@
 
 <%- include('../../components/toast') %>
 
-<script>
+<script nonce="<%- nonce %>">
   // Initialize allocated ports
   let allocatedPorts = <%= node.allocatedPorts ? node.allocatedPorts : '[]' %>;
 

@@ -142,7 +142,7 @@
   </div>
 </main>
 
-<script>
+<script nonce="<%- nonce %>">
 document.addEventListener('DOMContentLoaded', () => {
   const { showToast } = createToastSystem();
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');

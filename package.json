@@ -1,6 +1,6 @@
 {
-  "name": "airlink-panel",
-  "version": "",
+  "name": "Airlink",
+  "version": "2.0.0-rc1",
   "description": "Airlink is a simple-to-use game server management panel",
   "repository": {
     "type": "git",

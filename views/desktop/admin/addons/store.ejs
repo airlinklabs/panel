@@ -195,7 +195,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="<%- nonce %>">
 (function() {
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function show(id, d='') { const e=document.getElementById(id); if(e) e.style.display=d; }

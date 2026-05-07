@@ -138,7 +138,7 @@
 <%- include('../../components/toast') %>
 <%- include('../../components/footer') %>
 
-<script>
+<script nonce="<%- nonce %>">
   const currentVersion = '<%= airlinkVersion %>';
   document.querySelectorAll('.current-version').forEach(el => el.textContent = currentVersion);
   const versionInline = document.getElementById('current-version-inline');
