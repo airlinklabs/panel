@@ -45,7 +45,7 @@ async function resolveUserResourceLimits(userId: number, settings: any) {
   return {
     maxMemory: user?.maxMemory ?? settings?.defaultMaxMemory ?? 512,
     maxCpu: user?.maxCpu ?? settings?.defaultMaxCpu ?? 100,
-    maxStorage: user?.maxStorage ?? settings?.defaultMaxStorage ?? 5,
+    maxStorage: user?.maxStorage ?? settings?.defaultMaxStorage ?? 5120,
   };
 }
 
@@ -144,8 +144,8 @@ const userCreateServerModule: Module = {
         if (isNaN(cpu) || cpu < 50 || cpu > resourceLimits.maxCpu) {
           return res.status(400).json({ error: `CPU must be between 50 and ${resourceLimits.maxCpu}% (50% = half a core).` });
         }
-        if (isNaN(storage) || storage < 1 || storage > resourceLimits.maxStorage) {
-          return res.status(400).json({ error: `Storage must be between 1 and ${resourceLimits.maxStorage} GB.` });
+        if (isNaN(storage) || storage < 128 || storage > resourceLimits.maxStorage) {
+          return res.status(400).json({ error: `Storage must be between 128 and ${resourceLimits.maxStorage} MB.` });
         }
 
         const node = await prisma.node.findUnique({ where: { id: parseInt(nodeId) } });

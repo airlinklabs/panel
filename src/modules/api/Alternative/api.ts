@@ -577,7 +577,7 @@ const coreModule: Module = {
               Ports: Port || '[{"Port": "25565:25565", "primary": true}]',
               Memory: parseInt(Memory) || 4,
               Cpu: parseInt(Cpu) || 2,
-              Storage: parseInt(Storage) || 20,
+              Storage: parseInt(Storage) || 20480,
               Variables: JSON.stringify(variables) || '[]',
               StartCommand,
               dockerImage: JSON.stringify(imageDocker),

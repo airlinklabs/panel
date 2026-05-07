@@ -210,8 +210,8 @@ const coreModule: Module = {
         "UUID": "550e8400-e29b-41d4-a716-446655440000",
         "name": "Minecraft Server",
         "Memory": 2048,
-        "Cpu": 2,
-        "Storage": 10000
+        "Cpu": 100,
+        "Storage": 20480
       }
     ]
   }

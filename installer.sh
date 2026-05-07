@@ -1324,7 +1324,6 @@ phase_daemon_deps() {
 }
 
 phase_daemon_build() {
-    pnpm add uuid
     cd /etc/daemon || die "Daemon directory missing"
     "$PNPM" run build || die "Daemon build failed"
     id www-data &>/dev/null && chown -R www-data:www-data /etc/daemon

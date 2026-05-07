@@ -75,18 +75,39 @@
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Resource Allocation</h2>
             <div class="grid grid-cols-3 gap-4 mb-6">
               <div>
-                <label for="serverMemory" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Memory (MB):</label>
-                <input id="serverMemory" name="Memory" type="number" value="<%= server.Memory %>" min="128" max="131072" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                <label class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Memory:</label>
+                <input type="hidden" id="serverMemory" name="Memory" value="<%= server.Memory %>">
+                <div class="flex items-stretch mt-2 mb-1 gap-0">
+                  <input id="serverMemoryDisplay" type="number" min="1"
+                    value="<%= server.Memory >= 1024 ? Math.round(server.Memory / 1024) : server.Memory %>"
+                    class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-r-0 border-neutral-800/10 dark:border-white/5">
+                  <select id="serverMemoryUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-800/10 dark:border-white/5 cursor-pointer">
+                    <option value="1"    <%= server.Memory < 1024  ? 'selected' : '' %>>MB</option>
+                    <option value="1024" <%= server.Memory >= 1024 ? 'selected' : '' %>>GB</option>
+                  </select>
+                </div>
+                <p class="text-xs text-neutral-400 mb-3">Min 128 MB</p>
               </div>
 
               <div>
-                <label for="serverCpu" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">CPU Cores:</label>
-                <input id="serverCpu" name="Cpu" type="number" value="<%= server.Cpu %>" min="1" max="16" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                <label for="serverCpu" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">CPU (%):</label>
+                <input id="serverCpu" name="Cpu" type="number" value="<%= server.Cpu %>" min="50" max="10000" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-1 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                <p class="text-xs text-neutral-400 mb-3">100% = 1 core weight</p>
               </div>
 
               <div>
-                <label for="serverStorage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Storage (GB):</label>
-                <input id="serverStorage" name="Storage" type="number" value="<%= server.Storage %>" min="1" max="500" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                <label class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Storage:</label>
+                <input type="hidden" id="serverStorage" name="Storage" value="<%= server.Storage %>">
+                <div class="flex items-stretch mt-2 mb-1 gap-0">
+                  <input id="serverStorageDisplay" type="number" min="1"
+                    value="<%= server.Storage >= 1024 ? Math.round(server.Storage / 1024) : server.Storage %>"
+                    class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-r-0 border-neutral-800/10 dark:border-white/5">
+                  <select id="serverStorageUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-800/10 dark:border-white/5 cursor-pointer">
+                    <option value="1"    <%= server.Storage < 1024  ? 'selected' : '' %>>MB</option>
+                    <option value="1024" <%= server.Storage >= 1024 ? 'selected' : '' %>>GB</option>
+                  </select>
+                </div>
+                <p class="text-xs text-neutral-400 mb-3">Min 128 MB</p>
               </div>
             </div>
 
@@ -207,9 +228,29 @@
   document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('editServerForm');
     const allowStartupEditToggle = document.getElementById('allowStartupEdit');
-    const allowStartupEditLabel = document.getElementById('allowStartupEditLabel');
-    const suspendServerToggle = document.getElementById('suspendServer');
-    const suspendServerLabel = document.getElementById('suspendServerLabel');
+    const allowStartupEditLabel  = document.getElementById('allowStartupEditLabel');
+    const suspendServerToggle    = document.getElementById('suspendServer');
+    const suspendServerLabel     = document.getElementById('suspendServerLabel');
+
+    // MB/GB picker
+    function syncUnit(displayId, unitId, hiddenId) {
+      const display = document.getElementById(displayId);
+      const unit    = document.getElementById(unitId);
+      const hidden  = document.getElementById(hiddenId);
+      function update() {
+        hidden.value = Math.round(parseFloat(display.value || 0) * parseInt(unit.value));
+      }
+      display.addEventListener('input', update);
+      unit.addEventListener('change', function() {
+        const prevMult = this.value === '1024' ? 1 : 1024;
+        const newMult  = parseInt(this.value);
+        if (prevMult !== newMult) display.value = Math.round(parseFloat(display.value || 0) * prevMult / newMult) || 1;
+        update();
+      });
+      update();
+    }
+    syncUnit('serverMemoryDisplay',  'serverMemoryUnit',  'serverMemory');
+    syncUnit('serverStorageDisplay', 'serverStorageUnit', 'serverStorage');
 
     allowStartupEditToggle.addEventListener('change', function() {
       allowStartupEditLabel.textContent = this.checked ? 'Enabled' : 'Disabled';
