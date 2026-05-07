@@ -122,7 +122,7 @@ async function saveSettings(data: Record<string, any>) {
       defaultServerLimit:    0,
       defaultMaxMemory:      512,
       defaultMaxCpu:         100,
-      defaultMaxStorage:     5,
+      defaultMaxStorage:     5120,
       loginMaxAttempts:      5,
       loginLockoutMinutes:   15,
       enforceDaemonHttps:    false,
@@ -354,8 +354,8 @@ const adminModule: Module = {
             return res.status(400).json({ success: false, error: 'Max memory must be at least 128 MB.' });
           if (isNaN(defaultMaxCpu) || defaultMaxCpu < 10)
             return res.status(400).json({ success: false, error: 'Max CPU must be at least 10%.' });
-          if (isNaN(defaultMaxStorage) || defaultMaxStorage < 1)
-            return res.status(400).json({ success: false, error: 'Max storage must be at least 1 GB.' });
+          if (isNaN(defaultMaxStorage) || defaultMaxStorage < 128)
+            return res.status(400).json({ success: false, error: 'Max storage must be at least 128 MB.' });
 
           const serverPolicyData: Record<string, any> = {
             allowUserCreateServer,

@@ -25,7 +25,7 @@ export const settingsLoader = async () => {
           defaultServerLimit:    0,
           defaultMaxMemory:      512,
           defaultMaxCpu:         100,
-          defaultMaxStorage:     5,
+          defaultMaxStorage:     5120,
           loginMaxAttempts:      5,
           loginLockoutMinutes:   15,
           enforceDaemonHttps:    false,

@@ -175,11 +175,17 @@
             </div>
             <div class="p-5 grid grid-cols-3 gap-4">
               <div>
-                <label class="form-label">RAM <span class="text-neutral-400 font-normal">(MB)</span></label>
-                <div class="stepper">
-                  <button type="button" class="stepper-btn" data-action="dec" data-target="Memory">−</button>
-                  <input id="Memory" type="number" value="512" min="128" max="<%= resourceLimits.maxMemory %>" class="stepper-input">
-                  <button type="button" class="stepper-btn" data-action="inc" data-target="Memory" data-step="128" data-max="<%= resourceLimits.maxMemory %>">+</button>
+                <label class="form-label">RAM</label>
+                <!-- hidden field always holds MB -->
+                <input type="hidden" id="Memory" value="512">
+                <div class="flex items-stretch gap-0">
+                  <button type="button" class="stepper-btn rounded-l-xl" data-action="dec" data-target="MemoryDisplay" data-step="128" data-min="1">−</button>
+                  <input id="MemoryDisplay" type="number" value="512" min="1" class="stepper-input flex-1">
+                  <button type="button" class="stepper-btn" data-action="inc" data-target="MemoryDisplay" data-step="128">+</button>
+                  <select id="MemoryUnit" class="rounded-r-xl text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-white border border-l-0 border-neutral-200 dark:border-white/10 cursor-pointer">
+                    <option value="1" selected>MB</option>
+                    <option value="1024">GB</option>
+                  </select>
                 </div>
                 <p class="text-[11px] text-neutral-400 mt-1.5">Max <%= resourceLimits.maxMemory %> MB</p>
               </div>
@@ -193,13 +199,19 @@
                 <p class="text-[11px] text-neutral-400 mt-1.5">50% = half a core. Max <%= resourceLimits.maxCpu %>%</p>
               </div>
               <div>
-                <label class="form-label">Storage <span class="text-neutral-400 font-normal">(GB)</span></label>
-                <div class="stepper">
-                  <button type="button" class="stepper-btn" data-action="dec" data-target="Storage" data-step="1" data-min="1">−</button>
-                  <input id="Storage" type="number" value="5" min="1" max="<%= resourceLimits.maxStorage %>" class="stepper-input">
-                  <button type="button" class="stepper-btn" data-action="inc" data-target="Storage" data-step="1" data-max="<%= resourceLimits.maxStorage %>">+</button>
+                <label class="form-label">Storage</label>
+                <!-- hidden field always holds MB -->
+                <input type="hidden" id="Storage" value="5120">
+                <div class="flex items-stretch gap-0">
+                  <button type="button" class="stepper-btn rounded-l-xl" data-action="dec" data-target="StorageDisplay" data-step="1" data-min="1">−</button>
+                  <input id="StorageDisplay" type="number" value="5" min="1" class="stepper-input flex-1">
+                  <button type="button" class="stepper-btn" data-action="inc" data-target="StorageDisplay" data-step="1">+</button>
+                  <select id="StorageUnit" class="rounded-r-xl text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-white border border-l-0 border-neutral-200 dark:border-white/10 cursor-pointer">
+                    <option value="1">MB</option>
+                    <option value="1024" selected>GB</option>
+                  </select>
                 </div>
-                <p class="text-[11px] text-neutral-400 mt-1.5">Max <%= resourceLimits.maxStorage %> GB</p>
+                <p class="text-[11px] text-neutral-400 mt-1.5">Max <%= resourceLimits.maxStorage %> MB</p>
               </div>
             </div>
           </div>
@@ -366,8 +378,29 @@
       let val = parseInt(input.value) || 0;
       val = btn.dataset.action === 'inc' ? Math.min(max, val + step) : Math.max(min, val - step);
       input.value = val;
+      input.dispatchEvent(new Event('input')); // trigger MB sync
     });
   });
+
+  // MB/GB unit sync — hidden #Memory and #Storage always hold MB values
+  function syncUnit(displayId, unitId, hiddenId) {
+    const display = document.getElementById(displayId);
+    const unit    = document.getElementById(unitId);
+    const hidden  = document.getElementById(hiddenId);
+    function update() {
+      hidden.value = Math.round(parseFloat(display.value || 0) * parseInt(unit.value));
+    }
+    display.addEventListener('input', update);
+    unit.addEventListener('change', function() {
+      const prevMult = this.value === '1024' ? 1 : 1024;
+      const newMult  = parseInt(this.value);
+      if (prevMult !== newMult) display.value = Math.round(parseFloat(display.value || 0) * prevMult / newMult) || 1;
+      update();
+    });
+    update();
+  }
+  syncUnit('MemoryDisplay',  'MemoryUnit',  'Memory');
+  syncUnit('StorageDisplay', 'StorageUnit', 'Storage');
 
   /* ── Confirm dialog ─────────────────────────────────────── */
   const overlay      = document.getElementById('confirmOverlay');

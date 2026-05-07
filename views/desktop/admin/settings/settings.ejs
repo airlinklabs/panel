@@ -230,9 +230,17 @@
                 <p class="mt-1 text-xs text-neutral-500">0 = cannot create.</p>
               </div>
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max memory <span class="text-neutral-400 font-normal">(MB)</span></label>
-                <input type="number" id="defaultMaxMemory" value="<%= settings.defaultMaxMemory %>" min="128" max="65536"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max memory</label>
+                <input type="hidden" id="defaultMaxMemory" value="<%= settings.defaultMaxMemory %>">
+                <div class="flex items-stretch gap-0">
+                  <input type="number" id="defaultMaxMemoryDisplay" min="1"
+                    value="<%= settings.defaultMaxMemory >= 1024 ? Math.round(settings.defaultMaxMemory / 1024) : settings.defaultMaxMemory %>"
+                    class="rounded-l-xl flex-1 border border-r-0 border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  <select id="defaultMaxMemoryUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-600 text-neutral-800 dark:text-white border border-neutral-200 dark:border-neutral-600/30 cursor-pointer">
+                    <option value="1"    <%= settings.defaultMaxMemory < 1024  ? 'selected' : '' %>>MB</option>
+                    <option value="1024" <%= settings.defaultMaxMemory >= 1024 ? 'selected' : '' %>>GB</option>
+                  </select>
+                </div>
               </div>
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max CPU <span class="text-neutral-400 font-normal">(%)</span></label>
@@ -240,9 +248,17 @@
                   class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
               </div>
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max storage <span class="text-neutral-400 font-normal">(GB)</span></label>
-                <input type="number" id="defaultMaxStorage" value="<%= settings.defaultMaxStorage %>" min="1" max="10000"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max storage</label>
+                <input type="hidden" id="defaultMaxStorage" value="<%= settings.defaultMaxStorage %>">
+                <div class="flex items-stretch gap-0">
+                  <input type="number" id="defaultMaxStorageDisplay" min="1"
+                    value="<%= settings.defaultMaxStorage >= 1024 ? Math.round(settings.defaultMaxStorage / 1024) : settings.defaultMaxStorage %>"
+                    class="rounded-l-xl flex-1 border border-r-0 border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  <select id="defaultMaxStorageUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-600 text-neutral-800 dark:text-white border border-neutral-200 dark:border-neutral-600/30 cursor-pointer">
+                    <option value="1"    <%= settings.defaultMaxStorage < 1024  ? 'selected' : '' %>>MB</option>
+                    <option value="1024" <%= settings.defaultMaxStorage >= 1024 ? 'selected' : '' %>>GB</option>
+                  </select>
+                </div>
               </div>
             </div>
             <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
