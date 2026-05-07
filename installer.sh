@@ -1292,7 +1292,14 @@ phase_daemon_deps() {
     # @types/body-parser is missing from the daemon's package.json but imported in src/
     "$PNPM" add @types/body-parser --store-dir "$PNPM_STORE" || die "@types/body-parser install failed"
 
-    # native libs — need rebuild after install
+    # native libs require a C/C++ toolchain (make + cc/gcc) to compile via node-gyp
+    case "$PKG" in
+        apt)    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq build-essential ;;
+        dnf|yum) $PKG install -y -q gcc gcc-c++ make ;;
+        pacman) pacman -Sy --noconfirm --needed base-devel ;;
+        apk)    apk add --no-cache build-base ;;
+    esac
+
     if [[ -d /etc/daemon/libs ]]; then
         cd /etc/daemon/libs || die "Cannot access /etc/daemon/libs"
         "$PNPM" install --no-frozen-lockfile --store-dir "$PNPM_STORE" || true
