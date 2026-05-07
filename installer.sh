@@ -1225,16 +1225,40 @@ process.stdout.write(v.replace(/^[^0-9]*/, ''));
         --store-dir "$PNPM_STORE" \
         || die "Prisma install failed"
 
-    # generate the Prisma client so TypeScript can find PrismaClient / Prisma types
-    npx prisma generate || die "Prisma client generation failed"
+    # chalk and form-data are imported in src/ but can be silently dropped when
+    # pnpm dedupes or the lockfile is stale — read pinned version from package.json
+    local chalk_ver
+    chalk_ver=$(node -e "
+const p = require('./package.json');
+const v = (p.dependencies && p.dependencies['chalk'])
+       || (p.devDependencies && p.devDependencies['chalk'])
+       || '';
+process.stdout.write(v.replace(/^[^0-9]*/, ''));
+" 2>/dev/null) || chalk_ver=""
+
+    local formdata_ver
+    formdata_ver=$(node -e "
+const p = require('./package.json');
+const v = (p.dependencies && p.dependencies['form-data'])
+       || (p.devDependencies && p.devDependencies['form-data'])
+       || '';
+process.stdout.write(v.replace(/^[^0-9]*/, ''));
+" 2>/dev/null) || formdata_ver=""
+
+    [[ -n "$chalk_ver" ]]    && "$PNPM" add "chalk@${chalk_ver}"        --store-dir "$PNPM_STORE" || true
+    [[ -n "$formdata_ver" ]] && "$PNPM" add "form-data@${formdata_ver}" --store-dir "$PNPM_STORE" || true
+
+    # migrate:deploy runs both prisma migrate deploy AND prisma generate —
+    # no need for a separate generate step here
 }
 
 phase_panel_build() {
     cd /var/www/panel || die "Panel directory missing"
 
-    # run database migrations before building — Prisma types must be in sync
-    # with the schema or the TypeScript compiler will reject them
-    "$PNPM" run migrate:dev || die "Database migration failed"
+    # migrate:deploy = "prisma migrate deploy && prisma generate" — non-interactive,
+    # safe for CI/automated installs. migrate:dev prompts for a migration name so
+    # it cannot be used in a non-interactive installer.
+    "$PNPM" run migrate:deploy || die "Database migration failed"
 
     "$PNPM" run build || die "Panel build failed"
 }
