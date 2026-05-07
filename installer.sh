@@ -1186,8 +1186,10 @@ phase_panel_deps() {
     local lockflag="--no-frozen-lockfile"
     [[ -f pnpm-lock.yaml ]] && lockflag="--frozen-lockfile"
 
-    # pnpm is so much faster than npm I can't believe people still use npm for CI
-    "$PNPM" install $lockflag \
+    # NODE_ENV=production makes pnpm silently skip devDependencies — build-time
+    # packages like chalk, form-data, prisma, and typescript disappear.
+    # Force development so pnpm installs everything listed in package.json.
+    NODE_ENV=development "$PNPM" install $lockflag \
         --store-dir "$PNPM_STORE" \
         --network-concurrency 16 \
         --prefer-offline \
@@ -1195,63 +1197,7 @@ phase_panel_deps() {
 
     # bcrypt needs native compilation — separate step so it doesn't poison the main install
     "$PNPM" add bcrypt --store-dir "$PNPM_STORE" || true
-
-    # read the exact prisma version pinned in package.json — never install latest
-    local prisma_ver
-    prisma_ver=$(node -e "
-const p = require('./package.json');
-const v = (p.dependencies && p.dependencies['prisma'])
-       || (p.devDependencies && p.devDependencies['prisma'])
-       || '';
-process.stdout.write(v.replace(/^[^0-9]*/, ''));
-" 2>/dev/null) || prisma_ver=""
-
-    local client_ver
-    client_ver=$(node -e "
-const p = require('./package.json');
-const v = (p.dependencies && p.dependencies['@prisma/client'])
-       || (p.devDependencies && p.devDependencies['@prisma/client'])
-       || '';
-process.stdout.write(v.replace(/^[^0-9]*/, ''));
-" 2>/dev/null) || client_ver=""
-
-    [[ -n "$prisma_ver" ]] || die "Could not read prisma version from package.json"
-    [[ -n "$client_ver" ]] || client_ver="$prisma_ver"   # they're always the same major
-    log "Prisma versions from package.json: prisma@${prisma_ver} @prisma/client@${client_ver}"
-
-    # ensure prisma CLI and client are present at the exact pinned version —
-    # pnpm install can skip devDependencies when NODE_ENV=production is set
-    "$PNPM" add "prisma@${prisma_ver}" "@prisma/client@${client_ver}" \
-        --store-dir "$PNPM_STORE" \
-        || die "Prisma install failed"
-
-    # chalk and form-data are imported in src/ but can be silently dropped when
-    # pnpm dedupes or the lockfile is stale — read pinned version from package.json
-    local chalk_ver
-    chalk_ver=$(node -e "
-const p = require('./package.json');
-const v = (p.dependencies && p.dependencies['chalk'])
-       || (p.devDependencies && p.devDependencies['chalk'])
-       || '';
-process.stdout.write(v.replace(/^[^0-9]*/, ''));
-" 2>/dev/null) || chalk_ver=""
-
-    local formdata_ver
-    formdata_ver=$(node -e "
-const p = require('./package.json');
-const v = (p.dependencies && p.dependencies['form-data'])
-       || (p.devDependencies && p.devDependencies['form-data'])
-       || '';
-process.stdout.write(v.replace(/^[^0-9]*/, ''));
-" 2>/dev/null) || formdata_ver=""
-
-    [[ -n "$chalk_ver" ]]    && "$PNPM" add "chalk@${chalk_ver}"        --store-dir "$PNPM_STORE" || true
-    [[ -n "$formdata_ver" ]] && "$PNPM" add "form-data@${formdata_ver}" --store-dir "$PNPM_STORE" || true
-
-    # migrate:deploy runs both prisma migrate deploy AND prisma generate —
-    # no need for a separate generate step here
 }
-
 phase_panel_build() {
     cd /var/www/panel || die "Panel directory missing"
 
