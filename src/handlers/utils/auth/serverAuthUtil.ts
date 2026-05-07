@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { WebSocket } from 'ws';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 import logger from '../../logger';
 import prisma from '../../../db';

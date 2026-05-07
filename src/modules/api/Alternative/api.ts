@@ -4,7 +4,7 @@ import prisma from '../../../db';
 import logger from '../../../handlers/logger';
 import axios from 'axios';
 import { queueer } from '../../../handlers/queueer';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { Buffer } from 'buffer';
 import { getParamAsString, getParamAsNumber } from "../../../utils/typeHelpers";
 import { daemonSchemeSync } from '../../../handlers/utils/core/daemonRequest';
