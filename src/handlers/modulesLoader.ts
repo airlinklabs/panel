@@ -74,14 +74,8 @@ export const loadModules = async (
     }
 
     const mod = result.mod?.default;
-    if (!mod || !mod.info || typeof mod.router !== 'function') {
+    if (!mod || typeof mod.router !== 'function') {
       if (isDebugMode) logger.warn(`Skipping non-module file: ${result.file}`);
-      skipped++;
-      continue;
-    }
-
-    if (mod.info.version !== airlinkVersion) {
-      logger.warn(`Skipping incompatible module: ${mod.info.name} (requires v${mod.info.version}, found v${airlinkVersion})`);
       skipped++;
       continue;
     }

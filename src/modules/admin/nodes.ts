@@ -8,17 +8,11 @@ import axios from 'axios';
 import { Buffer } from 'buffer';
 import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import crypto from 'crypto';
 
 
 function generateApiKey(length: number): string {
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    result += characters[randomIndex];
-  }
-  return result;
+  return crypto.randomBytes(length).toString('base64url').slice(0, length);
 }
 
 type NodeWithInstances = {
@@ -31,46 +25,36 @@ type NodeWithInstances = {
   port: number;
   key: string;
   createdAt: Date;
-  instances: any[];
-  servers?: any[]; // For port allocation UI
+  instances: unknown[];
+  servers?: unknown[];
 }
 
 async function listNodes(res: Response, includeServers = false) {
   try {
-    const nodes = await prisma.node.findMany();
-    const nodesWithStatus = [];
+    const nodes = await prisma.node.findMany({
+      include: { servers: true },
+    });
 
-    for (const node of nodes) {
-      const instances = await prisma.server.findMany({
-        where: { nodeId: node.id },
-      });
-
-      const nodeWithInstances: NodeWithInstances = {
+    const nodesWithStatus = await Promise.all(
+      nodes.map(async (node) => {
+        const nodeWithInstances: NodeWithInstances = {
         ...node,
-        instances,
-        ...(includeServers ? { servers: instances } : {}),
+          instances: node.servers,
+          ...(includeServers ? { servers: node.servers } : {}),
       };
 
-      nodesWithStatus.push(await checkNodeStatus(nodeWithInstances));
-    }
+        return checkNodeStatus(nodeWithInstances);
+      }),
+    );
 
     return nodesWithStatus;
   } catch (error) {
-    logger.error('Error fetching nodes:', error);
-    res.status(500).json({ message: 'Error fetching nodes.' });
+    logger.error('error fetching nodes', error);
+    res.status(500).json({ message: 'error fetching nodes' });
   }
 }
 
 const adminModule: Module = {
-  info: {
-    name: 'Admin Nodes Module',
-    description: 'This file is for admin functionality of the Nodes.',
-    version: '1.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
-  },
-
   router: () => {
     const router = Router();
 
@@ -80,7 +64,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
+          const user = req.session.user!;
           if (!user) {
             return res.redirect('/login');
           }
@@ -112,7 +96,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
+          const user = req.session.user!;
           if (!user) {
             return res.redirect('/login');
           }
@@ -198,7 +182,7 @@ const adminModule: Module = {
 
         try {
           const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
+          const user = req.session.user!;
           if (!user) {
             res.status(403).json({ message: 'Unauthorized access.' });
             return;
@@ -240,7 +224,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
+          const user = req.session.user!;
           if (!user) {
             return res.redirect('/login');
           }
@@ -279,7 +263,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
+          const user = req.session.user!;
           if (!user) {
             return res.redirect('/login');
           }
@@ -315,7 +299,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
+          const user = req.session.user!;
           if (!user) {
             return res.redirect('/login');
           }
@@ -353,7 +337,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
+          const user = req.session.user!;
           if (!user) {
             return res.redirect('/login');
           }
@@ -431,7 +415,7 @@ const adminModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
-        const user = await prisma.users.findUnique({ where: { id: userId } });
+        const user = req.session.user!;
         if (!user) {
           return res.redirect('/login');
         }

@@ -134,15 +134,6 @@ async function saveSettings(data: Record<string, any>) {
 }
 
 const adminModule: Module = {
-  info: {
-    name:          'Admin Settings Module',
-    description:   'Settings management for the admin panel.',
-    version:       '1.0.0',
-    moduleVersion: '1.0.0',
-    author:        'AirlinkLab',
-    license:       'MIT',
-  },
-
   router: () => {
     const router = Router();
 

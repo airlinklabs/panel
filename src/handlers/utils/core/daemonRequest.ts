@@ -52,8 +52,8 @@ export async function daemonBaseUrl(address: string, port: number | string): Pro
 
 // ── HMAC signing ─────────────────────────────────────────────────────────────
 
-function hmacSign(key: string, method: string, path: string, body: string, timestamp: number): string {
-  const payload = `${timestamp}:${method.toUpperCase()}:${path}:${body}`;
+function hmacSign(key: string, method: string, path: string, body: string, timestamp: number, nonce: string): string {
+  const payload = `${timestamp}:${nonce}:${method.toUpperCase()}:${path}:${body}`;
   return crypto.createHmac('sha256', key).update(payload).digest('hex');
 }
 
@@ -84,11 +84,10 @@ function serializeRequestBody(data: unknown): string {
 // X-Airlink-Timestamp and X-Airlink-Signature headers added.
 export function installDaemonRequestInterceptor(): void {
   axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-    if (!config.auth || (config.auth as any).username !== 'Airlink') {
-      return config;
-    }
+    const auth = config.auth as { username?: string; password?: string } | undefined;
+    if (!auth || auth.username !== 'Airlink') return config;
 
-    const key = extractKeyFromAuth(config.auth);
+    const key = extractKeyFromAuth(auth);
     if (!key) return config;
 
     const method = (config.method || 'GET').toUpperCase();
@@ -104,9 +103,11 @@ export function installDaemonRequestInterceptor(): void {
     const body = serializeRequestBody(config.data);
 
     const timestamp = Math.floor(Date.now() / 1000);
-    const signature = hmacSign(key, method, urlPath, body, timestamp);
+    const nonce = crypto.randomBytes(16).toString('hex');
+    const signature = hmacSign(key, method, urlPath, body, timestamp, nonce);
 
     config.headers.set('X-Airlink-Timestamp', String(timestamp));
+    config.headers.set('X-Airlink-Nonce', nonce);
     config.headers.set('X-Airlink-Signature', signature);
 
     return config;

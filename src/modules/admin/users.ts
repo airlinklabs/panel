@@ -24,15 +24,6 @@ async function listUsers(res: Response) {
 }
 
 const adminModule: Module = {
-  info: {
-    name: 'Admin Users Module',
-    description: 'This file is for admin functionality of the Users.',
-    version: '1.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
-  },
-
   router: () => {
     const router = Router();
 
@@ -42,7 +33,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
+          const user = req.session.user!;
           if (!user) {
             return res.redirect('/login');
           }
@@ -72,7 +63,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
+          const user = req.session.user!;
           if (!user) {
             return res.redirect('/login');
           }
@@ -158,7 +149,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
+          const user = req.session.user!;
           if (!user) {
             return res.redirect('/login');
           }
@@ -190,7 +181,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
+          const user = req.session.user!;
           if (!user) {
             return res.redirect('/login');
           }
@@ -223,7 +214,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
+          const user = req.session.user!;
           if (!user) {
             return res.redirect('/login');
           }

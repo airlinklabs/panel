@@ -5,15 +5,6 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 
 const adminModule: Module = {
-  info: {
-    name: 'Admin Security Module',
-    description: 'Security settings for the panel.',
-    version: '1.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
-  },
-
   router: () => {
     const router = Router();
 

@@ -43,15 +43,6 @@ function deriveSeverity(matchCount: number): string {
 }
 
 const radarModule: Module = {
-  info: {
-    name: 'Radar Module',
-    description: 'This module provides radar scanning functionality for server volumes.',
-    version: '1.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
-  },
-
   router: () => {
     const router = Router();
 

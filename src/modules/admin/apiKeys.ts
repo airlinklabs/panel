@@ -3,7 +3,7 @@ import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
-import { registerPermission } from '../../handlers/permisions';
+import { registerPermission } from '../../handlers/permissions';
 import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 import crypto from 'crypto';
 
@@ -27,26 +27,10 @@ registerPermission('airlink.admin.apikeys.edit');
 registerPermission('airlink.admin.api.docs.view');
 
 function generateApiKey(length: number): string {
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    result += characters[randomIndex];
-  }
-  return result;
+  return crypto.randomBytes(length).toString('base64url').slice(0, length);
 }
 
 const coreModule: Module = {
-  info: {
-    name: 'API Keys Module',
-    description: 'This module handles API key management.',
-    version: '1.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
-  },
-
   router: () => {
     const router = Router();
 

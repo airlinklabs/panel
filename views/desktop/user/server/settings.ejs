@@ -48,7 +48,14 @@
 
         <!-- Server Information -->
         <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5 mt-8">
-          <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white"><%= req.translations.serverInformation || 'Server Information' %></h2>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-neutral-800 dark:text-white"><%= req.translations.serverInformation || 'Server Information' %></h2>
+            <select id="sizeUnitSelect" class="px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 text-sm font-medium">
+              <option value="auto">Auto</option>
+              <option value="mb">MB</option>
+              <option value="gb">GB</option>
+            </select>
+          </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -73,17 +80,17 @@
 
             <div>
               <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.memory || 'Memory' %></h3>
-              <p class="text-neutral-400"><%= server.Memory %> MB</p>
+              <p class="text-neutral-400 js-size" data-mb="<%= server.Memory %>"><%= server.Memory %> MB</p>
             </div>
 
             <div>
               <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.cpu || 'CPU' %></h3>
-              <p class="text-neutral-400"><%= server.Cpu * 100 %>%</p>
+              <p class="text-neutral-400"><%= server.Cpu %>%</p>
             </div>
 
             <div>
               <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.storage || 'Storage' %></h3>
-              <p class="text-neutral-400"><%= server.Storage %> GB</p>
+              <p class="text-neutral-400 js-size" data-mb="<%= server.Storage %>"><%= server.Storage %> MB</p>
             </div>
 
             <div>
@@ -135,6 +142,27 @@
   document.addEventListener('DOMContentLoaded', function() {
     const serverSettingsForm = document.getElementById('serverSettingsForm');
     const reinstallButton = document.getElementById('reinstallButton');
+    const sizeUnitSelect = document.getElementById('sizeUnitSelect');
+
+    function formatSize(mb, unit) {
+      if (unit === 'mb') return `${Math.round(mb)} MB`;
+      if (unit === 'gb') return `${(mb / 1024).toFixed(mb >= 10240 ? 0 : 1)} GB`;
+      return mb >= 1024 ? `${(mb / 1024).toFixed(mb >= 10240 ? 0 : 1)} GB` : `${Math.round(mb)} MB`;
+    }
+    function updateSizes() {
+      const unit = sizeUnitSelect?.value || localStorage.getItem('serverSizeUnit') || 'auto';
+      document.querySelectorAll('.js-size').forEach((el) => {
+        el.textContent = formatSize(parseFloat(el.dataset.mb || '0'), unit);
+      });
+    }
+    if (sizeUnitSelect) {
+      sizeUnitSelect.value = localStorage.getItem('serverSizeUnit') || 'auto';
+      sizeUnitSelect.addEventListener('change', () => {
+        localStorage.setItem('serverSizeUnit', sizeUnitSelect.value);
+        updateSizes();
+      });
+      updateSizes();
+    }
 
     serverSettingsForm.addEventListener('submit', function(e) {
       e.preventDefault();

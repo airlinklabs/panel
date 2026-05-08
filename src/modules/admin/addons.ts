@@ -9,7 +9,7 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { getAllAddons, toggleAddonStatus, reloadAddons, loadAddons } from '../../handlers/addonHandler';
-import { registerPermission } from '../../handlers/permisions';
+import { registerPermission } from '../../handlers/permissions';
 import { getParamAsString } from '../../utils/typeHelpers';
 
 const execFileAsync = promisify(execFile);
@@ -89,15 +89,6 @@ async function* runInstall(
 }
 
 const addonsModule: Module = {
-  info: {
-    name: 'Admin Addons Module',
-    description: 'This file is for admin functionality of the Addons.',
-    version: '1.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
-  },
-
   router: () => {
     const router = Router();
 

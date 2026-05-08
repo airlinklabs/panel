@@ -1,12 +1,3 @@
-/**
- * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
- *      AirLink - Open Source Project by AirlinkLabs
- *      Repository: https://github.com/airlinklabs/panel
- *
- *     © 2025 AirlinkLabs. Licensed under the MIT License
- * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
- */
-
 import express, { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from "@prisma/client";
 import path from 'path';
@@ -58,17 +49,15 @@ const port = process.env.PORT || 3000;
 const name = process.env.NAME || 'AirLink';
 const airlinkVersion = config.meta.version;
 
-// Trust proxy when the panel is behind a reverse proxy (Nginx, Caddy, etc).
-// Reads from DB at startup — affects req.ip used by rate limiting and IP banning.
-// We set this before any middleware so the correct client IP flows through.
-(async () => {
+const trustProxyReady = (async () => {
   try {
     const s = await prisma.settings.findUnique({ where: { id: 1 } });
     if (s?.behindReverseProxy) {
       app.set('trust proxy', 1);
+      logger.info('trust proxy ready');
     }
-  } catch {
-    // DB not ready yet — leave default (no trust proxy)
+  } catch (err) {
+    logger.warn(`couldn't read reverse proxy setting, using direct IPs: ${(err as Error)?.message || err}`);
   }
 })();
 
@@ -136,7 +125,7 @@ function getAddonDirs(): string[] {
 
     return originalRenderFile(file, data, options, callback);
   } catch (error) {
-    logger.error('Error in EJS renderFile override:', error);
+    logger.error('view lookup broke:', error);
     return originalRenderFile(file, data, options, callback);
   }
 };
@@ -350,7 +339,7 @@ const useSecureCookie = process.env.URL?.startsWith('https://') ?? false;
 app.use(
   session({
     secret:
-      process.env.SESSION_SECRET || Math.random().toString(36).substring(2, 15),
+      process.env.SESSION_SECRET || crypto.randomBytes(32).toString('base64url'),
     resave: false,
     saveUninitialized: false,
     store: new PrismaSessionStore(),
@@ -500,7 +489,7 @@ app.use((_req, res, next) => {
 
 // Load error handling
 app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
-  logger.error('Unhandled error:', err);
+  logger.error('request fell over:', err);
 
   if (!res.headersSent) {
     const errorMessage = isProduction ? 'Internal server error' : err.message;
@@ -518,6 +507,7 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
   try {
     await databaseLoader();
     await settingsLoader();
+    await trustProxyReady;
     // Install HMAC signing interceptor for all panel→daemon requests
     installDaemonRequestInterceptor();
     // Initialize default UI components
@@ -531,7 +521,7 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
     const server = app.listen(port, () => {
       startPlayerStatsCollection();
       // Clone/pull egg repos on startup; auto-refreshes every 2 days
-      initEggCatalogue().catch(err => logger.warn(`Store catalogue init failed: ${err?.message || err}`));
+      initEggCatalogue().catch(err => logger.warn(`store catalogue could not load: ${err?.message || err}`));
     });
 
     let shuttingDown = false;
@@ -540,7 +530,7 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
       if (shuttingDown) return;
       shuttingDown = true;
 
-      logger.info(`Shutting down (${signal})...`);
+      logger.info(`shutting down (${signal})`);
 
       server.close(async () => {
         try {
@@ -548,13 +538,13 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
         } catch {
           // best effort
         }
-        logger.info('Server closed');
+        logger.info('server closed');
         process.exit(0);
       });
 
       // If server.close() doesn't finish within 10s, force exit
       setTimeout(() => {
-        logger.warn('Forced exit after timeout');
+        logger.warn('forcing exit after timeout');
         process.exit(1);
       }, 10_000).unref();
     }
@@ -562,7 +552,7 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
     process.on('SIGINT', () => shutdown('SIGINT'));
     process.on('SIGTERM', () => shutdown('SIGTERM'));
   } catch (err) {
-    logger.error('Failed to load modules or database:', err);
+    logger.error('could not load modules or database:', err);
   }
 })();
 

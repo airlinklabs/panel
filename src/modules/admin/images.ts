@@ -42,15 +42,6 @@ function normalizeImageData(raw: Record<string, unknown>) {
 }
 
 const adminModule: Module = {
-  info: {
-    name: 'Admin Module for Images',
-    description: 'This file is for admin functionality.',
-    version: '1.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
-  },
-
   router: () => {
     const router = Router();
 

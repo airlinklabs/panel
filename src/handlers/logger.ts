@@ -1,12 +1,3 @@
-/**
- * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
- *      AirLink - Open Source Project by AirlinkLabs
- *      Repository: https://github.com/airlinklabs/panel
- *
- *     © 2025 AirlinkLabs. Licensed under the MIT License
- * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
- */
-
 import { createConsola, ConsolaInstance } from 'consola';
 import fs from 'fs';
 import path from 'path';
@@ -47,14 +38,11 @@ const consola = createConsola({
   },
 }) as ConsolaInstance;
 
-consola.wrapConsole();
-consola.wrapAll();
-
 const writeToLogFile = (level: string, message: string): void => {
   const timestamp = new Date().toISOString();
   const logMessage = `[${timestamp}] ${level}: ${message}\n`;
   fs.appendFile(path.join(logsDir, 'combined.log'), logMessage, (err) => {
-    if (err) consola.error('Failed to write to combined log file:', err);
+    if (err) consola.error("couldn't write to combined log file:", err);
   });
 };
 
@@ -67,10 +55,9 @@ const getTimestamp = (): string => {
   ].join(':');
 };
 
-const formatLogMessage = (badge: string, message: string, maxWidth = 120): string => {
+const formatLogMessage = (badge: string, message: string): string => {
   const timestamp = `${colors.dim}${getTimestamp()}${colors.reset}`;
-  const padding = ' '.repeat(Math.max(0, maxWidth - (badge.length + message.length + timestamp.length)));
-  return `${badge} ${message}${padding}${timestamp}`;
+  return `${badge} ${message} ${timestamp}`;
 };
 
 const logger = {
@@ -85,7 +72,7 @@ const logger = {
 
     const timestamp = new Date().toISOString();
     fs.appendFile(path.join(logsDir, 'error.log'), `[${timestamp}] ERROR: ${message}: ${error}\n`, (err) => {
-      if (err) consola.error('Failed to write to error log file:', err);
+      if (err) consola.error("couldn't write to error log file:", err);
     });
   },
 
@@ -123,7 +110,7 @@ const logger = {
   },
 
   log(message: any, ...args: any[]): void {
-    const badge = `${colors.bgWhite}${colors.white}${colors.bright} LOG ${colors.reset}`;
+    const badge = `${colors.bgBlue}${colors.white}${colors.bright} LOG ${colors.reset}`;
     const formatted = formatLogMessage(badge, String(message));
 
     if (args.length > 0) {
@@ -133,21 +120,6 @@ const logger = {
     }
 
     writeToLogFile('LOG', [message, ...args].map(String).join(' '));
-  },
-
-  box(options: string | { title?: string; message: string | string[]; style?: any }): void {
-    if (typeof options === 'string') {
-      this.info(options);
-      writeToLogFile('BOX', options);
-      return;
-    }
-
-    const title = options.title || '';
-    const messages = Array.isArray(options.message) ? options.message : [options.message];
-    const text = title ? `${title}: ${messages.join(' | ')}` : messages.join(' | ');
-
-    this.info(text);
-    writeToLogFile('BOX', text);
   },
 };
 

@@ -50,7 +50,7 @@ export const isAuthenticatedForServer =
 export const isAuthenticatedForServerWS =
   (serverIdParam: string = 'id', passwordParam: string = 'password') =>
   async (ws: WebSocket, req: any, next: NextFunction): Promise<void> => {
-    const userId = req.session?.user?.id || +req.query.userId;
+    const userId = req.session?.user?.id;
     const password = req.params[passwordParam];
 
     if (!userId) {

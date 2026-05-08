@@ -4,7 +4,7 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
-import { registerPermission } from '../../handlers/permisions';
+import { registerPermission } from '../../handlers/permissions';
 import { collectPlayerStats } from '../../handlers/playerStatsCollector';
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
@@ -15,15 +15,6 @@ interface ErrorMessage {
 }
 
 const adminModule: Module = {
-  info: {
-    name: 'Admin Player Stats Module',
-    description: 'This file provides player statistics for the admin panel.',
-    version: '1.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
-  },
-
   router: () => {
     const router = Router();
 

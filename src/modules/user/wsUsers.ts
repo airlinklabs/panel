@@ -9,15 +9,6 @@ export const userTimeouts: Map<string, NodeJS.Timeout> = new Map();
 
 
 const wsUsersModule: Module = {
-  info: {
-    name: 'WS Users Module',
-    description: 'This file is for the users functionality.',
-    version: '1.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
-  },
-
   router: () => {
     const router = Router();
 

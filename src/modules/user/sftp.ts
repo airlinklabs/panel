@@ -9,15 +9,6 @@ import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 
 const sftpModule: Module = {
-  info: {
-    name: 'SFTP Module',
-    description: 'Provides SFTP credential generation for server file access.',
-    version: '1.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
-  },
-
   router: () => {
     const router = Router();
 

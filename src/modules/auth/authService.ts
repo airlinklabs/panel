@@ -41,15 +41,6 @@ async function getSecuritySettings() {
 }
 
 const authServiceModule: Module = {
-  info: {
-    name:          'Auth System Module',
-    description:   'Authentication and authorisation for users.',
-    version:       '1.0.0',
-    moduleVersion: '1.0.0',
-    author:        'AirlinkLab',
-    license:       'MIT',
-  },
-
   router: () => {
     const router = Router();
 
@@ -175,16 +166,6 @@ const authServiceModule: Module = {
       } catch (error) {
         logger.error('Register error:', error);
         res.redirect('/register?err=missing_credentials');
-      }
-    });
-
-    // ── GET /logout ──────────────────────────────────────────────────────────
-    router.get('/logout', (req: Request, res: Response) => {
-      res.clearCookie('connect.sid');
-      if (req.session) {
-        req.session.destroy(() => res.redirect('/login'));
-      } else {
-        res.redirect('/login');
       }
     });
 

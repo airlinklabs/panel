@@ -6,15 +6,6 @@ import { apiValidator } from '../../../handlers/utils/api/apiValidator';
 import { getParamAsString, getParamAsNumber } from "../../../utils/typeHelpers";
 
 const coreModule: Module = {
-  info: {
-    name: 'API Module',
-    description: 'This module provides the API endpoints for the panel.',
-    version: '1.0.0',
-    moduleVersion: '1.0.0',
-    author: 'AirLinkLab',
-    license: 'MIT',
-  },
-
   router: () => {
     const router = Router();
 
