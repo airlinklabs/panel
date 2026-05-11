@@ -132,6 +132,7 @@
 <script nonce="<%- nonce %>">
 (function () {
   var SERVER_ID = '<%= server.UUID %>';
+  var sftpPlainPassword = null;
 
   window.openSftpModal = function () {
     var modal = document.getElementById('sftpModal');
@@ -157,10 +158,14 @@
   }
 
   function fillCredentials(data) {
+    if (data.password) {
+      sftpPlainPassword = data.password;
+    }
+
     document.getElementById('sftpValHost').textContent = data.host;
     document.getElementById('sftpValPort').textContent = data.port;
     document.getElementById('sftpValUser').textContent = data.username;
-    document.getElementById('sftpValPass').textContent = data.password;
+    document.getElementById('sftpValPass').textContent = data.password || sftpPlainPassword || 'Regenerate to view';
     showSftpState('credentials');
   }
 

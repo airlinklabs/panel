@@ -125,7 +125,7 @@ model settings {
   defaultServerLimit       Int     @default(0)
   defaultMaxMemory         Int     @default(512)
   defaultMaxCpu            Int     @default(100)
-  defaultMaxStorage        Int     @default(5)
+  defaultMaxStorage        Int     @default(5120)
   loginWallpaper           String?
   registerWallpaper        String?
   loginMaxAttempts         Int     @default(5)
@@ -210,7 +210,7 @@ model Backup {
   filePath    String
   size        BigInt?
   createdAt   DateTime @default(now())
-  server      Server   @relation(fields: [serverId], references: [UUID])
+  server      Server   @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
   airlinkCloudId String?
 
   @@index([serverId])
@@ -226,5 +226,5 @@ model SftpCredential {
   port      Int
   expiresAt DateTime?
   createdAt DateTime @default(now())
-  server    Server   @relation(fields: [serverId], references: [UUID])
+  server    Server   @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
 }

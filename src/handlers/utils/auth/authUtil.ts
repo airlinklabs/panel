@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../../../db';
+import { renderErrorPage } from '../../errorPages';
 
 export const isAuthenticated =
   (isAdminRequired = false, requiredPermission: string | null = null) =>
@@ -21,7 +22,7 @@ export const isAuthenticated =
       try {
         userPermissions = JSON.parse(user.permissions || '[]');
       } catch {
-        return res.redirect('/');
+        return renderErrorPage(req, res, 403);
       }
 
       const hasPermission = userPermissions.some((perm: string) => {
@@ -36,10 +37,12 @@ export const isAuthenticated =
       if (hasPermission) {
         return next();
       }
+
+      return renderErrorPage(req, res, 403);
     }
 
     if (isAdminRequired && !user.isAdmin) {
-      return res.redirect('/');
+      return renderErrorPage(req, res, 403);
     }
 
     next();
