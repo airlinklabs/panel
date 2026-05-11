@@ -1,0 +1,45 @@
+<%- include('../components/header', { title: 'Settings' }) %>
+
+  <main id="page-content" class="">
+    <%- include('../components/template') %>
+      <div class="px-4 pt-5 pb-24">
+
+        <main id="page-content" class="min-h-[calc(100dvh-7.5rem)] px-4 py-10">
+          <section class="flex min-h-[calc(100dvh-10rem)] flex-col items-center justify-center text-center">
+            <div
+              class="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-neutral-200 bg-white text-neutral-800 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6"
+                stroke="currentColor" class="h-6 w-6">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 9v3.75m0 3.75h.008v.008H12v-.008Zm9-4.5a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+            </div>
+
+            <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400">Error <%= statusCode %>
+            </p>
+            <h1 class="mt-2 text-2xl font-semibold tracking-tight text-neutral-900 dark:text-white">
+              <%= errorTitle %>
+            </h1>
+            <p class="mt-3 max-w-sm text-sm leading-6 text-neutral-600 dark:text-neutral-400">
+              <%= errorMessage %>
+            </p>
+            <p
+              class="mt-4 w-full max-w-sm truncate rounded-lg border border-neutral-200 bg-white px-3 py-2 font-mono text-[11px] text-neutral-500 dark:border-white/10 dark:bg-white/5 dark:text-neutral-400">
+              <%= path %>
+            </p>
+
+            <div class="mt-7 grid w-full max-w-sm grid-cols-2 gap-2">
+              <button type="button" onclick="history.length > 1 ? history.back() : location.assign('/')"
+                class="rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-800 shadow-sm transition dark:border-white/10 dark:bg-white/5 dark:text-white">
+                Back
+              </button>
+              <a href="/"
+                class="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition dark:bg-white dark:text-neutral-900">
+                Dashboard
+              </a>
+            </div>
+          </section>
+        </main>
+      </div>
+  </main>
+  <%- include('../components/footer') %>

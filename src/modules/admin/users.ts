@@ -135,7 +135,7 @@ const adminModule: Module = {
             data: {
               email,
               username,
-              password: await bcrypt.hash(password, 10),
+              password: await bcrypt.hash(password, 12),
               isAdmin: isAdminBool,
             },
           });
@@ -328,7 +328,7 @@ const adminModule: Module = {
 
           // Handle password update if provided
           if (password && password.trim() !== '') {
-            updateData.password = await bcrypt.hash(password, 10);
+            updateData.password = await bcrypt.hash(password, 12);
           }
 
           // Update user

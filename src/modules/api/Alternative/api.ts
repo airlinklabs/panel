@@ -673,9 +673,12 @@ const coreModule: Module = {
                     `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/install`,
                     requestBody,
                     {
+                      auth: {
+                        username: 'Airlink',
+                        password: server.node.key,
+                      },
                       headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`,
                       },
                     },
                   );

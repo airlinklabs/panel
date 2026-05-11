@@ -5,7 +5,6 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
 import logger from '../../handlers/logger';
 import axios from 'axios';
-import { Buffer } from 'buffer';
 import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
@@ -250,6 +249,26 @@ const adminModule: Module = {
 
           try {
             if (deleteInstances) {
+              const node = await prisma.node.findUnique({
+                where: { id: nodeId },
+                include: { servers: true },
+              });
+
+              if (node) {
+                await Promise.allSettled(
+                  node.servers.map((server) =>
+                    axios.delete(
+                      `${daemonSchemeSync()}://${node.address}:${node.port}/container`,
+                      {
+                        auth: { username: 'Airlink', password: node.key },
+                        data: { id: server.UUID },
+                        timeout: 8000,
+                      },
+                    ),
+                  ),
+                );
+              }
+
               await prisma.server.deleteMany({
                 where: { nodeId: nodeId },
               });
@@ -454,9 +473,12 @@ const adminModule: Module = {
           const response = await axios.get(
             `${daemonSchemeSync()}://${node.address}:${node.port}/stats`,
             {
+              auth: {
+                username: 'Airlink',
+                password: node.key,
+              },
               headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Basic ${Buffer.from(`Airlink:${node.key}`).toString('base64')}`,
               },
             }
           );

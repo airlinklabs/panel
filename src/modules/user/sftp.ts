@@ -6,6 +6,7 @@ import prisma from '../../db';
 import axios from 'axios';
 import logger from '../../handlers/logger';
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import bcrypt from 'bcryptjs';
 
 
 const sftpModule: Module = {
@@ -44,7 +45,6 @@ const sftpModule: Module = {
 
           res.json({
             username: stored.username,
-            password: stored.password,
             host: stored.host,
             port: stored.port,
             expiresAt: stored.expiresAt,
@@ -104,12 +104,14 @@ const sftpModule: Module = {
             timeout: 15000,
           });
 
-          const { username, password, host, port, expiresAt } = response.data;
+          const { username, password, port, expiresAt } = response.data;
+          const host = server.node.address;
+          const hashedPassword = await bcrypt.hash(password, 12);
 
           await prisma.sftpCredential.upsert({
             where: { serverId },
-            update: { username, password, host, port, expiresAt: expiresAt ? new Date(expiresAt) : null },
-            create: { serverId, username, password, host, port, expiresAt: expiresAt ? new Date(expiresAt) : null },
+            update: { username, password: hashedPassword, host, port, expiresAt: expiresAt ? new Date(expiresAt) : null },
+            create: { serverId, username, password: hashedPassword, host, port, expiresAt: expiresAt ? new Date(expiresAt) : null },
           });
 
           res.json({ username, password, host, port, expiresAt });

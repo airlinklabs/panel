@@ -44,6 +44,11 @@ import {
   handleSPAPageRequest,
   setupSPARoutes,
 } from './handlers/spaHandler';
+import {
+  errorPageHandler,
+  notFoundHandler,
+  renderErrorPage,
+} from './handlers/errorPages';
 
 
 const prisma = new PrismaClient();
@@ -306,8 +311,7 @@ app.use(async (req, res, next) => {
 
     const clientIp = req.ip || req.socket.remoteAddress || '';
     if (banned.includes(clientIp)) {
-      res.status(403).json({ error: 'Access denied' });
-      return;
+      return renderErrorPage(req, res, 403, 'Your IP address is blocked from this panel.');
     }
   } catch {
     // DB not ready yet — allow through
@@ -346,11 +350,15 @@ app.use(
 // Setting secure:true on a plain HTTP server causes browsers to silently drop
 // all session cookies, breaking login on local network setups.
 const useSecureCookie = process.env.URL?.startsWith('https://') ?? false;
+const sessionSecret = process.env.SESSION_SECRET;
+
+if (!sessionSecret && process.env.NODE_ENV === 'production') {
+  throw new Error('SESSION_SECRET env var must be set in production.');
+}
 
 app.use(
   session({
-    secret:
-      process.env.SESSION_SECRET || Math.random().toString(36).substring(2, 15),
+    secret: sessionSecret || 'dev-only-insecure-secret-change-me',
     resave: false,
     saveUninitialized: false,
     store: new PrismaSessionStore(),
@@ -498,20 +506,8 @@ app.use((_req, res, next) => {
   next();
 });
 
-// Load error handling
-app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
-  logger.error('Unhandled error:', err);
-
-  if (!res.headersSent) {
-    const errorMessage = isProduction ? 'Internal server error' : err.message;
-
-    res.status(500).json({
-      error: errorMessage,
-    });
-  }
-
-  next(err);
-});
+// Catch errors from global middleware registered before modules.
+app.use(errorPageHandler);
 
 // Load modules, plugins, database and start the webserver
 (async () => {
@@ -527,6 +523,9 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
 
     // Setup SPA routes
     setupSPARoutes(app);
+
+    app.use(notFoundHandler);
+    app.use(errorPageHandler);
 
     const server = app.listen(port, () => {
       startPlayerStatsCollection();
