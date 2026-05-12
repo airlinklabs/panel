@@ -1,3 +1,12 @@
+/**
+ * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
+ *      AirLink - Open Source Project by AirlinkLabs
+ *      Repository: https://github.com/airlinklabs/panel
+ *
+ *     © 2025 AirlinkLabs. Licensed under the MIT License
+ * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
+ */
+
 import prisma from '../db';
 import axios from 'axios';
 import logger from './logger';

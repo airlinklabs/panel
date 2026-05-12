@@ -4,7 +4,6 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { queueer } from '../../handlers/queueer';
-import { Buffer } from 'buffer';
 import axios from 'axios';
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
@@ -50,6 +49,15 @@ async function resolveUserResourceLimits(userId: number, settings: any) {
 }
 
 const userCreateServerModule: Module = {
+  info: {
+    name: 'User Create Server Module',
+    description: 'Allows users to create their own servers within admin-defined limits.',
+    version: '1.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirlinkLab',
+    license: 'MIT',
+  },
+
   router: () => {
     const router = Router();
 
@@ -219,7 +227,15 @@ const userCreateServerModule: Module = {
                 env: String(v.env_variable ?? v.env ?? ''),
                 value: v.value ?? v.default_value ?? '',
               }));
-              serverEnv.push({ env: 'SERVER_PORT',   value: assignedPort });
+              let serverPort = assignedPort;
+              try {
+                const parsedPorts = JSON.parse(server.Ports);
+                const primary = parsedPorts.find((p: any) => p.primary);
+                if (primary?.Port) {
+                  serverPort = parseInt(String(primary.Port).split(':')[0]);
+                }
+              } catch { /* keep fallback */ }
+              serverEnv.push({ env: 'SERVER_PORT', value: serverPort });
               serverEnv.push({ env: 'SERVER_MEMORY', value: String(server.Memory) });
               serverEnv.push({ env: 'SERVER_CPU',    value: String(server.Cpu) });
             } catch (err) {
@@ -233,7 +249,6 @@ const userCreateServerModule: Module = {
               return acc;
             }, {});
 
-            const authHeader = `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`;
             const daemonUrl = `${daemonSchemeSync()}://${server.node.address}:${server.node.port}`;
 
             if (!server.image?.scripts) {
@@ -256,7 +271,11 @@ const userCreateServerModule: Module = {
                 await axios.post(
                   `${daemonUrl}/container/installer`,
                   { id: server.UUID, script: inst.script, container: inst.container, entrypoint: inst.entrypoint || 'bash', env },
-                  { headers: { 'Content-Type': 'application/json', Authorization: authHeader }, timeout: 600000 },
+                  {
+                    auth: { username: 'Airlink', password: server.node.key },
+                    headers: { 'Content-Type': 'application/json' },
+                    timeout: 600000,
+                  },
                 );
               } else if (Array.isArray(scripts.install)) {
                 // Pass the docker image so the daemon can pull it during install
@@ -280,7 +299,11 @@ const userCreateServerModule: Module = {
                       fileName: s.fileName,
                     })),
                   },
-                  { headers: { 'Content-Type': 'application/json', Authorization: authHeader }, timeout: 600000 },
+                  {
+                    auth: { username: 'Airlink', password: server.node.key },
+                    headers: { 'Content-Type': 'application/json' },
+                    timeout: 600000,
+                  },
                 );
               }
               await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
@@ -316,20 +339,24 @@ const userCreateServerModule: Module = {
         if (!server) return res.status(404).json({ error: 'Server not found.' });
         if (server.ownerId !== userId) return res.status(403).json({ error: 'This is not your server.' });
 
-        try {
-          await axios.delete(`${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container`, {
-            auth: { username: 'Airlink', password: server.node.key },
-            headers: { 'Content-Type': 'application/json' },
-            data: { id: server.UUID, deleteCmd: 'delete' },
-          });
-        } catch (err: any) {
-          const isNotFound =
-            err.response?.status === 404 ||
-            (err.response?.data?.error && String(err.response.data.error).includes('not exist'));
+        const force = req.query.force === 'true';
 
-          if (!isNotFound) {
-            logger.error('Error deleting container from daemon:', err);
-            return res.status(500).json({ error: 'Failed to delete container from node.' });
+        if (!force) {
+          try {
+            await axios.delete(`${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container`, {
+              auth: { username: 'Airlink', password: server.node.key },
+              headers: { 'Content-Type': 'application/json' },
+              data: { id: server.UUID, deleteCmd: 'delete' },
+            });
+          } catch (err: any) {
+            const isGone =
+              err.response?.status === 404 ||
+              err.response?.data?.error?.includes('not exist');
+
+            if (!isGone) {
+              logger.error('Error deleting container from daemon:', err);
+              return res.status(500).json({ error: 'Daemon unreachable. Use ?force=true to remove from panel only.' });
+            }
           }
         }
 

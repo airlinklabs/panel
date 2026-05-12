@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { WebSocket } from 'ws';
-import bcrypt from 'bcryptjs';
 
 import logger from '../../logger';
 import prisma from '../../../db';
@@ -48,10 +47,9 @@ export const isAuthenticatedForServer =
   };
 
 export const isAuthenticatedForServerWS =
-  (serverIdParam: string = 'id', passwordParam: string = 'password') =>
+  (serverIdParam: string = 'id') =>
   async (ws: WebSocket, req: any, next: NextFunction): Promise<void> => {
     const userId = req.session?.user?.id;
-    const password = req.params[passwordParam];
 
     if (!userId) {
       ws.close();
@@ -73,20 +71,12 @@ export const isAuthenticatedForServerWS =
       const serverId = req.params[serverIdParam];
       const server = await prisma.server.findUnique({
         where: { UUID: getParamAsString(serverId) },
-        include: { owner: true },
+        select: { ownerId: true },
       });
 
-      if (server?.ownerId === req.session?.user?.id) {
+      if (server?.ownerId === userId) {
         next();
         return;
-      }
-
-      if (password && server?.owner?.password) {
-        const isPasswordValid = await bcrypt.compare(password, server.owner.password);
-        if (isPasswordValid) {
-          next();
-          return;
-        }
       }
 
       ws.close();

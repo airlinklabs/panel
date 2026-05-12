@@ -1,33 +1,49 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../../../db';
+import { renderErrorPage } from '../../errorPages';
 
 export const isAuthenticated =
   (isAdminRequired = false, requiredPermission: string | null = null) =>
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.session.user?.id;
-    if (!userId) return res.redirect('/login');
+
+    if (!userId) {
+      return res.redirect('/login');
+    }
 
     const user = await prisma.users.findUnique({ where: { id: userId } });
-    if (!user) return res.redirect('/login');
+
+    if (!user) {
+      return res.redirect('/login');
+    }
 
     if (requiredPermission) {
-      let perms: string[] = [];
+      let userPermissions: string[] = [];
       try {
-        perms = JSON.parse(user.permissions || '[]');
+        userPermissions = JSON.parse(user.permissions || '[]');
       } catch {
-        return res.redirect('/');
+        return renderErrorPage(req, res, 403);
       }
 
-      const ok = perms.some((p) => {
-        if (p === requiredPermission) return true;
-        if (p.endsWith('.*')) return requiredPermission.startsWith(p.slice(0, -2) + '.');
+      const hasPermission = userPermissions.some((perm: string) => {
+        if (perm === requiredPermission) return true;
+        if (perm.endsWith('.*')) {
+          const base = perm.slice(0, -2);
+          return requiredPermission.startsWith(`${base}.`);
+        }
         return false;
       });
 
-      if (!ok) return res.redirect('/');
-      return next();
+      if (hasPermission) {
+        return next();
+      }
+
+      return renderErrorPage(req, res, 403);
     }
 
-    if (isAdminRequired && !user.isAdmin) return res.redirect('/');
+    if (isAdminRequired && !user.isAdmin) {
+      return renderErrorPage(req, res, 403);
+    }
+
     next();
   };

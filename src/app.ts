@@ -1,3 +1,12 @@
+/**
+ * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
+ *      AirLink - Open Source Project by AirlinkLabs
+ *      Repository: https://github.com/airlinklabs/panel
+ *
+ *     © 2025 AirlinkLabs. Licensed under the MIT License
+ * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
+ */
+
 import express, { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from "@prisma/client";
 import path from 'path';
@@ -35,6 +44,11 @@ import {
   handleSPAPageRequest,
   setupSPARoutes,
 } from './handlers/spaHandler';
+import {
+  errorPageHandler,
+  notFoundHandler,
+  renderErrorPage,
+} from './handlers/errorPages';
 
 
 const prisma = new PrismaClient();
@@ -49,15 +63,17 @@ const port = process.env.PORT || 3000;
 const name = process.env.NAME || 'AirLink';
 const airlinkVersion = config.meta.version;
 
-const trustProxyReady = (async () => {
+// Trust proxy when the panel is behind a reverse proxy (Nginx, Caddy, etc).
+// Reads from DB at startup — affects req.ip used by rate limiting and IP banning.
+// We set this before any middleware so the correct client IP flows through.
+(async () => {
   try {
     const s = await prisma.settings.findUnique({ where: { id: 1 } });
     if (s?.behindReverseProxy) {
       app.set('trust proxy', 1);
-      logger.info('trust proxy ready');
     }
-  } catch (err) {
-    logger.warn(`couldn't read reverse proxy setting, using direct IPs: ${(err as Error)?.message || err}`);
+  } catch {
+    // DB not ready yet — leave default (no trust proxy)
   }
 })();
 
@@ -125,7 +141,7 @@ function getAddonDirs(): string[] {
 
     return originalRenderFile(file, data, options, callback);
   } catch (error) {
-    logger.error('view lookup broke:', error);
+    logger.error('Error in EJS renderFile override:', error);
     return originalRenderFile(file, data, options, callback);
   }
 };
@@ -295,8 +311,7 @@ app.use(async (req, res, next) => {
 
     const clientIp = req.ip || req.socket.remoteAddress || '';
     if (banned.includes(clientIp)) {
-      res.status(403).json({ error: 'Access denied' });
-      return;
+      return renderErrorPage(req, res, 403, 'Your IP address is blocked from this panel.');
     }
   } catch {
     // DB not ready yet — allow through
@@ -335,11 +350,15 @@ app.use(
 // Setting secure:true on a plain HTTP server causes browsers to silently drop
 // all session cookies, breaking login on local network setups.
 const useSecureCookie = process.env.URL?.startsWith('https://') ?? false;
+const sessionSecret = process.env.SESSION_SECRET;
+
+if (!sessionSecret && process.env.NODE_ENV === 'production') {
+  throw new Error('SESSION_SECRET env var must be set in production.');
+}
 
 app.use(
   session({
-    secret:
-      process.env.SESSION_SECRET || crypto.randomBytes(32).toString('base64url'),
+    secret: sessionSecret || 'dev-only-insecure-secret-change-me',
     resave: false,
     saveUninitialized: false,
     store: new PrismaSessionStore(),
@@ -487,27 +506,14 @@ app.use((_req, res, next) => {
   next();
 });
 
-// Load error handling
-app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
-  logger.error('request fell over:', err);
-
-  if (!res.headersSent) {
-    const errorMessage = isProduction ? 'Internal server error' : err.message;
-
-    res.status(500).json({
-      error: errorMessage,
-    });
-  }
-
-  next(err);
-});
+// Catch errors from global middleware registered before modules.
+app.use(errorPageHandler);
 
 // Load modules, plugins, database and start the webserver
 (async () => {
   try {
     await databaseLoader();
     await settingsLoader();
-    await trustProxyReady;
     // Install HMAC signing interceptor for all panel→daemon requests
     installDaemonRequestInterceptor();
     // Initialize default UI components
@@ -518,10 +524,13 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
     // Setup SPA routes
     setupSPARoutes(app);
 
+    app.use(notFoundHandler);
+    app.use(errorPageHandler);
+
     const server = app.listen(port, () => {
       startPlayerStatsCollection();
       // Clone/pull egg repos on startup; auto-refreshes every 2 days
-      initEggCatalogue().catch(err => logger.warn(`store catalogue could not load: ${err?.message || err}`));
+      initEggCatalogue().catch(err => logger.warn(`Store catalogue init failed: ${err?.message || err}`));
     });
 
     let shuttingDown = false;
@@ -530,7 +539,7 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
       if (shuttingDown) return;
       shuttingDown = true;
 
-      logger.info(`shutting down (${signal})`);
+      logger.info(`Shutting down (${signal})...`);
 
       server.close(async () => {
         try {
@@ -538,13 +547,13 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
         } catch {
           // best effort
         }
-        logger.info('server closed');
+        logger.info('Server closed');
         process.exit(0);
       });
 
       // If server.close() doesn't finish within 10s, force exit
       setTimeout(() => {
-        logger.warn('forcing exit after timeout');
+        logger.warn('Forced exit after timeout');
         process.exit(1);
       }, 10_000).unref();
     }
@@ -552,7 +561,7 @@ app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
     process.on('SIGINT', () => shutdown('SIGINT'));
     process.on('SIGTERM', () => shutdown('SIGTERM'));
   } catch (err) {
-    logger.error('could not load modules or database:', err);
+    logger.error('Failed to load modules or database:', err);
   }
 })();
 

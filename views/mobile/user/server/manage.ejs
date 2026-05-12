@@ -204,14 +204,7 @@
         <div class="stats-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-auto min-h-[5rem]" style="--i:2">
           <canvas id="cpuChart"></canvas>
           <div class="relative z-10">
-            <div class="flex items-center justify-between gap-2">
-              <p class="text-[10px] font-medium text-neutral-500"><%= req.translations.cpuUsage %></p>
-              <button id="cpu-display-toggle" type="button" title="Toggle CPU unit" class="shrink-0 rounded-md p-1 bg-neutral-200 dark:bg-neutral-700/50 hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-3.5 w-3.5 text-neutral-500">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
-                </svg>
-              </button>
-            </div>
+            <p class="text-[10px] font-medium text-neutral-500"><%= req.translations.cpuUsage %></p>
             <p id="cpuUsage" class="mt-0.5 text-base font-semibold text-neutral-800 dark:text-white leading-tight">0%</p>
           </div>
         </div>
@@ -261,7 +254,7 @@ const termTheme = {
 };
 
 const term = new Terminal({
-  disableStdin: true,
+  disableStdin: false,
   lineHeight: 1.3,
   fontFamily: 'Menlo, Monaco, Consolas, monospace',
   fontSize: 11,
@@ -441,6 +434,7 @@ connectWebSocket();
                     socket.close();
                     return;
                 }
+                hideConsolePlaceholder();
                 term.write(maskPrompts(text));
             });
             return;
@@ -460,6 +454,7 @@ connectWebSocket();
             socket.close();
             return;
         }
+        hideConsolePlaceholder();
         term.write(maskPrompts(text));
     }
 
@@ -488,7 +483,7 @@ connectWebSocket();
     function sendCommand() {
         const inputElement = document.getElementById('input');
         const command = inputElement.value.trim();
-        if (command && socket) {
+        if (command && socket && socket.readyState === WebSocket.OPEN) {
             term.write('\u001b[1m\u001b[33m~ \u001b[0m' + command + '\r\n');
             socket.send(JSON.stringify({
                 event: 'CMD',
@@ -807,16 +802,10 @@ connectWebSocket();
 
             statsWs.onmessage = event => {
                 if (!isValidJson(event.data)) { return; }
-                const msg = JSON.parse(event.data);
-                if (msg.error) { return; }
-                if (!msg.data) { return; }
+                const stats = JSON.parse(event.data);
+                if (stats.error) { return; }
+                if (!stats.data) { return; }
 
-                if (msg.event === 'state') {
-                    if (msg.data.running === false && !lifecycleActive) setAllStatsOffline();
-                    return;
-                }
-
-                const stats = msg;
                 if (stats.data.running === false) {
                     if (!lifecycleActive) setAllStatsOffline();
                     return;
@@ -923,26 +912,6 @@ connectWebSocket();
     const ramChart = createBackgroundChart('ramChart');
     const cpuChart = createBackgroundChart('cpuChart');
     const diskChart = createBackgroundChart('diskChart', 'doughnut');
-    const cpuLimitPercent = <%- server.Cpu %>;
-    let lastCpuUsagePercent = 0;
-    let cpuDisplayMode = localStorage.getItem('cpuDisplayMode') === 'cores' ? 'cores' : 'percent';
-
-    function renderCpuUsage() {
-        const cpuUsage = document.getElementById('cpuUsage');
-        if (!cpuUsage) return;
-        if (cpuDisplayMode === 'cores') {
-            cpuUsage.textContent = `${(lastCpuUsagePercent / 100).toFixed(2)} / ${(cpuLimitPercent / 100).toFixed(1)} cores`;
-            return;
-        }
-        cpuUsage.textContent = `${lastCpuUsagePercent.toFixed(1)}% / ${cpuLimitPercent}%`;
-    }
-
-    document.getElementById('cpu-display-toggle')?.addEventListener('click', () => {
-        cpuDisplayMode = cpuDisplayMode === 'percent' ? 'cores' : 'percent';
-        localStorage.setItem('cpuDisplayMode', cpuDisplayMode);
-        renderCpuUsage();
-    });
-    renderCpuUsage();
 
     function updateRamUsage(stats) {
     const ramStatsUsage = stats?.data?.memory?.usage || 0;
@@ -964,14 +933,13 @@ connectWebSocket();
 }
 
     function updateCpuUsage(stats) {
-        let cpuUsagePercent = Number(stats.data.cpu.percentage) || 0;
+        let cpuUsagePercent = stats.data.cpu.percentage || 0;
 
         if (isNaN(cpuUsagePercent)) {
             cpuUsagePercent = 0;
         }
 
-        lastCpuUsagePercent = cpuUsagePercent;
-        renderCpuUsage();
+        document.getElementById('cpuUsage').textContent = `${cpuUsagePercent}% / ${<%- server.Cpu * 100 %>}%`;
 
         if (cpuUsagePercent > 0) {
             updateChart(cpuChart, cpuUsagePercent);
@@ -1117,6 +1085,7 @@ connectWebSocket();
             logEl.classList.add('hidden', 'opacity-0');
         } else {
             lifecycleActive = true;
+            hideConsolePlaceholder();
             const label = statusCardLabels[eventType] || msg;
             const color = statusColors[eventType] || 'text-neutral-400';
             logEl.classList.add('opacity-0');
@@ -1139,7 +1108,11 @@ connectWebSocket();
         statusChart.update();
     }
 
+    function hideConsolePlaceholder() {}
+    function showConsolePlaceholder() {}
+
     function setAllStatsOffline() {
+        showConsolePlaceholder();
         const statusElement = document.getElementById('status');
         statusElement.textContent = 'Offline';
         statusElement.className = 'mt-1 text-lg font-medium tracking-tight text-red-500';
@@ -1150,8 +1123,7 @@ connectWebSocket();
         document.getElementById('ramUsage').textContent = `0% (0 MB / ${formatRam(<%- server.Memory %> * 1024 * 1024)})`;
 
         // Update CPU usage
-        lastCpuUsagePercent = 0;
-        renderCpuUsage();
+        document.getElementById('cpuUsage').textContent = `0% / ${<%- server.Cpu * 100 %>}%`;
 
         // Update disk usage
         document.getElementById('diskUsage').textContent = '0% (0 Bytes / 10 GB)';

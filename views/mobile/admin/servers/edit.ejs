@@ -82,17 +82,9 @@
               </div>
 
               <div>
-                <label class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">CPU:</label>
-                <input type="hidden" id="serverCPU" name="Cpu" value="<%= server.Cpu %>">
-                <div class="flex items-stretch mt-2 mb-1 gap-0">
-                  <input id="serverCPUDisplay" type="number" min="0.5" step="0.1" value="<%= server.Cpu %>"
-                    class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-r-0 border-neutral-800/10 dark:border-white/5">
-                  <select id="serverCPUUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-800/10 dark:border-white/5 cursor-pointer">
-                    <option value="1" selected>%</option>
-                    <option value="100">cores</option>
-                  </select>
-                </div>
-                <p id="serverCPUHint" class="text-xs text-neutral-400 mb-3">100% = 1 core weight</p>
+                <label for="serverCpu" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">CPU (%):</label>
+                <input id="serverCpu" name="Cpu" type="number" value="<%= server.Cpu %>" min="50" max="10000" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-1 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                <p class="text-xs text-neutral-400 mb-3">100% = 1 core weight</p>
               </div>
 
               <div>
@@ -215,7 +207,6 @@
 
 <%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
-<%- include('../../components/customSelect') %>
 
 <script nonce="<%- nonce %>">
   document.addEventListener('DOMContentLoaded', function() {
@@ -225,28 +216,23 @@
     const suspendServerToggle    = document.getElementById('suspendServer');
     const suspendServerLabel     = document.getElementById('suspendServerLabel');
 
-    function syncUnit(displayId, unitId, hiddenId, hintId) {
+    // MB/GB unit sync
+    function syncUnit(displayId, unitId, hiddenId) {
       const display = document.getElementById(displayId);
       const unit    = document.getElementById(unitId);
       const hidden  = document.getElementById(hiddenId);
-      const hint    = hintId ? document.getElementById(hintId) : null;
-      let currentMult = parseFloat(unit.value);
-      function update() {
-        hidden.value = String(Math.round(parseFloat(display.value || 0) * currentMult));
-        if (hint) hint.textContent = unit.value === '100' ? '1 core = 100%' : '100% = 1 core weight';
-      }
+      function update() { hidden.value = Math.round(parseFloat(display.value || 0) * parseInt(unit.value)); }
       display.addEventListener('input', update);
       unit.addEventListener('change', function() {
-        const rawValue = parseFloat(hidden.value || 0) || parseFloat(display.value || 0) * currentMult;
-        currentMult = parseFloat(this.value);
-        display.value = String(rawValue / currentMult || 1);
+        const prevMult = this.value === '1024' ? 1 : 1024;
+        const newMult  = parseInt(this.value);
+        if (prevMult !== newMult) display.value = Math.round(parseFloat(display.value || 0) * prevMult / newMult) || 1;
         update();
       });
       update();
     }
     syncUnit('serverMemoryDisplay',  'serverMemoryUnit',  'serverMemory');
     syncUnit('serverStorageDisplay', 'serverStorageUnit', 'serverStorage');
-    syncUnit('serverCPUDisplay', 'serverCPUUnit', 'serverCPU', 'serverCPUHint');
 
     allowStartupEditToggle.addEventListener('change', function() {
       allowStartupEditLabel.textContent = this.checked ? 'Enabled' : 'Disabled';

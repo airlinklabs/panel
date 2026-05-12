@@ -4,7 +4,7 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { checkForUpdates, performUpdate } from '../../handlers/updater';
-import { registerPermission } from '../../handlers/permissions';
+import { registerPermission } from '../../handlers/permisions';
 
 
 registerPermission('airlink.admin.overview.main');
@@ -16,6 +16,15 @@ interface ErrorMessage {
 }
 
 const adminModule: Module = {
+  info: {
+    name: 'Admin Module',
+    description: 'This file is for admin functionality.',
+    version: '1.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirLinkLab',
+    license: 'MIT',
+  },
+
   router: () => {
     const router = Router();
 
@@ -27,7 +36,7 @@ const adminModule: Module = {
 
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
@@ -98,7 +107,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) return res.redirect('/login');
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           res.render('admin/menu/menu', { user, req, settings });

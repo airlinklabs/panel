@@ -43,6 +43,15 @@ function deriveSeverity(matchCount: number): string {
 }
 
 const radarModule: Module = {
+  info: {
+    name: 'Radar Module',
+    description: 'This module provides radar scanning functionality for server volumes.',
+    version: '1.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirLinkLab',
+    license: 'MIT',
+  },
+
   router: () => {
     const router = Router();
 
@@ -226,9 +235,12 @@ const radarModule: Module = {
               script
             },
             {
+              auth: {
+                username: 'Airlink',
+                password: server.node.key,
+              },
               headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`
               },
               timeout: 60000
             }
@@ -323,9 +335,12 @@ const radarModule: Module = {
               maxFileSizeMb: 32,
             },
             {
+              auth: {
+                username: 'Airlink',
+                password: server.node.key,
+              },
               headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`,
               },
               responseType: 'arraybuffer',
               timeout: 120000,

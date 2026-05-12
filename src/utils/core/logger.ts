@@ -37,6 +37,9 @@ logger.debug('Debug information');
 logger.trace('Detailed trace info');
 logger.fatal('Critical error occurred');
 
+// Pretty boxes for important messages
+logger.box('Server is running on http://localhost:3000');
+
 // Async prompt (if needed)
 await logger.prompt('Are you sure you want to proceed?', {
   type: 'confirm'

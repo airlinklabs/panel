@@ -4,7 +4,6 @@ import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUt
 import logger from '../../handlers/logger';
 import axios from 'axios';
 import multer from 'multer';
-import path from 'path';
 import { checkEulaStatus, isWorld } from '../../handlers/features';
 import { checkForServerInstallation } from '../../handlers/checkForServerInstallation';
 import { queueer } from '../../handlers/queueer';
@@ -14,7 +13,9 @@ import prisma from '../../db';
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 import { AirlinkCloudClient } from '../../handlers/utils/core/airlinkCloud';
 
-const stoppingStates = new Map<string, NodeJS.Timeout>();
+declare global {
+  var serverStoppingStates: { [key: string]: boolean };
+}
 
 interface ErrorMessage {
   message?: string;
@@ -75,61 +76,16 @@ function getPrimaryPort(portsJson: string): number | undefined {
   }
 }
 
-async function restartServer(
-  server: {
-    UUID: string;
-    node: { address: string; port: number; key: string };
-    image: { stop?: string | null } | null;
-    Ports: string;
-    Variables: string | null;
-    dockerImage: string | null;
-    Memory: number;
-    Cpu: number;
-    StartCommand: string | null;
-  },
-  overrideStartCommand?: string,
-): Promise<void> {
-  const stopReq = {
-    method: 'POST' as const,
-    url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
-    auth: { username: 'Airlink', password: server.node.key },
-    data: { id: server.UUID, stopCmd: server.image?.stop || 'stop' },
-  };
-
-  try {
-    await axios(stopReq);
-  } catch (err) {
-    if (axios.isAxiosError(err) && err.response?.status !== 404) throw err;
-  }
-
-  await new Promise((r) => setTimeout(r, 2000));
-
-  const ports = getPrimaryPort(server.Ports);
-  const env = buildEnvVariables(server.Variables);
-  env.SERVER_PORT = String(ports ?? '');
-  env.SERVER_MEMORY = String(server.Memory);
-  env.SERVER_CPU = String(server.Cpu);
-
-  if (!server.dockerImage) throw new Error('docker image not configured');
-  const image = String(Object.values(JSON.parse(server.dockerImage))[0]);
-
-  await axios({
-    method: 'POST',
-    url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
-    auth: { username: 'Airlink', password: server.node.key },
-    data: {
-      id: server.UUID,
-      image,
-      ports,
-      Memory: server.Memory,
-      Cpu: server.Cpu,
-      env,
-      StartCommand: overrideStartCommand ?? server.StartCommand,
-    },
-  });
-}
-
 const dashboardModule: Module = {
+  info: {
+    name: 'Server Module',
+    description: 'This file is for dashboard functionality.',
+    version: '1.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirLinkLab',
+    license: 'MIT',
+  },
+
   router: () => {
     const router = Router();
 
@@ -143,7 +99,7 @@ const dashboardModule: Module = {
         const serverId = req.params?.id;
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             errorMessage.message = 'User not found.';
             return res.render('user/account', { errorMessage, user, req });
@@ -264,7 +220,7 @@ const dashboardModule: Module = {
         const powerAction = req.params?.poweraction;
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             errorMessage.message = 'User not found.';
             return res.render('user/account', { errorMessage, user, req });
@@ -296,7 +252,16 @@ const dashboardModule: Module = {
           }
 
           if (powerAction === 'stop') {
-            try {
+              try {
+              // Get current server status
+              const serverInfos = {
+                nodeAddress: server.node.address,
+                nodePort: server.node.port,
+                serverUUID: server.UUID,
+                nodeKey: server.node.key,
+              };
+
+              // Create a custom status object with stopping=true
               const stoppingStatus = {
                 online: true,
                 starting: false,
@@ -305,27 +270,46 @@ const dashboardModule: Module = {
                 startedAt: null,
               };
 
-              const timer = setTimeout(() => stoppingStates.delete(getParamAsString(serverId)), 120_000);
-              stoppingStates.set(getParamAsString(serverId), timer);
+                  const cacheKey = `server_stopping_${serverId}`;
 
-              res.status(200).json({
+                      global.serverStoppingStates = global.serverStoppingStates || {};
+              global.serverStoppingStates[cacheKey] = true;
+
+                  setTimeout(() => {
+                if (
+                  global.serverStoppingStates &&
+                  global.serverStoppingStates[cacheKey]
+                ) {
+                  delete global.serverStoppingStates[cacheKey];
+                  logger.info(
+                    `Cleared stopping state for server ${serverId} after timeout`,
+                  );
+                }
+              }, 120000); // 2 minutes
+
+                  res.status(200).json({
                 success: true,
                 message: 'Server is stopping...',
                 status: stoppingStatus,
               });
 
-              await axios({
+                  const requestData = {
                 method: 'POST',
                 url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
                 },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
                 data: {
                   id: String(serverId),
                   stopCmd: server.image?.stop || 'stop',
                 },
-              });
+              };
+
+              await axios(requestData);
               logger.info('Container stopped successfully: ' + serverId);
               return;
             } catch (stopError) {
@@ -337,10 +321,12 @@ const dashboardModule: Module = {
                   'Container already stopped or not found: ' + serverId,
                 );
 
-                const t = stoppingStates.get(getParamAsString(serverId));
-                if (t) {
-                  clearTimeout(t);
-                  stoppingStates.delete(getParamAsString(serverId));
+                      const cacheKey = `server_stopping_${serverId}`;
+                if (
+                  global.serverStoppingStates &&
+                  global.serverStoppingStates[cacheKey]
+                ) {
+                  delete global.serverStoppingStates[cacheKey];
                 }
               } else {
                 logger.debug('Error stopping container:', stopError);
@@ -356,7 +342,52 @@ const dashboardModule: Module = {
           }
 
           if (powerAction === 'restart') {
-            await restartServer(server);
+            // The dedicated restart route is registered after this wildcard so
+            // Express never reaches it. Handle restart inline here.
+            try {
+              await axios({
+                method: 'POST',
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
+                auth: { username: 'Airlink', password: server.node.key },
+                headers: { 'Content-Type': 'application/json' },
+                data: { id: String(serverId), stopCmd: 'stop' },
+              });
+            } catch (stopErr) {
+              // Container may already be stopped — continue to start
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            const restartPorts = getPrimaryPort(server.Ports);
+            const restartEnv = buildEnvVariables(server.Variables);
+            restartEnv['SERVER_PORT']   = String(restartPorts ?? '');
+            restartEnv['SERVER_MEMORY'] = String(server.Memory);
+            restartEnv['SERVER_CPU']    = String(server.Cpu);
+
+            if (!server.dockerImage) {
+              res.status(400).json({ error: 'Docker image not found.' });
+              return;
+            }
+
+            const restartImage = Object.values(JSON.parse(server.dockerImage))[0];
+
+            await axios({
+              method: 'POST',
+              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
+              auth: { username: 'Airlink', password: server.node.key },
+              headers: { 'Content-Type': 'application/json' },
+              data: {
+                id: String(serverId),
+                image: String(restartImage),
+                ports: restartPorts,
+                Memory: server.Memory,
+                Cpu: server.Cpu,
+                Storage: server.Storage,
+                env: restartEnv,
+                StartCommand: server.StartCommand,
+              },
+            });
+
             logger.info('Container restarted successfully: ' + serverId);
             res.status(200).json({ success: true, message: 'Server restarted successfully' });
             return;
@@ -376,12 +407,15 @@ const dashboardModule: Module = {
 
           const ServerImage = Object.values(JSON.parse(server.dockerImage))[0];
 
-          await axios({
+          const startRequestData = {
             method: 'POST',
             url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
             auth: {
               username: 'Airlink',
               password: server.node.key,
+            },
+            headers: {
+              'Content-Type': 'application/json',
             },
             data: {
               id: String(serverId),
@@ -389,10 +423,13 @@ const dashboardModule: Module = {
               ports: ports,
               Memory: server.Memory,
               Cpu: server.Cpu,
+              Storage: server.Storage,
               env: envVariables,
               StartCommand: server.StartCommand,
             },
-          });
+          };
+
+          await axios(startRequestData);
           logger.info('Container started successfully: ' + serverId);
 
           res.status(200).json({ message: 'Container started successfully.' });
@@ -420,7 +457,7 @@ const dashboardModule: Module = {
 
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             errorMessage.message = 'User not found.';
             res.render('user/account', { errorMessage, user, req });
@@ -443,14 +480,19 @@ const dashboardModule: Module = {
             return;
           }
 
-          let files = (await axios({
+          const filesRequest = {
             method: 'GET',
             url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/list?id=${server.UUID}&path=${path}`,
             auth: {
               username: 'Airlink',
               password: server.node.key,
             },
-          })).data as any[];
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          };
+
+          let files = (await axios(filesRequest)).data as any[];
           files = typeof files === 'string' ? JSON.parse(files) : files;
 
           files = files.filter((file: any) => file.name !== 'airlink');
@@ -561,7 +603,7 @@ const dashboardModule: Module = {
         const filePath = req.params?.path;
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -687,7 +729,7 @@ const dashboardModule: Module = {
         const { content } = req.body;
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -744,7 +786,7 @@ const dashboardModule: Module = {
         );
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             logger.warn(`User not found: ${userId}`);
             res.status(404).json({ error: 'User not found' });
@@ -830,7 +872,7 @@ const dashboardModule: Module = {
         const filePath = req.params?.path;
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -857,11 +899,13 @@ const dashboardModule: Module = {
             responseType: 'stream',
           });
 
-          const safeFilename = encodeURIComponent(path.basename(String(filePath)));
-          res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${safeFilename}`);
+          res.setHeader(
+            'Content-Disposition',
+            `attachment; filename="${filePath}"`,
+          );
           res.setHeader('Content-Type', 'application/octet-stream');
 
-          response.data.pipe(res);
+          response.data.pipe(res); // Redirige le flux du fichier vers la réponse
         } catch (error) {
           logger.error('Error downloading file:', error);
           res.status(500).json({ error: 'Failed to download file' });
@@ -879,7 +923,7 @@ const dashboardModule: Module = {
         const zipName = req.body?.zipname;
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -946,7 +990,7 @@ const dashboardModule: Module = {
         const zipName = req.body?.zipname;
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -972,20 +1016,22 @@ const dashboardModule: Module = {
             .replace(/^\/|\/$/g, '');
           const cleanZipName = zipName.replace(/^\/+|\/+$/g, '');
 
+          const requestConfig = {
+            method: 'POST',
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/unzip`,
+            auth: {
+              username: 'Airlink',
+              password: server.node.key,
+            },
+            data: {
+              id: serverId,
+              path: cleanPath,
+              zipname: cleanZipName,
+            },
+          };
+
           try {
-            const response = await axios({
-              method: 'POST',
-              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/unzip`,
-              auth: {
-                username: 'Airlink',
-                password: server.node.key,
-              },
-              data: {
-                id: serverId,
-                path: cleanPath,
-                zipname: cleanZipName,
-              },
-            });
+            const response = await axios(requestConfig);
 
             if (response.status === 200) {
               res.json({ success: true });
@@ -1028,7 +1074,7 @@ const dashboardModule: Module = {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
 
-        const user = req.session.user!;
+        const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
           res.status(404).json({ error: 'User not found' });
           return;
@@ -1077,7 +1123,7 @@ const dashboardModule: Module = {
         const serverId = req.params?.id;
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -1236,7 +1282,7 @@ const dashboardModule: Module = {
         const serverId = req.params?.id;
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -1253,20 +1299,25 @@ const dashboardModule: Module = {
           }
 
           try {
-            const serverInfos = {
-              nodeAddress: server.node.address,
-              nodePort: server.node.port,
-              serverUUID: server.UUID,
-              nodeKey: server.node.key,
-            };
-            const response = await axios({
+            const worldsRequest = {
               method: 'GET',
               url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/list?id=${server.UUID}`,
               auth: {
                 username: 'Airlink',
                 password: server.node.key,
               },
-            });
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            };
+
+            const serverInfos = {
+              nodeAddress: server.node.address,
+              nodePort: server.node.port,
+              serverUUID: server.UUID,
+              nodeKey: server.node.key,
+            };
+              const response = await axios(worldsRequest);
             const Folders = response.data;
 
             const worlds = [];
@@ -1367,7 +1418,7 @@ const dashboardModule: Module = {
           return;
         }
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -1388,12 +1439,15 @@ const dashboardModule: Module = {
             // intermediate directory creation in afs.rename
             const newPath = newName;
 
-            await axios({
+            const renameRequest = {
               method: 'POST',
               url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/rename`,
               auth: {
                 username: 'Airlink',
                 password: server.node.key,
+              },
+              headers: {
+                'Content-Type': 'application/json',
               },
               data: {
                 id: server.UUID,
@@ -1401,7 +1455,9 @@ const dashboardModule: Module = {
                 newName: newName,
                 newPath: newPath,
               },
-            });
+            };
+
+            await axios(renameRequest);
             res.status(200).json({ success: true });
           } catch (error) {
             logger.error('Error renaming file:', error);
@@ -1438,7 +1494,7 @@ const dashboardModule: Module = {
         );
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             logger.warn(`User not found: ${userId}`);
             res.status(404).json({ error: 'User not found' });
@@ -1478,12 +1534,15 @@ const dashboardModule: Module = {
               const fileContent = req.file.buffer.toString('base64');
               const fileContentWithMeta = `data:${req.file.mimetype};base64,${fileContent}`;
 
-              const response = await axios({
+              const uploadRequest = {
                 method: 'POST',
                 url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/upload`,
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
+                },
+                headers: {
+                  'Content-Type': 'application/json',
                 },
                 data: {
                   id: server.UUID,
@@ -1494,7 +1553,9 @@ const dashboardModule: Module = {
                 maxContentLength: 15 * 1024 * 1024, // 15MB
                 maxBodyLength: 15 * 1024 * 1024, // 15MB
                 timeout: 60000,
-              });
+              };
+
+              const response = await axios(uploadRequest);
               logger.info(
                 `File ${fileName} successfully uploaded to ${relativePath}`,
               );
@@ -1504,7 +1565,7 @@ const dashboardModule: Module = {
                 path: response.data.path,
               });
             } else {
-              await axios({
+              const createEmptyFileRequest = {
                 method: 'POST',
                 url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/create-empty-file`,
                 auth: {
@@ -1517,7 +1578,9 @@ const dashboardModule: Module = {
                   fileName: fileName,
                 },
                 timeout: 10000,
-              });
+              };
+
+              await axios(createEmptyFileRequest);
               logger.info(`Created empty file ${fileName} in ${relativePath}`);
 
               const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks
@@ -1530,7 +1593,7 @@ const dashboardModule: Module = {
                 const chunkContent = chunk.toString('base64');
                 const chunkContentWithMeta = `data:${req.file.mimetype};base64,${chunkContent}`;
 
-                await axios({
+                const uploadChunkRequest = {
                   method: 'POST',
                   url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/append-file`,
                   auth: {
@@ -1546,7 +1609,9 @@ const dashboardModule: Module = {
                     totalChunks: totalChunks,
                   },
                   timeout: 30000, // 30 seconds per chunk
-                });
+                };
+
+                await axios(uploadChunkRequest);
                 logger.info(
                   `Uploaded chunk ${i + 1}/${totalChunks} for file ${fileName}`,
                 );
@@ -1611,7 +1676,7 @@ const dashboardModule: Module = {
         const serverId = req.params?.id;
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             errorMessage.message = 'User not found.';
             return res.render('user/account', { errorMessage, user, req });
@@ -1685,14 +1750,24 @@ const dashboardModule: Module = {
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
-        const startCommand = req.body.startCommand;
+        let startCommand;
+        const contentType = req.headers['content-type'] || '';
+
+        if (contentType.includes('application/json')) {
+          startCommand = req.body.startCommand;
+        } else {
+          startCommand = req.body.startCommand;
+          logger.info(
+            `Processing form data for startup command: ${startCommand}`,
+          );
+        }
 
         logger.info(
           `Updating startup command for server ${serverId}: ${startCommand}`,
         );
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             logger.warn(`User not found: ${userId}`);
             res.status(404).json({ error: 'User not found' });
@@ -1710,11 +1785,13 @@ const dashboardModule: Module = {
             return;
           }
 
-          const serverConfig = await prisma.server.findUnique({
-            where: { UUID: getParamAsString(serverId) },
-            select: { allowStartupEdit: true },
-          });
-          const isEditAllowed = serverConfig?.allowStartupEdit === true;
+          const allowStartupEdit =
+            await prisma.$queryRaw`SELECT "allowStartupEdit" FROM "Server" WHERE "UUID" = ${serverId}`;
+          const isEditAllowed =
+            allowStartupEdit &&
+            Array.isArray(allowStartupEdit) &&
+            allowStartupEdit.length > 0 &&
+            allowStartupEdit[0].allowStartupEdit === true;
 
           if (!isEditAllowed) {
             logger.warn(
@@ -1742,7 +1819,7 @@ const dashboardModule: Module = {
             `Startup command updated in database for server ${serverId}`,
           );
           try {
-            const statusResponse = await axios({
+            const statusRequest = {
               method: 'GET',
               url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status`,
               auth: {
@@ -1750,14 +1827,78 @@ const dashboardModule: Module = {
                 password: server.node.key,
               },
               params: { id: serverId },
-            });
+            };
+
+            const statusResponse = await axios(statusRequest);
             logger.info(
               `Server status response: ${JSON.stringify(statusResponse.data)}`,
             );
             const isRunning = statusResponse.data?.running === true;
 
             if (isRunning) {
-              await restartServer(server, startCommand);
+              const restartRequestData = {
+                method: 'POST',
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                data: {
+                  id: String(serverId),
+                  stopCmd: server.image?.stop || 'stop',
+                },
+              };
+
+              await axios(restartRequestData);
+              logger.info(
+                'Container stopped to apply new startup command: ' + serverId,
+              );
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+              const ports = (JSON.parse(server.Ports) as Port[])
+                .filter((port) => port.primary)
+                .map((port) => port.Port)
+                .pop();
+
+              const envVariables = buildEnvVariables(server.Variables);
+              envVariables['SERVER_PORT']   = String(ports ?? '');
+              envVariables['SERVER_MEMORY'] = String(server.Memory);
+              envVariables['SERVER_CPU']    = String(server.Cpu);
+
+              if (!server.dockerImage) {
+                res.status(400).json({ error: 'Docker image not found.' });
+                return;
+              }
+
+              const ServerImage = Object.values(
+                JSON.parse(server.dockerImage),
+              )[0];
+
+              const startRequestData = {
+                method: 'POST',
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                data: {
+                  id: String(serverId),
+                  image: String(ServerImage),
+                  ports: ports,
+                  Memory: server.Memory,
+                  Cpu: server.Cpu,
+                  Storage: server.Storage,
+                  env: envVariables,
+                  StartCommand: startCommand,
+                },
+              };
+
+              await axios(startRequestData);
               logger.info(
                 'Container restarted with new startup command: ' + serverId,
               );
@@ -1809,7 +1950,7 @@ const dashboardModule: Module = {
         );
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             logger.warn(`User not found: ${userId}`);
             res.status(404).json({ error: 'User not found' });
@@ -1894,7 +2035,7 @@ const dashboardModule: Module = {
           );
 
           try {
-            const statusResponse = await axios({
+            const statusRequest = {
               method: 'GET',
               url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status`,
               auth: {
@@ -1902,14 +2043,71 @@ const dashboardModule: Module = {
                 password: server.node.key,
               },
               params: { id: serverId },
-            });
+            };
+
+            const statusResponse = await axios(statusRequest);
             logger.info(
               `Server status response: ${JSON.stringify(statusResponse.data)}`,
             );
             const isRunning = statusResponse.data?.running === true;
 
             if (isRunning) {
-              await restartServer({ ...server, dockerImage: JSON.stringify(dockerImageObj) });
+              const restartRequestData = {
+                method: 'POST',
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                data: {
+                  id: String(serverId),
+                  stopCmd: server.image?.stop || 'stop',
+                },
+              };
+
+              await axios(restartRequestData);
+              logger.info(
+                'Container stopped to apply new Docker image: ' + serverId,
+              );
+
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+
+              const ports = (JSON.parse(server.Ports) as Port[])
+                .filter((port) => port.primary)
+                .map((port) => port.Port)
+                .pop();
+
+              const envVariables = buildEnvVariables(server.Variables);
+              envVariables['SERVER_PORT']   = String(ports ?? '');
+              envVariables['SERVER_MEMORY'] = String(server.Memory);
+              envVariables['SERVER_CPU']    = String(server.Cpu);
+
+              const startRequestData = {
+                method: 'POST',
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                data: {
+                  id: String(serverId),
+                  image: dockerImage,
+                  ports: ports,
+                  Memory: server.Memory,
+                  Cpu: server.Cpu,
+                  Storage: server.Storage,
+                  env: envVariables,
+                  StartCommand: server.StartCommand,
+                },
+              };
+
+              await axios(startRequestData);
               logger.info(
                 'Container restarted with new Docker image: ' + serverId,
               );
@@ -2044,7 +2242,7 @@ const dashboardModule: Module = {
         );
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             logger.warn(`User not found: ${userId}`);
             res.status(404).json({ error: 'User not found' });
@@ -2069,7 +2267,7 @@ const dashboardModule: Module = {
           logger.info(`Variables updated in database for server ${serverId}`);
 
           try {
-            const statusResponse = await axios({
+            const statusRequest = {
               method: 'GET',
               url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status`,
               auth: {
@@ -2077,14 +2275,84 @@ const dashboardModule: Module = {
                 password: server.node.key,
               },
               params: { id: serverId },
-            });
+            };
+
+            const statusResponse = await axios(statusRequest);
             logger.info(
               `Server status response: ${JSON.stringify(statusResponse.data)}`,
             );
             const isRunning = statusResponse.data?.running === true;
 
             if (isRunning) {
-              await restartServer({ ...server, Variables: JSON.stringify(variables) });
+              const restartRequestData = {
+                method: 'POST',
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                data: {
+                  id: String(serverId),
+                  stopCmd: server.image?.stop || 'stop',
+                },
+              };
+
+              await axios(restartRequestData);
+              logger.info(
+                'Container stopped to apply new variables: ' + serverId,
+              );
+
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+
+              const ports = (JSON.parse(server.Ports) as Port[])
+                .filter((port) => port.primary)
+                .map((port) => port.Port)
+                .pop();
+
+              const envVariables = buildEnvVariables(variables);
+              envVariables['SERVER_PORT']   = String(ports ?? '');
+              envVariables['SERVER_MEMORY'] = String(server.Memory);
+              envVariables['SERVER_CPU']    = String(server.Cpu);
+
+              if (!server.dockerImage) {
+                logger.error(
+                  `Docker image not found for server ${serverId}`,
+                  new Error('Docker image not found'),
+                );
+                res.status(400).json({ error: 'Docker image not found.' });
+                return;
+              }
+
+              const ServerImage = Object.values(
+                JSON.parse(server.dockerImage),
+              )[0];
+
+              const startRequestData = {
+                method: 'POST',
+                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
+                auth: {
+                  username: 'Airlink',
+                  password: server.node.key,
+                },
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                data: {
+                  id: String(serverId),
+                  image: String(ServerImage),
+                  ports: ports,
+                  Memory: server.Memory,
+                  Cpu: server.Cpu,
+                  Storage: server.Storage,
+                  env: envVariables,
+                  StartCommand: server.StartCommand,
+                },
+              };
+
+              await axios(startRequestData);
               logger.info(
                 'Container restarted with new variables: ' + serverId,
               );
@@ -2133,7 +2401,7 @@ const dashboardModule: Module = {
         const serverId = req.params?.id;
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             errorMessage.message = 'User not found.';
             return res.render('user/account', { errorMessage, user, req });
@@ -2187,7 +2455,7 @@ const dashboardModule: Module = {
         const { name, description } = req.body;
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -2220,6 +2488,100 @@ const dashboardModule: Module = {
     );
 
     router.post(
+      '/server/:id/power/restart',
+      isAuthenticatedForServer('id'),
+      async (req: Request, res: Response) => {
+        const userId = req.session?.user?.id;
+        const serverId = req.params?.id;
+
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.status(404).json({ error: 'User not found' });
+            return;
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { UUID: getParamAsString(serverId) },
+            include: { node: true, image: true },
+          });
+
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+
+          const stopRequestData = {
+            method: 'POST',
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
+            auth: {
+              username: 'Airlink',
+              password: server.node.key,
+            },
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            data: {
+              id: String(serverId),
+              stopCmd: server.image?.stop || 'stop',
+            },
+          };
+
+          await axios(stopRequestData);
+          logger.info('Container stopped for restart: ' + serverId);
+
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
+          const ports = getPrimaryPort(server.Ports);
+
+          const envVariables = buildEnvVariables(server.Variables);
+          envVariables['SERVER_PORT']   = String(ports ?? '');
+          envVariables['SERVER_MEMORY'] = String(server.Memory);
+          envVariables['SERVER_CPU']    = String(server.Cpu);
+
+          if (!server.dockerImage) {
+            res.status(400).json({ error: 'Docker image not found.' });
+            return;
+          }
+
+          const ServerImage = Object.values(JSON.parse(server.dockerImage))[0];
+
+          const startRequestData = {
+            method: 'POST',
+            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
+            auth: {
+              username: 'Airlink',
+              password: server.node.key,
+            },
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            data: {
+              id: String(serverId),
+              image: String(ServerImage),
+              ports: ports,
+              Memory: server.Memory,
+              Cpu: server.Cpu,
+              Storage: server.Storage,
+              env: envVariables,
+              StartCommand: server.StartCommand,
+            },
+          };
+
+          await axios(startRequestData);
+          logger.info('Container restarted successfully: ' + serverId);
+
+          res
+            .status(200)
+            .json({ success: true, message: 'Server restarted successfully' });
+        } catch (error) {
+          logger.error('Error restarting server:', error);
+          res.status(500).json({ error: 'Failed to restart server' });
+        }
+      },
+    );
+
+    router.post(
       '/server/:id/reinstall',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
@@ -2227,7 +2589,7 @@ const dashboardModule: Module = {
         const serverId = req.params?.id;
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -2251,17 +2613,22 @@ const dashboardModule: Module = {
             },
           });
 
-          await axios({
+          const deleteRequestData = {
             method: 'DELETE',
             url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container`,
             auth: {
               username: 'Airlink',
               password: server.node.key,
             },
+            headers: {
+              'Content-Type': 'application/json',
+            },
             data: {
               id: String(serverId),
             },
-          });
+          };
+
+          await axios(deleteRequestData);
           logger.info('Container deleted for reinstallation: ' + serverId);
 
           await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -2366,12 +2733,15 @@ const dashboardModule: Module = {
                     reinstallDockerImage = Object.values(parsed)[0] as string | undefined;
                   } catch { /* leave undefined */ }
 
-                  const installResponse = await axios({
+                  const installRequestData = {
                     method: 'POST',
                     url: `${daemonSchemeSync()}://${serverToReinstall.node.address}:${serverToReinstall.node.port}/container/install`,
                     auth: {
                       username: 'Airlink',
                       password: serverToReinstall.node.key,
+                    },
+                    headers: {
+                      'Content-Type': 'application/json',
                     },
                     data: {
                       id: serverToReinstall.UUID,
@@ -2391,7 +2761,9 @@ const dashboardModule: Module = {
                         }),
                       ),
                     },
-                  });
+                  };
+
+                  const installResponse = await axios(installRequestData);
                   logger.info(
                     `Installation scripts sent for server ${serverId}. Response status: ${installResponse.status}`,
                   );
@@ -2457,7 +2829,7 @@ const dashboardModule: Module = {
         const serverId = req.params?.id;
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -2512,7 +2884,7 @@ const dashboardModule: Module = {
         }
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -2639,7 +3011,7 @@ const dashboardModule: Module = {
         const backupId = req.params?.backupId;
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -2767,7 +3139,7 @@ const dashboardModule: Module = {
         const backupId = req.params?.backupId;
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;
@@ -2803,8 +3175,10 @@ const dashboardModule: Module = {
             const downloadResponse = await cloudClient.getDownloadStream(backup.airlinkCloudId);
 
             const fileName = `${backup.name}_${backup.createdAt.toISOString().split('T')[0]}.tar.gz`;
-            const safeBackupName = encodeURIComponent(fileName);
-            res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${safeBackupName}`);
+            res.setHeader(
+              'Content-Disposition',
+              `attachment; filename="${fileName}"`,
+            );
             res.setHeader('Content-Type', 'application/gzip');
 
             downloadResponse.data.pipe(res);
@@ -2826,8 +3200,10 @@ const dashboardModule: Module = {
           });
 
           const fileName = `${backup.name}_${backup.createdAt.toISOString().split('T')[0]}.tar.gz`;
-          const safeBackupName = encodeURIComponent(fileName);
-          res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${safeBackupName}`);
+          res.setHeader(
+            'Content-Disposition',
+            `attachment; filename="${fileName}"`,
+          );
           res.setHeader('Content-Type', 'application/gzip');
 
           response.data.pipe(res);
@@ -2853,7 +3229,7 @@ const dashboardModule: Module = {
         const backupId = req.params?.backupId;
 
         try {
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(404).json({ error: 'User not found' });
             return;

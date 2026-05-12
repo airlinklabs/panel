@@ -209,14 +209,7 @@
             <div class="stats-card overflow-hidden bg-white dark:bg-neutral-800/50 backdrop-blur-sm border border-neutral-200 dark:border-neutral-700/30 rounded-xl px-4 py-4 shadow-sm hover:shadow-md transition-shadow duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 group flex-1" style="--i:3">
                 <canvas id="cpuChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
-                    <div class="flex items-center justify-between gap-2">
-                        <h2 class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.cpuUsage %>:</h2>
-                        <button id="cpu-display-toggle" type="button" title="Toggle CPU unit" class="shrink-0 rounded-lg p-1.5 bg-neutral-100 dark:bg-neutral-700/50 hover:bg-neutral-200 dark:hover:bg-neutral-600/50 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-3.5 w-3.5 text-neutral-500">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
-                            </svg>
-                        </button>
-                    </div>
+                    <h2 class="text-sm font-medium text-neutral-500 dark:text-neutral-400"><%= req.translations.cpuUsage %>:</h2>
                     <p id="cpuUsage" class="mt-1 text-lg font-medium tracking-tight text-neutral-800 dark:text-white">0%</p>
                 </div>
             </div>
@@ -267,7 +260,7 @@ const termTheme = {
 };
 
 const term = new Terminal({
-  disableStdin: true,
+  disableStdin: false,
   lineHeight: 1.35,
   fontFamily: 'Menlo, Monaco, Consolas, monospace',
   fontSize: 12,
@@ -282,6 +275,92 @@ term.open(document.getElementById('terminal'));
 fitAddon.fit();
 
 window.addEventListener('resize', () => fitAddon.fit());
+term.focus();
+
+let terminalCommandBuffer = '';
+
+function sendTerminalCommand(command) {
+    const trimmed = command.trim();
+    if (!trimmed || !socket || socket.readyState !== WebSocket.OPEN) {
+        return;
+    }
+
+    term.write('\r\n');
+    socket.send(JSON.stringify({
+        event: 'CMD',
+        command: trimmed
+    }));
+
+    if (commandHistory.length === maxCommands) {
+        commandHistory.shift();
+    }
+    commandHistory.push(trimmed);
+    currentCommandIndex = commandHistory.length;
+}
+
+term.onData((data) => {
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+        return;
+    }
+
+    if (data === '\r') {
+        sendTerminalCommand(terminalCommandBuffer);
+        terminalCommandBuffer = '';
+        return;
+    }
+
+    if (data === '\u007f') {
+        if (terminalCommandBuffer.length > 0) {
+            terminalCommandBuffer = terminalCommandBuffer.slice(0, -1);
+            term.write('\b \b');
+        }
+        return;
+    }
+
+    if (data === '\u0003') {
+        terminalCommandBuffer = '';
+        term.write('^C\r\n');
+        return;
+    }
+
+    if (data === '\u0008') {
+        if (terminalCommandBuffer.length > 0) {
+            terminalCommandBuffer = terminalCommandBuffer.slice(0, -1);
+            term.write('\b \b');
+        }
+        return;
+    }
+
+    if (data === '\u001b[A') {
+        if (currentCommandIndex > 0) {
+            currentCommandIndex--;
+            terminalCommandBuffer = commandHistory[currentCommandIndex] || '';
+            term.write('\r\x1b[2K');
+            term.write(terminalCommandBuffer);
+        }
+        return;
+    }
+
+    if (data === '\u001b[B') {
+        if (currentCommandIndex < commandHistory.length - 1) {
+            currentCommandIndex++;
+            terminalCommandBuffer = commandHistory[currentCommandIndex] || '';
+            term.write('\r\x1b[2K');
+            term.write(terminalCommandBuffer);
+        } else {
+            currentCommandIndex = commandHistory.length;
+            terminalCommandBuffer = '';
+            term.write('\r\x1b[2K');
+        }
+        return;
+    }
+
+    if (data.length === 1 && data >= ' ') {
+        terminalCommandBuffer += data;
+        term.write(data);
+    }
+});
+
 
 // Intercept wheel events on the terminal so scrolling the console scrolls
 // the terminal buffer rather than the page behind it.
@@ -486,6 +565,7 @@ connectWebSocket();
                     socket.close();
                     return;
                 }
+                hideConsolePlaceholder();
                 term.write(maskPrompts(text));
             });
             return;
@@ -505,6 +585,7 @@ connectWebSocket();
             socket.close();
             return;
         }
+        hideConsolePlaceholder();
         term.write(maskPrompts(text));
     }
 
@@ -533,7 +614,7 @@ connectWebSocket();
     function sendCommand() {
         const inputElement = document.getElementById('input');
         const command = inputElement.value.trim();
-        if (command && socket) {
+        if (command && socket && socket.readyState === WebSocket.OPEN) {
             term.write('\u001b[1m\u001b[33m~ \u001b[0m' + command + '\r\n');
             socket.send(JSON.stringify({
                 event: 'CMD',
@@ -875,16 +956,10 @@ connectWebSocket();
 
             statsWs.onmessage = event => {
                 if (!isValidJson(event.data)) { return; }
-                const msg = JSON.parse(event.data);
-                if (msg.error) { return; }
-                if (!msg.data) { return; }
+                const stats = JSON.parse(event.data);
+                if (stats.error) { return; }
+                if (!stats.data) { return; }
 
-                if (msg.event === 'state') {
-                    if (msg.data.running === false && !lifecycleActive) setAllStatsOffline();
-                    return;
-                }
-
-                const stats = msg;
                 if (stats.data.running === false) {
                     if (!lifecycleActive) setAllStatsOffline();
                     return;
@@ -991,26 +1066,6 @@ connectWebSocket();
     const ramChart = createBackgroundChart('ramChart');
     const cpuChart = createBackgroundChart('cpuChart');
     const diskChart = createBackgroundChart('diskChart', 'doughnut');
-    const cpuLimitPercent = <%- server.Cpu %>;
-    let lastCpuUsagePercent = 0;
-    let cpuDisplayMode = localStorage.getItem('cpuDisplayMode') === 'cores' ? 'cores' : 'percent';
-
-    function renderCpuUsage() {
-        const cpuUsage = document.getElementById('cpuUsage');
-        if (!cpuUsage) return;
-        if (cpuDisplayMode === 'cores') {
-            cpuUsage.textContent = `${(lastCpuUsagePercent / 100).toFixed(2)} / ${(cpuLimitPercent / 100).toFixed(1)} cores`;
-            return;
-        }
-        cpuUsage.textContent = `${lastCpuUsagePercent.toFixed(1)}% / ${cpuLimitPercent}%`;
-    }
-
-    document.getElementById('cpu-display-toggle')?.addEventListener('click', () => {
-        cpuDisplayMode = cpuDisplayMode === 'percent' ? 'cores' : 'percent';
-        localStorage.setItem('cpuDisplayMode', cpuDisplayMode);
-        renderCpuUsage();
-    });
-    renderCpuUsage();
 
     function updateRamUsage(stats) {
     const ramStatsUsage = stats?.data?.memory?.usage || 0;
@@ -1032,14 +1087,13 @@ connectWebSocket();
 }
 
     function updateCpuUsage(stats) {
-        let cpuUsagePercent = Number(stats.data.cpu.percentage) || 0;
+        let cpuUsagePercent = stats.data.cpu.percentage || 0;
 
         if (isNaN(cpuUsagePercent)) {
             cpuUsagePercent = 0;
         }
 
-        lastCpuUsagePercent = cpuUsagePercent;
-        renderCpuUsage();
+        document.getElementById('cpuUsage').textContent = `${cpuUsagePercent}% / ${<%- server.Cpu * 100 %>}%`;
 
         if (cpuUsagePercent > 0) {
             updateChart(cpuChart, cpuUsagePercent);
@@ -1148,6 +1202,7 @@ connectWebSocket();
             }, 300);
         } else {
             lifecycleActive = true;
+            hideConsolePlaceholder();
             // Use the clean label — never raw layer output in the status card
             const label = statusLabel(eventType) || msg;
             const color = (statusColors[eventType] || { cls: 'text-neutral-500 dark:text-neutral-400' }).cls;
@@ -1170,7 +1225,12 @@ connectWebSocket();
         statusChart.update();
     }
 
+    // Function to set all stats to offline state
+    function hideConsolePlaceholder() {}
+    function showConsolePlaceholder() {}
+
     function setAllStatsOffline() {
+        showConsolePlaceholder();
         // Update status display
         const statusElement = document.getElementById('status');
         statusElement.textContent = 'Offline';
@@ -1183,8 +1243,7 @@ connectWebSocket();
         document.getElementById('ramUsage').textContent = `0% (0 MB / ${formatRam(<%- server.Memory %> * 1024 * 1024)})`;
 
         // Update CPU usage
-        lastCpuUsagePercent = 0;
-        renderCpuUsage();
+        document.getElementById('cpuUsage').textContent = `0% / ${<%- server.Cpu * 100 %>}%`;
 
         // Update disk usage
         document.getElementById('diskUsage').textContent = '0% (0 Bytes / 10 GB)';

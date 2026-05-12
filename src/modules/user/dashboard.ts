@@ -13,6 +13,15 @@ interface ErrorMessage {
 }
 
 const dashboardModule: Module = {
+  info: {
+    name: 'Dashboard Module',
+    description: 'This file is for dashboard functionality.',
+    version: '1.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirLinkLab',
+    license: 'MIT',
+  },
+
   router: () => {
     const router = Router();
 
@@ -118,7 +127,6 @@ const dashboardModule: Module = {
                   ramUsage: '0',
                   cpuUsage: '0',
                   ramUsed: '0MB',
-                  ramUsedMb: 0,
                   nodeOffline: true,
                 };
               }
@@ -138,7 +146,6 @@ const dashboardModule: Module = {
               let ramUsage = '0';
               let cpuUsage = '0';
               let ramUsed = '0MB';
-              let ramUsedMb = 0;
 
               if (isRunning) {
                 try {
@@ -159,7 +166,6 @@ const dashboardModule: Module = {
 
                     const memUsageBytes = statsResponse.data.memory?.usage || 0;
                     const memUsageMB = memUsageBytes / (1024 * 1024);
-                    ramUsedMb = memUsageMB;
                     ramUsed = memUsageMB >= 1024
                       ? `${(memUsageMB / 1024).toFixed(1)}GB`
                       : `${memUsageMB.toFixed(0)}MB`;
@@ -191,7 +197,6 @@ const dashboardModule: Module = {
                 ramUsage,
                 cpuUsage,
                 ramUsed,
-                ramUsedMb,
                 nodeOffline: false,
               };
             } catch (error) {
@@ -205,7 +210,6 @@ const dashboardModule: Module = {
                 ramUsage: '0',
                 cpuUsage: '0',
                 ramUsed: '0MB',
-                ramUsedMb: 0,
                 nodeOffline: true,
               };
             }

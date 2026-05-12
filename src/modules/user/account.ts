@@ -53,6 +53,15 @@ interface ErrorMessage {
 }
 
 const accountModule: Module = {
+  info: {
+    name: 'Account Module',
+    description: 'This file is for account functionality.',
+    version: '1.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirLinkLab',
+    license: 'MIT',
+  },
+
   router: () => {
     const router = Router();
 

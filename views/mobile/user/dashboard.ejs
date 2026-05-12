@@ -18,13 +18,6 @@
       </a>
       <% } %>
     </div>
-    <div class="flex justify-end mb-3">
-      <select id="sizeUnitSelect" class="px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 text-xs font-medium">
-        <option value="auto">Auto</option>
-        <option value="mb">MB</option>
-        <option value="gb">GB</option>
-      </select>
-    </div>
 
     <% if (req.query.err === "NOTACTIVEYET") { %>
       <div class="rounded-xl bg-amber-50 dark:bg-amber-800/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-4">
@@ -134,7 +127,7 @@
                 </div>
                 <div class="flex-1 bg-white dark:bg-neutral-700/30 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
                   <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">Used</p>
-                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300 js-size" data-mb="<%= server.ramUsedMb || 0 %>"><%= server.ramUsed || '0MB' %></p>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsed || '0MB' %></p>
                 </div>
               </div>
               <div class="flex items-center gap-1.5">
@@ -252,27 +245,6 @@
 
   const allFolders = <%- JSON.stringify(folders || []) %>;
   const allServers = <%- JSON.stringify((allServers || []).map(s => ({ UUID: s.UUID, name: s.name, status: s.status }))) %>;
-
-  const sizeUnitSelect = document.getElementById('sizeUnitSelect');
-  function formatSize(mb, unit) {
-    if (unit === 'mb') return `${Math.round(mb)} MB`;
-    if (unit === 'gb') return `${(mb / 1024).toFixed(mb >= 10240 ? 0 : 1)} GB`;
-    return mb >= 1024 ? `${(mb / 1024).toFixed(mb >= 10240 ? 0 : 1)} GB` : `${Math.round(mb)} MB`;
-  }
-  function updateSizes() {
-    const unit = sizeUnitSelect?.value || localStorage.getItem('serverSizeUnit') || 'auto';
-    document.querySelectorAll('.js-size').forEach((el) => {
-      el.textContent = formatSize(parseFloat(el.dataset.mb || '0'), unit);
-    });
-  }
-  if (sizeUnitSelect) {
-    sizeUnitSelect.value = localStorage.getItem('serverSizeUnit') || 'auto';
-    sizeUnitSelect.addEventListener('change', () => {
-      localStorage.setItem('serverSizeUnit', sizeUnitSelect.value);
-      updateSizes();
-    });
-    updateSizes();
-  }
 
   // New folder
   const newFolderBtn     = document.getElementById('newFolderBtn');

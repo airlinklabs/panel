@@ -5,12 +5,20 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
 import { queueer } from '../../handlers/queueer';
-import { Buffer } from 'buffer';
 import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 
 const adminModule: Module = {
+  info: {
+    name: 'Admin Module',
+    description: 'This file is for admin functionality.',
+    version: '1.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirLinkLab',
+    license: 'MIT',
+  },
+
   router: () => {
     const router = Router();
 
@@ -20,7 +28,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
@@ -49,7 +57,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.redirect('/login');
             return;
@@ -105,7 +113,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(401).json({ error: 'Unauthorized' });
             return;
@@ -217,7 +225,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
@@ -455,9 +463,17 @@ const adminModule: Module = {
                   value: v.value ?? v.default_value ?? '',
                 }));
 
+                let serverPort = Ports.split(':')[0];
+                try {
+                  const parsedPorts = JSON.parse(server.Ports);
+                  const primary = parsedPorts.find((p: any) => p.primary);
+                  if (primary?.Port) {
+                    serverPort = String(primary.Port).split(':')[0];
+                  }
+                } catch { /* keep fallback */ }
                 ServerEnv.push({
                   env: 'SERVER_PORT',
-                  value: Ports.split(':')[0],
+                  value: serverPort,
                 });
                 ServerEnv.push({
                   env: 'SERVER_MEMORY',
@@ -496,7 +512,6 @@ const adminModule: Module = {
                 {},
               );
 
-              const authHeader = `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`;
               const daemonUrl = `${daemonSchemeSync()}://${server.node.address}:${server.node.port}`;
 
               if (server.image?.scripts) {
@@ -527,7 +542,11 @@ const adminModule: Module = {
                         entrypoint: installation.entrypoint || 'bash',
                         env,
                       },
-                      { headers: { 'Content-Type': 'application/json', Authorization: authHeader }, timeout: 600000 },
+                      {
+                        auth: { username: 'Airlink', password: server.node.key },
+                        headers: { 'Content-Type': 'application/json' },
+                        timeout: 600000,
+                      },
                     );
 
                   // Legacy ALC format: scripts.install is an array of file downloads
@@ -553,7 +572,10 @@ const adminModule: Module = {
                           fileName: s.fileName,
                         })),
                       },
-                      { headers: { 'Content-Type': 'application/json', Authorization: authHeader } },
+                      {
+                        auth: { username: 'Airlink', password: server.node.key },
+                        headers: { 'Content-Type': 'application/json' },
+                      },
                     );
 
                     if (scripts.native && typeof scripts.native === 'object') {
@@ -561,7 +583,11 @@ const adminModule: Module = {
                       await axios.post(
                         `${daemonUrl}/container/installer`,
                         { id: server.UUID, env, script: native.CMD, container: native.container, entrypoint: 'bash' },
-                        { headers: { 'Content-Type': 'application/json', Authorization: authHeader }, timeout: 600000 },
+                        {
+                          auth: { username: 'Airlink', password: server.node.key },
+                          headers: { 'Content-Type': 'application/json' },
+                          timeout: 600000,
+                        },
                       );
                     }
                   } else {
@@ -596,7 +622,7 @@ const adminModule: Module = {
 
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.redirect('/login');
             return;
@@ -618,53 +644,67 @@ const adminModule: Module = {
             return;
           }
 
+          const force = req.query.force === 'true';
+
           try {
-            logger.info(`Deleting container ${server.UUID} on node ${server.node.address}:${server.node.port}`);
+            if (!force) {
+              logger.info(`Deleting container ${server.UUID} on node ${server.node.address}:${server.node.port}`);
 
-            try {
-              const response = await axios.delete(
-                `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container`,
-                {
-                  auth: {
-                    username: 'Airlink',
-                    password: server.node.key,
+              try {
+                const response = await axios.delete(
+                  `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container`,
+                  {
+                    auth: {
+                      username: 'Airlink',
+                      password: server.node.key,
+                    },
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    data: {
+                      id: server.UUID,
+                      deleteCmd: 'delete',
+                    },
                   },
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  data: {
-                    id: server.UUID,
-                    deleteCmd: 'delete',
-                  },
-                },
-              );
+                );
 
-              if (response.status !== 200) {
-                throw new Error(`Daemon returned status ${response.status}: ${JSON.stringify(response.data)}`);
-              }
+                if (response.status !== 200) {
+                  throw new Error(`Daemon returned status ${response.status}: ${JSON.stringify(response.data)}`);
+                }
 
-              logger.info(`Successfully deleted container ${server.UUID} on daemon`);
-            } catch (error: unknown) {
-              logger.error(`Error deleting container on daemon:`, error);
+                logger.info(`Successfully deleted container ${server.UUID} on daemon`);
+              } catch (error: unknown) {
+                logger.error(`Error deleting container on daemon:`, error);
 
-              const daemonError = error as any;
-              const isNotFoundError =
-                daemonError.response &&
-                (daemonError.response.status === 404 ||
-                 (daemonError.response.data && daemonError.response.data.error &&
-                  typeof daemonError.response.data.error === 'string' &&
-                  daemonError.response.data.error.includes('not exist')));
+                const daemonError = error as any;
+                const isNotFoundError =
+                  daemonError.response &&
+                  (daemonError.response.status === 404 ||
+                   (daemonError.response.data && daemonError.response.data.error &&
+                    typeof daemonError.response.data.error === 'string' &&
+                    daemonError.response.data.error.includes('not exist')));
 
-              if (!isNotFoundError) {
-                const errorMessage = error instanceof Error ? error.message : String(error);
-                throw new Error(`Failed to delete container on daemon: ${errorMessage}`);
-              } else {
-                logger.warn(`Container ${server.UUID} not found on daemon, proceeding with database cleanup`);
+                if (!isNotFoundError) {
+                  throw new Error('Daemon unreachable. Use ?force=true to remove from panel only.');
+                } else {
+                  logger.warn(`Container ${server.UUID} not found on daemon, proceeding with database cleanup`);
+                }
               }
             }
 
             logger.info(`Deleting server ${serverId} from database`);
-            await prisma.server.delete({ where: { id: serverId } });
+            await prisma.$transaction(async (tx) => {
+              await tx.sftpCredential.deleteMany({
+                where: { serverId: server.UUID },
+              });
+              await tx.backup.deleteMany({
+                where: { serverId: server.UUID },
+              });
+              await tx.serverFolderMember.deleteMany({
+                where: { serverUUID: server.UUID },
+              });
+              await tx.server.delete({ where: { id: serverId } });
+            });
 
             logger.info(`Server ${serverId} successfully deleted`);
             res.redirect('/admin/servers');

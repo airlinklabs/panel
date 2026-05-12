@@ -16,6 +16,15 @@ async function saveSettings(data: Record<string, any>) {
 }
 
 const airlinkCloudModule: Module = {
+  info: {
+    name: 'Airlink Cloud Module',
+    description: 'Airlink Cloud integration settings.',
+    version: '1.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirlinkLab',
+    license: 'MIT',
+  },
+
   router: () => {
     const router = Router();
 

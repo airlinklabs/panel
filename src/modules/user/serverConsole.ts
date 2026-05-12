@@ -5,6 +5,11 @@ import { WebSocket } from 'ws';
 import { isAuthenticatedForServerWS } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
 import { getParamAsString } from '../../utils/typeHelpers';
+import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+
+function wsScheme(): 'ws' | 'wss' {
+  return daemonSchemeSync() === 'https' ? 'wss' : 'ws';
+}
 
 async function proxyConsole(
   ws: WebSocket,
@@ -62,6 +67,15 @@ async function proxyConsole(
 }
 
 const wsServerConsoleModule: Module = {
+  info: {
+    name: 'Server Console Module',
+    description: 'This file is for the server console functionality.',
+    version: '1.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirLinkLab',
+    license: 'MIT',
+  },
+
   router: () => {
     const router = Router();
 
@@ -77,23 +91,7 @@ const wsServerConsoleModule: Module = {
         }
         await proxyConsole(
           ws, req, userId,
-          (addr, port, id) => `ws://${addr}:${port}/container/${id}`,
-        );
-      },
-    );
-
-    router.ws(
-      '/api/console/:id/:password',
-      isAuthenticatedForServerWS('id', 'password'),
-      async (ws: WebSocket, req: Request) => {
-        if (!req.query.userId) {
-          ws.send(JSON.stringify({ error: 'User not authenticated' }));
-          ws.close();
-          return;
-        }
-        await proxyConsole(
-          ws, req, +req.query.userId,
-          (addr, port, id) => `ws://${addr}:${port}/container/${id}`,
+          (addr, port, id) => `${wsScheme()}://${addr}:${port}/container/${id}`,
         );
       },
     );
@@ -110,7 +108,7 @@ const wsServerConsoleModule: Module = {
         }
         await proxyConsole(
           ws, req, userId,
-          (addr, port, id) => `ws://${addr}:${port}/containerstatus/${id}`,
+          (addr, port, id) => `${wsScheme()}://${addr}:${port}/containerstatus/${id}`,
         );
       },
     );
@@ -127,7 +125,7 @@ const wsServerConsoleModule: Module = {
         }
         await proxyConsole(
           ws, req, userId,
-          (addr, port, id) => `ws://${addr}:${port}/containerevents/${id}`,
+          (addr, port, id) => `${wsScheme()}://${addr}:${port}/containerevents/${id}`,
         );
       },
     );

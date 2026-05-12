@@ -1,3 +1,12 @@
+/**
+ * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
+ *      AirLink - Open Source Project by AirlinkLabs
+ *      Repository: https://github.com/airlinklabs/panel
+ *
+ *     © 2025 AirlinkLabs. Licensed under the MIT License
+ * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
+ */
+
 import fs from 'fs';
 import path from 'path';
 import logger from './logger';

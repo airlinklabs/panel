@@ -5,14 +5,19 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
 import logger from '../../handlers/logger';
 import axios from 'axios';
-import { Buffer } from 'buffer';
 import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
-import crypto from 'crypto';
 
 
 function generateApiKey(length: number): string {
-  return crypto.randomBytes(length).toString('base64url').slice(0, length);
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    result += characters[randomIndex];
+  }
+  return result;
 }
 
 type NodeWithInstances = {
@@ -25,36 +30,46 @@ type NodeWithInstances = {
   port: number;
   key: string;
   createdAt: Date;
-  instances: unknown[];
-  servers?: unknown[];
+  instances: any[];
+  servers?: any[]; // For port allocation UI
 }
 
 async function listNodes(res: Response, includeServers = false) {
   try {
-    const nodes = await prisma.node.findMany({
-      include: { servers: true },
-    });
+    const nodes = await prisma.node.findMany();
+    const nodesWithStatus = [];
 
-    const nodesWithStatus = await Promise.all(
-      nodes.map(async (node) => {
-        const nodeWithInstances: NodeWithInstances = {
+    for (const node of nodes) {
+      const instances = await prisma.server.findMany({
+        where: { nodeId: node.id },
+      });
+
+      const nodeWithInstances: NodeWithInstances = {
         ...node,
-          instances: node.servers,
-          ...(includeServers ? { servers: node.servers } : {}),
+        instances,
+        ...(includeServers ? { servers: instances } : {}),
       };
 
-        return checkNodeStatus(nodeWithInstances);
-      }),
-    );
+      nodesWithStatus.push(await checkNodeStatus(nodeWithInstances));
+    }
 
     return nodesWithStatus;
   } catch (error) {
-    logger.error('error fetching nodes', error);
-    res.status(500).json({ message: 'error fetching nodes' });
+    logger.error('Error fetching nodes:', error);
+    res.status(500).json({ message: 'Error fetching nodes.' });
   }
 }
 
 const adminModule: Module = {
+  info: {
+    name: 'Admin Nodes Module',
+    description: 'This file is for admin functionality of the Nodes.',
+    version: '1.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirLinkLab',
+    license: 'MIT',
+  },
+
   router: () => {
     const router = Router();
 
@@ -64,7 +79,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
@@ -96,7 +111,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
@@ -182,7 +197,7 @@ const adminModule: Module = {
 
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             res.status(403).json({ message: 'Unauthorized access.' });
             return;
@@ -224,7 +239,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
@@ -234,6 +249,26 @@ const adminModule: Module = {
 
           try {
             if (deleteInstances) {
+              const node = await prisma.node.findUnique({
+                where: { id: nodeId },
+                include: { servers: true },
+              });
+
+              if (node) {
+                await Promise.allSettled(
+                  node.servers.map((server) =>
+                    axios.delete(
+                      `${daemonSchemeSync()}://${node.address}:${node.port}/container`,
+                      {
+                        auth: { username: 'Airlink', password: node.key },
+                        data: { id: server.UUID },
+                        timeout: 8000,
+                      },
+                    ),
+                  ),
+                );
+              }
+
               await prisma.server.deleteMany({
                 where: { nodeId: nodeId },
               });
@@ -263,7 +298,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
@@ -299,7 +334,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
@@ -337,7 +372,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
@@ -415,7 +450,7 @@ const adminModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
-        const user = req.session.user!;
+        const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
           return res.redirect('/login');
         }
@@ -438,9 +473,12 @@ const adminModule: Module = {
           const response = await axios.get(
             `${daemonSchemeSync()}://${node.address}:${node.port}/stats`,
             {
+              auth: {
+                username: 'Airlink',
+                password: node.key,
+              },
               headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Basic ${Buffer.from(`Airlink:${node.key}`).toString('base64')}`,
               },
             }
           );

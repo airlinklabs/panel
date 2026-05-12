@@ -5,6 +5,15 @@ import prisma from '../../db';
 
 
 const authModule: Module = {
+  info: {
+    name: 'Auth Module',
+    description: 'This file is for authentication and authorization of users.',
+    version: '1.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirLinkLab',
+    license: 'MIT',
+  },
+
   router: () => {
     const router = Router();
 

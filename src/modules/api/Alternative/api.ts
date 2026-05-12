@@ -11,6 +11,15 @@ import { daemonSchemeSync } from '../../../handlers/utils/core/daemonRequest';
 
 
 const coreModule: Module = {
+  info: {
+    name: 'Core Module',
+    description: 'This file is for all core functionality.',
+    version: '1.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirLinkLab',
+    license: 'MIT',
+  },
+
   router: () => {
     let validKeys: string[] = [];
 
@@ -664,9 +673,12 @@ const coreModule: Module = {
                     `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/install`,
                     requestBody,
                     {
+                      auth: {
+                        username: 'Airlink',
+                        password: server.node.key,
+                      },
                       headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Basic ${Buffer.from(`Airlink:${server.node.key}`).toString('base64')}`,
                       },
                     },
                   );

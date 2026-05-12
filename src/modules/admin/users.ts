@@ -24,6 +24,15 @@ async function listUsers(res: Response) {
 }
 
 const adminModule: Module = {
+  info: {
+    name: 'Admin Users Module',
+    description: 'This file is for admin functionality of the Users.',
+    version: '1.0.0',
+    moduleVersion: '1.0.0',
+    author: 'AirLinkLab',
+    license: 'MIT',
+  },
+
   router: () => {
     const router = Router();
 
@@ -33,7 +42,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
@@ -63,7 +72,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
@@ -126,7 +135,7 @@ const adminModule: Module = {
             data: {
               email,
               username,
-              password: await bcrypt.hash(password, 10),
+              password: await bcrypt.hash(password, 12),
               isAdmin: isAdminBool,
             },
           });
@@ -149,7 +158,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
@@ -181,7 +190,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
@@ -214,7 +223,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const user = req.session.user!;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             return res.redirect('/login');
           }
@@ -319,7 +328,7 @@ const adminModule: Module = {
 
           // Handle password update if provided
           if (password && password.trim() !== '') {
-            updateData.password = await bcrypt.hash(password, 10);
+            updateData.password = await bcrypt.hash(password, 12);
           }
 
           // Update user
