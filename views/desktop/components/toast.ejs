@@ -9,6 +9,9 @@
         toastContainer.id = 'toast-container';
         toastContainer.className =
           'fixed top-4 right-4 z-50 flex flex-col gap-2';
+        toastContainer.setAttribute('aria-live', 'polite');
+        toastContainer.setAttribute('aria-atomic', 'false');
+        toastContainer.setAttribute('role', 'status');
         document.body.appendChild(toastContainer);
       }
 

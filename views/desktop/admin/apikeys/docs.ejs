@@ -156,7 +156,7 @@
                                         <% }); %>
                                     
                                         <button type="button"
-                                          class="test-endpoint-btn text-xs rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-3 py-1 font-medium shadow-sm transition focus:outline-none"
+                                          class="test-endpoint-btn text-xs rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-3 py-1 font-medium shadow-sm transition focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none"
                                           data-method="<%= endpoint.method %>" data-path="<%= endpoint.path %>"
                                           data-permission="<%= endpoint.permission %>"
                                           data-request="<%= endpoint.requestExample ? encodeURIComponent(endpoint.requestExample) : '' %>"
@@ -167,7 +167,7 @@
                                     <% } %>
                                     <% if (!dynamicParams) { %>
                                       <button type="button"
-                                        class="test-endpoint-btn text-xs rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-3 py-1 font-medium shadow-sm transition focus:outline-none"
+                                        class="test-endpoint-btn text-xs rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-3 py-1 font-medium shadow-sm transition focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none"
                                         data-method="<%= endpoint.method %>" data-path="<%= endpoint.path %>"
                                         data-permission="<%= endpoint.permission %>"
                                         data-request="<%= endpoint.requestExample ? encodeURIComponent(endpoint.requestExample) : '' %>"

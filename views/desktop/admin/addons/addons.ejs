@@ -38,7 +38,7 @@
 
       <% if (addons && addons.length > 0) { %>
       <div class="mx-8 mt-5 mb-1">
-        <input id="addonSearchInput" type="text" placeholder="Filter addons…" class="w-56 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
+        <input id="addonSearchInput" type="text" placeholder="Filter addons…" class="w-56 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
       </div>
       <div class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40">
         <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
@@ -62,9 +62,11 @@
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400 col-hide">v<%= addon.version %><% if (addon.author) { %> · <%= addon.author %><% } %></td>
               <td class="whitespace-nowrap px-3 py-4 text-sm col-hide">
-                <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset <%= addon.enabled ? 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' : 'bg-neutral-100 dark:bg-white/5 text-neutral-500 ring-neutral-300 dark:ring-white/10' %>">
-                  <%= addon.enabled ? 'Enabled' : 'Disabled' %>
-                </span>
+                <% if (addon.enabled) { %>
+                <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-600/20 dark:ring-emerald-400/20">Enabled</span>
+                <% } else { %>
+                <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-neutral-100 dark:bg-white/5 text-neutral-600 dark:text-neutral-300 ring-neutral-300 dark:ring-white/10">Disabled</span>
+                <% } %>
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm">
                 <div class="flex gap-2">
@@ -115,8 +117,9 @@
     if (!row) return;
     const badge = row.querySelector('.status-badge');
     if (badge) {
-      badge.className = 'status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ' +
-        (enabled ? 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' : 'bg-neutral-100 dark:bg-white/5 text-neutral-500 ring-neutral-300 dark:ring-white/10');
+      badge.className = enabled
+        ? 'status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-600/20 dark:ring-emerald-400/20'
+        : 'status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-neutral-100 dark:bg-white/5 text-neutral-600 dark:text-neutral-300 ring-neutral-300 dark:ring-white/10';
       badge.textContent = enabled ? 'Enabled' : 'Disabled';
     }
     const btn = row.querySelector('.toggle-btn');

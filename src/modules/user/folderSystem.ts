@@ -4,6 +4,14 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 
+const getAuthenticatedUserId = (req: Request): number => {
+  const userId = req.session.user?.id;
+  if (!userId) {
+    throw new Error('Authenticated request is missing a session user id.');
+  }
+  return userId;
+};
+
 const folderModule: Module = {
   info: {
     name: 'Folder System Module',
@@ -20,7 +28,7 @@ const folderModule: Module = {
     // List all folders with their member server UUIDs
     router.get('/api/folders', isAuthenticated(), async (req: Request, res: Response) => {
       try {
-        const userId = req.session?.user?.id;
+        const userId = getAuthenticatedUserId(req);
         const folders = await prisma.serverFolder.findMany({
           where: { ownerId: userId },
           include: { members: true },
@@ -36,7 +44,7 @@ const folderModule: Module = {
     // Create a new folder
     router.post('/api/folders', isAuthenticated(), async (req: Request, res: Response) => {
       try {
-        const userId = req.session?.user?.id!;
+        const userId = getAuthenticatedUserId(req);
         const { name } = req.body;
 
         if (!name || typeof name !== 'string' || name.trim().length === 0) {
@@ -61,7 +69,7 @@ const folderModule: Module = {
     // Rename a folder
     router.patch('/api/folders/:id', isAuthenticated(), async (req: Request, res: Response) => {
       try {
-        const userId = req.session?.user?.id;
+        const userId = getAuthenticatedUserId(req);
         const folderId = parseInt(String(req.params.id), 10);
         const { name } = req.body;
 
@@ -90,7 +98,7 @@ const folderModule: Module = {
     // Delete a folder (servers inside are unfoldered, not deleted)
     router.delete('/api/folders/:id', isAuthenticated(), async (req: Request, res: Response) => {
       try {
-        const userId = req.session?.user?.id;
+        const userId = getAuthenticatedUserId(req);
         const folderId = parseInt(String(req.params.id), 10);
 
         if (isNaN(folderId)) return res.status(400).json({ success: false, error: 'Invalid folder ID.' });
@@ -110,7 +118,7 @@ const folderModule: Module = {
     // Add a server to a folder (moves it if it's in another folder)
     router.post('/api/folders/:id/servers', isAuthenticated(), async (req: Request, res: Response) => {
       try {
-        const userId = req.session?.user?.id;
+        const userId = getAuthenticatedUserId(req);
         const folderId = parseInt(String(req.params.id), 10);
         const { serverUUID } = req.body;
 
@@ -142,7 +150,7 @@ const folderModule: Module = {
     // Remove a server from its folder
     router.delete('/api/folders/servers/:serverUUID', isAuthenticated(), async (req: Request, res: Response) => {
       try {
-        const userId = req.session?.user?.id;
+        const userId = getAuthenticatedUserId(req);
         const serverUUID = String(req.params.serverUUID);
 
         const server = await prisma.server.findUnique({ where: { UUID: serverUUID } });

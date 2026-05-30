@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "maintainable-typescript": {
+      "source": "miguelspizza/skills",
+      "sourceType": "github",
+      "skillPath": "skills/maintainable-typescript/SKILL.md",
+      "computedHash": "251c986673ff407a1052978ad01aef273091528427a2f0e15007a3f97f989aa0"
+    }
+  }
+}

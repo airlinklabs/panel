@@ -97,8 +97,13 @@
   function updateToggleDot() {
     const isDark = document.documentElement.classList.contains('dark');
     const dot = document.querySelector('#theme-toggle .dot');
+    const btn = document.getElementById('theme-toggle');
     if (!dot) return;
     dot.style.transform = isDark ? 'translateX(20px)' : 'translateX(0)';
+    if (btn) {
+      btn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+      btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
   }
 
   function toggleTheme() {
