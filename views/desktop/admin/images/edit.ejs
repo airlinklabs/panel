@@ -275,10 +275,13 @@
       row.className = 'flex gap-2 items-center';
       row.innerHTML = `
         <input data-docker-label="${idx}" type="text" value="${escHtml(label)}" placeholder="Label (e.g. java 21)"
+          aria-label="Docker image label"
           class="w-40 shrink-0 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-xs text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
         <input data-docker-image="${idx}" type="text" value="${escHtml(image)}" placeholder="Image ref (e.g. ghcr.io/ptero-eggs/yolks:java_21)"
+          aria-label="Docker image reference"
           class="flex-1 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-xs text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
         <button data-docker-remove="${idx}" type="button"
+          aria-label="Remove Docker image entry"
           class="px-3 py-2 text-xs rounded-xl border border-red-200 dark:border-red-900/30 bg-white dark:bg-neutral-800 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition shrink-0">
           Remove
         </button>`;

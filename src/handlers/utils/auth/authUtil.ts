@@ -17,6 +17,14 @@ export const isAuthenticated =
       return res.redirect('/login');
     }
 
+    if (isAdminRequired) {
+      if (!user.isAdmin) {
+        return renderErrorPage(req, res, 403);
+      }
+
+      return next();
+    }
+
     if (requiredPermission) {
       let userPermissions: string[] = [];
       try {
@@ -40,10 +48,5 @@ export const isAuthenticated =
 
       return renderErrorPage(req, res, 403);
     }
-
-    if (isAdminRequired && !user.isAdmin) {
-      return renderErrorPage(req, res, 403);
-    }
-
     next();
   };

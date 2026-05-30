@@ -40,6 +40,8 @@
 </head>
 <body style="font-family: 'General Sans'" class="bg-neutral-50 dark:bg-[#141414] h-full text-neutral-800 dark:text-white">
 
+<a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[99999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-neutral-900 focus:text-white focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
+
 <!-- Page loader overlay — rendered in HTML so it exists before any JS or paint -->
 <script nonce="<%- nonce %>">
 (function(){
@@ -75,7 +77,7 @@
 })();
 </script>
 
-<button id="theme-toggle" class="fixed right-4 top-4 w-14 h-8 flex items-center bg-neutral-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500 z-50">
+<button id="theme-toggle" class="fixed right-4 top-4 w-14 h-8 flex items-center bg-neutral-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500 z-50" aria-label="Switch to dark mode" aria-pressed="false">
     <span class="dot bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
 </button>
 <script nonce="<%- nonce %>">
@@ -117,11 +119,14 @@ function initializeTheme() {
 
   function updateSwitchPosition() {
     const isDark = document.documentElement.classList.contains('dark');
+    const btn = document.getElementById('theme-toggle');
     const dot = document.querySelector('#theme-toggle .dot');
     if (isDark) {
       dot.classList.add('translate-x-6');
+      if (btn) { btn.setAttribute('aria-pressed', 'true'); btn.setAttribute('aria-label', 'Switch to light mode'); }
     } else {
       dot.classList.remove('translate-x-6');
+      if (btn) { btn.setAttribute('aria-pressed', 'false'); btn.setAttribute('aria-label', 'Switch to dark mode'); }
     }
   }
 

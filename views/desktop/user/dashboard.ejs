@@ -34,11 +34,11 @@
 
   /* Ghost element that follows cursor */
   #drag-ghost {
-    position: fixed; z-index: 9999; pointer-events: none;
+    position: fixed; z-index: 70; pointer-events: none;
     background: white; border: 1px solid #e5e5e5; border-radius: 12px;
     padding: 10px 14px; font-size: 13px; font-weight: 500;
     color: #171717; box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-    display: flex; align-items: center; gap-8px; gap: 8px;
+    display: flex; align-items: center; gap: 8px;
     transform: rotate(2deg); opacity: 0.95;
     max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
@@ -90,11 +90,11 @@
   .txt-input:focus { border-color: #a3a3a3; }
   .dark .txt-input:focus { border-color: rgba(255,255,255,0.25); }
   .txt-input::placeholder { color: #a3a3a3; }
-  .dark .txt-input::placeholder { color: #525252; }
+  .dark .txt-input::placeholder { color: #a3a3a3; }
 
   .btn-primary {
     display: inline-flex; align-items: center; justify-content: center;
-    padding: 8px 16px; border-radius: 9px; font-size: 13px; font-weight: 500;
+    min-height: 40px; padding: 8px 16px; border-radius: 9px; font-size: 13px; font-weight: 500;
     background: #171717; color: white; border: none; cursor: pointer; transition: background 0.12s;
   }
   .dark .btn-primary { background: white; color: #0a0a0a; }
@@ -102,7 +102,7 @@
   .dark .btn-primary:hover { background: #e5e5e5; }
   .btn-ghost {
     display: inline-flex; align-items: center; justify-content: center;
-    padding: 8px 16px; border-radius: 9px; font-size: 13px; font-weight: 500;
+    min-height: 40px; padding: 8px 16px; border-radius: 9px; font-size: 13px; font-weight: 500;
     background: transparent; color: #737373; border: 1px solid #e5e5e5; cursor: pointer; transition: background 0.12s;
   }
   .dark .btn-ghost { border-color: rgba(255,255,255,0.1); color: #737373; }
@@ -125,22 +125,22 @@
           </div>
           <div class="flex items-center gap-2">
             <% if (canCreateServer) { %>
-            <a href="/create-server" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm font-medium hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">
+            <a href="/create-server" class="flex min-h-10 items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm font-medium hover:bg-neutral-700 dark:hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-white focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950 transition">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4"><path fill-rule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd"/></svg>
               New server
             </a>
             <% } %>
-            <button id="newFolderBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 text-sm font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+            <button id="newFolderBtn" class="flex min-h-10 items-center gap-1.5 px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 text-sm font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950 transition">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"/></svg>
               New folder
             </button>
             <% if (servers && servers.length > 0) { %>
             <div class="flex items-center gap-1 bg-neutral-100 dark:bg-neutral-800/60 p-1 rounded-xl border border-neutral-200 dark:border-white/5">
-              <button id="gridViewBtn" class="view-toggle-btn px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 active">
+              <button id="gridViewBtn" class="view-toggle-btn min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 active">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                 Grid
               </button>
-              <button id="listViewBtn" class="view-toggle-btn px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5">
+              <button id="listViewBtn" class="view-toggle-btn min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 List
               </button>
@@ -191,6 +191,9 @@
           <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3" id="folderGrid">
             <% let folderIdx = 0; folders.forEach(folder => { %>
             <div class="folder-card group"
+              role="button"
+              tabindex="0"
+              aria-label="Open folder <%= folder.name %>"
               style="--i:<%= folderIdx++ %>"
               data-folder-id="<%= folder.id %>"
               data-folder-name="<%= folder.name %>"
@@ -295,7 +298,7 @@
             <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-transparent">
               <% servers.forEach(server => { %>
               <% const inFolderL = folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID)); if (inFolderL) return; %>
-              <tr onclick="window.location.href='../server/<%= server.UUID %>';" class="hover:bg-neutral-50 dark:hover:bg-white/5 cursor-pointer transition-colors">
+              <tr data-href="../server/<%= server.UUID %>" role="link" tabindex="0" class="hover:bg-neutral-50 dark:hover:bg-white/5 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-neutral-500">
                 <td class="py-3.5 pl-6 pr-3">
                   <p class="text-sm font-medium text-neutral-900 dark:text-white"><%= server.name %></p>
                   <% if (server.description) { %><p class="text-xs text-neutral-500 dark:text-neutral-400 truncate max-w-xs"><%= server.description %></p><% } %>
@@ -343,16 +346,16 @@
 
 <!-- Folder popup -->
 <div class="folder-popup-overlay" id="folderPopupOverlay">
-  <div class="folder-popup">
+  <div class="folder-popup" role="dialog" aria-modal="true" aria-labelledby="folderPopupTitle">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5 flex-shrink-0">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white" id="folderPopupTitle"></h2>
       <div class="flex items-center gap-1">
-        <button id="deleteFolderBtn" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-100 dark:hover:bg-red-500/10 text-red-400 hover:text-red-500 transition" title="Delete folder">
+        <button id="deleteFolderBtn" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 text-red-600 dark:text-red-400 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" title="Delete folder" aria-label="Delete folder">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-3.5 h-3.5">
             <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd"/>
           </svg>
         </button>
-        <button id="closeFolderPopup" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
+        <button id="closeFolderPopup" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-300 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500" aria-label="Close folder">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
         </button>
       </div>
@@ -365,9 +368,10 @@
 
 <!-- New folder dialog -->
 <div class="dialog-overlay" id="newFolderOverlay">
-  <div class="dialog-box">
-    <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">New folder</p>
+  <div class="dialog-box" role="dialog" aria-modal="true" aria-labelledby="newFolderTitle">
+    <p id="newFolderTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">New folder</p>
     <p class="text-xs text-neutral-500 mb-4">Give your folder a name. Drag server cards onto it to add servers.</p>
+    <label for="newFolderName" class="sr-only">Folder name</label>
     <input id="newFolderName" type="text" class="txt-input mb-4" placeholder="e.g. Game Servers">
     <div class="flex gap-2 justify-end">
       <button id="cancelNewFolder" class="btn-ghost">Cancel</button>
@@ -378,12 +382,12 @@
 
 <!-- Delete folder confirm dialog -->
 <div class="dialog-overlay" id="deleteFolderOverlay">
-  <div class="dialog-box">
-    <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Delete folder?</p>
-    <p class="text-xs text-neutral-500 mb-4">Servers inside will stay accessible — they just won't be in this folder.</p>
+  <div class="dialog-box" role="dialog" aria-modal="true" aria-labelledby="deleteFolderTitle">
+    <p id="deleteFolderTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Delete folder?</p>
+    <p class="text-xs text-neutral-600 dark:text-neutral-300 mb-4">Servers inside will stay accessible. They just won't be in this folder.</p>
     <div class="flex gap-2 justify-end">
       <button id="cancelDeleteFolder" class="btn-ghost">Cancel</button>
-      <button id="confirmDeleteFolder" class="px-4 py-2 rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 text-white border-none cursor-pointer transition">Delete</button>
+      <button id="confirmDeleteFolder" class="min-h-10 px-4 py-2 rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 text-white border-none cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950">Delete folder</button>
     </div>
   </div>
 </div>
@@ -414,6 +418,18 @@
       listViewBtn.classList.toggle('active', which === 'list');
     }
   }
+
+  document.querySelectorAll('tr[data-href]').forEach(row => {
+    row.addEventListener('click', () => {
+      window.location.href = row.dataset.href;
+    });
+    row.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        window.location.href = row.dataset.href;
+      }
+    });
+  });
 
   // ── New folder dialog ─────────────────────────────────────
   const newFolderOverlay  = document.getElementById('newFolderOverlay');
@@ -452,6 +468,12 @@
   let activeFolderId = null;
 
   document.querySelectorAll('.folder-card').forEach(card => {
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        card.click();
+      }
+    });
     card.addEventListener('click', e => {
       if (e.target.closest('.folder-delete-btn')) return;
       const memberUUIDs = JSON.parse(card.dataset.folderMembers || '[]');
@@ -473,7 +495,7 @@
                 ${running ? 'Running' : 'Stopped'}
               </span>
             </a>
-            <button data-uuid="${s.UUID}" class="remove-from-folder-btn shrink-0 p-1.5 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Remove from folder">
+            <button data-uuid="${s.UUID}" class="remove-from-folder-btn shrink-0 w-10 h-10 inline-flex items-center justify-center rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" title="Remove from folder" aria-label="Remove server from folder">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" width="12" height="12">
                 <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd"/>
               </svg>

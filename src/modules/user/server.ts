@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import type { Prisma, Users, settings as PanelSettings } from '@prisma/client';
 import { Module } from '../../handlers/moduleInit';
 import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
@@ -21,11 +22,6 @@ interface ErrorMessage {
   message?: string;
 }
 
-interface ServerImageInfo {
-  features: string[];
-  stop: string;
-}
-
 interface Port {
   primary: boolean;
   Port: number;
@@ -37,6 +33,138 @@ interface ServerVariable {
   type: 'boolean' | 'text' | 'number';
   default: string | number | boolean;
   value: string | number | boolean;
+}
+
+const serverPageInclude = {
+  node: true,
+  image: true,
+  owner: true,
+} satisfies Prisma.ServerInclude;
+
+type ServerPageServer = Prisma.ServerGetPayload<{ include: typeof serverPageInclude }>;
+
+type ServerPageContext =
+  | {
+      status: 'ready';
+      settings: PanelSettings | null;
+      user: Users;
+      server: ServerPageServer;
+    }
+  | {
+      status: 'missing-user';
+      settings: PanelSettings | null;
+      user: null;
+    }
+  | {
+      status: 'missing-server';
+      settings: PanelSettings | null;
+      user: Users;
+    };
+
+type AuthenticatedServerContext =
+  | {
+      status: 'ready';
+      user: Users;
+      server: ServerPageServer;
+    }
+  | {
+      status: 'missing-user';
+      user: null;
+    }
+  | {
+      status: 'missing-server';
+      user: Users;
+    };
+
+function getAuthenticatedUserId(req: Request): number {
+  const userId = req.session?.user?.id;
+  if (!userId) {
+    throw new Error('Authenticated server request is missing a session user id.');
+  }
+  return userId;
+}
+
+async function loadServerPageContext(req: Request): Promise<ServerPageContext> {
+  const userId = getAuthenticatedUserId(req);
+  const serverId = String(req.params?.id);
+
+  const [settings, user] = await Promise.all([
+    prisma.settings.findUnique({ where: { id: 1 } }),
+    prisma.users.findUnique({ where: { id: userId } }),
+  ]);
+
+  if (!user) {
+    return { status: 'missing-user', settings, user: null };
+  }
+
+  const server = await prisma.server.findUnique({
+    where: { UUID: serverId },
+    include: serverPageInclude,
+  });
+
+  if (!server) {
+    return { status: 'missing-server', settings, user };
+  }
+
+  return { status: 'ready', settings, user, server };
+}
+
+async function loadAuthenticatedServerContext(req: Request): Promise<AuthenticatedServerContext> {
+  const userId = getAuthenticatedUserId(req);
+  const serverId = getParamAsString(req.params?.id);
+
+  const user = await prisma.users.findUnique({ where: { id: userId } });
+  if (!user) {
+    return { status: 'missing-user', user: null };
+  }
+
+  const server = await prisma.server.findUnique({
+    where: { UUID: serverId },
+    include: serverPageInclude,
+  });
+
+  if (!server) {
+    return { status: 'missing-server', user };
+  }
+
+  return { status: 'ready', user, server };
+}
+
+function sendMissingServerContext(
+  res: Response,
+  context: AuthenticatedServerContext,
+): context is Exclude<AuthenticatedServerContext, { status: 'ready' }> {
+  if (context.status === 'missing-user') {
+    res.status(404).json({ error: 'User not found' });
+    return true;
+  }
+
+  if (context.status === 'missing-server') {
+    res.status(404).json({ error: 'Server not found' });
+    return true;
+  }
+
+  return false;
+}
+
+function getServerDaemonAddress(server: Pick<ServerPageServer, 'node'>, path: string): string {
+  return `${daemonSchemeSync()}://${server.node.address}:${server.node.port}${path}`;
+}
+
+function getServerDaemonAuth(server: Pick<ServerPageServer, 'node'>): { username: string; password: string } {
+  return {
+    username: 'Airlink',
+    password: server.node.key,
+  };
+}
+
+function getServerStatusInput(server: Pick<ServerPageServer, 'UUID' | 'node'>) {
+  return {
+    nodeAddress: server.node.address,
+    nodePort: server.node.port,
+    serverUUID: server.UUID,
+    nodeKey: server.node.key,
+  };
 }
 
 function getImageFeatures(image: any): string[] {
@@ -76,6 +204,102 @@ function getPrimaryPort(portsJson: string): number | undefined {
   }
 }
 
+type ServerRuntimeConfig = Pick<
+  ServerPageServer,
+  | 'Cpu'
+  | 'Memory'
+  | 'Ports'
+  | 'StartCommand'
+  | 'Storage'
+  | 'Variables'
+  | 'dockerImage'
+  | 'node'
+>;
+
+function buildServerRuntimeEnv(
+  server: Pick<ServerRuntimeConfig, 'Cpu' | 'Memory' | 'Variables' | 'Ports'>,
+  variables: string | null | ServerVariable[] = server.Variables,
+): Record<string, string> {
+  const ports = getPrimaryPort(server.Ports);
+  const envVariables = buildEnvVariables(variables);
+  envVariables['SERVER_PORT'] = String(ports ?? '');
+  envVariables['SERVER_MEMORY'] = String(server.Memory);
+  envVariables['SERVER_CPU'] = String(server.Cpu);
+  return envVariables;
+}
+
+function getConfiguredDockerImage(server: Pick<ServerRuntimeConfig, 'dockerImage'>): string | null {
+  if (!server.dockerImage) {
+    return null;
+  }
+
+  return String(Object.values(JSON.parse(server.dockerImage))[0]);
+}
+
+async function stopServerContainer(
+  server: Pick<ServerPageServer, 'node' | 'image'>,
+  serverId: string,
+  stopCommand = server.image?.stop || 'stop',
+): Promise<void> {
+  await axios({
+    method: 'POST',
+    url: getServerDaemonAddress(server, '/container/stop'),
+    auth: getServerDaemonAuth(server),
+    headers: { 'Content-Type': 'application/json' },
+    data: {
+      id: serverId,
+      stopCmd: stopCommand,
+    },
+  });
+}
+
+async function startServerContainer(
+  server: ServerRuntimeConfig,
+  serverId: string,
+  options: {
+    dockerImage?: string;
+    startCommand?: string;
+    variables?: string | null | ServerVariable[];
+  } = {},
+): Promise<void> {
+  const dockerImage = options.dockerImage ?? getConfiguredDockerImage(server);
+  if (!dockerImage) {
+    throw new Error('Docker image not found.');
+  }
+
+  await axios({
+    method: 'POST',
+    url: getServerDaemonAddress(server, '/container/start'),
+    auth: getServerDaemonAuth(server),
+    headers: { 'Content-Type': 'application/json' },
+    data: {
+      id: serverId,
+      image: dockerImage,
+      ports: getPrimaryPort(server.Ports),
+      Memory: server.Memory,
+      Cpu: server.Cpu,
+      Storage: server.Storage,
+      env: buildServerRuntimeEnv(server, options.variables ?? server.Variables),
+      StartCommand: options.startCommand ?? server.StartCommand,
+    },
+  });
+}
+
+async function restartServerContainer(
+  server: ServerRuntimeConfig & Pick<ServerPageServer, 'image'>,
+  serverId: string,
+  options: {
+    dockerImage?: string;
+    startCommand?: string;
+    stopCommand?: string;
+    variables?: string | null | ServerVariable[];
+  } = {},
+): Promise<void> {
+  await stopServerContainer(server, serverId, options.stopCommand);
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await startServerContainer(server, serverId, options);
+}
+
 const dashboardModule: Module = {
   info: {
     name: 'Server Module',
@@ -95,31 +319,27 @@ const dashboardModule: Module = {
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
-        const userId = req.session?.user?.id;
         const serverId = req.params?.id;
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+        let settings: PanelSettings | null = null;
         try {
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
+          const context = await loadServerPageContext(req);
+          settings = context.settings;
+          if (context.status === 'missing-user') {
             errorMessage.message = 'User not found.';
-            return res.render('user/account', { errorMessage, user, req });
+            return res.render('user/account', { errorMessage, user: context.user, req });
           }
-
-          const server = await prisma.server.findUnique({
-            where: { UUID: String(serverId) },
-            include: { node: true, image: true, owner: true },
-          });
-          if (!server) {
+          if (context.status === 'missing-server') {
             errorMessage.message = 'Server not found.';
             return res.render('user/server/manage', {
               errorMessage,
               features: [],
-              user,
+              user: context.user,
               req,
               settings,
             });
           }
 
+          const { user, server } = context;
           let features = getImageFeatures(server.image);
 
           if (features.includes('eula')) {
@@ -130,15 +350,7 @@ const dashboardModule: Module = {
               features = features.filter((feature) => feature !== 'eula');
             }
           }
-
-
-          const serverInfos = {
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            serverUUID: server.UUID,
-            nodeKey: server.node.key,
-          };
-          const serverStatus = await getServerStatus(serverInfos);
+          const serverStatus = await getServerStatus(getServerStatusInput(server));
 
           return res.render('user/server/manage', {
             errorMessage,
@@ -253,14 +465,6 @@ const dashboardModule: Module = {
 
           if (powerAction === 'stop') {
               try {
-              // Get current server status
-              const serverInfos = {
-                nodeAddress: server.node.address,
-                nodePort: server.node.port,
-                serverUUID: server.UUID,
-                nodeKey: server.node.key,
-              };
-
               // Create a custom status object with stopping=true
               const stoppingStatus = {
                 online: true,
@@ -345,91 +549,36 @@ const dashboardModule: Module = {
             // The dedicated restart route is registered after this wildcard so
             // Express never reaches it. Handle restart inline here.
             try {
-              await axios({
-                method: 'POST',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
-                auth: { username: 'Airlink', password: server.node.key },
-                headers: { 'Content-Type': 'application/json' },
-                data: { id: String(serverId), stopCmd: 'stop' },
-              });
-            } catch (stopErr) {
+              await stopServerContainer(server, String(serverId), 'stop');
+            } catch {
               // Container may already be stopped — continue to start
             }
 
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            const restartPorts = getPrimaryPort(server.Ports);
-            const restartEnv = buildEnvVariables(server.Variables);
-            restartEnv['SERVER_PORT']   = String(restartPorts ?? '');
-            restartEnv['SERVER_MEMORY'] = String(server.Memory);
-            restartEnv['SERVER_CPU']    = String(server.Cpu);
-
-            if (!server.dockerImage) {
-              res.status(400).json({ error: 'Docker image not found.' });
-              return;
+            try {
+              await new Promise(resolve => setTimeout(resolve, 2000));
+              await startServerContainer(server, String(serverId));
+            } catch (error) {
+              if (error instanceof Error && error.message === 'Docker image not found.') {
+                res.status(400).json({ error: 'Docker image not found.' });
+                return;
+              }
+              throw error;
             }
-
-            const restartImage = Object.values(JSON.parse(server.dockerImage))[0];
-
-            await axios({
-              method: 'POST',
-              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
-              auth: { username: 'Airlink', password: server.node.key },
-              headers: { 'Content-Type': 'application/json' },
-              data: {
-                id: String(serverId),
-                image: String(restartImage),
-                ports: restartPorts,
-                Memory: server.Memory,
-                Cpu: server.Cpu,
-                Storage: server.Storage,
-                env: restartEnv,
-                StartCommand: server.StartCommand,
-              },
-            });
 
             logger.info('Container restarted successfully: ' + serverId);
             res.status(200).json({ success: true, message: 'Server restarted successfully' });
             return;
           }
 
-          const ports = getPrimaryPort(server.Ports);
-
-          const envVariables = buildEnvVariables(server.Variables);
-          envVariables['SERVER_PORT']   = String(ports ?? '');
-          envVariables['SERVER_MEMORY'] = String(server.Memory);
-          envVariables['SERVER_CPU']    = String(server.Cpu);
-
-          if (!server.dockerImage) {
-            res.status(400).json({ error: 'Docker image not found.' });
-            return;
+          try {
+            await startServerContainer(server, String(serverId));
+          } catch (error) {
+            if (error instanceof Error && error.message === 'Docker image not found.') {
+              res.status(400).json({ error: 'Docker image not found.' });
+              return;
+            }
+            throw error;
           }
-
-          const ServerImage = Object.values(JSON.parse(server.dockerImage))[0];
-
-          const startRequestData = {
-            method: 'POST',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            data: {
-              id: String(serverId),
-              image: String(ServerImage),
-              ports: ports,
-              Memory: server.Memory,
-              Cpu: server.Cpu,
-              Storage: server.Storage,
-              env: envVariables,
-              StartCommand: server.StartCommand,
-            },
-          };
-
-          await axios(startRequestData);
           logger.info('Container started successfully: ' + serverId);
 
           res.status(200).json({ message: 'Container started successfully.' });
@@ -508,14 +657,7 @@ const dashboardModule: Module = {
           });
 
           const features = getImageFeatures(server.image);
-
-          const serverInfos = {
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            serverUUID: server.UUID,
-            nodeKey: server.node.key,
-          };
-          const serverStatus = await getServerStatus(serverInfos);
+          const serverStatus = await getServerStatus(getServerStatusInput(server));
 
           res.render('user/server/files', {
             errorMessage,
@@ -560,13 +702,7 @@ const dashboardModule: Module = {
           const features = getImageFeatures(server.image);
 
           // Get server status to determine if daemon is offline
-          const serverInfos = {
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            serverUUID: server.UUID,
-            nodeKey: server.node.key,
-          };
-          const serverStatus = await getServerStatus(serverInfos);
+          const serverStatus = await getServerStatus(getServerStatusInput(server));
 
           if (serverStatus.daemonOffline) {
             errorMessage.message =
@@ -633,14 +769,7 @@ const dashboardModule: Module = {
           const extension = getParamAsString(filePath).split('.').pop()?.toLowerCase() || '';
 
           const features = getImageFeatures(server.image);
-
-          const serverInfos = {
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            serverUUID: server.UUID,
-            nodeKey: server.node.key,
-          };
-          const serverStatus = await getServerStatus(serverInfos);
+          const serverStatus = await getServerStatus(getServerStatusInput(server));
 
           res.render('user/server/file', {
             errorMessage: {},
@@ -678,13 +807,7 @@ const dashboardModule: Module = {
           const features = getImageFeatures(server.image);
 
           // Get server status to determine if daemon is offline
-          const serverInfos = {
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            serverUUID: server.UUID,
-            nodeKey: server.node.key,
-          };
-          const serverStatus = await getServerStatus(serverInfos);
+          const serverStatus = await getServerStatus(getServerStatusInput(server));
 
           let errorMessage = 'Error fetching file data.';
           if (serverStatus.daemonOffline) {
@@ -720,8 +843,6 @@ const dashboardModule: Module = {
       '/server/:id/files/:path(*)',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
-        const userId = req.session?.user?.id;
-        const serverId = req.params?.id;
         let filePath = req.params?.path;
         if (getParamAsString(filePath).endsWith('/save')) {
           filePath = filePath.slice(0, -5);
@@ -729,34 +850,21 @@ const dashboardModule: Module = {
         const { content } = req.body;
 
         try {
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
-            res.status(404).json({ error: 'User not found' });
+          const context = await loadAuthenticatedServerContext(req);
+          if (sendMissingServerContext(res, context)) {
             return;
           }
-
-          const server = await prisma.server.findUnique({
-            where: { UUID: getParamAsString(serverId) },
-            include: { node: true },
-          });
-
-          if (!server) {
-            res.status(404).json({ error: 'Server not found' });
-            return;
-          }
+          const { server } = context;
 
           await axios({
             method: 'POST',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/file/content`,
+            url: getServerDaemonAddress(server, '/fs/file/content'),
             data: {
               id: server.UUID,
               path: filePath,
               content: content,
             },
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
+            auth: getServerDaemonAuth(server),
           });
 
           res.json({ success: true });
@@ -777,7 +885,6 @@ const dashboardModule: Module = {
       '/server/:id/files/rm/:path(*)',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
-        const userId = req.session?.user?.id;
         const serverId = req.params?.id;
         const filePath = req.params?.path;
 
@@ -786,30 +893,16 @@ const dashboardModule: Module = {
         );
 
         try {
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
-            logger.warn(`User not found: ${userId}`);
-            res.status(404).json({ error: 'User not found' });
+          const context = await loadAuthenticatedServerContext(req);
+          if (sendMissingServerContext(res, context)) {
             return;
           }
+          const { server } = context;
 
-          const server = await prisma.server.findUnique({
-            where: { UUID: getParamAsString(serverId) },
-            include: { node: true },
-          });
-
-          if (!server) {
-            logger.warn(`Server not found: ${serverId}`);
-            res.status(404).json({ error: 'Server not found' });
-            return;
-          }
-
-          const isMinecraftWorld = await isWorld(getParamAsString(filePath), {
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            serverUUID: server.UUID,
-            nodeKey: server.node.key,
-          });
+          const isMinecraftWorld = await isWorld(
+            getParamAsString(filePath),
+            getServerStatusInput(server),
+          );
 
           if (isMinecraftWorld) {
             logger.info(`Deleting Minecraft world: ${filePath}`);
@@ -818,15 +911,12 @@ const dashboardModule: Module = {
           try {
             await axios({
               method: 'DELETE',
-              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/rm`,
+              url: getServerDaemonAddress(server, '/fs/rm'),
               data: {
                 id: server.UUID,
                 path: filePath,
               },
-              auth: {
-                username: 'Airlink',
-                password: server.node.key,
-              },
+              auth: getServerDaemonAuth(server),
               timeout: 10000, // 10 second timeout for large directories
             });
 
@@ -867,35 +957,20 @@ const dashboardModule: Module = {
       '/server/:id/files/download/:path(*)',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
-        const userId = req.session?.user?.id;
-        const serverId = req.params?.id;
         const filePath = req.params?.path;
 
         try {
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
-            res.status(404).json({ error: 'User not found' });
+          const context = await loadAuthenticatedServerContext(req);
+          if (sendMissingServerContext(res, context)) {
             return;
           }
-
-          const server = await prisma.server.findUnique({
-            where: { UUID: getParamAsString(serverId) },
-            include: { node: true },
-          });
-
-          if (!server) {
-            res.status(404).json({ error: 'Server not found' });
-            return;
-          }
+          const { server } = context;
 
           const response = await axios({
             method: 'GET',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/download`,
+            url: getServerDaemonAddress(server, '/fs/download'),
             params: { id: server.UUID, path: filePath },
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
+            auth: getServerDaemonAuth(server),
             responseType: 'stream',
           });
 
@@ -917,32 +992,21 @@ const dashboardModule: Module = {
       '/server/:id/zip',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
-        const userId = req.session?.user?.id;
         const serverId = req.params?.id;
         let relativePath = req.body?.relativePath || '/';
         const zipName = req.body?.zipname;
 
         try {
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
-            res.status(404).json({ error: 'User not found' });
-            return;
-          }
-
           if (!serverId) {
             res.status(400).json({ error: 'Server ID is required.' });
             return;
           }
 
-          const server = await prisma.server.findUnique({
-            where: { UUID: getParamAsString(serverId) },
-            include: { node: true },
-          });
-
-          if (!server) {
-            res.status(404).json({ error: 'Server not found' });
+          const context = await loadAuthenticatedServerContext(req);
+          if (sendMissingServerContext(res, context)) {
             return;
           }
+          const { server } = context;
 
           if (typeof relativePath !== 'string') {
             relativePath = JSON.stringify(relativePath);
@@ -950,11 +1014,8 @@ const dashboardModule: Module = {
 
           const response: any = await axios({
             method: 'POST',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/zip`,
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
+            url: getServerDaemonAddress(server, '/fs/zip'),
+            auth: getServerDaemonAuth(server),
             data: {
               id: serverId,
               path: relativePath,
@@ -984,32 +1045,21 @@ const dashboardModule: Module = {
       '/server/:id/unzip',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
-        const userId = req.session?.user?.id;
         const serverId = req.params?.id;
         const relativePath = req.body?.relativePath || '/';
         const zipName = req.body?.zipname;
 
         try {
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) {
-            res.status(404).json({ error: 'User not found' });
-            return;
-          }
-
           if (!serverId) {
             res.status(400).json({ error: 'Server ID is required.' });
             return;
           }
 
-          const server = await prisma.server.findUnique({
-            where: { UUID: getParamAsString(serverId) },
-            include: { node: true },
-          });
-
-          if (!server) {
-            res.status(404).json({ error: 'Server not found' });
+          const context = await loadAuthenticatedServerContext(req);
+          if (sendMissingServerContext(res, context)) {
             return;
           }
+          const { server } = context;
 
           const cleanPath = relativePath
             .replace(/\/+/g, '/')
@@ -1018,11 +1068,8 @@ const dashboardModule: Module = {
 
           const requestConfig = {
             method: 'POST',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/unzip`,
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
+            url: getServerDaemonAddress(server, '/fs/unzip'),
+            auth: getServerDaemonAuth(server),
             data: {
               id: serverId,
               path: cleanPath,
@@ -1071,38 +1118,22 @@ const dashboardModule: Module = {
       '/server/:id/feature/eula',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
-        const userId = req.session?.user?.id;
-        const serverId = req.params?.id;
-
-        const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) {
-          res.status(404).json({ error: 'User not found' });
+        const context = await loadAuthenticatedServerContext(req);
+        if (sendMissingServerContext(res, context)) {
           return;
         }
-
-        const server = await prisma.server.findUnique({
-          where: { UUID: getParamAsString(serverId) },
-          include: { node: true },
-        });
-
-        if (!server) {
-          res.status(404).json({ error: 'Server not found' });
-          return;
-        }
+        const { server } = context;
 
         try {
           await axios({
             method: 'POST',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/file/content`,
+            url: getServerDaemonAddress(server, '/fs/file/content'),
             data: {
               id: server.UUID,
               path: 'eula.txt',
               content: 'eula=true',
             },
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
+            auth: getServerDaemonAuth(server),
           });
 
           res.status(200).json({ success: true });
@@ -1240,14 +1271,7 @@ const dashboardModule: Module = {
 
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           const hasError = hadFetchError && !serverIsOnline;
-
-          const serverInfos = {
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            serverUUID: server.UUID,
-            nodeKey: server.node.key,
-          };
-          const serverStatus = await getServerStatus(serverInfos);
+          const serverStatus = await getServerStatus(getServerStatusInput(server));
 
           return res.render('user/server/players', {
             errorMessage: hasError
@@ -1311,12 +1335,7 @@ const dashboardModule: Module = {
               },
             };
 
-            const serverInfos = {
-              nodeAddress: server.node.address,
-              nodePort: server.node.port,
-              serverUUID: server.UUID,
-              nodeKey: server.node.key,
-            };
+            const serverStatusInput = getServerStatusInput(server);
               const response = await axios(worldsRequest);
             const Folders = response.data;
 
@@ -1324,7 +1343,7 @@ const dashboardModule: Module = {
             for (const folder of Folders) {
               if (
                 folder.type === 'directory' &&
-                (await isWorld(folder.name, serverInfos))
+                (await isWorld(folder.name, serverStatusInput))
               ) {
                 worlds.push({ name: folder.name });
               }
@@ -1332,7 +1351,7 @@ const dashboardModule: Module = {
 
             const features = getImageFeatures(server.image);
 
-              const serverStatus = await getServerStatus(serverInfos);
+              const serverStatus = await getServerStatus(serverStatusInput);
 
             return res.render('user/server/worlds', {
               errorMessage: {},
@@ -1711,14 +1730,7 @@ const dashboardModule: Module = {
           } else {
             logger.info(`No variables found for server ${serverId}`);
           }
-
-          const serverInfos = {
-            nodeAddress: server.node.address,
-            nodePort: server.node.port,
-            serverUUID: server.UUID,
-            nodeKey: server.node.key,
-          };
-          const serverStatus = await getServerStatus(serverInfos);
+          const serverStatus = await getServerStatus(getServerStatusInput(server));
 
           return res.render('user/server/startup', {
             errorMessage,
@@ -1836,69 +1848,14 @@ const dashboardModule: Module = {
             const isRunning = statusResponse.data?.running === true;
 
             if (isRunning) {
-              const restartRequestData = {
-                method: 'POST',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
-                auth: {
-                  username: 'Airlink',
-                  password: server.node.key,
-                },
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                data: {
-                  id: String(serverId),
-                  stopCmd: server.image?.stop || 'stop',
-                },
-              };
-
-              await axios(restartRequestData);
-              logger.info(
-                'Container stopped to apply new startup command: ' + serverId,
-              );
-              await new Promise((resolve) => setTimeout(resolve, 2000));
-              const ports = (JSON.parse(server.Ports) as Port[])
-                .filter((port) => port.primary)
-                .map((port) => port.Port)
-                .pop();
-
-              const envVariables = buildEnvVariables(server.Variables);
-              envVariables['SERVER_PORT']   = String(ports ?? '');
-              envVariables['SERVER_MEMORY'] = String(server.Memory);
-              envVariables['SERVER_CPU']    = String(server.Cpu);
-
               if (!server.dockerImage) {
                 res.status(400).json({ error: 'Docker image not found.' });
                 return;
               }
 
-              const ServerImage = Object.values(
-                JSON.parse(server.dockerImage),
-              )[0];
-
-              const startRequestData = {
-                method: 'POST',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
-                auth: {
-                  username: 'Airlink',
-                  password: server.node.key,
-                },
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                data: {
-                  id: String(serverId),
-                  image: String(ServerImage),
-                  ports: ports,
-                  Memory: server.Memory,
-                  Cpu: server.Cpu,
-                  Storage: server.Storage,
-                  env: envVariables,
-                  StartCommand: startCommand,
-                },
-              };
-
-              await axios(startRequestData);
+              await restartServerContainer(server, String(serverId), {
+                startCommand,
+              });
               logger.info(
                 'Container restarted with new startup command: ' + serverId,
               );
@@ -2052,62 +2009,9 @@ const dashboardModule: Module = {
             const isRunning = statusResponse.data?.running === true;
 
             if (isRunning) {
-              const restartRequestData = {
-                method: 'POST',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
-                auth: {
-                  username: 'Airlink',
-                  password: server.node.key,
-                },
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                data: {
-                  id: String(serverId),
-                  stopCmd: server.image?.stop || 'stop',
-                },
-              };
-
-              await axios(restartRequestData);
-              logger.info(
-                'Container stopped to apply new Docker image: ' + serverId,
-              );
-
-              await new Promise((resolve) => setTimeout(resolve, 2000));
-
-              const ports = (JSON.parse(server.Ports) as Port[])
-                .filter((port) => port.primary)
-                .map((port) => port.Port)
-                .pop();
-
-              const envVariables = buildEnvVariables(server.Variables);
-              envVariables['SERVER_PORT']   = String(ports ?? '');
-              envVariables['SERVER_MEMORY'] = String(server.Memory);
-              envVariables['SERVER_CPU']    = String(server.Cpu);
-
-              const startRequestData = {
-                method: 'POST',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
-                auth: {
-                  username: 'Airlink',
-                  password: server.node.key,
-                },
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                data: {
-                  id: String(serverId),
-                  image: dockerImage,
-                  ports: ports,
-                  Memory: server.Memory,
-                  Cpu: server.Cpu,
-                  Storage: server.Storage,
-                  env: envVariables,
-                  StartCommand: server.StartCommand,
-                },
-              };
-
-              await axios(startRequestData);
+              await restartServerContainer(server, String(serverId), {
+                dockerImage,
+              });
               logger.info(
                 'Container restarted with new Docker image: ' + serverId,
               );
@@ -2284,39 +2188,6 @@ const dashboardModule: Module = {
             const isRunning = statusResponse.data?.running === true;
 
             if (isRunning) {
-              const restartRequestData = {
-                method: 'POST',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
-                auth: {
-                  username: 'Airlink',
-                  password: server.node.key,
-                },
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                data: {
-                  id: String(serverId),
-                  stopCmd: server.image?.stop || 'stop',
-                },
-              };
-
-              await axios(restartRequestData);
-              logger.info(
-                'Container stopped to apply new variables: ' + serverId,
-              );
-
-              await new Promise((resolve) => setTimeout(resolve, 2000));
-
-              const ports = (JSON.parse(server.Ports) as Port[])
-                .filter((port) => port.primary)
-                .map((port) => port.Port)
-                .pop();
-
-              const envVariables = buildEnvVariables(variables);
-              envVariables['SERVER_PORT']   = String(ports ?? '');
-              envVariables['SERVER_MEMORY'] = String(server.Memory);
-              envVariables['SERVER_CPU']    = String(server.Cpu);
-
               if (!server.dockerImage) {
                 logger.error(
                   `Docker image not found for server ${serverId}`,
@@ -2326,33 +2197,9 @@ const dashboardModule: Module = {
                 return;
               }
 
-              const ServerImage = Object.values(
-                JSON.parse(server.dockerImage),
-              )[0];
-
-              const startRequestData = {
-                method: 'POST',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
-                auth: {
-                  username: 'Airlink',
-                  password: server.node.key,
-                },
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                data: {
-                  id: String(serverId),
-                  image: String(ServerImage),
-                  ports: ports,
-                  Memory: server.Memory,
-                  Cpu: server.Cpu,
-                  Storage: server.Storage,
-                  env: envVariables,
-                  StartCommand: server.StartCommand,
-                },
-              };
-
-              await axios(startRequestData);
+              await restartServerContainer(server, String(serverId), {
+                variables,
+              });
               logger.info(
                 'Container restarted with new variables: ' + serverId,
               );
@@ -2511,64 +2358,12 @@ const dashboardModule: Module = {
             return;
           }
 
-          const stopRequestData = {
-            method: 'POST',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            data: {
-              id: String(serverId),
-              stopCmd: server.image?.stop || 'stop',
-            },
-          };
-
-          await axios(stopRequestData);
-          logger.info('Container stopped for restart: ' + serverId);
-
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-
-          const ports = getPrimaryPort(server.Ports);
-
-          const envVariables = buildEnvVariables(server.Variables);
-          envVariables['SERVER_PORT']   = String(ports ?? '');
-          envVariables['SERVER_MEMORY'] = String(server.Memory);
-          envVariables['SERVER_CPU']    = String(server.Cpu);
-
           if (!server.dockerImage) {
             res.status(400).json({ error: 'Docker image not found.' });
             return;
           }
 
-          const ServerImage = Object.values(JSON.parse(server.dockerImage))[0];
-
-          const startRequestData = {
-            method: 'POST',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/start`,
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            data: {
-              id: String(serverId),
-              image: String(ServerImage),
-              ports: ports,
-              Memory: server.Memory,
-              Cpu: server.Cpu,
-              Storage: server.Storage,
-              env: envVariables,
-              StartCommand: server.StartCommand,
-            },
-          };
-
-          await axios(startRequestData);
+          await restartServerContainer(server, String(serverId));
           logger.info('Container restarted successfully: ' + serverId);
 
           res
@@ -3274,7 +3069,7 @@ const dashboardModule: Module = {
                   },
                 },
               );
-            } catch (daemonError) {
+            } catch {
               logger.warn('Failed to delete backup file from daemon');
             }
           }
