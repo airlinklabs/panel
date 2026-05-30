@@ -16,7 +16,7 @@
 
 Airlink Panel is an open-source platform for deploying, monitoring, and managing game servers. It provides a full-featured web UI for both admins and users, a daemon-based node system for running containers, and an addon API for extending functionality without modifying core code.
 
-For full documentation, visit **[airlinklabs.github.io/home/docs/quickstart](https://airlinklabs.github.io/home/docs/quickstart/)**.
+For full documentation, visit **[airlinklabs.github.io/home/docs/quickstart](https://airlinklabs.xyz/docs/quick-start/)**.
 
 ---
 
@@ -148,8 +148,8 @@ Run `pnpm run lint` before submitting. Follow TypeScript best practices and upda
 
 ## Links
 
-- Website: [airlinklabs.github.io/home](https://airlinklabs.github.io/home/)
-- Docs: [airlinklabs.github.io/home/docs/quickstart](https://airlinklabs.github.io/home/docs/quickstart/)
+- Website: [airlinklabs.github.io/home](https://airlinklabs.xyz/)
+- Docs: [airlinklabs.github.io/home/docs/quickstart](https://airlinklabs.xyz/docs/quick-start/)
 - Discord: [discord.gg/ujXyxwwMHc](https://discord.gg/ujXyxwwMHc)
 - GitHub: [github.com/airlinklabs/panel](https://github.com/airlinklabs/panel)
 
