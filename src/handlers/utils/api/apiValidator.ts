@@ -35,13 +35,11 @@ export const apiValidator = (requiredPermission?: string) => {
       const keyData = await prisma.apiKey.findUnique({ where: { key: lookupKey } });
 
       if (!keyData) {
-        logger.debug(`Invalid API key: ${rawKey.substring(0, 8)}...`);
         res.status(401).json({ error: 'Unauthorized: Invalid API Key' });
         return;
       }
 
       if (!keyData.active) {
-        logger.debug(`Inactive API key: ${rawKey.substring(0, 8)}...`);
         res.status(401).json({ error: 'Unauthorized: API Key is inactive' });
         return;
       }
@@ -58,7 +56,6 @@ export const apiValidator = (requiredPermission?: string) => {
           });
 
           if (!hasPermission) {
-            logger.debug(`API key ${rawKey.substring(0, 8)}... lacks permission: ${requiredPermission}`);
             res.status(403).json({ error: 'Forbidden: API Key does not have the required permission', requiredPermission });
             return;
           }

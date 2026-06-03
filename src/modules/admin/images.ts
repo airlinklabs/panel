@@ -412,6 +412,7 @@ const adminModule: Module = {
           forceRefresh().catch(err => logger.warn(`Store force refresh failed: ${err?.message || err}`));
           res.status(200).json({ message: 'Refresh started. The catalogue will update in the background.' });
         } catch (error) {
+          logger.error('Failed to start image store refresh:', error);
           res.status(500).json({ error: 'Failed to start refresh.' });
         }
       },

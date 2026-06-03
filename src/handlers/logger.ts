@@ -10,6 +10,7 @@
 import { createConsola, ConsolaInstance } from 'consola';
 import fs from 'fs';
 import path from 'path';
+import util from 'util';
 
 const logsDir = path.join(process.cwd(), 'logs');
 if (!fs.existsSync(logsDir)) {
@@ -47,8 +48,26 @@ const consola = createConsola({
   },
 }) as ConsolaInstance;
 
-consola.wrapConsole();
-consola.wrapAll();
+type LogContext = Record<string, unknown>;
+
+const serializeValue = (value: unknown): string => {
+  if (value instanceof Error) {
+    return value.stack || `${value.name}: ${value.message}`;
+  }
+
+  if (typeof value === 'string') return value;
+
+  return util.inspect(value, {
+    depth: 5,
+    breakLength: 160,
+    compact: true,
+  });
+};
+
+const serializeContext = (context?: unknown): string => {
+  if (context === undefined) return '';
+  return ` ${serializeValue(context)}`;
+};
 
 const writeToLogFile = (level: string, message: string): void => {
   const timestamp = new Date().toISOString();
@@ -74,65 +93,57 @@ const formatLogMessage = (badge: string, message: string, maxWidth = 120): strin
 };
 
 const logger = {
-  error(message: string, error?: unknown): void {
+  error(message: string, error?: unknown, context?: LogContext): void {
     const badge = `${colors.bgRed}${colors.white}${colors.bright} ERROR ${colors.reset}`;
+    const fileMessage = `${message}${serializeContext(context)}${error === undefined ? '' : `\n${serializeValue(error)}`}`;
 
     if (error instanceof Error) {
       consola.error(formatLogMessage(badge, message), error);
     } else {
-      consola.error(formatLogMessage(badge, `${message}: ${error}`));
+      consola.error(formatLogMessage(badge, `${message}${serializeContext(error)}`));
     }
 
     const timestamp = new Date().toISOString();
-    fs.appendFile(path.join(logsDir, 'error.log'), `[${timestamp}] ERROR: ${message}: ${error}\n`, (err) => {
+    fs.appendFile(path.join(logsDir, 'error.log'), `[${timestamp}] ERROR: ${fileMessage}\n`, (err) => {
       if (err) consola.error('Failed to write to error log file:', err);
     });
+    writeToLogFile('ERROR', fileMessage);
   },
 
-  warn(message: any): void {
+  warn(message: string, context?: LogContext): void {
     const badge = `${colors.bgYellow}${colors.white}${colors.bright} WARN ${colors.reset}`;
-    consola.warn(formatLogMessage(badge, String(message)));
-    writeToLogFile('WARN', String(message));
+    const text = `${message}${serializeContext(context)}`;
+    consola.warn(formatLogMessage(badge, text));
+    writeToLogFile('WARN', text);
   },
 
-  info(message: any): void {
+  info(message: string, context?: LogContext): void {
     const badge = `${colors.bgBlue}${colors.white}${colors.bright} INFO ${colors.reset}`;
-    consola.info(formatLogMessage(badge, `${colors.blue}${message}${colors.reset}`));
-    writeToLogFile('INFO', String(message));
+    const text = `${message}${serializeContext(context)}`;
+    consola.info(formatLogMessage(badge, `${colors.blue}${text}${colors.reset}`));
+    writeToLogFile('INFO', text);
   },
 
-  success(message: any): void {
+  success(message: string, context?: LogContext): void {
     const badge = `${colors.bgGreen}${colors.white}${colors.bright} SUCCESS ${colors.reset}`;
-    consola.success(formatLogMessage(badge, String(message)));
-    writeToLogFile('SUCCESS', String(message));
+    const text = `${message}${serializeContext(context)}`;
+    consola.success(formatLogMessage(badge, text));
+    writeToLogFile('SUCCESS', text);
   },
 
-  debug(message: any, ...args: any[]): void {
+  debug(message: string, context?: LogContext): void {
     if (!isDebugMode) return;
 
     const badge = `${colors.bgMagenta}${colors.white}${colors.bright} DEBUG ${colors.reset}`;
-    const formatted = formatLogMessage(badge, String(message));
-
-    if (args.length > 0) {
-      consola.debug(formatted, ...args);
-    } else {
-      consola.debug(formatted);
-    }
-
-    writeToLogFile('DEBUG', [message, ...args].map(String).join(' '));
+    const text = `${message}${serializeContext(context)}`;
+    consola.debug(formatLogMessage(badge, text));
   },
 
-  log(message: any, ...args: any[]): void {
+  log(message: string, context?: LogContext): void {
     const badge = `${colors.bgWhite}${colors.white}${colors.bright} LOG ${colors.reset}`;
-    const formatted = formatLogMessage(badge, String(message));
-
-    if (args.length > 0) {
-      consola.log(formatted, ...args);
-    } else {
-      consola.log(formatted);
-    }
-
-    writeToLogFile('LOG', [message, ...args].map(String).join(' '));
+    const text = `${message}${serializeContext(context)}`;
+    consola.log(formatLogMessage(badge, text));
+    writeToLogFile('LOG', text);
   },
 
   box(options: string | { title?: string; message: string | string[]; style?: any }): void {

@@ -1,7 +1,7 @@
 <!-- Global confirm modal — window.modal.confirm({ title, body, danger, confirmLabel, onConfirm }) -->
-<div id="globalModal" class="fixed inset-0 z-[9000] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200">
+<div id="globalModal" class="fixed inset-0 z-[9000] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200" aria-hidden="true">
   <div class="absolute inset-0 bg-black/60" id="globalModalBackdrop"></div>
-  <div id="globalModalPanel" class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-2xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-200">
+  <div id="globalModalPanel" role="dialog" aria-modal="true" aria-labelledby="globalModalTitle" aria-describedby="globalModalBody" tabindex="-1" class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-2xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-200">
     <div class="px-5 pt-5 pb-4">
       <p id="globalModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white leading-snug"></p>
       <p id="globalModalBody" class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed"></p>
@@ -26,8 +26,14 @@
   const backdrop = document.getElementById('globalModalBackdrop');
 
   let currentResolve = null;
+  let lastFocused = null;
+
+  function focusableElements() {
+    return panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  }
 
   function open({ title: t, body: b, danger = true, confirmLabel = 'Confirm', onConfirm }) {
+    lastFocused = document.activeElement;
     title.textContent = t || '';
     body.textContent  = b || '';
     confirmBtn.textContent = confirmLabel;
@@ -37,16 +43,23 @@
 
     currentResolve = onConfirm || null;
 
+    overlay.setAttribute('aria-hidden', 'false');
     overlay.classList.remove('opacity-0', 'pointer-events-none');
     panel.classList.remove('scale-95');
     panel.classList.add('scale-100');
+    setTimeout(function () { confirmBtn.focus(); }, 0);
   }
 
   function close() {
+    overlay.setAttribute('aria-hidden', 'true');
     overlay.classList.add('opacity-0', 'pointer-events-none');
     panel.classList.remove('scale-100');
     panel.classList.add('scale-95');
     currentResolve = null;
+    if (lastFocused && typeof lastFocused.focus === 'function') {
+      lastFocused.focus();
+    }
+    lastFocused = null;
   }
 
   cancel.addEventListener('click', close);
@@ -56,6 +69,30 @@
     const fn = currentResolve;
     close();
     if (fn) fn();
+  });
+
+  overlay.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      close();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    const focusable = Array.from(focusableElements());
+    if (!focusable.length) {
+      event.preventDefault();
+      panel.focus();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   });
 
   window.modal = { confirm: open };

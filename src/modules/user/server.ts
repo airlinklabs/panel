@@ -533,7 +533,11 @@ const dashboardModule: Module = {
                   delete global.serverStoppingStates[cacheKey];
                 }
               } else {
-                logger.debug('Error stopping container:', stopError);
+                logger.warn('Failed to stop container', {
+                  serverId: String(serverId),
+                  action: 'stop',
+                  error: stopError,
+                });
               }
               return;
             }
@@ -584,7 +588,10 @@ const dashboardModule: Module = {
           res.status(200).json({ message: 'Container started successfully.' });
           return;
         } catch (error) {
-          logger.debug('Error processing power action:', error);
+          logger.error('Failed to process power action', error, {
+            serverId: String(serverId),
+            action: String(powerAction),
+          });
           res.status(500).json({ error: 'Failed to process power action.' });
         }
       },

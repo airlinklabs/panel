@@ -177,7 +177,7 @@ class ComponentPersistence {
     }
 
     // Check if element matches any static selector
-    for (let [componentId, component] of this.staticComponents) {
+    for (let [, component] of this.staticComponents) {
       if (element.matches && element.matches(component.selector)) {
         return true;
       }

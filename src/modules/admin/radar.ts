@@ -8,7 +8,7 @@ import fsSync from 'fs';
 import path from 'path';
 import axios from 'axios';
 import FormData from 'form-data';
-import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
+import { getParamAsNumber } from "../../utils/typeHelpers";
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 
@@ -65,7 +65,7 @@ const radarModule: Module = {
 
           try {
             await fs.access(radarDir);
-          } catch (error: unknown) {
+          } catch {
             await fs.mkdir(radarDir, { recursive: true });
           }
 

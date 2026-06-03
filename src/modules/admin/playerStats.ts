@@ -118,7 +118,7 @@ const adminModule: Module = {
                   online: response.data.online || false,
                   version: response.data.version || 'Unknown'
                 };
-              } catch (error) {
+              } catch {
                 return {
                   serverId: server.UUID,
                   serverName: server.name,
@@ -151,6 +151,7 @@ const adminModule: Module = {
             historicalData
           });
         } catch (error) {
+          logger.error('Failed to fetch player statistics:', error);
           res.status(500).json({ error: 'Failed to fetch player statistics' });
         }
       }
@@ -164,6 +165,7 @@ const adminModule: Module = {
           await collectPlayerStats();
           res.json({ success: true, message: 'Player statistics collected successfully' });
         } catch (error) {
+          logger.error('Failed to collect player statistics:', error);
           res.status(500).json({ error: 'Failed to collect player statistics' });
         }
       }

@@ -272,6 +272,6 @@ class IntelligentPreloader {
 // Initialize preloader when router is available
 document.addEventListener('DOMContentLoaded', () => {
   if (window.spaRouter) {
-    window.preloader = new pagePreloader(window.spaRouter);
+    window.preloader = new IntelligentPreloader(window.spaRouter);
   }
 });

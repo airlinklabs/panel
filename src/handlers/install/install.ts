@@ -24,7 +24,7 @@ class Install {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create the first user
-    const newUser = await prisma.users.create({
+    await prisma.users.create({
       data: {
         email,
         password: hashedPassword, // Store the hashed password
@@ -32,7 +32,7 @@ class Install {
       },
     });
 
-    logger.debug('First user created:', newUser);
+    logger.info('First admin user created');
   }
 }
 

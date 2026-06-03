@@ -64,7 +64,7 @@ const dashboardModule: Module = {
         for (const server of servers) {
           if (!nodeStatuses[server.node.id]) {
             try {
-              const nodeResponse = await axios({
+              await axios({
                 method: 'GET',
                 url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}`,
                 auth: {
@@ -74,7 +74,7 @@ const dashboardModule: Module = {
                 timeout: 2000,
               });
               nodeStatuses[server.node.id] = { online: true };
-            } catch (error) {
+            } catch {
               // Silently handle node offline errors - don't log to console
               // Just mark the node as offline in our status tracking
               nodeStatuses[server.node.id] = { online: false };

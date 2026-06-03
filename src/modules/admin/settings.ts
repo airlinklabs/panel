@@ -55,7 +55,7 @@ function installThemeZip(zipPath: string): { success: boolean; error?: string } 
     if (!fs.existsSync(infoPath))  return { success: false, error: 'Theme zip must contain info.json.' };
     if (!fs.existsSync(lightPath)) return { success: false, error: 'Theme zip must contain light.css.' };
     if (!fs.existsSync(darkPath))  return { success: false, error: 'Theme zip must contain dark.css.' };
-    const info = JSON.parse(fs.readFileSync(infoPath, 'utf-8'));
+    JSON.parse(fs.readFileSync(infoPath, 'utf-8'));
     const themeId  = randomUUID();
     const themeDir = path.join(themesDir, themeId);
     fs.mkdirSync(themeDir, { recursive: true });

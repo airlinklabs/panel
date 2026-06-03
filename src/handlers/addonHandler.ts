@@ -71,8 +71,7 @@ function buildTailwind() {
       logger.error('Tailwind build failed:', error.message);
       return;
     }
-    if (stderr) logger.debug('Tailwind:', stderr.trim());
-    if (stdout) logger.debug('Tailwind:', stdout.trim());
+    if (stderr) logger.warn('Tailwind reported warnings', { stderr: stderr.trim() });
   });
 }
 
@@ -95,7 +94,7 @@ export async function loadAddons(app: Express | any) {
   let addonTableExists = true;
   try {
     await prisma.$queryRaw`SELECT 1 FROM Addon LIMIT 1`;
-  } catch (_error) {
+  } catch {
     addonTableExists = false;
     logger.warn('Addon table does not exist yet. Run migrations to create it.');
   }
@@ -119,8 +118,6 @@ export async function loadAddons(app: Express | any) {
   }
 
   if (addonFolders.length > 0) {
-    logger.debug(`Loading ${addonFolders.length} addons`);
-
     for (const folder of addonFolders) {
       const addonPath = path.join(addonsDir, folder);
       const packageJsonPath = path.join(addonPath, 'package.json');
@@ -345,13 +342,11 @@ export async function loadAddons(app: Express | any) {
             Object.defineProperty(addonRouter, 'name', { value: `router_${folder}` });
             app.use(routerPath, addonRouter);
             loadedAddons.set(folder, { router: addonRouter, path: routerPath });
-            logger.debug(`Loaded addon: ${packageJson.name}`);
           } else if (addonModule.default && typeof addonModule.default === 'function') {
             addonModule.default(addonRouter, addonAPI);
             Object.defineProperty(addonRouter, 'name', { value: `router_${folder}` });
             app.use(routerPath, addonRouter);
             loadedAddons.set(folder, { router: addonRouter, path: routerPath });
-            logger.debug(`Loaded addon: ${packageJson.name}`);
           } else {
             logger.error(`Invalid main export for addon ${packageJson.name}`, null);
           }
@@ -362,8 +357,6 @@ export async function loadAddons(app: Express | any) {
         logger.error(`Failed to load addon from folder ${folder}:`, error.message);
       }
     }
-  } else {
-    logger.debug('No addons found');
   }
 
   buildTailwind();
@@ -446,7 +439,7 @@ export async function toggleAddonStatus(slug: string, enabled: boolean) {
   try {
     try {
       await prisma.$queryRaw`SELECT 1 FROM Addon LIMIT 1`;
-    } catch (_error) {
+    } catch {
       logger.warn('Addon table does not exist yet. Run migrations to create it.');
       return { success: false, message: 'Addon table does not exist yet' };
     }
@@ -513,7 +506,7 @@ export async function getAllAddons() {
   try {
     try {
       await prisma.$queryRaw`SELECT 1 FROM Addon LIMIT 1`;
-    } catch (_error) {
+    } catch {
       logger.warn('Addon table does not exist yet. Run migrations to create it.');
       return [];
     }

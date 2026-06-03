@@ -355,7 +355,9 @@ const userCreateServerModule: Module = {
 
             if (!isGone) {
               logger.error('Error deleting container from daemon:', err);
-              return res.status(500).json({ error: 'Daemon unreachable. Use ?force=true to remove from panel only.' });
+              return res.status(502).json({
+                error: 'Could not delete the server on the node. Try again, or use force delete to remove it from the panel only.',
+              });
             }
           }
         }
