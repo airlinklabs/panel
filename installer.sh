@@ -20,7 +20,7 @@ set -uo pipefail
 readonly VERSION="3.2.0-Stable"
 readonly LOG="/tmp/airlink.log"
 readonly PANEL_REPO="https://github.com/airlinklabs/panel.git"
-readonly DAEMON_REPO="https://github.com/airlinklabs/daemon.git"
+readonly DAEMON_RELEASE_API="https://api.github.com/repos/airlinklabs/daemon/releases/latest"
 
 PNPM_REGISTRY="https://registry.npmjs.org"
 PNPM="pnpm"
@@ -308,8 +308,6 @@ draw_banner() {
 
 # =============================================================================
 # Main menu
-# — fixed: right border no longer eaten by highlighted row
-# — adaptive width: scales with terminal, minimum 60 cols
 # =============================================================================
 TUI_RESULT=0
 
@@ -328,9 +326,7 @@ tui_menu() {
         [[ $iw -gt $max_item_len ]] && max_item_len=$iw
     done
 
-    # [N] prefix = 4, left pad = 2, right pad = 2, borders = 2
     local min_needed=$(( max_item_len + 10 ))
-    # try to use ~60% of terminal width so it feels roomy
     local preferred=$(( TERM_COLS * 60 / 100 ))
     local box_w=$preferred
     [[ $box_w -lt $min_needed ]] && box_w=$min_needed
@@ -363,7 +359,6 @@ tui_menu() {
             move_to $(( box_r + 3 + i )) $(( box_c + 1 ))
             local label=" [${i}] ${items[$i]}"
             if [[ $i -eq $selected ]]; then
-                # %-${inner}s fills exactly inner cols — doesn't bleed into right border
                 printf "${REV}%-${inner}s${RESET}" "$label"
             else
                 printf "%-${inner}s" "$label"
@@ -375,7 +370,7 @@ tui_menu() {
 
         read_key
         case "$_KEY" in
-            UP|k)   [[ $selected -gt 0 ]]           && selected=$(( selected - 1 )) ;;
+            UP|k)   [[ $selected -gt 0 ]]              && selected=$(( selected - 1 )) ;;
             DOWN|j) [[ $selected -lt $(( count-1 )) ]] && selected=$(( selected + 1 )) ;;
             ENTER)
                 TUI_RESULT=$selected
@@ -453,7 +448,7 @@ tui_checklist() {
 
         read_key
         case "$_KEY" in
-            UP|k)   [[ $cursor -gt 0 ]]           && cursor=$(( cursor - 1 )) ;;
+            UP|k)   [[ $cursor -gt 0 ]]              && cursor=$(( cursor - 1 )) ;;
             DOWN|j) [[ $cursor -lt $(( count-1 )) ]] && cursor=$(( cursor + 1 )) ;;
             SPACE)
                 if [[ ${checked[$cursor]} -eq 1 ]]; then checked[$cursor]=0; else checked[$cursor]=1; fi
@@ -550,7 +545,7 @@ tui_input() {
         read_key
         printf "%b" "${HIDE_CURSOR}"
         case "$_KEY" in
-            ENTER)    TUI_INPUT="$value"; stty -echo 2>/dev/null || true; return 0 ;;
+            ENTER)     TUI_INPUT="$value"; stty -echo 2>/dev/null || true; return 0 ;;
             BACKSPACE) [[ ${#value} -gt 0 ]] && value="${value%?}" ;;
             ESC)       value="$default" ;;
             UP|DOWN|LEFT|RIGHT) : ;;
@@ -612,7 +607,7 @@ tui_password() {
 
         read_key
         case "$_KEY" in
-            ENTER)    TUI_INPUT="$value"; return 0 ;;
+            ENTER)     TUI_INPUT="$value"; return 0 ;;
             BACKSPACE) [[ ${#value} -gt 0 ]] && value="${value%?}" ;;
             ESC)       value="" ;;
             UP|DOWN|LEFT|RIGHT) : ;;
@@ -685,9 +680,9 @@ tui_run() {
     local col=$(( (TERM_COLS - box_w) / 2 ))
     [[ $col -lt 1 ]] && col=1
 
-    move_to "$row"              "$col"; printf "+%s+" "$(printf '%*s' $(( box_w - 2 )) '' | tr ' ' '-')"
-    move_to $(( row + 1 ))     "$col"; printf "| %-$(( box_w - 4 ))s  |" "$label"
-    move_to $(( row + 2 ))     "$col"; printf "+%s+" "$(printf '%*s' $(( box_w - 2 )) '' | tr ' ' '-')"
+    move_to "$row"          "$col"; printf "+%s+" "$(printf '%*s' $(( box_w - 2 )) '' | tr ' ' '-')"
+    move_to $(( row + 1 )) "$col"; printf "| %-$(( box_w - 4 ))s  |" "$label"
+    move_to $(( row + 2 )) "$col"; printf "+%s+" "$(printf '%*s' $(( box_w - 2 )) '' | tr ' ' '-')"
 
     "$@" &>/dev/null &
     local pid=$!
@@ -904,7 +899,7 @@ pkg_install() {
 # Dep check
 # =============================================================================
 ensure_deps() {
-    local deps=(curl wget git openssl)
+    local deps=(curl wget git openssl unzip)
     local missing=()
     for d in "${deps[@]}"; do
         command -v "$d" &>/dev/null || missing+=("$d")
@@ -928,10 +923,7 @@ get_latest_node_lts() {
         echo "22"; return
     }
     local lts_ver
-    lts_ver=$(echo "$idx" | grep -o '"version":"v[0-9]*\.[0-9]*\.[0-9]*","[^}]*"lts":"[A-Za-z]*"' \
-              | head -1 | grep -o 'v[0-9]*' | head -1 | tr -d 'v') 2>/dev/null || true
-    if [[ -z "$lts_ver" ]]; then
-        lts_ver=$(echo "$idx" | python3 -c "
+    lts_ver=$(echo "$idx" | python3 -c "
 import json,sys
 data=json.load(sys.stdin)
 for r in data:
@@ -939,7 +931,6 @@ for r in data:
         print(r['version'].lstrip('v').split('.')[0])
         break
 " 2>/dev/null) || true
-    fi
     if [[ -z "$lts_ver" || ! "$lts_ver" =~ ^[0-9]+$ ]]; then
         log "WARN: can't parse LTS version, defaulting to 22"
         echo "22"
@@ -948,7 +939,6 @@ for r in data:
     fi
 }
 
-# pick nearest npm registry based on geo — pnpm is way faster than npm btw
 select_npm_registry() {
     local geo
     geo=$(curl -fsSL --max-time 8 "http://ip-api.com/json/?fields=continentCode,countryCode" 2>/dev/null || echo "")
@@ -990,7 +980,6 @@ setup_node() {
 
     select_npm_registry
 
-    # install pnpm globally — so much faster than raw npm it's not even funny
     if ! command -v pnpm &>/dev/null; then
         echo "Installing pnpm..."
         npm install -g pnpm --registry "${PNPM_REGISTRY}" &>/dev/null \
@@ -1109,22 +1098,13 @@ parse_status_line() {
         echo "apt: setting up ${pkg:-package}"
         return
     fi
-    if [[ "$line" =~ "error TS" ]]; then
-        echo "tsc error: $(echo "$line" | grep -o 'error TS[^:]*:.*' | head -1 | cut -c1-60)"
-        return
-    fi
-    if [[ "$line" =~ ".ts(" ]]; then
-        local f; f=$(echo "$line" | grep -o '[^ ]*\.ts([0-9,]*)' | head -1)
-        echo "tsc: compiling ${f:-...}"
+    if [[ "$line" =~ "Downloading" ]]; then
+        local pct; pct=$(echo "$line" | grep -o '[0-9]*%' | head -1)
+        [[ -n "$pct" ]] && echo "downloading: ${pct}" || echo "downloading..."
         return
     fi
     if [[ "$line" =~ "Created symlink" ]]; then
         echo "systemd: service enabled"; return
-    fi
-    if [[ "$line" =~ "Pulling from" ]]; then
-        local img; img=$(echo "$line" | awk '{print $NF}')
-        echo "docker: pulling ${img:-image}"
-        return
     fi
     if [[ "$line" =~ "Installing Node.js" ]]; then
         echo "${line}" | sed 's/^ *//'
@@ -1136,7 +1116,131 @@ parse_status_line() {
 }
 
 # =============================================================================
-# Panel install phases
+# Platform detection (for daemon binary download)
+# =============================================================================
+detect_platform() {
+    local kernel arch
+    kernel=$(uname -s | tr '[:upper:]' '[:lower:]')
+    arch=$(uname -m)
+
+    case "$kernel" in
+        linux)  DAEMON_PLATFORM="linux" ;;
+        darwin) DAEMON_PLATFORM="macos" ;;
+        *)      die "Unsupported platform: $kernel" ;;
+    esac
+
+    case "$arch" in
+        x86_64|amd64) DAEMON_ARCH="x64" ;;
+        aarch64|arm64) DAEMON_ARCH="arm64" ;;
+        *) die "Unsupported architecture: $arch" ;;
+    esac
+
+    log "Platform: ${DAEMON_PLATFORM}-${DAEMON_ARCH}"
+}
+
+DAEMON_PLATFORM=""
+DAEMON_ARCH=""
+
+# =============================================================================
+# Daemon install — binary release
+# =============================================================================
+phase_daemon_download() {
+    detect_platform
+
+    echo "Fetching latest daemon release info..."
+    local release_json
+    release_json=$(curl -fsSL --max-time 30 "${DAEMON_RELEASE_API}" 2>/dev/null) \
+        || die "Failed to fetch daemon release info from GitHub"
+
+    # extract tag name for logging
+    local tag
+    tag=$(echo "$release_json" | python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+print(d.get('tag_name', 'unknown'))
+" 2>/dev/null) || tag="unknown"
+    log "Latest daemon release: $tag"
+
+    # find the matching asset URL — name format: airlinkd-{platform}-{arch}-{version}.zip
+    local asset_url
+    asset_url=$(echo "$release_json" | python3 -c "
+import json, sys
+platform = sys.argv[1]
+arch     = sys.argv[2]
+d = json.load(sys.stdin)
+assets = d.get('assets', [])
+needle = 'airlinkd-' + platform + '-' + arch + '-'
+for a in assets:
+    name = a.get('name', '')
+    if name.startswith(needle) and name.endswith('.zip'):
+        print(a['browser_download_url'])
+        break
+" "$DAEMON_PLATFORM" "$DAEMON_ARCH" 2>/dev/null) || true
+
+    [[ -z "$asset_url" ]] && die "No daemon binary found for ${DAEMON_PLATFORM}-${DAEMON_ARCH} in release ${tag}"
+    log "Downloading: $asset_url"
+    echo "Downloading airlinkd ${tag} for ${DAEMON_PLATFORM}-${DAEMON_ARCH}..."
+
+    local tmpdir; tmpdir=$(mktemp -d /tmp/al-daemon-XXXXXX)
+    local zipfile="${tmpdir}/airlinkd.zip"
+
+    curl -fsSL --max-time 120 --progress-bar -o "$zipfile" "$asset_url" \
+        || die "Failed to download daemon binary"
+
+    echo "Extracting..."
+    unzip -o -q "$zipfile" -d "$tmpdir" \
+        || die "Failed to unzip daemon binary"
+
+    # the binary inside is always named airlinkd
+    [[ -f "${tmpdir}/airlinkd" ]] \
+        || die "Binary 'airlinkd' not found inside zip (contents: $(ls "$tmpdir"))"
+
+    mkdir -p /etc/daemon
+    cp "${tmpdir}/airlinkd" /etc/daemon/airlinkd
+    chmod +x /etc/daemon/airlinkd
+    rm -rf "$tmpdir"
+
+    log "OK: airlinkd binary installed to /etc/daemon/airlinkd"
+
+    # write .env if not already present
+    if [[ ! -f /etc/daemon/.env ]]; then
+        cat > /etc/daemon/.env <<ENVEOF
+remote=${PANEL_ADDRESS}
+key=${DAEMON_KEY}
+port=${DAEMON_PORT}
+DEBUG=false
+version=1.0.0
+environment=production
+STATS_INTERVAL=10000
+ENVEOF
+    fi
+}
+
+phase_daemon_service() {
+    cat > /etc/systemd/system/airlink-daemon.service <<SVCEOF
+[Unit]
+Description=Airlink Daemon
+After=network.target docker.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/etc/daemon
+EnvironmentFile=/etc/daemon/.env
+ExecStart=/etc/daemon/airlinkd
+Restart=on-failure
+RestartSec=5
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
+SVCEOF
+    systemctl daemon-reload
+    systemctl enable --now airlink-daemon
+}
+
+# =============================================================================
+# Panel install phases (unchanged)
 # =============================================================================
 phase_panel_clone() {
     mkdir -p /var/www
@@ -1146,12 +1250,10 @@ phase_panel_clone() {
         local tmpdir; tmpdir=$(mktemp -d /tmp/al-panel-XXXXXX)
         git clone --depth 1 "${PANEL_REPO}" "$tmpdir" || die "Failed to clone panel"
 
-        # rsync over the new code, protect user data
         if command -v rsync &>/dev/null; then
             rsync -a --exclude='.env' --exclude='dev.db' --exclude='node_modules' \
                   --exclude='storage' "$tmpdir/" /var/www/panel/
         else
-            # if rsync isn't here, copy everything except the protected stuff
             find "$tmpdir" -mindepth 1 -maxdepth 1 \
                 ! -name '.env' ! -name 'dev.db' ! -name 'node_modules' ! -name 'storage' \
                 -exec cp -r {} /var/www/panel/ \;
@@ -1165,9 +1267,6 @@ phase_panel_clone() {
     id www-data &>/dev/null && chown -R www-data:www-data /var/www/panel
     chmod -R 755 /var/www/panel
 
-    # Patch package.json to pre-approve Prisma/parcel build scripts via the
-    # pnpm.onlyBuiltDependencies field — this means pnpm install runs them
-    # automatically and we never need the interactive approve-builds prompt.
     if command -v python3 &>/dev/null; then
         python3 - /var/www/panel/package.json <<'PYEOF'
 import json, sys
@@ -1182,10 +1281,9 @@ with open(f, "w") as fh:
     fh.write("\n")
 PYEOF
     fi
+
     if [[ ! -f /var/www/panel/.env ]]; then
         local secret; secret=$(openssl rand -hex 32)
-        # Detect the primary non-loopback IP so the panel is reachable
-        # from the network (not just localhost).
         local server_ip
         server_ip=$(hostname -I 2>/dev/null | awk '{print $1}') || server_ip="localhost"
         [[ -z "$server_ip" ]] && server_ip="localhost"
@@ -1203,31 +1301,20 @@ ENVEOF
 phase_panel_deps() {
     cd /var/www/panel || die "Panel directory missing"
 
-    # NODE_ENV=production silently skips devDependencies (typescript, prisma, tailwind).
-    # Force development so pnpm installs everything in package.json.
     NODE_ENV=development "$PNPM" install --no-frozen-lockfile \
         --store-dir "$PNPM_STORE" \
         --network-concurrency 16 \
         || die "Panel dependency install failed"
 
-    # Prisma/@parcel/watcher postinstall scripts are sandboxed by default in
-    # pnpm v10+. approve-builds --all unblocks them all non-interactively so
-    # the Prisma query-engine binary gets compiled before we try to run migrate.
     "$PNPM" approve-builds --all || true
 
-    # chalk and form-data are imported in src/ but not in package.json —
-    # add them explicitly so the TypeScript build doesn't fail.
     "$PNPM" add chalk form-data --store-dir "$PNPM_STORE" \
         || die "chalk/form-data install failed"
 }
+
 phase_panel_build() {
     cd /var/www/panel || die "Panel directory missing"
-
-    # migrate:deploy runs "prisma migrate deploy && prisma generate" —
-    # this is exactly what worked in testing. It applies the migration SQL,
-    # creates dev.db, and generates the Prisma client all in one step.
     "$PNPM" run migrate:deploy || die "Database migration failed"
-
     "$PNPM" run build || die "Panel build failed"
 }
 
@@ -1257,103 +1344,6 @@ SVCEOF
     systemctl daemon-reload
     systemctl enable --now airlink-panel
     _process_addons
-}
-
-# =============================================================================
-# Daemon install phases
-# =============================================================================
-phase_daemon_clone() {
-    if [[ -d /etc/daemon ]]; then
-        echo "Daemon already exists — overwriting files, keeping .env"
-        local tmpdir; tmpdir=$(mktemp -d /tmp/al-daemon-XXXXXX)
-        git clone --depth 1 "${DAEMON_REPO}" "$tmpdir" || die "Failed to clone daemon"
-
-        if command -v rsync &>/dev/null; then
-            rsync -a --exclude='.env' --exclude='node_modules' "$tmpdir/" /etc/daemon/
-        else
-            find "$tmpdir" -mindepth 1 -maxdepth 1 \
-                ! -name '.env' ! -name 'node_modules' \
-                -exec cp -r {} /etc/daemon/ \;
-        fi
-        rm -rf "$tmpdir"
-    else
-        cd /etc || die "Cannot access /etc"
-        git clone --depth 1 "${DAEMON_REPO}" daemon || die "Failed to clone daemon"
-    fi
-
-    if [[ ! -f /etc/daemon/.env ]]; then
-        cat > /etc/daemon/.env <<ENVEOF
-remote=${PANEL_ADDRESS}
-key=${DAEMON_KEY}
-port=${DAEMON_PORT}
-DEBUG=false
-version=1.0.0
-environment=production
-STATS_INTERVAL=10000
-ENVEOF
-    fi
-}
-
-phase_daemon_deps() {
-    cd /etc/daemon || die "Daemon directory missing"
-
-    NODE_ENV=development "$PNPM" install --no-frozen-lockfile \
-        --store-dir "$PNPM_STORE" \
-        --network-concurrency 16 \
-        || die "Daemon dependency install failed"
-
-    "$PNPM" add express --store-dir "$PNPM_STORE" || die "express install failed"
-
-    # @types/body-parser is missing from the daemon's package.json but imported in src/
-    "$PNPM" add @types/body-parser --store-dir "$PNPM_STORE" || die "@types/body-parser install failed"
-
-    # native libs require a C/C++ toolchain (make + cc/gcc) to compile via node-gyp
-    case "$PKG" in
-        apt)    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq build-essential ;;
-        dnf|yum) $PKG install -y -q gcc gcc-c++ make ;;
-        pacman) pacman -Sy --noconfirm --needed base-devel ;;
-        apk)    apk add --no-cache build-base ;;
-    esac
-
-    if [[ -d /etc/daemon/libs ]]; then
-        cd /etc/daemon/libs || die "Cannot access /etc/daemon/libs"
-        "$PNPM" install --no-frozen-lockfile --store-dir "$PNPM_STORE" || true
-        "$PNPM" rebuild
-        cd /etc/daemon
-    fi
-}
-
-phase_daemon_build() {
-    cd /etc/daemon || die "Daemon directory missing"
-    "$PNPM" run build || die "Daemon build failed"
-    id www-data &>/dev/null && chown -R www-data:www-data /etc/daemon
-}
-
-phase_daemon_service() {
-    local pnpm_bin; pnpm_bin=$(command -v pnpm)
-    local node_bin_dir; node_bin_dir=$(dirname "$(command -v node)")
-
-    cat > /etc/systemd/system/airlink-daemon.service <<SVCEOF
-[Unit]
-Description=Airlink Daemon
-After=network.target docker.service
-
-[Service]
-Type=simple
-User=root
-WorkingDirectory=/etc/daemon
-EnvironmentFile=/etc/daemon/.env
-ExecStart=${pnpm_bin} run start
-Restart=on-failure
-RestartSec=5
-Environment=NODE_ENV=production
-Environment=PATH=${node_bin_dir}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
-[Install]
-WantedBy=multi-user.target
-SVCEOF
-    systemctl daemon-reload
-    systemctl enable --now airlink-daemon
 }
 
 # =============================================================================
@@ -1391,11 +1381,13 @@ _process_addons() {
             cd "$target"
             git pull origin "$branch" &>/dev/null || true
         else
-            git clone --depth 1 --branch "$branch" "$repo_url" "$target" || die "Failed to clone $display_name"
+            git clone --depth 1 --branch "$branch" "$repo_url" "$target" \
+                || die "Failed to clone $display_name"
             cd "$target"
         fi
 
-        "$PNPM" install --no-frozen-lockfile --store-dir "$PNPM_STORE" || die "$display_name install failed"
+        "$PNPM" install --no-frozen-lockfile --store-dir "$PNPM_STORE" \
+            || die "$display_name install failed"
         "$PNPM" run build || die "$display_name build failed"
         log "OK: $display_name addon done"
     done
@@ -1502,7 +1494,7 @@ tui_do_install() {
             tasks=(
                 "Check dependencies" "Install Node.js" "Install Docker"
                 "Clone panel" "Panel dependencies" "Build panel" "Start panel service"
-                "Clone daemon" "Daemon dependencies" "Build daemon" "Start daemon service"
+                "Download daemon binary" "Start daemon service"
             )
             ;;
         panel)
@@ -1513,8 +1505,8 @@ tui_do_install() {
             ;;
         daemon)
             tasks=(
-                "Check dependencies" "Install Node.js" "Install Docker"
-                "Clone daemon" "Daemon dependencies" "Build daemon" "Start daemon service"
+                "Check dependencies" "Install Docker"
+                "Download daemon binary" "Start daemon service"
             )
             ;;
     esac
@@ -1524,7 +1516,11 @@ tui_do_install() {
     _INSTALLING=1
 
     tui_progress_step ensure_deps
-    tui_progress_step setup_node
+
+    if [[ "$mode" == "both" || "$mode" == "panel" ]]; then
+        tui_progress_step setup_node
+    fi
+
     tui_progress_step setup_docker
 
     if [[ "$mode" == "both" || "$mode" == "panel" ]]; then
@@ -1535,9 +1531,7 @@ tui_do_install() {
     fi
 
     if [[ "$mode" == "both" || "$mode" == "daemon" ]]; then
-        tui_progress_step phase_daemon_clone
-        tui_progress_step phase_daemon_deps
-        tui_progress_step phase_daemon_build
+        tui_progress_step phase_daemon_download
         tui_progress_step phase_daemon_service
     fi
 
@@ -1645,13 +1639,17 @@ run_noninteractive() {
     DAEMON_KEY="${ARG_DAEMON_KEY:-}"
     ADDON_CHOICES="${ARG_ADDONS:-none}"
 
-    valid_port "$PANEL_PORT"  || die "Invalid panel port: $PANEL_PORT"
-    valid_port "$DAEMON_PORT" || die "Invalid daemon port: $DAEMON_PORT"
+    if [[ "$mode" != "daemon" ]]; then
+        valid_port "$PANEL_PORT" || die "Invalid panel port: $PANEL_PORT"
+    fi
+    if [[ "$mode" != "panel" ]]; then
+        valid_port "$DAEMON_PORT" || die "Invalid daemon port: $DAEMON_PORT"
+    fi
     command -v systemctl &>/dev/null || die "systemd required"
 
     case "$mode" in
         both)
-            ni_start 11
+            ni_start 9
             ni_run "Checking dependencies"   ensure_deps
             ni_run "Setting up Node.js"      setup_node
             ni_run "Setting up Docker"       setup_docker
@@ -1659,9 +1657,7 @@ run_noninteractive() {
             ni_run "Installing panel deps"   phase_panel_deps
             ni_run "Building panel"          phase_panel_build
             ni_run "Starting panel service"  phase_panel_service
-            ni_run "Cloning daemon"          phase_daemon_clone
-            ni_run "Installing daemon deps"  phase_daemon_deps
-            ni_run "Building daemon"         phase_daemon_build
+            ni_run "Downloading daemon"      phase_daemon_download
             ni_run "Starting daemon service" phase_daemon_service
             ;;
         panel)
@@ -1675,13 +1671,10 @@ run_noninteractive() {
             ni_run "Starting panel service"  phase_panel_service
             ;;
         daemon)
-            ni_start 7
+            ni_start 4
             ni_run "Checking dependencies"   ensure_deps
-            ni_run "Setting up Node.js"      setup_node
             ni_run "Setting up Docker"       setup_docker
-            ni_run "Cloning daemon"          phase_daemon_clone
-            ni_run "Installing daemon deps"  phase_daemon_deps
-            ni_run "Building daemon"         phase_daemon_build
+            ni_run "Downloading daemon"      phase_daemon_download
             ni_run "Starting daemon service" phase_daemon_service
             ;;
         *)
