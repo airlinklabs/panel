@@ -6,30 +6,19 @@ import logger from '../../handlers/logger';
 import { queueer } from '../../handlers/queueer';
 import axios from 'axios';
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import {
+  getUsedExternalPorts,
+  parseImagePortRequirements,
+  serializeServerPorts,
+} from '../../handlers/utils/server/ports';
 
-function pickAvailablePort(allocatedPorts: number[], usedPorts: number[]): number | null {
+function pickAvailablePorts(allocatedPorts: number[], usedPorts: number[], count: number): number[] {
+  const picked: number[] = [];
   for (const port of allocatedPorts) {
-    if (!usedPorts.includes(port)) {
-      return port;
-    }
+    if (!usedPorts.includes(port)) picked.push(port);
+    if (picked.length === count) return picked;
   }
-  return null;
-}
-
-function getUsedPortsOnNode(servers: { Ports: string }[]): number[] {
-  const used: number[] = [];
-  for (const server of servers) {
-    try {
-      const ports = JSON.parse(server.Ports);
-      for (const p of ports) {
-        const portNum = parseInt(String(p.Port).split(':')[0]);
-        if (!isNaN(portNum)) used.push(portNum);
-      }
-    } catch {
-      // skip malformed port data
-    }
-  }
-  return used;
+  return picked;
 }
 
 async function resolveUserServerLimit(userId: number, settings: any): Promise<number> {
@@ -157,16 +146,17 @@ const userCreateServerModule: Module = {
           return res.status(500).json({ error: 'Node port configuration is invalid.' });
         }
 
-        const existingServers = await prisma.server.findMany({ where: { nodeId: node.id } });
-        const usedPorts = getUsedPortsOnNode(existingServers);
-        const assignedPort = pickAvailablePort(allocatedPorts, usedPorts);
-
-        if (!assignedPort) {
-          return res.status(503).json({ error: 'No available ports on the selected node.' });
-        }
-
         const image = await prisma.images.findUnique({ where: { id: parseInt(imageId) } });
         if (!image) return res.status(400).json({ error: 'Image not found.' });
+
+        const portRequirements = parseImagePortRequirements(image.portRequirements);
+        const requiredPortCount = Math.max(1, portRequirements.length);
+        const existingServers = await prisma.server.findMany({ where: { nodeId: node.id } });
+        const assignedPorts = pickAvailablePorts(allocatedPorts, getUsedExternalPorts(existingServers), requiredPortCount);
+
+        if (assignedPorts.length < requiredPortCount) {
+          return res.status(503).json({ error: `No available ports on the selected node. ${requiredPortCount} port(s) required.` });
+        }
 
         let dockerImages: any[] = [];
         try {
@@ -188,8 +178,15 @@ const userCreateServerModule: Module = {
           imageVariables = [];
         }
 
-        const portString = `${assignedPort}:${assignedPort}`;
-        const portsJson = JSON.stringify([{ Port: portString, primary: true }]);
+        const portsJson = serializeServerPorts(assignedPorts.map((externalPort, index) => {
+          const requirement = portRequirements[index];
+          return {
+            name: requirement?.name || `Port ${index + 1}`,
+            internalPort: requirement?.internalPort || externalPort,
+            externalPort,
+            primary: index === 0,
+          };
+        }));
 
         const createdServer = await prisma.server.create({
           data: {
@@ -227,7 +224,7 @@ const userCreateServerModule: Module = {
                 env: String(v.env_variable ?? v.env ?? ''),
                 value: v.value ?? v.default_value ?? '',
               }));
-              let serverPort = assignedPort;
+              let serverPort = assignedPorts[0];
               try {
                 const parsedPorts = JSON.parse(server.Ports);
                 const primary = parsedPorts.find((p: any) => p.primary);

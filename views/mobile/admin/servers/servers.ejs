@@ -124,7 +124,7 @@
           </div>
           <div class="flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg px-2.5 py-2">
             <p class="text-[10px] text-neutral-500 mb-0.5">Port</p>
-            <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300 font-mono truncate"><%= server.node.address %>:<%= JSON.parse(server.Ports).filter(p => p.primary).map(p => p.Port.split(':')[1]).pop() %></p>
+            <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300 font-mono truncate"><%= server.node.address %>:<%= JSON.parse(server.Ports).filter(p => p.primary).map(p => p.externalPort || String(p.Port || '').split(':')[0]).pop() %></p>
           </div>
         </div>
 

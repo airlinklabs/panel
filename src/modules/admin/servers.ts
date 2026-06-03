@@ -7,6 +7,14 @@ import axios from 'axios';
 import { queueer } from '../../handlers/queueer';
 import { getParamAsNumber } from "../../utils/typeHelpers";
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import {
+  getUsedExternalPorts,
+  normalizeServerPorts,
+  parseImagePortRequirements,
+  parseServerPorts,
+  serializeServerPorts,
+  validatePortAssignments,
+} from '../../handlers/utils/server/ports';
 
 
 const adminModule: Module = {
@@ -147,6 +155,7 @@ const adminModule: Module = {
             allowStartupEdit,
             Suspended,
             StartCommand,
+            ports,
           } = req.body;
 
           // Validate required fields
@@ -160,7 +169,26 @@ const adminModule: Module = {
           const newSuspendedState = Suspended === 'true';
           const suspensionChanged = currentSuspendedState !== newSuspendedState;
 
-          // Update server in database
+          const selectedImage = await prisma.images.findUnique({ where: { id: parseInt(imageId) } });
+          if (!selectedImage) {
+            res.status(400).json({ error: 'Image not found' });
+            return;
+          }
+
+          const submittedPorts = normalizeServerPorts(ports);
+          const minPorts = parseImagePortRequirements(selectedImage.portRequirements).length;
+          const allocatedPorts = server.nodeId === parseInt(nodeId)
+            ? JSON.parse(server.node.allocatedPorts || '[]')
+            : JSON.parse((await prisma.node.findUnique({ where: { id: parseInt(nodeId) } }))?.allocatedPorts || '[]');
+          const existingServers = await prisma.server.findMany({
+            where: { nodeId: parseInt(nodeId), NOT: { id: serverId } },
+          });
+          const portError = validatePortAssignments(submittedPorts, allocatedPorts, getUsedExternalPorts(existingServers), minPorts);
+          if (portError) {
+            res.status(400).json({ error: portError });
+            return;
+          }
+
           await prisma.server.update({
             where: { id: serverId },
             data: {
@@ -173,6 +201,7 @@ const adminModule: Module = {
               Cpu: parseInt(Cpu),
               Storage: parseInt(Storage),
               StartCommand,
+              Ports: serializeServerPorts(submittedPorts),
               Suspended: newSuspendedState,
             },
           });
@@ -262,6 +291,7 @@ const adminModule: Module = {
           nodeId,
           imageId,
           Ports,
+          ports,
           Memory,
           Cpu,
           Storage,
@@ -277,7 +307,7 @@ const adminModule: Module = {
           !description ||
           !nodeId ||
           !imageId ||
-          !Ports ||
+          (!Ports && !ports) ||
           !Memory ||
           !Cpu ||
           !Storage ||
@@ -298,10 +328,6 @@ const adminModule: Module = {
             return;
           }
 
-          // Extract the port number from the port string (e.g., "25565:25565" -> 25565)
-          const portNumber = parseInt(Ports.split(':')[0]);
-
-          // Check if the port is allocated to the node
           let allocatedPorts = [];
           try {
             if (node.allocatedPorts) {
@@ -313,33 +339,23 @@ const adminModule: Module = {
             return;
           }
 
-          if (!allocatedPorts.includes(portNumber)) {
-            res.status(400).send(`Port ${portNumber} is not allocated to the selected node`);
-            return;
-          }
-
-          // Check if the port is already in use by another server on this node
           const existingServers = await prisma.server.findMany({
             where: {
               nodeId: parseInt(nodeId)
             }
           });
 
-          // Check each server's ports to see if our port is already in use
-          for (const server of existingServers) {
-            try {
-              const serverPorts = JSON.parse(server.Ports);
-              for (const portInfo of serverPorts) {
-                const usedPort = parseInt(portInfo.Port.split(':')[0]);
-                if (usedPort === portNumber) {
-                  res.status(400).send(`Port ${portNumber} is already in use by server "${server.name}"`);
-                  return;
-                }
-              }
-            } catch (error) {
-              logger.error(`Error parsing ports for server ${server.id}:`, error);
-              // Continue checking other servers even if one has invalid port data
-            }
+          const image = await prisma.images.findUnique({ where: { id: parseInt(imageId) } });
+          if (!image) {
+            res.status(400).send('Image not found');
+            return;
+          }
+          const submittedPorts = ports ? normalizeServerPorts(ports) : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`);
+          const minPorts = parseImagePortRequirements(image.portRequirements).length;
+          const portError = validatePortAssignments(submittedPorts, allocatedPorts, getUsedExternalPorts(existingServers), minPorts);
+          if (portError) {
+            res.status(400).send(portError);
+            return;
           }
         } catch (error) {
           logger.error('Error validating port allocation:', error);
@@ -347,7 +363,7 @@ const adminModule: Module = {
           return;
         }
 
-        const Port = `[{"Port": "${Ports}", "primary": true}]`;
+        const Port = serializeServerPorts(ports ? normalizeServerPorts(ports) : parseServerPorts(`[{"Port":"${Ports}","primary":true}]`));
 
         try {
           const dockerImages = await prisma.images
@@ -463,7 +479,7 @@ const adminModule: Module = {
                   value: v.value ?? v.default_value ?? '',
                 }));
 
-                let serverPort = Ports.split(':')[0];
+                let serverPort = String(parseServerPorts(Port)[0]?.externalPort ?? '');
                 try {
                   const parsedPorts = JSON.parse(server.Ports);
                   const primary = parsedPorts.find((p: any) => p.primary);

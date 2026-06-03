@@ -37,6 +37,7 @@
           <button type="button" data-tab="docker" class="tab-btn px-4 py-2.5 text-sm font-medium transition-colors -mb-px border-b-2">Docker Images</button>
           <button type="button" data-tab="variables" class="tab-btn px-4 py-2.5 text-sm font-medium transition-colors -mb-px border-b-2">Variables</button>
           <button type="button" data-tab="install" class="tab-btn px-4 py-2.5 text-sm font-medium transition-colors -mb-px border-b-2">Install Script</button>
+          <button type="button" data-tab="settings" class="tab-btn px-4 py-2.5 text-sm font-medium transition-colors -mb-px border-b-2">Settings</button>
           <button type="button" data-tab="raw" class="tab-btn px-4 py-2.5 text-sm font-medium transition-colors -mb-px border-b-2">Raw JSON</button>
         </div>
 
@@ -178,6 +179,29 @@
           </div>
         </div>
 
+        <!-- Settings tab -->
+        <div data-tab-form="settings" class="tab-form space-y-5 hidden">
+          <div class="flex flex-col bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5">
+            <div class="flex items-center justify-between px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">
+              <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white">Required Ports</h2>
+              <button type="button" id="add-port-requirement"
+                class="px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition">
+                Add Port
+              </button>
+            </div>
+            <div class="px-5 py-4">
+              <p class="text-xs text-neutral-500 mb-4">Each entry is shown when creating servers. Users get exactly these required ports; admins can add more.</p>
+              <div id="port-requirements-list" class="space-y-2"></div>
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button type="button" id="save-settings"
+              class="px-5 py-2.5 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+              Save Changes
+            </button>
+          </div>
+        </div>
+
         <!-- Raw JSON tab -->
         <div data-tab-form="raw" class="tab-form space-y-5 hidden">
           <div class="flex flex-col bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5">
@@ -219,6 +243,7 @@
     scripts: <%- JSON.stringify(image.scripts || {}) %>,
     info: <%- JSON.stringify(image.info || {}) %>,
     meta: <%- JSON.stringify(image.meta || {}) %>,
+    portRequirements: <%- JSON.stringify(image.portRequirements || []) %>,
   };
 
   // ── Tabs ───────────────────────────────────────────────────────────────────
@@ -426,6 +451,47 @@
     await saveState();
   });
 
+  // ── Settings tab ──────────────────────────────────────────────────────────
+  function renderPortRequirements() {
+    const list = document.getElementById('port-requirements-list');
+    list.innerHTML = '';
+    if (!state.portRequirements.length) {
+      list.innerHTML = '<p class="text-xs text-neutral-400">No required ports. Servers can be created without port bindings unless an admin adds ports.</p>';
+      return;
+    }
+    state.portRequirements.forEach((port, idx) => {
+      const row = document.createElement('div');
+      row.className = 'grid grid-cols-1 sm:grid-cols-[1fr_140px_auto] gap-2 items-end';
+      row.innerHTML = `
+        <label class="text-xs text-neutral-500">Port name<input data-port-req="${idx}" data-field="name" value="${escHtml(port.name || '')}" class="mt-1 w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-xs text-neutral-800 dark:text-white"></label>
+        <label class="text-xs text-neutral-500">Internal port<input data-port-req="${idx}" data-field="internalPort" type="number" min="1" max="65535" value="${escHtml(port.internalPort || '')}" class="mt-1 w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-xs text-neutral-800 dark:text-white"></label>
+        <button type="button" data-port-req-remove="${idx}" class="rounded-xl border border-red-200 dark:border-red-900/30 bg-white dark:bg-neutral-800 px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">Remove</button>`;
+      list.appendChild(row);
+    });
+    list.querySelectorAll('[data-port-req-remove]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.portRequirements.splice(Number(btn.dataset.portReqRemove), 1);
+        renderPortRequirements();
+      });
+    });
+  }
+  renderPortRequirements();
+
+  document.getElementById('add-port-requirement').addEventListener('click', () => {
+    state.portRequirements.push({ name: `Port ${state.portRequirements.length + 1}`, internalPort: 25565 });
+    renderPortRequirements();
+  });
+
+  document.getElementById('save-settings').addEventListener('click', async () => {
+    document.querySelectorAll('[data-port-req]').forEach(input => {
+      const idx = Number(input.dataset.portReq);
+      const field = input.dataset.field;
+      state.portRequirements[idx][field] = field === 'internalPort' ? Number(input.value) : input.value;
+    });
+    state.portRequirements = state.portRequirements.filter(port => port.name && port.internalPort);
+    await saveState();
+  });
+
   // ── Raw JSON tab ───────────────────────────────────────────────────────────
   let monacoEditor = null;
 
@@ -474,6 +540,7 @@
       docker_images: state.docker_images,
       variables: state.variables,
       scripts: { installation: state.scripts.installation || null },
+      portRequirements: state.portRequirements,
     }, null, 2);
   }
 
@@ -494,6 +561,7 @@
       variables: state.variables,
       scripts: { installation: state.scripts.installation || null },
       info: state.info,
+      portRequirements: state.portRequirements,
     };
     await savePayload(payload);
   }

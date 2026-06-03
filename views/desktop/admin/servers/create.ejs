@@ -112,7 +112,7 @@
                 <label class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.Image %>:</label>
                 <select id="serverImage" name="imageId" class="hidden">
                   <% images.forEach(image => { %>
-                    <option value="<%= image.id %>" data-docker-images='<%= image.dockerImages %>' data-variables='<%= image.variables %>'>
+                    <option value="<%= image.id %>" data-docker-images='<%= image.dockerImages %>' data-variables='<%= image.variables %>' data-port-requirements='<%= image.portRequirements || "[]" %>'>
                       <%= image.name %>
                     </option>
                   <% }); %>
@@ -130,11 +130,10 @@
 
               <div>
                 <label class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.Ports %>:</label>
-                <select id="serverPorts" name="Ports" class="hidden">
-                  <option value="" disabled selected>Select a port</option>
-                  <!-- Port options will be populated based on selected node -->
-                </select>
-                <div class="custom-select mt-2 mb-4" data-for="serverPorts"></div>
+                <input type="hidden" id="serverPorts" name="Ports">
+                <button type="button" id="assignPortsBtn" class="mt-2 mb-4 w-full rounded-xl bg-neutral-100 dark:bg-neutral-700/30 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white px-4 py-2 text-sm border border-neutral-200 dark:border-white/5 text-left">
+                  Assign ports
+                </button>
               </div>
 
               <div class="bg-neutral-100 dark:bg-neutral-700/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
@@ -181,6 +180,22 @@
   </div>
 </main>
 
+<div id="portsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+  <div class="w-full max-w-4xl rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-900 shadow-xl">
+    <div class="flex items-center justify-between border-b border-neutral-200 dark:border-white/10 px-5 py-4">
+      <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
+      <button type="button" id="closePortsModal" class="text-sm text-neutral-500 hover:text-neutral-800 dark:hover:text-white">Close</button>
+    </div>
+    <div class="p-5">
+      <div id="portsRows" class="space-y-3"></div>
+      <button type="button" id="addPortRow" class="mt-4 rounded-lg border border-neutral-200 dark:border-white/10 px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5">Add port</button>
+    </div>
+    <div class="flex justify-end gap-2 border-t border-neutral-200 dark:border-white/10 px-5 py-4">
+      <button type="button" id="savePortsModal" class="rounded-lg bg-neutral-900 dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-neutral-900">Save ports</button>
+    </div>
+  </div>
+</div>
+
 <%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
 
@@ -189,12 +204,14 @@
     const serverImageSelect = document.getElementById('serverImage');
     const dockerImageSelect = document.getElementById('dockerImage');
     const serverNodeSelect = document.getElementById('serverNode');
-    const serverPortsSelect = document.getElementById('serverPorts');
+    const serverPortsInput = document.getElementById('serverPorts');
     const variablesContainer = document.getElementById('variablesContainer');
     const form = document.getElementById('createServerForm');
 
     // Store node data
     let nodesData = {};
+    let availablePorts = [];
+    let assignedPorts = [];
 
     // Fetch nodes data with allocated ports
     async function fetchNodesData() {
@@ -229,9 +246,10 @@
     // Update available ports based on selected node
     function updatePortsForSelectedNode() {
       const selectedNodeId = serverNodeSelect.value;
-      serverPortsSelect.innerHTML = '<option value="" disabled selected>Select a port</option>';
+      availablePorts = [];
 
       if (!selectedNodeId || !nodesData[selectedNodeId]) {
+        syncPortsButton();
         return;
       }
 
@@ -239,10 +257,7 @@
       const nodeAddress = node.address;
 
       if (!node.parsedPorts || node.parsedPorts.length === 0) {
-        const option = document.createElement('option');
-        option.disabled = true;
-        option.textContent = 'No ports allocated for this node';
-        serverPortsSelect.appendChild(option);
+        syncPortsButton();
         return;
       }
 
@@ -266,26 +281,93 @@
         });
       }
 
-      // Add each available port as an option (filtering out used ports)
-      let availablePortsCount = 0;
-      node.parsedPorts.forEach(port => {
-        if (!usedPorts.has(port)) {
-          const option = document.createElement('option');
-          option.value = `${port}:${port}`;
-          option.textContent = `${nodeAddress}:${port}`;
-          serverPortsSelect.appendChild(option);
-          availablePortsCount++;
-        }
-      });
-
-      // If all ports are in use, show a message
-      if (availablePortsCount === 0 && node.parsedPorts.length > 0) {
-        const option = document.createElement('option');
-        option.disabled = true;
-        option.textContent = 'All allocated ports are currently in use';
-        serverPortsSelect.appendChild(option);
-      }
+      availablePorts = node.parsedPorts.filter(port => !usedPorts.has(port)).map(port => ({ port, label: `${nodeAddress}:${port}` }));
+      assignedPorts = assignedPorts.filter(port => availablePorts.some(item => item.port === Number(port.externalPort)));
+      ensureMinimumPortRows();
+      syncPortsButton();
     }
+
+    function getPortRequirements() {
+      const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+      try { return JSON.parse(selectedOption.getAttribute('data-port-requirements') || '[]'); } catch { return []; }
+    }
+
+    function ensureMinimumPortRows() {
+      const requirements = getPortRequirements();
+      const min = requirements.length;
+      while (assignedPorts.length < min) {
+        const req = requirements[assignedPorts.length] || {};
+        assignedPorts.push({
+          name: req.name || `Port ${assignedPorts.length + 1}`,
+          internalPort: Number(req.internalPort || 25565),
+          externalPort: availablePorts.find(item => !assignedPorts.some(port => Number(port.externalPort) === item.port))?.port || '',
+          primary: assignedPorts.length === 0
+        });
+      }
+      serverPortsInput.value = JSON.stringify(assignedPorts);
+    }
+
+    function syncPortsButton() {
+      serverPortsInput.value = JSON.stringify(assignedPorts);
+      document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? `Assign ports (${assignedPorts.length})` : 'Assign ports';
+    }
+
+    function renderPortRows() {
+      ensureMinimumPortRows();
+      const rows = document.getElementById('portsRows');
+      rows.innerHTML = '';
+      const min = getPortRequirements().length;
+      assignedPorts.forEach((port, index) => {
+        const row = document.createElement('div');
+        row.className = 'grid grid-cols-1 md:grid-cols-[1fr_130px_1fr_auto] gap-2 items-end rounded-lg border border-neutral-200 dark:border-white/10 p-3';
+        row.innerHTML = `
+          <label class="text-xs text-neutral-500">Port name<input data-port-field="${index}" data-field="name" value="${port.name || ''}" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
+          <label class="text-xs text-neutral-500">Internal port<input data-port-field="${index}" data-field="internalPort" type="number" min="1" max="65535" value="${port.internalPort || ''}" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
+          <label class="text-xs text-neutral-500">External port<select data-port-field="${index}" data-field="externalPort" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></select></label>
+          <button type="button" data-remove-port="${index}" class="rounded-lg border border-red-200 px-3 py-2 text-sm text-red-500 ${index < min ? 'opacity-40 pointer-events-none' : ''}">Remove</button>`;
+        rows.appendChild(row);
+        const select = row.querySelector('select');
+        select.innerHTML = '<option value="">Select port</option>';
+        availablePorts.forEach(item => {
+          const option = document.createElement('option');
+          option.value = item.port;
+          option.textContent = item.label;
+          option.selected = Number(port.externalPort) === item.port;
+          select.appendChild(option);
+        });
+      });
+    }
+
+    document.getElementById('assignPortsBtn').addEventListener('click', () => {
+      renderPortRows();
+      document.getElementById('portsModal').classList.remove('hidden');
+      document.getElementById('portsModal').classList.add('flex');
+    });
+    document.getElementById('closePortsModal').addEventListener('click', () => {
+      document.getElementById('portsModal').classList.add('hidden');
+      document.getElementById('portsModal').classList.remove('flex');
+    });
+    document.getElementById('addPortRow').addEventListener('click', () => {
+      assignedPorts.push({ name: `Port ${assignedPorts.length + 1}`, internalPort: 25565, externalPort: '', primary: assignedPorts.length === 0 });
+      renderPortRows();
+    });
+    document.getElementById('portsRows').addEventListener('click', (event) => {
+      const button = event.target.closest('[data-remove-port]');
+      if (!button) return;
+      assignedPorts.splice(Number(button.dataset.removePort), 1);
+      renderPortRows();
+    });
+    document.getElementById('savePortsModal').addEventListener('click', () => {
+      document.querySelectorAll('[data-port-field]').forEach(input => {
+        const index = Number(input.dataset.portField);
+        assignedPorts[index][input.dataset.field] = input.dataset.field.includes('Port') ? Number(input.value) : input.value;
+      });
+      assignedPorts = assignedPorts.filter(port => port.name && port.internalPort && port.externalPort);
+      assignedPorts.forEach((port, index) => { port.primary = index === 0; });
+      syncPortsButton();
+      document.getElementById('portsModal').classList.add('hidden');
+      document.getElementById('portsModal').classList.remove('flex');
+    });
 
     function updateDockerImages() {
       const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
@@ -400,6 +482,7 @@
 
       const data = Object.fromEntries(formData);
       data.variables = variablesArray;
+      data.ports = assignedPorts;
 
       const loader = showLoadingPopup('Creating Server', 'Initializing server creation...');
       loader.updateProgress(20, 'Sending server configuration...');
@@ -452,6 +535,8 @@
     serverImageSelect.addEventListener('change', () => {
       updateDockerImages();
       updateVariables();
+      ensureMinimumPortRows();
+      syncPortsButton();
     });
     serverNodeSelect.addEventListener('change', () => {
       updatePortsForSelectedNode();

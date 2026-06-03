@@ -14,7 +14,11 @@ import {
 function normalizeImageData(raw: Record<string, unknown>) {
   if (isPterodactylEgg(raw)) {
     const egg = parseEgg(raw);
-    return normalizeEggForDb(egg);
+    const data = normalizeEggForDb(egg);
+    return {
+      ...data,
+      portRequirements: JSON.stringify(raw.portRequirements ?? raw.port_requirements ?? []),
+    };
   }
 
   const dockerImages = raw.docker_images || raw.dockerImages;
@@ -38,6 +42,7 @@ function normalizeImageData(raw: Record<string, unknown>) {
     info: JSON.stringify(raw.info ?? {}),
     scripts: JSON.stringify(raw.scripts ?? {}),
     variables: JSON.stringify(raw.variables ?? []),
+    portRequirements: JSON.stringify(raw.portRequirements ?? raw.port_requirements ?? []),
   };
 }
 
@@ -137,6 +142,7 @@ const adminModule: Module = {
             info: JSON.stringify({ features: [] }),
             scripts: JSON.stringify({}),
             variables: JSON.stringify([]),
+            portRequirements: JSON.stringify([]),
           };
 
           const image = await prisma.images.create({ data });
@@ -184,12 +190,16 @@ const adminModule: Module = {
           let info: Record<string, unknown> = {};
           try { info = JSON.parse(image.info || '{}'); } catch { /* keep empty */ }
 
+          let portRequirements: unknown[] = [];
+          try { portRequirements = JSON.parse(image.portRequirements || '[]'); } catch { /* keep empty */ }
+
           const parsedImage = {
             ...image,
             dockerImages,
             variables,
             scripts,
             info,
+            portRequirements,
           };
 
           res.render('admin/images/edit', {
@@ -287,6 +297,7 @@ const adminModule: Module = {
                 } catch { return null; }
               })(),
             },
+            portRequirements: (() => { try { return JSON.parse((image as any).portRequirements || '[]'); } catch { return []; } })(),
           };
 
           const filename = `${(image.name || 'image').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
