@@ -1,4 +1,24 @@
 <%- include('../../components/header', { title: 'Files' }) %>
+<style>
+  .al-editor-shell { min-height: calc(100dvh - 15rem); }
+  .al-editor-toolbar { gap: 0.75rem; }
+  .al-editor-path {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.35;
+  }
+  .al-editor-status {
+    gap: 0.5rem 1rem;
+    scrollbar-width: thin;
+  }
+  .al-editor-status button,
+  .al-editor-status span[data-kbd] {
+    min-height: 1.5rem;
+  }
+  @media (max-width: 1023px) {
+    .al-editor-shell { min-height: 60dvh; }
+  }
+</style>
 <main class="h-screen m-auto">
   <div class="flex h-screen">
     <div class="w-60 h-full">
@@ -36,12 +56,12 @@
       <% } %>
 
       <div class="flex flex-col lg:flex-row px-8 mt-8">
-        <div class="overflow-hidden rounded-lg shadow-md w-full">
+        <div class="al-ui-surface overflow-hidden rounded-xl w-full">
           <!-- File Editor -->
-          <div class="bg-white dark:bg-neutral-800 p-6">
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-lg font-medium text-neutral-900 dark:text-white">
-                <a class="text-neutral-300 hover:text-neutral-200 transition" href="/server/<%= server.UUID %>/files">/home/container/</a>
+          <div class="p-5">
+            <div class="al-editor-toolbar flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
+              <h2 class="al-editor-path text-sm font-medium text-neutral-900 dark:text-white min-w-0">
+                <a class="text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-neutral-100 transition" href="/server/<%= server.UUID %>/files">/home/container/</a>
               <%
                   if (file.path) {
                       const parts = file.path.split('/');
@@ -52,20 +72,20 @@
 
                           if (index < parts.length - 1) {
                               %>
-                              <a href="/server/<%= server.UUID %>/files?path=<%= currentPath %>" class="text-neutral-300 hover:text-neutral-200 transition"><%= part %></a>/
+                              <a href="/server/<%= server.UUID %>/files?path=<%= currentPath %>" class="text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-neutral-100 transition"><%= part %></a><span class="text-neutral-400 dark:text-neutral-600">/</span>
                               <%
                               currentPath += '/';
                           } else {
                               %>
-                              <span class="text-neutral-100"><%= part %></span>
+                              <span class="text-neutral-950 dark:text-neutral-100"><%= part %></span>
                               <%
                           }
                       });
                   }
               %>
               </h2>
-              <div class="flex space-x-2">
-                <button id="saveBtn" class="px-4 py-2 bg-white dark:bg-neutral-700 text-neutral-800 dark:text-white rounded-xl hover:bg-blue-500 hover:text-white dark:hover:bg-blue-600 transition-colors duration-200 shadow-sm border border-neutral-300 dark:border-neutral-600 flex items-center">
+              <div class="flex shrink-0">
+                <button id="saveBtn" class="al-ui-button-primary min-w-24" type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                   </svg>
@@ -73,14 +93,14 @@
                 </button>
               </div>
             </div>
-            <div class="border border-neutral-300 dark:border-neutral-600 rounded-lg shadow-inner overflow-hidden" id="editor-container-wrapper">
-              <div class="h-[490px]" id="editor-container"></div>
-              <div class="flex justify-between items-center px-3 py-1.5 bg-neutral-100 dark:bg-neutral-700 border-t border-neutral-300 dark:border-neutral-600 text-xs text-neutral-500 dark:text-neutral-400 font-mono">
-                <div class="flex items-center space-x-3">
+            <div class="border border-neutral-200 dark:border-neutral-700/60 rounded-xl overflow-hidden" id="editor-container-wrapper">
+              <div class="al-editor-shell" id="editor-container"></div>
+              <div class="al-editor-status flex flex-col xl:flex-row xl:justify-between xl:items-center px-3 py-2 bg-neutral-100 dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700/60 text-xs text-neutral-600 dark:text-neutral-400 font-mono overflow-x-auto">
+                <div class="flex items-center gap-3 whitespace-nowrap">
                   <div id="editor-status">Line: 1, Column: 1</div>
                   <div id="file-info" class="px-2 py-0.5 bg-neutral-200 dark:bg-neutral-600 rounded text-neutral-600 dark:text-neutral-300">Loading...</div>
                 </div>
-                <div class="flex space-x-4">
+                <div class="flex flex-wrap items-center gap-3">
                   <div class="flex items-center">
                     <span class="opacity-75 mr-1.5">Word Wrap:</span>
                     <button id="toggle-wordwrap" class="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-600 hover:bg-neutral-300 dark:hover:bg-neutral-500 transition-colors">Off</button>
@@ -95,7 +115,7 @@
                   </div>
                   <div class="flex items-center">
                     <span class="opacity-75 mr-1.5">Save:</span>
-                    <span class="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-600">Ctrl+S</span>
+                    <span data-kbd class="px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-600">Ctrl+S</span>
                   </div>
                 </div>
               </div>
@@ -146,6 +166,9 @@ require.config({
   let wordWrapEnabled = false;
   let minimapEnabled = false;
   let themeMode = 'auto'; // 'auto', 'light', or 'dark'
+  const serverUuid = <%- JSON.stringify(server.UUID) %>;
+  const editorFilePath = <%- JSON.stringify(file.path || '') %>;
+  const saveUrl = `/server/${serverUuid}/files/${encodeURIComponent(editorFilePath)}`;
 
   require(['vs/editor/editor.main'], function (_) {
     // Define custom themes
@@ -189,7 +212,7 @@ require.config({
 
     // Create editor with enhanced options
     editor = monaco.editor.create(document.getElementById('editor-container'), {
-      value: `<%- file.content.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$') %>`,
+      value: <%- JSON.stringify(file.content || '') %>,
       language: '<%= language %>',
       theme: document.documentElement.classList.contains('dark') ? 'custom-dark' : 'custom-light',
       automaticLayout: true,
@@ -288,7 +311,7 @@ require.config({
       } else {
         theme = 'custom-light';
       }
-      editor.updateOptions({ theme: theme });
+      monaco.editor.setTheme(theme);
     }
 
     // Toggle theme button
@@ -317,10 +340,10 @@ require.config({
   });
 
 
-  document.getElementById('saveBtn').addEventListener('click', async () => {
+  async function saveFile() {
+    if (!editor) return;
     const saveBtn = document.getElementById('saveBtn');
     saveBtn.disabled = true;
-    saveBtn.classList.add('opacity-75');
     saveBtn.innerHTML = `
       <svg class="animate-spin h-4 w-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -331,7 +354,7 @@ require.config({
 
     const content = editor.getValue();
     try {
-      const response = await fetch(`/server/<%= server.UUID %>/files/<%= file.path %>`, {
+      const response = await fetch(saveUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -341,14 +364,12 @@ require.config({
 
       if (!response.ok) throw new Error('Failed to save file');
 
-      showToast('File saved successfully!', 'success');
+      showToast('File saved.', 'success');
     } catch (error) {
       console.error('Error saving file:', error);
       showToast('Failed to save file', 'error');
     } finally {
-      // Restore button state
       saveBtn.disabled = false;
-      saveBtn.classList.remove('opacity-75');
       saveBtn.innerHTML = `
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
@@ -356,51 +377,14 @@ require.config({
         Save
       `;
     }
-  });
+  }
+
+  document.getElementById('saveBtn').addEventListener('click', saveFile);
 
   document.addEventListener('keydown', async (event) => {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
       event.preventDefault();
-
-      // Show saving state in the button
-      const saveBtn = document.getElementById('saveBtn');
-      saveBtn.disabled = true;
-      saveBtn.classList.add('opacity-75');
-      saveBtn.innerHTML = `
-        <svg class="animate-spin h-4 w-4 mr-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        Saving...
-      `;
-
-      const content = editor.getValue();
-      try {
-        const response = await fetch(`/server/<%= server.UUID %>/files/<%= file.path %>/save`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ content }),
-        });
-
-        if (!response.ok) throw new Error('Failed to save file');
-
-        showToast('File saved successfully!', 'success');
-      } catch (error) {
-        console.error('Error saving file:', error);
-        showToast('Failed to save file', 'error');
-      } finally {
-        // Restore button state
-        saveBtn.disabled = false;
-        saveBtn.classList.remove('opacity-75');
-        saveBtn.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-          </svg>
-          Save
-        `;
-      }
+      await saveFile();
     }
   });
 </script>
