@@ -1,5 +1,4 @@
 import { Module } from '../../handlers/moduleInit';
-import { uiComponentStore } from '../../handlers/uiComponentHandler';
 import { Router } from 'express';
 
 const uiComponentsModule: Module = {

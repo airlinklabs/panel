@@ -25,7 +25,7 @@ function highlightMatch(text, term) {
   if (!term) return escHtml(text);
   const safe  = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const regex = new RegExp('(' + safe + ')', 'gi');
-  return escHtml(text).replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-600/60 text-neutral-900 dark:text-white rounded px-0.5">$1</mark>');
+  return escHtml(text).replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-600/60 text-yellow-950 dark:text-yellow-50 rounded px-0.5">$1</mark>');
 }
 
 function getNavResults(term) {
@@ -49,12 +49,14 @@ function getNavResults(term) {
 function renderResults(items, term) {
   searchResults.innerHTML = '';
   activeIndex = -1;
+  searchInput.setAttribute('aria-activedescendant', '');
 
   if (!items.length) {
     const msg = document.createElement('p');
     msg.textContent = 'No results.';
     msg.className   = 'text-sm text-neutral-500 dark:text-neutral-400 px-3 py-4 text-center';
     searchResults.appendChild(msg);
+    searchInput.setAttribute('aria-expanded', 'true');
     return;
   }
 
@@ -78,6 +80,9 @@ function renderResults(items, term) {
     groups[type].forEach(function(item) {
       const row = document.createElement('a');
       row.href      = item.url;
+      row.id        = 'search-result-' + type + '-' + searchResults.querySelectorAll('.search-result').length;
+      row.setAttribute('role', 'option');
+      row.setAttribute('aria-selected', 'false');
       row.className = 'search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer';
       row.innerHTML = (typeIcon[item.type] || typeIcon.nav) +
         '<span class="flex-1 min-w-0">' +
@@ -95,18 +100,25 @@ function renderResults(items, term) {
       searchResults.appendChild(row);
     });
   });
+  searchInput.setAttribute('aria-expanded', 'true');
 }
 
 async function doSearch(term) {
-  if (!term) { searchResults.classList.add('hidden'); return; }
+  if (!term) {
+    searchResults.classList.add('hidden');
+    searchInput.setAttribute('aria-expanded', 'false');
+    searchInput.setAttribute('aria-activedescendant', '');
+    return;
+  }
   searchResults.classList.remove('hidden');
+  searchInput.setAttribute('aria-expanded', 'true');
 
   const navItems = getNavResults(term);
   try {
     const r    = await fetch('/api/search?q=' + encodeURIComponent(term));
     const data = await r.json();
     renderResults((data.results || []).concat(navItems), term);
-  } catch (_) {
+  } catch {
     renderResults(navItems, term);
   }
 }
@@ -114,9 +126,13 @@ async function doSearch(term) {
 function updateActiveResult() {
   const rows = searchResults.querySelectorAll('.search-result');
   rows.forEach(function(row, i) {
-    row.classList.toggle('bg-neutral-100', i === activeIndex);
-    row.classList.toggle('dark:bg-neutral-700/50', i === activeIndex);
+    const active = i === activeIndex;
+    row.classList.toggle('bg-neutral-100', active);
+    row.classList.toggle('dark:bg-neutral-700/50', active);
+    row.setAttribute('aria-selected', active ? 'true' : 'false');
   });
+  const activeRow = rows[activeIndex];
+  searchInput.setAttribute('aria-activedescendant', activeRow ? activeRow.id : '');
 }
 
 searchInput.addEventListener('input', function() {
@@ -124,7 +140,12 @@ searchInput.addEventListener('input', function() {
   if (term === lastQuery) return;
   lastQuery = term;
   clearTimeout(searchTimeout);
-  if (!term) { searchResults.classList.add('hidden'); return; }
+  if (!term) {
+    searchResults.classList.add('hidden');
+    searchInput.setAttribute('aria-expanded', 'false');
+    searchInput.setAttribute('aria-activedescendant', '');
+    return;
+  }
   searchTimeout = setTimeout(function() { doSearch(term); }, 150);
 });
 
@@ -144,6 +165,8 @@ searchInput.addEventListener('keydown', function(e) {
     if (activeIndex >= 0 && rows[activeIndex]) rows[activeIndex].click();
   } else if (e.key === 'Escape') {
     searchResults.classList.add('hidden');
+    searchInput.setAttribute('aria-expanded', 'false');
+    searchInput.setAttribute('aria-activedescendant', '');
     searchInput.blur();
   }
 });
@@ -151,6 +174,8 @@ searchInput.addEventListener('keydown', function(e) {
 document.addEventListener('click', function(e) {
   if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
     searchResults.classList.add('hidden');
+    searchInput.setAttribute('aria-expanded', 'false');
+    searchInput.setAttribute('aria-activedescendant', '');
   }
 });
 

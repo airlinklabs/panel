@@ -70,7 +70,7 @@ export async function collectPlayerStats(): Promise<void> {
             maxPlayers: response.data.maxPlayers || 0,
             online: response.data.online || false,
           };
-        } catch (error) {
+        } catch {
           return {
             serverId: server.UUID,
             playerCount: 0,
@@ -116,12 +116,8 @@ export async function collectPlayerStats(): Promise<void> {
         }
       });
     }
-
-    logger.debug(`Collected player stats: ${totalPlayers} players, ${onlineServers}/${totalServers} servers online`);
   } catch (error) {
-    // Silently handle errors during player stats collection
-    // This prevents console errors when nodes are offline
-    logger.debug('Player stats collection skipped due to error');
+    logger.warn('Player stats collection failed', { error });
   }
 }
 
@@ -140,7 +136,7 @@ export function startPlayerStatsCollection(): void {
 
   // Then set up interval
   statsCollectionInterval = setInterval(collectPlayerStats, COLLECTION_INTERVAL);
-  logger.debug(`Player stats collection started (interval: ${COLLECTION_INTERVAL / 1000} seconds)`);
+  logger.info(`Player stats collection started (interval: ${COLLECTION_INTERVAL / 1000} seconds)`);
 }
 
 /**

@@ -60,10 +60,8 @@ class UIComponentStore {
     const existingIndex = this.sidebarItems.findIndex(i => i.id === item.id);
     if (existingIndex !== -1) {
       this.sidebarItems[existingIndex] = item;
-      logger.debug(`Updated sidebar item: ${item.id}`);
     } else {
       this.sidebarItems.push(item);
-      logger.debug(`Added sidebar item: ${item.id}`);
     }
     if (addonSlug) {
       const reg = this.ensureAddonRegistry(addonSlug);
@@ -73,7 +71,6 @@ class UIComponentStore {
 
   public removeSidebarItem(id: string): void {
     this.sidebarItems = this.sidebarItems.filter(item => item.id !== id);
-    logger.debug(`Removed sidebar item: ${id}`);
   }
 
   public getSidebarItems(section?: string, isAdmin?: boolean): SidebarItem[] {
@@ -97,10 +94,8 @@ class UIComponentStore {
     const existingIndex = this.serverMenuItems.findIndex(i => i.id === item.id);
     if (existingIndex !== -1) {
       this.serverMenuItems[existingIndex] = item;
-      logger.debug(`Updated server menu item: ${item.id}`);
     } else {
       this.serverMenuItems.push(item);
-      logger.debug(`Added server menu item: ${item.id}`);
     }
     if (addonSlug) {
       const reg = this.ensureAddonRegistry(addonSlug);
@@ -110,7 +105,6 @@ class UIComponentStore {
 
   public removeServerMenuItem(id: string): void {
     this.serverMenuItems = this.serverMenuItems.filter(item => item.id !== id);
-    logger.debug(`Removed server menu item: ${id}`);
   }
 
   public getServerMenuItems(feature?: string, includeDefaults: boolean = true): ServerMenuItem[] {
@@ -131,10 +125,8 @@ class UIComponentStore {
     const existingIndex = this.serverSections.findIndex(s => s.id === section.id);
     if (existingIndex !== -1) {
       this.serverSections[existingIndex] = section;
-      logger.debug(`Updated server section: ${section.id}`);
     } else {
       this.serverSections.push(section);
-      logger.debug(`Added server section: ${section.id}`);
     }
     if (addonSlug) {
       const reg = this.ensureAddonRegistry(addonSlug);
@@ -149,12 +141,10 @@ class UIComponentStore {
     reg.menuIds.forEach(id => this.removeServerMenuItem(id));
     reg.sectionIds.forEach(id => this.removeServerSection(id));
     this.addonItemRegistry.delete(addonSlug);
-    logger.debug(`Cleared all UI items for addon: ${addonSlug}`);
   }
 
   public removeServerSection(id: string): void {
     this.serverSections = this.serverSections.filter(section => section.id !== id);
-    logger.debug(`Removed server section: ${id}`);
   }
 
   public getServerSections(): ServerSection[] {
@@ -167,10 +157,8 @@ class UIComponentStore {
       const existingIndex = section.items.findIndex(i => i.id === item.id);
       if (existingIndex !== -1) {
         section.items[existingIndex] = item;
-        logger.debug(`Updated server section item: ${item.id} in section ${sectionId}`);
       } else {
         section.items.push(item);
-        logger.debug(`Added server section item: ${item.id} to section ${sectionId}`);
       }
     } else {
       logger.warn(`Cannot add item to non-existent section: ${sectionId}`);
@@ -181,7 +169,6 @@ class UIComponentStore {
     const section = this.serverSections.find(s => s.id === sectionId);
     if (section) {
       section.items = section.items.filter(item => item.id !== itemId);
-      logger.debug(`Removed server section item: ${itemId} from section ${sectionId}`);
     }
   }
 

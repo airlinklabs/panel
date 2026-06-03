@@ -10,10 +10,6 @@ import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 registerPermission('airlink.admin.analytics.view');
 
-interface ErrorMessage {
-  message?: string;
-}
-
 const analyticsModule: Module = {
   info: {
     name: 'Admin Analytics Module',

@@ -40,8 +40,6 @@ export async function createPlayerStatsTable(): Promise<void> {
       `);
 
       logger.info('PlayerStats table created successfully');
-    } else {
-      logger.debug('PlayerStats table already exists');
     }
   } catch (error) {
     logger.error('Error creating PlayerStats table:', error);

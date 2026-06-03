@@ -12,7 +12,7 @@
     try {
       var v = sessionStorage.getItem(NAV_FLAG);
       if (v) { sessionStorage.removeItem(NAV_FLAG); return true; }
-    } catch (_) {}
+    } catch {}
     return false;
   })();
 
@@ -27,7 +27,7 @@
 
   function normalizePath(p) {
     try { return new URL(p, window.location.origin).pathname.replace(/\/+$/, '') || '/'; }
-    catch (_) { return p; }
+    catch { return p; }
   }
 
   function isNavLink(a) {
@@ -40,7 +40,7 @@
   }
 
   function markNavigation() {
-    try { sessionStorage.setItem(NAV_FLAG, '1'); } catch (_) {}
+    try { sessionStorage.setItem(NAV_FLAG, '1'); } catch {}
   }
 
   // ── Animated element ──────────────────────────────────────────────────────

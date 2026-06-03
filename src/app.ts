@@ -332,7 +332,7 @@ app.use(
         return 100;
       }
     },
-    skip: async (req) => {
+    skip: async (_req) => {
       try {
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         return !settings?.rateLimitEnabled;

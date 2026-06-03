@@ -1,4 +1,24 @@
 <%- include('../../components/header', { title: 'Files' }) %>
+<style>
+  .al-file-panel { contain: layout paint; }
+  .al-file-row {
+    animation: al-file-row-in 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i, 0) * 18ms);
+  }
+  .al-file-row:hover .al-file-icon { transform: translateY(-1px); }
+  .al-file-row.is-selected { background: rgb(245 245 245); }
+  .dark .al-file-row.is-selected { background: rgb(255 255 255 / 0.04); }
+  .al-file-icon { transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms ease; }
+  .al-file-menu { will-change: transform, opacity; }
+  @keyframes al-file-row-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .al-file-row { animation: none; }
+    .al-file-icon, .al-file-menu { transition-duration: 0.01ms !important; }
+  }
+</style>
 
 <%
 function getFileIcon(category) {
@@ -123,7 +143,7 @@ function isImageFile(filename) {
       <% } else { %>
         <!-- File Table -->
         <div class="mt-4">
-          <div class="rounded-xl border border-neutral-200 dark:border-neutral-700/40 overflow-hidden">
+          <div class="al-file-panel rounded-xl border border-neutral-200 dark:border-neutral-700/40 overflow-hidden">
             <table class="min-w-full bg-white dark:bg-neutral-900/60">
 
                     <div class="p-2 overflow-hidden">
@@ -162,8 +182,8 @@ function isImageFile(filename) {
               </tr>
             </thead>
             <tbody>
-              <% files.forEach(file => { %>
-                <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.02] border-b border-neutral-100 dark:border-neutral-700/30 last:border-0 cursor-pointer transition-colors">
+              <% files.forEach((file, index) => { %>
+                <tr class="al-file-row hover:bg-neutral-50 dark:hover:bg-white/[0.02] border-b border-neutral-100 dark:border-neutral-700/30 last:border-0 cursor-pointer transition-colors duration-150" style="--i:<%= Math.min(index, 10) %>">
                   <td class="px-3 py-3 w-9">
                     <input type="checkbox" class="form-checkbox h-4 w-4 text-neutral-500 bg-white/5 border border-white/10 rounded transition file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>">
                   </td>
@@ -190,7 +210,7 @@ function isImageFile(filename) {
                       })();
                     %>
                     <a href="<%= fileHref %>" class="flex items-center gap-2 text-sm font-medium text-neutral-800 dark:text-neutral-200 transition-colors" <% if (isImage) { %>onclick="event.preventDefault(); showImageViewer('<%= file.name %>', '<%= filePath %>', '<%= fileSize %>', '<%= server.UUID %>');"<% } %>>
-                      <span class="text-neutral-400 dark:text-neutral-500 shrink-0">
+                      <span class="al-file-icon text-neutral-400 dark:text-neutral-500 shrink-0">
                         <%- getFileIcon(file.type === 'directory' ? 'Folder' : file.category || 'No Category') %>
                       </span>
                       <span class="truncate"><%= file.name %></span>
@@ -199,7 +219,7 @@ function isImageFile(filename) {
                   <td class="px-3 py-3 text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap">
                     <%= fileSize %>
                   </td>
-                    <div id="dropdown-<%= file.name %>" class="fixed w-44 rounded-xl shadow-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/60 z-50 transform opacity-0 scale-95 transition-all duration-150 ease-out pointer-events-none overflow-hidden">
+                    <div id="dropdown-<%= file.name %>" class="al-file-menu fixed w-44 rounded-xl shadow-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/60 z-50 transform opacity-0 scale-95 transition-all duration-150 ease-out pointer-events-none overflow-hidden">
                       <div class="py-1" role="menu">
                         <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
                           onclick="rename('<%= file.name %>', '<%= currentPath && currentPath !== "/" ? currentPath.replace(/^\/+/, "") + "/" + file.name : file.name %>')">
@@ -246,7 +266,7 @@ function isImageFile(filename) {
 
    <!-- Floating Action Bar (only show when daemon is online) -->
    <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-   <div id="floatingActionBar" class="fixed left-0 right-0 bg-neutral-900 dark:bg-neutral-800 z-40 text-white py-3 px-4 transition-all duration-300 ease-in-out flex justify-between items-center pointer-events-none" style="bottom: -80px;">
+   <div id="floatingActionBar" class="fixed left-0 right-0 bottom-16 bg-neutral-900 dark:bg-neutral-800 z-40 text-white py-3 px-4 transition-transform duration-200 ease-out flex justify-between items-center pointer-events-none translate-y-[calc(100%+80px)]">
     <span id="selectedFilesCount">0 files selected</span>
     <div class="flex gap-4">
         <button id="massRenameBtn" class="rounded-xl bg-neutral-700 dark:bg-neutral-600 text-white px-2.5 py-1.5 text-xs font-medium transition active:scale-95">
@@ -500,12 +520,16 @@ function isImageFile(filename) {
   function updateSelectedFiles() {
     const selectedCount = selectedFiles.length;
     if (selectedFiles.length > 0) {
-      floatingActionBar.style.bottom = '64px';
+      floatingActionBar.classList.remove('translate-y-[calc(100%+80px)]');
       floatingActionBar.classList.remove('pointer-events-none');
     } else {
-      floatingActionBar.style.bottom = '-80px';
+      floatingActionBar.classList.add('translate-y-[calc(100%+80px)]');
       floatingActionBar.classList.add('pointer-events-none');
     }
+    document.querySelectorAll('.file-checkbox[data-filename]').forEach(checkbox => {
+      const row = checkbox.closest('tr');
+      if (row) row.classList.toggle('is-selected', checkbox.checked);
+    });
     document.getElementById('selectedFilesCount').innerText = `${selectedCount} file${selectedCount !== 1 ? 's' : ''} selected`;
 
     document.getElementById('massDeleteBtn').disabled = selectedCount === 0;
@@ -563,7 +587,7 @@ document.querySelectorAll('.file-checkbox').forEach(checkbox => {
         const fileName = event.target.dataset.filename;
 
         if (event.target.checked) {
-            selectedFiles.push(fileName);
+            if (!selectedFiles.includes(fileName)) selectedFiles.push(fileName);
         } else {
             selectedFiles = selectedFiles.filter(name => name !== fileName);
         }

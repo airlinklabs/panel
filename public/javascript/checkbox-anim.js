@@ -45,7 +45,7 @@
         if (node.tagName === 'INPUT' && node.type === 'checkbox') {
           attachTo(node);
         } else {
-          node.querySelectorAll && node.querySelectorAll('input[type="checkbox"]').forEach(attachTo);
+          if (node.querySelectorAll) node.querySelectorAll('input[type="checkbox"]').forEach(attachTo);
         }
       });
     });

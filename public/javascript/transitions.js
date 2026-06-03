@@ -2,7 +2,7 @@
 
   // Pages that need a full hard navigation — can't survive a DOM swap.
   var HARD_NAV = [
-    /^\/server\/[^\/]+$/,  // console: xterm + live WebSocket
+    /^\/server\/[^/]+$/,  // console: xterm + live WebSocket
     /^\/auth\//,
     /^\/logout/,
     /^\/install/,
@@ -105,7 +105,7 @@
           var rawSrc = old.getAttribute('src') || '';
           var abs;
           try { abs = new URL(rawSrc, window.location.origin).href; }
-          catch (_) { abs = rawSrc; }
+          catch { abs = rawSrc; }
           if (seenSrc.has(abs)) { resolve(); return; }
           seenSrc.add(abs);
           var s = document.createElement('script');
@@ -314,7 +314,7 @@
             setTimeout(function () {
               newEl.style.transition = '';
               newEl.style.opacity = '';
-              try { newEl.scrollTop = 0; } catch (_) {}
+              try { newEl.scrollTop = 0; } catch {}
 
               // Run scripts after DOM is visible and settled
               runScripts(scripts).then(resolve).catch(function (e) {
@@ -373,7 +373,7 @@
 
     var href = a.getAttribute('href');
     var parsed;
-    try { parsed = new URL(href, window.location.origin); } catch (_) { return; }
+    try { parsed = new URL(href, window.location.origin); } catch { return; }
     if (parsed.origin !== window.location.origin) return;
 
     var path = parsed.pathname + parsed.search + parsed.hash;
@@ -392,7 +392,7 @@
   window.addEventListener('popstate', function (e) {
     var url = (e.state && e.state.url) || window.location.pathname;
     var parsed;
-    try { parsed = new URL(url, window.location.origin); } catch (_) { window.location.href = url; return; }
+    try { parsed = new URL(url, window.location.origin); } catch { window.location.href = url; return; }
     if (isHardNav(parsed.pathname)) { window.location.href = url; return; }
     navigate(url, false);
   });

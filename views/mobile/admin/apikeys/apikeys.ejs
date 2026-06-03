@@ -52,7 +52,7 @@
 
             <div class="flex items-center gap-2 mb-3 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg px-3 py-2">
               <code class="text-xs font-mono text-neutral-600 dark:text-neutral-400 flex-1 truncate"><%= apiKey.key.substring(0, 8) %>...</code>
-              <button onclick="copyToClipboard('<%= apiKey.key %>')" class="shrink-0 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition active:scale-90">
+              <button type="button" onclick="copyToClipboard('<%= apiKey.key %>')" class="shrink-0 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition active:scale-90" aria-label="Copy API key">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
                 </svg>
@@ -62,14 +62,14 @@
             <div class="flex items-center justify-between">
               <p class="text-xs text-neutral-500">By <%= apiKey.user ? apiKey.user.username : 'System' %> · <%= new Date(apiKey.createdAt).toLocaleDateString() %></p>
               <div class="flex gap-1.5">
-                <button onclick="showEditModal('<%= apiKey.id %>', '<%= apiKey.name %>', '<%= (apiKey.description || '').replace(/'/g, "\\'") %>', <%= JSON.stringify(apiKey.permissions) %>)" type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90">
+                <button onclick="showEditModal('<%= apiKey.id %>', '<%= apiKey.name %>', '<%= (apiKey.description || '').replace(/'/g, "\\'") %>', <%= JSON.stringify(apiKey.permissions) %>)" type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="Edit API key">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
                   </svg>
                 </button>
                 <form action="/admin/apikeys/toggle/<%= apiKey.id %>" method="POST" class="inline">
                   <%- include('../../components/csrf') %>
-                  <button type="submit" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90">
+                  <button type="submit" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="<%= apiKey.active ? 'Disable API key' : 'Enable API key' %>">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
                       <% if (apiKey.active) { %>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
@@ -81,7 +81,7 @@
                 </form>
                 <form id="deleteKeyForm_<%= apiKey.id %>" action="/admin/apikeys/delete/<%= apiKey.id %>" method="POST" class="inline">
                   <%- include('../../components/csrf') %>
-                  <button type="button" onclick="confirmDeleteApiKey('<%= apiKey.id %>')" class="rounded-lg bg-red-600 p-1.5 text-white hover:bg-red-500 transition active:scale-90">
+                  <button type="button" onclick="confirmDeleteApiKey('<%= apiKey.id %>')" class="rounded-lg bg-red-600 p-1.5 text-white hover:bg-red-500 transition active:scale-90" aria-label="Delete API key">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
                       <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                     </svg>
@@ -98,15 +98,15 @@
 </main>
 
 <!-- Create Key Modal -->
-<div id="createApiKeyModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60">
-  <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto translate-y-full transition-transform duration-300">
+<div id="createApiKeyModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60" aria-hidden="true">
+  <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto translate-y-full transition-transform duration-300" role="dialog" aria-modal="true" aria-labelledby="createApiKeyTitle" aria-describedby="createApiKeyDescription" tabindex="-1">
 
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60 sticky top-0 bg-white dark:bg-neutral-900 z-10">
       <div>
-        <p class="text-sm font-semibold text-neutral-800 dark:text-white">New API Key</p>
-        <p class="text-xs text-neutral-500 mt-0.5">Set a name and choose what this key can do.</p>
+        <p id="createApiKeyTitle" class="text-sm font-semibold text-neutral-800 dark:text-white">New API Key</p>
+        <p id="createApiKeyDescription" class="text-xs text-neutral-500 mt-0.5">Set a name and choose what this key can do.</p>
       </div>
-      <button onclick="hideCreateModal()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90">
+      <button type="button" onclick="hideCreateModal()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="Close new API key dialog">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
       </button>
     </div>
@@ -140,6 +140,7 @@
             <div class="rounded-xl border border-neutral-200 dark:border-neutral-700/60 overflow-hidden">
               <button type="button"
                 class="w-full flex items-center justify-between px-4 py-3 bg-neutral-50 dark:bg-neutral-800 active:bg-neutral-100 dark:active:bg-neutral-700/60 transition-colors"
+                aria-expanded="false"
                 onclick="toggleCat(this)">
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-medium text-neutral-700 dark:text-neutral-300 capitalize"><%= category %></span>
@@ -175,15 +176,15 @@
 </div>
 
 <!-- Edit Key Modal -->
-<div id="editApiKeyModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60">
-  <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto translate-y-full transition-transform duration-300">
+<div id="editApiKeyModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60" aria-hidden="true">
+  <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto translate-y-full transition-transform duration-300" role="dialog" aria-modal="true" aria-labelledby="editApiKeyTitle" aria-describedby="editApiKeyDescription" tabindex="-1">
 
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60 sticky top-0 bg-white dark:bg-neutral-900 z-10">
       <div>
-        <p class="text-sm font-semibold text-neutral-800 dark:text-white">Edit API Key</p>
-        <p class="text-xs text-neutral-500 mt-0.5">Update permissions and details.</p>
+        <p id="editApiKeyTitle" class="text-sm font-semibold text-neutral-800 dark:text-white">Edit API Key</p>
+        <p id="editApiKeyDescription" class="text-xs text-neutral-500 mt-0.5">Update permissions and details.</p>
       </div>
-      <button onclick="hideEditModal()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90">
+      <button type="button" onclick="hideEditModal()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="Close edit API key dialog">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
       </button>
     </div>
@@ -217,6 +218,7 @@
             <div class="rounded-xl border border-neutral-200 dark:border-neutral-700/60 overflow-hidden">
               <button type="button"
                 class="w-full flex items-center justify-between px-4 py-3 bg-neutral-50 dark:bg-neutral-800 active:bg-neutral-100 dark:active:bg-neutral-700/60 transition-colors"
+                aria-expanded="false"
                 onclick="toggleCat(this)">
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-medium text-neutral-700 dark:text-neutral-300 capitalize"><%= category %></span>
@@ -256,6 +258,14 @@
 </div>
 
 <script nonce="<%- nonce %>">
+  let activeModalId = null;
+  let modalReturnFocus = null;
+
+  function getFocusableElements(root) {
+    return Array.from(root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+      .filter(el => !el.disabled && el.offsetParent !== null);
+  }
+
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text)
       .then(() => showToast('API key copied', 'success'))
@@ -264,19 +274,33 @@
 
   function showModal(id) {
     const el = document.getElementById(id);
+    const panel = el.querySelector('[role="dialog"]');
+    modalReturnFocus = document.activeElement;
+    activeModalId = id;
+    el.setAttribute('aria-hidden', 'false');
     el.classList.remove('hidden');
     el.classList.add('flex');
     requestAnimationFrame(() => {
-      el.querySelector('div').classList.remove('translate-y-full');
-      el.querySelector('div').classList.add('translate-y-0');
+      panel.classList.remove('translate-y-full');
+      panel.classList.add('translate-y-0');
+      const focusable = getFocusableElements(panel);
+      (focusable[0] || panel).focus();
     });
   }
 
   function hideModal(id) {
     const el = document.getElementById(id);
-    el.querySelector('div').classList.remove('translate-y-0');
-    el.querySelector('div').classList.add('translate-y-full');
-    setTimeout(() => { el.classList.add('hidden'); el.classList.remove('flex'); }, 300);
+    const panel = el.querySelector('[role="dialog"]');
+    el.setAttribute('aria-hidden', 'true');
+    panel.classList.remove('translate-y-0');
+    panel.classList.add('translate-y-full');
+    setTimeout(() => {
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+      if (modalReturnFocus && typeof modalReturnFocus.focus === 'function') modalReturnFocus.focus();
+      modalReturnFocus = null;
+      activeModalId = null;
+    }, 300);
   }
 
   document.getElementById('createApiKeyBtn').addEventListener('click', () => showModal('createApiKeyModal'));
@@ -289,9 +313,38 @@
     });
   });
 
+  document.addEventListener('keydown', function(e) {
+    if (!activeModalId) return;
+    const modal = document.getElementById(activeModalId);
+    const panel = modal.querySelector('[role="dialog"]');
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      hideModal(activeModalId);
+      return;
+    }
+    if (e.key !== 'Tab') return;
+    const focusable = getFocusableElements(panel);
+    if (!focusable.length) {
+      e.preventDefault();
+      panel.focus();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+
   function toggleCat(btn) {
-    btn.nextElementSibling.classList.toggle('hidden');
-    btn.querySelector('.category-chevron').classList.toggle('rotate-180');
+    const panel = btn.nextElementSibling;
+    const expanded = panel.classList.toggle('hidden') === false;
+    btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    btn.querySelector('.category-chevron').classList.toggle('rotate-180', expanded);
   }
 
   function refreshLabels(changedCb, form, category) {
@@ -400,6 +453,18 @@
   }
 
   function confirmDeleteApiKey(keyId) {
+    if (window.modal && typeof window.modal.confirm === 'function') {
+      window.modal.confirm({
+        title: 'Delete API key',
+        body: 'This will permanently revoke the key. Any integrations using it will stop working.',
+        danger: true,
+        confirmLabel: 'Delete',
+        onConfirm: () => {
+          document.getElementById('deleteKeyForm_' + keyId).submit();
+        }
+      });
+      return;
+    }
     showConfirmModal('Delete API key', 'This will permanently revoke the key. Any integrations using it will stop working.', () => {
       document.getElementById('deleteKeyForm_' + keyId).submit();
     });

@@ -42,7 +42,7 @@ export const addCsrfTokenToLocals = (req: Request, res: Response, next: NextFunc
     if (req.csrfToken) {
       res.locals.csrfToken = req.csrfToken();
     }
-  } catch (error) {
+  } catch {
     // If there's an error, just continue without setting the token
     // This can happen if the route doesn't have CSRF protection
   }

@@ -5,7 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
 import { queueer } from '../../handlers/queueer';
-import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
+import { getParamAsNumber } from "../../utils/typeHelpers";
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 

@@ -4,8 +4,6 @@ import path from 'path';
 import logger from './logger';
 import chalk from 'chalk';
 
-type ModuleResult = { file: string; mod: any } | { file: string; error: any };
-
 const isDebugMode = process.env.DEBUG === 'true';
 
 export const loadModules = async (

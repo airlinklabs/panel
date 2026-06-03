@@ -37,7 +37,7 @@
     const token = getCsrfToken();
     const originalSend = this.send;
     
-    this.send = function(data) {
+    this.send = function(_data) {
       if (
         token && 
         method.toUpperCase() !== 'GET' && 

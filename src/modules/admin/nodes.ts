@@ -5,7 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
 import logger from '../../handlers/logger';
 import axios from 'axios';
-import { getParamAsString, getParamAsNumber } from "../../utils/typeHelpers";
+import { getParamAsNumber } from "../../utils/typeHelpers";
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 
@@ -484,7 +484,7 @@ const adminModule: Module = {
           );
 
           stats = response.data;
-        } catch (_error) {
+        } catch {
           stats = { error: 'Unable to fetch stats from the node.' };
         }
         res.render('admin/nodes/stats', { node, user, req, settings, stats });

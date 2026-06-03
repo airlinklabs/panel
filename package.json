@@ -79,6 +79,10 @@
     "typescript-eslint": "^8.15.0"
   },
   "pnpm": {
+    "overrides": {
+      "cookie": "^0.7.2",
+      "dompurify": "^3.4.0"
+    },
     "onlyBuiltDependencies": [
       "@parcel/watcher",
       "@prisma/client",

@@ -420,7 +420,7 @@ export function initDesktop(inputEl) {
 }
 
 // Wire up the suggestion bar for mobile.
-export function initMobile(inputEl, serverUUID) {
+export function initMobile(inputEl, _serverUUID) {
   const bar = document.getElementById('suggestion-bar');
   const list = document.getElementById('suggestion-list');
   if (!bar || !list) return;
