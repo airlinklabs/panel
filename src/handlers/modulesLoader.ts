@@ -33,6 +33,7 @@ export const loadModules = async (
     '| $$  | $| $| $$     | $| $| $$  | $| $$ \\  $$',
     '|__/  |__|__|__/     |__|__|__/  |__|__/  \\__/',
     '                                              ',
+    '---Airlink Panel - By Airlinklabs MIT LICENSE---',
   ];
 
   ascii.forEach((line, i) => {
