@@ -64,10 +64,18 @@
                 <label for="serverImage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Image:</label>
                 <select id="serverImage" name="imageId" class="hidden">
                   <% images.forEach(image => { %>
-                    <option value="<%= image.id %>" <%= image.id === server.imageId ? 'selected' : '' %>><%= image.name %></option>
+                    <option value="<%= image.id %>" <%= image.id === server.imageId ? 'selected' : '' %> data-port-requirements='<%= image.portRequirements || "[]" %>'><%= image.name %></option>
                   <% }); %>
                 </select>
                 <div class="custom-select mt-2 mb-4" data-for="serverImage"></div>
+              </div>
+
+              <div>
+                <label class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Ports:</label>
+                <input type="hidden" id="serverPorts" name="Ports">
+                <button type="button" id="assignPortsBtn" class="mt-2 mb-4 w-full rounded-xl bg-neutral-100 dark:bg-neutral-700/30 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white px-4 py-2 text-sm border border-neutral-200 dark:border-white/5 text-left">
+                  Assign ports
+                </button>
               </div>
             </div>
 
@@ -221,6 +229,22 @@
   </div>
 </main>
 
+<div id="portsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+  <div class="w-full max-w-4xl rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-900 shadow-xl">
+    <div class="flex items-center justify-between border-b border-neutral-200 dark:border-white/10 px-5 py-4">
+      <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
+      <button type="button" id="closePortsModal" class="text-sm text-neutral-500 hover:text-neutral-800 dark:hover:text-white">Close</button>
+    </div>
+    <div class="p-5">
+      <div id="portsRows" class="space-y-3"></div>
+      <button type="button" id="addPortRow" class="mt-4 rounded-lg border border-neutral-200 dark:border-white/10 px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5">Add port</button>
+    </div>
+    <div class="flex justify-end gap-2 border-t border-neutral-200 dark:border-white/10 px-5 py-4">
+      <button type="button" id="savePortsModal" class="rounded-lg bg-neutral-900 dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-neutral-900">Save ports</button>
+    </div>
+  </div>
+</div>
+
 <%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
 
@@ -231,6 +255,135 @@
     const allowStartupEditLabel  = document.getElementById('allowStartupEditLabel');
     const suspendServerToggle    = document.getElementById('suspendServer');
     const suspendServerLabel     = document.getElementById('suspendServerLabel');
+    const serverNodeSelect = document.getElementById('serverNode');
+    const serverImageSelect = document.getElementById('serverImage');
+    const serverPortsInput = document.getElementById('serverPorts');
+    let nodesData = {};
+    let availablePorts = [];
+    let assignedPorts = <%- JSON.stringify((() => { try { return JSON.parse(server.Ports || '[]'); } catch { return []; } })()) %>.map((port, index) => {
+      const parts = String(port.Port || '').split(':');
+      return {
+        name: port.name || `Port ${index + 1}`,
+        internalPort: Number(port.internalPort || parts[1] || parts[0]),
+        externalPort: Number(port.externalPort || parts[0]),
+        primary: Boolean(port.primary || index === 0),
+      };
+    });
+
+    async function fetchNodesData() {
+      const response = await fetch('/admin/nodes/list');
+      const nodes = await response.json();
+      nodes.forEach(node => {
+        let ports = [];
+        try { ports = JSON.parse(node.allocatedPorts || '[]'); } catch {}
+        nodesData[node.id] = { ...node, parsedPorts: ports };
+      });
+      updatePortsForSelectedNode();
+    }
+
+    function updatePortsForSelectedNode() {
+      const node = nodesData[serverNodeSelect.value];
+      if (!node) return;
+      const usedPorts = new Set();
+      (node.servers || []).forEach(server => {
+        if (server.id === <%= server.id %>) return;
+        try {
+          JSON.parse(server.Ports || '[]').forEach(portInfo => {
+            const external = Number(portInfo.externalPort || String(portInfo.Port || '').split(':')[0]);
+            if (!isNaN(external)) usedPorts.add(external);
+          });
+        } catch {}
+      });
+      availablePorts = (node.parsedPorts || [])
+        .filter(port => !usedPorts.has(port) || assignedPorts.some(item => Number(item.externalPort) === port))
+        .map(port => ({ port, label: `${node.address}:${port}` }));
+      ensureMinimumPortRows();
+      syncPortsButton();
+    }
+
+    function getPortRequirements() {
+      const selectedOption = serverImageSelect.options[serverImageSelect.selectedIndex];
+      try { return JSON.parse(selectedOption.getAttribute('data-port-requirements') || '[]'); } catch { return []; }
+    }
+
+    function ensureMinimumPortRows() {
+      const requirements = getPortRequirements();
+      while (assignedPorts.length < requirements.length) {
+        const req = requirements[assignedPorts.length] || {};
+        assignedPorts.push({
+          name: req.name || `Port ${assignedPorts.length + 1}`,
+          internalPort: Number(req.internalPort || 25565),
+          externalPort: availablePorts.find(item => !assignedPorts.some(port => Number(port.externalPort) === item.port))?.port || '',
+          primary: assignedPorts.length === 0
+        });
+      }
+      serverPortsInput.value = JSON.stringify(assignedPorts);
+    }
+
+    function syncPortsButton() {
+      serverPortsInput.value = JSON.stringify(assignedPorts);
+      document.getElementById('assignPortsBtn').textContent = assignedPorts.length ? `Assign ports (${assignedPorts.length})` : 'Assign ports';
+    }
+
+    function renderPortRows() {
+      ensureMinimumPortRows();
+      const rows = document.getElementById('portsRows');
+      rows.innerHTML = '';
+      const min = getPortRequirements().length;
+      assignedPorts.forEach((port, index) => {
+        const row = document.createElement('div');
+        row.className = 'grid grid-cols-1 md:grid-cols-[1fr_130px_1fr_auto] gap-2 items-end rounded-lg border border-neutral-200 dark:border-white/10 p-3';
+        row.innerHTML = `
+          <label class="text-xs text-neutral-500">Port name<input data-port-field="${index}" data-field="name" value="${port.name || ''}" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
+          <label class="text-xs text-neutral-500">Internal port<input data-port-field="${index}" data-field="internalPort" type="number" min="1" max="65535" value="${port.internalPort || ''}" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
+          <label class="text-xs text-neutral-500">External port<select data-port-field="${index}" data-field="externalPort" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></select></label>
+          <button type="button" data-remove-port="${index}" class="rounded-lg border border-red-200 px-3 py-2 text-sm text-red-500 ${index < min ? 'opacity-40 pointer-events-none' : ''}">Remove</button>`;
+        rows.appendChild(row);
+        const select = row.querySelector('select');
+        select.innerHTML = '<option value="">Select port</option>';
+        availablePorts.forEach(item => {
+          const option = document.createElement('option');
+          option.value = item.port;
+          option.textContent = item.label;
+          option.selected = Number(port.externalPort) === item.port;
+          select.appendChild(option);
+        });
+      });
+    }
+
+    document.getElementById('assignPortsBtn').addEventListener('click', () => {
+      renderPortRows();
+      document.getElementById('portsModal').classList.remove('hidden');
+      document.getElementById('portsModal').classList.add('flex');
+    });
+    document.getElementById('closePortsModal').addEventListener('click', () => {
+      document.getElementById('portsModal').classList.add('hidden');
+      document.getElementById('portsModal').classList.remove('flex');
+    });
+    document.getElementById('addPortRow').addEventListener('click', () => {
+      assignedPorts.push({ name: `Port ${assignedPorts.length + 1}`, internalPort: 25565, externalPort: '', primary: assignedPorts.length === 0 });
+      renderPortRows();
+    });
+    document.getElementById('portsRows').addEventListener('click', (event) => {
+      const button = event.target.closest('[data-remove-port]');
+      if (!button) return;
+      assignedPorts.splice(Number(button.dataset.removePort), 1);
+      renderPortRows();
+    });
+    document.getElementById('savePortsModal').addEventListener('click', () => {
+      document.querySelectorAll('[data-port-field]').forEach(input => {
+        const index = Number(input.dataset.portField);
+        assignedPorts[index][input.dataset.field] = input.dataset.field.includes('Port') ? Number(input.value) : input.value;
+      });
+      assignedPorts = assignedPorts.filter(port => port.name && port.internalPort && port.externalPort);
+      assignedPorts.forEach((port, index) => { port.primary = index === 0; });
+      syncPortsButton();
+      document.getElementById('portsModal').classList.add('hidden');
+      document.getElementById('portsModal').classList.remove('flex');
+    });
+    serverNodeSelect.addEventListener('change', updatePortsForSelectedNode);
+    serverImageSelect.addEventListener('change', () => { ensureMinimumPortRows(); syncPortsButton(); });
+    fetchNodesData();
 
     // MB/GB picker
     function syncUnit(displayId, unitId, hiddenId) {
@@ -269,6 +422,7 @@
 
       const formData = new FormData(form);
       const data = Object.fromEntries(formData);
+      data.ports = assignedPorts;
 
       // Handle checkbox values
       if (!formData.has('allowStartupEdit')) {

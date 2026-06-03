@@ -150,7 +150,7 @@
                   <select id="imageId" class="hidden">
                     <option value="" disabled selected>Select an image</option>
                     <% images.forEach(image => { %>
-                    <option value="<%= image.id %>" data-docker="<%= image.dockerImages %>"><%= image.name %></option>
+                    <option value="<%= image.id %>" data-docker="<%= image.dockerImages %>" data-port-requirements='<%= image.portRequirements || "[]" %>'><%= image.name %></option>
                     <% }); %>
                   </select>
                   <div class="custom-select" data-for="imageId"></div>
@@ -162,6 +162,12 @@
                   </select>
                   <div class="custom-select" data-for="dockerImage"></div>
                 </div>
+              </div>
+              <div>
+                <label class="form-label">Ports</label>
+                <button type="button" id="assignPortsBtn" class="cs-trigger">
+                  <span id="assignPortsLabel">Assign ports</span>
+                </button>
               </div>
             </div>
           </div>
@@ -235,6 +241,16 @@
     </div>
   </div>
 </main>
+
+<div class="confirm-overlay" id="portsOverlay">
+  <div class="confirm-box max-w-lg">
+    <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-3">Assign ports</p>
+    <div id="requiredPortsList" class="space-y-2"></div>
+    <div class="flex justify-end mt-4">
+      <button id="portsOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">OK</button>
+    </div>
+  </div>
+</div>
 
 <!-- Custom confirm dialog -->
 <div class="confirm-overlay" id="confirmOverlay">
@@ -366,7 +382,37 @@
       } catch {}
     }
     docker.dispatchEvent(new Event('change', { bubbles: true }));
+    updateRequiredPorts();
   });
+
+  function getRequiredPorts() {
+    const image = document.getElementById('imageId');
+    const opt = image.options[image.selectedIndex];
+    try { return JSON.parse(opt?.dataset.portRequirements || '[]'); } catch { return []; }
+  }
+
+  function updateRequiredPorts() {
+    const ports = getRequiredPorts();
+    document.getElementById('assignPortsLabel').textContent = ports.length ? `Assign ports (${ports.length})` : 'Assign ports';
+  }
+
+  document.getElementById('assignPortsBtn').addEventListener('click', () => {
+    const ports = getRequiredPorts();
+    const list = document.getElementById('requiredPortsList');
+    list.innerHTML = '';
+    if (!ports.length) {
+      list.innerHTML = '<p class="text-xs text-neutral-500">This image does not require ports.</p>';
+    } else {
+      ports.forEach((port, index) => {
+        const row = document.createElement('div');
+        row.className = 'grid grid-cols-2 gap-2 rounded-lg border border-neutral-200 dark:border-white/10 p-3 text-xs text-neutral-600 dark:text-neutral-300';
+        row.innerHTML = `<span>${port.name || `Port ${index + 1}`}</span><span class="font-mono text-right">internal ${port.internalPort || ''}</span>`;
+        list.appendChild(row);
+      });
+    }
+    document.getElementById('portsOverlay').classList.add('open');
+  });
+  document.getElementById('portsOk').addEventListener('click', () => document.getElementById('portsOverlay').classList.remove('open'));
 
   /* ── Stepper buttons ────────────────────────────────────── */
   document.querySelectorAll('.stepper-btn').forEach(btn => {

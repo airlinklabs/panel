@@ -107,7 +107,7 @@
             <select id="imageId" class="form-input" style="appearance:none;-webkit-appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2'%3E%3Cpath d='M19 9l-7 7-7-7'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 12px center;background-size:14px;padding-right:36px;">
               <option value="">Select an image</option>
               <% images.forEach(image => { %>
-              <option value="<%= image.id %>" data-docker="<%= image.dockerImages %>"><%= image.name %></option>
+              <option value="<%= image.id %>" data-docker="<%= image.dockerImages %>" data-port-requirements='<%= image.portRequirements || "[]" %>'><%= image.name %></option>
               <% }); %>
             </select>
           </div>
@@ -116,6 +116,12 @@
             <select id="dockerImage" disabled class="form-input" style="appearance:none;-webkit-appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2'%3E%3Cpath d='M19 9l-7 7-7-7'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 12px center;background-size:14px;padding-right:36px;">
               <option value="">Select image first</option>
             </select>
+          </div>
+          <div>
+            <label class="form-label">Ports</label>
+            <button type="button" id="assignPortsBtn" class="form-input text-left">
+              <span id="assignPortsLabel">Assign ports</span>
+            </button>
           </div>
         </div>
       </div>
@@ -182,6 +188,16 @@
   </div>
 </div>
 
+<!-- Ports sheet -->
+<div class="sheet-overlay" id="portsOverlay">
+  <div class="sheet-box">
+    <div class="w-10 h-1 bg-neutral-200 dark:bg-neutral-700 rounded-full mx-auto mb-4"></div>
+    <p class="text-base font-semibold text-neutral-900 dark:text-white mb-3">Assign ports</p>
+    <div id="requiredPortsList" class="space-y-2"></div>
+    <button id="portsOk" class="mt-5 w-full py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm font-semibold transition active:scale-[0.98]">OK</button>
+  </div>
+</div>
+
 <%- include('../components/toast') %>
 <%- include('../components/loadingPopup') %>
 
@@ -205,7 +221,41 @@
       });
       docker.disabled = false;
     } catch {}
+    updateRequiredPorts();
   });
+
+  function getRequiredPorts() {
+    const image = document.getElementById('imageId');
+    const opt = image.options[image.selectedIndex];
+    try { return JSON.parse(opt?.dataset.portRequirements || '[]'); } catch { return []; }
+  }
+
+  function updateRequiredPorts() {
+    const ports = getRequiredPorts();
+    document.getElementById('assignPortsLabel').textContent = ports.length ? `Assign ports (${ports.length})` : 'Assign ports';
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  document.getElementById('assignPortsBtn').addEventListener('click', () => {
+    const ports = getRequiredPorts();
+    const list = document.getElementById('requiredPortsList');
+    list.innerHTML = '';
+    if (!ports.length) {
+      list.innerHTML = '<p class="text-sm text-neutral-500">This image does not require ports.</p>';
+    } else {
+      ports.forEach((port, index) => {
+        const row = document.createElement('div');
+        row.className = 'rounded-xl border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-neutral-800/40 p-3';
+        row.innerHTML = `<div class="flex items-center justify-between gap-3"><span class="text-sm font-medium text-neutral-700 dark:text-neutral-200">${escapeHtml(port.name || `Port ${index + 1}`)}</span><span class="text-xs font-mono text-neutral-500">internal ${escapeHtml(port.internalPort || '')}</span></div>`;
+        list.appendChild(row);
+      });
+    }
+    document.getElementById('portsOverlay').classList.add('open');
+  });
+  document.getElementById('portsOk').addEventListener('click', () => document.getElementById('portsOverlay').classList.remove('open'));
 
   /* Stepper buttons */
   document.querySelectorAll('.stepper-btn').forEach(btn => {

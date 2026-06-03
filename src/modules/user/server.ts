@@ -13,6 +13,7 @@ import { getParamAsString } from '../../utils/typeHelpers';
 import prisma from '../../db';
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 import { AirlinkCloudClient } from '../../handlers/utils/core/airlinkCloud';
+import { getPrimaryExternalPort, portsToDaemonString } from '../../handlers/utils/server/ports';
 
 declare global {
   var serverStoppingStates: { [key: string]: boolean };
@@ -196,12 +197,7 @@ function buildEnvVariables(variables: string | null | ServerVariable[]): Record<
 }
 
 function getPrimaryPort(portsJson: string): number | undefined {
-  try {
-    const ports = JSON.parse(portsJson) as Port[];
-    return ports.filter((p) => p.primary).map((p) => p.Port).pop();
-  } catch {
-    return undefined;
-  }
+  return getPrimaryExternalPort(portsJson);
 }
 
 type ServerRuntimeConfig = Pick<
@@ -275,7 +271,7 @@ async function startServerContainer(
     data: {
       id: serverId,
       image: dockerImage,
-      ports: getPrimaryPort(server.Ports),
+      ports: portsToDaemonString(server.Ports),
       Memory: server.Memory,
       Cpu: server.Cpu,
       Storage: server.Storage,

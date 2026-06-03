@@ -133,7 +133,7 @@
                 <a href="/admin/node/<%= server.node.id %>/stats" class="font-medium text-neutral-800 dark:text-blue-400 hover:underline" onclick="event.stopPropagation()"><%= server.node.name %></a>
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400">
-                <%= server.node.address %>:<%= JSON.parse(server.Ports).filter(p => p.primary).map(p => p.Port.split(':')[1]).pop() %>
+                <%= server.node.address %>:<%= JSON.parse(server.Ports).filter(p => p.primary).map(p => p.externalPort || String(p.Port || '').split(':')[0]).pop() %>
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm">
                 <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset

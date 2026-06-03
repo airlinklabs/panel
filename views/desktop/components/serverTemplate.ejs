@@ -106,7 +106,7 @@
               if (value.includes(':id')) value = value.replace(':id', server.id);
               if (value.includes(':address')) {
                 const primaryPort = server.Ports ? JSON.parse(server.Ports).find(p => p.primary) : null;
-                const portNumber = primaryPort ? primaryPort.Port.split(':')[1] : '';
+                const portNumber = primaryPort ? (primaryPort.externalPort || String(primaryPort.Port || '').split(':')[0]) : '';
                 value = value.replace(':address', `${server.node.address}:${portNumber}`);
               }
               if (value.includes(':image')) value = value.replace(':image', server.image.name || 'Unknown');

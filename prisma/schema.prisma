@@ -82,6 +82,7 @@ model Images {
   info         String?
   scripts      String?
   variables    String?
+  portRequirements String @default("[]")
 
   servers      Server[]
 }
