@@ -2,3 +2,80 @@
 @plugin '@tailwindcss/forms';
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  html {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  dd {
+    text-wrap: pretty;
+  }
+
+  :where(button, [role="button"], a, input, select, textarea):focus-visible {
+    outline: 2px solid rgb(59 130 246 / 0.75);
+    outline-offset: 2px;
+  }
+
+  :where(button, [role="button"]) {
+    min-height: 2.25rem;
+  }
+
+  :where(button, input, select, textarea) {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .shadow-md {
+    --tw-shadow: 0 6px 12px -10px rgb(0 0 0 / 0.32);
+    --tw-shadow-colored: 0 6px 12px -10px var(--tw-shadow-color);
+  }
+
+  .shadow-lg {
+    --tw-shadow: 0 8px 18px -14px rgb(0 0 0 / 0.34);
+    --tw-shadow-colored: 0 8px 18px -14px var(--tw-shadow-color);
+  }
+
+  .shadow-2xl {
+    --tw-shadow: 0 18px 44px -28px rgb(0 0 0 / 0.45);
+    --tw-shadow-colored: 0 18px 44px -28px var(--tw-shadow-color);
+  }
+
+  .al-ui-surface {
+    @apply border border-neutral-200 bg-white dark:border-neutral-700/50 dark:bg-neutral-900/60;
+  }
+
+  .al-ui-button {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-800 transition-colors hover:bg-neutral-100 active:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-55 dark:border-white/10 dark:bg-white/5 dark:text-neutral-100 dark:hover:bg-white/10 dark:active:bg-white/15;
+  }
+
+  .al-ui-button-primary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl bg-neutral-950 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800 active:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-55 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200 dark:active:bg-neutral-300;
+  }
+
+  .al-ui-muted {
+    @apply text-neutral-600 dark:text-neutral-400;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
