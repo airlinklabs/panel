@@ -314,7 +314,7 @@ const adminModule: Module = {
           res
             .status(200)
             .json(
-              'npm run configure -- -- --panel "' +
+              'configure -- -- --panel "' +
                 process.env.URL +
                 '" --key "' +
                 node.key +
