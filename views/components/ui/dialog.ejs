@@ -1,0 +1,8 @@
+<div id="<%= id %>" data-ui-dialog class="fixed inset-0 z-[9000] hidden items-center justify-center bg-black/50" role="dialog" aria-modal="true" aria-labelledby="<%= id %>-title">
+  <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-2xl w-full max-w-sm mx-4">
+    <div class="px-5 py-4 border-b border-neutral-200 dark:border-white/5"><h2 id="<%= id %>-title" class="text-base font-medium text-neutral-900 dark:text-white"><%= title %></h2></div>
+    <div class="px-5 py-4 text-sm text-neutral-600 dark:text-neutral-300"><%- body || '' %></div>
+    <div class="px-5 py-4 flex justify-end gap-2"><%- actions || '' %></div>
+  </div>
+</div>
+<script nonce="<%- nonce %>">document.addEventListener('DOMContentLoaded',function(){if(window.ui)window.ui.registerDialog('<%= id %>');});</script>

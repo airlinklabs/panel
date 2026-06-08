@@ -1,0 +1,12 @@
+<fieldset>
+  <% if (label) { %><legend class="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2"><%= label %></legend><% } %>
+  <div class="<%= layout === 'inline' ? 'flex flex-wrap gap-2' : 'space-y-2' %>">
+    <% (options || []).forEach(function(option, idx) { %>
+    <label class="flex items-start gap-3 rounded-xl border px-3 py-2 transition <%= option.checked ? 'bg-neutral-50 dark:bg-white/5 border-neutral-300 dark:border-white/10' : 'border-neutral-200 dark:border-white/5' %>">
+      <input class="sr-only peer" type="radio" name="<%= name %>" value="<%= option.value %>" <%= option.checked ? 'checked' : '' %>>
+      <span class="mt-0.5 h-4 w-4 rounded-full border-2 border-neutral-300 dark:border-neutral-600 peer-checked:border-neutral-900 dark:peer-checked:border-white after:block after:m-0.5 after:h-2 after:w-2 after:rounded-full peer-checked:after:bg-neutral-900 dark:peer-checked:after:bg-white"></span>
+      <span><span class="block text-sm font-medium text-neutral-800 dark:text-white"><%= option.label %></span><% if (option.description) { %><span class="block text-xs text-neutral-500"><%= option.description %></span><% } %></span>
+    </label>
+    <% }); %>
+  </div>
+</fieldset>

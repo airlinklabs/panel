@@ -469,14 +469,8 @@ app.use((_req, res, next) => {
       return;
     }
 
-    const prefix = isMobileViewport ? 'mobile/' : 'desktop/';
-    const prefixedView =
-      view.startsWith('desktop/') || view.startsWith('mobile/')
-        ? view
-        : prefix + view;
-
-    const prefixedViewPath = path.join(viewsPath, prefixedView + '.ejs');
-    if (!fs.existsSync(prefixedViewPath) && !view.startsWith('desktop/') && !view.startsWith('mobile/')) {
+    const viewPath = path.join(viewsPath, view + '.ejs');
+    if (!fs.existsSync(viewPath)) {
       for (const addonDir of getAddonDirs()) {
         const viewportSubdir = isMobileViewport ? 'mobile' : 'desktop';
         const addonViewportPath = path.join(addonViewsDir, addonDir, 'views', viewportSubdir, view + '.ejs');
@@ -497,7 +491,7 @@ app.use((_req, res, next) => {
       }
     }
 
-    return originalRenderBase(prefixedView, options, callback);
+    return originalRenderBase(view, options, callback);
   };
 
   const renderWithViewport = res.render;

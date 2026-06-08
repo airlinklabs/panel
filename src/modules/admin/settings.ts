@@ -169,7 +169,7 @@ const adminModule: Module = {
             ...loadUserThemes(),
           ];
 
-          res.render('admin/settings/settings', { user, req, settings, allThemes });
+          res.render('admin/settings', { user, req, settings, allThemes });
         } catch (error) {
           logger.error('Error loading settings page:', error);
           res.redirect('/login');

@@ -1,0 +1,17 @@
+<div class="rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden shadow-sm">
+  <table class="min-w-full">
+    <thead class="bg-neutral-50 dark:bg-neutral-800/20">
+      <tr><% (columns || []).forEach(function(column) { %><th class="text-xs font-medium text-neutral-500 dark:text-neutral-400 py-3 px-4 text-left <%= column.class || '' %>"><%= column.label %></th><% }); %></tr>
+    </thead>
+    <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-transparent">
+      <% if (!rows || rows.length === 0) { %>
+      <tr><td colspan="<%= (columns || []).length || 1 %>" class="px-4 py-12 text-center"><div class="flex flex-col items-center"><%- emptyIcon || '' %><p class="text-sm font-medium text-neutral-800 dark:text-white"><%= emptyLabel %></p><% if (emptySubtext) { %><p class="text-xs text-neutral-500 mt-1"><%= emptySubtext %></p><% } %></div></td></tr>
+      <% } else { rows.forEach(function(row) { %>
+      <tr class="<%= rowHref ? 'hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors cursor-pointer' : '' %>" <% if (rowHref && row[rowHref]) { %>data-row-href="<%= row[rowHref] %>"<% } %>>
+        <% columns.forEach(function(column) { %><td class="py-3 px-4 text-sm text-neutral-700 dark:text-neutral-200 <%= column.class || '' %>"><%- row[column.key] ?? '' %></td><% }); %>
+      </tr>
+      <% }); } %>
+    </tbody>
+  </table>
+</div>
+<script nonce="<%- nonce %>">document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('[data-row-href]').forEach(function(r){r.addEventListener('click',function(){window.location.href=r.getAttribute('data-row-href');});});});</script>

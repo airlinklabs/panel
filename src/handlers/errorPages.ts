@@ -105,9 +105,7 @@ function getCookieValue(req: Request, name: string): string | undefined {
 }
 
 function getErrorView(req: Request): string {
-  return getCookieValue(req, 'viewport_mode') === 'mobile'
-    ? 'mobile/errors/error'
-    : 'desktop/errors/error';
+  return 'errors/error';
 }
 
 async function getErrorRenderData(req: Request, statusCode: number, detail?: string) {
