@@ -82,7 +82,7 @@ class Seeder {
 
   private async fetchAndProcessImages(): Promise<Record<string, any>[]> {
     console.info(`Fetching image index from ${IMAGES_URL}...`);
-    const { data: imageUrls } = await axios.get<string[]>(IMAGES_URL);
+    const { data: imageUrls } = await axios.get(IMAGES_URL);
     console.info(`Found ${imageUrls.length} images in the index.`);
 
     const results = await Promise.allSettled(
@@ -120,7 +120,7 @@ class Seeder {
       }
 
       const existingImages = await prisma.images.findMany();
-      const existingImageMap = new Map(existingImages.map(img => [img.name, img]));
+      const existingImageMap = new Map<string, any>(existingImages.map((img: any) => [img.name, img]));
 
       let updatedCount = 0;
       let createdCount = 0;
@@ -130,7 +130,7 @@ class Seeder {
       for (const image of processedImages) {
         if (existingImageMap.has(image.name)) {
           await prisma.images.update({
-            where: { id: existingImageMap.get(image.name)!.id },
+            where: { id: (existingImageMap.get(image.name) as any).id },
             data: image
           });
           updatedCount++;

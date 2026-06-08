@@ -2,10 +2,10 @@
 
 <main class="min-h-screen m-auto">
   <div class="flex min-h-screen">
-    <div class="contents lg:block w-60 h-full">
+    <div class="contents md:block w-60 h-full">
       <%- include('../components/template') %>
     </div>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-14 pb-16 lg:pt-16 lg:pb-0">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-14 pb-16 md:pt-16 md:pb-0">
       <div class="px-12 pt-6 pb-8">
 
         <div class="mb-6">
@@ -14,7 +14,7 @@
         </div>
 
         <!-- Stats grid -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
             <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.users || 'Users' %></p>
             <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= userCount %></p>
@@ -66,7 +66,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="rounded-xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 p-4">
               <p class="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-3">API Response Time</p>
               <div class="flex items-center justify-between mb-2">
@@ -87,7 +87,7 @@
         </div>
 
         <!-- Resources -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <a href="https://discord.gg/BybfXms7JZ" class="group rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors">
             <div class="flex items-center gap-2 mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-neutral-500 dark:text-neutral-400 shrink-0" viewBox="0 0 127.14 96.36" fill="currentColor">

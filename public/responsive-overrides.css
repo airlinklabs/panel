@@ -1,0 +1,21 @@
+@media (min-width: 768px) {
+  .md\:hidden { display: none !important; }
+  .md\:block { display: block !important; }
+  .md\:flex { display: flex !important; }
+  .md\:fixed { position: fixed !important; }
+  .md\:inset-y-0 { top: 0 !important; bottom: 0 !important; }
+  .md\:z-50 { z-index: 50 !important; }
+  .md\:w-56 { width: 14rem !important; }
+  .md\:flex-col { flex-direction: column !important; }
+  .md\:pl-56 { padding-left: 14rem !important; }
+  .md\:pt-16 { padding-top: 4rem !important; }
+  .md\:pb-0 { padding-bottom: 0 !important; }
+  .md\:left-56 { left: 14rem !important; }
+  .md\:px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+  .md\:gap-x-6 { column-gap: 1.5rem !important; }
+  .md\:-ml-2 { margin-left: -0.5rem !important; }
+  .md\:hidden.mobile-top-bar,
+  .md\:hidden.mobile-bottom-nav,
+  .md\:hidden#admin-sheet,
+  .md\:hidden#admin-sheet-backdrop { display: none !important; }
+}

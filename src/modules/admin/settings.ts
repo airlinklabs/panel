@@ -31,7 +31,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (_req: any, file: any, cb: any) => {
   if (file.fieldname === 'themeFile') {
     const ext = path.extname(file.originalname).toLowerCase();
     return cb(null, ext === '.zip' || file.mimetype.includes('zip'));
@@ -214,7 +214,7 @@ const adminModule: Module = {
       async (req, res) => {
         try {
           const raw   = req.body;
-          const files = req.files as Record<string, Express.Multer.File[]>;
+          const files = req.files as Record<string, any[]>;
 
           if (files.themeFile?.[0]) {
             const result = installThemeZip(files.themeFile[0].path);

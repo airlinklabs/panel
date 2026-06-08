@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
-import { Express, Router } from 'express';
+import express, { Router as createRouter } from 'express';
+import type { Express, Router } from 'express';
 import { uiComponentStore, SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from './uiComponentHandler';
 import prisma from '../db';
-import type { PrismaClient } from '@prisma/client';
 import logger from './logger';
 
 
@@ -26,9 +26,9 @@ interface AddonPackageJson {
 }
 
 export interface AddonAPI {
-  registerRoute: (path: string, router: Router) => void;
+  registerRoute: (path: string, router: any) => void;
   logger: typeof logger;
-  prisma: PrismaClient;
+  prisma: any;
 
   utils: {
     isUserAdmin: (userId: number) => Promise<boolean>;
@@ -208,7 +208,7 @@ export async function loadAddons(app: Express | any) {
           fs.mkdirSync(addonMobileViewsPath, { recursive: true });
         }
 
-        const addonRouter = Router();
+        const addonRouter = createRouter();
         const addonAPI: AddonAPI = {
           registerRoute: (routePath, router) => {
             app.use(routePath, router);
@@ -520,7 +520,7 @@ export async function getAllAddons() {
   }
 }
 
-const loadedAddons: Map<string, { router: Router, path: string }> = new Map();
+const loadedAddons: Map<string, { router: any; path: string }> = new Map();
 
 function unloadAddon(app: Express | any, slug: string) {
   const addon = loadedAddons.get(slug);

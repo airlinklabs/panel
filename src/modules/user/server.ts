@@ -1,5 +1,4 @@
 import { Router, Request, Response } from 'express';
-import type { Prisma, Users, settings as PanelSettings } from '@prisma/client';
 import { Module } from '../../handlers/moduleInit';
 import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
@@ -40,9 +39,11 @@ const serverPageInclude = {
   node: true,
   image: true,
   owner: true,
-} satisfies Prisma.ServerInclude;
+} as const;
 
-type ServerPageServer = Prisma.ServerGetPayload<{ include: typeof serverPageInclude }>;
+type Users = any;
+type PanelSettings = any;
+type ServerPageServer = any;
 
 type ServerPageContext =
   | {

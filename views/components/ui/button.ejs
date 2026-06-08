@@ -8,7 +8,7 @@ const variants = {
   danger: 'bg-red-600 hover:bg-red-500 text-white',
   outline: 'bg-transparent border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'
 };
-const sizes = { sm: 'px-3 py-1.5 text-xs min-h-8', md: 'px-4 py-2 text-sm min-h-10', lg: 'px-5 py-2.5 text-sm min-h-11' };
+const sizes = { sm: 'px-3 py-1.5 text-xs min-h-8', md: 'px-4 py-2 text-sm min-h-10', md: 'px-5 py-2.5 text-sm min-h-11' };
 const cls = [base, variants[v], sizes[s], extraClass || ''].join(' ');
 %>
 <% if (href) { %>

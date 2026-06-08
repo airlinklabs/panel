@@ -51,9 +51,9 @@ export async function createPlayerStatsTable(): Promise<void> {
  */
 async function checkIfTableExists(tableName: string): Promise<boolean> {
   try {
-    const result = await prisma.$queryRawUnsafe<any[]>(`
+    const result = (await prisma.$queryRawUnsafe(`
       SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}';
-    `);
+    `)) as any[];
 
     return result.length > 0;
   } catch (error) {

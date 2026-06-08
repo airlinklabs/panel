@@ -3,7 +3,7 @@
 <main class="h-screen m-auto text-neutral-800 dark:text-white">
   <div class="flex h-screen">
     <!-- Sidebar -->
-    <aside class="contents lg:block w-60 h-full">
+    <aside class="contents md:block w-60 h-full">
       <%- include('../../components/template') %>
     </aside>
 
@@ -74,7 +74,7 @@
 
         <!-- Players Grid -->
         <% if (players && players.length > 0) { %>
-        <div id="PlayersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div id="PlayersGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
           <% players.forEach(player => { %>
             <div class="relative p-4 bg-neutral-100 dark:bg-neutral-800 rounded-xl shadow-lg group hover:bg-neutral-200/60 dark:hover:bg-neutral-700/50 transition-all duration-200">
               <div class="flex items-center">

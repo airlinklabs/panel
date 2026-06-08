@@ -291,7 +291,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
           },
         }
       : false,
-  })(req, res, next);
+  })(req as any, res as any, next as any);
 });
 
 app.use(hpp());

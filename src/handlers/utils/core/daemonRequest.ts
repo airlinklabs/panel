@@ -1,6 +1,5 @@
 import crypto from 'crypto';
 import axios from 'axios';
-import type { InternalAxiosRequestConfig } from 'axios';
 import { URL } from 'url';
 import prisma from '../../../db';
 
@@ -83,7 +82,7 @@ function serializeRequestBody(data: unknown): string {
 // { auth: { username: 'Airlink', password: key } } automatically gets
 // X-Airlink-Timestamp and X-Airlink-Signature headers added.
 export function installDaemonRequestInterceptor(): void {
-  axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  axios.interceptors.request.use((config: any) => {
     if (!config.auth || (config.auth as any).username !== 'Airlink') {
       return config;
     }

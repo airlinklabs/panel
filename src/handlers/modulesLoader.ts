@@ -1,4 +1,4 @@
-import express from 'express';
+import type { Express } from 'express';
 import fs from 'fs';
 import path from 'path';
 import logger from './logger';
@@ -7,7 +7,7 @@ import chalk from 'chalk';
 const isDebugMode = process.env.DEBUG === 'true';
 
 export const loadModules = async (
-  app: express.Express,
+  app: Express,
   airlinkVersion: string,
   serverPort?: number,
 ) => {

@@ -42,9 +42,11 @@ function sendSocketError(socket: WebSocket, message: string): void {
 
 function normalizeWsMessage(data: WsMessage): ProxiedMessage {
   if (typeof data === 'string') return data;
-  if (Buffer.isBuffer(data)) return data;
-  if (Array.isArray(data)) return Buffer.concat(data);
-  return Buffer.from(data);
+  if (Buffer.isBuffer(data)) return data as Buffer;
+  if (Array.isArray(data)) return Buffer.concat(data as Buffer[]);
+  if (data instanceof ArrayBuffer) return Buffer.from(data);
+  const view = new Uint8Array(data as unknown as ArrayBufferLike);
+  return Buffer.from(view);
 }
 
 function extractConsoleCommand(data: WsMessage): string | null {

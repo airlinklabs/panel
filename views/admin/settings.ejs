@@ -2,9 +2,9 @@
 
 <main class="min-h-screen">
   <div class="flex min-h-screen">
-    <div class="contents lg:block w-60 shrink-0"><%- include('../components/template') %></div>
+    <div class="contents md:block w-60 shrink-0"><%- include('../components/template') %></div>
 
-    <div id="page-content" class="flex-1 overflow-y-auto pt-14 pb-16 lg:pt-16 lg:pb-0 pb-12">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-14 pb-16 md:pt-16 md:pb-0 pb-12">
       <div class="px-8 pt-5">
         <h1 class="text-base font-medium text-neutral-800 dark:text-white">Settings</h1>
         <p class="mt-0.5 text-sm text-neutral-500">Manage your panel configuration.</p>
@@ -222,7 +222,7 @@
           <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
             <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Default limits</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3">Applied to new users unless overridden per-user.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 px-5 py-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 px-5 py-5">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Server limit</label>
                 <input type="number" id="defaultServerLimit" value="<%= settings.defaultServerLimit %>" min="0" max="100"

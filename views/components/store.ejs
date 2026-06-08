@@ -270,11 +270,11 @@
 
 <main class="h-screen m-auto">
   <div class="flex h-screen">
-    <div class="contents lg:block w-60 h-full">
+    <div class="contents md:block w-60 h-full">
       <%- include('./template') %>
     </div>
 
-    <div class="flex-1 overflow-y-auto pt-14 pb-16 lg:pt-16 lg:pb-0">
+    <div class="flex-1 overflow-y-auto pt-14 pb-16 md:pt-16 md:pb-0">
       <div class="px-8 pt-6 pb-0 flex items-center justify-between">
         <div>
           <h1 class="text-base font-medium text-neutral-800 dark:text-white">Addons</h1>
@@ -304,7 +304,7 @@
         </div>
 
         <!-- Skeletons -->
-        <div id="storeLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div id="storeLoading" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div class="s-skeleton"></div><div class="s-skeleton"></div><div class="s-skeleton"></div>
           <div class="s-skeleton"></div><div class="s-skeleton"></div><div class="s-skeleton"></div>
         </div>
@@ -319,7 +319,7 @@
         </div>
 
         <!-- Grid -->
-        <div id="storeGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <div id="storeGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
 
         <!-- Empty -->
         <div id="storeEmpty" class="hidden py-16 text-center">
