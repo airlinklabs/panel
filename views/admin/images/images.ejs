@@ -64,7 +64,7 @@
         <input id="imageFilterInput" type="text" placeholder="Filter images…" class="w-56 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
       </div>
 
-      <div class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40">
+      <div class="overflow-x-auto shadow-sm rounded-xl m-4 md:m-8 border border-neutral-200 dark:border-neutral-800/40">
         <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
           <thead class="bg-neutral-50 dark:bg-neutral-800/50">
             <tr>
@@ -112,16 +112,16 @@
         <p class="text-xs text-neutral-500 mt-0.5">Configure Docker images and variables after creation.</p>
       </div>
       <button onclick="closeCreate()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        <%- icons.x() %>
       </button>
     </div>
     <form action="/admin/images/create" method="POST" class="p-5 flex flex-col gap-4">
-      <div class="grid grid-cols-2 gap-3">
-        <div class="col-span-2"><label class="field-label">Name <span class="text-red-500">*</span></label><input class="field-input" type="text" name="name" required placeholder="e.g. Minecraft Java"></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="md:col-span-2"><label class="field-label">Name <span class="text-red-500">*</span></label><input class="field-input" type="text" name="name" required placeholder="e.g. Minecraft Java"></div>
         <div><label class="field-label">Author</label><input class="field-input" type="text" name="author" placeholder="e.g. github.com/you"></div>
         <div><label class="field-label">Author Name</label><input class="field-input" type="text" name="authorName" placeholder="Your Name"></div>
-        <div class="col-span-2"><label class="field-label">Startup Command <span class="text-red-500">*</span></label><input class="field-input" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
-        <div class="col-span-2"><label class="field-label">Description</label><textarea class="field-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
+        <div class="md:col-span-2"><label class="field-label">Startup Command <span class="text-red-500">*</span></label><input class="field-input" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+        <div class="md:col-span-2"><label class="field-label">Description</label><textarea class="field-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
       </div>
       <div class="flex gap-2 pt-1">
         <button type="button" onclick="closeCreate()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition">Cancel</button>

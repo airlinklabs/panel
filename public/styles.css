@@ -384,6 +384,9 @@
   .bottom-4 {
     bottom: calc(var(--spacing) * 4);
   }
+  .bottom-20 {
+    bottom: calc(var(--spacing) * 20);
+  }
   .bottom-full {
     bottom: 100%;
   }
@@ -456,8 +459,8 @@
       max-width: 96rem;
     }
   }
-  .m-8 {
-    margin: calc(var(--spacing) * 8);
+  .m-4 {
+    margin: calc(var(--spacing) * 4);
   }
   .m-auto {
     margin: auto;
@@ -555,9 +558,6 @@
   .mr-5 {
     margin-right: calc(var(--spacing) * 5);
   }
-  .mr-8 {
-    margin-right: calc(var(--spacing) * 8);
-  }
   .-mb-px {
     margin-bottom: -1px;
   }
@@ -614,9 +614,6 @@
   }
   .ml-5 {
     margin-left: calc(var(--spacing) * 5);
-  }
-  .ml-8 {
-    margin-left: calc(var(--spacing) * 8);
   }
   .ml-auto {
     margin-left: auto;
@@ -1090,6 +1087,9 @@
   .min-w-full {
     min-width: 100%;
   }
+  .min-w-max {
+    min-width: max-content;
+  }
   .flex-1 {
     flex: 1;
   }
@@ -1141,6 +1141,10 @@
   }
   .translate-y-1 {
     --tw-translate-y: calc(var(--spacing) * 1);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
+  .translate-y-4 {
+    --tw-translate-y: calc(var(--spacing) * 4);
     translate: var(--tw-translate-x) var(--tw-translate-y);
   }
   .translate-y-full {
@@ -1195,6 +1199,9 @@
   .resize-y {
     resize: vertical;
   }
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
   .appearance-none {
     appearance: none;
   }
@@ -1212,6 +1219,9 @@
   }
   .flex-col {
     flex-direction: column;
+  }
+  .flex-col-reverse {
+    flex-direction: column-reverse;
   }
   .flex-row {
     flex-direction: row;
@@ -2031,9 +2041,6 @@
   .px-8 {
     padding-inline: calc(var(--spacing) * 8);
   }
-  .px-12 {
-    padding-inline: calc(var(--spacing) * 12);
-  }
   .py-0\.5 {
     padding-block: calc(var(--spacing) * 0.5);
   }
@@ -2678,6 +2685,14 @@
   .duration-500 {
     --tw-duration: 500ms;
     transition-duration: 500ms;
+  }
+  .duration-\[280ms\] {
+    --tw-duration: 280ms;
+    transition-duration: 280ms;
+  }
+  .ease-\[cubic-bezier\(0\.16\,1\,0\.3\,1\)\] {
+    --tw-ease: cubic-bezier(0.16,1,0.3,1);
+    transition-timing-function: cubic-bezier(0.16,1,0.3,1);
   }
   .ease-in-out {
     --tw-ease: var(--ease-in-out);
@@ -3659,6 +3674,11 @@
       scale: var(--tw-scale-x) var(--tw-scale-y);
     }
   }
+  .active\:scale-\[0\.99\] {
+    &:active {
+      scale: 0.99;
+    }
+  }
   .disabled\:pointer-events-none {
     &:disabled {
       pointer-events: none;
@@ -3689,9 +3709,19 @@
       background-color: var(--color-neutral-900);
     }
   }
+  .data-\[active\=true\]\:rounded-xl {
+    &[data-active="true"] {
+      border-radius: var(--radius-xl);
+    }
+  }
   .data-\[active\=true\]\:border-neutral-300 {
     &[data-active="true"] {
       border-color: var(--color-neutral-300);
+    }
+  }
+  .data-\[active\=true\]\:bg-neutral-100 {
+    &[data-active="true"] {
+      background-color: var(--color-neutral-100);
     }
   }
   .data-\[active\=true\]\:bg-neutral-200 {
@@ -3731,6 +3761,11 @@
       margin-inline: calc(var(--spacing) * 4);
     }
   }
+  .sm\:mx-8 {
+    @media (width >= 40rem) {
+      margin-inline: calc(var(--spacing) * 8);
+    }
+  }
   .sm\:mt-0 {
     @media (width >= 40rem) {
       margin-top: calc(var(--spacing) * 0);
@@ -3754,6 +3789,26 @@
   .sm\:flex {
     @media (width >= 40rem) {
       display: flex;
+    }
+  }
+  .sm\:hidden {
+    @media (width >= 40rem) {
+      display: none;
+    }
+  }
+  .sm\:inline {
+    @media (width >= 40rem) {
+      display: inline;
+    }
+  }
+  .sm\:table-cell {
+    @media (width >= 40rem) {
+      display: table-cell;
+    }
+  }
+  .sm\:w-auto {
+    @media (width >= 40rem) {
+      width: auto;
     }
   }
   .sm\:max-w-md {
@@ -3829,6 +3884,11 @@
       border-radius: var(--radius-2xl);
     }
   }
+  .sm\:px-3 {
+    @media (width >= 40rem) {
+      padding-inline: calc(var(--spacing) * 3);
+    }
+  }
   .sm\:px-4 {
     @media (width >= 40rem) {
       padding-inline: calc(var(--spacing) * 4);
@@ -3837,6 +3897,16 @@
   .sm\:px-6 {
     @media (width >= 40rem) {
       padding-inline: calc(var(--spacing) * 6);
+    }
+  }
+  .sm\:px-8 {
+    @media (width >= 40rem) {
+      padding-inline: calc(var(--spacing) * 8);
+    }
+  }
+  .sm\:py-3 {
+    @media (width >= 40rem) {
+      padding-block: calc(var(--spacing) * 3);
     }
   }
   .sm\:pr-0 {
@@ -3860,6 +3930,11 @@
       line-height: var(--tw-leading, var(--text-sm--line-height));
     }
   }
+  .md\:absolute {
+    @media (width >= 48rem) {
+      position: absolute;
+    }
+  }
   .md\:fixed {
     @media (width >= 48rem) {
       position: fixed;
@@ -3868,6 +3943,11 @@
   .md\:inset-y-0 {
     @media (width >= 48rem) {
       inset-block: calc(var(--spacing) * 0);
+    }
+  }
+  .md\:bottom-6 {
+    @media (width >= 48rem) {
+      bottom: calc(var(--spacing) * 6);
     }
   }
   .md\:left-56 {
@@ -3885,9 +3965,19 @@
       grid-column: span 2 / span 2;
     }
   }
+  .md\:m-8 {
+    @media (width >= 48rem) {
+      margin: calc(var(--spacing) * 8);
+    }
+  }
   .md\:-mx-8 {
     @media (width >= 48rem) {
       margin-inline: calc(var(--spacing) * -8);
+    }
+  }
+  .md\:mx-8 {
+    @media (width >= 48rem) {
+      margin-inline: calc(var(--spacing) * 8);
     }
   }
   .md\:mt-0 {
@@ -3938,6 +4028,18 @@
   .md\:w-auto {
     @media (width >= 48rem) {
       width: auto;
+    }
+  }
+  .md\:translate-x-full {
+    @media (width >= 48rem) {
+      --tw-translate-x: 100%;
+      translate: var(--tw-translate-x) var(--tw-translate-y);
+    }
+  }
+  .md\:translate-y-0 {
+    @media (width >= 48rem) {
+      --tw-translate-y: calc(var(--spacing) * 0);
+      translate: var(--tw-translate-x) var(--tw-translate-y);
     }
   }
   .md\:grid-cols-2 {
@@ -5590,6 +5692,16 @@
         border-color: color-mix(in srgb, oklch(87% 0 0) 20%, transparent);
         @supports (color: color-mix(in lab, red, red)) {
           border-color: color-mix(in oklab, var(--color-neutral-300) 20%, transparent);
+        }
+      }
+    }
+  }
+  .dark\:data-\[active\=true\]\:bg-white\/8 {
+    &:where(.dark, .dark *) {
+      &[data-active="true"] {
+        background-color: color-mix(in srgb, #fff 8%, transparent);
+        @supports (color: color-mix(in lab, red, red)) {
+          background-color: color-mix(in oklab, var(--color-white) 8%, transparent);
         }
       }
     }

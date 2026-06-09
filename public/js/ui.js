@@ -41,18 +41,34 @@
 
   function openDialog(id) {
     var dialog = byId(id);
+    var panel = dialog && dialog.querySelector('[data-ui-dialog-panel]');
     if (!dialog) return;
     dialog.classList.remove('hidden');
     dialog.classList.add('flex');
+    requestAnimationFrame(function () {
+      dialog.classList.remove('opacity-0', 'pointer-events-none');
+      if (panel) {
+        panel.classList.remove('scale-95');
+        panel.classList.add('scale-100');
+      }
+    });
     var focusable = dialog.querySelector('button,a,input,select,textarea,[tabindex]:not([tabindex="-1"])');
     if (focusable) focusable.focus();
   }
 
   function closeDialog(id) {
     var dialog = byId(id);
+    var panel = dialog && dialog.querySelector('[data-ui-dialog-panel]');
     if (!dialog) return;
-    dialog.classList.add('hidden');
-    dialog.classList.remove('flex');
+    if (panel) {
+      panel.classList.remove('scale-100');
+      panel.classList.add('scale-95');
+    }
+    dialog.classList.add('opacity-0', 'pointer-events-none');
+    setTimeout(function () {
+      dialog.classList.add('hidden');
+      dialog.classList.remove('flex');
+    }, 210);
   }
 
   function registerDialog(id) {
@@ -61,6 +77,9 @@
     if (!dialog) return;
     dialog.addEventListener('click', function (event) {
       if (event.target === dialog) closeDialog(id);
+    });
+    document.querySelectorAll('[data-ui-dialog-close="' + id + '"]').forEach(function (btn) {
+      btn.addEventListener('click', function () { closeDialog(id); });
     });
   }
 

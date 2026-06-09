@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html class="h-full js-loading" lang="en">
 <head>
+    <%- include('../ui/icons') %>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <% if (typeof csrfToken !== 'undefined') { %>
@@ -10,6 +11,9 @@
     <link rel="stylesheet" href="/styles.css">
     <link rel="stylesheet" href="/layout-animations.css">
     <link rel="stylesheet" href="/responsive-overrides.css">
+    <style nonce="<%- nonce %>">
+      <%- include('../ui/animations.css') %>
+    </style>
     <link rel="icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
     <link rel="shortcut icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
     <% if (settings.lightTheme && settings.lightTheme !== 'default') { %>
@@ -28,6 +32,7 @@
     <script nonce="<%- nonce %>" src="/javascript/checkbox-anim.js"></script>
     <script nonce="<%- nonce %>" src="/javascript/layout-animations.js"></script>
     <script nonce="<%- nonce %>" src="/js/ui.js"></script>
+    <script nonce="<%- nonce %>"><%- include('../ui/motion.js') %></script>
     <style>
       html, body, * { scrollbar-width: none; -ms-overflow-style: none; }
       ::-webkit-scrollbar { display: none; }

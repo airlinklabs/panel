@@ -1,18 +1,14 @@
 <% if (typeof installed !== 'undefined') { %>
 <% if (installed.failed) { %>
-<div class="mx-8 mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-center gap-3">
-  <div class="h-8 w-8 rounded-lg bg-red-100 dark:bg-red-500/10 flex items-center justify-center shrink-0">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
-    </svg>
-  </div>
+<div class="mx-4 sm:mx-8 mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-center gap-3">
+  <div class="h-8 w-8 rounded-lg bg-red-100 dark:bg-red-500/10 flex items-center justify-center shrink-0"><%- icons.x() %></div>
   <div class="min-w-0">
     <p class="text-sm font-medium text-neutral-800 dark:text-neutral-100">Installation failed</p>
     <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Check the server logs or contact an administrator.</p>
   </div>
 </div>
 <% } else if (!installed.installed && !installed.error) { %>
-<div id="installBanner" class="mx-8 mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-center gap-3">
+<div id="installBanner" class="mx-4 sm:mx-8 mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-center gap-3">
   <div id="installIconWrap" class="h-8 w-8 rounded-lg bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center shrink-0">
     <svg id="installSpinner" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500 dark:text-neutral-400 animate-spin" fill="none" viewBox="0 0 24 24">
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>

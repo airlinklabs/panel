@@ -127,11 +127,11 @@
         <span id="statusText" class="text-xs text-neutral-400 dark:text-neutral-500 ml-auto whitespace-nowrap"></span>
       </div>
 
-      <div id="loadingEl" class="m-8 space-y-2"><% for(let i=0;i<8;i++){%><div class="sk h-11 w-full"></div><%}%></div>
+      <div id="loadingEl" class="m-4 md:m-8 space-y-2"><% for(let i=0;i<8;i++){%><div class="sk h-11 w-full"></div><%}%></div>
       <div id="errorEl" style="display:none" class="mx-8 mt-6 py-16 text-center"><p id="errorMsg" class="text-sm text-neutral-500"></p><button onclick="loadStore()" class="mt-3 text-xs text-neutral-400 underline cursor-pointer bg-transparent border-none">Retry</button></div>
       <div id="emptyEl" style="display:none" class="mx-8 mt-6 py-16 text-center"><p class="text-sm text-neutral-500">No addons match your search.</p><button id="clearSearch" class="mt-3 text-xs text-neutral-400 underline cursor-pointer bg-transparent border-none">Clear</button></div>
 
-      <div id="tableWrap" style="display:none" class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40">
+      <div id="tableWrap" style="display:none" class="overflow-x-auto shadow-sm rounded-xl m-4 md:m-8 border border-neutral-200 dark:border-neutral-800/40">
         <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
           <thead class="bg-neutral-50 dark:bg-neutral-800/50">
             <tr>
@@ -162,7 +162,7 @@
           GitHub
         </a>
         <button onclick="closeDetail()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+          <%- icons.x() %>
         </button>
       </div>
     </div>

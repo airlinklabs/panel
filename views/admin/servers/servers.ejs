@@ -9,21 +9,21 @@
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
 
       <!-- Page header -->
-      <div class="sm:flex sm:items-center px-8 pt-4">
+      <div class="sm:flex sm:items-center px-4 sm:px-8 pt-4">
         <div class="sm:flex-auto">
           <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminServersTitle %></h1>
           <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminServersText %></p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <button onclick="location.href='/admin/servers/create'" type="button"
-            class="border border-neutral-800/20 dark:border-white/10 block rounded-xl bg-white dark:bg-white/5 hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-800 dark:text-white px-3 py-2 text-center text-sm font-medium shadow-sm transition">
+            class="border border-neutral-800/20 dark:border-white/10 block rounded-xl bg-white dark:bg-white/5 hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-800 dark:text-white px-3 py-2 text-center text-sm font-medium shadow-sm transition w-full sm:w-auto">
             <%= req.translations.createNewServer %>
           </button>
         </div>
       </div>
 
       <% if (req.query.err == "none") { %>
-      <div class="mt-6 mx-8">
+      <div class="mt-6 mx-4 md:mx-8">
         <div class="rounded-xl bg-emerald-600/10 dark:bg-emerald-800/10 px-4 py-3 border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-3">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-emerald-500 shrink-0">
             <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd"/>
@@ -34,12 +34,12 @@
       <% } %>
 
       <!-- Sentinel — watched to know when toolbar scrolls off screen -->
-      <div id="toolbarSentinel" class="h-px w-full mx-8" aria-hidden="true"></div>
+      <div id="toolbarSentinel" class="h-px w-full mx-4 md:mx-8" aria-hidden="true"></div>
 
       <!-- Bulk toolbar — grid-template-rows 0fr→1fr for smooth height animation -->
       <div id="bulkToolbarRow" class="no-anim" style="display:grid;grid-template-rows:0fr;transition:grid-template-rows 0.36s cubic-bezier(0.16,1,0.3,1)">
         <div style="min-height:0;overflow:hidden">
-          <div id="bulkToolbarContent" class="mx-8 mt-4 pb-0.5" style="opacity:0;transition:opacity 0.28s ease">
+          <div id="bulkToolbarContent" class="mx-4 md:mx-8 mt-4 pb-0.5" style="opacity:0;transition:opacity 0.28s ease">
             <div class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700/40">
               <span class="selection-count text-sm font-medium text-neutral-600 dark:text-neutral-300 mr-1">0 selected</span>
               <div class="h-4 w-px bg-neutral-200 dark:bg-neutral-700 mx-1"></div>
@@ -86,7 +86,7 @@
       </div>
 
       <!-- Server table -->
-      <div class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40" id="serverTable">
+      <div class="overflow-x-auto shadow-sm rounded-xl m-4 md:m-8 border border-neutral-200 dark:border-neutral-800/40" id="serverTable">
         <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
           <thead class="bg-neutral-50 dark:bg-neutral-800/50">
             <tr>

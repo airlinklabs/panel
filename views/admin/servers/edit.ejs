@@ -25,7 +25,7 @@
           <form id="editServerForm">
             <!-- General Category -->
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">General</h2>
-            <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div>
                 <label for="serverName" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.name %>:</label>
                 <input id="serverName" name="name" value="<%= server.name %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
@@ -39,7 +39,7 @@
 
             <!-- Server Configuration -->
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Server Configuration</h2>
-            <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div>
                 <label for="serverOwner" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Owner:</label>
                 <select id="serverOwner" name="ownerId" class="hidden">
@@ -151,7 +151,7 @@
 
             <!-- Server Status -->
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Server Status</h2>
-            <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div>
                 <div class="flex items-center space-x-2 mb-4">
                   <div class="flex-shrink-0">

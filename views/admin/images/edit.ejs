@@ -7,7 +7,7 @@
     </div>
     <div id="page-content" class="flex-1 overflow-y-auto pt-14 pb-16 md:pt-16 md:pb-0 pb-12">
 
-      <div class="px-8 pt-5 flex items-start justify-between">
+      <div class="px-4 sm:px-8 pt-5 flex items-start justify-between">
         <div>
           <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= image.name || 'Edit Image' %></h1>
           <p class="mt-0.5 text-sm text-neutral-500">Edit egg configuration, variables, Docker images, and install scripts.</p>
@@ -358,7 +358,7 @@
           <button data-var-remove="${idx}" type="button"
             class="text-xs text-red-500 hover:text-red-400 transition">Remove</button>
         </div>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1">Name</label>
             <input data-var-field="${idx}" data-field="name" type="text" value="${escHtml(v.name || '')}"

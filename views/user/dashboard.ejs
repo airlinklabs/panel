@@ -115,7 +115,7 @@
     <div class="contents md:block w-60 h-full"><%- include('../components/template') %></div>
 
     <div id="page-content" class="flex-1 overflow-y-auto pt-14 pb-16 md:pt-16 md:pb-0">
-      <div class="px-12 pt-6 pb-8">
+      <div class="px-4 sm:px-8 pt-6 pb-8">
 
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
@@ -188,7 +188,7 @@
         <% if (folders && folders.length > 0) { %>
         <div class="mb-8">
           <p class="text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider mb-3">Folders</p>
-          <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3" id="folderGrid">
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3" id="folderGrid">
             <% let folderIdx = 0; folders.forEach(folder => { %>
             <div class="folder-card group"
               role="button"
@@ -346,7 +346,7 @@
 
 <!-- Folder popup -->
 <div class="folder-popup-overlay" id="folderPopupOverlay">
-  <div class="folder-popup" role="dialog" aria-modal="true" aria-labelledby="folderPopupTitle">
+  <div class="folder-popup anim-scale-in" role="dialog" aria-modal="true" aria-labelledby="folderPopupTitle">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5 flex-shrink-0">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white" id="folderPopupTitle"></h2>
       <div class="flex items-center gap-1">
@@ -356,7 +356,7 @@
           </svg>
         </button>
         <button id="closeFolderPopup" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-300 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500" aria-label="Close folder">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+          <%- icons.x() %>
         </button>
       </div>
     </div>

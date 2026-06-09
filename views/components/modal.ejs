@@ -1,29 +1,26 @@
-<!-- Global confirm modal — window.modal.confirm({ title, body, danger, confirmLabel, onConfirm }) -->
-<div id="globalModal" class="fixed inset-0 z-[9000] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200" aria-hidden="true">
-  <div class="absolute inset-0 bg-black/60" id="globalModalBackdrop"></div>
-  <div id="globalModalPanel" role="dialog" aria-modal="true" aria-labelledby="globalModalTitle" aria-describedby="globalModalBody" tabindex="-1" class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-2xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-200">
-    <div class="px-5 pt-5 pb-4">
-      <p id="globalModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white leading-snug"></p>
-      <p id="globalModalBody" class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed"></p>
+<%- include('../ui/icons') %>
+<div id="globalModal" class="fixed inset-0 z-[9000] hidden items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 bg-black/50" aria-hidden="true">
+  <div id="globalModalBackdrop" class="absolute inset-0"></div>
+  <div id="globalModalPanel" role="dialog" aria-modal="true" aria-labelledby="globalModalTitle" aria-describedby="globalModalBody" tabindex="-1" class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-2xl w-full max-w-sm mx-4 transform transition-transform duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)] scale-95" data-ui-dialog-panel>
+    <div class="px-5 py-4 border-b border-neutral-200 dark:border-white/5 flex items-center justify-between">
+      <h2 id="globalModalTitle" class="text-base font-medium text-neutral-900 dark:text-white"></h2>
+      <button id="globalModalCancel" type="button" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 transition text-neutral-500 hover:text-neutral-800 dark:hover:text-white" aria-label="Close modal"><%- icons.x() %></button>
     </div>
-    <div class="flex gap-2 px-5 pb-5 justify-end">
-      <button id="globalModalCancel" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
-      <button id="globalModalConfirm" class="px-4 py-2 text-xs font-medium rounded-xl text-white transition"></button>
+    <div id="globalModalBody" class="px-5 py-4 text-sm text-neutral-600 dark:text-neutral-300"></div>
+    <div class="px-5 py-4 flex justify-end gap-2">
+      <button id="globalModalConfirm" type="button" class="px-4 py-2 text-xs font-medium rounded-xl text-white transition bg-red-600 hover:bg-red-500"></button>
     </div>
   </div>
 </div>
-
 <script nonce="<%- nonce %>">
 (function () {
-  if (window.modal) return;
-
-  const overlay  = document.getElementById('globalModal');
-  const panel    = document.getElementById('globalModalPanel');
-  const title    = document.getElementById('globalModalTitle');
-  const body     = document.getElementById('globalModalBody');
-  const cancel   = document.getElementById('globalModalCancel');
-  const confirmBtn  = document.getElementById('globalModalConfirm');
-  const backdrop = document.getElementById('globalModalBackdrop');
+  const overlay   = document.getElementById('globalModal');
+  const panel     = document.getElementById('globalModalPanel');
+  const title     = document.getElementById('globalModalTitle');
+  const body      = document.getElementById('globalModalBody');
+  const cancel    = document.getElementById('globalModalCancel');
+  const confirmBtn = document.getElementById('globalModalConfirm');
+  const backdrop  = document.getElementById('globalModalBackdrop');
 
   let currentResolve = null;
   let lastFocused = null;
@@ -44,22 +41,28 @@
     currentResolve = onConfirm || null;
 
     overlay.setAttribute('aria-hidden', 'false');
-    overlay.classList.remove('opacity-0', 'pointer-events-none');
-    panel.classList.remove('scale-95');
-    panel.classList.add('scale-100');
+    overlay.classList.remove('hidden');
+    requestAnimationFrame(function () {
+      overlay.classList.remove('opacity-0', 'pointer-events-none');
+      panel.classList.remove('scale-95');
+      panel.classList.add('scale-100');
+    });
     setTimeout(function () { confirmBtn.focus(); }, 0);
   }
 
   function close() {
     overlay.setAttribute('aria-hidden', 'true');
-    overlay.classList.add('opacity-0', 'pointer-events-none');
     panel.classList.remove('scale-100');
     panel.classList.add('scale-95');
+    overlay.classList.add('opacity-0', 'pointer-events-none');
     currentResolve = null;
     if (lastFocused && typeof lastFocused.focus === 'function') {
       lastFocused.focus();
     }
     lastFocused = null;
+    setTimeout(function () {
+      overlay.classList.add('hidden');
+    }, 210);
   }
 
   cancel.addEventListener('click', close);

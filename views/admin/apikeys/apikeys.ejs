@@ -27,7 +27,7 @@
     </div>
 
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
-      <div class="sm:flex sm:items-center px-8 pt-4">
+      <div class="sm:flex sm:items-center px-4 sm:px-8 pt-4">
         <div class="sm:flex-auto">
           <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.apiKeysManagement || 'API Keys Management' %></h1>
           <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.apiKeysDesc || 'Create and manage API keys with specific permissions' %></p>
@@ -43,7 +43,7 @@
           </div>
         </div>
       </div>
-      <div class="px-8 mt-5">
+      <div class="px-4 sm:px-8 mt-5">
         <div class="rounded-xl bg-neutral-700/10 dark:bg-neutral-900 p-6">
           <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
@@ -253,7 +253,7 @@
                   </svg>
                 </button>
                 <div class="category-panel hidden px-4 py-3 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60">
-                  <div class="grid grid-cols-2 gap-2">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <% allPermissions.filter(p => p.value.includes(category)).forEach(permission => { %>
                       <label class="permission-label flex items-center gap-2 px-3 py-2 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
                         <input type="checkbox" name="permissions" value="<%= permission.value %>"
@@ -309,7 +309,7 @@
       <div class="px-5 py-4 overflow-y-auto flex-1 space-y-4">
 
         <!-- Name + description -->
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1"><%= req.translations.apiKeyName || 'Name' %></label>
             <input type="text" name="name" id="edit-name" required
@@ -339,7 +339,7 @@
               <p class="text-xs font-semibold text-neutral-700 dark:text-neutral-200 capitalize"><%= cat %></p>
               <button type="button" class="edit-select-category text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition" data-category="<%= cat %>">Select all</button>
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 px-4 py-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 px-4 py-3">
               <% allPermissions.filter(p => p.value.includes(cat)).forEach(permission => { %>
               <label class="flex items-center gap-2 cursor-pointer group">
                 <input id="edit-permission-<%= permission.value %>" name="permissions" value="<%= permission.value %>" type="checkbox"

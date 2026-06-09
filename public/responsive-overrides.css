@@ -19,3 +19,48 @@
   .md\:hidden#admin-sheet,
   .md\:hidden#admin-sheet-backdrop { display: none !important; }
 }
+
+
+@media (max-width: 767px) {
+  #page-content {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  #server-page-body {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  .mobile-px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+}
+
+.scrollbar-none { scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+@media (min-width: 480px) {
+  .xs\:grid-cols-2 { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  .xs\:flex-row { flex-direction: row !important; }
+  .xs\:items-center { align-items: center !important; }
+}
+
+.mobile-nav-link.active svg,
+.mobile-nav-link.active span,
+.mobile-nav-link.active-mobile svg,
+.mobile-nav-link.active-mobile span {
+  color: var(--active-color, #0a0a0a);
+}
+
+.dark .mobile-nav-link.active,
+.dark .mobile-nav-link.active-mobile {
+  --active-color: #ffffff;
+}
+
+.mobile-nav-link.active,
+.mobile-nav-link.active-mobile {
+  background: rgba(0,0,0,0.06);
+  border-radius: 0.9rem;
+}
+
+.dark .mobile-nav-link.active,
+.dark .mobile-nav-link.active-mobile {
+  background: rgba(255,255,255,0.08);
+}

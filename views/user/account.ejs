@@ -7,8 +7,8 @@
     </div>
     <div id="page-content" class="flex-1 overflow-y-auto pt-14 pb-16 md:pt-16 md:pb-0 pb-12">
 
-      <div class="px-8 pt-5 mb-5">
-        <div class="flex items-center gap-4">
+      <div class="px-4 sm:px-8 pt-5 mb-5">
+        <div class="flex flex-wrap items-center gap-4">
           <!-- Avatar -->
           <div class="relative shrink-0">
             <img id="avatar-preview"
@@ -27,9 +27,7 @@
             <% if (user.avatar) { %>
             <button id="remove-avatar-btn" type="button" title="Remove photo"
               class="absolute -top-1.5 -right-1.5 w-6 h-6 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-500 border-2 border-white dark:border-neutral-900 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3 text-white">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-              </svg>
+              <%- icons.x() %>
             </button>
             <% } %>
           </div>
@@ -53,7 +51,7 @@
 
         <!-- Unified settings card: 2-column grid, no dividers -->
         <div class="bg-neutral-50 dark:bg-white/5 rounded-2xl border border-neutral-200 dark:border-white/5 p-5">
-          <div class="grid grid-cols-2 gap-x-5 gap-y-4">
+          <div class="grid grid-cols-1 xs:grid-cols-2 gap-x-5 gap-y-4">
 
             <!-- Username -->
             <form id="change-username-form" action="/change-username" method="POST" class="col-span-1">
@@ -343,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="text-xs text-neutral-500 mt-0.5">Drag and resize the selection box.</p>
           </div>
           <button id="crop-cancel" class="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+            <%- icons.x() %>
           </button>
         </div>
         <div class="relative bg-neutral-950 select-none overflow-hidden" style="height:340px" id="crop-stage">

@@ -232,7 +232,7 @@
 
   function initMobileHighlight() {
     var path = normalizePath(window.location.pathname);
-    document.querySelectorAll('.mobile-nav-link').forEach(function (link) {
+    document.querySelectorAll('.mobile-nav-link, .mobile-subnav-link').forEach(function (link) {
       var href     = normalizePath(link.getAttribute('href') || '');
       var mPrefix  = link.getAttribute('data-match-prefix');
       var mAlso    = link.getAttribute('data-match-prefix-also');
@@ -246,6 +246,9 @@
       link.classList.add(active ? 'text-neutral-900' : 'text-neutral-500');
       link.classList.add(active ? 'dark:text-white'  : 'dark:text-neutral-400');
       if (active) link.classList.add('active-mobile');
+      if (link.classList.contains('mobile-subnav-link')) {
+        link.setAttribute('data-active', active ? 'true' : 'false');
+      }
     });
   }
 
@@ -328,13 +331,15 @@
       setDesktopActiveLink(a);
       movePill(a, true);
     }
-    if (a.classList.contains('mobile-nav-link')) {
-      document.querySelectorAll('.mobile-nav-link').forEach(function (l) {
+    if (a.classList.contains('mobile-nav-link') || a.classList.contains('mobile-subnav-link')) {
+      document.querySelectorAll('.mobile-nav-link, .mobile-subnav-link').forEach(function (l) {
         l.classList.remove('text-neutral-900', 'dark:text-white', 'active-mobile');
         l.classList.add('text-neutral-500', 'dark:text-neutral-400');
+        if (l.classList.contains('mobile-subnav-link')) l.setAttribute('data-active', 'false');
       });
       a.classList.remove('text-neutral-500', 'dark:text-neutral-400');
       a.classList.add('text-neutral-900', 'dark:text-white', 'active-mobile');
+      if (a.classList.contains('mobile-subnav-link')) a.setAttribute('data-active', 'true');
     }
     markNavigation();
     fadeContentOut();

@@ -24,6 +24,9 @@
 /* manage.ejs — server page body and stats cards */
 #server-page-body,
 .console-wrap,
+.anim-scale-in,
+.anim-fade-up,
+.anim-slide-up,
 
 /* dashboard — folder popup, new folder dialog */
 .folder-popup-overlay .folder-popup,
@@ -54,6 +57,8 @@
 
 /* apikeys.ejs — create modal, panel accordion */
 #createApiKeyModal,
+#portsSheet,
+#managePortsMobileBtn,
 
 /* apikeys/docs.ejs — response panel */
 #responseContainer,
@@ -113,6 +118,9 @@
   #installBanner,
   #server-page-body,
   .console-wrap,
+  .anim-scale-in,
+  .anim-fade-up,
+  .anim-slide-up,
   .folder-popup-overlay .folder-popup,
   .dialog-overlay .dialog-box,
   #updateStatus,
@@ -133,6 +141,10 @@
   #fileNamePreview,
   #renamePreview,
   #createApiKeyModal,
+  #portsSheet,
+  #managePortsMobileBtn,
+#portsSheet,
+#managePortsMobileBtn,
   #responseContainer,
   #searchResults,
   #sftpLoading,
@@ -205,6 +217,9 @@
   animation: card-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(var(--i, 0) * 60ms);
 }
+
+/* Mobile subnav links keep their own transitions */
+.mobile-subnav-link { transition: none !important; }
 
 /* ── Never animate these ──────────────────────────────────────────────────*/
 

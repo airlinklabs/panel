@@ -22,7 +22,7 @@
         </div>
       </div>
 
-      <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
+      <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-4 md:m-8">
 
         <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.totalNodes %></h2>
@@ -51,7 +51,7 @@
 
       <!-- notifications -->
       <% if (req.query.err == "none") { %>
-        <div class="mt-6 ml-8 mr-8">
+        <div class="mt-6 mx-4 md:mx-8">
           <div class="rounded-xl bg-emerald-600/20 dark:bg-emerald-800/10 px-4 py-6 shadow-lg border border-neutral-800/20">
             <div class="flex">
               <div class="flex-shrink-0 ml-1.5">
@@ -70,7 +70,7 @@
 
       <!-- Daemon offline warning -->
       <% if (nodes.some(node => node.status === 'Offline')) { %>
-        <div class="mt-6 ml-8 mr-8">
+        <div class="mt-6 mx-4 md:mx-8">
           <div class="rounded-xl bg-red-600/20 dark:bg-red-800/10 px-4 py-6 shadow-lg border border-neutral-800/20">
             <div class="flex">
               <div class="flex-shrink-0 ml-1.5">
@@ -91,7 +91,7 @@
       <% } %>
 
       <!-- Table of nodes -->
-      <div class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40" id="nodeTable">
+      <div class="overflow-x-auto shadow-sm rounded-xl m-4 md:m-8 border border-neutral-200 dark:border-neutral-800/40" id="nodeTable">
         <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
           <thead class="bg-neutral-50 dark:bg-neutral-800/50">
             <tr>

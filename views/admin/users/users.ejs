@@ -8,21 +8,21 @@
     </div>
     <!-- Content -->
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
-      <div class="sm:flex sm:items-center px-8 pt-4">
+      <div class="sm:flex sm:items-center px-4 sm:px-8 pt-4">
         <div class="sm:flex-auto">
           <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminUsersTitle %></h1>
           <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminUsersText %></p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <div class="flex gap-2">
-            <button id="createButton" type="button" class="inline-flex items-center gap-1.5 border border-neutral-200 dark:border-neutral-700/40 rounded-xl bg-neutral-900 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-100 px-3 py-2 text-sm font-medium transition">
+            <button id="createButton" type="button" class="inline-flex items-center gap-1.5 border border-neutral-200 dark:border-neutral-700/40 rounded-xl bg-neutral-900 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-100 px-3 py-2 text-sm font-medium transition w-full sm:w-auto">
               <%= req.translations.createNewUser %>
             </button>
           </div>
         </div>
       </div>
 
-      <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
+      <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-4 md:m-8">
 
         <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.totalUsers %></h2>
@@ -46,7 +46,7 @@
 
       <!-- notifications -->
       <% if (req.query.err == "none") { %>
-        <div class="mt-6 ml-8 mr-8">
+        <div class="mt-6 mx-4 md:mx-8">
           <div class="rounded-xl bg-emerald-600/20 dark:bg-emerald-800/10 px-4 py-6 shadow-lg border border-neutral-800/20">
             <div class="flex">
               <div class="flex-shrink-0 ml-1.5">
@@ -64,7 +64,7 @@
       <% } %>
 
       <!-- Table of users -->
-      <div class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40" id="userTable">
+      <div class="overflow-x-auto shadow-sm rounded-xl m-4 md:m-8 border border-neutral-200 dark:border-neutral-800/40" id="userTable">
         <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
           <thead class="bg-neutral-50 dark:bg-neutral-800/50">
             <tr>
