@@ -87,7 +87,7 @@
 
 <script nonce="<%- nonce %>">
   // Initialize allocated ports
-  let allocatedPorts = <%= node.allocatedPorts ? node.allocatedPorts : '[]' %>;
+  let allocatedPorts = <%- JSON.stringify((() => { try { return JSON.parse(node.allocatedPorts || '[]'); } catch { return []; } })()) %>;
 
   // Get ports that are already in use by existing servers
   function getUsedPorts() {
@@ -97,7 +97,7 @@
     <% if (node.servers && node.servers.length > 0) { %>
       <% node.servers.forEach(function(server) { %>
         try {
-          const ports = JSON.parse('<%= server.Ports %>');
+          const ports = <%- JSON.stringify((() => { try { return JSON.parse(server.Ports || '[]'); } catch { return []; } })()) %>;
           ports.forEach(portInfo => {
             const port = parseInt(portInfo.Port.split(':')[0]);
             if (!isNaN(port)) {
@@ -287,9 +287,15 @@
     };
 
     try {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
       const response = await fetch('/admin/node/<%= node.id %>/edit', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'CSRF-Token': csrfToken,
+          'X-CSRF-Token': csrfToken,
+        },
         body: JSON.stringify(nodeData)
       });
 

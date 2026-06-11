@@ -67,8 +67,13 @@
 
   // ── Content animation ─────────────────────────────────────────────────────
 
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
   function animateOut(c) {
     if (!c) return;
+    if (prefersReducedMotion()) return;
     var children = getAnimatableChildren(c);
     var targets  = children.length ? children : [c];
     targets.forEach(function (t) {
@@ -80,6 +85,17 @@
 
   function animateIn(c) {
     if (!c) return;
+    if (prefersReducedMotion()) {
+      document.documentElement.classList.remove('js-loading');
+      c.style.opacity = '1';
+      c.style.transform = '';
+      Array.from(c.children).forEach(function (child) {
+        child.style.opacity = '';
+        child.style.transform = '';
+        child.style.transition = '';
+      });
+      return;
+    }
 
     var children = getAnimatableChildren(c);
 
@@ -246,9 +262,7 @@
       link.classList.add(active ? 'text-neutral-900' : 'text-neutral-500');
       link.classList.add(active ? 'dark:text-white'  : 'dark:text-neutral-400');
       if (active) link.classList.add('active-mobile');
-      if (link.classList.contains('mobile-subnav-link')) {
-        link.setAttribute('data-active', active ? 'true' : 'false');
-      }
+      link.setAttribute('data-active', active ? 'true' : 'false');
     });
   }
 
@@ -319,6 +333,12 @@
       initMobileHighlight();
       fadeContentIn();
     }
+  });
+
+  document.addEventListener('al:navigated', function () {
+    initDesktopHighlight(true);
+    initMobileHighlight();
+    fadeContentIn();
   });
 
   // ── Click interception ────────────────────────────────────────────────────

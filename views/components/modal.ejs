@@ -29,10 +29,26 @@
     return panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
   }
 
-  function open({ title: t, body: b, danger = true, confirmLabel = 'Confirm', onConfirm }) {
+  function open(options) {
+    var t = '';
+    var b = '';
+    var bh = '';
+    var danger = true;
+    var confirmLabel = 'Confirm';
+    var onConfirm = null;
+
+    if (typeof options === 'object' && options !== null) {
+      t = options.title || '';
+      b = options.body || '';
+      bh = options.bodyHtml || '';
+      danger = options.danger !== undefined ? options.danger : true;
+      confirmLabel = options.confirmLabel || 'Confirm';
+      onConfirm = options.onConfirm || null;
+    }
+
     lastFocused = document.activeElement;
-    title.textContent = t || '';
-    body.textContent  = b || '';
+    title.textContent = t;
+    if (bh) body.innerHTML = bh; else body.textContent = b;
     confirmBtn.textContent = confirmLabel;
     confirmBtn.className = danger
       ? 'px-4 py-2 text-xs font-medium rounded-xl text-white transition bg-red-600 hover:bg-red-500'
@@ -98,6 +114,18 @@
     }
   });
 
-  window.modal = { confirm: open };
+  window.modal = {
+    confirm: function (optionsOrTitle, body, onConfirm, extras) {
+      if (typeof optionsOrTitle === 'object' && optionsOrTitle !== null) {
+        open(optionsOrTitle);
+        return;
+      }
+      open(Object.assign({
+        title: optionsOrTitle,
+        body: body,
+        onConfirm: onConfirm
+      }, extras || {}));
+    }
+  };
 })();
 </script>

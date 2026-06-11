@@ -59,7 +59,7 @@
 </script>
 <div id="pl-overlay" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99998;display:none;align-items:center;justify-content:center;pointer-events:all;background:rgba(249,250,251,0.08);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);">
   <div id="pl-inner" style="display:flex;flex-direction:column;align-items:center;gap:18px;">
-    <img src="/assets/logo.png" alt="" style="width:42px;height:42px;object-fit:contain;border-radius:10px;display:block;" onerror="this.style.display='none'">
+    <img src="/assets/logo.png" alt="" style="width:42px;height:42px;object-fit:contain;border-radius:10px;display:block;" data-hide-on-error="true">
     <p style="margin:0;margin-top:-4px;font-family:'General Sans',sans-serif;font-size:14px;font-weight:600;letter-spacing:-0.015em;" id="pl-title"><%= settings.title %></p>
     <div style="width:128px;height:1.5px;border-radius:2px;overflow:hidden;" id="pl-track">
       <div id="pl-bar" style="height:100%;width:0%;border-radius:2px;transition:width 260ms cubic-bezier(0.4,0,0.2,1);"></div>
@@ -139,6 +139,12 @@ function initializeTheme() {
   function updateSwitchPosition() { updateToggleDot(); }
 
   document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('img[data-hide-on-error="true"]').forEach(function (img) {
+      img.addEventListener('error', function () {
+        this.style.display = 'none';
+      });
+    });
+
     document.querySelectorAll('[data-theme-toggle]').forEach(function(btn) {
       btn.addEventListener('click', toggleTheme);
     });

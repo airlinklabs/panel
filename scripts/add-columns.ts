@@ -37,7 +37,7 @@ async function main() {
       console.log(`  added ${col.table}.${col.name}`);
     }
   }
-  console.log('\nDone. Run: npx prisma generate && npm run build');
+  console.log('\nDone. Run: prisma generate && npm run build');
 }
 
 main()

@@ -4,7 +4,7 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { checkForUpdates, performUpdate } from '../../handlers/updater';
-import { registerPermission } from '../../handlers/permisions';
+import { registerPermission } from '../../handlers/permissions';
 
 
 registerPermission('airlink.admin.overview.main');

@@ -666,7 +666,14 @@
 
   function switchTab(name) {
     document.querySelectorAll('.m-tab').forEach(t => t.classList.toggle('on', t.dataset.tab === name));
-    document.querySelectorAll('.m-pane').forEach(p => p.classList.toggle('on', p.id === `m-pane-${name}`));
+    document.querySelectorAll('.m-pane').forEach(function (pane) {
+      var active = pane.id === `m-pane-${name}`;
+      pane.classList.toggle('on', active);
+      if (active) {
+        if (window.airlinkAnimate) window.airlinkAnimate(pane, { duration: 220 });
+        if (window.airlinkAnimateChildren) window.airlinkAnimateChildren(pane, { baseDelay: 30, stagger: 35, duration: 240 });
+      }
+    });
   }
 
   document.getElementById('mClose').addEventListener('click', closeModal);

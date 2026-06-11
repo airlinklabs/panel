@@ -102,7 +102,14 @@
     },
     confirm: function (config) {
       if (window.modal && typeof window.modal.confirm === 'function') {
-        return window.modal.confirm(config.title, config.body, config.onConfirm, { danger: config.danger, confirmLabel: config.confirmLabel });
+        return window.modal.confirm({
+          title: config.title,
+          body: config.body,
+          bodyHtml: config.bodyHtml,
+          onConfirm: config.onConfirm,
+          danger: config.danger,
+          confirmLabel: config.confirmLabel
+        });
       }
     }
   };

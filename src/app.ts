@@ -168,7 +168,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 app.use((req: Request, res: Response, next: NextFunction) => {
   const nonce = crypto.randomBytes(16).toString('base64');
   res.locals.nonce = nonce;
-  (req as any).nonce = nonce;
+  req.nonce = nonce;
   next();
 });
 

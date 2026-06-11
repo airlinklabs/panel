@@ -81,7 +81,7 @@
 
             <!-- Resource Allocation -->
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Resource Allocation</h2>
-            <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
               <div>
                 <label class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Memory:</label>
                 <input type="hidden" id="serverMemory" name="Memory" value="<%= server.Memory %>">
@@ -229,13 +229,13 @@
   </div>
 </main>
 
-<div id="portsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
-  <div class="w-full max-w-4xl rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-900 shadow-xl">
+<div id="portsModal" role="dialog" aria-modal="true" aria-labelledby="portsModalTitle" class="fixed inset-0 z-[9000] hidden items-center justify-center bg-black/50 opacity-0 pointer-events-none transition-opacity duration-200 p-4">
+  <div id="portsModalPanel" class="w-full max-w-xl sm:max-w-2xl md:max-w-4xl rounded-2xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-900 shadow-2xl transform scale-95 opacity-0 transition-[transform,opacity] duration-[280ms] ease-[cubic-bezier(0.16,1,0.3,1)]">
     <div class="flex items-center justify-between border-b border-neutral-200 dark:border-white/10 px-5 py-4">
-      <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
-      <button type="button" id="closePortsModal" class="text-sm text-neutral-500 hover:text-neutral-800 dark:hover:text-white">Close</button>
+      <h2 id="portsModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
+      <button type="button" id="closePortsModal" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 transition text-neutral-500 hover:text-neutral-800 dark:hover:text-white" aria-label="Close ports dialog"><%- icons.x() %></button>
     </div>
-    <div class="p-5">
+    <div class="p-5 max-h-[60vh] overflow-y-auto">
       <div id="portsRows" class="space-y-3"></div>
       <button type="button" id="addPortRow" class="mt-4 rounded-lg border border-neutral-200 dark:border-white/10 px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5">Add port</button>
     </div>
@@ -351,15 +351,34 @@
       });
     }
 
-    document.getElementById('assignPortsBtn').addEventListener('click', () => {
+    function openPortsModal() {
+      const overlay = document.getElementById('portsModal');
+      const panel = document.getElementById('portsModalPanel');
       renderPortRows();
-      document.getElementById('portsModal').classList.remove('hidden');
-      document.getElementById('portsModal').classList.add('flex');
-    });
-    document.getElementById('closePortsModal').addEventListener('click', () => {
-      document.getElementById('portsModal').classList.add('hidden');
-      document.getElementById('portsModal').classList.remove('flex');
-    });
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          overlay.classList.remove('opacity-0', 'pointer-events-none');
+          panel.classList.remove('scale-95', 'opacity-0');
+          panel.classList.add('scale-100', 'opacity-100');
+        });
+      });
+    }
+    function closePortsModal() {
+      const overlay = document.getElementById('portsModal');
+      const panel = document.getElementById('portsModalPanel');
+      overlay.classList.add('opacity-0', 'pointer-events-none');
+      panel.classList.remove('scale-100', 'opacity-100');
+      panel.classList.add('scale-95', 'opacity-0');
+      setTimeout(function () {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+      }, 280);
+    }
+    document.getElementById('assignPortsBtn').addEventListener('click', openPortsModal);
+    document.getElementById('closePortsModal').addEventListener('click', closePortsModal);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePortsModal(); });
     document.getElementById('addPortRow').addEventListener('click', () => {
       assignedPorts.push({ name: `Port ${assignedPorts.length + 1}`, internalPort: 25565, externalPort: '', primary: assignedPorts.length === 0 });
       renderPortRows();
@@ -437,10 +456,14 @@
       loader.updateProgress(20, 'Sending server configuration...');
 
       try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
         const response = await fetch('/admin/servers/edit/<%= server.id %>', {
           method: 'POST',
+          credentials: 'same-origin',
           headers: {
             'Content-Type': 'application/json',
+            'CSRF-Token': csrfToken,
+            'X-CSRF-Token': csrfToken,
           },
           body: JSON.stringify(data),
         });

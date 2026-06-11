@@ -39,9 +39,9 @@ importers:
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
-      csurf:
-        specifier: ^1.11.0
-        version: 1.11.0
+      csrf-csrf:
+        specifier: ^3.2.2
+        version: 3.2.2
       ejs:
         specifier: ^3.1.10
         version: 3.1.10
@@ -106,9 +106,6 @@ importers:
       '@types/cookie-parser':
         specifier: ^1.4.8
         version: 1.4.10(@types/express@5.0.6)
-      '@types/csurf':
-        specifier: ^1.11.5
-        version: 1.11.5
       '@types/ejs':
         specifier: ^3.1.5
         version: 3.1.5
@@ -678,9 +675,6 @@ packages:
     peerDependencies:
       '@types/express': '*'
 
-  '@types/csurf@1.11.5':
-    resolution: {integrity: sha512-5rw87+5YGixyL2W8wblSUl5DSZi5YOlXE6Awwn2ofLvqKr/1LruKffrQipeJKUX44VaxKj8m5es3vfhltJTOoA==}
-
   '@types/ejs@3.1.5':
     resolution: {integrity: sha512-nv+GSx77ZtXiJzwKdsASqi+YQ5Z7vwHsTP0JY2SiQgjGckkBRKZnk8nIM+7oUZ1VCtuTz0+By4qVR7fqzp/Dfg==}
 
@@ -1043,14 +1037,8 @@ packages:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
 
-  csrf@3.1.0:
-    resolution: {integrity: sha512-uTqEnCvWRk042asU6JtapDTcJeeailFy4ydOQS28bj1hcLnYRiqi8SsD2jS412AY1I/4qdOwWZun774iqywf9w==}
-    engines: {node: '>= 0.8'}
-
-  csurf@1.11.0:
-    resolution: {integrity: sha512-UCtehyEExKTxgiu8UHdGvHj4tnpE/Qctue03Giq5gPgMQ9cg/ciod5blZQ5a4uCEenNQjxyGuzygLdKUmee/bQ==}
-    engines: {node: '>= 0.8.0'}
-    deprecated: This package is archived and no longer maintained. For support, visit https://github.com/expressjs/express/discussions
+  csrf-csrf@3.2.2:
+    resolution: {integrity: sha512-E3TgLWX1e+jqigDva+nFItfqa59UZ+gLR56DVNyL/xawBGwQr8o3U4/o1gP9FZmIWLnWCiIl5ni85MghMCNRfg==}
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -1090,10 +1078,6 @@ packages:
   delayed-stream@1.0.0:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
     engines: {node: '>=0.4.0'}
-
-  depd@1.1.2:
-    resolution: {integrity: sha512-7emPTl6Dpo6JRXOXjLRxck+FlLRX5847cLKEn00PLAgc3g2hTZZgr+e4c2v6QpSmLeFP3n5yUo7ft6avBK/5jQ==}
-    engines: {node: '>= 0.6'}
 
   depd@2.0.0:
     resolution: {integrity: sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==}
@@ -1421,10 +1405,6 @@ packages:
   hpp@0.2.3:
     resolution: {integrity: sha512-4zDZypjQcxK/8pfFNR7jaON7zEUpXZxz4viyFmqjb3kWNWAHsLEUmWXcdn25c5l76ISvnD6hbOGO97cXUI3Ryw==}
     engines: {node: '>=0.10.0'}
-
-  http-errors@1.7.3:
-    resolution: {integrity: sha512-ZTTX0MWrsQ2ZAhA1cejAwDLycFsd7I7nVtnkT3Ol0aqodaKW+0CTZDQ1uBv5whptCnc8e8HeRRJxRs0kmm/Qfw==}
-    engines: {node: '>= 0.6'}
 
   http-errors@2.0.1:
     resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
@@ -1940,9 +1920,6 @@ packages:
     deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
-  rndm@1.2.0:
-    resolution: {integrity: sha512-fJhQQI5tLrQvYIYFpOnFinzv9dwmR7hRnUz1XqP3OJ1jIweTNOd6aTO4jwQSgcBSFUB+/KHJxuGneime+FdzOw==}
-
   rxjs@7.8.2:
     resolution: {integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==}
 
@@ -1964,9 +1941,6 @@ packages:
   serve-static@1.16.3:
     resolution: {integrity: sha512-x0RTqQel6g5SY7Lg6ZreMmsOzncHFU7nhnRWkKgWuMTu5NN0DR5oruckMqRvacAN9d5w6ARnRBXl9xhDCgfMeA==}
     engines: {node: '>= 0.8.0'}
-
-  setprototypeof@1.1.1:
-    resolution: {integrity: sha512-JvdAWfbXeIGaZ9cILp38HntZSFSo3mWg6xGcJJsd+d4aRMOqauag1C63dJfDw7OaMYwEbHMOxEZ1lqVRYP2OAw==}
 
   setprototypeof@1.2.0:
     resolution: {integrity: sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==}
@@ -2019,10 +1993,6 @@ packages:
   source-map@0.6.1:
     resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
-
-  statuses@1.5.0:
-    resolution: {integrity: sha512-OpZ3zP+jT1PI7I8nemJX4AKmAX070ZkYPVWV/AaKTJl+tXCTGyVdC1a4SL8RUQYEwk/f34ZX8UTykN68FwrqAA==}
-    engines: {node: '>= 0.6'}
 
   statuses@2.0.2:
     resolution: {integrity: sha512-DvEy55V3DB7uknRo+4iOGT5fP1slR8wQohVdknigZPMpMstaKJQWhwiYBACJE3Ul2pTnATihhBYnRhZQHGBiRw==}
@@ -2097,10 +2067,6 @@ packages:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
 
-  toidentifier@1.0.0:
-    resolution: {integrity: sha512-yaOH/Pk/VEhBWWTlhI+qXxDFXlejDGcQipMlyxda9nthulaxLZUNcUqFxokp0vcYnvteJln5FNQDRrxj3YcbVw==}
-    engines: {node: '>=0.6'}
-
   toidentifier@1.0.1:
     resolution: {integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==}
     engines: {node: '>=0.6'}
@@ -2149,10 +2115,6 @@ packages:
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
-
-  tsscmp@1.0.6:
-    resolution: {integrity: sha512-LxhtAkPDTkVCMQjt2h6eBVY28KCjikZqZfMcC15YBeNjkgUpdCfBu5HoiOTDu86v6smE8yOjyEktJ8hlbANHQA==}
-    engines: {node: '>=0.6.x'}
 
   tunnel-agent@0.6.0:
     resolution: {integrity: sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==}
@@ -2662,10 +2624,6 @@ snapshots:
     dependencies:
       '@types/express': 5.0.6
 
-  '@types/csurf@1.11.5':
-    dependencies:
-      '@types/express-serve-static-core': 5.1.1
-
   '@types/ejs@3.1.5': {}
 
   '@types/estree@1.0.9': {}
@@ -3106,18 +3064,9 @@ snapshots:
       shebang-command: 2.0.0
       which: 2.0.2
 
-  csrf@3.1.0:
+  csrf-csrf@3.2.2:
     dependencies:
-      rndm: 1.2.0
-      tsscmp: 1.0.6
-      uid-safe: 2.1.5
-
-  csurf@1.11.0:
-    dependencies:
-      cookie: 0.7.2
-      cookie-signature: 1.0.6
-      csrf: 3.1.0
-      http-errors: 1.7.3
+      http-errors: 2.0.1
 
   debug@2.6.9:
     dependencies:
@@ -3142,8 +3091,6 @@ snapshots:
   defu@6.1.7: {}
 
   delayed-stream@1.0.0: {}
-
-  depd@1.1.2: {}
 
   depd@2.0.0: {}
 
@@ -3517,14 +3464,6 @@ snapshots:
     dependencies:
       lodash: 4.18.1
       type-is: 1.6.18
-
-  http-errors@1.7.3:
-    dependencies:
-      depd: 1.1.2
-      inherits: 2.0.4
-      setprototypeof: 1.1.1
-      statuses: 1.5.0
-      toidentifier: 1.0.0
 
   http-errors@2.0.1:
     dependencies:
@@ -3972,8 +3911,6 @@ snapshots:
     dependencies:
       glob: 7.2.3
 
-  rndm@1.2.0: {}
-
   rxjs@7.8.2:
     dependencies:
       tslib: 2.8.1
@@ -4010,8 +3947,6 @@ snapshots:
       send: 0.19.2
     transitivePeerDependencies:
       - supports-color
-
-  setprototypeof@1.1.1: {}
 
   setprototypeof@1.2.0: {}
 
@@ -4071,8 +4006,6 @@ snapshots:
       source-map: 0.6.1
 
   source-map@0.6.1: {}
-
-  statuses@1.5.0: {}
 
   statuses@2.0.2: {}
 
@@ -4142,8 +4075,6 @@ snapshots:
     dependencies:
       is-number: 7.0.0
 
-  toidentifier@1.0.0: {}
-
   toidentifier@1.0.1: {}
 
   touch@3.1.1: {}
@@ -4198,8 +4129,6 @@ snapshots:
       strip-json-comments: 2.0.1
 
   tslib@2.8.1: {}
-
-  tsscmp@1.0.6: {}
 
   tunnel-agent@0.6.0:
     dependencies:

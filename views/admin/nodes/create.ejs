@@ -87,9 +87,15 @@
     loader.updateProgress(20, 'Sending node configuration...');
 
     try {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
       const response = await fetch('/admin/nodes/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'CSRF-Token': csrfToken,
+          'X-CSRF-Token': csrfToken,
+        },
         body: JSON.stringify(nodeData)
       });
 

@@ -66,7 +66,7 @@ export interface AddonAPI {
 }
 
 function buildTailwind() {
-  exec('npx tailwindcss -i ./public/tw.css -o ./public/styles.css', (error, stdout, stderr) => {
+  exec('./node_modules/.bin/tailwindcss -i ./public/tw.css -o ./public/styles.css', (error, stdout, stderr) => {
     if (error) {
       logger.error('Tailwind build failed:', error.message);
       return;

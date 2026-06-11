@@ -4,7 +4,7 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
-import { registerPermission } from '../../handlers/permisions';
+import { registerPermission } from '../../handlers/permissions';
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 

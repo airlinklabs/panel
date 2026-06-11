@@ -304,24 +304,21 @@
         target.parentNode.replaceChild(newEl, target);
         updateNav(newPath);
 
-        // Fade in
+        // Keep hidden until page-loader.js re-animates the new content.
         newEl.style.opacity = '0';
-        newEl.style.transition = 'opacity 0.15s ease';
+        newEl.style.transition = '';
+        try { newEl.scrollTop = 0; } catch {}
 
         requestAnimationFrame(function () {
           requestAnimationFrame(function () {
-            newEl.style.opacity = '1';
-            setTimeout(function () {
-              newEl.style.transition = '';
-              newEl.style.opacity = '';
-              try { newEl.scrollTop = 0; } catch {}
-
-              // Run scripts after DOM is visible and settled
-              runScripts(scripts).then(resolve).catch(function (e) {
-                console.warn('[nav] runScripts error', e);
-                resolve();
-              });
-            }, 155);
+            runScripts(scripts).then(function () {
+              document.dispatchEvent(new Event('al:navigated'));
+              resolve();
+            }).catch(function (e) {
+              console.warn('[nav] runScripts error', e);
+              document.dispatchEvent(new Event('al:navigated'));
+              resolve();
+            });
           });
         });
       }, 105);

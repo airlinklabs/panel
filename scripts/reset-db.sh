@@ -4,7 +4,7 @@ set -e
 echo "Deleting old database..."
 rm -f prisma/dev.db prisma/dev.db-shm prisma/dev.db-wal
 echo "Applying migration..."
-npx prisma migrate deploy
+./node_modules/.bin/prisma migrate deploy
 echo "Regenerating Prisma client..."
-npx prisma generate
+./node_modules/.bin/prisma generate
 echo "Done."

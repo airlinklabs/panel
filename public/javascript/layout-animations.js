@@ -2,6 +2,7 @@
 
   var MOVE_MS  = 340;
   var EASE_MOVE = 'cubic-bezier(0.4, 0, 0.2, 1)';
+  var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var animating = new WeakSet();
 
@@ -38,6 +39,7 @@
   }
 
   function flipSiblings(snap) {
+    if (prefersReduced) return;
     snap.forEach(function (first, el) {
       if (animating.has(el)) return;
       var last = el.getBoundingClientRect();
@@ -103,6 +105,7 @@
   // entrance animation: fade in + slight upward slide.
   window.airlinkAnimate = function (el, options) {
     if (!el || el.nodeType !== 1) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var duration = (options && options.duration) || 260;
     var delay    = (options && options.delay)    || 0;
     el.animate(
@@ -118,6 +121,7 @@
   // Each child staggers by 40ms so they cascade rather than all pop at once.
   window.airlinkAnimateChildren = function (container, options) {
     if (!container || container.nodeType !== 1) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var baseDelay = (options && options.baseDelay) || 0;
     var stagger   = (options && options.stagger)   || 40;
     Array.from(container.children).forEach(function (child, i) {

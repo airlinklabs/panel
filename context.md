@@ -312,7 +312,7 @@ npm run build
 This runs:
 
 ```sh
-tsc && npx tailwindcss -i ./public/tw.css -o ./public/styles.css
+tsc && tailwindcss -i ./public/tw.css -o ./public/styles.css
 ```
 
 EJS compile check was also run with Node/EJS against all files in `views/`.
