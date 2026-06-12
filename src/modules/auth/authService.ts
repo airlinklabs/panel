@@ -7,6 +7,7 @@ import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
 declare module 'express-session' {
   interface SessionData {
+    csrfSessionId?: string;
     user: {
       id: number;
       email: string;
@@ -173,8 +174,10 @@ const authServiceModule: Module = {
         const existing = await prisma.users.findFirst({
           where: { OR: [{ email }, { username }] },
         });
-        if (existing) res.redirect('/register?err=user_already_exists');
- return;
+        if (existing) {
+          res.redirect('/register?err=user_already_exists');
+          return;
+        }
 
         await prisma.users.create({
           data: {
