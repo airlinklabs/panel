@@ -1,188 +1,203 @@
-const searchInput   = document.getElementById('searchInput');
-const searchResults = document.getElementById('searchResults');
-const navLinks      = document.querySelectorAll('.nav-link');
 
-let activeIndex   = -1;
-let searchTimeout = null;
-let lastQuery     = '';
+(function () {
+  const configs = [
+    { input: document.getElementById('searchInput'), results: document.getElementById('searchResults'), mode: 'desktop' },
+    { input: document.getElementById('mobileSearchInput'), results: document.getElementById('mobileSearchResults'), mode: 'mobile' }
+  ].filter((cfg) => cfg.input && cfg.results);
 
-const isAdmin = !!document.querySelector('a[href="/admin/overview"]');
+  if (!configs.length) return;
 
-const typeIcon = {
-  server: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0 text-neutral-400"><path fill-rule="evenodd" d="M2.25 6a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3v3a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V6Zm3.97.47a.75.75 0 0 1 1.06 0l.97.97.97-.97a.75.75 0 0 1 1.06 1.06l-.97.97.97.97a.75.75 0 1 1-1.06 1.06l-.97-.97-.97.97a.75.75 0 0 1-1.06-1.06l.97-.97-.97-.97a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>',
-  user:   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0 text-neutral-400"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd"/></svg>',
-  node:   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0 text-neutral-400"><path fill-rule="evenodd" d="M2.25 4.125c0-1.036.84-1.875 1.875-1.875h5.25c1.036 0 1.875.84 1.875 1.875V17.25a4.5 4.5 0 1 1-9 0V4.125Zm4.5 14.25a1.125 1.125 0 1 0 0-2.25 1.125 1.125 0 0 0 0 2.25Z" clip-rule="evenodd"/></svg>',
-  nav:    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0 text-neutral-400"><path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd"/></svg>',
-};
+  const typeBadges = {
+    Page: 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300',
+    Setting: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300',
+    Server: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+    User: 'bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300',
+    Node: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
+    Action: 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300'
+  };
 
-function escHtml(t) {
-  const d = document.createElement('div');
-  d.textContent = t || '';
-  return d.innerHTML;
-}
+  const staticIndex = [
+    { label: 'Dashboard', sublabel: 'Server list', url: '/', keywords: ['home', 'servers', 'instances'], type: 'Page' },
+    { label: 'Account', sublabel: 'Profile settings', url: '/account', keywords: ['profile', 'avatar', 'username'], type: 'Page' },
+    { label: 'Create Server', sublabel: 'Provision a new server', url: '/create-server', keywords: ['new server', 'instance'], type: 'Page' },
+    { label: 'Admin Overview', sublabel: 'System status', url: '/admin/overview', keywords: ['overview', 'admin'], type: 'Page' },
+    { label: 'Server Console', sublabel: 'Live terminal', url: '/server/:uuid', keywords: ['console', 'terminal', 'server tab'], type: 'Server' }
+  ];
 
-function highlightMatch(text, term) {
-  if (!term) return escHtml(text);
-  const safe  = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp('(' + safe + ')', 'gi');
-  return escHtml(text).replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-600/60 text-yellow-950 dark:text-yellow-50 rounded px-0.5">$1</mark>');
-}
-
-function getNavResults(term) {
-  const scopedLinks = Array.from(navLinks).filter(function(link) {
-    if (isAdmin) return true;
-    return !((link.getAttribute('href') || '').startsWith('/admin'));
-  });
-
-  return scopedLinks
-    .filter(function(link) {
-      const text  = link.textContent.trim().toLowerCase();
-      const extra = (link.getAttribute('searchdata') || link.getAttribute('data-search') || '').toLowerCase();
-      return text.includes(term) || extra.includes(term);
-    })
-    .slice(0, 5)
-    .map(function(link) {
-      return { type: 'nav', label: link.textContent.trim(), sub: '', url: link.href };
-    });
-}
-
-function renderResults(items, term) {
-  searchResults.innerHTML = '';
-  activeIndex = -1;
-  searchInput.setAttribute('aria-activedescendant', '');
-
-  if (!items.length) {
-    const msg = document.createElement('p');
-    msg.textContent = 'No results.';
-    msg.className   = 'text-sm text-neutral-500 dark:text-neutral-400 px-3 py-4 text-center';
-    searchResults.appendChild(msg);
-    searchInput.setAttribute('aria-expanded', 'true');
-    return;
+  function esc(text) {
+    return String(text || '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
   }
 
-  const groups = {};
-  items.forEach(function(item) {
-    if (!groups[item.type]) groups[item.type] = [];
-    groups[item.type].push(item);
-  });
+  function norm(text) {
+    return String(text || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  }
 
-  const order  = ['server', 'user', 'node', 'nav'];
-  const labels = { server: 'Servers', user: 'Users', node: 'Nodes', nav: 'Pages' };
+  function collectDomIndex() {
+    const items = [];
+    const seen = new Set();
+    document.querySelectorAll('[data-search], a[href], button, label, h1, h2, h3, h4, h5, th').forEach((el) => {
+      const label = norm(el.getAttribute('data-search') || el.textContent || '');
+      if (!label) return;
+      const href = el.getAttribute && el.getAttribute('href');
+      const url = href && href !== '#' ? href : el.dataset.href || null;
+      const type = (el.getAttribute('data-search') || '').match(/^(page|setting|server|user|node|action)/i)?.[1];
+      const item = {
+        label: el.textContent.trim().replace(/\s+/g, ' '),
+        sublabel: el.getAttribute('data-search') || '',
+        url,
+        keywords: label.split(/\s+/),
+        type: type ? type.charAt(0).toUpperCase() + type.slice(1).toLowerCase() : (href ? 'Page' : 'Action')
+      };
+      const key = [item.label, item.url, item.type].join('|');
+      if (seen.has(key)) return;
+      seen.add(key);
+      items.push(item);
+    });
+    return items;
+  }
 
-  order.forEach(function(type) {
-    if (!groups[type]) return;
+  function staticMatches(term) {
+    return staticIndex.filter((item) => {
+      const hay = norm([item.label, item.sublabel, (item.keywords || []).join(' ')].join(' '));
+      return hay.includes(term);
+    });
+  }
 
-    const hdr = document.createElement('p');
-    hdr.className   = 'text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-3 pt-3 pb-1';
-    hdr.textContent = labels[type];
-    searchResults.appendChild(hdr);
+  function domMatches(term) {
+    return collectDomIndex().filter((item) => {
+      const hay = norm([item.label, item.sublabel, (item.keywords || []).join(' ')].join(' '));
+      return hay.includes(term);
+    });
+  }
 
-    groups[type].forEach(function(item) {
-      const row = document.createElement('a');
-      row.href      = item.url;
-      row.id        = 'search-result-' + type + '-' + searchResults.querySelectorAll('.search-result').length;
-      row.setAttribute('role', 'option');
-      row.setAttribute('aria-selected', 'false');
-      row.className = 'search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer';
-      row.innerHTML = (typeIcon[item.type] || typeIcon.nav) +
-        '<span class="flex-1 min-w-0">' +
-          '<span class="block truncate">' + highlightMatch(item.label, term) + '</span>' +
-          (item.sub ? '<span class="block text-[11px] text-neutral-400 truncate">' + escHtml(item.sub) + '</span>' : '') +
-        '</span>';
+  function search(term) {
+    const matches = [];
+    const seen = new Set();
 
-      row.addEventListener('click', function(e) {
-        e.preventDefault();
-        searchResults.classList.add('hidden');
-        searchInput.value = '';
-        location.href = item.url;
+    [...staticMatches(term), ...domMatches(term)].forEach((item) => {
+      const key = [item.label, item.url || '', item.type].join('|');
+      if (seen.has(key)) return;
+      seen.add(key);
+      matches.push(item);
+    });
+
+    return matches.slice(0, 24);
+  }
+
+  function badge(type) {
+    const cls = typeBadges[type] || typeBadges.Page;
+    return `<span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${cls}">${esc(type)}</span>`;
+  }
+
+  function highlight(text, term) {
+    if (!term) return esc(text);
+    const safe = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return esc(text).replace(new RegExp(`(${safe})`, 'ig'), '<mark class="rounded bg-yellow-200/80 dark:bg-yellow-500/30 text-inherit">$1</mark>');
+  }
+
+  function render(cfg, term) {
+    const { results } = cfg;
+    results.innerHTML = '';
+    const rows = search(term);
+    if (!rows.length) {
+      results.classList.remove('hidden');
+      results.innerHTML = '<div class="px-4 py-4 text-sm text-neutral-500 dark:text-neutral-400">No results.</div>';
+      return;
+    }
+
+    results.classList.remove('hidden');
+    rows.forEach((item, index) => {
+      const a = document.createElement(item.url ? 'a' : 'button');
+      if (item.url) a.href = item.url;
+      else a.type = 'button';
+      a.className = 'search-result group flex items-start gap-3 px-3 py-2.5 rounded-xl text-left transition-colors duration-150 hover:bg-neutral-100 dark:hover:bg-white/5';
+      a.style.animationDelay = `${index * 20}ms`;
+      a.style.animationDuration = '150ms';
+      a.style.animationTimingFunction = 'cubic-bezier(0.16,1,0.3,1)';
+      a.style.animationFillMode = 'both';
+      a.style.animationName = 'fadeDown';
+      a.innerHTML = `
+        <div class="mt-0.5 shrink-0">${badge(item.type)}</div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="truncate text-sm font-medium text-neutral-800 dark:text-neutral-100">${highlight(item.label, term)}</span>
+          </div>
+          ${item.sublabel ? `<div class="truncate text-xs text-neutral-500 dark:text-neutral-400">${esc(item.sublabel)}</div>` : ''}
+        </div>
+      `;
+      a.addEventListener('click', (event) => {
+        if (!item.url) return;
+        event.preventDefault();
+        window.location.href = item.url;
       });
-
-      searchResults.appendChild(row);
+      results.appendChild(a);
     });
-  });
-  searchInput.setAttribute('aria-expanded', 'true');
-}
-
-async function doSearch(term) {
-  if (!term) {
-    searchResults.classList.add('hidden');
-    searchInput.setAttribute('aria-expanded', 'false');
-    searchInput.setAttribute('aria-activedescendant', '');
-    return;
   }
-  searchResults.classList.remove('hidden');
-  searchInput.setAttribute('aria-expanded', 'true');
 
-  const navItems = getNavResults(term);
-  try {
-    const r    = await fetch('/api/search?q=' + encodeURIComponent(term));
-    const data = await r.json();
-    renderResults((data.results || []).concat(navItems), term);
-  } catch {
-    renderResults(navItems, term);
+  function setup(cfg) {
+    const { input, results, mode } = cfg;
+    let timer = 0;
+    let focused = false;
+
+    function update() {
+      const term = norm(input.value);
+      if (!term) {
+        results.classList.add('hidden');
+        results.innerHTML = '';
+        input.setAttribute('aria-expanded', 'false');
+        return;
+      }
+      render(cfg, term);
+      input.setAttribute('aria-expanded', 'true');
+      results.style.display = 'block';
+      results.classList.remove('hidden');
+      results.style.opacity = '0';
+      results.style.transform = 'translateY(-8px)';
+      results.style.transition = 'opacity 200ms ease, transform 200ms cubic-bezier(0.16,1,0.3,1)';
+      requestAnimationFrame(() => {
+        results.style.opacity = '1';
+        results.style.transform = 'translateY(0)';
+      });
+    }
+
+    input.addEventListener('focus', () => {
+      focused = true;
+      input.parentElement?.classList?.add('ring-2', 'ring-neutral-500/30');
+      update();
+      if (mode === 'mobile') {
+        results.classList.remove('hidden');
+      }
+    });
+    input.addEventListener('blur', () => {
+      focused = false;
+      setTimeout(() => {
+        if (!focused) {
+          results.classList.add('hidden');
+          results.setAttribute('aria-expanded', 'false');
+        }
+      }, 150);
+      input.parentElement?.classList?.remove('ring-2', 'ring-neutral-500/30');
+    });
+
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(update, 120);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        input.value = '';
+        results.classList.add('hidden');
+        input.blur();
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!input.contains(event.target) && !results.contains(event.target)) {
+        results.classList.add('hidden');
+      }
+    });
   }
-}
 
-function updateActiveResult() {
-  const rows = searchResults.querySelectorAll('.search-result');
-  rows.forEach(function(row, i) {
-    const active = i === activeIndex;
-    row.classList.toggle('bg-neutral-100', active);
-    row.classList.toggle('dark:bg-neutral-700/50', active);
-    row.setAttribute('aria-selected', active ? 'true' : 'false');
-  });
-  const activeRow = rows[activeIndex];
-  searchInput.setAttribute('aria-activedescendant', activeRow ? activeRow.id : '');
-}
-
-searchInput.addEventListener('input', function() {
-  const term = searchInput.value.trim().toLowerCase();
-  if (term === lastQuery) return;
-  lastQuery = term;
-  clearTimeout(searchTimeout);
-  if (!term) {
-    searchResults.classList.add('hidden');
-    searchInput.setAttribute('aria-expanded', 'false');
-    searchInput.setAttribute('aria-activedescendant', '');
-    return;
-  }
-  searchTimeout = setTimeout(function() { doSearch(term); }, 150);
-});
-
-searchInput.addEventListener('keydown', function(e) {
-  const rows = searchResults.querySelectorAll('.search-result');
-  if (!rows.length) return;
-  if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    activeIndex = (activeIndex + 1) % rows.length;
-    updateActiveResult();
-  } else if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    activeIndex = (activeIndex - 1 + rows.length) % rows.length;
-    updateActiveResult();
-  } else if (e.key === 'Enter') {
-    e.preventDefault();
-    if (activeIndex >= 0 && rows[activeIndex]) rows[activeIndex].click();
-  } else if (e.key === 'Escape') {
-    searchResults.classList.add('hidden');
-    searchInput.setAttribute('aria-expanded', 'false');
-    searchInput.setAttribute('aria-activedescendant', '');
-    searchInput.blur();
-  }
-});
-
-document.addEventListener('click', function(e) {
-  if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
-    searchResults.classList.add('hidden');
-    searchInput.setAttribute('aria-expanded', 'false');
-    searchInput.setAttribute('aria-activedescendant', '');
-  }
-});
-
-document.addEventListener('keydown', function(e) {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-    e.preventDefault();
-    searchInput.focus();
-    searchInput.select();
-  }
-});
+  configs.forEach(setup);
+})();

@@ -8,7 +8,7 @@
  */
 
 import express, { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from "@prisma/client";
+import prisma from "./db";
 import path from 'path';
 import session from 'express-session';
 import { loadEnv } from './handlers/envLoader';
@@ -50,8 +50,6 @@ import {
   renderErrorPage,
 } from './handlers/errorPages';
 
-
-const prisma = new PrismaClient();
 
 loadEnv();
 

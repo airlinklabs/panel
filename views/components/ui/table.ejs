@@ -8,7 +8,7 @@
         <% if (!rows || rows.length === 0) { %>
         <tr><td colspan="<%= (columns || []).length || 1 %>" class="px-4 py-12 text-center"><div class="flex flex-col items-center"><%- emptyIcon || '' %><p class="text-sm font-medium text-neutral-800 dark:text-white"><%= emptyLabel %></p><% if (emptySubtext) { %><p class="text-xs text-neutral-500 mt-1"><%= emptySubtext %></p><% } %></div></td></tr>
         <% } else { rows.forEach(function(row) { %>
-        <tr class="<%= rowHref ? 'hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors cursor-pointer' : '' %>" <% if (rowHref && row[rowHref]) { %>data-row-href="<%= row[rowHref] %>"<% } %>>
+        <tr class="<%= rowHref ? 'hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors duration-150 cursor-pointer' : 'hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors duration-150' %>" <% if (rowHref && row[rowHref]) { %>data-row-href="<%= row[rowHref] %>"<% } %>>
           <% columns.forEach(function(column) { %><td class="py-3 px-4 text-sm text-neutral-700 dark:text-neutral-200 <%= column.class || '' %> <%= column.mobileHidden ? 'hidden sm:table-cell' : '' %>"><%- row[column.key] ?? '' %></td><% }); %>
         </tr>
         <% }); } %>

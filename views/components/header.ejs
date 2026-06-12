@@ -32,6 +32,7 @@
     <script nonce="<%- nonce %>" src="/javascript/checkbox-anim.js"></script>
     <script nonce="<%- nonce %>" src="/javascript/layout-animations.js"></script>
     <script nonce="<%- nonce %>" src="/js/ui.js"></script>
+    <script nonce="<%- nonce %>" src="/javascript/panel-enhancements.js"></script>
     <script nonce="<%- nonce %>"><%- include('../ui/motion.js') %></script>
     <style>
       html, body, * { scrollbar-width: none; -ms-overflow-style: none; }
@@ -45,7 +46,13 @@
       }
     </style>
 </head>
-<body style="font-family: 'General Sans'" class="bg-neutral-50 dark:bg-[#141414] h-full text-neutral-800 dark:text-white overflow-x-hidden">
+<%
+  const bodyViewportClass = isMobileViewport ? 'viewport-mobile' : 'viewport-desktop';
+  const bodyServerNameAttr = (typeof server !== 'undefined' && server && server.name)
+    ? ' data-server-name="' + String(server.name).replace(/"/g, '&quot;') + '"'
+    : '';
+%>
+<body style="font-family: 'General Sans'" class="bg-neutral-50 dark:bg-[#141414] h-full text-neutral-800 dark:text-white overflow-x-hidden <%= bodyViewportClass %>" data-viewport-mode="<%= isMobileViewport ? 'mobile' : 'desktop' %>"<%- bodyServerNameAttr %>>
 
 <a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[99999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-neutral-900 focus:text-white focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
 

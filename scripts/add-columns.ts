@@ -6,7 +6,7 @@
  * Safe to run multiple times — checks PRAGMA table_info before each ALTER.
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../src/generated/prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -23,11 +23,17 @@ const columns: { table: string; name: string; def: string }[] = [
 ];
 
 async function main() {
+  const ALLOWED_TABLES = ['settings', 'Users'] as const;
+
   for (const col of columns) {
+    if (!ALLOWED_TABLES.includes(col.table as (typeof ALLOWED_TABLES)[number])) {
+      throw new Error(`Disallowed table: ${col.table}`);
+    }
+
     const rows = await prisma.$queryRawUnsafe<{ name: string }[]>(
       `PRAGMA table_info("${col.table}")`
     );
-    const exists = rows.some((r: any) => r.name === col.name);
+    const exists = rows.some((r) => r.name === col.name);
     if (exists) {
       console.log(`  skip  ${col.table}.${col.name}`);
     } else {

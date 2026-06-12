@@ -1,6 +1,8 @@
 import session from 'express-session';
 import prisma from '../db';
 
+const SESSION_MAX_AGE_MS = 3600000 * 72;
+
 class PrismaSessionStore extends session.Store {
   async get(sid: string, callback: (err: any, session: any) => void) {
     try {
@@ -16,7 +18,7 @@ class PrismaSessionStore extends session.Store {
       const data = {
         session_id: sid,
         data: JSON.stringify(session),
-        expires: new Date(Date.now() + (session.cookie.maxAge || 3600000 * 72)),
+        expires: new Date(Date.now() + (session.cookie.maxAge ?? SESSION_MAX_AGE_MS)),
       };
       await prisma.session.upsert({
         where: { session_id: sid },
@@ -62,7 +64,7 @@ class PrismaSessionStore extends session.Store {
         where: { session_id: sid },
         data: {
           data: JSON.stringify(session),
-          expires: new Date(Date.now() + (session.cookie.maxAge || 3600000)),
+          expires: new Date(Date.now() + (session.cookie.maxAge ?? SESSION_MAX_AGE_MS)),
           updatedAt: new Date(),
         },
       });

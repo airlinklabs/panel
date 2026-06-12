@@ -114,6 +114,7 @@ const sftpModule: Module = {
             create: { serverId, username, password: hashedPassword, host, port, expiresAt: expiresAt ? new Date(expiresAt) : null },
           });
 
+          // Plaintext password is intentionally returned only once during generation.
           res.json({ username, password, host, port, expiresAt });
         } catch (error) {
           if (axios.isAxiosError(error)) {

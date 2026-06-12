@@ -1,10 +1,10 @@
 <%
 const hasError = !!error;
 const inputType = type || 'text';
-const inputClass = 'w-full rounded-xl border bg-neutral-50 dark:bg-neutral-800/40 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 transition ' + (hasError ? 'border-red-400 dark:border-red-500 focus:ring-red-400' : 'border-neutral-200 dark:border-white/10 focus:ring-neutral-400 dark:focus:ring-neutral-600');
+const inputClass = 'w-full rounded-xl border bg-white dark:bg-neutral-800/40 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-950 transition ' + (hasError ? 'border-red-400 dark:border-red-500 focus:ring-red-400' : 'border-neutral-300 dark:border-white/10 focus:ring-neutral-400 dark:focus:ring-neutral-600');
 %>
 <div>
-  <% if (label) { %><label for="<%= id %>" class="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1 block"><%= label %></label><% } %>
+  <% if (label) { %><label for="<%= id %>" class="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1 block" data-search="setting: <%= label %>"><%= label %></label><% } %>
   <input id="<%= id %>" name="<%= name %>" type="<%= inputType %>" placeholder="<%= placeholder || '' %>" value="<%= value || '' %>" class="<%= inputClass %>" <%= required ? 'required' : '' %> <%= disabled ? 'disabled' : '' %>>
   <% if (hint && !hasError) { %><p class="text-xs text-neutral-500 mt-1"><%= hint %></p><% } %>
   <% if (hasError) { %><p class="text-xs text-red-600 dark:text-red-400 mt-1"><%= error %></p><% } %>

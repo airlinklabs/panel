@@ -1,5 +1,5 @@
-<div class="flex flex-col items-center justify-center mt-32 text-center px-4">
-  <div class="h-16 w-16 text-neutral-200 dark:text-neutral-700 mb-4"><%- icon || '' %></div>
+<div class="flex flex-col items-center justify-center mt-32 text-center px-4 anim-fade-up">
+  <div class="h-16 w-16 text-neutral-200 dark:text-neutral-700 mb-4 bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 rounded-2xl p-3"><%- icon || '' %></div>
   <h2 class="text-base font-medium text-neutral-800 dark:text-white"><%= title %></h2>
   <% if (body) { %><p class="text-sm text-neutral-500 mt-1"><%= body %></p><% } %>
   <% if (action) { %><div class="mt-4"><%- include('./button', { label: action.label, href: action.href, type: 'button', variant: 'primary', onClick: action.onClick }) %></div><% } %>

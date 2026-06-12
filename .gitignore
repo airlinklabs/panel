@@ -30,3 +30,5 @@ coverage/
 .agents/
 .codex/
 .github/
+
+src/generated/

@@ -10,3 +10,16 @@
 
 /* stagger helper — set --i: N on each child */
 .anim-stagger > * { animation-delay: calc(var(--i,0) * 50ms) }
+
+
+@keyframes fadeLeft { from { opacity:0; transform:translateX(-8px) } to { opacity:1; transform:translateX(0) } }
+@keyframes bounceUp { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-2px) } }
+@keyframes bounceIn { 0% { opacity:0; transform:translateY(8px) scale(.98) } 100% { opacity:1; transform:translateY(0) scale(1) } }
+@keyframes slideRight { from { opacity:0; transform:translateX(100%) } to { opacity:1; transform:translateX(0) } }
+@keyframes fadeBlurIn { from { opacity:0; filter:blur(4px); transform:translateY(4px) } to { opacity:1; filter:blur(0); transform:translateY(0) } }
+
+.anim-fade-left { animation: fadeLeft 0.3s cubic-bezier(0.16,1,0.3,1) both }
+.anim-bounce-up { animation: bounceUp 0.2s cubic-bezier(0.16,1,0.3,1) both }
+.anim-bounce-in { animation: bounceIn 0.2s cubic-bezier(0.16,1,0.3,1) both }
+.anim-slide-right { animation: slideRight 0.28s cubic-bezier(0.16,1,0.3,1) both }
+.anim-fade-blur-in { animation: fadeBlurIn 0.25s cubic-bezier(0.16,1,0.3,1) both }

@@ -3,7 +3,7 @@ import prisma from '../../db';
 import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import logger from '../../handlers/logger';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
 declare module 'express-session' {
   interface SessionData {
@@ -25,7 +25,7 @@ const authRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many attempts. Try again in a minute.' },
-  keyGenerator: (req) => req.ip || 'unknown',
+  keyGenerator: (req) => ipKeyGenerator(req.ip || 'unknown'),
 });
 
 async function getSecuritySettings() {
@@ -103,12 +103,19 @@ const authServiceModule: Module = {
           data: { loginAttempts: 0, lockedUntil: null },
         });
 
+        await new Promise<void>((resolve, reject) => {
+          req.session.regenerate((err) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+
         req.session.user = {
-          id:          user.id,
-          email:       user.email,
-          isAdmin:     user.isAdmin,
+          id: user.id,
+          email: user.email,
+          isAdmin: user.isAdmin,
           description: user.description ?? '',
-          username:    user.username    ?? '',
+          username: user.username ?? '',
         };
 
         await prisma.loginHistory.create({

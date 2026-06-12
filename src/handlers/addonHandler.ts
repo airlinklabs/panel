@@ -75,6 +75,14 @@ function buildTailwind() {
   });
 }
 
+function resolveAddonPath(addonsDir: string, slug: string): string {
+  const addonPath = path.join(addonsDir, slug);
+  if (!addonPath.startsWith(addonsDir + path.sep)) {
+    throw new Error('Invalid addon slug: path traversal detected');
+  }
+  return addonPath;
+}
+
 export async function loadAddons(app: Express | any) {
   for (const [slug] of loadedAddons.entries()) {
     unloadAddon(app, slug);
@@ -408,8 +416,12 @@ async function applyAddonMigrations(slug: string, packageJson: AddonPackageJson)
       try {
         logger.info(`Applying migration ${migration.name} for addon ${packageJson.name}...`);
 
-        // Execute the migration SQL
-        await prisma.$executeRawUnsafe(migration.sql);
+        // Addons can ship arbitrary migration SQL. Validate it is non-empty before execution.
+        const migrationSql = typeof migration.sql === 'string' ? migration.sql.trim() : '';
+        if (!migrationSql) {
+          throw new Error(`Migration ${migration.name} for addon ${packageJson.name} is empty`);
+        }
+        await prisma.$executeRawUnsafe(migrationSql);
 
         // Record the migration as applied
         await prisma.$executeRaw`
@@ -456,7 +468,7 @@ export async function toggleAddonStatus(slug: string, enabled: boolean) {
     let migrationsApplied = 0;
     if (enabled && !addon.enabled) {
       const addonsDir = path.join(__dirname, '../../storage/addons');
-      const addonPath = path.join(addonsDir, slug);
+      const addonPath = resolveAddonPath(addonsDir, slug);
       const packageJsonPath = path.join(addonPath, 'package.json');
 
       if (fs.existsSync(packageJsonPath)) {
@@ -554,7 +566,7 @@ export async function reloadAddons(app: Express | any) {
 
       for (const addon of enabledAddons) {
         const addonsDir = path.join(__dirname, '../../storage/addons');
-        const addonPath = path.join(addonsDir, addon.slug);
+        const addonPath = resolveAddonPath(addonsDir, addon.slug);
         const packageJsonPath = path.join(addonPath, 'package.json');
 
         if (fs.existsSync(packageJsonPath)) {

@@ -125,3 +125,25 @@ declare module '@prisma/client' {
   const client: any;
   export default client;
 }
+
+// Prisma client shim for generated client path used in source imports.
+declare module '../generated/prisma/client' {
+  export const Prisma: any;
+  export type PrismaClient = any;
+  export const PrismaClient: any;
+  export type Users = any;
+  export type Session = any;
+  export type Server = any;
+  export type Images = any;
+  export type Node = any;
+  export type settings = any;
+  export type ServerFolder = any;
+  export type ServerFolderMember = any;
+  export type ApiKey = any;
+  export type LoginHistory = any;
+  export type PlayerStats = any;
+  export type Addon = any;
+  export type Backup = any;
+  const client: any;
+  export default client;
+}

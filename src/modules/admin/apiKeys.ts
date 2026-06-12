@@ -27,14 +27,10 @@ registerPermission('airlink.admin.apikeys.edit');
 registerPermission('airlink.admin.api.docs.view');
 
 function generateApiKey(length: number): string {
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    result += characters[randomIndex];
-  }
-  return result;
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  return Array.from(crypto.randomBytes(length))
+    .map((byte) => charset[byte % charset.length])
+    .join('');
 }
 
 const coreModule: Module = {

@@ -355,9 +355,20 @@ function connectWebSocket() {
             wsErrorCount = 0;
             const row = document.getElementById('daemonOfflineWarningRow');
             if (row) row.classList.add('hidden');
+            window.__pageReady = true;
+            window.dispatchEvent(new CustomEvent('custom:page-ready'));
         };
 
-        socket.onmessage = handleWebSocketMessage;
+        let pageReadyDispatched = false;
+        socket.onmessage = (event) => {
+            if (!pageReadyDispatched) {
+                pageReadyDispatched = true;
+                window.__pageReady = true;
+                window.__pageReady = true;
+            window.dispatchEvent(new CustomEvent('custom:page-ready'));
+            }
+            handleWebSocketMessage(event);
+        };
 
         socket.onerror = () => {
             wsErrorCount++;

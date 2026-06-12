@@ -735,7 +735,7 @@ const dashboardModule: Module = {
      * File system : Get file content
      */
     router.get(
-      '/server/:id/files/edit/:path(*)',
+      '/server/:id/files/edit{/*path}',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
@@ -844,7 +844,7 @@ const dashboardModule: Module = {
      * File system : Save
      */
     router.post(
-      '/server/:id/files/:path(*)',
+      '/server/:id/files/*path',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
         let filePath = req.params?.path;
@@ -886,7 +886,7 @@ const dashboardModule: Module = {
      * Used by both the files page and the worlds page
      */
     router.delete(
-      '/server/:id/files/rm/:path(*)',
+      '/server/:id/files/rm/*path',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
         const serverId = req.params?.id;
@@ -958,7 +958,7 @@ const dashboardModule: Module = {
     );
 
     router.get(
-      '/server/:id/files/download/:path(*)',
+      '/server/:id/files/download/*path',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
         const filePath = req.params?.path;

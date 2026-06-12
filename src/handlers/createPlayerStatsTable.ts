@@ -10,20 +10,17 @@
 import prisma from '../db';
 import logger from './logger';
 
-
 /**
  * Creates the PlayerStats table if it doesn't exist
  */
 export async function createPlayerStatsTable(): Promise<void> {
   try {
-    // Check if the table exists
     const tableExists = await checkIfTableExists('PlayerStats');
 
     if (!tableExists) {
       logger.info('Creating PlayerStats table...');
 
-      // Create the table using raw SQL
-      await prisma.$executeRawUnsafe(`
+      await prisma.$executeRaw`
         CREATE TABLE IF NOT EXISTS "PlayerStats" (
           "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
           "timestamp" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -32,12 +29,11 @@ export async function createPlayerStatsTable(): Promise<void> {
           "onlineServers" INTEGER NOT NULL DEFAULT 0,
           "totalServers" INTEGER NOT NULL DEFAULT 0
         );
-      `);
+      `;
 
-      // Create index
-      await prisma.$executeRawUnsafe(`
+      await prisma.$executeRaw`
         CREATE INDEX IF NOT EXISTS "PlayerStats_timestamp_idx" ON "PlayerStats"("timestamp");
-      `);
+      `;
 
       logger.info('PlayerStats table created successfully');
     }
@@ -51,9 +47,9 @@ export async function createPlayerStatsTable(): Promise<void> {
  */
 async function checkIfTableExists(tableName: string): Promise<boolean> {
   try {
-    const result = (await prisma.$queryRawUnsafe(`
-      SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}';
-    `)) as any[];
+    const result = await prisma.$queryRaw<{ name: string }[]>`
+      SELECT name FROM sqlite_master WHERE type='table' AND name=${tableName}
+    `;
 
     return result.length > 0;
   } catch (error) {
