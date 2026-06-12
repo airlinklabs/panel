@@ -421,6 +421,8 @@ async function applyAddonMigrations(slug: string, packageJson: AddonPackageJson)
         if (!migrationSql) {
           throw new Error(`Migration ${migration.name} for addon ${packageJson.name} is empty`);
         }
+        // WARNING: addon migrations run arbitrary SQL — only install addons from trusted sources
+        logger.warn(`Addon ${packageJson.name}: executing migration SQL (admin-authorized): ${migration.name}`);
         await prisma.$executeRawUnsafe(migrationSql);
 
         // Record the migration as applied

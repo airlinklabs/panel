@@ -10,17 +10,18 @@
   "license": "MIT",
   "scripts": {
     "start": "node dist/app.js",
-    "prestart": "prisma generate --config ./prisma.config.cjs",
+    "prestart": "prisma generate",
     "start:dev": "concurrently \"npm run dev\"",
-    "dev": "prisma migrate deploy --config ./prisma.config.cjs && prisma generate --config ./prisma.config.cjs && nodemon",
-    "build": "tsc && tailwindcss -i ./public/tw.css -o ./public/styles.css",
+    "dev": "prisma migrate deploy && prisma generate && nodemon",
+    "build": "tsc && tsc -p tsconfig.prisma.json && tailwindcss -i ./public/tw.css -o ./public/styles.css",
     "build:css": "tailwindcss -i ./public/tw.css -o ./public/styles.css --watch",
-    "migrate:dev": "prisma migrate dev --config ./prisma.config.cjs",
-    "migrate:deploy": "prisma migrate deploy --config ./prisma.config.cjs && prisma generate --config ./prisma.config.cjs",
-    "generate": "prisma generate --config ./prisma.config.cjs",
+    "migrate:dev": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy && prisma generate",
+    "generate": "prisma generate",
     "lint": "eslint src --fix",
     "format": "prettier --write src/",
-    "postinstall": "prisma generate --config ./prisma.config.cjs"
+    "postinstall": "prisma generate",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.prisma.json --noEmit"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.8.2",

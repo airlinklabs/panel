@@ -42,8 +42,8 @@ import csrfProtection, {
 import {
   spaMiddleware,
   handleSPAPageRequest,
-  setupSPARoutes,
 } from './handlers/spaHandler';
+import * as ejs from 'ejs';
 import {
   errorPageHandler,
   notFoundHandler,
@@ -76,7 +76,7 @@ const airlinkVersion = config.meta.version;
 })();
 
 // Load websocket
-expressWs(app);
+const expressWsInstance = expressWs(app);
 
 // Load static files
 app.use(express.static(path.join(__dirname, '../public')));
@@ -96,11 +96,9 @@ const viewsPath = path.join(__dirname, '../views');
 app.set('views', viewsPath);
 app.set('view engine', 'ejs');
 
-import ejs from 'ejs';
-
-const originalRenderFile = (ejs as any).__express
-  ? (ejs as any).__express.bind(ejs)
-  : (ejs as any).renderFile.bind(ejs);
+const originalRenderFile = ejs.__express
+  ? ejs.__express.bind(ejs)
+  : ejs.renderFile.bind(ejs);
 
 const addonViewsDir = path.join(__dirname, '../../storage/addons');
 
@@ -112,7 +110,7 @@ function getAddonDirs(): string[] {
     .map((d) => d.name);
 }
 
-(ejs as any).renderFile = function (
+function renderEjsWithAddonFallback(
   file: string,
   data: any,
   options: any,
@@ -139,10 +137,10 @@ function getAddonDirs(): string[] {
 
     return originalRenderFile(file, data, options, callback);
   } catch (error) {
-    logger.error('Error in EJS renderFile override:', error);
+    logger.error('Error in EJS render fallback:', error);
     return originalRenderFile(file, data, options, callback);
   }
-};
+}
 
 // Load compression
 app.use(compression());
@@ -371,24 +369,24 @@ app.use(
 
 app.use(
   express.json({
-    limit: '100mb',
+    limit: '512kb',
   }),
 );
 app.use(
   express.urlencoded({
     extended: true,
-    limit: '100mb',
-    parameterLimit: 100000,
+    limit: '512kb',
+    parameterLimit: 100,
   }),
 );
 app.use(
   express.raw({
-    limit: '100mb',
+    limit: '1mb',
   }),
 );
 app.use(
   express.text({
-    limit: '100mb',
+    limit: '512kb',
   }),
 );
 
@@ -456,7 +454,7 @@ app.use((_req, res, next) => {
 
     if (isAbsolutePath || isAddonView) {
       const data = { ...res.locals, ...(typeof options === 'object' ? options : {}) };
-      (ejs as any).renderFile(view, data, {}, (err: any, html: string) => {
+      renderEjsWithAddonFallback(view, data, {}, (err: any, html: string) => {
         if (err) {
           if (typeof callback === 'function') return callback(err);
           return (res as any).status(500).send('View render error: ' + err.message);
@@ -476,7 +474,7 @@ app.use((_req, res, next) => {
         const addonViewPath = fs.existsSync(addonViewportPath) ? addonViewportPath : addonFallbackPath;
         if (fs.existsSync(addonViewPath)) {
           const data = { ...res.locals, ...(typeof options === 'object' ? options : {}) };
-          (ejs as any).renderFile(addonViewPath, data, {}, (err: any, html: string) => {
+          renderEjsWithAddonFallback(addonViewPath, data, {}, (err: any, html: string) => {
             if (err) {
               if (typeof callback === 'function') return callback(err);
               return (res as any).status(500).send('View render error: ' + err.message);
@@ -510,11 +508,9 @@ app.use(errorPageHandler);
     installDaemonRequestInterceptor();
     // Initialize default UI components
     initializeDefaultUIComponents();
-    await loadModules(app, airlinkVersion, Number(port));
+    await loadModules(app, airlinkVersion, Number(port), expressWsInstance);
     await loadAddons(app);
 
-    // Setup SPA routes
-    setupSPARoutes(app);
 
     app.use(notFoundHandler);
     app.use(errorPageHandler);

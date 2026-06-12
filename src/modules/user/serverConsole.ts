@@ -212,10 +212,9 @@ const wsServerConsoleModule: Module = {
     license: 'MIT',
   },
 
-  router: (app: Express) => {
-    const router = Router();
+  router: (router = Router()) => {
 
-    app.ws(
+    router.ws(
       '/console/:id',
       isAuthenticatedForServerWS('id'),
       async (ws: WebSocket, req: Request) => {
@@ -235,7 +234,7 @@ const wsServerConsoleModule: Module = {
       },
     );
 
-    app.ws(
+    router.ws(
       '/status/:id',
       isAuthenticatedForServerWS('id'),
       async (ws: WebSocket, req: Request) => {
@@ -256,7 +255,7 @@ const wsServerConsoleModule: Module = {
       },
     );
 
-    app.ws(
+    router.ws(
       '/events/:id',
       isAuthenticatedForServerWS('id'),
       async (ws: WebSocket, req: Request) => {

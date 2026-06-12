@@ -24,7 +24,7 @@ const coreModule: Module = {
 
     router.get(
       '/api/application/users',
-      apiValidator('airlink.api.users.create'),
+      apiValidator('airlink.api.users.read'),
       async (req: Request, res: Response) => {
         try {
           const include = req.query.include;
@@ -98,7 +98,7 @@ const coreModule: Module = {
 
     router.get(
       '/api/application/users/:id',
-      apiValidator('airlink.api.users.update'),
+      apiValidator('airlink.api.users.read'),
       async (req: Request, res: Response) => {
         try {
           const include = req.query.include;

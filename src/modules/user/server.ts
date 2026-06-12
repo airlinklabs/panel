@@ -735,7 +735,7 @@ const dashboardModule: Module = {
      * File system : Get file content
      */
     router.get(
-      '/server/:id/files/edit{/*path}',
+      '/server/:id/files/edit/*path',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;

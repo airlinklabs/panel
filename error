@@ -1,6 +1,0 @@
-npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm.
-npm warn Unknown env config "npm-globalconfig". This will stop working in the next major version of npm.
-npm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm
-
- WARN   WARN  Tailwind reported warnings { stderr:
-   'npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm.\nnpm warn Unknown env config "npm-globalconfig". This will stop working in the next major version of npm.\nnpm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm.\n≈ tailwindcss v4.3.0\n\nDone in 280ms' }0

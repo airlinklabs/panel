@@ -64,3 +64,65 @@
 .dark .mobile-nav-link.active-mobile {
   background: rgba(255,255,255,0.08);
 }
+
+/* ── Mobile bottom nav: safe area inset for iPhone home indicator ── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .mobile-bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+    height: calc(4rem + env(safe-area-inset-bottom));
+  }
+  /* Ensure content clears the taller nav on notch devices */
+  @media (max-width: 767px) {
+    #page-content,
+    #server-page-body {
+      padding-bottom: calc(4rem + env(safe-area-inset-bottom)) !important;
+    }
+  }
+}
+
+/* ── Better active state contrast ── */
+.mobile-nav-link.active,
+.mobile-nav-link.active-mobile {
+  background: rgba(0, 0, 0, 0.09);
+  border-radius: 0.9rem;
+}
+.dark .mobile-nav-link.active,
+.dark .mobile-nav-link.active-mobile {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ── Mobile top bar: safe area treatment ── */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .mobile-top-bar {
+    padding-top: env(safe-area-inset-top);
+    height: calc(3.5rem + env(safe-area-inset-top));
+  }
+  @media (max-width: 767px) {
+    #page-content,
+    #server-page-body {
+      padding-top: calc(3.5rem + env(safe-area-inset-top)) !important;
+    }
+  }
+}
+
+/* ── Minimum touch target: 44×44px per WCAG 2.5.5 ── */
+.mobile-nav-link {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Scroll fade hint for server tabs on mobile */
+@media (max-width: 639px) {
+  #server-tab-scroll-wrap::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 2rem;
+    background: linear-gradient(to right, transparent, var(--fade-bg, #f9fafb));
+    pointer-events: none;
+    border-radius: 0 0.75rem 0.75rem 0;
+  }
+  .dark #server-tab-scroll-wrap::after {
+    --fade-bg: #141414;
+  }
+}

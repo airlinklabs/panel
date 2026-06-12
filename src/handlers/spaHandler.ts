@@ -14,7 +14,7 @@ interface SPAPageData {
 export class SPAHandler {
   private static instance: SPAHandler;
   private pageCache = new Map<string, SPAPageData>();
-  private cacheEnabled = process.env.NODE_ENV === 'production';
+  private cacheEnabled = false; // disabled — data-keyed cache causes memory leak
 
   static getInstance(): SPAHandler {
     if (!SPAHandler.instance) {
@@ -173,23 +173,3 @@ export function handleSPAPageRequest(originalRender: Function) {
   };
 }
 
-export function setupSPARoutes(app: any) {
-  app.get('/api/page-content/*', (req: Request, res: Response) => {
-    const originalPath = req.path.replace('/api/page-content', '');
-    res.locals.isSPA = true;
-
-    // Create a new request object with modified properties
-    const modifiedReq = {
-      ...req,
-      url: originalPath,
-      path: originalPath
-    };
-
-    app._router.handle(modifiedReq, res, (err: any) => {
-      if (err) {
-        console.error('SPA route error:', err);
-        res.status(500).json({ error: 'Failed to load page content' });
-      }
-    });
-  });
-}

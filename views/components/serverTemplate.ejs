@@ -13,9 +13,9 @@
                 %>
                 <script nonce="<%- nonce %>">
                   window.__serverContext = {
-                    name: <%- JSON.stringify(server.name || '') %>,
-                    uuid: <%- JSON.stringify(server.UUID || '') %>,
-                    path: <%- JSON.stringify(String(req.originalUrl || '').replace(/[<>'"]/g, '')) %>
+                    name: <%- JSON.stringify((server.name || '').replace(/<\/script>/gi, '<\\/script>')) %>,
+                    uuid: <%- JSON.stringify((server.UUID || '').replace(/<\/script>/gi, '<\\/script>')) %>,
+                    path: "<%= (req.originalUrl || '').replace(/[^a-zA-Z0-9\-_./?=&]/g, '') %>"
                   };
                 </script>
                 <% if (!menuItems || menuItems.length === 0) {
@@ -91,7 +91,8 @@
        </div>
     </div>
  
- <div class="block sm:hidden overflow-x-auto -mx-4 px-4 mt-4 mb-1 scrollbar-none">
+ <div class="block sm:hidden relative -mx-4 mt-4 mb-1" id="server-tab-scroll-wrap">
+  <div class="overflow-x-auto px-4 scrollbar-none" id="server-tab-scroll">
     <div class="flex gap-1.5 min-w-max pb-1">
       <%
       const mobileItems = (menuItems && menuItems.length > 0)

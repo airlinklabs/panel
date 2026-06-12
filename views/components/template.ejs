@@ -657,6 +657,20 @@ function renderNavIcon(iconHtml) {
 
   closeBtn.addEventListener('click', closeSearch);
 
+  if (resultsEl) {
+    resultsEl.addEventListener('click', function(e) {
+      var link = (e.target as Element).closest('a');
+      if (link) {
+        setTimeout(function() {
+          if (input) input.value = '';
+          resultsEl.innerHTML = '';
+          resultsEl.classList.add('hidden');
+          closeSearch();
+        }, 50);
+      }
+    });
+  }
+
   var debounce;
   input.addEventListener('input', function () {
     clearTimeout(debounce);

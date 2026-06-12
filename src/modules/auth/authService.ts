@@ -25,7 +25,7 @@ const authRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many attempts. Try again in a minute.' },
-  keyGenerator: (req) => ipKeyGenerator(req.ip || 'unknown'),
+  keyGenerator: (req) => ipKeyGenerator(req.ip),
 });
 
 async function getSecuritySettings() {
@@ -58,7 +58,8 @@ const authServiceModule: Module = {
       const { identifier, password } = req.body as { identifier: string; password: string };
 
       if (!identifier || !password) {
-        return res.redirect('/login?err=invalid_credentials');
+        res.redirect('/login?err=invalid_credentials');
+        return;
       }
 
       try {
@@ -75,7 +76,8 @@ const authServiceModule: Module = {
         // Check lockout (only meaningful if the user exists).
         if (user && user.lockedUntil && user.lockedUntil > new Date()) {
           const minutesLeft = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000);
-          return res.redirect(`/login?err=account_locked&wait=${minutesLeft}`);
+          res.redirect(`/login?err=account_locked&wait=${minutesLeft}`);
+          return;
         }
 
         if (!user || !isPasswordValid) {
@@ -94,7 +96,8 @@ const authServiceModule: Module = {
             });
           }
           // Single generic error — never reveal whether the username exists.
-          return res.redirect('/login?err=invalid_credentials');
+          res.redirect('/login?err=invalid_credentials');
+          return;
         }
 
         // Successful login: reset counters.
@@ -138,7 +141,8 @@ const authServiceModule: Module = {
       const { email, username, password } = req.body;
 
       if (!email || !username || !password) {
-        return res.redirect('/register?err=missing_credentials');
+        res.redirect('/register?err=missing_credentials');
+        return;
       }
 
       const emailRegex    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -146,10 +150,12 @@ const authServiceModule: Module = {
       const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
 
       if (!emailRegex.test(email) || !passwordRegex.test(password)) {
-        return res.redirect('/register?err=invalid_input');
+        res.redirect('/register?err=invalid_input');
+        return;
       }
       if (!usernameRegex.test(username)) {
-        return res.redirect('/register?err=invalid_username');
+        res.redirect('/register?err=invalid_username');
+        return;
       }
 
       try {
@@ -159,14 +165,16 @@ const authServiceModule: Module = {
         if (!isFirstUser) {
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           if (!settings?.allowRegistration) {
-            return res.redirect('/login?err=registration_disabled');
+            res.redirect('/login?err=registration_disabled');
+            return;
           }
         }
 
         const existing = await prisma.users.findFirst({
           where: { OR: [{ email }, { username }] },
         });
-        if (existing) return res.redirect('/register?err=user_already_exists');
+        if (existing) res.redirect('/register?err=user_already_exists');
+ return;
 
         await prisma.users.create({
           data: {

@@ -1,14 +1,11 @@
 generator client {
-  provider   = "prisma-client"
-  output     = "../src/generated/prisma"
-  engineType = "client"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "sqlite"
 }
-
-
 
 model Users {
   id            Int              @id @default(autoincrement())
