@@ -104,11 +104,11 @@ Copy `example.env` to `.env` and fill in the required values:
 | `NODE_ENV` | Yes | Set to `production` for live deployments |
 | `URL` | Yes | Full URL the panel is served from, e.g. `http://192.168.1.10:3000` |
 | `PORT` | Yes | Port to listen on |
-| `DATABASE_URL` | Yes | SQLite path, e.g. `file:/var/www/panel/dev.db` |
+| `DATABASE_URL` | Yes | SQLite path, e.g. `file:/var/www/panel/prisma/dev.db` |
 | `SESSION_SECRET` | Yes | Random secret for session signing — use `openssl rand -hex 32` |
 
 > [!IMPORTANT]
-> `DATABASE_URL` must be an **absolute path** (e.g. `file:/var/www/panel/dev.db`), not a relative one like `file:./dev.db`. Relative paths break when the process is started from a different working directory (e.g. via systemd).
+> `DATABASE_URL` must be an **absolute path** (e.g. `file:/var/www/panel/prisma/dev.db`), not a relative one like `file:./dev.db`. Relative paths break when the process is started from a different working directory (e.g. via systemd). Database file lives in `prisma/` directory.
 
 > [!IMPORTANT]
 > `URL` should be set to the actual IP or hostname the panel is served from. Setting it to `http://localhost` will prevent the panel from being reachable over the network and causes CSP issues in the browser.

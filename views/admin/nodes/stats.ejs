@@ -69,7 +69,7 @@
 <script nonce="<%- nonce %>" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script nonce="<%- nonce %>">
-  const stats = <%- JSON.stringify(stats.totalStats) || '[]' %>;
+  const stats = <%- JSON.stringify(stats.totalStats).replace(/<\/script>/gi, '<\\/script>') || '[]' %>;
 
   function parseRam(ramString) {
     return parseFloat(ramString.replace(' MB', ''));

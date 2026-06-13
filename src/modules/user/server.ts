@@ -22,11 +22,6 @@ interface ErrorMessage {
   message?: string;
 }
 
-interface Port {
-  primary: boolean;
-  Port: number;
-}
-
 interface ServerVariable {
   name: string;
   env: string;
@@ -461,7 +456,7 @@ const dashboardModule: Module = {
           }
 
           if (powerAction === 'stop') {
-              try {
+            try {
               // Create a custom status object with stopping=true
               const stoppingStatus = {
                 online: true,
@@ -471,12 +466,12 @@ const dashboardModule: Module = {
                 startedAt: null,
               };
 
-                  const cacheKey = `server_stopping_${serverId}`;
+              const cacheKey = `server_stopping_${serverId}`;
 
-                      global.serverStoppingStates = global.serverStoppingStates || {};
+              global.serverStoppingStates = global.serverStoppingStates || {};
               global.serverStoppingStates[cacheKey] = true;
 
-                  setTimeout(() => {
+              setTimeout(() => {
                 if (
                   global.serverStoppingStates &&
                   global.serverStoppingStates[cacheKey]
@@ -488,13 +483,13 @@ const dashboardModule: Module = {
                 }
               }, 120000); // 2 minutes
 
-                  res.status(200).json({
+              res.status(200).json({
                 success: true,
                 message: 'Server is stopping...',
                 status: stoppingStatus,
               });
 
-                  const requestData = {
+              const requestData = {
                 method: 'POST',
                 url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
                 auth: {
@@ -522,7 +517,7 @@ const dashboardModule: Module = {
                   'Container already stopped or not found: ' + serverId,
                 );
 
-                      const cacheKey = `server_stopping_${serverId}`;
+                const cacheKey = `server_stopping_${serverId}`;
                 if (
                   global.serverStoppingStates &&
                   global.serverStoppingStates[cacheKey]
@@ -1176,9 +1171,9 @@ const dashboardModule: Module = {
 
           const primaryPort = server.Ports
             ? JSON.parse(server.Ports)
-                .filter((Port: any) => Port.primary)
-                .map((Port: any) => Port.Port.split(':')[1])
-                .pop()
+              .filter((Port: any) => Port.primary)
+              .map((Port: any) => Port.Port.split(':')[1])
+              .pop()
             : '';
 
           const features = getImageFeatures(server.image);
@@ -1253,7 +1248,7 @@ const dashboardModule: Module = {
               hadFetchError = true;
             }
           } catch (error) {
-              if (axios.isAxiosError(error)) {
+            if (axios.isAxiosError(error)) {
               if (
                 error.code !== 'ECONNREFUSED' &&
                 error.code !== 'ETIMEDOUT' &&
@@ -1280,9 +1275,9 @@ const dashboardModule: Module = {
           return res.render('user/server/players', {
             errorMessage: hasError
               ? {
-                  message:
+                message:
                     'Unable to fetch players. The server may be offline or not responding.',
-                }
+              }
               : {},
             serverIsOnline,
             user,
@@ -1340,7 +1335,7 @@ const dashboardModule: Module = {
             };
 
             const serverStatusInput = getServerStatusInput(server);
-              const response = await axios(worldsRequest);
+            const response = await axios(worldsRequest);
             const Folders = response.data;
 
             const worlds = [];
@@ -1355,7 +1350,7 @@ const dashboardModule: Module = {
 
             const features = getImageFeatures(server.image);
 
-              const serverStatus = await getServerStatus(serverStatusInput);
+            const serverStatus = await getServerStatus(serverStatusInput);
 
             return res.render('user/server/worlds', {
               errorMessage: {},
@@ -1369,7 +1364,7 @@ const dashboardModule: Module = {
               settings,
             });
           } catch (fileRequestError) {
-              if (axios.isAxiosError(fileRequestError)) {
+            if (axios.isAxiosError(fileRequestError)) {
               if (
                 fileRequestError.code !== 'ECONNREFUSED' &&
                 fileRequestError.code !== 'ETIMEDOUT' &&
@@ -2487,21 +2482,21 @@ const dashboardModule: Module = {
                     // Process the value based on its type
                     let processedValue: string | number | boolean;
                     switch (curr.type) {
-                      case 'boolean':
-                        processedValue =
+                    case 'boolean':
+                      processedValue =
                           curr.value === 1 ||
                           curr.value === '1' ||
                           curr.value === true
                             ? 'true'
                             : 'false';
-                        break;
-                      case 'number':
-                        processedValue = Number(curr.value);
-                        break;
-                      case 'text':
-                      default:
-                        processedValue = String(curr.value);
-                        break;
+                      break;
+                    case 'number':
+                      processedValue = Number(curr.value);
+                      break;
+                    case 'text':
+                    default:
+                      processedValue = String(curr.value);
+                      break;
                     }
                     acc[curr.env] = processedValue;
                     logger.info(
@@ -2578,7 +2573,7 @@ const dashboardModule: Module = {
                   );
                   if (error.response) {
                     logger.error(`Response status: ${error.response.status}`);
-                    logger.error(`Response data:`, error.response.data);
+                    logger.error('Response data:', error.response.data);
                   }
                   await prisma.server.update({
                     where: { UUID: getParamAsString(serverId) },

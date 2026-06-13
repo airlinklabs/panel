@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Router, type Express } from 'express';
 import fs from 'fs';
 import path from 'path';

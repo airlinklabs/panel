@@ -117,7 +117,7 @@ const dashboardModule: Module = {
         const serversWithStats = await Promise.all(
           servers.map(async (server) => {
             try {
-                    if (
+              if (
                 nodeStatuses[server.node.id] &&
                 !nodeStatuses[server.node.id].online
               ) {
@@ -171,7 +171,7 @@ const dashboardModule: Module = {
                       : `${memUsageMB.toFixed(0)}MB`;
                   }
                 } catch (statsError) {
-                            if (axios.isAxiosError(statsError)) {
+                  if (axios.isAxiosError(statsError)) {
                     if (
                       statsError.code !== 'ECONNREFUSED' &&
                       statsError.code !== 'ETIMEDOUT' &&

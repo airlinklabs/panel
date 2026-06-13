@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { createInterface } from 'readline';
 import axios from 'axios';
 import prisma from '../../db';

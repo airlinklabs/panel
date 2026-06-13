@@ -247,6 +247,7 @@
 
 <%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
+<%- include('../../components/footer') %>
 
 <script nonce="<%- nonce %>">
   document.addEventListener('DOMContentLoaded', function() {
@@ -260,7 +261,7 @@
     const serverPortsInput = document.getElementById('serverPorts');
     let nodesData = {};
     let availablePorts = [];
-    let assignedPorts = <%- JSON.stringify((() => { try { return JSON.parse(server.Ports || '[]'); } catch { return []; } })()) %>.map((port, index) => {
+    let assignedPorts = <%- JSON.stringify((() => { try { return JSON.parse(server.Ports || '[]'); } catch { return []; } })()).replace(/<\/script>/gi, '<\\/script>') %>.map((port, index) => {
       const parts = String(port.Port || '').split(':');
       return {
         name: port.name || `Port ${index + 1}`,

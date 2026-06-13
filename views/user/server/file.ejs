@@ -132,212 +132,112 @@
 
 <%- include('../../components/toast')%>
 
-<script nonce="<%- nonce %>" src="/monaco/vs/loader.js"></script>
 <%
     const fileExtension = file.extension;
-    const language = fileExtension === 'js' ? 'javascript'
-                       : fileExtension === 'json' ? 'json'
-                       : fileExtension === 'html' ? 'html'
-                       : fileExtension === 'css' ? 'css'
-                       : fileExtension === 'ts' ? 'typescript'
-                       : fileExtension === 'md' ? 'markdown'
-                       : fileExtension === 'txt' ? 'plaintext'
-                       : fileExtension === 'py' ? 'python'
-                       : fileExtension === 'sh' ? 'shell'
-                       : fileExtension === 'go' ? 'go'
-                       : fileExtension === 'php' ? 'php'
-                       : fileExtension === 'sql' ? 'sql'
-                       : fileExtension === 'c' ? 'c'
-                       : fileExtension === 'cpp' ? 'cpp'
-                       : fileExtension === 'java' ? 'java'
-                       : fileExtension === 'rb' ? 'ruby'
-                       : fileExtension === 'pl' ? 'perl'
-                       : fileExtension === 'yml' ? 'yaml'
-                       : fileExtension === 'xml' ? 'xml'
-                       : 'plaintext';
+    const aceMode = fileExtension === 'js' ? 'javascript'
+                    : fileExtension === 'json' ? 'json'
+                    : fileExtension === 'html' ? 'html'
+                    : fileExtension === 'css' ? 'css'
+                    : fileExtension === 'ts' ? 'typescript'
+                    : fileExtension === 'md' ? 'markdown'
+                    : fileExtension === 'txt' ? 'text'
+                    : fileExtension === 'py' ? 'python'
+                    : fileExtension === 'sh' ? 'sh'
+                    : fileExtension === 'go' ? 'golang'
+                    : fileExtension === 'php' ? 'php'
+                    : fileExtension === 'sql' ? 'sql'
+                    : fileExtension === 'c' ? 'c_cpp'
+                    : fileExtension === 'cpp' ? 'c_cpp'
+                    : fileExtension === 'java' ? 'java'
+                    : fileExtension === 'rb' ? 'ruby'
+                    : fileExtension === 'pl' ? 'perl'
+                    : fileExtension === 'yml' ? 'yaml'
+                    : fileExtension === 'xml' ? 'xml'
+                    : 'text';
 %>
+<script nonce="<%- nonce %>" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/ace.js"></script>
 <script nonce="<%- nonce %>">
-require.config({
-  paths: {
-    'vs': '/monaco/vs'
-  }
-});
-  let editor;
-  let wordWrapEnabled = false;
-  let minimapEnabled = false;
-  let themeMode = 'auto'; // 'auto', 'light', or 'dark'
-  const serverUuid = <%- JSON.stringify(server.UUID) %>;
-  const editorFilePath = <%- JSON.stringify(file.path || '') %>;
+  const serverUuid = <%- JSON.stringify(server.UUID).replace(/<\/script>/gi, '<\\/script>') %>;
+  const editorFilePath = <%- JSON.stringify(file.path || '').replace(/<\/script>/gi, '<\\/script>') %>;
   const saveUrl = `/server/${serverUuid}/files/${encodeURIComponent(editorFilePath)}`;
+  let themeMode = 'auto';
+  let wrapEnabled = false;
 
-  require(['vs/editor/editor.main'], function (_) {
-    // Define custom themes
-    monaco.editor.defineTheme('custom-dark', {
-      base: 'vs-dark',
-      inherit: true,
-      rules: [
-        { token: 'comment', foreground: '6A9955', fontStyle: 'italic' },
-        { token: 'keyword', foreground: 'C586C0', fontStyle: 'bold' },
-        { token: 'string', foreground: 'CE9178' }
-      ],
-      colors: {
-        'editor.background': '#1E1E1E',
-        'editor.foreground': '#D4D4D4',
-        'editor.lineHighlightBackground': '#2A2A2A',
-        'editor.selectionBackground': '#264F78',
-        'editor.selectionHighlightBackground': '#2D3B40',
-        'editorCursor.foreground': '#AEAFAD',
-        'editorWhitespace.foreground': '#3B3B3B'
-      }
-    });
-
-    monaco.editor.defineTheme('custom-light', {
-      base: 'vs',
-      inherit: true,
-      rules: [
-        { token: 'comment', foreground: '008000', fontStyle: 'italic' },
-        { token: 'keyword', foreground: '0000FF', fontStyle: 'bold' },
-        { token: 'string', foreground: 'A31515' }
-      ],
-      colors: {
-        'editor.background': '#FFFFFF',
-        'editor.foreground': '#000000',
-        'editor.lineHighlightBackground': '#F5F5F5',
-        'editor.selectionBackground': '#ADD6FF',
-        'editor.selectionHighlightBackground': '#E5EBF1',
-        'editorCursor.foreground': '#000000',
-        'editorWhitespace.foreground': '#DDDDDD'
-      }
-    });
-
-    // Create editor with enhanced options
-    editor = monaco.editor.create(document.getElementById('editor-container'), {
-      value: <%- JSON.stringify(file.content || '') %>,
-      language: '<%= language %>',
-      theme: document.documentElement.classList.contains('dark') ? 'custom-dark' : 'custom-light',
-      automaticLayout: true,
-      lineNumbers: 'on',
-      roundedSelection: true,
-      scrollBeyondLastLine: false,
-      renderLineHighlight: 'all',
-      cursorBlinking: 'smooth',
-      cursorSmoothCaretAnimation: 'on',
-      minimap: {
-        enabled: minimapEnabled,
-        scale: 1,
-        showSlider: 'mouseover'
-      },
-      wordWrap: wordWrapEnabled ? 'on' : 'off',
-      fontSize: 14,
-      fontFamily: 'Menlo, Monaco, "Courier New", monospace',
-      fontLigatures: true,
-      contextmenu: true,
-      rulers: [],
-      bracketPairColorization: {
-        enabled: true
-      },
-      padding: {
-        top: 10
-      },
-      folding: true,
-      foldingStrategy: 'auto',
-      matchBrackets: 'always',
-      autoIndent: 'full',
-      formatOnPaste: true,
-      formatOnType: true,
-      renderWhitespace: 'selection',
-      renderControlCharacters: true,
-      renderIndentGuides: true,
-      renderFinalNewline: true,
-      colorDecorators: true,
-      suggest: {
-        showMethods: true,
-        showFunctions: true,
-        showConstructors: true,
-        showFields: true,
-        showVariables: true,
-        showClasses: true,
-        showStructs: true,
-        showInterfaces: true,
-        showModules: true,
-        showProperties: true,
-        showEvents: true,
-        showOperators: true,
-        showUnits: true,
-        showValues: true,
-        showConstants: true,
-        showEnums: true,
-        showEnumMembers: true,
-        showKeywords: true,
-        showWords: true,
-        showColors: true,
-        showFiles: true,
-        showReferences: true,
-        showFolders: true,
-        showTypeParameters: true,
-        showSnippets: true
-      }
-    });
-
-    // Update status bar with cursor position
-    editor.onDidChangeCursorPosition(function(e) {
-      document.getElementById('editor-status').textContent = `Line: ${e.position.lineNumber}, Column: ${e.position.column}`;
-    });
-
-    // Set file info in the status bar
-    document.getElementById('file-info').textContent = '<%= fileExtension %>' || 'plaintext';
-
-    // Toggle word wrap
-    document.getElementById('toggle-wordwrap').addEventListener('click', function() {
-      wordWrapEnabled = !wordWrapEnabled;
-      editor.updateOptions({ wordWrap: wordWrapEnabled ? 'on' : 'off' });
-      this.textContent = wordWrapEnabled ? 'On' : 'Off';
-    });
-
-    // Toggle minimap
-    document.getElementById('toggle-minimap').addEventListener('click', function() {
-      minimapEnabled = !minimapEnabled;
-      editor.updateOptions({ minimap: { enabled: minimapEnabled } });
-      this.textContent = minimapEnabled ? 'On' : 'Off';
-    });
-
-    // Function to update editor theme
-    function updateEditorTheme() {
-      let theme;
-      if (themeMode === 'auto') {
-        theme = document.documentElement.classList.contains('dark') ? 'custom-dark' : 'custom-light';
-      } else if (themeMode === 'dark') {
-        theme = 'custom-dark';
-      } else {
-        theme = 'custom-light';
-      }
-      monaco.editor.setTheme(theme);
-    }
-
-    // Toggle theme button
-    document.getElementById('toggle-theme').addEventListener('click', function() {
-      if (themeMode === 'auto') {
-        themeMode = 'light';
-      } else if (themeMode === 'light') {
-        themeMode = 'dark';
-      } else {
-        themeMode = 'auto';
-      }
-      this.textContent = themeMode.charAt(0).toUpperCase() + themeMode.slice(1);
-      updateEditorTheme();
-    });
-
-    // Adjust theme when system theme changes
-    const darkModeObserver = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-        if (mutation.attributeName === 'class' && themeMode === 'auto') {
-          updateEditorTheme();
-        }
-      });
-    });
-
-    darkModeObserver.observe(document.documentElement, { attributes: true });
+  const isDark = document.documentElement.classList.contains('dark');
+  const editor = ace.edit('editor-container', {
+    value: <%- JSON.stringify(file.content || '').replace(/<\/script>/gi, '<\\/script>') %>,
+    mode: 'ace/mode/<%= aceMode %>',
+    theme: isDark ? 'ace/theme/chaos' : 'ace/theme/cloud_editor',
+    fontSize: 14,
+    fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+    wrap: false,
+    showGutter: true,
+    showPrintMargin: false,
+    enableBasicAutocompletion: true,
+    enableLiveAutocompletion: true,
+    cursorStyle: 'smooth',
+    animatedScroll: true,
+    enableMultiselect: true,
+    indentedSoftWrap: false,
+    useWorker: true,
+    displayIndentGuides: true,
+    showInvisibles: false,
+    showFoldWidgets: true,
+    behavioursEnabled: true,
+    navigateWithinSoftTabs: true,
   });
+
+  editor.renderer.setScrollMargin(10, 10, 10, 10);
+  editor.selection.on('changeCursor', function() {
+    const pos = editor.getCursorPosition();
+    document.getElementById('editor-status').textContent = `Line: ${pos.row + 1}, Column: ${pos.column + 1}`;
+  });
+
+  document.getElementById('file-info').textContent = '<%= fileExtension %>' || 'text';
+
+  document.getElementById('toggle-wordwrap').addEventListener('click', function() {
+    wrapEnabled = !wrapEnabled;
+    editor.session.setOption('wrap', wrapEnabled);
+    this.textContent = wrapEnabled ? 'On' : 'Off';
+  });
+
+  document.getElementById('toggle-minimap').addEventListener('click', function() {
+    editor.renderer.setShowGutter(!editor.renderer.getShowGutter());
+    this.textContent = editor.renderer.getShowGutter() ? 'On' : 'Off';
+  });
+
+  function updateEditorTheme() {
+    let theme;
+    if (themeMode === 'auto') {
+      theme = document.documentElement.classList.contains('dark') ? 'ace/theme/chaos' : 'ace/theme/cloud_editor';
+    } else if (themeMode === 'dark') {
+      theme = 'ace/theme/chaos';
+    } else {
+      theme = 'ace/theme/cloud_editor';
+    }
+    editor.setTheme(theme);
+  }
+
+  document.getElementById('toggle-theme').addEventListener('click', function() {
+    if (themeMode === 'auto') {
+      themeMode = 'light';
+    } else if (themeMode === 'light') {
+      themeMode = 'dark';
+    } else {
+      themeMode = 'auto';
+    }
+    this.textContent = themeMode.charAt(0).toUpperCase() + themeMode.slice(1);
+    updateEditorTheme();
+  });
+
+  const darkModeObserver = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.attributeName === 'class' && themeMode === 'auto') {
+        updateEditorTheme();
+      }
+    });
+  });
+  darkModeObserver.observe(document.documentElement, { attributes: true });
 
 
   async function saveFile() {

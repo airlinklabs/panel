@@ -86,25 +86,7 @@ function normalizeStatus(status: unknown): number {
   return 500;
 }
 
-function getCookieValue(req: Request, name: string): string | undefined {
-  const parsedCookies = (req as any).cookies as Record<string, string> | undefined;
-  if (parsedCookies?.[name]) return parsedCookies[name];
-
-  const cookieHeader = req.headers.cookie;
-  if (!cookieHeader) return undefined;
-
-  return cookieHeader
-    .split(';')
-    .map((part) => part.trim())
-    .map((part) => {
-      const separatorIndex = part.indexOf('=');
-      if (separatorIndex === -1) return [part, ''];
-      return [part.slice(0, separatorIndex), decodeURIComponent(part.slice(separatorIndex + 1))];
-    })
-    .find(([key]) => key === name)?.[1];
-}
-
-function getErrorView(req: Request): string {
+function getErrorView(): string {
   return 'errors/error';
 }
 
@@ -160,7 +142,7 @@ export async function renderErrorPage(
 
   try {
     const data = await getErrorRenderData(req, normalizedStatus, detail);
-    return res.status(normalizedStatus).render(getErrorView(req), data);
+    return res.status(normalizedStatus).render(getErrorView(), data);
   } catch (renderError) {
     logger.error('Failed to render error page:', renderError);
     return res.status(normalizedStatus).send(`${normalizedStatus} ${info.title}`);

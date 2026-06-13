@@ -232,18 +232,18 @@
   const imageId = <%= image.id %>;
 
   let state = {
-    name: <%- JSON.stringify(image.name || '') %>,
-    description: <%- JSON.stringify(image.description || '') %>,
-    author: <%- JSON.stringify(image.author || '') %>,
-    startup: <%- JSON.stringify(image.startup || '') %>,
-    stop: <%- JSON.stringify(image.stop || 'stop') %>,
-    startup_done: <%- JSON.stringify(image.startup_done || '') %>,
-    docker_images: <%- JSON.stringify(image.dockerImages || {}) %>,
-    variables: <%- JSON.stringify(image.variables || []) %>,
-    scripts: <%- JSON.stringify(image.scripts || {}) %>,
-    info: <%- JSON.stringify(image.info || {}) %>,
-    meta: <%- JSON.stringify(image.meta || {}) %>,
-    portRequirements: <%- JSON.stringify(image.portRequirements || []) %>,
+    name: <%- JSON.stringify(image.name || '').replace(/<\/script>/gi, '<\\/script>') %>,
+    description: <%- JSON.stringify(image.description || '').replace(/<\/script>/gi, '<\\/script>') %>,
+    author: <%- JSON.stringify(image.author || '').replace(/<\/script>/gi, '<\\/script>') %>,
+    startup: <%- JSON.stringify(image.startup || '').replace(/<\/script>/gi, '<\\/script>') %>,
+    stop: <%- JSON.stringify(image.stop || 'stop').replace(/<\/script>/gi, '<\\/script>') %>,
+    startup_done: <%- JSON.stringify(image.startup_done || '').replace(/<\/script>/gi, '<\\/script>') %>,
+    docker_images: <%- JSON.stringify(image.dockerImages || {}).replace(/<\/script>/gi, '<\\/script>') %>,
+    variables: <%- JSON.stringify(image.variables || []).replace(/<\/script>/gi, '<\\/script>') %>,
+    scripts: <%- JSON.stringify(image.scripts || {}).replace(/<\/script>/gi, '<\\/script>') %>,
+    info: <%- JSON.stringify(image.info || {}).replace(/<\/script>/gi, '<\\/script>') %>,
+    meta: <%- JSON.stringify(image.meta || {}).replace(/<\/script>/gi, '<\\/script>') %>,
+    portRequirements: <%- JSON.stringify(image.portRequirements || []).replace(/<\/script>/gi, '<\\/script>') %>,
   };
 
   // ── Tabs ───────────────────────────────────────────────────────────────────

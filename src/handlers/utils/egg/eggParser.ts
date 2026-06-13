@@ -132,12 +132,12 @@ export function normalizeEggForDb(egg: ParsedEgg): NormalizedImageData {
 
   const scripts = egg.installScript
     ? {
-        installation: {
-          script: egg.installScript.script,
-          container: egg.installScript.container,
-          entrypoint: egg.installScript.entrypoint,
-        },
-      }
+      installation: {
+        script: egg.installScript.script,
+        container: egg.installScript.container,
+        entrypoint: egg.installScript.entrypoint,
+      },
+    }
     : {};
 
   const info = {

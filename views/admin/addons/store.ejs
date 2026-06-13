@@ -201,7 +201,7 @@
   function show(id, d='') { const e=document.getElementById(id); if(e) e.style.display=d; }
   function hide(id) { const e=document.getElementById(id); if(e) e.style.display='none'; }
 
-  const INSTALLED = new Set(<%- JSON.stringify((addons||[]).map(a=>a.slug)) %>);
+  const INSTALLED = new Set(<%- JSON.stringify((addons||[]).map(a=>a.slug)).replace(/<\/script>/gi, '<\\/script>') %>);
   let allAddons = [], activeTag = null, currentAddon = null;
 
   function badgeCls(status, inst) {

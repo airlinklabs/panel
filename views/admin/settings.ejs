@@ -1,6 +1,8 @@
 <%- include('../components/header', { title: 'Settings' }) %>
 
 <main class="min-h-screen">
+  <% if (!isMobileViewport) { %>
+  <!-- Desktop: Flex layout with sidebar -->
   <div class="flex min-h-screen">
     <div class="contents md:block w-60 shrink-0"><%- include('../components/template') %></div>
 
@@ -11,6 +13,17 @@
       </div>
 
       <div class="px-8 mt-5">
+  <% } else { %>
+  <!-- Mobile: Stacked layout -->
+  <div class="px-4 pt-5 pb-24">
+    <%- include('../components/template') %>
+    <div>
+      <h1 class="text-base font-medium text-neutral-800 dark:text-white">Settings</h1>
+      <p class="mt-0.5 text-sm text-neutral-500">Manage your panel configuration.</p>
+    </div>
+
+    <div class="mt-4">
+  <% } %>
 
         <!-- Tab bar -->
         <div class="flex gap-0.5 mb-6 border-b border-neutral-200 dark:border-neutral-700/40">
@@ -25,7 +38,7 @@
           <!-- Branding -->
           <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
             <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Branding</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 px-5 py-5">
+            <div class="grid grid-cols-1 <% if (!isMobileViewport) { %>sm:grid-cols-3<% } %> gap-5 px-5 py-5">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Site title</label>
                 <input type="text" name="title" value="<%= settings.title %>"
@@ -66,7 +79,7 @@
           <!-- Themes -->
           <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
             <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Themes</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-5 py-5">
+            <div class="grid grid-cols-1 <% if (!isMobileViewport) { %>md:grid-cols-2<% } %> gap-6 px-5 py-5">
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white mb-1">Light mode</p>
                 <p class="text-xs text-neutral-500 mb-3">Applied when the panel is in light mode.</p>
@@ -141,7 +154,7 @@
           <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
             <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Auth page wallpapers</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3 pb-1">Background image on the login and register pages. Upload a file or paste a URL. Leave both blank to use the default.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-5 py-5">
+            <div class="grid grid-cols-1 <% if (!isMobileViewport) { %>md:grid-cols-2<% } %> gap-6 px-5 py-5">
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white mb-3">Login page</p>
                 <% if (settings.loginWallpaper) { %>
@@ -222,6 +235,8 @@
           <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
             <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Default limits</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3">Applied to new users unless overridden per-user.</p>
+            <% if (!isMobileViewport) { %>
+            <!-- Desktop: 4 columns with unit selector -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 px-5 py-5">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Server limit</label>
@@ -261,6 +276,32 @@
                 </div>
               </div>
             </div>
+            <% } else { %>
+            <!-- Mobile: Simplified single column -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 px-5 py-5">
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Server limit</label>
+                <input type="number" id="defaultServerLimit" value="<%= settings.defaultServerLimit %>" min="0" max="100"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                <p class="mt-1 text-xs text-neutral-500">0 = cannot create.</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max memory <span class="text-neutral-400 font-normal">(MB)</span></label>
+                <input type="number" id="defaultMaxMemory" value="<%= settings.defaultMaxMemory %>" min="128" max="65536"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max CPU <span class="text-neutral-400 font-normal">(%)</span></label>
+                <input type="number" id="defaultMaxCpu" value="<%= settings.defaultMaxCpu %>" min="50" max="10000"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max storage <span class="text-neutral-400 font-normal">(GB)</span></label>
+                <input type="number" id="defaultMaxStorage" value="<%= settings.defaultMaxStorage %>" min="1" max="10000"
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+              </div>
+            </div>
+            <% } %>
             <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
               <button type="button" id="saveServerPolicy" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-5 py-2 text-sm font-medium shadow-sm transition">Save</button>
             </div>
@@ -315,7 +356,7 @@
           <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
             <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Login protection</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3">After N failed attempts from a single account, that account is locked for the configured duration. Errors always say "invalid credentials" — the username is never revealed.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 px-5 py-5">
+            <div class="grid grid-cols-1 <% if (!isMobileViewport) { %>sm:grid-cols-2<% } %> gap-5 px-5 py-5">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max failed attempts before lockout</label>
                 <input type="number" id="loginMaxAttempts" value="<%= settings.loginMaxAttempts ?? 5 %>" min="1" max="100"
@@ -395,14 +436,21 @@
         </div>
 
       </div>
+  <% if (!isMobileViewport) { %>
     </div>
   </div>
+  <% } else { %>
+    </div>
+  </div>
+  <% } %>
 </main>
 
 <%- include('../components/toast') %>
 <%- include('../components/modal') %>
 
 <script nonce="<%- nonce %>">
+var isMobileViewport = <%= isMobileViewport ? 'true' : 'false' %>;
+
 (function () {
   const tabBtns   = document.querySelectorAll('.tab-btn');
   const tabPanels = document.querySelectorAll('.tab-panel');
@@ -457,13 +505,15 @@
 
   // Servers tab
   document.getElementById('saveServerPolicy').addEventListener('click', function () {
+    var maxMemory = isMobileViewport ? parseInt(document.getElementById('defaultMaxMemory').value, 10) : parseInt(document.getElementById('defaultMaxMemory').value, 10) * parseInt(document.getElementById('defaultMaxMemoryUnit').value, 10);
+    var maxStorage = isMobileViewport ? parseInt(document.getElementById('defaultMaxStorage').value, 10) : parseInt(document.getElementById('defaultMaxStorage').value, 10) * parseInt(document.getElementById('defaultMaxStorageUnit').value, 10);
     post('/admin/settings/server-policy', {
       allowUserCreateServer: document.getElementById('allowUserCreateServer').checked,
       allowUserDeleteServer: document.getElementById('allowUserDeleteServer').checked,
       defaultServerLimit:    parseInt(document.getElementById('defaultServerLimit').value, 10),
-      defaultMaxMemory:      parseInt(document.getElementById('defaultMaxMemory').value,   10),
+      defaultMaxMemory:      maxMemory,
       defaultMaxCpu:         parseInt(document.getElementById('defaultMaxCpu').value,      10),
-      defaultMaxStorage:     parseInt(document.getElementById('defaultMaxStorage').value,  10),
+      defaultMaxStorage:     maxStorage,
       uploadLimit:           parseInt(document.getElementById('uploadLimitInput').value,   10) || 100,
     }, this);
   });

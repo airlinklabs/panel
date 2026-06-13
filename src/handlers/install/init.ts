@@ -24,7 +24,7 @@ app.post('/install', async (req, res) => {
       return;
     }
 
-    await install.install(key, email, password);
+    await install.install(email, password);
     res
       .status(200)
       .json({ message: 'Installation successful. First user created.' });

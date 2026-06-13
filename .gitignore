@@ -9,26 +9,40 @@ prisma/*
 !prisma/schema.prisma
 !prisma/migrations/
 
-# Lock file
+# Prisma dev database
+prisma/dev.db
+prisma/dev.db-shm
+prisma/dev.db-wal
+
+# Build & runtime
+dist/
+/logs
+*.log
+coverage/
+
+# Node
 /package-lock.json
 /bun.lockb
 bun.lock
-.DS_Store
 
-# Logs
-/logs
-*.log
-
-# Coverage reports
-coverage/
-
-# .env
+# Environment & secrets
 .env
 *.env.*
- storage/eggs
 
+# OS
+.DS_Store
+.DS_Store?
+*.swp
+*.swo
+*~
+
+# Storage runtime (eggs are committed)
+storage/cache/
+storage/tmp/
+storage/uploads/
+
+# System
 .agents/
 .codex/
 .github/
-
 src/generated/

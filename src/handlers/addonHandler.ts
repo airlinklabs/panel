@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
-import express, { Router as createRouter } from 'express';
-import type { Express, Router } from 'express';
+import { Router as createRouter } from 'express';
+import type { Express } from 'express';
 import { uiComponentStore, SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from './uiComponentHandler';
 import prisma from '../db';
 import logger from './logger';

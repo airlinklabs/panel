@@ -20,6 +20,7 @@ export type Permission =
   | 'airlink.admin.apikeys.delete'
   | 'airlink.admin.apikeys.edit'
   | 'airlink.admin.api.docs.view'
+  | 'airlink.admin.menu.main'
   | 'airlink.admin.overview.main'
   | 'airlink.admin.overview.checkForUpdates'
   | 'airlink.admin.overview.performUpdate'
@@ -79,5 +80,6 @@ registerPermission('airlink.api.nodes.update');
 registerPermission('airlink.api.nodes.delete');
 registerPermission('airlink.api.settings.read');
 registerPermission('airlink.api.settings.update');
+registerPermission('airlink.admin.menu.main');
 
 export default permissions;

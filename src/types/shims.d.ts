@@ -1,5 +1,5 @@
-declare var global: any;
-declare var process: any;
+declare let global: any;
+declare let process: any;
 declare function require(name: string): any;
 
 declare class Buffer {
@@ -10,7 +10,11 @@ declare class Buffer {
 }
 
 declare namespace NodeJS {
-  interface Timeout {}
+  interface Timeout {
+    ref(): Timeout;
+    unref(): Timeout;
+    hasRef(): boolean;
+  }
 }
 
 declare function setTimeout(handler: (...args: any[]) => void, timeout?: number, ...args: any[]): NodeJS.Timeout;

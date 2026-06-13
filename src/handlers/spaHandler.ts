@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import path from 'path';
-import fs from 'fs';
 import * as ejs from 'ejs';
+import logger from './logger';
 
 interface SPAPageData {
   content: string;
@@ -145,26 +145,27 @@ export function spaMiddleware(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-export function handleSPAPageRequest(originalRender: Function) {
-  return function(this: Response, view: string, options?: any, callback?: Function) {
+export function handleSPAPageRequest(
+  originalRender: (view: string, options?: any, callback?: (err: any, html?: string) => void) => void,
+) {
+  return function(
+    this: Response,
+    view: string,
+    options?: any,
+    callback?: (err: any, html?: string) => void,
+  ) {
     if (this.locals.isSPA) {
       const spaHandler = SPAHandler.getInstance();
 
-      // Use SPA-specific template if it exists
-      let spaView = view;
-      const spaViewPath = path.resolve(process.cwd(), 'views', view + '-spa.ejs');
-      if (fs.existsSync(spaViewPath)) {
-        spaView = view + '-spa';
-      }
+      const viewPath = path.resolve(process.cwd(), 'views', view + '.ejs');
 
-      const viewPath = path.resolve(process.cwd(), 'views', spaView + '.ejs');
-
-      spaHandler.renderPageContent(viewPath, { ...this.locals, ...options })
-        .then(pageData => {
+      spaHandler
+        .renderPageContent(viewPath, { ...this.locals, ...options })
+        .then((pageData) => {
           this.json(pageData);
         })
-        .catch(error => {
-          console.error('SPA render error:', error);
+        .catch((error) => {
+          logger.error('SPA render error:', error);
           this.status(500).json({ error: 'Failed to render page content' });
         });
     } else {

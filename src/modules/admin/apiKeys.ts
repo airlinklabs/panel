@@ -4,7 +4,7 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { registerPermission } from '../../handlers/permissions';
-import { getParamAsNumber } from "../../utils/typeHelpers";
+import { getParamAsNumber } from '../../utils/typeHelpers';
 import crypto from 'crypto';
 
 function sha256(value: string): string {
@@ -277,7 +277,7 @@ const coreModule: Module = {
           });
         } catch (error) {
           logger.error('Error rendering API documentation:', error);
-          res.status(500).render('error', {
+          res.status(500).render('errors/error', {
             error: 'Failed to load API documentation',
             req
           });
@@ -330,7 +330,7 @@ const coreModule: Module = {
           });
         } catch (error) {
           logger.error('Error fetching API keys:', error);
-          res.status(500).render('error', {
+          res.status(500).render('errors/error', {
             error: 'Failed to fetch API keys',
             req,
           });

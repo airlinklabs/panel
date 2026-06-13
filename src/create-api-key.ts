@@ -16,12 +16,12 @@ async function createApiKey() {
       },
     });
     
-    console.log('API Key created successfully:');
-    console.log(`ID: ${apiKey.id}`);
-    console.log(`Key: ${apiKey.key}`);
-    console.log(`Use this key in the Authorization header: Bearer ${apiKey.key}`);
+    console.log('API Key created successfully:'); // eslint-disable-line no-console
+    console.log(`ID: ${apiKey.id}`); // eslint-disable-line no-console
+    console.log(`Key: ${apiKey.key}`); // eslint-disable-line no-console
+    console.log(`Use this key in the Authorization header: Bearer ${apiKey.key}`); // eslint-disable-line no-console
   } catch (error) {
-    console.error('Error creating API key:', error);
+    console.error('Error creating API key:', error); // eslint-disable-line no-console
   } finally {
     await prisma.$disconnect();
   }

@@ -85,6 +85,13 @@ export async function performUpdate(): Promise<boolean> {
         'https://api.github.com/repos/airlinklabs/panel/releases/latest',
       );
       const latestRelease: GithubRelease = response.data;
+      
+      // Validate tag_name against safe pattern (semantic versioning: v1.2.3)
+      const tagPattern = /^v\d+\.\d+\.\d+(-[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)?$/;
+      if (!tagPattern.test(latestRelease.tag_name)) {
+        throw new Error(`Invalid release tag format: ${latestRelease.tag_name}`);
+      }
+      
       execSync(`git fetch && git checkout ${latestRelease.tag_name}`, {
         stdio: 'inherit',
       });

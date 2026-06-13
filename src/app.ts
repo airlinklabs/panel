@@ -8,7 +8,7 @@
  */
 
 import express, { Request, Response, NextFunction } from 'express';
-import prisma from "./db";
+import prisma from './db';
 import path from 'path';
 import session from 'express-session';
 import { loadEnv } from './handlers/envLoader';
@@ -34,7 +34,6 @@ import crypto from 'crypto';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
-import fs from 'fs';
 import csrfProtection, {
   handleCsrfError,
   addCsrfTokenToLocals,
@@ -43,7 +42,6 @@ import {
   spaMiddleware,
   handleSPAPageRequest,
 } from './handlers/spaHandler';
-import * as ejs from 'ejs';
 import {
   errorPageHandler,
   notFoundHandler,
@@ -95,52 +93,6 @@ app.use(
 const viewsPath = path.join(__dirname, '../views');
 app.set('views', viewsPath);
 app.set('view engine', 'ejs');
-
-const originalRenderFile = ejs.__express
-  ? ejs.__express.bind(ejs)
-  : ejs.renderFile.bind(ejs);
-
-const addonViewsDir = path.join(__dirname, '../../storage/addons');
-
-function getAddonDirs(): string[] {
-  if (!fs.existsSync(addonViewsDir)) return [];
-  return fs
-    .readdirSync(addonViewsDir, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
-    .map((d) => d.name);
-}
-
-function renderEjsWithAddonFallback(
-  file: string,
-  data: any,
-  options: any,
-  callback: any,
-) {
-  try {
-    if (fs.existsSync(file)) {
-      return originalRenderFile(file, data, options, callback);
-    }
-
-    const viewName = path.basename(file);
-
-    for (const addonDir of getAddonDirs()) {
-      const addonViewPath = path.join(addonViewsDir, addonDir, 'views', viewName);
-      if (fs.existsSync(addonViewPath)) {
-        return originalRenderFile(addonViewPath, data, options, callback);
-      }
-    }
-
-    const mainViewPath = path.join(viewsPath, viewName);
-    if (fs.existsSync(mainViewPath)) {
-      return originalRenderFile(mainViewPath, data, options, callback);
-    }
-
-    return originalRenderFile(file, data, options, callback);
-  } catch (error) {
-    logger.error('Error in EJS render fallback:', error);
-    return originalRenderFile(file, data, options, callback);
-  }
-}
 
 // Load compression
 app.use(compression());
@@ -221,71 +173,71 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
     contentSecurityPolicy: isProduction
       ? {
-          directives: {
-            // Fallback for any directive not listed explicitly.
-            defaultSrc: ["'self'"],
+        directives: {
+          // Fallback for any directive not listed explicitly.
+          defaultSrc: ['\'self\''],
 
-            // Scripts:
-            //   'nonce-{nonce}' — allows only <script nonce="…"> blocks that
-            //                     carry the per-request nonce. Blocks all other
-            //                     inline scripts and eval().
-            //   'strict-dynamic' — lets nonce-carrying scripts load further
-            //                     scripts dynamically (needed by Monaco loader).
-            //                     When strict-dynamic is present, host allowlists
-            //                     are ignored by supporting browsers, so the CDN
-            //                     list here is a fallback for older browsers only.
-            scriptSrc: [
-              "'self'",
-              `'nonce-${nonce}'`,
-              "'strict-dynamic'",
-              ...cdnScripts,
-            ],
+          // Scripts:
+          //   'nonce-{nonce}' — allows only <script nonce="…"> blocks that
+          //                     carry the per-request nonce. Blocks all other
+          //                     inline scripts and eval().
+          //   'strict-dynamic' — lets nonce-carrying scripts load further
+          //                     scripts dynamically (needed by Monaco loader).
+          //                     When strict-dynamic is present, host allowlists
+          //                     are ignored by supporting browsers, so the CDN
+          //                     list here is a fallback for older browsers only.
+          scriptSrc: [
+            '\'self\'',
+            `'nonce-${nonce}'`,
+            '\'strict-dynamic\'',
+            ...cdnScripts,
+          ],
 
-            // Inline event handlers (onclick, onchange, etc.) cannot carry nonces.
-            // 'unsafe-inline' here is scoped only to attributes, not to <script>
-            // blocks (which are governed by scriptSrc above).
-            // This is the minimum needed to avoid rewriting 126+ EJS event handlers.
-            scriptSrcAttr: ["'unsafe-inline'"],
+          // Inline event handlers (onclick, onchange, etc.) cannot carry nonces.
+          // 'unsafe-inline' here is scoped only to attributes, not to <script>
+          // blocks (which are governed by scriptSrc above).
+          // This is the minimum needed to avoid rewriting 126+ EJS event handlers.
+          scriptSrcAttr: ['\'unsafe-inline\''],
 
-            // Styles — allow inline (Tailwind utility classes are inline by nature)
-            // plus the exact external stylesheet CDNs used.
-            styleSrc: ["'self'", "'unsafe-inline'", ...cdnStyles, ...cdnFonts],
+          // Styles — allow inline (Tailwind utility classes are inline by nature)
+          // plus the exact external stylesheet CDNs used.
+          styleSrc: ['\'self\'', '\'unsafe-inline\'', ...cdnStyles, ...cdnFonts],
 
-            // Fonts — exact CDN origins only, plus data URIs for embedded icons.
-            fontSrc: ["'self'", 'data:', ...cdnFonts],
+          // Fonts — exact CDN origins only, plus data URIs for embedded icons.
+          fontSrc: ['\'self\'', 'data:', ...cdnFonts],
 
-            // Images — self + data URIs (avatars/favicons) + https for remote images.
-            // http: is intentionally excluded; image URLs served by the daemon
-            // should be proxied through the panel rather than loaded directly.
-            imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+          // Images — self + data URIs (avatars/favicons) + https for remote images.
+          // http: is intentionally excluded; image URLs served by the daemon
+          // should be proxied through the panel rather than loaded directly.
+          imgSrc: ['\'self\'', 'data:', 'blob:', 'https:'],
 
-            // WebSocket connections for the server console + same-origin API calls.
-            connectSrc: [
-              "'self'",
-              ...(isHttps ? ['wss:'] : ['ws:', 'wss:']),
-            ],
+          // WebSocket connections for the server console + same-origin API calls.
+          connectSrc: [
+            '\'self\'',
+            ...(isHttps ? ['wss:'] : ['ws:', 'wss:']),
+          ],
 
-            // Prevent the panel from being embedded in any frame anywhere.
-            // Supersedes X-Frame-Options for modern browsers.
-            frameAncestors: ["'none'"],
+          // Prevent the panel from being embedded in any frame anywhere.
+          // Supersedes X-Frame-Options for modern browsers.
+          frameAncestors: ['\'none\''],
 
-            // Prevent any plugins (Flash, PDF, etc.) from being embedded.
-            objectSrc: ["'none'"],
+          // Prevent any plugins (Flash, PDF, etc.) from being embedded.
+          objectSrc: ['\'none\''],
 
-            // Lock down <base> tags — prevents base-tag hijacking attacks.
-            baseUri: ["'self'"],
+          // Lock down <base> tags — prevents base-tag hijacking attacks.
+          baseUri: ['\'self\''],
 
-            // All form submissions must go to same origin.
-            formAction: ["'self'"],
+          // All form submissions must go to same origin.
+          formAction: ['\'self\''],
 
-            // Only upgrade to HTTPS when we are actually serving HTTPS.
-            // Without this guard, helmet's default adds upgrade-insecure-requests
-            // which rewrites every asset URL to https://, breaking HTTP installs.
-            ...(isHttps
-              ? { upgradeInsecureRequests: [] }
-              : { upgradeInsecureRequests: null }),
-          },
-        }
+          // Only upgrade to HTTPS when we are actually serving HTTPS.
+          // Without this guard, helmet's default adds upgrade-insecure-requests
+          // which rewrites every asset URL to https://, breaking HTTP installs.
+          ...(isHttps
+            ? { upgradeInsecureRequests: [] }
+            : { upgradeInsecureRequests: null }),
+        },
+      }
       : false,
   })(req as any, res as any, next as any);
 });
@@ -328,7 +280,7 @@ app.use(
         return 100;
       }
     },
-    skip: async (_req) => {
+    skip: async () => {
       try {
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         return !settings?.rateLimitEnabled;
@@ -430,7 +382,7 @@ interface GlobalWithCustomProperties extends NodeJS.Global {
 
 declare const global: GlobalWithCustomProperties;
 
-app.use((_req, res, next) => {
+app.use((req, res, next) => {
   res.locals.name = name;
   res.locals.airlinkVersion = airlinkVersion;
   global.uiComponentStore = uiComponentStore;
@@ -443,52 +395,9 @@ app.use((_req, res, next) => {
     false,
   );
 
-  const viewportCookie = (_req as any).cookies?.viewport_mode;
+  const viewportCookie = (req as any).cookies?.viewport_mode;
   const isMobileViewport = viewportCookie === 'mobile';
   res.locals.isMobileViewport = isMobileViewport;
-
-  const originalRenderBase = res.render.bind(res);
-  res.render = function (view: string, options?: any, callback?: any) {
-    const isAbsolutePath = path.isAbsolute(view);
-    const isAddonView = view.includes('/storage/addons/') || view.includes('\\storage\\addons\\');
-
-    if (isAbsolutePath || isAddonView) {
-      const data = { ...res.locals, ...(typeof options === 'object' ? options : {}) };
-      renderEjsWithAddonFallback(view, data, {}, (err: any, html: string) => {
-        if (err) {
-          if (typeof callback === 'function') return callback(err);
-          return (res as any).status(500).send('View render error: ' + err.message);
-        }
-        if (typeof callback === 'function') return callback(null, html);
-        (res as any).send(html);
-      });
-      return;
-    }
-
-    const viewPath = path.join(viewsPath, view + '.ejs');
-    if (!fs.existsSync(viewPath)) {
-      for (const addonDir of getAddonDirs()) {
-        const viewportSubdir = isMobileViewport ? 'mobile' : 'desktop';
-        const addonViewportPath = path.join(addonViewsDir, addonDir, 'views', viewportSubdir, view + '.ejs');
-        const addonFallbackPath = path.join(addonViewsDir, addonDir, 'views', view + '.ejs');
-        const addonViewPath = fs.existsSync(addonViewportPath) ? addonViewportPath : addonFallbackPath;
-        if (fs.existsSync(addonViewPath)) {
-          const data = { ...res.locals, ...(typeof options === 'object' ? options : {}) };
-          renderEjsWithAddonFallback(addonViewPath, data, {}, (err: any, html: string) => {
-            if (err) {
-              if (typeof callback === 'function') return callback(err);
-              return (res as any).status(500).send('View render error: ' + err.message);
-            }
-            if (typeof callback === 'function') return callback(null, html);
-            (res as any).send(html);
-          });
-          return;
-        }
-      }
-    }
-
-    return originalRenderBase(view, options, callback);
-  };
 
   const renderWithViewport = res.render;
   res.render = handleSPAPageRequest(renderWithViewport);
@@ -522,6 +431,15 @@ app.use(errorPageHandler);
     });
 
     let shuttingDown = false;
+    const activeConnections = new Set<any>();
+
+    // Track active connections
+    server.on('connection', (conn) => {
+      activeConnections.add(conn);
+      conn.on('close', () => {
+        activeConnections.delete(conn);
+      });
+    });
 
     async function shutdown(signal: string) {
       if (shuttingDown) return;
@@ -529,6 +447,7 @@ app.use(errorPageHandler);
 
       logger.info(`Shutting down (${signal})...`);
 
+      // Stop accepting new connections
       server.close(async () => {
         try {
           await prisma.$disconnect();
@@ -539,11 +458,27 @@ app.use(errorPageHandler);
         process.exit(0);
       });
 
-      // If server.close() doesn't finish within 10s, force exit
-      setTimeout(() => {
-        logger.warn('Forced exit after timeout');
+      // Grace period for existing connections
+      const graceTimeout = setTimeout(async () => {
+        logger.warn(`Forcefully closing ${activeConnections.size} active connection(s)`);
+
+        // Force close remaining connections
+        for (const conn of activeConnections) {
+          conn.destroy();
+        }
+
+        // Disconnect Prisma
+        try {
+          await prisma.$disconnect();
+        } catch {
+          // best effort
+        }
+
+        logger.warn('Forced shutdown');
         process.exit(1);
-      }, 10_000).unref();
+      }, 5000);
+
+      graceTimeout.unref();
     }
 
     process.on('SIGINT', () => shutdown('SIGINT'));

@@ -3,7 +3,7 @@ import { Module } from '../../../handlers/moduleInit';
 import prisma from '../../../db';
 import logger from '../../../handlers/logger';
 import { apiValidator } from '../../../handlers/utils/api/apiValidator';
-import { getParamAsString, getParamAsNumber } from "../../../utils/typeHelpers";
+import { getParamAsString, getParamAsNumber } from '../../../utils/typeHelpers';
 
 const coreModule: Module = {
   info: {
@@ -37,7 +37,7 @@ const coreModule: Module = {
         });
       } catch (error) {
         logger.error('Error rendering API documentation:', error);
-        res.status(500).render('error', {
+        res.status(500).render('errors/error', {
           error: 'Failed to load API documentation',
           req
         });

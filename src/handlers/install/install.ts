@@ -6,14 +6,7 @@ import logger from '../logger';
 
 
 class Install {
-  async install(key: string, email: string, password: string): Promise<void> {
-    const installationKey = 'your-installation-key'; // Replace with your actual key
-
-    // Validate the installation key
-    if (key !== installationKey) {
-      throw new Error('Invalid installation key');
-    }
-
+  async install(email: string, password: string): Promise<void> {
     // Check if the first user already exists
     const existingUser = await prisma.users.findFirst();
     if (existingUser) {

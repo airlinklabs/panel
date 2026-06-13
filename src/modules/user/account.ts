@@ -12,17 +12,21 @@ import validator from 'validator';
 
 const avatarStorage = multer.diskStorage({
   destination: (req, _file, cb) => {
-    const username = (req as any).session?.user?.username;
-    if (!username) return cb(new Error('Not authenticated'), '');
+    const userId = (req as any).session?.user?.id;
+    if (!userId) return cb(new Error('Not authenticated'), '');
 
-    const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', username);
+    const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', String(userId));
 
     if (!fs.existsSync(userDir)) {
       fs.mkdirSync(userDir, { recursive: true });
     } else {
       const existing = fs.readdirSync(userDir);
       existing.forEach(f => {
-        try { fs.unlinkSync(path.join(userDir, f)); } catch {}
+        try {
+          fs.unlinkSync(path.join(userDir, f));
+        } catch {
+          // Ignore cleanup failures
+        }
       });
     }
 
@@ -407,8 +411,7 @@ const accountModule: Module = {
 
         try {
           const userId = req.session?.user?.id;
-          const username = (req as any).session?.user?.username;
-          const avatarPath = `/uploads/avatars/${username}/${req.file.filename}`;
+          const avatarPath = `/uploads/avatars/${userId}/${req.file.filename}`;
 
           await prisma.users.update({
             where: { id: userId },
@@ -429,14 +432,21 @@ const accountModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const username = (req as any).session?.user?.username;
 
-          const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', username);
+          const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', String(userId));
           if (fs.existsSync(userDir)) {
             fs.readdirSync(userDir).forEach(f => {
-              try { fs.unlinkSync(path.join(userDir, f)); } catch {}
+              try {
+                fs.unlinkSync(path.join(userDir, f));
+              } catch {
+                // Ignore cleanup failures
+              }
             });
-            try { fs.rmdirSync(userDir); } catch {}
+            try {
+              fs.rmdirSync(userDir);
+            } catch {
+              // Ignore cleanup failures
+            }
           }
 
           await prisma.users.update({
