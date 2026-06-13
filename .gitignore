@@ -46,3 +46,5 @@ storage/uploads/
 .codex/
 .github/
 src/generated/
+.opencode
+.*
