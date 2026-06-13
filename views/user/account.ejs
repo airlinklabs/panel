@@ -5,9 +5,9 @@
     <div class="contents md:block w-60 h-full">
       <%- include('../components/template') %>
     </div>
-    <div id="page-content" class="flex-1 overflow-y-auto pt-14 pb-16 md:pt-16 md:pb-0">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-14 pb-16 md:pt-16 md:pb-0 anim-fade-up">
 
-      <div class="px-4 sm:px-8 pt-5 mb-5">
+      <div class="px-4 pt-4 sm:px-8 sm:pt-4 mb-5">
         <div class="flex flex-wrap items-center gap-4">
           <!-- Avatar -->
           <div class="relative shrink-0">
@@ -38,7 +38,7 @@
           </div>
           <!-- Credits button -->
           <a href="/credits"
-            class="flex items-center gap-1.5 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-white/5 hover:bg-neutral-50 dark:hover:bg-white/10 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white px-3 py-1.5 text-xs font-medium shadow-sm dark:shadow-none transition shrink-0">
+            class="flex items-center gap-1.5 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-white/5 hover:bg-neutral-50 dark:hover:bg-white/10 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white px-3 py-1.5 text-xs font-medium shadow-sm dark:shadow-none transition duration-200 shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
               <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 0 1 .67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 1 1-.671-1.34l.041-.022ZM12 9a.75.75 0 1 0 0-1.5A.75.75 0 0 0 12 9Z" clip-rule="evenodd" />
             </svg>
@@ -50,8 +50,8 @@
       <div class="px-8 space-y-4">
 
         <!-- Unified settings card: 2-column grid, no dividers -->
-        <div class="bg-neutral-50 dark:bg-white/5 rounded-2xl border border-neutral-200 dark:border-white/5 p-5">
-          <div class="grid grid-cols-1 xs:grid-cols-2 gap-x-5 gap-y-4">
+        <div class="bg-neutral-50 dark:bg-white/5 rounded-2xl border border-neutral-200 dark:border-white/5 p-5 shadow-sm">
+          <div class="grid grid-cols-1 xs:grid-cols-2 gap-x-5 gap-y-4 anim-stagger">
 
             <!-- Username -->
             <form id="change-username-form" action="/change-username" method="POST" class="col-span-1">
@@ -157,7 +157,7 @@
         </div>
 
         <!-- Login history — full width -->
-        <div class="bg-neutral-50 dark:bg-white/5 rounded-2xl p-5 border border-neutral-200 dark:border-white/5">
+        <div class="bg-neutral-50 dark:bg-white/5 rounded-2xl p-5 border border-neutral-200 dark:border-white/5 shadow-sm">
           <p class="text-sm font-medium text-neutral-800 dark:text-white mb-4"><%= req.translations.loginHistory || 'Login history' %></p>
           <div class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-white/5">
             <table class="min-w-full text-sm divide-y divide-neutral-200 dark:divide-white/5">
@@ -189,6 +189,8 @@
     </div>
   </div>
 </main>
+
+<%# ~ https://github.com/thavanish edited this shitty code %>
 
 <%- include('../components/toast') %>
 

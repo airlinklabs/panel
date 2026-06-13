@@ -11,13 +11,14 @@
     width: 100%; max-width: 460px; flex-shrink: 0;
     display: flex; flex-direction: column; justify-content: center;
     padding: 48px 40px;
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
     border-right: 1px solid rgba(0,0,0,0.08);
+    position: relative; z-index: 1;
   }
   html.dark .auth-panel {
-    background: rgba(20,20,20,0.08);
+    background: rgba(20,20,20,0.88);
     border-right-color: rgba(255,255,255,0.08);
   }
   .auth-image {
@@ -25,10 +26,40 @@
     background: url('<%= settings.registerWallpaper || "https://i.imgur.com/8G5eRWX.jpeg" %>') center/cover no-repeat;
   }
 
-  @media (max-width: 768px) {
-    .auth-split { display: block; min-height: 100vh; }
-    .auth-panel { max-width: 100%; border-right: none; padding: 40px 24px; min-height: 100vh; justify-content: center; }
-    .auth-image { display: none; }
+  @media (max-width: 767px) {
+    body { padding: 0 !important; }
+    .auth-split {
+      position: relative;
+      display: block;
+      min-height: 100dvh;
+    }
+    .auth-image {
+      position: fixed;
+      inset: 0;
+      display: block;
+      z-index: 0;
+    }
+    .auth-panel {
+      position: relative;
+      z-index: 1;
+      max-width: 100%;
+      border-right: none;
+      padding: 40px 24px;
+      min-height: 100dvh;
+      justify-content: center;
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
+    html.dark .auth-panel {
+      background: rgba(20,20,20,0.82);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .auth-panel { transition: none !important; animation: none !important; }
   }
 
   .auth-input {
@@ -84,8 +115,8 @@
   .auth-submit.loading .btn-label { display: none; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .auth-panel { opacity: 0; transform: translateX(-12px); transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1); }
-  .auth-panel.visible { opacity: 1; transform: translateX(0); }
+  .auth-panel { opacity: 0; transform: translateY(12px); transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+  .auth-panel.visible { opacity: 1; transform: translateY(0); }
 </style>
 
 <div class="auth-split">
@@ -209,3 +240,4 @@
 </script>
 
 <%- include('../components/footer') %>
+<%# ~ https://github.com/thavanish edited this shitty code %>

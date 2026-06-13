@@ -71,14 +71,14 @@ function isImageFile(filename) {
     </div>
 
     <!-- Content -->
-    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-14 pb-16 md:pt-14 pb-16 md:pt-16 md:pb-0 md:pb-0">
+    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-14 pb-16 md:pt-16 md:pb-0 anim-fade-up">
       <!-- Page Header -->
       <div class="sm:flex sm:items-center px-8 pt-4">
         <%- include('../../components/serverHeader') %>
         <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex gap-2.5">
           <button id="createFile" onclick="openCreateFileModal()" type="button"
-              class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2 mr-2">
+              class="w-full sm:w-auto border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-3 sm:py-2 text-center text-sm font-medium shadow-lg transition duration-200 focus:outline focus:outline-2 focus:outline-offset-2 mr-2">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 inline-flex mr-1 text-neutral-800 mb-0.5">
                 <path fill-rule="evenodd" d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875ZM12.75 12a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V18a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V12Z" clip-rule="evenodd" />
                 <path d="M14.25 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Z" />
@@ -87,7 +87,7 @@ function isImageFile(filename) {
           </button>
 
           <button id="uploadFile" onclick="openUploadFileModal()" type="button"
-              class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+              class="w-full sm:w-auto border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-3 sm:py-2 text-center text-sm font-medium shadow-lg transition duration-200 focus:outline focus:outline-2 focus:outline-offset-2">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 inline-flex mr-1 text-neutral-800 mb-0.5">
                 <path fill-rule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1-1.06 1.06l-3.22-3.22V16.5a.75.75 0 0 1-1.5 0V4.81L8.03 8.03a.75.75 0 0 1-1.06-1.06l4.5-4.5ZM3 15.75a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
               </svg>
@@ -151,9 +151,79 @@ function isImageFile(filename) {
         </div>
       <% } else { %>
         <!-- File Table -->
-        <div class="px-8 mt-8">
+        <div class="px-4 md:px-8 mt-8">
           <div class="al-file-panel overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700/40">
-            <table class="min-w-full bg-white dark:bg-neutral-900/60">
+            <!-- Mobile Card List -->
+            <div class="md:hidden divide-y divide-neutral-100 dark:divide-neutral-700/30">
+              <div class="px-3 py-2.5 flex items-center overflow-hidden">
+                <nav class="flex items-center gap-0 text-xs min-w-0 overflow-hidden">
+                  <a class="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition shrink-0" href="./files">/home/container/</a><span class="text-neutral-400 dark:text-neutral-600 mx-0.5"></span>
+                  <%
+                      if (req.query.path) {
+                          const parts = req.query.path.split('/');
+                          let currentPath = '';
+
+                          parts.forEach((part, index) => {
+                              currentPath += part;
+
+                              if (index < parts.length - 1) {
+                                  %>
+                                  <a href="./files?path=<%= currentPath %>" class="text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition"><%= part %></a><span class="text-neutral-400 dark:text-neutral-600 mx-0.5">/</span>
+                                  <%
+                                  currentPath += '/';
+                              } else {
+                                  %>
+                                  <span class="text-neutral-700 dark:text-neutral-200 font-medium"><%= part %></span>
+                                  <%
+                              }
+                          });
+                      }
+                  %>
+                </nav>
+              </div>
+              <div class="px-3 py-2.5">
+                <input type="checkbox" id="selectAllMobile" class="form-checkbox h-4 w-4 text-neutral-500 bg-neutral-100 dark:bg-white/10 border border-neutral-300 dark:border-white/15 rounded transition file-checkbox">
+                <span class="ml-2 text-xs text-neutral-500">Select all</span>
+              </div>
+              <% files.forEach((file, index) => { %>
+                <div class="al-file-row px-4 py-3 hover:bg-neutral-50 dark:hover:bg-white/[0.02] cursor-pointer transition-colors duration-150" style="--i:<%= Math.min(index, 10) %>">
+                  <div class="flex items-center gap-3">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-neutral-500 bg-neutral-50 dark:bg-white/5 border border-neutral-300 dark:border-white/10 rounded transition file-checkbox shrink-0" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>">
+                    <%
+                      const isImageMob = file.type !== 'directory' && isImageFile(file.name);
+                      const filePathMob = currentPath && currentPath !== '/'
+                        ? currentPath.replace(/^\/+/, '') + '/' + file.name
+                        : file.name;
+                      const fileHrefMob = file.type === 'directory'
+                        ? `/server/${server.UUID}/files?path=${encodeURIComponent(filePathMob)}`
+                        : isImageMob
+                          ? '#'
+                          : `/server/${server.UUID}/files/edit/${encodeURIComponent(filePathMob)}`;
+                      const fileSizeMob = (() => {
+                        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                        let size = file.size;
+                        let unitIndex = 0;
+                        while (size >= 1024 && unitIndex < sizes.length - 1) {
+                          size /= 1024;
+                          unitIndex++;
+                        }
+                        return `${size.toFixed(2)} ${sizes[unitIndex]}`;
+                      })();
+                    %>
+                    <a href="<%= fileHrefMob %>" class="flex-1 min-w-0 flex items-center gap-2.5 text-sm font-medium text-neutral-800 dark:text-neutral-200 hover:text-neutral-600 dark:hover:text-white transition-colors" <% if (isImageMob) { %>onclick="event.preventDefault(); showImageViewer('<%= file.name %>', '<%= filePathMob %>', '<%= fileSizeMob %>', '<%= server.UUID %>');"<% } %>>
+                      <span class="al-file-icon text-neutral-400 dark:text-neutral-500 shrink-0">
+                        <%- getFileIcon(file.type === 'directory' ? 'Folder' : file.category || 'No Category') %>
+                      </span>
+                      <span class="truncate"><%= file.name %></span>
+                    </a>
+                    <span class="text-xs text-neutral-400 dark:text-neutral-500 shrink-0"><%= fileSizeMob %></span>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+
+            <!-- Desktop Table -->
+            <table class="hidden md:table min-w-full bg-white dark:bg-neutral-900/60">
 
                     <div class="px-3 py-2.5 flex items-center overflow-hidden">
         <nav class="flex items-center gap-0 text-xs min-w-0 overflow-hidden">
@@ -330,13 +400,13 @@ function isImageFile(filename) {
   </div>
 
   <!-- Upload file -->
-  <div id="uploadFileModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-    <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
-        <h2 class="text-2xl font-medium mb-1 text-neutral-800">Upload File</h2>
-        <p class="mb-6 text-neutral-600">Select a file to upload to the current directory.</p>
+  <div id="uploadFileModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="bg-white dark:bg-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md sm:mx-4 border border-neutral-200 dark:border-neutral-700/60 shadow-2xl transform scale-95 transition-transform duration-300">
+        <h2 class="text-2xl font-medium mb-1 text-neutral-800 dark:text-white">Upload File</h2>
+        <p class="mb-6 text-neutral-600 dark:text-neutral-400">Select a file to upload to the current directory.</p>
         <div class="mb-4">
           <div class="mb-4">
-            <label for="fileInput" class="w-full px-3 py-6 border-2 border-dashed border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition text-neutral-800 text-center cursor-pointer hover:bg-neutral-50 block" id="dropZone">
+            <label for="fileInput" class="w-full px-3 py-6 border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition text-neutral-800 dark:text-neutral-400 text-center cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800 block" id="dropZone">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-10 h-10 mx-auto mb-2 text-neutral-400">
                 <path fill-rule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1-1.06 1.06l-3.22-3.22V16.5a.75.75 0 0 1-1.5 0V4.81L8.03 8.03a.75.75 0 0 1-1.06-1.06l4.5-4.5ZM3 15.75a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
               </svg>
@@ -362,9 +432,9 @@ function isImageFile(filename) {
             </div>
           </div>
         </div>
-        <div class="flex justify-end space-x-4">
-          <button onclick="closeUploadFileModal()" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
-          <button id="uploadButton" class="w-full md:w-auto rounded-xl bg-neutral-800 dark:bg-neutral-950 hover:bg-neutral-700 dark:hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2" disabled>Upload</button>
+        <div class="flex flex-col sm:flex-row justify-end gap-2 sm:space-x-4 px-5 pb-5">
+          <button onclick="closeUploadFileModal()" class="px-5 py-3 sm:py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white rounded-xl hover:bg-neutral-300 dark:hover:bg-neutral-600 transition">Cancel</button>
+          <button id="uploadButton" class="w-full sm:w-auto rounded-xl bg-neutral-800 dark:bg-neutral-950 hover:bg-neutral-700 dark:hover:bg-neutral-800 text-white px-3 py-3 sm:py-2 text-sm font-medium shadow-md transition duration-200 focus:outline focus:outline-2 focus:outline-offset-2" disabled>Upload</button>
         </div>
     </div>
   </div>
@@ -1260,3 +1330,5 @@ function openCreateFileModal() {
 </script>
 
 <%- include('../../components/footer') %>
+
+<%# ~ https://github.com/thavanish edited this shitty code %>

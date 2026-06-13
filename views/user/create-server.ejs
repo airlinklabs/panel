@@ -94,8 +94,8 @@
   <div class="flex h-screen">
     <div class="contents md:block w-60 h-full"><%- include('../components/template') %></div>
 
-    <div id="page-content" class="flex-1 overflow-y-auto pt-14 pb-16 md:pt-16 md:pb-0">
-      <div class="px-4 sm:px-8 md:px-12 pt-6 pb-12 max-w-5xl">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-14 pb-16 md:pt-16 md:pb-0 anim-fade-up">
+      <div class="px-4 pt-4 sm:px-8 sm:pt-4 md:px-12 pb-12 max-w-5xl">
 
         <!-- Header -->
         <div class="flex items-center justify-between mb-7">
@@ -106,13 +106,13 @@
           <a href="/" class="text-sm text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-300 transition">Cancel</a>
         </div>
 
-        <div class="space-y-5">
+        <div class="space-y-5 anim-stagger">
 
           <!-- Top row: Details + Node & Image side by side on desktop -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
           <!-- Details -->
-          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5">
+          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm">
             <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
               <p class="text-sm font-medium text-neutral-800 dark:text-white">Details</p>
             </div>
@@ -129,7 +129,7 @@
           </div>
 
           <!-- Node & Image -->
-          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5">
+          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm">
             <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
               <p class="text-sm font-medium text-neutral-800 dark:text-white">Node & image</p>
             </div>
@@ -175,11 +175,11 @@
           </div><!-- /top grid -->
 
           <!-- Resources -->
-          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
+          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden shadow-sm">
             <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
               <p class="text-sm font-medium text-neutral-800 dark:text-white">Resources</p>
             </div>
-            <div class="p-5 grid grid-cols-3 gap-4">
+            <div class="p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label class="form-label">RAM</label>
                 <!-- hidden field always holds MB -->
@@ -230,7 +230,7 @@
           <!-- Submit -->
           <div class="flex justify-end pt-1">
             <button type="button" id="createBtn"
-              class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-6 py-2.5 text-sm font-medium shadow-sm transition flex items-center gap-2">
+              class="w-full md:w-auto rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-6 py-3 md:py-2.5 text-sm font-medium shadow-sm transition duration-200 flex items-center justify-center gap-2">
               <span id="createBtnText">Create server</span>
               <span id="createBtnSpinner" class="hidden w-4 h-4 border-2 border-white/30 dark:border-neutral-900/30 border-t-white dark:border-t-neutral-900 rounded-full animate-spin"></span>
             </button>
@@ -542,5 +542,7 @@
 
 })();
 </script>
+
+<%# ~ https://github.com/thavanish edited this shitty code %>
 
 <%- include('../components/footer') %>

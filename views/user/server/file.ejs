@@ -24,7 +24,7 @@
     <div class="contents md:block w-60 h-full">
       <%- include('../../components/template') %>
     </div>
-    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-14 pb-16 md:pt-14 pb-16 md:pt-16 md:pb-0 md:pb-0">
+    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-14 pb-16 md:pt-16 md:pb-0 anim-fade-up">
       <div class="sm:flex sm:items-center px-8 pt-4">
         <%- include('../../components/serverHeader') %>
       </div>
@@ -84,8 +84,8 @@
                   }
               %>
               </h2>
-              <div class="flex shrink-0">
-                <button id="saveBtn" class="al-ui-button-primary min-w-24" type="button">
+              <div class="flex shrink-0 mt-3 sm:mt-0">
+                <button id="saveBtn" class="w-full sm:w-auto rounded-xl bg-blue-600 hover:bg-blue-500 text-white px-3 py-3 sm:py-2 text-sm font-medium shadow-sm transition duration-200 flex items-center justify-center" type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                   </svg>
@@ -290,3 +290,5 @@
 </script>
 
 <%- include('../../components/footer') %>
+
+<%# ~ https://github.com/thavanish edited this shitty code %>

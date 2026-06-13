@@ -4,7 +4,6 @@
   ::-webkit-scrollbar { display: none; }
   body, html { height: 100%; margin: 0; }
 
-  /* Desktop: left panel + right image */
   .auth-split {
     display: flex; min-height: 100vh;
   }
@@ -12,14 +11,14 @@
     width: 100%; max-width: 420px; flex-shrink: 0;
     display: flex; flex-direction: column; justify-content: center;
     padding: 48px 40px;
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
     border-right: 1px solid rgba(0,0,0,0.08);
     position: relative; z-index: 1;
   }
   html.dark .auth-panel {
-    background: rgba(20,20,20,0.08);
+    background: rgba(20,20,20,0.88);
     border-right-color: rgba(255,255,255,0.08);
   }
   .auth-image {
@@ -27,14 +26,40 @@
     background: url('<%= settings.loginWallpaper || "https://i.imgur.com/j9BodUY.jpeg" %>') center/cover no-repeat;
   }
 
-  /* Mobile: full-screen centered card */
-  @media (max-width: 768px) {
-    .auth-split { display: block; min-height: 100vh; }
-    .auth-panel {
-      max-width: 100%; border-right: none; padding: 40px 24px;
-      min-height: 100vh; justify-content: center;
+  @media (max-width: 767px) {
+    body { padding: 0 !important; }
+    .auth-split {
+      position: relative;
+      display: block;
+      min-height: 100dvh;
     }
-    .auth-image { display: none; }
+    .auth-image {
+      position: fixed;
+      inset: 0;
+      display: block;
+      z-index: 0;
+    }
+    .auth-panel {
+      position: relative;
+      z-index: 1;
+      max-width: 100%;
+      border-right: none;
+      padding: 40px 24px;
+      min-height: 100dvh;
+      justify-content: center;
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
+    html.dark .auth-panel {
+      background: rgba(20,20,20,0.82);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .auth-panel { transition: none !important; animation: none !important; }
   }
 
   .auth-input {
@@ -78,7 +103,6 @@
   .pw-toggle:hover { color: #737373; }
   html.dark .pw-toggle:hover { color: #d4d4d4; }
 
-  /* Custom checkbox */
   .cb-row { display: flex; align-items: center; gap: 9px; cursor: pointer; user-select: none; }
   .cb-box {
     width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0;
@@ -99,9 +123,8 @@
   .auth-submit.loading .btn-label { display: none; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Entry animation for the panel */
-  .auth-panel { opacity: 0; transform: translateX(-12px); transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1); }
-  .auth-panel.visible { opacity: 1; transform: translateX(0); }
+  .auth-panel { opacity: 0; transform: translateY(12px); transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+  .auth-panel.visible { opacity: 1; transform: translateY(0); }
 </style>
 
 <div class="auth-split">
@@ -195,7 +218,6 @@
       : '<path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/><path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" clip-rule="evenodd"/>';
   });
 
-  // Custom checkbox behavior
   var cbInput = document.getElementById('remember');
   var cbBox   = document.getElementById('cbBox');
   var cbCheck = document.getElementById('cbCheck');
@@ -221,3 +243,4 @@
 </script>
 
 <%- include('../components/footer') %>
+<%# ~ https://github.com/thavanish edited this shitty code %>

@@ -10,7 +10,7 @@
     </aside>
 
     <!-- Main Content -->
-    <section id="page-content" class="flex-1 p-6 overflow-y-auto pt-14 pb-16 md:pt-14 pb-16 md:pt-16 md:pb-0 md:pb-0">
+    <section id="page-content" class="flex-1 p-6 overflow-y-auto pt-14 pb-16 md:pt-16 md:pb-0 anim-fade-up">
       <!-- Page Header -->
       <header class="sm:flex sm:items-center px-8 pt-4">
         <%- include('../../components/serverHeader') %>
@@ -66,7 +66,7 @@
               <div class="p-5">
                 <div class="mb-4">
                   <label for="startCommand" class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.startupCommand || 'Startup Command' %></label>
-                  <textarea id="startCommand" name="startCommand" rows="3" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 <%= !isStartupEditAllowed ? 'bg-neutral-100 dark:bg-neutral-800/50 cursor-not-allowed' : 'bg-white dark:bg-neutral-600/20' %> border border-neutral-300 dark:border-white/5" <%= !isStartupEditAllowed ? 'readonly' : '' %>><%= server.StartCommand %></textarea>
+                  <textarea id="startCommand" name="startCommand" rows="3" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-3 sm:py-2 <%= !isStartupEditAllowed ? 'bg-neutral-100 dark:bg-neutral-800/50 cursor-not-allowed' : 'bg-white dark:bg-neutral-600/20' %> border border-neutral-300 dark:border-white/5" <%= !isStartupEditAllowed ? 'readonly' : '' %>><%= server.StartCommand %></textarea>
                   <% if (!isStartupEditAllowed) { %>
                     <p class="mt-2 text-xs text-red-500"><%= req.translations.startupCommandDisabled || 'Startup command editing is disabled for this server. Contact an administrator to enable this feature.' %></p>
                   <% } else { %>
@@ -76,7 +76,7 @@
               </div>
 
               <div class="px-5 py-4 bg-neutral-50 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-neutral-700">
-                <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors duration-200 <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %>><%= req.translations.saveCommand || 'Save Command' %></button>
+                <button type="submit" class="w-full sm:w-auto rounded-xl bg-blue-600 px-6 py-3 sm:py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors duration-200 <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %>><%= req.translations.saveCommand || 'Save Command' %></button>
               </div>
             </form>
           </div>
@@ -128,7 +128,7 @@
                   %>
 
                   <div class="relative">
-                    <select id="dockerImage" name="dockerImage" class="w-full rounded-xl appearance-none focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5 pr-10">
+                    <select id="dockerImage" name="dockerImage" class="w-full rounded-xl appearance-none focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-3 sm:py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5 pr-10">
                       <% if (availableDockerImages.length > 0) { %>
                         <% availableDockerImages.forEach(image => { %>
                           <option value="<%= image %>" <%= image === currentDockerImage ? 'selected' : '' %>><%= image %></option>
@@ -148,7 +148,7 @@
               </div>
 
               <div class="px-5 py-4 bg-neutral-50 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-neutral-700">
-                <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 hover:shadow-lg transition-all duration-200"><%= req.translations.updateDockerImage || 'Update Docker Image' %></button>
+                <button type="submit" class="w-full sm:w-auto rounded-xl bg-blue-600 px-6 py-3 sm:py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 hover:shadow-lg transition-all duration-200"><%= req.translations.updateDockerImage || 'Update Docker Image' %></button>
               </div>
             </form>
           </div>
@@ -182,9 +182,9 @@
                           });
                         </script>
                       <% } else if (variable.type === 'number') { %>
-                        <input type="number" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5">
+                        <input type="number" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-3 sm:py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5">
                       <% } else { %>
-                        <input type="text" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5">
+                        <input type="text" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm px-4 py-3 sm:py-2 bg-white dark:bg-neutral-600/20 border border-neutral-300 dark:border-white/5">
                       <% } %>
                       <p class="mt-1 text-xs text-neutral-500">Type: <%= variable.type %></p>
                     </div>
@@ -196,7 +196,7 @@
             </div>
 
             <div class="mt-6">
-              <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-lg hover:bg-blue-700 hover:scale-105 transition-all duration-200"><%= req.translations.saveVariables || 'Save Variables' %></button>
+              <button type="submit" class="w-full sm:w-auto rounded-xl bg-blue-600 px-6 py-3 sm:py-2.5 text-center text-sm font-semibold text-white shadow-lg hover:bg-blue-700 hover:scale-105 transition-all duration-200"><%= req.translations.saveVariables || 'Save Variables' %></button>
             </div>
           </form>
         </div>
@@ -391,3 +391,5 @@
     });
   });
 </script>
+
+<%# ~ https://github.com/thavanish edited this shitty code %>
