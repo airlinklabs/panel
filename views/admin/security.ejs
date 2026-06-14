@@ -1,6 +1,7 @@
 <%- include('../components/header', { title: 'Security' }) %>
 
 <main class="min-h-screen">
+  <% if (!isMobileViewport) { %>
   <div class="flex min-h-screen">
     <div class="contents md:block w-60 shrink-0">
       <%- include('../components/template') %>
@@ -11,7 +12,17 @@
         <p class="mt-0.5 text-sm text-neutral-500">Manage panel security settings, rate limiting, and IP access controls.</p>
       </div>
 
-      <div class="px-8 mt-6 space-y-6 max-w-3xl">
+      <div class="px-8 mt-6 space-y-6 max-w-3xl anim-fade-up">
+  <% } else { %>
+  <div class="px-4 pt-4 pb-24">
+    <%- include('../components/template') %>
+    <div class="mt-4 mb-5">
+      <h1 class="text-base font-medium text-neutral-800 dark:text-white">Security</h1>
+      <p class="mt-0.5 text-sm text-neutral-500">Manage panel security settings, rate limiting, and IP access controls.</p>
+    </div>
+
+    <div class="space-y-6 anim-fade-up">
+  <% } %>
 
         <!-- Rate Limiting -->
         <div class="bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
@@ -33,10 +44,10 @@
             <div>
               <label for="rateLimitRpm" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Requests per minute</label>
               <input type="number" id="rateLimitRpm" name="rateLimitRpm" min="1" max="10000" value="<%= settings ? settings.rateLimitRpm : 100 %>"
-                class="w-40 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                class="w-full md:w-40 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
             </div>
             <div class="pt-1">
-              <button type="submit" class="px-4 py-2 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+              <button type="submit" class="w-full md:w-auto px-4 py-2 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition duration-200">
                 Save
               </button>
             </div>
@@ -50,21 +61,21 @@
             <p class="mt-0.5 text-xs text-neutral-500">IPs on this list are blocked from accessing the panel entirely.</p>
           </div>
           <div class="px-5 py-5 space-y-4">
-            <div class="flex gap-2">
+            <div class="flex flex-col sm:flex-row gap-2">
               <input type="text" id="ban-ip-input" placeholder="e.g. 192.168.1.100"
-                class="flex-1 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                class="flex-1 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-3 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition duration-200">
               <button id="ban-ip-btn" type="button"
-                class="px-4 py-2 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition whitespace-nowrap">
+                class="w-full sm:w-auto px-4 py-3 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition duration-200 whitespace-nowrap">
                 Ban IP
               </button>
             </div>
 
             <% if (bannedIps && bannedIps.length > 0) { %>
-              <ul id="banned-list" class="space-y-1.5">
+              <ul id="banned-list" class="space-y-1.5 anim-stagger">
                 <% bannedIps.forEach(ip => { %>
-                  <li class="flex items-center justify-between px-3 py-2 rounded-lg bg-white dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 text-sm" data-ip="<%= ip %>">
+                  <li class="flex items-center justify-between px-3 py-2 rounded-lg bg-white dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 text-sm anim-fade-up" data-ip="<%= ip %>">
                     <span class="font-mono text-neutral-700 dark:text-neutral-300 text-xs"><%= ip %></span>
-                    <button type="button" class="unban-btn text-xs text-red-500 hover:text-red-400 transition">Remove</button>
+                    <button type="button" class="unban-btn text-xs text-red-500 hover:text-red-400 transition duration-200">Remove</button>
                   </li>
                 <% }); %>
               </ul>
@@ -76,13 +87,20 @@
 
 
       </div>
+  <% if (!isMobileViewport) { %>
     </div>
   </div>
+  <% } else { %>
+    </div>
+  </div>
+  <% } %>
 </main>
 
 <%- include('../components/toast') %>
 
 <script nonce="<%- nonce %>">
+var isMobileViewport = <%= isMobileViewport ? 'true' : 'false' %>;
+
   // Rate limit form
   document.getElementById('form-rate-limit').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -163,3 +181,5 @@
 </script>
 
 <%- include('../components/footer') %>
+
+<%# ~ https://github.com/thavanish edited this shitty code %>

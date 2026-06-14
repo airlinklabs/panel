@@ -1,11 +1,18 @@
 <%- include('../components/header', { title: 'Analytics' }) %>
 
 <main class="h-screen m-auto">
+  <% if (!isMobileViewport) { %>
   <div class="flex h-screen">
     <div class="contents md:block w-60 h-full"><%- include('../components/template') %></div>
 
     <div id="page-content" class="flex-1 overflow-y-auto pt-14 pb-16 md:pt-16 md:pb-0">
       <div class="px-4 sm:px-8 pt-5 pb-8">
+  <% } else { %>
+  <div class="px-4 pt-4 pb-24">
+    <%- include('../components/template') %>
+
+    <div class="mt-4">
+  <% } %>
 
         <div class="flex items-center justify-between mb-6">
           <div>
@@ -13,7 +20,7 @@
             <p class="text-sm text-neutral-500 mt-0.5">Live data from the database and connected daemons.</p>
           </div>
           <button id="refreshBtn"
-            class="flex items-center gap-1.5 rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 px-3 py-2 text-sm font-medium transition">
+            class="w-full md:w-auto flex items-center justify-center gap-1.5 rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 px-3 py-3 md:py-2 text-sm font-medium transition duration-200">
             <svg id="refreshIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
             </svg>
@@ -22,10 +29,10 @@
         </div>
 
         <!-- Tab bar -->
-        <div class="flex gap-0.5 border-b border-neutral-200 dark:border-neutral-700/40 mb-6">
-          <button type="button" data-tab="servers"  class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Servers</button>
-          <button type="button" data-tab="nodes"    class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Nodes</button>
-          <button type="button" data-tab="activity" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Activity</button>
+        <div class="flex gap-0.5 border-b border-neutral-200 dark:border-neutral-700/40 mb-6 overflow-x-auto">
+          <button type="button" data-tab="servers"  class="tab-btn px-4 py-2.5 text-sm font-medium transition duration-200 -mb-px border-b-2">Servers</button>
+          <button type="button" data-tab="nodes"    class="tab-btn px-4 py-2.5 text-sm font-medium transition duration-200 -mb-px border-b-2">Nodes</button>
+          <button type="button" data-tab="activity" class="tab-btn px-4 py-2.5 text-sm font-medium transition duration-200 -mb-px border-b-2">Activity</button>
         </div>
 
         <!-- Loading state -->
@@ -38,9 +45,9 @@
         </div>
 
         <!-- ── SERVERS ─────────────────────────────────────────────────────── -->
-        <div data-tab-panel="servers" class="tab-panel hidden space-y-6">
+        <div data-tab-panel="servers" class="tab-panel hidden space-y-6 anim-fade-up">
 
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 anim-stagger">
             <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
               <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Total servers</p>
               <p class="text-2xl font-semibold text-neutral-800 dark:text-white" id="sv-total">—</p>
@@ -83,9 +90,9 @@
         </div>
 
         <!-- ── NODES ──────────────────────────────────────────────────────── -->
-        <div data-tab-panel="nodes" class="tab-panel hidden space-y-4">
+        <div data-tab-panel="nodes" class="tab-panel hidden space-y-4 anim-fade-up">
 
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 anim-stagger">
             <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
               <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Nodes</p>
               <p class="text-2xl font-semibold text-neutral-800 dark:text-white" id="nd-total">—</p>
@@ -104,9 +111,9 @@
         </div>
 
         <!-- ── ACTIVITY ────────────────────────────────────────────────────── -->
-        <div data-tab-panel="activity" class="tab-panel hidden space-y-6">
+        <div data-tab-panel="activity" class="tab-panel hidden space-y-6 anim-fade-up">
 
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 anim-stagger">
             <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
               <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Users</p>
               <p class="text-2xl font-semibold text-neutral-800 dark:text-white" id="ac-users">—</p>
@@ -132,17 +139,19 @@
           <!-- Login chart -->
           <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">
             <p class="text-sm font-medium text-neutral-800 dark:text-white mb-4">Login activity — last 30 days</p>
-            <div class="relative h-44">
+            <div class="relative h-44 w-full">
               <canvas id="loginChart"></canvas>
             </div>
           </div>
 
-          <!-- Recent logins -->
+          <!-- Recent logins — card stack on mobile, table on desktop -->
           <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
             <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
               <p class="text-sm font-medium text-neutral-800 dark:text-white">Recent logins</p>
             </div>
-            <div class="overflow-x-auto">
+
+            <!-- Desktop: table -->
+            <div class="hidden md:block overflow-x-auto">
               <table class="min-w-full text-sm divide-y divide-neutral-100 dark:divide-white/5">
                 <thead class="bg-neutral-100/60 dark:bg-white/[0.02]">
                   <tr>
@@ -154,12 +163,20 @@
                 <tbody id="ac-logins-table" class="divide-y divide-neutral-100 dark:divide-white/5"></tbody>
               </table>
             </div>
+
+            <!-- Mobile: card stack -->
+            <div id="ac-logins-cards" class="md:hidden divide-y divide-neutral-100 dark:divide-white/5 anim-stagger"></div>
           </div>
         </div>
 
+  <% if (!isMobileViewport) { %>
       </div>
     </div>
   </div>
+  <% } else { %>
+    </div>
+  </div>
+  <% } %>
 </main>
 
 <%- include('../components/toast') %>
@@ -167,6 +184,8 @@
 <script nonce="<%- nonce %>" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
 
 <script nonce="<%- nonce %>">
+var isMobileViewport = <%= isMobileViewport ? 'true' : 'false' %>;
+
 (function () {
   const tabBtns   = document.querySelectorAll('.tab-btn');
   const tabPanels = document.querySelectorAll('.tab-panel');
@@ -269,7 +288,7 @@
       return;
     }
     listEl.innerHTML = nodes.map(n => `
-      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5 anim-fade-up">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-3">
             <span class="w-2 h-2 rounded-full ${n.online ? 'bg-emerald-500' : 'bg-red-500'} shrink-0"></span>
@@ -340,13 +359,29 @@
       },
     });
 
+    // Desktop: render table rows
     const tbody = document.getElementById('ac-logins-table');
-    tbody.innerHTML = (a.recentLogins || []).map(l => `
-      <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition">
-        <td class="px-5 py-3 text-xs font-mono text-neutral-500">#${l.userId}</td>
-        <td class="px-5 py-3 text-xs font-mono text-neutral-600 dark:text-neutral-400">${l.ipAddress || 'Unknown'}</td>
-        <td class="px-5 py-3 text-xs text-neutral-500">${new Date(l.timestamp).toLocaleString()}</td>
-      </tr>`).join('') || '<tr><td colspan="3" class="px-5 py-5 text-center text-sm text-neutral-400">No login history.</td></tr>';
+    if (tbody) {
+      tbody.innerHTML = (a.recentLogins || []).map(l => `
+        <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition duration-200">
+          <td class="px-5 py-3 text-xs font-mono text-neutral-500">#${l.userId}</td>
+          <td class="px-5 py-3 text-xs font-mono text-neutral-600 dark:text-neutral-400">${l.ipAddress || 'Unknown'}</td>
+          <td class="px-5 py-3 text-xs text-neutral-500">${new Date(l.timestamp).toLocaleString()}</td>
+        </tr>`).join('') || '<tr><td colspan="3" class="px-5 py-5 text-center text-sm text-neutral-400">No login history.</td></tr>';
+    }
+
+    // Mobile: render card stack
+    const cardsEl = document.getElementById('ac-logins-cards');
+    if (cardsEl) {
+      cardsEl.innerHTML = (a.recentLogins || []).map(l => `
+        <div class="px-4 py-3 anim-fade-up">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-neutral-800 dark:text-white">#${l.userId}</span>
+            <span class="text-xs text-neutral-500">${new Date(l.timestamp).toLocaleString()}</span>
+          </div>
+          <p class="text-xs font-mono text-neutral-500 mt-1">${l.ipAddress || 'Unknown'}</p>
+        </div>`).join('') || '<p class="px-4 py-5 text-center text-sm text-neutral-400">No login history.</p>';
+    }
   }
 
   async function load() {
@@ -382,3 +417,5 @@
 </script>
 
 <%- include('../components/footer') %>
+
+<%# ~ https://github.com/thavanish edited this shitty code %>

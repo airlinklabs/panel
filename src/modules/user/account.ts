@@ -474,7 +474,7 @@ const accountModule: Module = {
             prisma.settings.findUnique({ where: { id: 1 } }),
           ]);
           if (!user) return res.redirect('/login');
-          const pkg = JSON.parse(require('fs').readFileSync(require('path').join(process.cwd(), 'package.json'), 'utf-8'));
+          const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'));
           res.render('user/credits', { user, req, settings, version: pkg.version });
         } catch (error) {
           logger.error('Error loading credits page:', error);

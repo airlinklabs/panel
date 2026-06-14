@@ -193,63 +193,284 @@
 <div id="colcont" class="md:pl-56">
   <div class="hidden md:flex fixed top-0 left-0 md:left-56 right-0 z-40 h-16 shrink-0 items-center gap-x-4 bg-white/8 dark:bg-[#141414]/8 backdrop-blur-xl border-b border-neutral-200/30 dark:border-white/5 px-4 sm:gap-x-6 sm:px-4 md:px-4">
     <div class="flex flex-1 gap-x-4 self-stretch md:gap-x-6">
-      <div class="relative flex flex-1 flex-col">
+      <style>
+        #search-container {
+          position: relative;
+          width: 200px;
+          transition: width 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+        #search-container.expanded { width: 380px; }
+        #search-container:not(.expanded) { width: 200px; }
+        #search-dropdown {
+          position: fixed;
+          transform-origin: top left;
+          z-index: 9999;
+        }
+        #search-dropdown.anim-scale-in {
+          animation: scaleIn 0.28s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        #search-container:not(.expanded) #search-clear-btn { display: none; }
+        #search-container.expanded #search-clear-btn { display: flex; }
+      </style>
 
-        <div class="md:-ml-2 flex items-center w-fit mt-3.5 px-4 py-2 h-10 rounded-xl border border-neutral-300 dark:border-white/5 active:scale-100 duration-200 hover:border-neutral-400 dark:hover:border-neutral-300/10 bg-transparent text-neutral-800 dark:text-white" role="search">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-neutral-400">
-            <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
+      <div id="search-container" class="md:-ml-2 flex items-center mt-3.5 px-4 py-2 h-10 rounded-xl border border-neutral-300 dark:border-white/5 active:scale-100 duration-200 hover:border-neutral-400 dark:hover:border-neutral-300/10 bg-transparent text-neutral-800 dark:text-white" role="search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-neutral-400 shrink-0">
+          <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
+        </svg>
+        <input id="searchInput"
+          class="bg-transparent border-transparent ml-2 flex-1 min-w-0 focus-visible:ring-transparent border-none ring-transparent sm:text-sm placeholder:text-zinc-500 text-neutral-700 dark:text-neutral-300 focus-visible:outline-none"
+          placeholder="Search servers, users, pages..."
+          type="search"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded="false"
+          aria-controls="searchResults"
+          aria-activedescendant=""
+          aria-label="Search"
+          name="search"
+          autocomplete="off">
+        <button id="search-clear-btn" type="button" class="ml-1 shrink-0 w-5 h-5 flex items-center justify-center rounded text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors" aria-label="Clear search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
-          <input id="searchInput"
-            class="bg-transparent border-transparent ml-2 focus-visible:ring-transparent border-none ring-transparent sm:text-sm placeholder:text-zinc-500 text-neutral-700 dark:text-neutral-300 focus-visible:outline-none"
-            placeholder="<%= req.translations.navSearch || 'Search' %>"
-            type="search"
-            role="combobox"
-            aria-autocomplete="list"
-            aria-expanded="false"
-            aria-controls="searchResults"
-            aria-activedescendant=""
-            aria-label="<%= req.translations.navSearch || 'Search' %>"
-            name="search"
-            autocomplete="off"
-            onfocus="showSearchResults()">
-          <div aria-hidden="true" class="ml-2 px-1 py-0.5 text-[10px] w-[55px] font-medium text-neutral-700 dark:text-neutral-400 bg-neutral-200 dark:bg-neutral-800 rounded-md border border-neutral-300 dark:border-neutral-700
-            bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.2)_50%,transparent_75%,transparent_100%)]
-            bg-[length:250%_250%,100%_100%] bg-[position:-100%_0,0_0] bg-no-repeat transition-ease-out
-            hover:bg-[position:200%_0,0_0] hover:duration-[2s]">
-            CTRL + K
-          </div>
-        </div>
-
-        <div id="searchResults" role="listbox" aria-label="Search results" class="absolute bg-neutral-50 dark:bg-neutral-900 w-[19.5rem] rounded-xl shadow-2xl shadow-neutral-200/80 dark:shadow-black/40 hidden mt-20 px-2 pb-2 border border-neutral-200 dark:border-neutral-700/60">
+        </button>
+        <div aria-hidden="true" class="ml-2 px-1 py-0.5 text-[10px] w-[55px] font-medium text-neutral-700 dark:text-neutral-400 bg-neutral-200 dark:bg-neutral-800 rounded-md border border-neutral-300 dark:border-neutral-700
+          bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.2)_50%,transparent_75%,transparent_100%)]
+          bg-[length:250%_250%,100%_100%] bg-[position:-100%_0,0_0] bg-no-repeat transition-ease-out
+          hover:bg-[position:200%_0,0_0] hover:duration-[2s] shrink-0">
+          CTRL + K
         </div>
       </div>
 
-      <script nonce="<%- nonce %>">
-        document.addEventListener('keydown', function(event) {
-          if (event.ctrlKey && event.key === 'k') {
-            event.preventDefault();
-            document.getElementById('searchInput').focus();
-          }
-        });
+      <div id="searchResults" role="listbox" aria-label="Search results" class="hidden bg-neutral-50 dark:bg-neutral-900 w-[380px] rounded-xl shadow-2xl shadow-neutral-200/80 dark:shadow-black/40 px-2 pb-2 border border-neutral-200 dark:border-neutral-700/60 max-h-[60vh] overflow-y-auto">
+      </div>
 
-        function showSearchResults() {
-          document.getElementById('searchResults').classList.remove('hidden');
-          document.getElementById('searchInput').setAttribute('aria-expanded', 'true');
+      <script nonce="<%- nonce %>">
+      (function () {
+        var container  = document.getElementById('search-container');
+        var input      = document.getElementById('searchInput');
+        var clearBtn   = document.getElementById('search-clear-btn');
+        var resultsEl  = document.getElementById('searchResults');
+        var activeIndex = -1;
+
+        function getNavItems() {
+          var items = [];
+          var links = document.querySelectorAll('#pc-sidebar .nav-link, #pc-sidebar a[href]');
+          links.forEach(function (link) {
+            var href = link.getAttribute('href');
+            if (!href || href === '#' || href === '/logout' || href === '/account') return;
+            var label = (link.textContent || '').trim();
+            var svg = link.querySelector('svg');
+            var iconHtml = svg ? svg.outerHTML : '';
+            var existing = items.find(function (i) { return i.path === href; });
+            if (!existing) items.push({ path: href, label: label, iconHtml: iconHtml });
+          });
+          return items;
         }
 
-        document.getElementById('searchInput').addEventListener('focus', showSearchResults);
+        function getRecentNav() {
+          try {
+            var raw = localStorage.getItem('airlink-recent-nav');
+            return raw ? JSON.parse(raw) : [];
+          } catch (e) { return []; }
+        }
 
-        document.addEventListener('click', function(event) {
-          var searchInput = document.getElementById('searchInput');
-          var searchResults = document.getElementById('searchResults');
-          if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
-            searchResults.classList.add('hidden');
-            searchInput.setAttribute('aria-expanded', 'false');
-            searchInput.setAttribute('aria-activedescendant', '');
+        function storeRecentNav(path) {
+          var recent = getRecentNav().filter(function (r) { return r.path !== path; });
+          var navItems = getNavItems();
+          var navItem = navItems.find(function (n) { return n.path === path; });
+          recent.unshift({
+            path: path,
+            label: navItem ? navItem.label : path,
+            iconHtml: navItem ? navItem.iconHtml : ''
+          });
+          if (recent.length > 3) recent = recent.slice(0, 3);
+          try { localStorage.setItem('airlink-recent-nav', JSON.stringify(recent)); } catch (e) {}
+        }
+
+        function renderDropdown() {
+          var term = input.value.trim().toLowerCase();
+          var recent = getRecentNav();
+          var navItems = getNavItems();
+          activeIndex = -1;
+
+          var filteredNav = navItems;
+          if (term) {
+            filteredNav = navItems.filter(function (item) {
+              return item.label.toLowerCase().includes(term) || item.path.toLowerCase().includes(term);
+            });
+          }
+
+          if (recent.length === 0 && filteredNav.length === 0) {
+            resultsEl.innerHTML = '<p class="px-4 py-3 text-sm text-neutral-400">No results.</p>';
+            return;
+          }
+
+          var html = '';
+
+          if (recent.length > 0) {
+            html += '<div class="px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Recent</div>';
+            recent.forEach(function (item, i) {
+              var icon = item.iconHtml || '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>';
+              html += '<a href="' + item.path + '" data-search-item class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 transition cursor-pointer" data-index="' + i + '">';
+              html += '<span class="w-5 h-5 flex items-center justify-center shrink-0 text-neutral-400 [&>svg]:w-5 [&>svg]:h-5">' + icon + '</span>';
+              html += '<span class="text-sm text-neutral-700 dark:text-neutral-200 truncate">' + item.label + '</span>';
+              html += '<span class="ml-auto text-xs text-neutral-400 dark:text-neutral-500 truncate shrink-0">' + item.path + '</span>';
+              html += '</a>';
+            });
+          }
+
+          if (filteredNav.length > 0) {
+            html += '<div class="px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">Navigation</div>';
+            filteredNav.forEach(function (item, i) {
+              var idx = recent.length + i;
+              html += '<a href="' + item.path + '" data-search-item class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 transition cursor-pointer" data-index="' + idx + '">';
+              html += '<span class="w-5 h-5 flex items-center justify-center shrink-0 text-neutral-400 [&>svg]:w-5 [&>svg]:h-5">' + (item.iconHtml || '') + '</span>';
+              html += '<span class="text-sm text-neutral-700 dark:text-neutral-200 truncate">' + item.label + '</span>';
+              html += '<span class="ml-auto text-xs text-neutral-400 dark:text-neutral-500 truncate shrink-0">' + item.path + '</span>';
+              html += '</a>';
+            });
+          }
+
+          resultsEl.innerHTML = html;
+        }
+
+        function positionDropdown() {
+          var rect = container.getBoundingClientRect();
+          resultsEl.style.top = (rect.bottom + 4) + 'px';
+          resultsEl.style.left = rect.left + 'px';
+        }
+
+        function openDropdown() {
+          container.classList.add('expanded');
+          renderDropdown();
+          positionDropdown();
+          resultsEl.classList.remove('hidden');
+          resultsEl.classList.add('anim-scale-in');
+          input.setAttribute('aria-expanded', 'true');
+        }
+
+        function closeDropdown() {
+          container.classList.remove('expanded');
+          resultsEl.classList.add('hidden');
+          resultsEl.classList.remove('anim-scale-in');
+          input.setAttribute('aria-expanded', 'false');
+          input.setAttribute('aria-activedescendant', '');
+          activeIndex = -1;
+        }
+
+        function updateActive() {
+          var items = resultsEl.querySelectorAll('[data-search-item]');
+          items.forEach(function (el, i) {
+            if (i === activeIndex) {
+              el.classList.add('bg-neutral-100', 'dark:bg-white/5');
+              el.setAttribute('aria-selected', 'true');
+              input.setAttribute('aria-activedescendant', 'search-item-' + i);
+              el.id = 'search-item-' + i;
+              el.scrollIntoView({ block: 'nearest' });
+            } else {
+              el.classList.remove('bg-neutral-100', 'dark:bg-white/5');
+              el.setAttribute('aria-selected', 'false');
+              el.id = '';
+            }
+          });
+        }
+
+        input.addEventListener('focus', function () {
+          openDropdown();
+        });
+
+        input.addEventListener('input', function () {
+          if (input.value.trim().length > 0) {
+            clearBtn.style.display = 'flex';
+          } else {
+            clearBtn.style.display = 'none';
+          }
+          renderDropdown();
+          positionDropdown();
+        });
+
+        clearBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          input.value = '';
+          clearBtn.style.display = 'none';
+          renderDropdown();
+          input.focus();
+        });
+
+        input.addEventListener('keydown', function (e) {
+          var items = resultsEl.querySelectorAll('[data-search-item]');
+          var count = items.length;
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeIndex = activeIndex < count - 1 ? activeIndex + 1 : 0;
+            updateActive();
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeIndex = activeIndex > 0 ? activeIndex - 1 : count - 1;
+            updateActive();
+          } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (activeIndex >= 0 && activeIndex < count) {
+              var link = items[activeIndex];
+              var path = link.getAttribute('href');
+              storeRecentNav(path);
+              window.location.href = path;
+            } else if (input.value.trim()) {
+              var firstLink = items[0];
+              if (firstLink) {
+                var fp = firstLink.getAttribute('href');
+                storeRecentNav(fp);
+                window.location.href = fp;
+              }
+            }
+          } else if (e.key === 'Escape') {
+            e.preventDefault();
+            closeDropdown();
+            input.blur();
           }
         });
+
+        resultsEl.addEventListener('click', function (e) {
+          var link = e.target.closest('[data-search-item]');
+          if (link) {
+            e.preventDefault();
+            var path = link.getAttribute('href');
+            storeRecentNav(path);
+            window.location.href = path;
+          }
+        });
+
+        document.addEventListener('keydown', function (e) {
+          if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            if (document.activeElement === input && container.classList.contains('expanded')) {
+              closeDropdown();
+              input.blur();
+            } else {
+              input.focus();
+            }
+          }
+        });
+
+        document.addEventListener('click', function (e) {
+          if (!container.contains(e.target) && !resultsEl.contains(e.target)) {
+            closeDropdown();
+          }
+        });
+
+        document.addEventListener('al:navigated', function () {
+          closeDropdown();
+        });
+
+        window.addEventListener('resize', function () {
+          if (container.classList.contains('expanded')) {
+            positionDropdown();
+          }
+        });
+      })();
       </script>
-      <script nonce="<%- nonce %>" src="/javascript/search.js"></script>
     </div>
   </div>
 </div>
@@ -682,3 +903,5 @@ function renderNavIcon(iconHtml) {
 })();
 </script>
 </div>
+
+<%# ~ https://github.com/thavanish edited this shitty code %>

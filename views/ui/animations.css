@@ -23,3 +23,21 @@
 .anim-bounce-in { animation: bounceIn 0.2s cubic-bezier(0.16,1,0.3,1) both }
 .anim-slide-right { animation: slideRight 0.28s cubic-bezier(0.16,1,0.3,1) both }
 .anim-fade-blur-in { animation: fadeBlurIn 0.25s cubic-bezier(0.16,1,0.3,1) both }
+
+/* Button press effect — apply active:scale-[0.97] via Tailwind or this class */
+button:active:not(:disabled),
+a:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Reduced motion — disable all non-essential animations */
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-up, .anim-fade-down, .anim-scale-in, .anim-slide-up,
+  .anim-fade-left, .anim-bounce-up, .anim-bounce-in, .anim-slide-right, .anim-fade-blur-in {
+    animation: none !important;
+  }
+  button:active:not(:disabled),
+  a:active:not(:disabled) {
+    transform: none;
+  }
+}
