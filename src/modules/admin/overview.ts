@@ -49,7 +49,7 @@ const adminModule: Module = {
             where: { id: 1 },
           });
 
-          res.render('admin/overview', {
+          res.render('admin/overview/overview', {
             errorMessage,
             user,
             userCount,

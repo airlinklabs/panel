@@ -50,18 +50,6 @@ export class UIBuilder {
     return { size: 'md', type: 'button', disabled: false, ...config };
   }
 
-  static table(config: TableConfig): TableConfig {
-    return config;
-  }
-
-  static badge(config: BadgeConfig): BadgeConfig {
-    return config;
-  }
-
-  static alert(config: AlertConfig): AlertConfig {
-    return config;
-  }
-
   static input(config: InputConfig): InputConfig {
     return { type: 'text', required: false, disabled: false, ...config };
   }

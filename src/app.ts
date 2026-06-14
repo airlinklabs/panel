@@ -366,18 +366,12 @@ app.use(handleCsrfError);
 // Add CSRF token to response locals for templates
 app.use(addCsrfTokenToLocals);
 
-interface SidebarItem {
-  id: string;
-  label: string;
-  link: string;
-}
-
 interface GlobalWithCustomProperties extends NodeJS.Global {
   uiComponentStore: typeof import('./handlers/uiComponentHandler').uiComponentStore;
   appName: string;
   airlinkVersion: string;
-  adminMenuItems: SidebarItem[];
-  regularMenuItems: SidebarItem[];
+  adminMenuItems: import('./handlers/uiComponentHandler').SidebarItem[];
+  regularMenuItems: import('./handlers/uiComponentHandler').SidebarItem[];
 }
 
 declare const global: GlobalWithCustomProperties;
@@ -398,9 +392,14 @@ app.use((req, res, next) => {
   const viewportCookie = (req as any).cookies?.viewport_mode;
   const isMobileViewport = viewportCookie === 'mobile';
   res.locals.isMobileViewport = isMobileViewport;
+  const viewport = isMobileViewport ? 'mobile' : 'desktop';
 
-  const renderWithViewport = res.render;
-  res.render = handleSPAPageRequest(renderWithViewport);
+  const originalRender = res.render;
+  res.render = function (view: string, options?: any, callback?: any) {
+    const prefixed = view.startsWith(viewport + '/') ? view : viewport + '/' + view;
+    return originalRender.call(this, prefixed, options, callback);
+  } as any;
+  res.render = handleSPAPageRequest(res.render);
 
   next();
 });

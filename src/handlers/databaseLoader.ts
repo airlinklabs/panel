@@ -28,7 +28,6 @@ export const databaseLoader = async () => {
     logger.info('Database connected');
     await prisma.$queryRaw`SELECT 1`;
     await assertDatabaseWritable();
-    return prisma;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error occurred';
     logger.error('databaseLoader', `Database connection error: ${message}`);

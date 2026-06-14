@@ -35,8 +35,6 @@ export const settingsLoader = async () => {
       });
       logger.info('Settings created');
     }
-
-    return prisma;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error occurred';
     logger.error('settingsLoader', `Database connection error: ${message}`);

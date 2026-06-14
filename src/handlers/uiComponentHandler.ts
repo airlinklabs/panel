@@ -276,7 +276,4 @@ export function initializeDefaultUIComponents(): void {
   });
 }
 
-export default {
-  uiComponentStore,
-  initializeDefaultUIComponents
-};
+

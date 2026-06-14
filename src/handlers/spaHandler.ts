@@ -13,8 +13,7 @@ interface SPAPageData {
 
 export class SPAHandler {
   private static instance: SPAHandler;
-  private pageCache = new Map<string, SPAPageData>();
-  private cacheEnabled = false; // disabled — data-keyed cache causes memory leak
+
 
   static getInstance(): SPAHandler {
     if (!SPAHandler.instance) {
@@ -24,27 +23,15 @@ export class SPAHandler {
   }
 
   async renderPageContent(viewPath: string, data: any): Promise<SPAPageData> {
-    const cacheKey = `${viewPath}_${JSON.stringify(data)}`;
-    
-    if (this.cacheEnabled && this.pageCache.has(cacheKey)) {
-      return this.pageCache.get(cacheKey)!;
-    }
-
     try {
       const content = await this.renderView(viewPath, data);
-      const pageData: SPAPageData = {
+      return {
         content,
         title: this.extractTitle(data),
         scripts: this.extractScripts(content),
         styles: this.extractStyles(content),
         meta: this.extractMeta(data)
       };
-
-      if (this.cacheEnabled) {
-        this.pageCache.set(cacheKey, pageData);
-      }
-
-      return pageData;
     } catch (error) {
       throw new Error(`Failed to render page content: ${error}`);
     }
@@ -125,13 +112,6 @@ export class SPAHandler {
     return meta;
   }
 
-  clearCache(): void {
-    this.pageCache.clear();
-  }
-
-  getCacheSize(): number {
-    return this.pageCache.size;
-  }
 }
 
 export function spaMiddleware(req: Request, res: Response, next: NextFunction) {

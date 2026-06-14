@@ -1,0 +1,307 @@
+<%- include('../../components/header', { title: 'Edit Image' }) %>
+
+<main id="page-content" class="">
+  <%- include('../../components/template') %>
+
+  <div class="px-4 pt-5 pb-8">
+
+    <!-- Page header -->
+    <div class="mb-5">
+      <a href="/admin/images" class="inline-flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 mb-3 hover:text-neutral-700 dark:hover:text-neutral-200 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+        </svg>
+        Back to Images
+      </a>
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <h1 class="text-base font-medium text-neutral-800 dark:text-white truncate">Edit Image: <%= image.name %></h1>
+          <p class="mt-0.5 text-xs text-neutral-500">Edit the image configuration or export it as JSON.</p>
+        </div>
+        <a href="/admin/images/export/<%= image.id %>"
+          class="shrink-0 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 border border-neutral-200 dark:border-white/5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700/80 transition">
+          Export JSON
+        </a>
+      </div>
+    </div>
+
+    <!-- Success banner -->
+    <% if (req.query.success) { %>
+      <div class="rounded-xl bg-green-500/10 border border-green-500/20 px-4 py-3 mb-5 flex items-center gap-3">
+        <svg class="h-4 w-4 text-green-400 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+        </svg>
+        <div>
+          <p class="text-sm font-medium text-green-400">Image updated successfully</p>
+          <p class="text-xs text-green-400/60 mt-0.5">Your changes have been saved.</p>
+        </div>
+      </div>
+    <% } %>
+
+    <div class="mb-4 flex gap-1 overflow-x-auto border-b border-neutral-200 dark:border-white/10">
+      <button type="button" data-mobile-tab="general" class="mobile-tab px-3 py-2 text-sm font-medium border-b-2">General</button>
+      <button type="button" data-mobile-tab="settings" class="mobile-tab px-3 py-2 text-sm font-medium border-b-2">Settings</button>
+      <button type="button" data-mobile-tab="raw" class="mobile-tab px-3 py-2 text-sm font-medium border-b-2">Raw JSON</button>
+    </div>
+
+    <div class="space-y-4">
+
+      <!-- Basic Information -->
+      <div id="mobileTabGeneral" class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+        <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-4">Basic Information</h2>
+        <div class="space-y-3">
+
+          <div class="flex flex-col gap-1">
+            <label for="name" class="text-sm font-medium text-neutral-700 dark:text-neutral-400">Name</label>
+            <input type="text" id="name" name="name" value="<%= image.name %>"
+              class="w-full rounded-xl border border-neutral-800/10 dark:border-white/5 bg-neutral-400/10 dark:bg-neutral-600/20 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-neutral-800/20 dark:focus:ring-white/10">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1">
+              <label for="author" class="text-sm font-medium text-neutral-700 dark:text-neutral-400">Author</label>
+              <input type="text" id="author" name="author" value="<%= image.author %>"
+                class="w-full rounded-xl border border-neutral-800/10 dark:border-white/5 bg-neutral-400/10 dark:bg-neutral-600/20 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-neutral-800/20 dark:focus:ring-white/10">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label for="authorName" class="text-sm font-medium text-neutral-700 dark:text-neutral-400">Author Name</label>
+              <input type="text" id="authorName" name="authorName" value="<%= image.authorName %>"
+                class="w-full rounded-xl border border-neutral-800/10 dark:border-white/5 bg-neutral-400/10 dark:bg-neutral-600/20 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-neutral-800/20 dark:focus:ring-white/10">
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label for="startup" class="text-sm font-medium text-neutral-700 dark:text-neutral-400">Startup Command</label>
+            <input type="text" id="startup" name="startup" value="<%= image.startup %>"
+              class="w-full rounded-xl border border-neutral-800/10 dark:border-white/5 bg-neutral-400/10 dark:bg-neutral-600/20 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-neutral-800/20 dark:focus:ring-white/10">
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label for="description" class="text-sm font-medium text-neutral-700 dark:text-neutral-400">Description</label>
+            <textarea id="description" name="description" rows="3"
+              class="w-full rounded-xl border border-neutral-800/10 dark:border-white/5 bg-neutral-400/10 dark:bg-neutral-600/20 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-neutral-800/20 dark:focus:ring-white/10 resize-none"><%= image.description %></textarea>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div id="mobileTabSettings" class="hidden rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <div>
+            <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Required Ports</h2>
+            <p class="text-xs text-neutral-500 mt-0.5">Users get these ports; admins can add more on servers.</p>
+          </div>
+          <button type="button" id="addPortRequirement"
+            class="shrink-0 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300">
+            Add
+          </button>
+        </div>
+        <div class="p-4">
+          <div id="portRequirementsList" class="space-y-3"></div>
+          <button id="saveSettingsButton" type="button"
+            class="mt-4 w-full rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-900 px-4 py-3 text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-100 transition">
+            Save Settings
+          </button>
+        </div>
+      </div>
+
+      <!-- JSON Editor -->
+      <div id="mobileTabRaw" class="hidden rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+        <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">JSON Configuration</h2>
+        <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-3">Edit the JSON directly. Keep the format valid.</p>
+        <div id="jsonEditor" class="w-full h-64 border border-neutral-200 dark:border-white/5 rounded-xl overflow-hidden"></div>
+        <button id="saveButton" type="button"
+          class="mt-4 w-full rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-900 px-4 py-3 text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-100 transition">
+          Save Changes
+        </button>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast') %>
+
+<script nonce="<%- nonce %>" src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+<script nonce="<%- nonce %>">
+  require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
+  require(['vs/editor/editor.main'], function() {
+    const tabPanels = {
+      general: document.getElementById('mobileTabGeneral'),
+      settings: document.getElementById('mobileTabSettings'),
+      raw: document.getElementById('mobileTabRaw'),
+    };
+
+    function activateMobileTab(name) {
+      Object.entries(tabPanels).forEach(([key, panel]) => {
+        panel.classList.toggle('hidden', key !== name);
+      });
+      document.querySelectorAll('.mobile-tab').forEach(button => {
+        const active = button.dataset.mobileTab === name;
+        button.classList.toggle('border-neutral-900', active);
+        button.classList.toggle('dark:border-white', active);
+        button.classList.toggle('text-neutral-900', active);
+        button.classList.toggle('dark:text-white', active);
+        button.classList.toggle('border-transparent', !active);
+        button.classList.toggle('text-neutral-500', !active);
+      });
+      if (name === 'raw') editor.layout();
+    }
+
+    const editor = monaco.editor.create(document.getElementById('jsonEditor'), {
+      value: `<%- imageJson.replace(/\n/g, '\\n').replace(/"/g, '\\"') %>`,
+      language: 'json',
+      theme: document.documentElement.classList.contains('dark') ? 'vs-dark' : 'vs',
+      automaticLayout: true,
+      minimap: { enabled: false },
+      scrollBeyondLastLine: false,
+      fontSize: 13,
+      tabSize: 2,
+      lineNumbers: 'off',
+      folding: false,
+    });
+    activateMobileTab('general');
+
+    function getPayload() {
+      return JSON.parse(editor.getValue());
+    }
+
+    function setPayload(payload) {
+      editor.setValue(JSON.stringify(payload, null, 2));
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function getPortRequirements() {
+      try {
+        const payload = getPayload();
+        return Array.isArray(payload.portRequirements) ? payload.portRequirements : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function renderPortRequirements() {
+      const list = document.getElementById('portRequirementsList');
+      const ports = getPortRequirements();
+      list.innerHTML = '';
+      if (!ports.length) {
+        list.innerHTML = '<p class="text-xs text-neutral-400">No required ports. Servers can be created without port bindings unless an admin adds ports.</p>';
+        return;
+      }
+      ports.forEach((port, index) => {
+        const row = document.createElement('div');
+        row.className = 'rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800/50 p-3 space-y-2';
+        row.innerHTML = `
+          <label class="block text-xs text-neutral-500">Port name<input data-port-req="${index}" data-field="name" value="${escapeHtml(port.name || '')}" class="mt-1 w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
+          <label class="block text-xs text-neutral-500">Internal port<input data-port-req="${index}" data-field="internalPort" type="number" min="1" max="65535" value="${escapeHtml(port.internalPort || '')}" class="mt-1 w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
+          <button type="button" data-port-req-remove="${index}" class="w-full rounded-xl border border-red-200 dark:border-red-900/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-red-500">Remove</button>`;
+        list.appendChild(row);
+      });
+
+      list.querySelectorAll('[data-port-req-remove]').forEach(button => {
+        button.addEventListener('click', () => {
+          const payload = getPayload();
+          payload.portRequirements = getPortRequirements();
+          payload.portRequirements.splice(Number(button.dataset.portReqRemove), 1);
+          setPayload(payload);
+          renderPortRequirements();
+        });
+      });
+    }
+
+    document.querySelectorAll('.mobile-tab').forEach(button => {
+      button.addEventListener('click', () => {
+        if (button.dataset.mobileTab === 'settings') renderPortRequirements();
+        activateMobileTab(button.dataset.mobileTab);
+      });
+    });
+
+    document.getElementById('addPortRequirement').addEventListener('click', () => {
+      const payload = getPayload();
+      const ports = getPortRequirements();
+      ports.push({ name: `Port ${ports.length + 1}`, internalPort: 25565 });
+      payload.portRequirements = ports;
+      setPayload(payload);
+      renderPortRequirements();
+    });
+
+    document.getElementById('saveSettingsButton').addEventListener('click', function() {
+      try {
+        const payload = getPayload();
+        const ports = getPortRequirements();
+        document.querySelectorAll('[data-port-req]').forEach(input => {
+          const index = Number(input.dataset.portReq);
+          const field = input.dataset.field;
+          ports[index][field] = field === 'internalPort' ? Number(input.value) : input.value;
+        });
+        payload.portRequirements = ports.filter(port => port.name && port.internalPort);
+
+        fetch('/admin/images/edit/<%= image.id %>', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(response => {
+          if (response.ok) {
+            setPayload(payload);
+            renderPortRequirements();
+            showToast('Settings saved', 'success');
+          } else {
+            return response.json().then(data => { throw new Error(data.error || 'Failed to update image'); });
+          }
+        })
+        .catch(error => { showToast(error.message || 'Failed to update image', 'error'); });
+      } catch (error) {
+        showToast('Invalid JSON: ' + error.message, 'error');
+      }
+    });
+
+    document.getElementById('saveButton').addEventListener('click', function() {
+      try {
+        const jsonValue = editor.getValue();
+        const parsed = JSON.parse(jsonValue);
+
+        document.getElementById('name').value = parsed.name || '';
+        document.getElementById('author').value = parsed.author || '';
+        document.getElementById('authorName').value = parsed.authorName || '';
+        document.getElementById('startup').value = parsed.startup || '';
+        document.getElementById('description').value = parsed.description || '';
+
+        fetch('/admin/images/edit/<%= image.id %>', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: jsonValue
+        })
+        .then(response => {
+          if (response.ok) {
+            window.location.href = '/admin/images/edit/<%= image.id %>?success=true';
+          } else {
+            return response.json().then(data => { throw new Error(data.error || 'Failed to update image'); });
+          }
+        })
+        .catch(error => { showToast(error.message || 'Failed to update image', 'error'); });
+      } catch (error) {
+        showToast('Invalid JSON: ' + error.message, 'error');
+      }
+    });
+
+    const formFields = ['name', 'author', 'authorName', 'startup', 'description'];
+    formFields.forEach(field => {
+      document.getElementById(field).addEventListener('change', function() {
+        try {
+          const parsed = JSON.parse(editor.getValue());
+          parsed[field] = this.value;
+          editor.setValue(JSON.stringify(parsed, null, 2));
+        } catch (error) {
+          showToast('Invalid JSON: ' + error.message, 'error');
+        }
+      });
+    });
+  });
+</script>
+
+<%- include('../../../shared/components/footer' ) %>

@@ -34,7 +34,7 @@ const analyticsModule: Module = {
             prisma.settings.findUnique({ where: { id: 1 } }),
           ]);
           if (!user) return res.redirect('/login');
-          res.render('admin/analytics', { user, req, settings, title: 'Analytics' });
+          res.render('admin/analytics/analytics', { user, req, settings, title: 'Analytics' });
         } catch (error) {
           logger.error('Error loading analytics page:', error);
           res.redirect('/admin/overview');
