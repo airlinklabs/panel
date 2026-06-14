@@ -300,7 +300,7 @@
               <% const inFolderL = folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID)); if (inFolderL) return; %>
               <tr data-href="../server/<%= server.UUID %>" role="link" tabindex="0" class="hover:bg-neutral-50 dark:hover:bg-white/5 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-neutral-500">
                 <td class="py-3.5 pl-6 pr-3">
-                  <p class="text-sm font-medium text-neutral-900 dark:text-white"><%= server.name %></p>
+                  <p class="text-sm font-medium text-neutral-900 dark:text-white truncate"><%= server.name %></p>
                   <% if (server.description) { %><p class="text-xs text-neutral-500 dark:text-neutral-400 truncate max-w-xs"><%= server.description %></p><% } %>
                 </td>
                 <td class="px-3 py-3.5">

@@ -20,5 +20,5 @@ interface ModuleInfo {
 
 export interface Module {
   info: ModuleInfo;
-  router: () => Router;
+  router: (applyWs?: (router: Router) => void) => Router;
 }

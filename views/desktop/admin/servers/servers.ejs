@@ -117,7 +117,7 @@
                     <% } %>
                   </span>
                   <div>
-                    <div class="font-medium text-neutral-800 dark:text-white"><%= server.name %></div>
+                    <div class="font-medium text-neutral-800 dark:text-white truncate max-w-[200px]"><%= server.name %></div>
                     <div class="text-xs text-neutral-400 dark:text-neutral-500 font-mono mt-0.5"><%= server.UUID %></div>
                   </div>
                 </div>
@@ -126,11 +126,11 @@
                 <a href="/admin/users/view/<%= server.owner.id %>" class="flex items-center gap-2 group" onclick="event.stopPropagation()">
                   <img class="h-6 w-6 rounded-md object-cover shrink-0"
                     src="<%= server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner.username) %>" alt="<%= server.owner.username %>'s avatar">
-                  <span class="font-medium text-neutral-800 dark:text-blue-400 group-hover:underline"><%= server.owner.username %></span>
+                  <span class="font-medium text-neutral-800 dark:text-blue-400 group-hover:underline truncate max-w-[120px]"><%= server.owner.username %></span>
                 </a>
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm">
-                <a href="/admin/node/<%= server.node.id %>/stats" class="font-medium text-neutral-800 dark:text-blue-400 hover:underline" onclick="event.stopPropagation()"><%= server.node.name %></a>
+                <a href="/admin/node/<%= server.node.id %>/stats" class="font-medium text-neutral-800 dark:text-blue-400 hover:underline truncate max-w-[120px]" onclick="event.stopPropagation()"><%= server.node.name %></a>
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400">
                 <%= server.node.address %>:<%= JSON.parse(server.Ports).filter(p => p.primary).map(p => p.externalPort || String(p.Port || '').split(':')[0]).pop() %>

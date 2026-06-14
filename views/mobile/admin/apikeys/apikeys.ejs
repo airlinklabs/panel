@@ -99,7 +99,7 @@
 
 <!-- Create Key Modal -->
 <div id="createApiKeyModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60" aria-hidden="true">
-  <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto translate-y-full transition-transform duration-300" role="dialog" aria-modal="true" aria-labelledby="createApiKeyTitle" aria-describedby="createApiKeyDescription" tabindex="-1">
+  <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="createApiKeyTitle" aria-describedby="createApiKeyDescription" tabindex="-1">
 
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60 sticky top-0 bg-white dark:bg-neutral-900 z-10">
       <div>
@@ -177,7 +177,7 @@
 
 <!-- Edit Key Modal -->
 <div id="editApiKeyModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60" aria-hidden="true">
-  <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto translate-y-full transition-transform duration-300" role="dialog" aria-modal="true" aria-labelledby="editApiKeyTitle" aria-describedby="editApiKeyDescription" tabindex="-1">
+  <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="editApiKeyTitle" aria-describedby="editApiKeyDescription" tabindex="-1">
 
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60 sticky top-0 bg-white dark:bg-neutral-900 z-10">
       <div>
@@ -280,27 +280,18 @@
     el.setAttribute('aria-hidden', 'false');
     el.classList.remove('hidden');
     el.classList.add('flex');
-    requestAnimationFrame(() => {
-      panel.classList.remove('translate-y-full');
-      panel.classList.add('translate-y-0');
-      const focusable = getFocusableElements(panel);
-      (focusable[0] || panel).focus();
-    });
+    const focusable = getFocusableElements(panel);
+    (focusable[0] || panel).focus();
   }
 
   function hideModal(id) {
     const el = document.getElementById(id);
-    const panel = el.querySelector('[role="dialog"]');
     el.setAttribute('aria-hidden', 'true');
-    panel.classList.remove('translate-y-0');
-    panel.classList.add('translate-y-full');
-    setTimeout(() => {
-      el.classList.add('hidden');
-      el.classList.remove('flex');
-      if (modalReturnFocus && typeof modalReturnFocus.focus === 'function') modalReturnFocus.focus();
-      modalReturnFocus = null;
-      activeModalId = null;
-    }, 300);
+    el.classList.add('hidden');
+    el.classList.remove('flex');
+    if (modalReturnFocus && typeof modalReturnFocus.focus === 'function') modalReturnFocus.focus();
+    modalReturnFocus = null;
+    activeModalId = null;
   }
 
   document.getElementById('createApiKeyBtn').addEventListener('click', () => showModal('createApiKeyModal'));
@@ -431,9 +422,9 @@
 <script nonce="<%- nonce %>">
   function showConfirmModal(title, message, onConfirm) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-end justify-center opacity-0 pointer-events-none transition-opacity duration-200';
+    modal.className = 'fixed inset-0 bg-black/60 z-50 flex items-end justify-center';
     modal.innerHTML = `
-      <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 rounded-t-2xl p-5 w-full translate-y-full transition-transform duration-200 shadow-2xl">
+      <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl p-5 w-full shadow-2xl">
         <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">${title}</h2>
         <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-5">${message}</p>
         <div class="flex gap-2">
@@ -442,12 +433,7 @@
         </div>
       </div>`;
     document.body.appendChild(modal);
-    requestAnimationFrame(() => {
-      modal.classList.remove('opacity-0', 'pointer-events-none');
-      modal.querySelector('div').classList.remove('translate-y-full');
-      modal.querySelector('div').classList.add('translate-y-0');
-    });
-    const close = () => { modal.classList.add('opacity-0'); setTimeout(() => document.body.removeChild(modal), 200); };
+    const close = () => { document.body.removeChild(modal); };
     modal.querySelector('#modalCancel').addEventListener('click', close);
     modal.querySelector('#modalConfirm').addEventListener('click', () => { close(); onConfirm(); });
   }

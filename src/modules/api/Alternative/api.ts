@@ -5,7 +5,7 @@ import logger from '../../../handlers/logger';
 import axios from 'axios';
 import { queueer } from '../../../handlers/queueer';
 import bcrypt from 'bcryptjs';
-import { getParamAsNumber } from "../../../utils/typeHelpers";
+import { getParamAsNumber } from '../../../utils/typeHelpers';
 import { daemonSchemeSync } from '../../../handlers/utils/core/daemonRequest';
 
 

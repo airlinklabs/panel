@@ -1122,14 +1122,29 @@
   .max-w-\[110px\] {
     max-width: 110px;
   }
+  .max-w-\[120px\] {
+    max-width: 120px;
+  }
   .max-w-\[140px\] {
     max-width: 140px;
   }
   .max-w-\[150px\] {
     max-width: 150px;
   }
+  .max-w-\[200px\] {
+    max-width: 200px;
+  }
+  .max-w-\[250px\] {
+    max-width: 250px;
+  }
   .max-w-\[260px\] {
     max-width: 260px;
+  }
+  .max-w-\[300px\] {
+    max-width: 300px;
+  }
+  .max-w-\[400px\] {
+    max-width: 400px;
   }
   .max-w-full {
     max-width: 100%;
@@ -1249,6 +1264,9 @@
   }
   .transform {
     transform: var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,);
+  }
+  .animate-\[fadeSlideIn_0\.2s_ease-out\] {
+    animation: fadeSlideIn 0.2s ease-out;
   }
   .animate-ping {
     animation: var(--animate-ping);

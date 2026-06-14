@@ -4,7 +4,7 @@ import { exec } from 'child_process';
 import { Express, Router } from 'express';
 import { uiComponentStore, SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from './uiComponentHandler';
 import prisma from '../db';
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '../generated/prisma/client';
 import logger from './logger';
 
 

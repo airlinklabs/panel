@@ -4,7 +4,7 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
-import { registerPermission } from '../../handlers/permisions';
+import { registerPermission } from '../../handlers/permissions';
 import { collectPlayerStats } from '../../handlers/playerStatsCollector';
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
@@ -81,7 +81,7 @@ const adminModule: Module = {
           const playerData = await Promise.all(
             servers.map(async (server) => {
               try {
-                      const ports = JSON.parse(server.Ports || '[]');
+                const ports = JSON.parse(server.Ports || '[]');
                 const primaryPort = ports.find((p: any) => p.primary)?.Port;
 
                 if (!primaryPort) {
@@ -95,7 +95,7 @@ const adminModule: Module = {
                   };
                 }
 
-                      const response = await axios({
+                const response = await axios({
                   method: 'GET',
                   url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/minecraft/players`,
                   params: {

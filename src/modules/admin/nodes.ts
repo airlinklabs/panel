@@ -5,7 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
 import logger from '../../handlers/logger';
 import axios from 'axios';
-import { getParamAsNumber } from "../../utils/typeHelpers";
+import { getParamAsNumber } from '../../utils/typeHelpers';
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 

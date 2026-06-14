@@ -18,7 +18,9 @@
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">General</h2>
             <div class="grid grid-cols-1 gap-4 mb-6">
               <div>
-                <label for="serverName" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.name %>:</label>
+                <label for="serverName" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+                  <%= req.translations.name %>:</label>
                 <div class="flex items-center space-x-2">
                     <input id="serverName" name="name" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server">
                     <div class="flex-shrink-0 p-2 mb-1 -ml-5" onclick="generateRandomName()">
@@ -30,12 +32,16 @@
             </div>
 
               <div>
-                <label for="serverDescription" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.description %>:</label>
+                <label for="serverDescription" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                  <%= req.translations.description %>:</label>
                 <input id="serverDescription" name="description" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server description">
               </div>
 
               <div>
-                <label for="serverUser" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.user %>:</label>
+                <label for="serverUser" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <%= req.translations.user %>:</label>
                 <select id="serverUser" name="ownerId" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
                   <% users.forEach(user => { %>
                     <option value="<%= user.id %>"><%= user.username %></option>
@@ -44,7 +50,8 @@
               </div>
 
               <div>
-                <label for="serverNode" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                <label for="serverNode" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><path d="M6 18h.01"/><path d="M10 18h.01"/></svg>
                   <%= req.translations.Node %>:
                 </label>
                 <div class="relative mt-2 mb-4">
@@ -66,7 +73,10 @@
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Resources</h2>
             <div class="grid grid-cols-1 gap-4 mb-6">
               <div>
-                <label class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">CPU:</label>
+                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+                  CPU:
+                </label>
                 <input type="hidden" id="serverCPU" name="Cpu" value="100">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverCPUDisplay" type="number" min="0.5" step="0.5" value="1" class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-r-0 border-neutral-800/10 dark:border-white/5">
@@ -79,7 +89,10 @@
               </div>
 
               <div>
-                <label class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Memory:</label>
+                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 19v-3"/><path d="M10 19v-3"/><path d="M14 19v-3"/><path d="M18 19v-3"/><path d="M8 11V9"/><path d="M16 11V9"/><path d="M12 11V9"/><path d="M2 15h20"/><path d="M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1.1a2 2 0 0 0 0 3.837V15H2v-3.063a2 2 0 0 0 0-3.837Z"/></svg>
+                  Memory:
+                </label>
                 <input type="hidden" id="serverMemory" name="Memory" value="1024">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverMemoryDisplay" type="number" min="1" value="1"
@@ -93,7 +106,10 @@
               </div>
 
               <div>
-                <label class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">Storage:</label>
+                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+                  Storage:
+                </label>
                 <input type="hidden" id="serverStorage" name="Storage" value="20480">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverStorageDisplay" type="number" min="1" value="20"
@@ -111,7 +127,9 @@
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Startup</h2>
             <div class="grid grid-cols-1 gap-4 mb-6">
               <div>
-                <label for="serverImage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.Image %>:</label>
+                <label for="serverImage" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                  <%= req.translations.Image %>:</label>
                 <select id="serverImage" name="imageId"
                         class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
                   <% images.forEach(image => { %>
@@ -123,7 +141,9 @@
               </div>
 
               <div>
-                <label for="dockerImage" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.DockerImage %>:</label>
+                <label for="dockerImage" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+                  <%= req.translations.DockerImage %>:</label>
                 <select id="dockerImage" name="dockerImage"
                         class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
                   <option value="" disabled selected>Select a Docker image</option>
@@ -131,11 +151,14 @@
               </div>
 
               <div>
-                <label class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.Ports %>:</label>
+                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8z"/></svg>
+                  <%= req.translations.Ports %>:</label>
                 <input type="hidden" id="serverPorts" name="Ports">
-                <button type="button" id="assignPortsBtn" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-neutral-800/10 dark:border-white/5 text-left">
-                  Assign ports
-                </button>
+          <button type="button" id="assignPortsBtn" class="mt-2 mb-4 w-full inline-flex items-center gap-2 rounded-xl bg-neutral-100 dark:bg-neutral-700/30 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white px-4 py-2.5 text-sm font-medium border border-neutral-200 dark:border-white/5 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8z"/></svg>
+            Assign ports
+          </button>
               </div>
 
               <div class="bg-neutral-100 dark:bg-neutral-800/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
@@ -182,18 +205,20 @@
   </div>
 </main>
 
-<div id="portsModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/50 px-3 pb-3 pt-16">
-  <div class="w-full max-h-[88vh] overflow-hidden rounded-2xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-900 shadow-xl">
-    <div class="flex items-center justify-between border-b border-neutral-200 dark:border-white/10 px-4 py-3">
+<div id="portsModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60 px-3 pb-3 pt-16">
+  <div class="w-full max-h-[88vh] overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-700/60 bg-white dark:bg-neutral-900 shadow-xl">
+    <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700/60 px-4 py-3">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
-      <button type="button" id="closePortsModal" class="text-xs text-neutral-500 hover:text-neutral-800 dark:hover:text-white">Close</button>
+      <button type="button" id="closePortsModal" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
     </div>
     <div class="max-h-[64vh] overflow-y-auto p-4">
       <div id="portsRows" class="space-y-3"></div>
-      <button type="button" id="addPortRow" class="mt-4 w-full rounded-xl border border-neutral-200 dark:border-white/10 px-3 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5">Add port</button>
+      <button type="button" id="addPortRow" class="mt-4 w-full rounded-xl border border-neutral-200 dark:border-white/10 px-3 py-2.5 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition">Add port</button>
     </div>
-    <div class="border-t border-neutral-200 dark:border-white/10 px-4 py-3">
-      <button type="button" id="savePortsModal" class="w-full rounded-xl bg-neutral-950 dark:bg-white px-4 py-3 text-sm font-medium text-white dark:text-neutral-900">Save ports</button>
+    <div class="border-t border-neutral-200 dark:border-neutral-700/60 px-4 py-3">
+      <button type="button" id="savePortsModal" class="w-full rounded-xl bg-neutral-950 dark:bg-white px-4 py-3 text-sm font-medium text-white dark:text-neutral-900 transition hover:bg-neutral-800 dark:hover:bg-neutral-100">Save ports</button>
     </div>
   </div>
 </div>
@@ -322,7 +347,7 @@
       const min = getPortRequirements().length;
       assignedPorts.forEach((port, index) => {
         const row = document.createElement('div');
-        row.className = 'rounded-xl border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-neutral-800/40 p-3 space-y-2';
+        row.className = 'rounded-xl border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-neutral-800/40 p-3 space-y-2 animate-[fadeSlideIn_0.2s_ease-out]';
         row.innerHTML = `
           <label class="block text-xs text-neutral-500">Port name<input data-port-field="${index}" data-field="name" value="${escapeHtml(port.name || '')}" class="mt-1 w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
           <label class="block text-xs text-neutral-500">Internal port<input data-port-field="${index}" data-field="internalPort" type="number" min="1" max="65535" value="${escapeHtml(port.internalPort || '')}" class="mt-1 w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
@@ -580,3 +605,30 @@ const listB = [
       document.getElementById("serverName").value = randomName;
   }
   </script>
+
+<script nonce="<%- nonce %>">
+(function () {
+  const display   = document.getElementById('serverCPUDisplay');
+  const hidden    = document.getElementById('serverCPU');
+  const unit      = document.getElementById('serverCPUUnit');
+
+  function syncHidden() {
+    const val = parseFloat(display.value) || 0;
+    hidden.value = unit.value === 'cores'
+      ? String(Math.round(val * 100))
+      : String(Math.round(val));
+  }
+
+  unit.addEventListener('change', syncHidden);
+  display.addEventListener('input', syncHidden);
+
+  syncHidden();
+})();
+</script>
+
+<style>
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>

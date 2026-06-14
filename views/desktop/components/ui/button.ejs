@@ -1,0 +1,10 @@
+<%
+  const v = variants[variant] || variants.primary;
+  const disabledAttr = disabled ? 'disabled' : '';
+  const extra = extraClass || '';
+  const btnType = type || 'button';
+-%>
+<button type="<%= btnType %>" <% if (typeof id !== 'undefined') { %>id="<%= id %>"<% } %> <%= disabledAttr %>
+  class="<%= v %> <%= disabled ? 'opacity-50 cursor-not-allowed' : '' %> <%= extra %>">
+  <% if (typeof label !== 'undefined') { %><%= label %><% } %>
+</button>

@@ -8,7 +8,7 @@
 </button>
 
 
-<div id="sftpModal" class="fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200">
+<div id="sftpModal" class="fixed inset-0 z-50 hidden items-center justify-center">
 
   
   <div onclick="closeSftpModal()" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
@@ -136,19 +136,15 @@
 
   window.openSftpModal = function () {
     var modal = document.getElementById('sftpModal');
-    var panel = modal.querySelector('.relative');
-    modal.classList.remove('opacity-0', 'pointer-events-none');
-    panel.classList.remove('scale-95');
-    panel.classList.add('scale-100');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
     loadSftpCredentials();
   };
 
   window.closeSftpModal = function () {
     var modal = document.getElementById('sftpModal');
-    var panel = modal.querySelector('.relative');
-    modal.classList.add('opacity-0', 'pointer-events-none');
-    panel.classList.remove('scale-100');
-    panel.classList.add('scale-95');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
   };
 
   function showSftpState(state) {

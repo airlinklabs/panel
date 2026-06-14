@@ -8,7 +8,7 @@
  */
 
 import express, { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from "@prisma/client";
+import prisma from './db';
 import path from 'path';
 import session from 'express-session';
 import { loadEnv } from './handlers/envLoader';
@@ -42,7 +42,6 @@ import csrfProtection, {
 import {
   spaMiddleware,
   handleSPAPageRequest,
-  setupSPARoutes,
 } from './handlers/spaHandler';
 import {
   errorPageHandler,
@@ -50,8 +49,6 @@ import {
   renderErrorPage,
 } from './handlers/errorPages';
 
-
-const prisma = new PrismaClient();
 
 loadEnv();
 
@@ -78,7 +75,7 @@ const airlinkVersion = config.meta.version;
 })();
 
 // Load websocket
-expressWs(app);
+const expressWsInstance = expressWs(app);
 
 // Load static files
 app.use(express.static(path.join(__dirname, '../public')));
@@ -100,9 +97,9 @@ app.set('view engine', 'ejs');
 
 import ejs from 'ejs';
 
-const originalRenderFile = (ejs as any).__express
-  ? (ejs as any).__express.bind(ejs)
-  : (ejs as any).renderFile.bind(ejs);
+const originalRenderFile = (ejs as any).renderFile
+  ? (ejs as any).renderFile.bind(ejs)
+  : (ejs as any).__express?.bind(ejs);
 
 const addonViewsDir = path.join(__dirname, '../../storage/addons');
 
@@ -168,7 +165,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 app.use((req: Request, res: Response, next: NextFunction) => {
   const nonce = crypto.randomBytes(16).toString('base64');
   res.locals.nonce = nonce;
-  (req as any).nonce = nonce;
+  req.nonce = nonce;
   next();
 });
 
@@ -225,71 +222,71 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
     contentSecurityPolicy: isProduction
       ? {
-          directives: {
-            // Fallback for any directive not listed explicitly.
-            defaultSrc: ["'self'"],
+        directives: {
+          // Fallback for any directive not listed explicitly.
+          defaultSrc: ['\'self\''],
 
-            // Scripts:
-            //   'nonce-{nonce}' — allows only <script nonce="…"> blocks that
-            //                     carry the per-request nonce. Blocks all other
-            //                     inline scripts and eval().
-            //   'strict-dynamic' — lets nonce-carrying scripts load further
-            //                     scripts dynamically (needed by Monaco loader).
-            //                     When strict-dynamic is present, host allowlists
-            //                     are ignored by supporting browsers, so the CDN
-            //                     list here is a fallback for older browsers only.
-            scriptSrc: [
-              "'self'",
-              `'nonce-${nonce}'`,
-              "'strict-dynamic'",
-              ...cdnScripts,
-            ],
+          // Scripts:
+          //   'nonce-{nonce}' — allows only <script nonce="…"> blocks that
+          //                     carry the per-request nonce. Blocks all other
+          //                     inline scripts and eval().
+          //   'strict-dynamic' — lets nonce-carrying scripts load further
+          //                     scripts dynamically (needed by Monaco loader).
+          //                     When strict-dynamic is present, host allowlists
+          //                     are ignored by supporting browsers, so the CDN
+          //                     list here is a fallback for older browsers only.
+          scriptSrc: [
+            '\'self\'',
+            `'nonce-${nonce}'`,
+            '\'strict-dynamic\'',
+            ...cdnScripts,
+          ],
 
-            // Inline event handlers (onclick, onchange, etc.) cannot carry nonces.
-            // 'unsafe-inline' here is scoped only to attributes, not to <script>
-            // blocks (which are governed by scriptSrc above).
-            // This is the minimum needed to avoid rewriting 126+ EJS event handlers.
-            scriptSrcAttr: ["'unsafe-inline'"],
+          // Inline event handlers (onclick, onchange, etc.) cannot carry nonces.
+          // 'unsafe-inline' here is scoped only to attributes, not to <script>
+          // blocks (which are governed by scriptSrc above).
+          // This is the minimum needed to avoid rewriting 126+ EJS event handlers.
+          scriptSrcAttr: ['\'unsafe-inline\''],
 
-            // Styles — allow inline (Tailwind utility classes are inline by nature)
-            // plus the exact external stylesheet CDNs used.
-            styleSrc: ["'self'", "'unsafe-inline'", ...cdnStyles, ...cdnFonts],
+          // Styles — allow inline (Tailwind utility classes are inline by nature)
+          // plus the exact external stylesheet CDNs used.
+          styleSrc: ['\'self\'', '\'unsafe-inline\'', ...cdnStyles, ...cdnFonts],
 
-            // Fonts — exact CDN origins only, plus data URIs for embedded icons.
-            fontSrc: ["'self'", 'data:', ...cdnFonts],
+          // Fonts — exact CDN origins only, plus data URIs for embedded icons.
+          fontSrc: ['\'self\'', 'data:', ...cdnFonts],
 
-            // Images — self + data URIs (avatars/favicons) + https for remote images.
-            // http: is intentionally excluded; image URLs served by the daemon
-            // should be proxied through the panel rather than loaded directly.
-            imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+          // Images — self + data URIs (avatars/favicons) + https for remote images.
+          // http: is intentionally excluded; image URLs served by the daemon
+          // should be proxied through the panel rather than loaded directly.
+          imgSrc: ['\'self\'', 'data:', 'blob:', 'https:'],
 
-            // WebSocket connections for the server console + same-origin API calls.
-            connectSrc: [
-              "'self'",
-              ...(isHttps ? ['wss:'] : ['ws:', 'wss:']),
-            ],
+          // WebSocket connections for the server console + same-origin API calls.
+          connectSrc: [
+            '\'self\'',
+            ...(isHttps ? ['wss:'] : ['ws:', 'wss:']),
+          ],
 
-            // Prevent the panel from being embedded in any frame anywhere.
-            // Supersedes X-Frame-Options for modern browsers.
-            frameAncestors: ["'none'"],
+          // Prevent the panel from being embedded in any frame anywhere.
+          // Supersedes X-Frame-Options for modern browsers.
+          frameAncestors: ['\'none\''],
 
-            // Prevent any plugins (Flash, PDF, etc.) from being embedded.
-            objectSrc: ["'none'"],
+          // Prevent any plugins (Flash, PDF, etc.) from being embedded.
+          objectSrc: ['\'none\''],
 
-            // Lock down <base> tags — prevents base-tag hijacking attacks.
-            baseUri: ["'self'"],
+          // Lock down <base> tags — prevents base-tag hijacking attacks.
+          baseUri: ['\'self\''],
 
-            // All form submissions must go to same origin.
-            formAction: ["'self'"],
+          // All form submissions must go to same origin.
+          formAction: ['\'self\''],
 
-            // Only upgrade to HTTPS when we are actually serving HTTPS.
-            // Without this guard, helmet's default adds upgrade-insecure-requests
-            // which rewrites every asset URL to https://, breaking HTTP installs.
-            ...(isHttps
-              ? { upgradeInsecureRequests: [] }
-              : { upgradeInsecureRequests: null }),
-          },
-        }
+          // Only upgrade to HTTPS when we are actually serving HTTPS.
+          // Without this guard, helmet's default adds upgrade-insecure-requests
+          // which rewrites every asset URL to https://, breaking HTTP installs.
+          ...(isHttps
+            ? { upgradeInsecureRequests: [] }
+            : { upgradeInsecureRequests: null }),
+        },
+      }
       : false,
   })(req, res, next);
 });
@@ -373,24 +370,24 @@ app.use(
 
 app.use(
   express.json({
-    limit: '100mb',
+    limit: '512kb',
   }),
 );
 app.use(
   express.urlencoded({
-    extended: true,
-    limit: '100mb',
-    parameterLimit: 100000,
+    extended: false,
+    limit: '512kb',
+    parameterLimit: 1000,
   }),
 );
 app.use(
   express.raw({
-    limit: '100mb',
+    limit: '1mb',
   }),
 );
 app.use(
   express.text({
-    limit: '100mb',
+    limit: '512kb',
   }),
 );
 
@@ -412,11 +409,16 @@ app.use((req, res, next) => {
   csrfProtection(req, res, next);
 });
 
+// Add CSRF token to view locals
+app.use((req, res, next) => {
+  if (req.path.startsWith('/ws') || req.path.startsWith('/api/')) {
+    return next();
+  }
+  addCsrfTokenToLocals(req, res, next);
+});
+
 // Handle CSRF errors
 app.use(handleCsrfError);
-
-// Add CSRF token to response locals for templates
-app.use(addCsrfTokenToLocals);
 
 interface SidebarItem {
   id: string;
@@ -452,19 +454,25 @@ app.use((_req, res, next) => {
   res.locals.isMobileViewport = isMobileViewport;
 
   const originalRenderBase = res.render.bind(res);
-  res.render = function (view: string, options?: any, callback?: any) {
+  res.render = function (view: string, options?: Record<string, unknown> | ((err: Error | null, html?: string) => void), callback?: (err: Error | null, html?: string) => void) {
     const isAbsolutePath = path.isAbsolute(view);
     const isAddonView = view.includes('/storage/addons/') || view.includes('\\storage\\addons\\');
 
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+    const opts = options || {};
+
     if (isAbsolutePath || isAddonView) {
-      const data = { ...res.locals, ...(typeof options === 'object' ? options : {}) };
-      (ejs as any).renderFile(view, data, {}, (err: any, html: string) => {
+      const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
+      (ejs as any).renderFile(view, data, {}, (err: Error | null, html: string) => {
         if (err) {
           if (typeof callback === 'function') return callback(err);
-          return (res as any).status(500).send('View render error: ' + err.message);
+          return res.status(500).send('View render error: ' + err.message);
         }
         if (typeof callback === 'function') return callback(null, html);
-        (res as any).send(html);
+        res.send(html);
       });
       return;
     }
@@ -483,21 +491,21 @@ app.use((_req, res, next) => {
         const addonFallbackPath = path.join(addonViewsDir, addonDir, 'views', view + '.ejs');
         const addonViewPath = fs.existsSync(addonViewportPath) ? addonViewportPath : addonFallbackPath;
         if (fs.existsSync(addonViewPath)) {
-          const data = { ...res.locals, ...(typeof options === 'object' ? options : {}) };
-          (ejs as any).renderFile(addonViewPath, data, {}, (err: any, html: string) => {
+          const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
+          (ejs as any).renderFile(addonViewPath, data, {}, (err: Error | null, html: string) => {
             if (err) {
               if (typeof callback === 'function') return callback(err);
-              return (res as any).status(500).send('View render error: ' + err.message);
+              return res.status(500).send('View render error: ' + err.message);
             }
             if (typeof callback === 'function') return callback(null, html);
-            (res as any).send(html);
+            res.send(html);
           });
           return;
         }
       }
     }
 
-    return originalRenderBase(prefixedView, options, callback);
+    return originalRenderBase(prefixedView, opts, callback);
   };
 
   const renderWithViewport = res.render;
@@ -518,11 +526,8 @@ app.use(errorPageHandler);
     installDaemonRequestInterceptor();
     // Initialize default UI components
     initializeDefaultUIComponents();
-    await loadModules(app, airlinkVersion, Number(port));
+    await loadModules(app, airlinkVersion, Number(port), expressWsInstance);
     await loadAddons(app);
-
-    // Setup SPA routes
-    setupSPARoutes(app);
 
     app.use(notFoundHandler);
     app.use(errorPageHandler);

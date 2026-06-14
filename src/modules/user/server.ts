@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import type { Prisma, Users, settings as PanelSettings } from '@prisma/client';
+import type { Prisma, Users, settings as PanelSettings } from '../../generated/prisma/client';
 import { Module } from '../../handlers/moduleInit';
 import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
@@ -460,7 +460,7 @@ const dashboardModule: Module = {
           }
 
           if (powerAction === 'stop') {
-              try {
+            try {
               // Create a custom status object with stopping=true
               const stoppingStatus = {
                 online: true,
@@ -470,12 +470,12 @@ const dashboardModule: Module = {
                 startedAt: null,
               };
 
-                  const cacheKey = `server_stopping_${serverId}`;
+              const cacheKey = `server_stopping_${serverId}`;
 
-                      global.serverStoppingStates = global.serverStoppingStates || {};
+              global.serverStoppingStates = global.serverStoppingStates || {};
               global.serverStoppingStates[cacheKey] = true;
 
-                  setTimeout(() => {
+              setTimeout(() => {
                 if (
                   global.serverStoppingStates &&
                   global.serverStoppingStates[cacheKey]
@@ -487,13 +487,13 @@ const dashboardModule: Module = {
                 }
               }, 120000); // 2 minutes
 
-                  res.status(200).json({
+              res.status(200).json({
                 success: true,
                 message: 'Server is stopping...',
                 status: stoppingStatus,
               });
 
-                  const requestData = {
+              const requestData = {
                 method: 'POST',
                 url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
                 auth: {
@@ -521,7 +521,7 @@ const dashboardModule: Module = {
                   'Container already stopped or not found: ' + serverId,
                 );
 
-                      const cacheKey = `server_stopping_${serverId}`;
+                const cacheKey = `server_stopping_${serverId}`;
                 if (
                   global.serverStoppingStates &&
                   global.serverStoppingStates[cacheKey]
@@ -734,12 +734,12 @@ const dashboardModule: Module = {
      * File system : Get file content
      */
     router.get(
-      '/server/:id/files/edit/:path(*)',
+      '/server/:id/files/edit/{*path}',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
-        const filePath = req.params?.path;
+        const filePath = Array.isArray(req.params?.path) ? req.params.path.join('/') : getParamAsString(req.params?.path);
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         try {
           const user = await prisma.users.findUnique({ where: { id: userId } });
@@ -843,11 +843,11 @@ const dashboardModule: Module = {
      * File system : Save
      */
     router.post(
-      '/server/:id/files/:path(*)',
+      '/server/:id/files/{*path}',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
-        let filePath = req.params?.path;
-        if (getParamAsString(filePath).endsWith('/save')) {
+        let filePath = Array.isArray(req.params?.path) ? req.params.path.join('/') : getParamAsString(req.params?.path);
+        if (filePath.endsWith('/save')) {
           filePath = filePath.slice(0, -5);
         }
         const { content } = req.body;
@@ -885,11 +885,11 @@ const dashboardModule: Module = {
      * Used by both the files page and the worlds page
      */
     router.delete(
-      '/server/:id/files/rm/:path(*)',
+      '/server/:id/files/rm/{*path}',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
         const serverId = req.params?.id;
-        const filePath = req.params?.path;
+        const filePath = Array.isArray(req.params?.path) ? req.params.path.join('/') : getParamAsString(req.params?.path);
 
         logger.info(
           `Deleting file/directory: ${filePath} from server ${serverId}`,
@@ -957,10 +957,10 @@ const dashboardModule: Module = {
     );
 
     router.get(
-      '/server/:id/files/download/:path(*)',
+      '/server/:id/files/download/{*path}',
       isAuthenticatedForServer('id'),
       async (req: Request, res: Response) => {
-        const filePath = req.params?.path;
+        const filePath = Array.isArray(req.params?.path) ? req.params.path.join('/') : getParamAsString(req.params?.path);
 
         try {
           const context = await loadAuthenticatedServerContext(req);
@@ -1175,9 +1175,9 @@ const dashboardModule: Module = {
 
           const primaryPort = server.Ports
             ? JSON.parse(server.Ports)
-                .filter((Port: any) => Port.primary)
-                .map((Port: any) => Port.Port.split(':')[1])
-                .pop()
+              .filter((Port: any) => Port.primary)
+              .map((Port: any) => Port.Port.split(':')[1])
+              .pop()
             : '';
 
           const features = getImageFeatures(server.image);
@@ -1252,7 +1252,7 @@ const dashboardModule: Module = {
               hadFetchError = true;
             }
           } catch (error) {
-              if (axios.isAxiosError(error)) {
+            if (axios.isAxiosError(error)) {
               if (
                 error.code !== 'ECONNREFUSED' &&
                 error.code !== 'ETIMEDOUT' &&
@@ -1279,9 +1279,9 @@ const dashboardModule: Module = {
           return res.render('user/server/players', {
             errorMessage: hasError
               ? {
-                  message:
+                message:
                     'Unable to fetch players. The server may be offline or not responding.',
-                }
+              }
               : {},
             serverIsOnline,
             user,
@@ -1339,7 +1339,7 @@ const dashboardModule: Module = {
             };
 
             const serverStatusInput = getServerStatusInput(server);
-              const response = await axios(worldsRequest);
+            const response = await axios(worldsRequest);
             const Folders = response.data;
 
             const worlds = [];
@@ -1354,7 +1354,7 @@ const dashboardModule: Module = {
 
             const features = getImageFeatures(server.image);
 
-              const serverStatus = await getServerStatus(serverStatusInput);
+            const serverStatus = await getServerStatus(serverStatusInput);
 
             return res.render('user/server/worlds', {
               errorMessage: {},
@@ -1368,7 +1368,7 @@ const dashboardModule: Module = {
               settings,
             });
           } catch (fileRequestError) {
-              if (axios.isAxiosError(fileRequestError)) {
+            if (axios.isAxiosError(fileRequestError)) {
               if (
                 fileRequestError.code !== 'ECONNREFUSED' &&
                 fileRequestError.code !== 'ETIMEDOUT' &&
@@ -2486,21 +2486,21 @@ const dashboardModule: Module = {
                     // Process the value based on its type
                     let processedValue: string | number | boolean;
                     switch (curr.type) {
-                      case 'boolean':
-                        processedValue =
+                    case 'boolean':
+                      processedValue =
                           curr.value === 1 ||
                           curr.value === '1' ||
                           curr.value === true
                             ? 'true'
                             : 'false';
-                        break;
-                      case 'number':
-                        processedValue = Number(curr.value);
-                        break;
-                      case 'text':
-                      default:
-                        processedValue = String(curr.value);
-                        break;
+                      break;
+                    case 'number':
+                      processedValue = Number(curr.value);
+                      break;
+                    case 'text':
+                    default:
+                      processedValue = String(curr.value);
+                      break;
                     }
                     acc[curr.env] = processedValue;
                     logger.info(
@@ -2577,7 +2577,7 @@ const dashboardModule: Module = {
                   );
                   if (error.response) {
                     logger.error(`Response status: ${error.response.status}`);
-                    logger.error(`Response data:`, error.response.data);
+                    logger.error('Response data:', error.response.data);
                   }
                   await prisma.server.update({
                     where: { UUID: getParamAsString(serverId) },

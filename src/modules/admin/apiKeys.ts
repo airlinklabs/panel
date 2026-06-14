@@ -3,8 +3,8 @@ import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
-import { registerPermission } from '../../handlers/permisions';
-import { getParamAsNumber } from "../../utils/typeHelpers";
+import { registerPermission } from '../../handlers/permissions';
+import { getParamAsNumber } from '../../utils/typeHelpers';
 import crypto from 'crypto';
 
 function sha256(value: string): string {

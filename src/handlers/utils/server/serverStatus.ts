@@ -61,7 +61,7 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
         errorStatus.error = 'Connection refused — daemon may be offline';
       } else if (error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
         errorStatus.error = 'Connection timed out';
-        } else if (error.code === 'ENOTFOUND') {
+      } else if (error.code === 'ENOTFOUND') {
         errorStatus.error = 'Host not found — check node address';
       } else if (error.response) {
         errorStatus.error = `Daemon responded with ${error.response.status}`;

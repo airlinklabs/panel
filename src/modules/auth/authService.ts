@@ -25,7 +25,8 @@ const authRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many attempts. Try again in a minute.' },
-  keyGenerator: (req) => req.ip || 'unknown',
+  keyGenerator: (req) => req.ip || req.socket?.remoteAddress || 'unknown',
+  validate: false,
 });
 
 async function getSecuritySettings() {

@@ -133,7 +133,10 @@
         </div>
         <div class="p-4 space-y-4">
           <div>
-            <label class="form-label">RAM — max <%= resourceLimits.maxMemory %> MB</label>
+            <label class="form-label flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 19v-3"/><path d="M10 19v-3"/><path d="M14 19v-3"/><path d="M18 19v-3"/><path d="M8 11V9"/><path d="M16 11V9"/><path d="M12 11V9"/><path d="M2 15h20"/><path d="M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1.1a2 2 0 0 0 0 3.837V15H2v-3.063a2 2 0 0 0 0-3.837Z"/></svg>
+              RAM — max <%= resourceLimits.maxMemory %> MB
+            </label>
             <div class="stepper">
               <button type="button" class="stepper-btn" data-action="dec" data-target="Memory" data-step="128" data-min="128">−</button>
               <input id="Memory" type="number" value="512" min="128" max="<%= resourceLimits.maxMemory %>" class="stepper-input">
@@ -141,7 +144,10 @@
             </div>
           </div>
           <div>
-            <label class="form-label">CPU — 50% = half a core, max <%= resourceLimits.maxCpu %>%</label>
+            <label class="form-label flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+              CPU — 50% = half a core, max <%= resourceLimits.maxCpu %>%
+            </label>
             <div class="stepper">
               <button type="button" class="stepper-btn" data-action="dec" data-target="Cpu" data-step="50" data-min="50">−</button>
               <input id="Cpu" type="number" value="100" min="50" max="<%= resourceLimits.maxCpu %>" class="stepper-input">
@@ -149,7 +155,10 @@
             </div>
           </div>
           <div>
-            <label class="form-label">Storage — max <%= resourceLimits.maxStorage %> GB</label>
+            <label class="form-label flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+              Storage — max <%= resourceLimits.maxStorage %> GB
+            </label>
             <div class="stepper">
               <button type="button" class="stepper-btn" data-action="dec" data-target="Storage" data-step="1" data-min="1">−</button>
               <input id="Storage" type="number" value="5" min="1" max="<%= resourceLimits.maxStorage %>" class="stepper-input">

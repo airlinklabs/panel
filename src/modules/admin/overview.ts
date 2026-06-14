@@ -4,7 +4,7 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { checkForUpdates, performUpdate } from '../../handlers/updater';
-import { registerPermission } from '../../handlers/permisions';
+import { registerPermission } from '../../handlers/permissions';
 
 
 registerPermission('airlink.admin.overview.main');
@@ -101,22 +101,6 @@ const adminModule: Module = {
       },
     );
 
-    router.get(
-      '/admin/menu',
-      isAuthenticated(true, 'airlink.admin.overview.main'),
-      async (req: Request, res: Response) => {
-        try {
-          const userId = req.session?.user?.id;
-          const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.redirect('/login');
-          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-          res.render('admin/menu/menu', { user, req, settings });
-        } catch (error) {
-          logger.error('Error rendering admin menu:', error);
-          res.redirect('/admin/overview');
-        }
-      },
-    );
 
     return router;
   },

@@ -18,8 +18,9 @@ const wsUsersModule: Module = {
     license: 'MIT',
   },
 
-  router: () => {
+  router: (applyWs?: (router: Router) => void) => {
     const router = Router();
+    if (applyWs) applyWs(router);
 
     router.ws('/online-check', async (ws: WebSocket, req: Request) => {
       const userId = req.session?.user?.id;

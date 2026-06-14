@@ -5,7 +5,7 @@ import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import axios from 'axios';
 import { queueer } from '../../handlers/queueer';
-import { getParamAsNumber } from "../../utils/typeHelpers";
+import { getParamAsNumber } from '../../utils/typeHelpers';
 import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 import {
   getUsedExternalPorts,
@@ -690,7 +690,7 @@ const adminModule: Module = {
 
                 logger.info(`Successfully deleted container ${server.UUID} on daemon`);
               } catch (error: unknown) {
-                logger.error(`Error deleting container on daemon:`, error);
+                logger.error('Error deleting container on daemon:', error);
 
                 const daemonError = error as any;
                 const isNotFoundError =

@@ -210,8 +210,9 @@ const wsServerConsoleModule: Module = {
     license: 'MIT',
   },
 
-  router: () => {
+  router: (applyWs?: (router: Router) => void) => {
     const router = Router();
+    if (applyWs) applyWs(router);
 
     router.ws(
       '/console/:id',

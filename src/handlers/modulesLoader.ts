@@ -10,6 +10,7 @@ export const loadModules = async (
   app: express.Express,
   airlinkVersion: string,
   serverPort?: number,
+  wsInstance?: { applyTo: (router: express.Router) => void },
 ) => {
   const modulesDir = path.join(__dirname, '../modules');
 
@@ -85,7 +86,8 @@ export const loadModules = async (
       continue;
     }
 
-    app.use(mod.router());
+    const router = mod.router(wsInstance ? (r) => wsInstance.applyTo(r) : undefined);
+    app.use(router);
     loaded++;
   }
 
