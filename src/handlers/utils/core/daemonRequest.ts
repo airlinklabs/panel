@@ -52,8 +52,13 @@ export async function daemonBaseUrl(address: string, port: number | string): Pro
 
 // ── HMAC signing ─────────────────────────────────────────────────────────────
 
-function hmacSign(key: string, method: string, path: string, body: string, timestamp: number): string {
-  const payload = `${timestamp}:${method.toUpperCase()}:${path}:${body}`;
+// Why this format: timestamp prevents old requests, nonce prevents replay within
+// the window, method+path+body bind the signature to a specific operation.
+// Version tag so future format changes are detectable by both sides.
+export const HMAC_PAYLOAD_VERSION = 1;
+
+function hmacSign(key: string, method: string, path: string, body: string, timestamp: number, nonce: string): string {
+  const payload = `${timestamp}:${nonce}:${method.toUpperCase()}:${path}:${body}`;
   return crypto.createHmac('sha256', key).update(payload).digest('hex');
 }
 
@@ -84,7 +89,7 @@ function serializeRequestBody(data: unknown): string {
 // X-Airlink-Timestamp and X-Airlink-Signature headers added.
 export function installDaemonRequestInterceptor(): void {
   axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-    if (!config.auth || (config.auth as any).username !== 'Airlink') {
+    if (!config.auth || config.auth.username !== 'Airlink') {
       return config;
     }
 
@@ -93,7 +98,7 @@ export function installDaemonRequestInterceptor(): void {
 
     const method = (config.method || 'GET').toUpperCase();
 
-    let urlPath = '/';
+    let urlPath: string;
     try {
       const parsed = new URL(config.url || '', 'http://localhost');
       urlPath = parsed.pathname;
@@ -104,10 +109,15 @@ export function installDaemonRequestInterceptor(): void {
     const body = serializeRequestBody(config.data);
 
     const timestamp = Math.floor(Date.now() / 1000);
-    const signature = hmacSign(key, method, urlPath, body, timestamp);
+    // Cryptographic nonce prevents replay attacks within the 30s signature window.
+    // Each request gets a unique nonce so an attacker cannot resubmit a captured request.
+    const nonce = crypto.randomBytes(16).toString('hex');
+    const signature = hmacSign(key, method, urlPath, body, timestamp, nonce);
 
     config.headers.set('X-Airlink-Timestamp', String(timestamp));
     config.headers.set('X-Airlink-Signature', signature);
+    config.headers.set('X-Airlink-Nonce', nonce);
+    config.headers.set('X-Airlink-Payload-Version', String(HMAC_PAYLOAD_VERSION));
 
     return config;
   });

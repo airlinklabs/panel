@@ -26,7 +26,7 @@ export const isAuthenticated =
       }
 
       if (requiredPermission) {
-        let userPermissions: string[] = [];
+        let userPermissions: string[];
         try {
           userPermissions = JSON.parse(user.permissions || '[]');
         } catch {

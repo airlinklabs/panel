@@ -36,8 +36,8 @@ export async function collectPlayerStats(): Promise<void> {
       servers.map(async (server) => {
         try {
           // Parse ports to find the primary port
-          const ports = JSON.parse(server.Ports || '[]');
-          const primaryPort = ports.find((p: any) => p.primary)?.Port;
+          const ports = JSON.parse(server.Ports || '[]') as Array<{ primary?: boolean; Port?: string }>;
+          const primaryPort = ports.find((p) => p.primary)?.Port;
 
           if (!primaryPort) {
             return {

@@ -5,6 +5,9 @@ declare global {
     interface Request {
       apiKey?: ApiKey;
       nonce?: string;
+      lang?: string;
+      translations?: Record<string, unknown>;
+      cookies?: Record<string, string>;
     }
   }
 }

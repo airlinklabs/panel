@@ -87,7 +87,7 @@ function normalizeStatus(status: unknown): number {
 }
 
 function getCookieValue(req: Request, name: string): string | undefined {
-  const parsedCookies = (req as any).cookies as Record<string, string> | undefined;
+  const parsedCookies = req.cookies;
   if (parsedCookies?.[name]) return parsedCookies[name];
 
   const cookieHeader = req.headers.cookie;

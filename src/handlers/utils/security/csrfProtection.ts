@@ -16,7 +16,13 @@ function ensureCsrfSessionId(req: Request): string {
 }
 
 const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
-  getSecret: () => process.env.SESSION_SECRET || 'fallback-secret',
+  // SESSION_SECRET must be set. The startup check in envLoader.ts ensures this.
+  // If somehow missing at runtime, fail hard rather than using an insecure default.
+  getSecret: () => {
+    const secret = process.env.SESSION_SECRET;
+    if (!secret) throw new Error('SESSION_SECRET is required but not set');
+    return secret;
+  },
   getSessionIdentifier: (req: Request) => ensureCsrfSessionId(req),
   cookieName:
     process.env.NODE_ENV === 'production'

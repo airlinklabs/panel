@@ -49,7 +49,7 @@ export function translationMiddleware(
   res: Response,
   next: () => void,
 ) {
-  (req as any).lang = req.cookies && req.cookies.lang ? req.cookies.lang : 'en';
-  (req as any).translations = loadTranslations((req as any).lang);
+  req.lang = req.cookies?.lang || 'en';
+  req.translations = loadTranslations(req.lang);
   next();
 }
