@@ -531,7 +531,7 @@ const adminModule: Module = {
               const daemonUrl = `${daemonSchemeSync()}://${server.node.address}:${server.node.port}`;
 
               if (server.image?.scripts) {
-                let scripts: Record<string, unknown> = {};
+                let scripts: Record<string, unknown>;
                 try {
                   scripts = JSON.parse(server.image.scripts);
                 } catch (error: unknown) {
@@ -679,7 +679,6 @@ const adminModule: Module = {
                     },
                     data: {
                       id: server.UUID,
-                      deleteCmd: 'delete',
                     },
                   },
                 );
@@ -701,7 +700,7 @@ const adminModule: Module = {
                     daemonError.response.data.error.includes('not exist')));
 
                 if (!isNotFoundError) {
-                  throw new Error('Daemon unreachable. Use ?force=true to remove from panel only.');
+                  throw new Error(`Daemon unreachable${daemonError?.message ? `: ${String(daemonError.message)}` : ''}. Use ?force=true to remove from panel only.`, { cause: error });
                 } else {
                   logger.warn(`Container ${server.UUID} not found on daemon, proceeding with database cleanup`);
                 }

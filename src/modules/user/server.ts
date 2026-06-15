@@ -23,11 +23,6 @@ interface ErrorMessage {
   message?: string;
 }
 
-interface Port {
-  primary: boolean;
-  Port: number;
-}
-
 interface ServerVariable {
   name: string;
   env: string;
@@ -274,7 +269,6 @@ async function startServerContainer(
       ports: portsToDaemonString(server.Ports),
       Memory: server.Memory,
       Cpu: server.Cpu,
-      Storage: server.Storage,
       env: buildServerRuntimeEnv(server, options.variables ?? server.Variables),
       StartCommand: options.startCommand ?? server.StartCommand,
     },
@@ -2061,8 +2055,8 @@ const dashboardModule: Module = {
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
-        let variables = [];
         const contentType = req.headers['content-type'] || '';
+        let variables: ServerVariable[];
 
         if (contentType.includes('application/json')) {
           variables = req.body.variables || [];
@@ -2080,29 +2074,14 @@ const dashboardModule: Module = {
             return;
           }
 
-          let serverVariables = [];
-          let imageVariables = [];
+          let serverVariables: ServerVariable[] = [];
 
-          try {
-            if (server.Variables) {
+          if (server.Variables) {
+            try {
               serverVariables = JSON.parse(server.Variables);
+            } catch (error) {
+              logger.error('Error parsing server variables:', error);
             }
-          } catch (error) {
-            logger.error('Error parsing server variables:', error);
-            serverVariables = [];
-          }
-
-          // Get original default values from the server image
-          try {
-            if (server.image && server.image.variables) {
-              imageVariables = JSON.parse(server.image.variables);
-              logger.info(
-                `Image variables for server ${serverId}: ${JSON.stringify(imageVariables)}`,
-              );
-            }
-          } catch (error) {
-            logger.error('Error parsing image variables:', error);
-            imageVariables = [];
           }
 
           variables = serverVariables.map((variable: ServerVariable) => {

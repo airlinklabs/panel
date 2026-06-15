@@ -143,7 +143,7 @@ class Seeder {
       console.info('Seeding completed successfully!');
       this.printSeedingSummary(processedImages.length, updatedCount, createdCount);
     } catch (error) {
-      throw new Error(`Failed to perform seeding: ${error}`);
+      throw new Error(`Failed to perform seeding: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
     }
   }
 

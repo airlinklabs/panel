@@ -467,7 +467,7 @@ const adminModule: Module = {
           where: { id: 1 },
         });
 
-        let stats = {};
+        let stats: Record<string, unknown>;
 
         try {
           const response = await axios.get(

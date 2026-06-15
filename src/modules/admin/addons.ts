@@ -232,7 +232,7 @@ const addonsModule: Module = {
                     headers: { 'User-Agent': 'airlink-panel' },
                   });
                   if (instRes.ok) installManifest = await instRes.json() as InstallManifest;
-                } catch {}
+                } catch { /* addon manifest fetch is best-effort */ }
 
                 return {
                   id: folder.name,
@@ -440,7 +440,7 @@ const addonsModule: Module = {
 
           try {
             await prisma.addon.delete({ where: { slug } });
-          } catch {}
+          } catch { /* best-effort cleanup */ }
 
           fs.rmSync(targetDir, { recursive: true, force: true });
           await reloadAddons(req.app);

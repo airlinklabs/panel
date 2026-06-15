@@ -1,3 +1,9 @@
+// ── WebSocket proxy for container console ────────────────────────────────────
+// Commands go via REST (POST /container/command); the WebSocket is receive-only
+// for terminal output. Binary frames are preserved end-to-end for TUI pass-through:
+// daemon -> panel proxy -> browser WebSocket -> xterm.js. Do not convert Buffer
+// to string in the proxy path — TUI escape sequences are binary data.
+
 import { Router, Request } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';

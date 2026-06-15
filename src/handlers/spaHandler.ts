@@ -46,7 +46,7 @@ export class SPAHandler {
 
       return pageData;
     } catch (error) {
-      throw new Error(`Failed to render page content: ${error}`);
+      throw new Error(`Failed to render page content: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
     }
   }
 
@@ -145,7 +145,9 @@ export function spaMiddleware(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export function handleSPAPageRequest(originalRender: Function) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return function(this: Response, view: string, options?: any, callback?: Function) {
     if (this.locals.isSPA) {
       const spaHandler = SPAHandler.getInstance();

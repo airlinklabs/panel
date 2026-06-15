@@ -22,7 +22,7 @@ const avatarStorage = multer.diskStorage({
     } else {
       const existing = fs.readdirSync(userDir);
       existing.forEach(f => {
-        try { fs.unlinkSync(path.join(userDir, f)); } catch {}
+        try { fs.unlinkSync(path.join(userDir, f)); } catch { /* ignore per-file errors */ }
       });
     }
 
@@ -434,9 +434,9 @@ const accountModule: Module = {
           const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', username);
           if (fs.existsSync(userDir)) {
             fs.readdirSync(userDir).forEach(f => {
-              try { fs.unlinkSync(path.join(userDir, f)); } catch {}
+              try { fs.unlinkSync(path.join(userDir, f)); } catch { /* ignore per-file errors */ }
             });
-            try { fs.rmdirSync(userDir); } catch {}
+            try { fs.rmdirSync(userDir); } catch { /* ignore if dir still has files */ }
           }
 
           await prisma.users.update({

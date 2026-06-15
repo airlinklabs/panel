@@ -253,7 +253,7 @@ const userCreateServerModule: Module = {
               continue;
             }
 
-            let scripts: any = {};
+            let scripts: Record<string, unknown>;
             try {
               scripts = JSON.parse(server.image.scripts);
             } catch (err) {
@@ -343,7 +343,7 @@ const userCreateServerModule: Module = {
             await axios.delete(`${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container`, {
               auth: { username: 'Airlink', password: server.node.key },
               headers: { 'Content-Type': 'application/json' },
-              data: { id: server.UUID, deleteCmd: 'delete' },
+              data: { id: server.UUID },
             });
           } catch (err: any) {
             const isGone =
