@@ -25,7 +25,14 @@ coverage/
 # .env
 .env
 *.env.*
- storage/eggs
+
+# Database
+storage/dev.db
+storage/dev.db-wal
+storage/dev.db-shm
+
+# Storage (keep structure, ignore data)
+storage/eggs
 
 .agents/
 .codex/

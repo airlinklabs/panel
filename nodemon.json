@@ -1,6 +1,6 @@
 {
     "watch": ["src"],
     "ext": "ts",
-    "exec": "ts-node-dev --respawn --transpile-only src/app.ts"
-  }
+    "exec": "tsx src/app.ts"
+}
   

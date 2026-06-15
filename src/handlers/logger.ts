@@ -37,14 +37,15 @@ const colors = {
 };
 
 const isDebugMode = process.env.DEBUG === 'true' || process.env.NODE_ENV === 'development';
+const useJsonFormat = process.env.LOG_FORMAT === 'json' || process.env.NODE_ENV === 'production';
 
 const consola = createConsola({
   level: isDebugMode ? 4 : 3,
-  fancy: true,
+  fancy: !useJsonFormat,
   formatOptions: {
     date: false,
-    colors: true,
-    compact: process.env.NODE_ENV === 'production',
+    colors: !useJsonFormat,
+    compact: useJsonFormat,
   },
 }) as ConsolaInstance;
 

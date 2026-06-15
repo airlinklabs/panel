@@ -1251,11 +1251,11 @@ phase_panel_clone() {
         git clone --depth 1 "${PANEL_REPO}" "$tmpdir" || die "Failed to clone panel"
 
         if command -v rsync &>/dev/null; then
-            rsync -a --exclude='.env' --exclude='dev.db' --exclude='node_modules' \
+            rsync -a --exclude='.env' --exclude='node_modules' \
                   --exclude='storage' "$tmpdir/" /var/www/panel/
         else
             find "$tmpdir" -mindepth 1 -maxdepth 1 \
-                ! -name '.env' ! -name 'dev.db' ! -name 'node_modules' ! -name 'storage' \
+                ! -name '.env' ! -name 'node_modules' ! -name 'storage' \
                 -exec cp -r {} /var/www/panel/ \;
         fi
         rm -rf "$tmpdir"
@@ -1292,7 +1292,7 @@ NAME=${PANEL_NAME}
 NODE_ENV=production
 URL=http://${server_ip}:${PANEL_PORT}
 PORT=${PANEL_PORT}
-DATABASE_URL=file:/var/www/panel/dev.db
+DATABASE_URL=file:/var/www/panel/storage/dev.db
 SESSION_SECRET=${secret}
 ENVEOF
     fi

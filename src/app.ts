@@ -34,7 +34,8 @@ import crypto from 'crypto';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import icon from './utils/icon';
-import hpp from 'hpp';
+// hpp removed: Express 5's req.query parsing (qs with arrayLimit: 0) already
+// prevents HTTP Parameter Pollution. No replacement needed.
 import fs from 'fs';
 import csrfProtection, {
   handleCsrfError,
@@ -292,7 +293,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   })(req, res, next);
 });
 
-app.use(hpp());
+// hpp removed: Express 5 handles parameter pollution natively
 
 // IP ban middleware — checked before rate limiting
 app.use(async (req, res, next) => {
