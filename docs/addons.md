@@ -230,7 +230,7 @@ api.registerRoute('/my-addon/api', apiRouter);
 
 Views are created using EJS templates. The addon system supports the same desktop/mobile two-view layout as the rest of the panel.
 
-Place templates in `views/desktop/` for desktop and `views/mobile/` for mobile. If only one version exists, place it in `views/` as a shared fallback — the system will use it for both viewports.
+Place templates in `views/desktop/` for desktop and `views/mobile/` for mobile. If only one version exists, place it in `views/` as a shared fallback - the system will use it for both viewports.
 
 Example desktop view (`views/desktop/my-view.ejs`):
 

@@ -17,8 +17,8 @@
 Airlink Panel is the brain of the operation. It's a web-based control center for deploying, monitoring, and managing game servers across multiple machines. Think of it as the thing that yells at the daemon so you don't have to -_-
 
 **What you get:**
-- Full web UI for admins and users (EJS templates, not React — we like it simple)
-- Node-based architecture — one panel, many daemons, infinite game servers
+- Full web UI for admins and users (EJS templates, not React - we like it simple)
+- Node-based architecture - one panel, many daemons, infinite game servers
 - Addon system for extending functionality without touching core code
 - REST API (v1 + legacy) for automation and third-party integrations
 - Real-time console, file manager, backups, SFTP, and more
@@ -48,7 +48,7 @@ For full documentation, visit **[airlinklabs.xyz/docs/quick-start/](https://airl
 
 ## Installation
 
-### Option 1 — Installer script (recommended)
+### Option 1 - Installer script (recommended)
 
 ```bash
 sudo su
@@ -66,7 +66,7 @@ systemctl restart airlink-panel
 journalctl -u airlink-panel -f
 ```
 
-### Option 2 — Manual
+### Option 2 - Manual
 
 ```bash
 cd /var/www/
@@ -82,7 +82,7 @@ pnpm install
 
 # Set up environment
 cp example.env .env
-# Edit .env — set PORT, URL, SESSION_SECRET, and DATABASE_URL
+# Edit .env - set PORT, URL, SESSION_SECRET, and DATABASE_URL
 
 # One command to rule them all
 pnpm run setup
@@ -115,7 +115,7 @@ Copy `example.env` to `.env` and fill in the required values:
 | `URL` | Yes | Full URL the panel is served from, e.g. `http://192.168.1.10:3000` |
 | `PORT` | Yes | Port to listen on |
 | `DATABASE_URL` | Yes | SQLite path, e.g. `file:./storage/dev.db` |
-| `SESSION_SECRET` | Yes | Random secret for session signing — use `openssl rand -hex 32` |
+| `SESSION_SECRET` | Yes | Random secret for session signing - use `openssl rand -hex 32` |
 
 > [!IMPORTANT]
 > `DATABASE_URL` must be an **absolute path** in production (e.g. `file:/var/www/panel/storage/dev.db`). Relative paths break when started from a different working directory (e.g. via systemd). This is not a suggestion. This is a warning -_-
@@ -194,4 +194,4 @@ Run `pnpm run lint` and `pnpm run typecheck` before submitting. If your PR break
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE) for details.
+MIT - see [`LICENSE`](LICENSE) for details.

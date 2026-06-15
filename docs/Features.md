@@ -1,4 +1,4 @@
-# Airlink Panel — Feature Guide
+# Airlink Panel - Feature Guide
 
 This is a reference for everything in the Airlink panel. It covers the admin side, the user side, the addon system, and the API.
 
@@ -20,14 +20,11 @@ git clone https://github.com/AirlinkLabs/panel.git
 cd panel
 sudo chown -R www-data:www-data /var/www/panel
 sudo chmod -R 755 /var/www/panel
-mv example.env .env
-npm install -g typescript
-npm install --omit=dev
-npm run build-ts
-npm run migrate:dev
-npm install pm2 -g
-pm2 start dist/app.js --name "panel"
-pm2 save && pm2 startup
+cp example.env .env
+# Edit .env - set PORT, URL, SESSION_SECRET, DATABASE_URL
+pnpm install
+pnpm run setup
+pnpm run start
 ```
 
 ## Admin Panel
@@ -44,7 +41,7 @@ If a newer version of the panel is available, a notice appears here with a link 
 
 Nodes are the machines that run game servers. Each node runs the Airlink daemon, which the panel communicates with.
 
-To create a node, go to Admin > Nodes > Create Node. You need to provide a name, the node's IP address, and the daemon port (default: 8080).
+To create a node, go to Admin > Nodes > Create Node. You need to provide a name, the node's IP address, and the daemon port (default: 3002).
 
 After creating a node, use the Configure button to get the daemon configuration details. Install and start the daemon on the node machine using those details.
 
@@ -87,13 +84,13 @@ When creating a key, you assign it a name, an optional description, and a set of
 - Nodes: read, create, update, delete
 - Settings: read, update
 
-The key is shown once after creation. Copy it immediately — it cannot be retrieved again.
+The key is shown once after creation. Copy it immediately - it cannot be retrieved again.
 
 ### Addons
 
 The addons page at `/admin/addons` lists all addons in the `storage/addons/` folder. Each entry shows whether the addon is enabled or disabled. Toggling the switch enables or disables the addon (a panel restart is required for the change to take effect).
 
-The marketplace tab lists all community addons from the `airlinklabs/addons` registry. From here you can install addons with one click — the panel clones the repository, runs `npm install` and `npm run build`, and streams the output back to the browser.
+The marketplace tab lists all community addons from the `airlinklabs/addons` registry. From here you can install addons with one click - the panel clones the repository, runs `pnpm install` and `pnpm run build`, and streams the output back to the browser.
 
 ### Settings
 
@@ -113,13 +110,13 @@ Clicking a server card opens the server management interface.
 
 Each server has its own set of pages accessible from the server sidebar.
 
-**Console** — A live terminal connected to the server process. You can send commands and see output in real time. The top of the console shows CPU, RAM, and disk usage. Buttons for start, stop, and restart are here.
+**Console** - A live terminal connected to the server process. You can send commands and see output in real time. The top of the console shows CPU, RAM, and disk usage. Buttons for start, stop, and restart are here.
 
-**File Manager** — Browse, upload, download, edit, rename, move, and delete files on the server. The editor opens in the browser for text-based files.
+**File Manager** - Browse, upload, download, edit, rename, move, and delete files on the server. The editor opens in the browser for text-based files.
 
-**Settings** — Shows the server's name, resource limits, and startup command. Users can edit the startup variables that the image exposes.
+**Settings** - Shows the server's name, resource limits, and startup command. Users can edit the startup variables that the image exposes.
 
-**Subusers** — Lets the server owner invite other users by email and give them access to the server. Each subuser can be given full access or specific permissions (console, files, settings, etc.).
+**Subusers** - Lets the server owner invite other users by email and give them access to the server. Each subuser can be given full access or specific permissions (console, files, settings, etc.).
 
 ### Account
 
@@ -163,9 +160,9 @@ The `package.json` at the root of the addon folder tells the panel how to load i
 }
 ```
 
-- `main` — the entry point file. Defaults to `index.ts`.
-- `router` — the base URL path for all routes in this addon.
-- `migrations` — SQL statements to run when the addon is first enabled. Each migration runs once and is tracked so it never runs again.
+- `main` - the entry point file. Defaults to `index.ts`.
+- `router` - the base URL path for all routes in this addon.
+- `migrations` - SQL statements to run when the addon is first enabled. Each migration runs once and is tracked so it never runs again.
 
 ### Entry Point
 
@@ -204,25 +201,25 @@ The second argument passed to your default function gives you access to everythi
 
 **Core**
 
-- `logger.info / warn / error / debug` — write to the panel log
-- `prisma` — the Prisma ORM client, connected to the panel's database
-- `addonPath` — absolute path to your addon folder
-- `viewsPath` — absolute path to your addon's `views/` folder
-- `getComponentPath(path)` — returns the absolute path to a panel layout component
+- `logger.info / warn / error / debug` - write to the panel log
+- `prisma` - the Prisma ORM client, connected to the panel's database
+- `addonPath` - absolute path to your addon folder
+- `viewsPath` - absolute path to your addon's `views/` folder
+- `getComponentPath(path)` - returns the absolute path to a panel layout component
 
 **User utilities**
 
-- `utils.isUserAdmin(userId)` — returns true if the user is an admin
-- `utils.checkServerAccess(userId, serverId)` — returns true if the user can access the server
-- `utils.getServerById(serverId)` — returns a server object
-- `utils.getServerByUUID(uuid)` — returns a server object by UUID
-- `utils.getPrimaryPort(server)` — returns the primary port for a server
+- `utils.isUserAdmin(userId)` - returns true if the user is an admin
+- `utils.checkServerAccess(userId, serverId)` - returns true if the user can access the server
+- `utils.getServerById(serverId)` - returns a server object
+- `utils.getServerByUUID(uuid)` - returns a server object by UUID
+- `utils.getPrimaryPort(server)` - returns the primary port for a server
 
 **UI registration**
 
-- `ui.addSidebarItem(item)` — adds an entry to the sidebar navigation
-- `ui.addServerMenuItem(item)` — adds an item to the per-server sidebar
-- `ui.addServerSection(section)` — adds a section to the server page
+- `ui.addSidebarItem(item)` - adds an entry to the sidebar navigation
+- `ui.addServerMenuItem(item)` - adds an item to the per-server sidebar
+- `ui.addServerSection(section)` - adds a section to the server page
 
 **Adding a sidebar item:**
 ```typescript
@@ -277,8 +274,8 @@ Prefix your table names with your addon slug to avoid collisions with other addo
 cd /var/www/panel/storage/addons/
 git clone https://github.com/you/your-addon.git your-addon
 cd your-addon
-npm install
-npm run build
+pnpm install
+pnpm run build
 systemctl restart airlink-panel
 ```
 

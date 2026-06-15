@@ -14,19 +14,19 @@
   - [Server Management](#server-management)
   - [Folder System](#folder-system)
   - [SFTP](#sftp)
-  - [Admin — Overview](#admin--overview)
-  - [Admin — Servers](#admin--servers)
-  - [Admin — Users](#admin--users)
-  - [Admin — Settings](#admin--settings)
-  - [Admin — Nodes](#admin--nodes)
-  - [Admin — Images / Eggs](#admin--images--eggs)
-  - [Admin — Addons](#admin--addons)
-  - [Admin — API Keys](#admin--api-keys)
-  - [Admin — Security](#admin--security)
-  - [Admin — Analytics](#admin--analytics)
-  - [Admin — Player Stats](#admin--player-stats)
-  - [Admin — Radar](#admin--radar)
-  - [Admin — Misc](#admin--misc)
+  - [Admin - Overview](#admin--overview)
+  - [Admin - Servers](#admin--servers)
+  - [Admin - Users](#admin--users)
+  - [Admin - Settings](#admin--settings)
+  - [Admin - Nodes](#admin--nodes)
+  - [Admin - Images / Eggs](#admin--images--eggs)
+  - [Admin - Addons](#admin--addons)
+  - [Admin - API Keys](#admin--api-keys)
+  - [Admin - Security](#admin--security)
+  - [Admin - Analytics](#admin--analytics)
+  - [Admin - Player Stats](#admin--player-stats)
+  - [Admin - Radar](#admin--radar)
+  - [Admin - Misc](#admin--misc)
   - [API v1](#api-v1)
   - [Alternative API (Legacy)](#alternative-api-legacy)
   - [WebSocket Endpoints](#websocket-endpoints)
@@ -83,8 +83,8 @@
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| `GET` | `/api/system/status` | None | System status — OS info, node statuses, server/user counts |
-| `GET` | `/api/health` | None | Health check — returns `{ status: 'ok' }` |
+| `GET` | `/api/system/status` | None | System status - OS info, node statuses, server/user counts |
+| `GET` | `/api/health` | None | Health check - returns `{ status: 'ok' }` |
 | `POST` | `/api/system/test-node-connection` | None | Test daemon connection. Body: `{ address, port, key }` |
 | `GET` | `/api/search` | 🔒 | Search servers, users (admin), nodes (admin) by query `?q=` |
 
@@ -94,12 +94,12 @@
 
 | Method | Path | Auth | Description | Body |
 |--------|------|------|-------------|------|
-| `GET` | `/login` | None | Render login page. Redirects to `/register` if no users exist | — |
-| `GET` | `/register` | None | Render registration page | — |
+| `GET` | `/login` | None | Render login page. Redirects to `/register` if no users exist | - |
+| `GET` | `/register` | None | Render registration page | - |
 | `POST` | `/login` | None | Authenticate. Rate limited: 10/min | `{ identifier, password }` |
 | `POST` | `/register` | None | Create account. Rate limited: 10/min | `{ email, username, password }` |
-| `POST` | `/logout` | 🔒 | Destroy session, redirect to `/` | — |
-| `GET` | `/logout` | 🔒 | Alternative GET logout | — |
+| `POST` | `/logout` | 🔒 | Destroy session, redirect to `/` | - |
+| `GET` | `/logout` | 🔒 | Alternative GET logout | - |
 
 ---
 
@@ -107,10 +107,10 @@
 
 | Method | Path | Auth | Description | Body |
 |--------|------|------|-------------|------|
-| `GET` | `/` | 🔒 | Dashboard — server list, folders, node statuses, stats | — |
-| `GET` | `/account` | 🔒 | Account page with login history | — |
-| `GET` | `/credits` | 🔒 | Credits / about page | — |
-| `GET` | `/check-username` | 🔒 | Check username availability. Query: `?username=` | — |
+| `GET` | `/` | 🔒 | Dashboard - server list, folders, node statuses, stats | - |
+| `GET` | `/account` | 🔒 | Account page with login history | - |
+| `GET` | `/credits` | 🔒 | Credits / about page | - |
+| `GET` | `/check-username` | 🔒 | Check username availability. Query: `?username=` | - |
 | `POST` | `/update-description` | 🔒 | Update profile description | `{ description }` |
 | `POST` | `/update-username` | 🔒 | Update username | `{ newUsername }` |
 | `POST` | `/change-password` | 🔒 | Change password | `{ currentPassword, newPassword }` |
@@ -118,7 +118,7 @@
 | `POST` | `/change-email` | 🔒 | Change email | `{ email }` |
 | `POST` | `/set-language` | 🔒 | Set language preference (cookie) | `{ language }` |
 | `POST` | `/upload-avatar` | 🔒 | Upload avatar image | Multipart: `avatar` |
-| `POST` | `/remove-avatar` | 🔒 | Remove avatar | — |
+| `POST` | `/remove-avatar` | 🔒 | Remove avatar | - |
 
 ---
 
@@ -126,26 +126,26 @@
 
 | Method | Path | Auth | Description | Body |
 |--------|------|------|-------------|------|
-| `GET` | `/create-server` | 🔒 | Server creation form | — |
+| `GET` | `/create-server` | 🔒 | Server creation form | - |
 | `POST` | `/create-server` | 🔒 | Create a new server | `{ name, description, nodeId, imageId, dockerImage, Memory, Cpu, Storage }` |
-| `DELETE` | `/user/server/:uuid` | 🔒 | Delete own server (if allowed) | — |
-| `GET` | `/server/:id` | 🔒 | Server detail/manage page | — |
-| `GET` | `/server/:id/status` | 🔒 | Server runtime status + install state | — |
-| `POST` | `/server/:id/power/:poweraction` | 🔒 | Power action: `start`, `stop`, `restart`, `kill` | — |
-| `POST` | `/server/:id/power/restart` | 🔒 | Restart server container | — |
-| `POST` | `/server/:id/reinstall` | 🔒 | Reinstall server (destroy + re-install) | — |
+| `DELETE` | `/user/server/:uuid` | 🔒 | Delete own server (if allowed) | - |
+| `GET` | `/server/:id` | 🔒 | Server detail/manage page | - |
+| `GET` | `/server/:id/status` | 🔒 | Server runtime status + install state | - |
+| `POST` | `/server/:id/power/:poweraction` | 🔒 | Power action: `start`, `stop`, `restart`, `kill` | - |
+| `POST` | `/server/:id/power/restart` | 🔒 | Restart server container | - |
+| `POST` | `/server/:id/reinstall` | 🔒 | Reinstall server (destroy + re-install) | - |
 | `POST` | `/server/:id/rename` | 🔒 | Rename file/folder | `{ path, newName }` |
-| `POST` | `/server/:id/feature/eula` | 🔒 | Accept Minecraft EULA | — |
+| `POST` | `/server/:id/feature/eula` | 🔒 | Accept Minecraft EULA | - |
 
 #### File Management
 
 | Method | Path | Auth | Description | Body |
 |--------|------|------|-------------|------|
-| `GET` | `/server/:id/files` | 🔒 | File manager. Query: `?path=` | — |
-| `GET` | `/server/:id/files/edit/{*path}` | 🔒 | File editor page | — |
+| `GET` | `/server/:id/files` | 🔒 | File manager. Query: `?path=` | - |
+| `GET` | `/server/:id/files/edit/{*path}` | 🔒 | File editor page | - |
 | `POST` | `/server/:id/files/{*path}` | 🔒 | Save file content | `{ content }` |
-| `DELETE` | `/server/:id/files/rm/{*path}` | 🔒 | Delete file or directory | — |
-| `GET` | `/server/:id/files/download/{*path}` | 🔒 | Download file | — |
+| `DELETE` | `/server/:id/files/rm/{*path}` | 🔒 | Delete file or directory | - |
+| `GET` | `/server/:id/files/download/{*path}` | 🔒 | Download file | - |
 | `POST` | `/server/:id/upload` | 🔒 | Upload file | Multipart: `file`, `path`, `fileName` |
 | `POST` | `/server/:id/zip` | 🔒 | Zip files | `{ relativePath, zipname }` |
 | `POST` | `/server/:id/unzip` | 🔒 | Unzip files | `{ relativePath, zipname }` |
@@ -154,7 +154,7 @@
 
 | Method | Path | Auth | Description | Body |
 |--------|------|------|-------------|------|
-| `GET` | `/server/:id/startup` | 🔒 | Startup configuration page | — |
+| `GET` | `/server/:id/startup` | 🔒 | Startup configuration page | - |
 | `POST` | `/server/:id/startup/command` | 🔒 | Update startup command | `{ startCommand }` |
 | `POST` | `/server/:id/startup/docker-image` | 🔒 | Update Docker image variant | `{ dockerImage }` |
 | `POST` | `/server/:id/startup/variables` | 🔒 | Update server variables | `{ variables }` or form data |
@@ -163,18 +163,18 @@
 
 | Method | Path | Auth | Description | Body |
 |--------|------|------|-------------|------|
-| `GET` | `/server/:id/settings` | 🔒 | Server settings page | — |
+| `GET` | `/server/:id/settings` | 🔒 | Server settings page | - |
 | `POST` | `/server/:id/settings` | 🔒 | Update server name/description | `{ name, description }` |
 
 #### Backups
 
 | Method | Path | Auth | Description | Body |
 |--------|------|------|-------------|------|
-| `GET` | `/server/:id/backups` | 🔒 | Backups page | — |
+| `GET` | `/server/:id/backups` | 🔒 | Backups page | - |
 | `POST` | `/server/:id/backups/create` | 🔒 | Create a backup | `{ name }` |
-| `POST` | `/server/:id/backups/:backupId/restore` | 🔒 | Restore a backup | — |
-| `GET` | `/server/:id/backups/:backupId/download` | 🔒 | Download backup | — |
-| `DELETE` | `/server/:id/backups/:backupId` | 🔒 | Delete backup | — |
+| `POST` | `/server/:id/backups/:backupId/restore` | 🔒 | Restore a backup | - |
+| `GET` | `/server/:id/backups/:backupId/download` | 🔒 | Download backup | - |
+| `DELETE` | `/server/:id/backups/:backupId` | 🔒 | Delete backup | - |
 
 #### Players & Worlds (Minecraft)
 
@@ -189,12 +189,12 @@
 
 | Method | Path | Auth | Description | Body |
 |--------|------|------|-------------|------|
-| `GET` | `/api/folders` | 🔒 | List all folders with member server UUIDs | — |
+| `GET` | `/api/folders` | 🔒 | List all folders with member server UUIDs | - |
 | `POST` | `/api/folders` | 🔒 | Create folder | `{ name }` |
 | `PATCH` | `/api/folders/:id` | 🔒 | Rename folder | `{ name }` |
-| `DELETE` | `/api/folders/:id` | 🔒 | Delete folder (servers become un-foldered) | — |
+| `DELETE` | `/api/folders/:id` | 🔒 | Delete folder (servers become un-foldered) | - |
 | `POST` | `/api/folders/:id/servers` | 🔒 | Add server to folder | `{ serverUUID }` |
-| `DELETE` | `/api/folders/servers/:serverUUID` | 🔒 | Remove server from folder | — |
+| `DELETE` | `/api/folders/servers/:serverUUID` | 🔒 | Remove server from folder | - |
 
 ---
 
@@ -208,7 +208,7 @@
 
 ---
 
-### Admin — Overview
+### Admin - Overview
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -218,7 +218,7 @@
 
 ---
 
-### Admin — Servers
+### Admin - Servers
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -231,7 +231,7 @@
 
 ---
 
-### Admin — Users
+### Admin - Users
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -245,7 +245,7 @@
 
 ---
 
-### Admin — Settings
+### Admin - Settings
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -261,7 +261,7 @@
 
 ---
 
-### Admin — Nodes
+### Admin - Nodes
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -277,7 +277,7 @@
 
 ---
 
-### Admin — Images / Eggs
+### Admin - Images / Eggs
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -295,7 +295,7 @@
 
 ---
 
-### Admin — Addons
+### Admin - Addons
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -311,7 +311,7 @@
 
 ---
 
-### Admin — API Keys
+### Admin - API Keys
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -324,7 +324,7 @@
 
 ---
 
-### Admin — Security
+### Admin - Security
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -335,7 +335,7 @@
 
 ---
 
-### Admin — Analytics
+### Admin - Analytics
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -344,7 +344,7 @@
 
 ---
 
-### Admin — Player Stats
+### Admin - Player Stats
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -354,7 +354,7 @@
 
 ---
 
-### Admin — Radar
+### Admin - Radar
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -366,7 +366,7 @@
 
 ---
 
-### Admin — Misc
+### Admin - Misc
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -382,26 +382,26 @@ All routes use `Authorization: Bearer <api_key>` header with scoped permissions.
 
 | Method | Path | Permission | Description | Body |
 |--------|------|------------|-------------|------|
-| `GET` | `/api/v1/ping` | None | Ping/health check | — |
-| `GET` | `/api/v1` | None | API index (version, endpoints) | — |
-| `GET` | `/api/v1/users` | `airlink.api.users.read` | List users | — |
-| `GET` | `/api/v1/users/:id` | `airlink.api.users.read` | Get user by ID | — |
+| `GET` | `/api/v1/ping` | None | Ping/health check | - |
+| `GET` | `/api/v1` | None | API index (version, endpoints) | - |
+| `GET` | `/api/v1/users` | `airlink.api.users.read` | List users | - |
+| `GET` | `/api/v1/users/:id` | `airlink.api.users.read` | Get user by ID | - |
 | `POST` | `/api/v1/users` | `airlink.api.users.create` | Create user | `{ email, username, password, isAdmin?, description? }` |
 | `PATCH` | `/api/v1/users/:id` | `airlink.api.users.update` | Update user | `{ email?, username?, password?, isAdmin?, description? }` |
-| `DELETE` | `/api/v1/users/:id` | `airlink.api.users.delete` | Delete user | — |
-| `GET` | `/api/v1/servers` | `airlink.api.servers.read` | List servers | — |
-| `GET` | `/api/v1/servers/:id` | `airlink.api.servers.read` | Get server by ID | — |
+| `DELETE` | `/api/v1/users/:id` | `airlink.api.users.delete` | Delete user | - |
+| `GET` | `/api/v1/servers` | `airlink.api.servers.read` | List servers | - |
+| `GET` | `/api/v1/servers/:id` | `airlink.api.servers.read` | Get server by ID | - |
 | `POST` | `/api/v1/servers` | `airlink.api.servers.create` | Create server | `{ name, nodeId, imageId, ownerId, ... }` |
 | `PATCH` | `/api/v1/servers/:id` | `airlink.api.servers.update` | Update server | Various fields |
-| `POST` | `/api/v1/servers/:id/suspend` | `airlink.api.servers.update` | Suspend server | — |
-| `POST` | `/api/v1/servers/:id/unsuspend` | `airlink.api.servers.update` | Unsuspend server | — |
-| `DELETE` | `/api/v1/servers/:id` | `airlink.api.servers.delete` | Delete server | — |
-| `GET` | `/api/v1/nodes` | `airlink.api.nodes.read` | List nodes | — |
-| `GET` | `/api/v1/nodes/:id` | `airlink.api.nodes.read` | Get node by ID | — |
+| `POST` | `/api/v1/servers/:id/suspend` | `airlink.api.servers.update` | Suspend server | - |
+| `POST` | `/api/v1/servers/:id/unsuspend` | `airlink.api.servers.update` | Unsuspend server | - |
+| `DELETE` | `/api/v1/servers/:id` | `airlink.api.servers.delete` | Delete server | - |
+| `GET` | `/api/v1/nodes` | `airlink.api.nodes.read` | List nodes | - |
+| `GET` | `/api/v1/nodes/:id` | `airlink.api.nodes.read` | Get node by ID | - |
 | `POST` | `/api/v1/nodes` | `airlink.api.nodes.create` | Create node | `{ name, address, port, ram, cpu, disk, key, sftpPort? }` |
 | `PATCH` | `/api/v1/nodes/:id` | `airlink.api.nodes.update` | Update node | Various fields |
-| `DELETE` | `/api/v1/nodes/:id` | `airlink.api.nodes.delete` | Delete node | — |
-| `GET` | `/api/v1/settings` | `airlink.api.settings.read` | Get panel settings | — |
+| `DELETE` | `/api/v1/nodes/:id` | `airlink.api.nodes.delete` | Delete node | - |
+| `GET` | `/api/v1/settings` | `airlink.api.settings.read` | Get panel settings | - |
 | `PATCH` | `/api/v1/settings` | `airlink.api.settings.update` | Update panel settings | `{ title?, description?, logo?, favicon?, theme?, language? }` |
 
 ---
@@ -438,9 +438,9 @@ Older API using raw Bearer token validation. All routes require `Authorization: 
 ### Legend
 
 All authenticated routes require:
-1. **IP allowlist** — must be in `ALLOWED_IPS`
-2. **Basic Auth** — `Authorization: Basic <base64(Airlink:<key>)>`
-3. **HMAC-SHA256** — `X-Airlink-Timestamp`, `X-Airlink-Signature`, `X-Airlink-Nonce` headers
+1. **IP allowlist** - must be in `ALLOWED_IPS`
+2. **Basic Auth** - `Authorization: Basic <base64(Airlink:<key>)>`
+3. **HMAC-SHA256** - `X-Airlink-Timestamp`, `X-Airlink-Signature`, `X-Airlink-Nonce` headers
 
 ---
 
@@ -448,9 +448,9 @@ All authenticated routes require:
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| `GET` | `/` | HMAC | Daemon identity — version, status, remote URL |
+| `GET` | `/` | HMAC | Daemon identity - version, status, remote URL |
 | `GET` | `/stats` | HMAC | Total cumulative stats (bytes in/out) and uptime |
-| `GET` | `/healthz` | None | Health check — returns `{ ok: true }`. **Localhost only** |
+| `GET` | `/healthz` | None | Health check - returns `{ ok: true }`. **Localhost only** |
 
 ---
 
@@ -459,7 +459,7 @@ All authenticated routes require:
 | Method | Path | Auth | Description | Body |
 |--------|------|------|-------------|------|
 | `POST` | `/container/installer` | HMAC | Create container from script (legacy). Synchronous. | `{ id, script, container, entrypoint?, env? }` |
-| `POST` | `/container/install` | HMAC | Async install — pulls image, downloads scripts. Returns immediately. | `{ id, image?, scripts?: [{ url, fileName, ALVKT? }], env? }` |
+| `POST` | `/container/install` | HMAC | Async install - pulls image, downloads scripts. Returns immediately. | `{ id, image?, scripts?: [{ url, fileName, ALVKT? }], env? }` |
 | `POST` | `/container/start` | HMAC | Start container with image, env, ports, resources, command | `{ id, image, ports?, env?, Memory?, Cpu?, StartCommand? }` |
 | `POST` | `/container/stop` | HMAC | Gracefully stop container | `{ id, stopCmd? }` |
 | `DELETE` | `/container/kill` | HMAC | Force-kill container (SIGKILL) | `{ id }` |
@@ -509,7 +509,7 @@ All authenticated routes require:
 |--------|------|------|-------------|------|
 | `POST` | `/sftp/credentials` | HMAC | Generate temporary SFTP credentials | `{ id }` |
 | `DELETE` | `/sftp/credentials` | HMAC | Revoke SFTP credentials | `{ id }` |
-| `GET` | `/sftp/status` | HMAC | Count of active SFTP sessions | — |
+| `GET` | `/sftp/status` | HMAC | Count of active SFTP sessions | - |
 
 ---
 
@@ -606,11 +606,11 @@ payload = "${timestamp}:${nonce}:${METHOD}:${path}:${body}"
 signature = HMAC-SHA256(key, payload)
 ```
 
-- `timestamp` — Unix epoch seconds (must be within 30s of daemon clock)
-- `nonce` — 16-byte random hex string (prevents replay attacks)
-- `METHOD` — Uppercase HTTP method
-- `path` — Request path (e.g. `/container/start`)
-- `body` — Raw request body string (empty string for GET)
+- `timestamp` - Unix epoch seconds (must be within 30s of daemon clock)
+- `nonce` - 16-byte random hex string (prevents replay attacks)
+- `METHOD` - Uppercase HTTP method
+- `path` - Request path (e.g. `/container/start`)
+- `body` - Raw request body string (empty string for GET)
 
 ### Verification
 
