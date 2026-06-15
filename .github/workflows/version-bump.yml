@@ -1,0 +1,81 @@
+name: version-bump
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to set (e.g. 2.1.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    # Only run on human commits, skip bot pushes and this workflow's own commits
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.head_commit.message != null &&
+        !contains(github.event.head_commit.message, 'chore(release):') &&
+        !contains(github.event.head_commit.message, 'ci: version bump') &&
+        github.actor != 'github-actions[bot]'
+      )
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "new=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            # Auto-bump patch version
+            CURRENT=$(node -p "require('./package.json').version")
+            MAJOR=$(echo "$CURRENT" | cut -d. -f1)
+            MINOR=$(echo "$CURRENT" | cut -d. -f2)
+            PATCH=$(echo "$CURRENT" | cut -d. -f3)
+            NEW_PATCH=$((PATCH + 1))
+            echo "new=${MAJOR}.${MINOR}.${NEW_PATCH}" >> "$GITHUB_OUTPUT"
+            echo "current=${CURRENT}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: update package.json version
+        run: |
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = '${{ steps.version.outputs.new }}';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: update README.md version badge
+        run: |
+          sed -i "s/v[0-9]*\.[0-9]*\.[0-9]*[^ ]*/v${{ steps.version.outputs.new }}/g" README.md || true
+
+      - name: update docs/specsheet.md version if present
+        run: |
+          if [ -f docs/specsheet.md ]; then
+            sed -i "s/v[0-9]*\.[0-9]*\.[0-9]*[^ ]*/v${{ steps.version.outputs.new }}/g" docs/specsheet.md || true
+          fi
+
+      - name: commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json README.md docs/ 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m "ci(release): bump version to ${{ steps.version.outputs.new }}"
+          git push
