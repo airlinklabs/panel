@@ -12,11 +12,7 @@
               class="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-3xl flex-col items-center justify-center text-center">
             <div
               class="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-neutral-200 bg-white text-neutral-800 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6"
-                stroke="currentColor" class="h-7 w-7">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M12 9v3.75m0 3.75h.008v.008H12v-.008Zm9-4.5a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-              </svg>
+              <%- icon('triangle-alert', { class: 'h-7 w-7', strokeWidth: 1.6 }) %>
             </div>
 
             <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Error <%= statusCode %>

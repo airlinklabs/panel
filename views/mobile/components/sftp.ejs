@@ -11,13 +11,13 @@
 <div id="sftpModal" class="fixed inset-0 z-50 hidden items-center justify-center">
 
   
-  <div onclick="closeSftpModal()" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+  <div onclick="closeSftpModal()" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
   
-  <div class="relative bg-neutral-800 border border-white/5 rounded-xl shadow-2xl w-full max-w-md mx-4 transform scale-95 transition-transform duration-200">
+  <div class="relative bg-white dark:bg-[#1c1c1c] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-xl w-full max-w-md mx-4 transform scale-95 transition-transform duration-200">
 
     
-    <div class="flex items-center justify-between px-5 py-4 border-b border-white/5">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5">
       <div class="flex items-center gap-3">
         <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 text-neutral-300">
@@ -42,7 +42,7 @@
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      <span class="text-sm text-neutral-400">Loading credentials...</span>
+      <span class="text-sm text-neutral-400">Fetching your keys…</span>
     </div>
 
     
@@ -52,7 +52,7 @@
           <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd" />
         </svg>
         <div>
-          <p class="text-xs font-medium text-red-400">Failed to load credentials</p>
+          <p class="text-xs font-medium text-red-400">Couldn't load credentials — maybe generate a fresh set?</p>
           <p id="sftpErrorMsg" class="text-xs text-red-400/70 mt-0.5"></p>
         </div>
       </div>
@@ -120,7 +120,7 @@
       </div>
 
       
-      <div class="flex items-center gap-2 px-5 py-4 border-t border-white/5">
+      <div class="flex items-center gap-2 px-5 py-4 border-t border-neutral-200 dark:border-white/5">
         <button onclick="generateSftpCredentials()" id="sftpRegenBtn" class="px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-400 text-black text-xs font-semibold transition focus:outline-none disabled:opacity-40">Regenerate</button>
         <button onclick="revokeSftpCredentials()" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition focus:outline-none">Revoke</button>
       </div>
@@ -205,7 +205,7 @@
       .then(function (data) {
         if (btn) btn.disabled = false;
         fillCredentials(data);
-        showToast('Credentials regenerated.', 'success');
+        showToast('Fresh credentials ready.', 'success');
       })
       .catch(function (err) {
         if (btn) btn.disabled = false;
@@ -224,7 +224,7 @@
         showToast('SFTP access revoked.', 'success');
       })
       .catch(function () {
-        showToast('Failed to revoke SFTP access.', 'error');
+        showToast('Couldn\'t revoke SFTP — try again?', 'error');
       });
   };
 
@@ -232,9 +232,9 @@
     var el = document.getElementById(elementId);
     if (!el) return;
     navigator.clipboard.writeText(el.textContent || '').then(function () {
-      showToast('Copied to clipboard', 'success');
+      showToast('Copied!', 'success');
     }).catch(function () {
-      showToast('Copy failed', 'error');
+      showToast('Copy failed — try selecting and copying manually.', 'error');
     });
   };
 })();

@@ -24,9 +24,7 @@
       <% if (errorMessage && errorMessage.message) { %>
       <div class="rounded-xl bg-red-800/10 px-6 py-4 mt-8 mx-8">
         <div class="flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
+          <%- icon('triangle-alert', { size: 20, class: 'text-red-400 mr-4 shrink-0' }) %>
           <div>
             <h3 class="text-sm font-medium text-red-400">Error</h3>
             <p class="text-sm text-red-400/50">
@@ -44,14 +42,9 @@
             <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
                <div class="flex items-center justify-between">
                  <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Total Players</dt>
-                 <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
-                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                     <circle cx="9" cy="7" r="4"></circle>
-                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                   </svg>
-                 </div>
+                  <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                    <%- icon('users', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
+                  </div>
                </div>
                <dd id="totalPlayers" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">
                 0
@@ -63,12 +56,9 @@
             <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
                <div class="flex items-center justify-between">
                  <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Max Capacity</dt>
-                 <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
-                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                     <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                     <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                   </svg>
-                 </div>
+                  <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                    <%- icon('database', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
+                  </div>
                </div>
                <dd id="maxCapacity" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">
                 0
@@ -80,14 +70,9 @@
             <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
                <div class="flex items-center justify-between">
                  <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Online Servers</dt>
-                 <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
-                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                     <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
-                     <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
-                     <line x1="6" y1="6" x2="6.01" y2="6"></line>
-                     <line x1="6" y1="18" x2="6.01" y2="18"></line>
-                   </svg>
-                 </div>
+                  <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                    <%- icon('server', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
+                  </div>
                </div>
                <dd id="onlineServers" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">
                 0
@@ -99,11 +84,9 @@
             <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
                <div class="flex items-center justify-between">
                  <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Utilization</dt>
-                 <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
-                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                     <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                   </svg>
-                 </div>
+                  <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                    <%- icon('activity', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
+                  </div>
                </div>
                <dd id="utilization" class="mt-3 text-3xl font-semibold tracking-tight text-neutral-800 dark:text-white">
                 0%

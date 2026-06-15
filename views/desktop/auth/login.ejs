@@ -142,10 +142,7 @@
             <input id="password" name="password" type="password" autocomplete="current-password"
               required class="auth-input" placeholder="••••••••" style="padding-right:40px">
             <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">
-              <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-                <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>
-                <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" clip-rule="evenodd"/>
-              </svg>
+              <span id="eyeIcon"><%- icon('eye', { width: 16, height: 16 }) %></span>
             </button>
           </div>
         </div>
@@ -153,9 +150,7 @@
         <label class="cb-row" id="rememberLabel">
           <input id="remember" name="remember-me" type="checkbox" class="sr-only">
           <span class="cb-box" id="cbBox">
-            <svg class="cb-check" id="cbCheck" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" fill="none" width="10" height="10">
-              <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <span class="cb-check" id="cbCheck"><%- icon('check', { width: 10, height: 10, strokeWidth: 1.5 }) %></span>
           </span>
           <span class="text-sm text-neutral-500 dark:text-neutral-400">Remember me</span>
         </label>

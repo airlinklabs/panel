@@ -16,9 +16,7 @@
           <button type="button" class="inline-flex items-center rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-95">Docs</button>
         </a>
         <button id="createApiKeyBtn" type="button" class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-300 hover:bg-neutral-800 dark:hover:bg-neutral-700 transition active:scale-95">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
+          <%- icon('plus', { size: 14, class: 'shrink-0' }) %>
           New Key
         </button>
       </div>
@@ -28,10 +26,8 @@
     <div class="space-y-2">
       <% if (apiKeys.length === 0) { %>
         <div class="py-16 text-center">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-10 h-10 mx-auto mb-3 text-neutral-300 dark:text-neutral-700">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 0 1 21.75 8.25Z" />
-          </svg>
-          <p class="text-sm text-neutral-500">No API keys yet</p>
+          <%- icon('key', { size: 16, class: 'text-neutral-700 shrink-0' }) %>
+          <p class="text-sm text-neutral-500">No API keys yet. The robots can't connect without them.</p>
         </div>
       <% } else { %>
         <% apiKeys.forEach(apiKey => { %>
@@ -53,9 +49,7 @@
             <div class="flex items-center gap-2 mb-3 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg px-3 py-2">
               <code class="text-xs font-mono text-neutral-600 dark:text-neutral-400 flex-1 truncate"><%= apiKey.key.substring(0, 8) %>...</code>
               <button type="button" onclick="copyToClipboard('<%= apiKey.key %>')" class="shrink-0 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition active:scale-90" aria-label="Copy API key">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
-                </svg>
+                <%- icon('copy', { size: 16, class: 'shrink-0' }) %>
               </button>
             </div>
 
@@ -63,28 +57,18 @@
               <p class="text-xs text-neutral-500">By <%= apiKey.user ? apiKey.user.username : 'System' %> · <%= new Date(apiKey.createdAt).toLocaleDateString() %></p>
               <div class="flex gap-1.5">
                 <button onclick="showEditModal('<%= apiKey.id %>', '<%= apiKey.name %>', '<%= (apiKey.description || '').replace(/'/g, "\\'") %>', <%= JSON.stringify(apiKey.permissions) %>)" type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="Edit API key">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
-                  </svg>
+                  <%- icon('pencil', { size: 14, class: 'shrink-0' }) %>
                 </button>
                 <form action="/admin/apikeys/toggle/<%= apiKey.id %>" method="POST" class="inline">
                   <%- include('../../components/csrf') %>
                   <button type="submit" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="<%= apiKey.active ? 'Disable API key' : 'Enable API key' %>">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
-                      <% if (apiKey.active) { %>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
-                      <% } else { %>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                      <% } %>
-                    </svg>
+                    <%- icon('play-circle', { size: 14, class: 'shrink-0' }) %>
                   </button>
                 </form>
                 <form id="deleteKeyForm_<%= apiKey.id %>" action="/admin/apikeys/delete/<%= apiKey.id %>" method="POST" class="inline">
                   <%- include('../../components/csrf') %>
                   <button type="button" onclick="confirmDeleteApiKey('<%= apiKey.id %>')" class="rounded-lg bg-red-600 p-1.5 text-white hover:bg-red-500 transition active:scale-90" aria-label="Delete API key">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                    </svg>
+                    <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
                   </button>
                 </form>
               </div>
@@ -98,8 +82,8 @@
 </main>
 
 <!-- Create Key Modal -->
-<div id="createApiKeyModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60" aria-hidden="true">
-  <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="createApiKeyTitle" aria-describedby="createApiKeyDescription" tabindex="-1">
+<div id="createApiKeyModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/50 backdrop-blur-sm" aria-hidden="true">
+  <div class="bg-white dark:bg-[#1c1c1c] border-t border-neutral-200 dark:border-white/5 rounded-t-2xl w-full shadow-xl max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="createApiKeyTitle" aria-describedby="createApiKeyDescription" tabindex="-1">
 
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60 sticky top-0 bg-white dark:bg-neutral-900 z-10">
       <div>
@@ -107,7 +91,7 @@
         <p id="createApiKeyDescription" class="text-xs text-neutral-500 mt-0.5">Set a name and choose what this key can do.</p>
       </div>
       <button type="button" onclick="hideCreateModal()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="Close new API key dialog">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+        <%- icon('x', { size: 14, class: 'shrink-0' }) %>
       </button>
     </div>
 
@@ -169,15 +153,15 @@
 
       <div class="flex gap-2 pb-2">
         <button type="button" onclick="hideCreateModal()" class="flex-1 py-2.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 active:scale-95 transition"><%= req.translations.cancel || 'Cancel' %></button>
-        <button type="submit" class="flex-1 py-2.5 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 active:scale-95 transition"><%= req.translations.create || 'Create' %></button>
+        <button type="submit" class="flex-1 py-2.5 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 active:scale-95 transition"><%= req.translations.create || 'Create API key' %></button>
       </div>
     </form>
   </div>
 </div>
 
 <!-- Edit Key Modal -->
-<div id="editApiKeyModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60" aria-hidden="true">
-  <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="editApiKeyTitle" aria-describedby="editApiKeyDescription" tabindex="-1">
+<div id="editApiKeyModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/50 backdrop-blur-sm" aria-hidden="true">
+  <div class="bg-white dark:bg-[#1c1c1c] border-t border-neutral-200 dark:border-white/5 rounded-t-2xl w-full shadow-xl max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="editApiKeyTitle" aria-describedby="editApiKeyDescription" tabindex="-1">
 
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60 sticky top-0 bg-white dark:bg-neutral-900 z-10">
       <div>
@@ -185,7 +169,7 @@
         <p id="editApiKeyDescription" class="text-xs text-neutral-500 mt-0.5">Update permissions and details.</p>
       </div>
       <button type="button" onclick="hideEditModal()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="Close edit API key dialog">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+        <%- icon('x', { size: 14, class: 'shrink-0' }) %>
       </button>
     </div>
 
@@ -444,7 +428,7 @@
         title: 'Delete API key',
         body: 'This will permanently revoke the key. Any integrations using it will stop working.',
         danger: true,
-        confirmLabel: 'Delete',
+        confirmLabel: 'Yeah, delete it',
         onConfirm: () => {
           document.getElementById('deleteKeyForm_' + keyId).submit();
         }

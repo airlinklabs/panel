@@ -25,12 +25,12 @@ const ERROR_INFO: Record<number, ErrorPageInfo> = {
     message: 'Your session is missing or has expired.',
   },
   403: {
-    title: 'Access denied',
-    message: 'You do not have permission to open this page.',
+    title: 'Not your territory',
+    message: 'You don\'t have access here. If that\'s wrong, your admin can fix it.',
   },
   404: {
-    title: 'Page not found',
-    message: 'This route does not exist on the panel.',
+    title: 'Fell off the map',
+    message: 'This page doesn\'t exist, or it did and we broke it.',
   },
   405: {
     title: 'Method not allowed',
@@ -53,8 +53,8 @@ const ERROR_INFO: Record<number, ErrorPageInfo> = {
     message: 'Slow down and try again in a moment.',
   },
   500: {
-    title: 'Server error',
-    message: 'The panel hit an unexpected error.',
+    title: 'We tripped',
+    message: 'Something broke on our end. It\'s logged. We\'re probably already embarrassed.',
   },
   502: {
     title: 'Bad gateway',

@@ -18,18 +18,14 @@
             <!-- Upload button -->
             <label for="avatar-input" title="Upload photo"
               class="absolute -bottom-1.5 -right-1.5 w-6 h-6 flex items-center justify-center rounded-full bg-neutral-800 dark:bg-white border-2 border-white dark:border-neutral-900 cursor-pointer hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3 text-white dark:text-neutral-900">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
-              </svg>
+              <%- icon('upload', { class: 'w-3 h-3 text-white dark:text-neutral-900', strokeWidth: 2.5 }) %>
             </label>
             <input id="avatar-input" type="file" accept="image/*" class="hidden">
             <!-- Delete button — only when avatar set -->
             <% if (user.avatar) { %>
             <button id="remove-avatar-btn" type="button" title="Remove photo"
               class="absolute -top-1.5 -right-1.5 w-6 h-6 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-500 border-2 border-white dark:border-neutral-900 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3 text-white">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-              </svg>
+              <%- icon('x', { class: 'w-3 h-3 text-white', strokeWidth: 2.5 }) %>
             </button>
             <% } %>
           </div>
@@ -41,9 +37,7 @@
           <!-- Credits button -->
           <a href="/credits"
             class="flex items-center gap-1.5 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-white/5 hover:bg-neutral-50 dark:hover:bg-white/10 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white px-3 py-1.5 text-xs font-medium shadow-sm dark:shadow-none transition shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
-              <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 0 1 .67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 1 1-.671-1.34l.041-.022ZM12 9a.75.75 0 1 0 0-1.5A.75.75 0 0 0 12 9Z" clip-rule="evenodd" />
-            </svg>
+            <%- icon('circle-alert', { class: 'w-3.5 h-3.5' }) %>
             Credits
           </a>
         </div>
@@ -58,7 +52,7 @@
             <!-- Username -->
             <form id="change-username-form" action="/change-username" method="POST" class="col-span-1">
               <%- include('../components/csrf') %>
-              <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%= req.translations.username || 'Username' %></label>
+              <label class="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%- icon('user', { class: 'w-3 h-3' }) %> <%= req.translations.username || 'Username' %></label>
               <div class="flex gap-1.5">
                 <input id="username" type="text" name="username" placeholder="<%= user.username %>"
                   class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700/20 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
@@ -73,7 +67,7 @@
             <!-- Email -->
             <form id="change-email-form" class="col-span-1">
               <%- include('../components/csrf') %>
-              <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%= req.translations.email || 'Email' %></label>
+              <label class="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%- icon('mail', { class: 'w-3 h-3' }) %> <%= req.translations.email || 'Email' %></label>
               <div class="flex gap-1.5">
                 <input id="email" type="email" name="email" placeholder="<%= user.email %>"
                   class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700/20 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
@@ -87,7 +81,7 @@
             <!-- Current password -->
             <form id="change-password-form" class="col-span-2">
               <%- include('../components/csrf') %>
-              <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%= req.translations.changePassword || 'Change password' %></label>
+              <label class="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%- icon('lock', { class: 'w-3 h-3' }) %> <%= req.translations.changePassword || 'Change password' %></label>
               <div class="grid grid-cols-2 gap-1.5">
                 <div>
                   <span id="current-password-feedback" class="text-[11px] text-neutral-400 block mb-1"><%= req.translations.checking || 'Checking...' %></span>
@@ -108,7 +102,7 @@
             <!-- Description -->
             <form id="change-description-form" class="col-span-2">
               <%- include('../components/csrf') %>
-              <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%= req.translations.description || 'Description' %></label>
+              <label class="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%- icon('file-text', { class: 'w-3 h-3' }) %> <%= req.translations.description || 'Description' %></label>
               <textarea id="description" name="description" rows="2"
                 class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700/20 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors resize-none"
                 placeholder="<%= user.description %>"><%= user.description %></textarea>
@@ -120,7 +114,7 @@
             <!-- Language -->
             <form id="language-preference-form" class="col-span-1">
               <%- include('../components/csrf') %>
-              <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%= req.translations.languagePreference || 'Language' %></label>
+              <label class="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%- icon('globe', { class: 'w-3 h-3' }) %> <%= req.translations.languagePreference || 'Language' %></label>
               <select id="language" name="language"
                 class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-xs w-full bg-white dark:bg-neutral-700/20 px-3 py-1.5 text-neutral-800 dark:text-white transition-colors mb-1.5">
                 <option value="en"  <%= req.lang === 'en'  ? 'selected' : '' %>>English</option>
@@ -142,7 +136,7 @@
 
             <!-- 2FA -->
             <div class="col-span-1">
-              <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%= req.translations.twoFactorAuth || 'Two-factor authentication' %></p>
+              <p class="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%- icon('shield', { class: 'w-3 h-3' }) %> <%= req.translations.twoFactorAuth || 'Two-factor authentication' %></p>
               <% if (user['2fa'] !== true) { %>
               <p class="text-xs text-neutral-500 dark:text-neutral-400">Not yet available.</p>
               <% } else { %>
@@ -222,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const input = e.target.querySelector('#username');
     const { ok, text } = await post('/update-username', { newUsername: input.value.trim() });
     if (ok) {
-      showToast('Username updated', 'success');
+      showToast('Username updated.', 'success');
       const sb = document.getElementById('sidebar-username');
       if (sb) sb.textContent = input.value.trim();
       input.placeholder = input.value.trim();
@@ -232,14 +226,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('change-email-form')?.addEventListener('submit', async e => {
     e.preventDefault();
     const { ok, text } = await post('/change-email', { email: e.target.querySelector('#email').value.trim() });
-    if (ok) showToast('Email updated', 'success'); else showToast(text);
+    if (ok) showToast('Email updated.', 'success'); else showToast(text);
   });
 
   document.getElementById('change-description-form')?.addEventListener('submit', async e => {
     e.preventDefault();
     const el = e.target.querySelector('#description');
     const { ok, text } = await post('/update-description', { description: el.value.trim() });
-    if (ok) { showToast('Description updated', 'success'); el.placeholder = el.value.trim(); } else showToast(text);
+    if (ok) { showToast('Description updated.', 'success'); el.placeholder = el.value.trim(); } else showToast(text);
   });
 
   document.getElementById('change-password-form')?.addEventListener('submit', async e => {
@@ -248,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
       currentPassword: e.target.querySelector('#currentPassword').value,
       newPassword:     e.target.querySelector('#newPassword').value,
     });
-    if (ok) { showToast('Password updated', 'success'); setTimeout(() => location.href = '/login?err=UpdatedCredentials', 1500); }
+    if (ok) { showToast('Password updated.', 'success'); setTimeout(() => location.href = '/login?err=UpdatedCredentials', 1500); }
     else showToast(text);
   });
 
@@ -305,8 +299,8 @@ document.addEventListener('DOMContentLoaded', () => {
       headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
       body: JSON.stringify({ language: lang }),
     });
-    if (res.ok) { showToast('Language saved', 'success'); setTimeout(() => location.reload(), 1400); }
-    else showToast('Failed to save language', 'error');
+    if (res.ok) { showToast('Language saved.', 'success'); setTimeout(() => location.reload(), 1400); }
+    else showToast('Something went wrong.', 'error');
   });
 
   // Avatar
@@ -327,9 +321,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const res = await fetch('/remove-avatar', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken } });
     if (res.ok) {
       avatarPreview.src = 'https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(user.username) %>';
-      showToast('Profile picture removed', 'success');
+      showToast('Profile picture removed.', 'success');
       setTimeout(() => location.reload(), 1200);
-    } else showToast('Failed to remove picture', 'error');
+    } else showToast('Something went wrong.', 'error');
   });
 
   function openCropPopup(dataUrl, csrf) {
@@ -343,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="text-xs text-neutral-500 mt-0.5">Drag and resize the selection box.</p>
           </div>
           <button id="crop-cancel" class="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+            <%- icon('x', { class: 'w-4 h-4', strokeWidth: 2 }) %>
           </button>
         </div>
         <div class="relative bg-neutral-950 select-none overflow-hidden" style="height:340px" id="crop-stage">
@@ -433,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (res.ok) {
             const { avatar } = await res.json();
             avatarPreview.src = avatar + '?t=' + Date.now();
-            showToast('Profile picture updated', 'success');
+             showToast('Profile picture updated.', 'success');
             close();
           } else showToast('Failed to upload', 'error');
         } catch { showToast('Failed to upload', 'error'); }

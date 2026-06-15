@@ -28,14 +28,14 @@
             <div class="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <label for="serverName" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+                  <%- icon('tag', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.name %>:</label>
                 <input id="serverName" name="name" value="<%= server.name %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
               </div>
 
               <div>
                 <label for="serverDescription" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                  <%- icon('file-text', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.description %>:</label>
                 <input id="serverDescription" name="description" value="<%= server.description || '' %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="Server description">
               </div>
@@ -46,7 +46,7 @@
             <div class="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <label for="serverOwner" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <%- icon('user', { size: 14, class: 'shrink-0' }) %>
                   Owner:</label>
                 <select id="serverOwner" name="ownerId" class="hidden">
                   <% users.forEach(userOption => { %>
@@ -58,7 +58,7 @@
 
               <div>
                 <label for="serverNode" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><path d="M6 18h.01"/><path d="M10 18h.01"/></svg>
+                  <%- icon('server', { size: 14, class: 'shrink-0' }) %>
                   Node:</label>
                 <select id="serverNode" name="nodeId" class="hidden">
                   <% nodes.forEach(node => { %>
@@ -70,7 +70,7 @@
 
               <div>
                 <label for="serverImage" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                  <%- icon('box', { size: 14, class: 'shrink-0' }) %>
                   Image:</label>
                 <select id="serverImage" name="imageId" class="hidden">
                   <% images.forEach(image => { %>
@@ -82,11 +82,11 @@
 
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8z"/></svg>
+                  <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
                   Ports:</label>
                 <input type="hidden" id="serverPorts" name="Ports">
           <button type="button" id="assignPortsBtn" class="mt-2 mb-4 w-full inline-flex items-center gap-2 rounded-xl bg-neutral-100 dark:bg-neutral-700/30 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white px-4 py-2.5 text-sm font-medium border border-neutral-200 dark:border-white/5 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8z"/></svg>
+            <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
             Assign ports
           </button>
               </div>
@@ -97,7 +97,7 @@
             <div class="grid grid-cols-3 gap-4 mb-6">
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 19v-3"/><path d="M10 19v-3"/><path d="M14 19v-3"/><path d="M18 19v-3"/><path d="M8 11V9"/><path d="M16 11V9"/><path d="M12 11V9"/><path d="M2 15h20"/><path d="M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1.1a2 2 0 0 0 0 3.837V15H2v-3.063a2 2 0 0 0 0-3.837Z"/></svg>
+                  <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
                   Memory:
                 </label>
                 <input type="hidden" id="serverMemory" name="Memory" value="<%= server.Memory %>">
@@ -115,7 +115,7 @@
 
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+                  <%- icon('cpu', { size: 14, class: 'shrink-0' }) %>
                   CPU:
                 </label>
                 <input type="hidden" id="serverCPU" name="Cpu" value="<%= server.Cpu %>">
@@ -132,7 +132,7 @@
 
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+                  <%- icon('database', { size: 14, class: 'shrink-0' }) %>
                   Storage:
                 </label>
                 <input type="hidden" id="serverStorage" name="Storage" value="<%= server.Storage %>">
@@ -154,7 +154,7 @@
             <div class="mb-6">
               <div>
                 <label for="startCommand" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                  <%- icon('terminal', { size: 14, class: 'shrink-0' }) %>
                   Startup Command:</label>
                 <textarea id="startCommand" name="StartCommand" rows="3" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5"><%= server.StartCommand %></textarea>
               </div>
@@ -163,9 +163,7 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between">
                   <div class="flex items-center mb-2 md:mb-0">
                     <div class="flex-shrink-0 mr-3">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
+                      <%- icon('pencil', { size: 24, class: 'text-blue-500' }) %>
                     </div>
                     <div>
                       <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
@@ -189,13 +187,9 @@
                   <div class="flex-shrink-0">
                     <span class="inline-flex items-center justify-center h-8 w-8 rounded-full <%= server.Suspended ? 'bg-red-100 text-red-500' : 'bg-green-100 text-green-500' %>">
                       <% if (server.Suspended) { %>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                        </svg>
+                        <%- icon('x-circle', { size: 20, class: 'shrink-0' }) %>
                       <% } else { %>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                        </svg>
+                        <%- icon('check-circle', { size: 20, class: 'shrink-0' }) %>
                       <% } %>
                     </span>
                   </div>
@@ -209,9 +203,7 @@
                   <div class="flex flex-col md:flex-row md:items-center justify-between">
                     <div class="flex items-center mb-2 md:mb-0">
                       <div class="flex-shrink-0 mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
+                        <%- icon('triangle-alert', { size: 24, class: 'text-yellow-500' }) %>
                       </div>
                       <div>
                         <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Server Suspension</h3>
@@ -231,9 +223,7 @@
                 <div class="flex items-center space-x-2 mb-4">
                   <div class="flex-shrink-0">
                     <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 text-blue-500">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                      </svg>
+                      <%- icon('calendar', { size: 20, class: 'shrink-0' }) %>
                     </span>
                   </div>
                   <div>
@@ -247,7 +237,7 @@
             <!-- Submit Button -->
             <div class="flex justify-between items-center">
               <button type="submit" id="updateServerBtn" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-lg hover:bg-blue-700 hover:scale-105 transition-all duration-200">
-                Update Server
+                Save changes
               </button>
 
               <a href="/admin/servers" class="rounded-xl bg-neutral-200 dark:bg-neutral-800 px-3 py-2 text-center text-sm font-medium text-neutral-700 dark:text-neutral-200 shadow-sm hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-all duration-200">
@@ -261,12 +251,12 @@
   </div>
 </main>
 
-<div id="portsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
-  <div class="w-full max-w-4xl rounded-2xl border border-neutral-200 dark:border-neutral-700/60 bg-white dark:bg-neutral-900 shadow-xl">
+<div id="portsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  <div class="al-modal-panel w-full max-w-4xl rounded-2xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-[#1c1c1c] shadow-xl">
     <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700/60 px-5 py-4">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
       <button type="button" id="closePortsModal" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>
     <div class="p-5">
@@ -385,15 +375,27 @@
       });
     }
 
-    document.getElementById('assignPortsBtn').addEventListener('click', () => {
+    function openPortsModal() {
+      const ov = document.getElementById('portsModal');
+      const p  = ov.querySelector('.al-modal-panel');
       renderPortRows();
-      document.getElementById('portsModal').classList.remove('hidden');
-      document.getElementById('portsModal').classList.add('flex');
-    });
-    document.getElementById('closePortsModal').addEventListener('click', () => {
-      document.getElementById('portsModal').classList.add('hidden');
-      document.getElementById('portsModal').classList.remove('flex');
-    });
+      ov.classList.remove('hidden'); ov.classList.add('flex');
+      p.classList.remove('al-closing'); void p.offsetWidth;
+    }
+    function closePortsModal() {
+      const ov = document.getElementById('portsModal');
+      const p  = ov.querySelector('.al-modal-panel');
+      if (!p || window.matchMedia('(prefers-reduced-motion:reduce)').matches) {
+        ov.classList.add('hidden'); ov.classList.remove('flex'); return;
+      }
+      p.classList.add('al-closing');
+      p.addEventListener('animationend', () => {
+        ov.classList.add('hidden'); ov.classList.remove('flex');
+        p.classList.remove('al-closing');
+      }, { once: true });
+    }
+    document.getElementById('assignPortsBtn').addEventListener('click', openPortsModal);
+    document.getElementById('closePortsModal').addEventListener('click', closePortsModal);
     document.getElementById('addPortRow').addEventListener('click', () => {
       assignedPorts.push({ name: `Port ${assignedPorts.length + 1}`, internalPort: 25565, externalPort: '', primary: assignedPorts.length === 0 });
       renderPortRows();
@@ -412,8 +414,7 @@
       assignedPorts = assignedPorts.filter(port => port.name && port.internalPort && port.externalPort);
       assignedPorts.forEach((port, index) => { port.primary = index === 0; });
       syncPortsButton();
-      document.getElementById('portsModal').classList.add('hidden');
-      document.getElementById('portsModal').classList.remove('flex');
+      closePortsModal();
     });
     serverNodeSelect.addEventListener('change', updatePortsForSelectedNode);
     serverImageSelect.addEventListener('change', () => { ensureMinimumPortRows(); syncPortsButton(); });
@@ -542,6 +543,11 @@
 .cs-option.selected { background: rgba(0,0,0,0.07); font-weight: 500; }
 .dark .cs-option.selected { background: rgba(255,255,255,0.08); }
 .cs-option.disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+
+@keyframes al-modal-in  { from { opacity:0; transform:scale(0.96) translateY(6px); } to { opacity:1; transform:scale(1) translateY(0); } }
+@keyframes al-modal-out { from { opacity:1; transform:scale(1) translateY(0); } to { opacity:0; transform:scale(0.96) translateY(6px); } }
+.al-modal-panel { animation: al-modal-in 0.2s cubic-bezier(0.16,1,0.3,1) both; }
+.al-modal-panel.al-closing { animation: al-modal-out 0.15s cubic-bezier(0.4,0,1,1) both; }
 </style>
 
 <script nonce="<%- nonce %>">

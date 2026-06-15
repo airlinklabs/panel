@@ -85,9 +85,7 @@
           <p class="mt-0.5 text-sm text-neutral-500">Manage installed addons and browse the store</p>
         </div>
         <button id="reloadBtn" class="inline-flex items-center gap-2 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 hover:bg-neutral-200 dark:hover:bg-neutral-700/80 border border-neutral-200 dark:border-neutral-700/50 text-neutral-600 dark:text-neutral-300 px-3 py-2 text-sm font-medium transition">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-          </svg>
+          <%- icon('refresh-cw', { size: 14, class: 'shrink-0' }) %>
           Reload
         </button>
       </div>
@@ -111,9 +109,7 @@
         <!-- Migration warning -->
         <% if (!addonTableExists) { %>
           <div class="flex gap-3 rounded-xl p-4 mb-6 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-amber-500 dark:text-amber-400 flex-shrink-0 mt-0.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 3.014-1.874 2.148-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-            </svg>
+            <%- icon('triangle-alert', { size: 16, class: 'text-amber-400 shrink-0' }) %>
             <div>
               <p class="text-sm font-medium text-amber-400">Database migration required</p>
               <p class="mt-1 text-xs text-amber-400/70">Run <code class="px-1 py-0.5 rounded font-mono" style="background:rgba(245,158,11,0.1);">npm run migrate:dev</code> then restart the panel.</p>
@@ -133,9 +129,7 @@
                 <!-- Top row: icon + badge -->
                 <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
                   <div class="a-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-neutral-400 dark:text-neutral-600">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
-                    </svg>
+                    <%- icon('box', { size: 16, class: 'text-neutral-600 shrink-0' }) %>
                   </div>
                   <span class="status-badge a-badge <%= addon.enabled ? 'a-badge-enabled' : 'a-badge-disabled' %>">
                     <%= addon.enabled ? 'Enabled' : 'Disabled' %>
@@ -177,9 +171,7 @@
         <% } else { %>
           <!-- Empty state -->
           <div class="py-20 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-10 h-10 mx-auto mb-4 text-neutral-300 dark:text-neutral-700">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z" />
-            </svg>
+            <%- icon('box', { size: 16, class: 'text-neutral-700 shrink-0' }) %>
             <p class="text-sm font-medium text-neutral-500">
               <% if (addonTableExists) { %>No addons installed<% } else { %>Migration required<% } %>
             </p>
@@ -224,7 +216,7 @@
         showToast(data.message || 'Failed to update addon', 'error');
       }
     })
-    .catch(() => { hideLoadingPopup(); showToast('An error occurred', 'error'); });
+    .catch(() => { hideLoadingPopup(); showToast('Something went wrong.', 'error'); });
   }
 
   function updateCard(slug, enabled) {
@@ -275,7 +267,7 @@
         showToast(data.message || 'Failed to uninstall addon', 'error');
       }
     })
-    .catch(() => { hideLoadingPopup(); showToast('An error occurred', 'error'); });
+    .catch(() => { hideLoadingPopup(); showToast('Something went wrong.', 'error'); });
   }
 
   window.confirmUninstall = confirmUninstall;
@@ -288,7 +280,7 @@
         hideLoadingPopup();
         showToast(data.message || (data.success ? 'Reloaded' : 'Failed'), data.success ? 'success' : 'error');
       })
-      .catch(() => { hideLoadingPopup(); showToast('An error occurred', 'error'); });
+    .catch(() => { hideLoadingPopup(); showToast('Something went wrong.', 'error'); });
   });
 
   const addonSearch = document.getElementById('addonSearchInput');

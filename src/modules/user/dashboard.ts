@@ -161,8 +161,10 @@ const dashboardModule: Module = {
                   });
 
                   if (statsResponse.data) {
-                    ramUsage = statsResponse.data.memory?.percentage || '0';
-                    cpuUsage = statsResponse.data.cpu?.percentage || '0';
+                    const rawRam = Number(statsResponse.data.memory?.percentage) || 0;
+                    const rawCpu = Number(statsResponse.data.cpu?.percentage) || 0;
+                    ramUsage = String(Math.round(rawRam * 100) / 100);
+                    cpuUsage = String(Math.round(rawCpu * 100) / 100);
 
                     const memUsageBytes = statsResponse.data.memory?.usage || 0;
                     const memUsageMB = memUsageBytes / (1024 * 1024);

@@ -104,6 +104,10 @@ const authServiceModule: Module = {
           data: { loginAttempts: 0, lockedUntil: null },
         });
 
+        await new Promise<void>((resolve, reject) =>
+          req.session.regenerate(err => (err ? reject(err) : resolve()))
+        );
+
         req.session.user = {
           id:          user.id,
           email:       user.email,

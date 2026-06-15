@@ -95,7 +95,7 @@
         body: JSON.stringify({ rateLimitEnabled: enabled, rateLimitRpm: rpm }),
       });
       const data = await r.json();
-      if (data.success) showToast('Rate limit settings saved.', 'success');
+      if (data.success) showToast('Rate limit settings saved. Breathe easy.', 'success');
       else showToast(data.error || 'Failed to save.', 'error');
     } catch {
       showToast('An error occurred.', 'error');

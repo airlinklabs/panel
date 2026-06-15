@@ -2,9 +2,7 @@
 <% if (installed.failed) { %>
 <div class="mx-8 mt-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 px-4 py-3 flex items-center gap-3">
   <div class="h-8 w-8 rounded-lg bg-red-100 dark:bg-red-500/10 flex items-center justify-center shrink-0">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
-    </svg>
+    <%- icon('x', { class: 'h-4 w-4 text-red-500 dark:text-red-400', strokeWidth: 2 }) %>
   </div>
   <div class="min-w-0">
     <p class="text-sm font-medium text-neutral-800 dark:text-neutral-100">Installation failed</p>

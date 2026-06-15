@@ -13,9 +13,9 @@
               <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
             </span>
             <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-              <% if (typeof serverStatus.uptime !== 'undefined') { %>
+              <% if (serverStatus.uptime != null && typeof serverStatus.uptime === 'number') { %>
                 Uptime: <span id="uptime-display"><%= formatUptime(serverStatus.uptime) %></span>
-                <% if (typeof serverStatus.startedAt !== 'undefined' && serverStatus.startedAt) { %>
+                <% if (serverStatus.startedAt) { %>
                   <span id="server-started-at" class="hidden"><%= serverStatus.startedAt %></span>
                 <% } %>
               <% } else { %>
@@ -40,16 +40,12 @@
 
     <% if (typeof serverStatus !== 'undefined' && serverStatus.online && typeof serverStatus.startedAt !== 'undefined' && serverStatus.startedAt) { %>
       <div class="ml-3 text-xs text-neutral-500 dark:text-neutral-500 flex items-center" data-server-started-container>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <%- icon('clock', { class: 'h-3 w-3 mr-1' }) %>
         <span data-server-started-time>Started: <%= new Date(serverStatus.startedAt).toLocaleString() %></span>
       </div>
     <% } else { %>
       <div class="ml-3 text-xs text-neutral-500 dark:text-neutral-500 hidden items-center" data-server-started-container>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <%- icon('clock', { class: 'h-3 w-3 mr-1' }) %>
         <span data-server-started-time><%= req.translations.startedUnknown || 'Started: Unknown' %></span>
       </div>
     <% } %>

@@ -12,9 +12,7 @@
         <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminNodesText %></p>
       </div>
       <button id="createButton" type="button" class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-300 hover:bg-neutral-800 dark:hover:bg-neutral-700 transition shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
+        <%- icon('plus', { size: 14, class: 'shrink-0' }) %>
         New Node
       </button>
     </div>
@@ -27,7 +25,7 @@
         <% if (nodes.length > 0) { %>
           <p class="text-xs text-emerald-500 mt-1"><%= nodes.filter(n => n.status === 'Online').length %> online</p>
         <% } else { %>
-          <p class="text-xs text-neutral-500 mt-1"><%= req.translations.noNodesAvailable %></p>
+          <p class="text-xs text-neutral-500 mt-1"><%= req.translations.noNodesAvailable || 'No nodes yet — your servers have nowhere to live.' %></p>
         <% } %>
       </div>
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
@@ -41,18 +39,14 @@
 
     <% if (req.query.err == "none") { %>
       <div class="rounded-xl bg-emerald-50 dark:bg-emerald-800/10 border border-emerald-200 dark:border-emerald-500/20 px-4 py-3 mb-4 flex items-center gap-3">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-emerald-500 shrink-0">
-          <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-        </svg>
+        <%- icon('check-circle', { size: 16, class: 'text-emerald-500 shrink-0' }) %>
         <p class="text-sm text-emerald-700 dark:text-emerald-400"><%= req.translations.actionCompleted %></p>
       </div>
     <% } %>
 
     <% if (nodes.some(n => n.status === 'Offline')) { %>
       <div class="rounded-xl bg-red-50 dark:bg-red-800/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-4 flex items-start gap-3">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-red-500 shrink-0 mt-0.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 3.014-1.874 2.148-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-        </svg>
+        <%- icon('triangle-alert', { size: 16, class: 'text-red-500 shrink-0' }) %>
         <div class="flex-1">
           <p class="text-sm font-medium text-red-700 dark:text-red-400">One or more nodes are offline</p>
           <button onclick="window.location.reload()" class="mt-1.5 px-3 py-1 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition">Retry</button>
@@ -114,7 +108,7 @@
   });
 
   function showConfirmModal(title, message, onConfirm) {
-    window.modal.confirm({ title, body: message, danger: true, confirmLabel: 'Delete', onConfirm });
+    window.modal.confirm({ title, body: message, danger: true, confirmLabel: 'Yeah, delete it', onConfirm });
   }
 
   async function deleteNode(nodeId) {
@@ -126,7 +120,7 @@
         });
         const result = await response.json();
         if (response.ok) {
-          showToast('Node deleted', 'success');
+          showToast('Node deleted.', 'success');
           window.location.reload();
         } else if (result.error === 'There are instances on the node') {
           showConfirmModal('Node has servers', 'There are servers on this node. Delete all servers and remove the node?', async () => {
@@ -135,7 +129,7 @@
               headers: { 'Content-Type': 'application/json' },
             });
             if (r2.ok) {
-              showToast('Node and servers deleted', 'success');
+              showToast('Node and servers deleted.', 'success');
               window.location.reload();
             } else {
               showToast('Failed to delete node', 'error');
@@ -145,7 +139,7 @@
           showToast(result.message || 'Failed to delete node', 'error');
         }
       } catch {
-        showToast('Request failed', 'error');
+        showToast('Request failed. Try again?', 'error');
       }
     });
   }

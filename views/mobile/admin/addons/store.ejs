@@ -348,16 +348,12 @@
           <p id="mMeta" style="font-size:11px;color:#525252;margin-top:3px;"></p>
         </div>
         <button id="mClose" style="flex-shrink:0;width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,0.06);border:none;display:flex;align-items:center;justify-content:center;color:#525252;cursor:pointer;">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:12px;height:12px;">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-          </svg>
+          <%- icon('x', { size: 16, class: 'shrink-0' }) %>
         </button>
       </div>
       <div class="m-actions">
         <button id="mActionBtn" class="btn-install">
-          <svg id="mActionIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-          </svg>
+          <%- icon('download', { size: 16, class: 'shrink-0' }) %>
           <span id="mActionLabel"><%= req.translations.install || 'Install' %></span>
         </button>
         <a id="mGhBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-gh">
@@ -737,7 +733,7 @@
           setActionBtn(true);
         }
       } catch {
-        showToast('An error occurred', 'error');
+        showToast('Something went wrong.', 'error');
         setActionBtn(true);
       }
       return;

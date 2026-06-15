@@ -133,13 +133,13 @@
       .then(function(data) {
         loader.close();
         if (data.success) {
-          showToast('Settings saved.', 'success');
+           showToast('Settings saved. Looking good.', 'success');
           setTimeout(function() { window.location.reload(); }, 1500);
         } else {
           showToast('Failed: ' + (data.error || 'Unknown error'), 'error');
         }
       })
-      .catch(function(err) { loader.close(); showToast('An error occurred.', 'error'); });
+       .catch(function(err) { loader.close(); showToast('Something went wrong.', 'error'); });
     });
 
     var deleteServerButton = document.getElementById('deleteServerButton');
@@ -187,11 +187,11 @@
                   loader.updateProgress(100, 'Reinstallation initiated!');
                   setTimeout(function() {
                     loader.close();
-                    if (data.success) { showToast('Reinstallation started. This may take a few minutes.', 'success'); }
+                     if (data.success) { showToast('Server reinstalling. This may take a while.', 'success'); }
                     else { showToast('Failed: ' + (data.error || 'Unknown error'), 'error'); }
                   }, 1000);
                 })
-                .catch(function() { loader.close(); showToast('An error occurred.', 'error'); });
+                 .catch(function() { loader.close(); showToast('Something went wrong.', 'error'); });
             }
           });
         }

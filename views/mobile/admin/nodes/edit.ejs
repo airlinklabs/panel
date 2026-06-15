@@ -77,7 +77,7 @@
 
           <button id="updateNodeBtn" type="button"
             class="w-full rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-900 px-4 py-3 text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-100 transition">
-            <%= req.translations.update %>
+            <%= req.translations.update || 'Save changes' %>
           </button>
 
         </div>
@@ -245,7 +245,7 @@
       });
 
       if (response.ok) {
-        showToast('Node updated successfully', 'success');
+        showToast('Node updated. Looking good.', 'success');
         setTimeout(() => { window.location.href = '/admin/nodes?err=none'; }, 1000);
       } else {
         throw new Error('Failed to update node');

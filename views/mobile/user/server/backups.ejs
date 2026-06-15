@@ -11,9 +11,7 @@
       <div class="flex gap-2 mt-3">
         <button id="createBackup" onclick="openCreateBackupModal()" type="button"
           class="flex items-center gap-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
+          <%- icon('plus', { size: 14, class: 'shrink-0' }) %>
           Create Backup
         </button>
       </div>
@@ -60,9 +58,7 @@
       </div>
       <% } else { %>
       <div class="px-4 py-10 text-center">
-        <svg class="mx-auto h-10 w-10 text-neutral-300 dark:text-neutral-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75"></path>
-        </svg>
+        <%- icon('database', { size: 16, class: 'text-neutral-600 shrink-0' }) %>
         <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">No backups yet</p>
         <p class="text-xs text-neutral-500 mt-1">Create your first backup to get started.</p>
       </div>
@@ -144,7 +140,7 @@ async function confirmCreateBackup() {
     clearInterval(interval);
     if (data.success) {
       loading.updateProgress(100);
-      showToast('Backup created!', 'success');
+      showToast('Backup created.', 'success');
       addBackupRow(data.backup);
     } else {
       loading.close();
@@ -169,7 +165,7 @@ function restoreBackup(id, name) {
       try {
         var res = await fetch('/server/' + serverUUID + '/backups/' + id + '/restore', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
         var data = await res.json();
-        if (data.success) { showToast('Backup restored!', 'success'); }
+        if (data.success) { showToast('Backup restored.', 'success'); }
         else { showToast(data.error || 'Failed to restore.', 'error'); }
       } catch(e) { showToast('Failed to restore.', 'error'); }
       finally { hideLoading(); }

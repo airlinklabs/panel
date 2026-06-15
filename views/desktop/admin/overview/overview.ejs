@@ -52,15 +52,11 @@
             </div>
             <div class="flex gap-2">
               <button id="checkUpdateBtn" class="rounded-xl bg-neutral-200 dark:bg-neutral-700/60 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border border-neutral-300 dark:border-white/5 px-3 py-2 text-sm font-medium transition-colors flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-                </svg>
+                <%- icon('refresh-cw', { size: 16, class: 'shrink-0' }) %>
                 Check Updates
               </button>
               <button id="performUpdateBtn" class="hidden rounded-xl bg-neutral-200 dark:bg-neutral-700/60 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border border-neutral-300 dark:border-white/5 px-3 py-2 text-sm font-medium transition-colors items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
+                <%- icon('download', { size: 16, class: 'shrink-0' }) %>
                 <%= req.translations.update || 'Update' %>
               </button>
             </div>
@@ -100,9 +96,7 @@
 
           <a href="https://airlinklabs.xyz/" target="_blank" rel="noopener noreferrer" class="group rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors">
             <div class="flex items-center gap-2 mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-neutral-500 dark:text-neutral-400 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
-              </svg>
+              <%- icon('book-open', { size: 16, class: 'text-neutral-500 dark:text-neutral-400 shrink-0' }) %>
               <p class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Docs</p>
             </div>
             <p class="text-xs text-neutral-500">Usage and configuration guides</p>
@@ -120,10 +114,7 @@
 
           <a href="https://ko-fi.com/airlinklabs#checkoutModal" class="group rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors">
             <div class="flex items-center gap-2 mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-neutral-500 dark:text-neutral-400 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
-              </svg>
+              <%- icon('credit-card', { size: 16, class: 'text-neutral-500 dark:text-neutral-400 shrink-0' }) %>
               <p class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Support</p>
             </div>
             <p class="text-xs text-neutral-500">Fund Airlink development</p>
@@ -200,7 +191,7 @@
         } catch (error) {
           statusDiv.innerHTML = '<span class="text-red-500">Update failed.</span>';
           fadeIn(statusDiv);
-          showToast('Error performing update', 'error');
+          showToast('Update failed. Check the logs.', 'error');
         }
       }
     });

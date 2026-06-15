@@ -15,9 +15,7 @@
         </div>
         <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
           <a href="/admin/users" class="inline-flex items-center rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
+            <%- icon('chevron-right', { size: 16, class: 'mr-2 rotate-180' }) %>
             <%= req.translations.back || 'Back to Users' %>
           </a>
         </div>
@@ -42,7 +40,8 @@
 
                 <!-- Username -->
                 <div>
-                  <label for="username" class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                  <label for="username" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                    <%- icon('user', { size: 14, class: 'shrink-0' }) %>
                     <%= req.translations.username || 'Username' %>
                   </label>
                   <input
@@ -57,7 +56,8 @@
 
                 <!-- Email -->
                 <div>
-                  <label for="email" class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                  <label for="email" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                    <%- icon('mail', { size: 14, class: 'shrink-0' }) %>
                     <%= req.translations.email || 'Email' %>
                   </label>
                   <input
@@ -92,7 +92,8 @@
 
                 <!-- Password -->
                 <div>
-                  <label for="password" class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                  <label for="password" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                    <%- icon('lock', { size: 14, class: 'shrink-0' }) %>
                     <%= req.translations.newPassword || 'New Password' %> <span class="text-neutral-400 text-xs">(<%= req.translations.leaveBlankToKeep || 'Leave blank to keep current password' %>)</span>
                   </label>
                   <input
@@ -148,7 +149,7 @@
               <p class="text-xs text-neutral-500 mb-4">Leave blank to use the global defaults set in Admin &rarr; Settings &rarr; Servers.</p>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">Server limit</label>
+                  <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> Server limit</label>
                   <input type="number" id="serverLimit" name="serverLimit" min="0" max="100"
                     value="<%= dataUser.serverLimit !== null && dataUser.serverLimit !== undefined ? dataUser.serverLimit : '' %>"
                     placeholder="Use global default"
@@ -156,21 +157,21 @@
                   <p class="mt-1 text-xs text-neutral-500">Max servers this user can create. 0 = cannot create.</p>
                 </div>
                 <div>
-                  <label class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">Max memory <span class="text-neutral-400 font-normal text-xs">(MB)</span></label>
+                  <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> Max memory <span class="text-neutral-400 font-normal text-xs">(MB)</span></label>
                   <input type="number" id="maxMemory" name="maxMemory" min="128" max="65536"
                     value="<%= dataUser.maxMemory !== null && dataUser.maxMemory !== undefined ? dataUser.maxMemory : '' %>"
                     placeholder="Use global default"
                     class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm w-full px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-400 dark:placeholder:text-white/30 border border-neutral-800/10 dark:border-white/5">
                 </div>
                 <div>
-                  <label class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">Max CPU <span class="text-neutral-400 font-normal text-xs">(%)</span></label>
+                  <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> Max CPU <span class="text-neutral-400 font-normal text-xs">(%)</span></label>
                   <input type="number" id="maxCpu" name="maxCpu" min="10" max="10000"
                     value="<%= dataUser.maxCpu !== null && dataUser.maxCpu !== undefined ? dataUser.maxCpu : '' %>"
                     placeholder="Use global default"
                     class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm w-full px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-400 dark:placeholder:text-white/30 border border-neutral-800/10 dark:border-white/5">
                 </div>
                 <div>
-                  <label class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">Max storage <span class="text-neutral-400 font-normal text-xs">(GB)</span></label>
+                  <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('database', { size: 14, class: 'shrink-0' }) %> Max storage <span class="text-neutral-400 font-normal text-xs">(GB)</span></label>
                   <input type="number" id="maxStorage" name="maxStorage" min="1" max="10000"
                     value="<%= dataUser.maxStorage !== null && dataUser.maxStorage !== undefined ? dataUser.maxStorage : '' %>"
                     placeholder="Use global default"

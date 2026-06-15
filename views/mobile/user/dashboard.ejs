@@ -21,7 +21,7 @@
 
     <% if (req.query.err === "NOTACTIVEYET") { %>
       <div class="rounded-xl bg-amber-50 dark:bg-amber-800/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-4">
-        <p class="text-sm font-medium text-amber-700 dark:text-amber-400"><%= req.translations.awaitingInstallation || 'Awaiting Installation' %></p>
+        <p class="text-sm font-medium text-amber-700 dark:text-amber-400"><%= req.translations.awaitingInstallation || "This server's still getting its act together. Check back in a moment." %></p>
         <p class="text-xs text-amber-600 dark:text-amber-400/60 mt-0.5"><%= req.translations.awaitingInstallationDesc || "The server isn't installed yet or is in a failed state." %></p>
       </div>
     <% } %>
@@ -71,7 +71,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-20 w-20 text-neutral-300 dark:text-neutral-600 mb-4">
           <path fill-rule="evenodd" d="M11.622 1.602a.75.75 0 0 1 .756 0l2.25 1.313a.75.75 0 0 1-.756 1.295L12 3.118 10.128 4.21a.75.75 0 1 1-.756-1.295l2.25-1.313ZM5.898 5.81a.75.75 0 0 1-.27 1.025l-1.14.665 1.14.665a.75.75 0 1 1-.756 1.295L3.75 8.806v.944a.75.75 0 0 1-1.5 0V7.5a.75.75 0 0 1 .372-.648l2.25-1.312a.75.75 0 0 1 1.026.27Zm12.204 0a.75.75 0 0 1 1.026-.27l2.25 1.312a.75.75 0 0 1 .372.648v2.25a.75.75 0 0 1-1.5 0v-.944l-1.122.654a.75.75 0 1 1-.756-1.295l1.14-.665-1.14-.665a.75.75 0 0 1-.27-1.025Zm-9 5.25a.75.75 0 0 1 1.026-.27L12 11.882l1.872-1.092a.75.75 0 1 1 .756 1.295l-1.878 1.096V15a.75.75 0 0 1-1.5 0v-1.82l-1.878-1.095a.75.75 0 0 1-.27-1.025Z" clip-rule="evenodd" />
         </svg>
-        <h2 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.noServersYet || 'No servers yet' %></h2>
+        <h2 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.noServersYet || "It's quiet here — suspiciously quiet." %></h2>
         <p class="text-sm text-neutral-500 mt-1">
           <% if (user.isAdmin) { %>
             <a href="/admin/servers/create" class="text-blue-500"><%= req.translations.createOneNow || 'Create one now' %></a>
@@ -264,7 +264,7 @@
     const r = await fetch('/api/folders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
     const d = await r.json();
     confirmNewFolder.disabled = false;
-    if (d.success) location.reload(); else showToast(d.error || 'Failed', 'error');
+    if (d.success) location.reload(); else showToast(d.error || 'Something went wrong.', 'error');
   });
 
   // Open folder popup (tap folder card)
@@ -302,7 +302,7 @@
             const r = await fetch('/api/folders/servers/' + uuid, { method: 'DELETE' });
             const d = await r.json();
             if (d.success) { document.getElementById('folderOverlay').classList.add('hidden'); showToast('Removed.', 'success'); setTimeout(() => location.reload(), 600); }
-            else showToast(d.error || 'Failed', 'error');
+            else showToast(d.error || 'Something went wrong.', 'error');
           });
           content.appendChild(row);
         });
@@ -334,7 +334,7 @@
     const d = await r.json();
     btn.disabled = false;
     document.getElementById('deleteFolderSheet').classList.add('hidden');
-    if (d.success) location.reload(); else showToast(d.error || 'Failed to delete folder', 'error');
+    if (d.success) location.reload(); else showToast(d.error || "Couldn't delete the folder.", 'error');
   });
 
   // Long-press on server cards
@@ -386,7 +386,7 @@
     document.getElementById('longPressSheet').classList.add('hidden');
     const r = await fetch('/api/folders/servers/' + activeServerUUID, { method: 'DELETE' });
     const d = await r.json();
-    if (d.success) location.reload(); else showToast(d.error || 'Failed', 'error');
+    if (d.success) location.reload(); else showToast(d.error || 'Something went wrong.', 'error');
   });
 
   function showFolderPickDialog(uuid) {
@@ -402,7 +402,7 @@
         b.addEventListener('click', async () => {
           const r = await fetch('/api/folders/' + f.id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: uuid }) });
           const d = await r.json();
-          if (d.success) location.reload(); else showToast(d.error || 'Failed', 'error');
+          if (d.success) location.reload(); else showToast(d.error || 'Something went wrong.', 'error');
         });
         list.appendChild(b);
       });

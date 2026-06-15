@@ -13,9 +13,9 @@
               <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
             </span>
             <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-              <% if (typeof serverStatus.uptime !== 'undefined') { %>
+              <% if (serverStatus.uptime != null && typeof serverStatus.uptime === 'number') { %>
                 Uptime: <span id="uptime-display"><%= formatUptime(serverStatus.uptime) %></span>
-                <% if (typeof serverStatus.startedAt !== 'undefined' && serverStatus.startedAt) { %>
+                <% if (serverStatus.startedAt) { %>
                   <span id="server-started-at" class="hidden"><%= serverStatus.startedAt %></span>
                 <% } %>
               <% } else { %>

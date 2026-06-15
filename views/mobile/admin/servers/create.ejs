@@ -7,7 +7,7 @@
 <div class="flex items-start justify-between mb-5">
         <div class="sm:flex-auto">
             <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminCreateServerTitle %></h1>
-            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminCreateServerText %></p>
+            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminCreateServerText || 'Spin up something new. Naming it is half the fun.' %></p>
         </div>
       </div>
 
@@ -19,7 +19,7 @@
             <div class="grid grid-cols-1 gap-4 mb-6">
               <div>
                 <label for="serverName" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+                  <%- icon('file', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.name %>:</label>
                 <div class="flex items-center space-x-2">
                     <input id="serverName" name="name" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server">
@@ -33,14 +33,14 @@
 
               <div>
                 <label for="serverDescription" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                  <%- icon('file', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.description %>:</label>
                 <input id="serverDescription" name="description" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server description">
               </div>
 
               <div>
                 <label for="serverUser" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <%- icon('user', { size: 16, class: 'shrink-0' }) %>
                   <%= req.translations.user %>:</label>
                 <select id="serverUser" name="ownerId" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
                   <% users.forEach(user => { %>
@@ -51,7 +51,7 @@
 
               <div>
                 <label for="serverNode" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><path d="M6 18h.01"/><path d="M10 18h.01"/></svg>
+                  <%- icon('server', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Node %>:
                 </label>
                 <div class="relative mt-2 mb-4">
@@ -74,7 +74,7 @@
             <div class="grid grid-cols-1 gap-4 mb-6">
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+                  <%- icon('settings', { size: 14, class: 'shrink-0' }) %>
                   CPU:
                 </label>
                 <input type="hidden" id="serverCPU" name="Cpu" value="100">
@@ -90,7 +90,7 @@
 
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 19v-3"/><path d="M10 19v-3"/><path d="M14 19v-3"/><path d="M18 19v-3"/><path d="M8 11V9"/><path d="M16 11V9"/><path d="M12 11V9"/><path d="M2 15h20"/><path d="M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1.1a2 2 0 0 0 0 3.837V15H2v-3.063a2 2 0 0 0 0-3.837Z"/></svg>
+                  <%- icon('server', { size: 14, class: 'shrink-0' }) %>
                   Memory:
                 </label>
                 <input type="hidden" id="serverMemory" name="Memory" value="1024">
@@ -107,7 +107,7 @@
 
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+                  <%- icon('database', { size: 14, class: 'shrink-0' }) %>
                   Storage:
                 </label>
                 <input type="hidden" id="serverStorage" name="Storage" value="20480">
@@ -128,7 +128,7 @@
             <div class="grid grid-cols-1 gap-4 mb-6">
               <div>
                 <label for="serverImage" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                  <%- icon('database', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Image %>:</label>
                 <select id="serverImage" name="imageId"
                         class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
@@ -152,11 +152,11 @@
 
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8z"/></svg>
+                  <%- icon('cloud-download', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Ports %>:</label>
                 <input type="hidden" id="serverPorts" name="Ports">
           <button type="button" id="assignPortsBtn" class="mt-2 mb-4 w-full inline-flex items-center gap-2 rounded-xl bg-neutral-100 dark:bg-neutral-700/30 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white px-4 py-2.5 text-sm font-medium border border-neutral-200 dark:border-white/5 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8z"/></svg>
+            <%- icon('cloud-download', { size: 14, class: 'shrink-0' }) %>
             Assign ports
           </button>
               </div>
@@ -195,7 +195,7 @@
             <!-- Submit Button -->
             <div class="col-span-2">
                 <button type="submit" class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
-                    <%= req.translations.create %>
+                    <%= req.translations.create || 'Create server' %>
                   </button>
               </div>
           </form>
@@ -210,7 +210,7 @@
     <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700/60 px-4 py-3">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
       <button type="button" id="closePortsModal" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>
     <div class="max-h-[64vh] overflow-y-auto p-4">

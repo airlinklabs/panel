@@ -294,9 +294,7 @@
         <!-- Search + filters row -->
         <div class="flex items-center gap-3 mb-5 flex-wrap">
           <div class="relative">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600 pointer-events-none">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
+            <%- icon('search', { class: 'w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600 pointer-events-none', strokeWidth: 1.5 }) %>
             <input id="searchInput" type="text" placeholder="<%= req.translations.searchAddons || 'Search addons...' %>"
               class="bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl pl-8 pr-4 py-1.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-600 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition w-56" />
           </div>
@@ -311,9 +309,7 @@
 
         <!-- Error -->
         <div id="storeError" class="hidden py-16 text-center">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-9 h-9 text-neutral-800 mx-auto mb-3">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-          </svg>
+          <%- icon('triangle-alert', { class: 'w-9 h-9 text-neutral-800 mx-auto mb-3', strokeWidth: 1 }) %>
           <p id="storeErrorMsg" class="text-sm text-neutral-600">Failed to load addon store.</p>
           <button onclick="loadStore()" class="mt-2 text-xs text-neutral-700 hover:text-neutral-400 transition underline">Retry</button>
         </div>
@@ -347,24 +343,18 @@
           <p id="mMeta" class="text-xs text-neutral-600 mt-0.5"></p>
         </div>
         <button id="mClose" class="flex-shrink-0 w-6 h-6 rounded-md bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 flex items-center justify-center text-neutral-500 hover:text-neutral-800 dark:hover:text-white transition">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-          </svg>
+          <%- icon('x', { class: 'w-3.5 h-3.5', strokeWidth: 2 }) %>
         </button>
       </div>
 
       <!-- Action buttons -->
       <div class="flex gap-2 mt-3">
         <button id="mActionBtn" class="m-btn-install">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-          </svg>
+          <%- icon('download', { class: 'w-3.5 h-3.5', strokeWidth: 1.5 }) %>
           <span id="mActionLabel"><%= req.translations.install || 'Install' %></span>
         </button>
         <a id="mGhBtn" href="#" target="_blank" rel="noopener noreferrer" class="m-btn-gh">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/>
-          </svg>
+          <%- icon('github', { class: 'w-3.5 h-3.5' }) %>
           GitHub
         </a>
       </div>
@@ -628,7 +618,7 @@
     if (addon.installNote) {
       const note = document.createElement('div');
       note.className = 'm-note';
-      note.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="s-note-icon"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg><span>${esc(addon.installNote)}</span>`;
+      note.innerHTML = `            <%- icon('circle-info', { class: 's-note-icon', strokeWidth: 1.5 }) %><span>${esc(addon.installNote)}</span>`;
       stepsEl.appendChild(note);
     }
 
@@ -728,7 +718,7 @@
           setActionBtn(true);
         }
       } catch {
-        showToast('An error occurred', 'error');
+        showToast('Something went wrong.', 'error');
         setActionBtn(true);
       }
       return;

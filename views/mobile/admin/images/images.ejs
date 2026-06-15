@@ -19,9 +19,7 @@
           Upload
         </button>
         <button onclick="openModal('createModal')" type="button" class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 dark:bg-neutral-800 border border-neutral-700/40 px-3 py-2 text-xs font-medium text-neutral-300 hover:bg-neutral-800 dark:hover:bg-neutral-700 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
+          <%- icon('plus', { size: 14, class: 'shrink-0' }) %>
           Create
         </button>
       </div>
@@ -33,9 +31,7 @@
         <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
           <div class="flex items-center gap-3 mb-3">
             <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 flex items-center justify-center shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-neutral-500">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-              </svg>
+              <%- icon('image', { size: 16, class: 'text-neutral-500 shrink-0' }) %>
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= image.name %></p>
@@ -57,9 +53,7 @@
 
       <% if (images.length === 0) { %>
         <div class="py-16 text-center">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-10 h-10 mx-auto mb-3 text-neutral-300 dark:text-neutral-700">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-          </svg>
+          <%- icon('image', { size: 16, class: 'text-neutral-700 shrink-0' }) %>
           <p class="text-sm text-neutral-500">No images yet</p>
         </div>
       <% } %>
@@ -77,9 +71,7 @@
         <p class="text-xs text-neutral-500 mt-0.5">Configure Docker images and variables after creation.</p>
       </div>
       <button onclick="closeModal('createModal')" class="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition ml-3">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-        </svg>
+        <%- icon('x', { size: 14, class: 'shrink-0' }) %>
       </button>
     </div>
 
@@ -149,9 +141,7 @@
       </div>
 
       <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-3 py-2.5 flex items-start gap-2.5">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 text-neutral-400 shrink-0 mt-0.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
-        </svg>
+        <%- icon('play-circle', { size: 14, class: 'text-neutral-400 shrink-0' }) %>
         <p class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">You'll be taken to the editor to add Docker images, variables, and scripts after creation.</p>
       </div>
 
@@ -211,14 +201,14 @@
       try {
         const response = await fetch(`/admin/images/delete/${imageId}`, { method: 'DELETE' });
         if (response.ok) {
-          showToast('Image deleted', 'success');
+          showToast('Image deleted.', 'success');
           setTimeout(() => location.reload(), 800);
         } else {
           const msg = await response.text();
           showToast(msg || 'Failed to delete image', 'error');
         }
       } catch {
-        showToast('An error occurred', 'error');
+        showToast('Something went wrong.', 'error');
       }
     });
   }
@@ -246,7 +236,7 @@
             xhr.onload = () => {
               if (xhr.status === 200) {
                 const res = JSON.parse(xhr.responseText);
-                showToast(res.message || 'Uploaded', 'success');
+                showToast(res.message || 'Image uploaded.', 'success');
                 setTimeout(() => location.reload(), 800);
               } else {
                 try {

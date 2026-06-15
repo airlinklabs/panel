@@ -190,7 +190,7 @@
         <span id="grpCount" class="text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap"></span>
       </div>
       <button onclick="closeGroup()" class="ml-3 shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>
     <div class="modal-two-col">
@@ -215,7 +215,7 @@
         <span id="eggCat" class="text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap"></span>
       </div>
       <button onclick="closeEgg()" class="ml-3 shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>
     <div class="modal-single-body">
@@ -456,7 +456,7 @@ async function confirmInstall() {
       show('eggErr'); btn.disabled = false; btn.textContent = 'Install'; return;
     }
     closeEgg();
-    showToast('"' + pendingEgg.name + '" installed.', 'success');
+    showToast('"' + pendingEgg.name + '" installed. Nice.', 'success');
   } catch (err) {
     document.getElementById('eggErrTxt').textContent = err.message || 'Network error.';
     show('eggErr'); btn.disabled = false; btn.textContent = 'Install';

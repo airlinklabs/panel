@@ -22,37 +22,15 @@
 
 <%
 function getFileIcon(category) {
-  const icons = {
-    'Configuration Files': `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-      <path fill-rule="evenodd" d="M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6Zm14.25 6a.75.75 0 0 1-.22.53l-2.25 2.25a.75.75 0 1 1-1.06-1.06L15.44 12l-1.72-1.72a.75.75 0 1 1 1.06-1.06l2.25 2.25c.141.14.22.331.22.53Zm-10.28-.53a.75.75 0 0 0 0 1.06l2.25 2.25a.75.75 0 1 0 1.06-1.06L8.56 12l1.72-1.72a.75.75 0 1 0-1.06-1.06l-2.25 2.25Z" clip-rule="evenodd" />
-    </svg>
-    `,
-    'Documents': `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-      <path fill-rule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clip-rule="evenodd" />
-      <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-    </svg>
-    `,
-    'Folder': `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-      <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 9h-15a4.483 4.483 0 0 0-3 1.146Z" />
-    </svg>
-    `,
-    'Images': `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-      <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z" clip-rule="evenodd" />
-    </svg>
-    `,
-    'No Category': `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-      <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
-      <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-    </svg>
-    `,
+  const iconNames = {
+    'Configuration Files': 'file-code',
+    'Documents': 'file-text',
+    'Folder': 'folder',
+    'Images': 'image',
+    'No Category': 'file',
   };
-
-  return icons[category] || icons['No Category'];
+  const name = iconNames[category] || 'file';
+  return `<span class="al-file-icon size-6">${icon(name, { class: 'size-6' })}</span>`;
 }
 
 // Function to check if a file is an image based on extension
@@ -79,18 +57,13 @@ function isImageFile(filename) {
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex gap-2.5">
           <button id="createFile" onclick="openCreateFileModal()" type="button"
               class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2 mr-2">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 inline-flex mr-1 text-neutral-800 mb-0.5">
-                <path fill-rule="evenodd" d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875ZM12.75 12a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V18a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V12Z" clip-rule="evenodd" />
-                <path d="M14.25 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Z" />
-              </svg>
+              <%- icon('file-plus', { class: 'size-4 inline-flex mr-1 text-neutral-800 mb-0.5' }) %>
               New File
           </button>
 
           <button id="uploadFile" onclick="openUploadFileModal()" type="button"
               class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 inline-flex mr-1 text-neutral-800 mb-0.5">
-                <path fill-rule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1-1.06 1.06l-3.22-3.22V16.5a.75.75 0 0 1-1.5 0V4.81L8.03 8.03a.75.75 0 0 1-1.06-1.06l4.5-4.5ZM3 15.75a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
-              </svg>
+              <%- icon('upload', { class: 'size-4 inline-flex mr-1 text-neutral-800 mb-0.5' }) %>
               Upload File
           </button>
 
@@ -112,9 +85,7 @@ function isImageFile(filename) {
       <% if (typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message) { %>
       <div class="mx-8 mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center">
         <div class="flex-shrink-0 mr-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
+          <%- icon('triangle-alert', { class: 'h-6 w-6 text-red-500', strokeWidth: 2 }) %>
         </div>
         <div>
           <h3 class="text-sm font-medium text-red-500">Connection Error</h3>
@@ -133,12 +104,10 @@ function isImageFile(filename) {
           <div class="bg-neutral-100 dark:bg-neutral-800/30 rounded-xl p-8 text-center">
             <div class="flex justify-center mb-6">
               <div class="w-16 h-16 rounded-full bg-neutral-200 dark:bg-neutral-700/50 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m3 3 8.735 8.735m0 0a.374.374 0 1 1 .53.53m-.53-.53.53.53m0 0L21 21M14.652 9.348a3.75 3.75 0 0 1 0 5.304m2.121-7.425a6.75 6.75 0 0 1 0 9.546m2.121-11.667c3.808 3.807 3.808 9.98 0 13.788m-9.546-4.242a3.733 3.733 0 0 1-1.06-2.122m-1.061 4.243a6.75 6.75 0 0 1-1.625-6.929m-.496 9.05c-3.068-3.067-3.664-7.67-1.79-11.334M12 12h.008v.008H12V12Z" />
-              </svg>
+              <%- icon('wifi-off', { class: 'size-6', strokeWidth: 1.5 }) %>
               </div>
             </div>
-            <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300">Daemon Offline</h2>
+            <h2 class="text-xl font-semibold text-neutral-700 dark:text-neutral-300">Node's gone quiet — file management is on hold until it's back.</h2>
             <p class="mt-2 text-sm text-neutral-500 max-w-md mx-auto">
               The daemon appears to be offline. File management is unavailable until the connection is restored.
             </p>
@@ -181,13 +150,28 @@ function isImageFile(filename) {
           %>
         </nav>
        </div>
-            <thead class="border-b border-neutral-200 dark:border-neutral-700/40">
+       <!-- Search/filter bar -->
+       <div class="px-4 py-2 border-b border-neutral-100 dark:border-neutral-700/30 flex items-center gap-2">
+         <%- icon('search', { size: 14, class: 'text-neutral-400 shrink-0' }) %>
+         <input
+           id="fileSearchInput"
+           type="text"
+           placeholder="Filter files…"
+           class="flex-1 bg-transparent text-sm text-neutral-700 dark:text-neutral-300 placeholder:text-neutral-400 focus:outline-none"
+           autocomplete="off"
+           spellcheck="false">
+         <button id="clearFileSearch" class="hidden text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-0.5 rounded transition">
+           <%- icon('x', { size: 12 }) %>
+         </button>
+       </div>
+       <thead class="border-b border-neutral-200 dark:border-neutral-700/40">
               <tr>
                 <th class="px-4 py-2.5 text-left w-10">
                   <input type="checkbox" id="selectAll" class="form-checkbox h-4 w-4 text-neutral-500 bg-neutral-100 dark:bg-white/10 border border-neutral-300 dark:border-white/15 rounded transition file-checkbox">
                 </th>
                 <th class="px-4 py-2.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-500">Name</th>
                 <th class="px-4 py-2.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-500 w-24">Size</th>
+                <th class="px-4 py-2.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-500 w-32 hidden md:table-cell">Modified</th>
               </tr>
             </thead>
             <tbody>
@@ -228,36 +212,55 @@ function isImageFile(filename) {
                   <td class="px-4 py-3 text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap">
                     <%= fileSize %>
                   </td>
+                  <td class="px-4 py-3 text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap hidden md:table-cell">
+                    <% if (file.modifiedAt) { %>
+                      <time datetime="<%= new Date(file.modifiedAt).toISOString() %>" class="relative-time"><%= new Date(file.modifiedAt).toLocaleDateString() %></time>
+                    <% } else { %>
+                      <span class="text-neutral-300 dark:text-neutral-600">—</span>
+                    <% } %>
+                  </td>
                     <div id="dropdown-<%= file.name %>" class="al-file-menu fixed w-44 rounded-xl shadow-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/60 z-50 transform opacity-0 scale-95 transition-all duration-150 ease-out pointer-events-none overflow-hidden">
                       <div class="py-1" role="menu">
                         <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
                           onclick="rename('<%= file.name %>', '<%= currentPath && currentPath !== "/" ? currentPath.replace(/^\/+/, "") + "/" + file.name : file.name %>')">
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-3.5 h-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z" /></svg>
+                          <%- icon('pencil', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                           Rename
                         </button>
                         <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
                           onclick="copyFilePath('<%= currentPath && currentPath !== "/" ? currentPath.replace(/^\/+/, "") + "/" + file.name : file.name %>')">
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-3.5 h-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" /></svg>
+                          <%- icon('copy', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                           Copy Path
                         </button>
+                        <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
+                          onclick="openMoveModal('<%= file.name %>', '<%= currentPath && currentPath !== "/" ? currentPath.replace(/^\/+/, "") + "/" + file.name : file.name %>')">
+                          <%- icon('move', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
+                          Move to…
+                        </button>
+                        <% if (file.type !== 'directory') { %>
+                        <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
+                          onclick="duplicateFile('<%= file.name %>', '<%= currentPath && currentPath !== "/" ? currentPath.replace(/^\/+/, "") + "/" + file.name : file.name %>')">
+                          <%- icon('copy', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
+                          Duplicate
+                        </button>
+                        <% } %>
                         <% if (file.type !== "directory") { %>
                           <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
                             onclick="downloadfile('<%= file.name %>', '<%= currentPath && currentPath !== "/" ? currentPath.replace(/^\/+/, "") + "/" + file.name : file.name %>')">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-3.5 h-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                            <%- icon('download', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                             Download
                           </button>
                         <% } %>
                         <% if (file.name.toLowerCase().endsWith(".zip")) { %>
                           <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
                             onclick="extractZip('<%= file.name %>', '<%= currentPath && currentPath !== "/" ? currentPath.replace(/^\/+/, "") + "/" + file.name : file.name %>')">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-3.5 h-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15" /></svg>
+                            <%- icon('file-archive', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                             Extract Here
                           </button>
                         <% } %>
                         <div class="mx-2 my-1 border-t border-neutral-100 dark:border-neutral-700/60"></div>
                         <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-left"
                           onclick="deletefile('<%= file.name %>', '<%= currentPath && currentPath !== "/" ? currentPath.replace(/^\/+/, "") + "/" + file.name : file.name %>')">
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-3.5 h-3.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+                          <%- icon('trash-2', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                           Delete
                         </button>
                       </div>
@@ -275,24 +278,63 @@ function isImageFile(filename) {
 
    <!-- Floating Action Bar (only show when daemon is online) -->
    <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-   <div id="floatingActionBar" class="fixed bottom-0 w-full bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700 z-50 backdrop-blur text-neutral-800 dark:text-white py-4 px-6 transform transition-transform duration-300 ease-in-out flex justify-between items-center translate-y-full">
-    <span id="selectedFilesCount">0 files selected</span>
-    <div class="flex gap-4">
-        <button id="massRenameBtn" class="w-full md:w-auto rounded-xl bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 text-neutral-800 dark:text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
-            Rename
-        </button>
-        <button id="massArchiveBtn" class="w-full md:w-auto rounded-xl bg-neutral-700 dark:bg-neutral-600 hover:bg-neutral-600 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
-            Archive
-        </button>
-        <button id="massDeleteBtn" class="w-full md:w-auto rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
-            Delete
-        </button>
-    </div>
-</div>
+   <div id="floatingActionBar" class="fixed bottom-0 right-0 bg-white dark:bg-[#1a1a1a] border-t border-neutral-200 dark:border-white/5 z-40 backdrop-blur-sm text-neutral-800 dark:text-white py-3.5 px-6 flex items-center justify-between gap-4 translate-y-full transition-transform duration-300 ease-out shadow-lg" style="left: 240px;">
+     <div class="flex items-center gap-2.5">
+       <%- icon('check-square', { size: 15, class: 'text-neutral-400 shrink-0' }) %>
+       <span id="selectedFilesCount" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">0 files selected</span>
+     </div>
+     <div class="flex items-center gap-2">
+       <button id="massRenameBtn"
+         class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 px-3 py-1.5 text-xs font-medium transition">
+         <%- icon('pencil', { size: 13, class: 'shrink-0' }) %>
+         Rename
+       </button>
+       <button id="massArchiveBtn"
+         class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-800 dark:bg-neutral-700 hover:bg-neutral-700 dark:hover:bg-neutral-600 text-white px-3 py-1.5 text-xs font-medium transition">
+         <%- icon('file-archive', { size: 13, class: 'shrink-0' }) %>
+         Archive
+       </button>
+       <button id="massDeleteBtn"
+         class="inline-flex items-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 text-xs font-medium transition">
+         <%- icon('trash-2', { size: 13, class: 'shrink-0' }) %>
+         Delete
+       </button>
+       <button id="dismissSelectionBtn"
+         class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition ml-1"
+         title="Deselect all">
+         <%- icon('x', { size: 13 }) %>
+       </button>
+     </div>
+   </div>
    <% } %>
- <!-- Mass Delete Confirmation Modal -->
- <div id="massDeleteModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200">
-    <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-2xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-200">
+  <!-- Move file modal -->
+  <div id="moveModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
+    <div class="bg-white dark:bg-[#1c1c1c] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-white/5 shadow-xl scale-95 transition-transform duration-200 sm:mx-4">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5">
+        <div>
+          <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Move file</h2>
+          <p class="text-xs text-neutral-500 mt-0.5">Enter the destination path. Use / for subdirectories.</p>
+        </div>
+        <button onclick="closeMoveModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+          <%- icon('x', { size: 16 }) %>
+        </button>
+      </div>
+      <div class="px-5 py-4">
+        <input type="hidden" id="moveSourcePath">
+        <input type="text" id="moveDestPath"
+          class="w-full px-3 py-2.5 rounded-xl text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono transition"
+          placeholder="path/to/destination/">
+      </div>
+      <div class="flex gap-2 px-5 pb-5 justify-end">
+        <button onclick="closeMoveModal()" class="px-4 py-2 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition">Cancel</button>
+        <button onclick="confirmMove()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">Move</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mass Delete Confirmation Modal -->
+ <div id="massDeleteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
+    <div class="bg-white dark:bg-[#1c1c1c] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-200">
       <div class="px-5 pt-5 pb-4">
         <p class="text-sm font-semibold text-neutral-800 dark:text-white">Confirm Mass Deletion</p>
         <p id="massDeleteMessage" class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed"></p>
@@ -304,15 +346,15 @@ function isImageFile(filename) {
     </div>
  </div>
     <!-- Create file / folder modal -->
-  <div id="createFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200">
-    <div class="bg-white dark:bg-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-neutral-700/60 shadow-2xl transform scale-95 transition-transform duration-200 sm:mx-4">
+  <div id="createFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
+    <div class="bg-white dark:bg-[#1c1c1c] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-white/5 shadow-xl transform scale-95 transition-transform duration-200 sm:mx-4">
       <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
         <div>
           <h2 id="createModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white">New File</h2>
           <p id="createModalHint" class="text-xs text-neutral-500 mt-0.5">Use / to create files inside new folders.</p>
         </div>
         <button onclick="closeCreateFileModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          <%- icon('x', { class: 'w-4 h-4', strokeWidth: 2 }) %>
         </button>
       </div>
       <div class="px-5 py-4">
@@ -330,16 +372,14 @@ function isImageFile(filename) {
   </div>
 
   <!-- Upload file -->
-  <div id="uploadFileModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-    <div class="bg-white rounded-xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300">
+  <div id="uploadFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 backdrop-blur-sm">
+    <div class="bg-white dark:bg-[#1c1c1c] rounded-2xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300 border border-neutral-200 dark:border-white/5 shadow-xl">
         <h2 class="text-2xl font-medium mb-1 text-neutral-800">Upload File</h2>
         <p class="mb-6 text-neutral-600">Select a file to upload to the current directory.</p>
         <div class="mb-4">
           <div class="mb-4">
             <label for="fileInput" class="w-full px-3 py-6 border-2 border-dashed border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition text-neutral-800 text-center cursor-pointer hover:bg-neutral-50 block" id="dropZone">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-10 h-10 mx-auto mb-2 text-neutral-400">
-                <path fill-rule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1-1.06 1.06l-3.22-3.22V16.5a.75.75 0 0 1-1.5 0V4.81L8.03 8.03a.75.75 0 0 1-1.06-1.06l4.5-4.5ZM3 15.75a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
-              </svg>
+              <%- icon('upload', { class: 'w-10 h-10 mx-auto mb-2 text-neutral-400', fill: 'currentColor', strokeWidth: 1 }) %>
               <p class="text-neutral-500">Drag & drop a file here or click to browse</p>
             </label>
             <input type="file" id="fileInput" class="hidden" onchange="handleFileInputChange(event)">
@@ -355,9 +395,7 @@ function isImageFile(filename) {
                 <p id="selectedFileSize" class="text-sm text-neutral-500"></p>
               </div>
               <button onclick="removeSelectedFile()" class="ml-2 text-neutral-400 hover:text-neutral-600">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                  <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z" clip-rule="evenodd" />
-                </svg>
+                <%- icon('x', { class: 'w-5 h-5' }) %>
               </button>
             </div>
           </div>
@@ -380,15 +418,15 @@ function isImageFile(filename) {
 <%- include('../../components/imageViewer')%>
 
 <!-- Rename Modal -->
-<div id="renameModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200">
-  <div class="bg-white dark:bg-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-neutral-700/60 shadow-2xl transform scale-95 transition-transform duration-200 sm:mx-4">
+<div id="renameModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
+  <div class="bg-white dark:bg-[#1c1c1c] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-white/5 shadow-xl transform scale-95 transition-transform duration-200 sm:mx-4">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
       <div>
         <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Rename</h2>
         <p class="text-xs text-neutral-500 mt-0.5">Use / to move the file into a different folder.</p>
       </div>
       <button onclick="closeRenameModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        <%- icon('x', { class: 'w-4 h-4' }) %>
       </button>
     </div>
     <div class="px-5 py-4">
@@ -477,7 +515,7 @@ function isImageFile(filename) {
       .then(response => {
         loader.close();
         if (response.ok) {
-          showToast(`File ${fileName} deleted successfully`, 'success');
+           showToast(`File ${fileName} deleted.`, 'success');
           setTimeout(() => location.reload(), 1000);
         } else {
           showToast('Failed to delete file', 'error');
@@ -486,7 +524,7 @@ function isImageFile(filename) {
       .catch(error => {
         loader.close();
         console.error('Error:', error);
-        showToast('An error occurred while deleting the file', 'error');
+        showToast('Something went wrong.', 'error');
       });
       }
     });
@@ -632,7 +670,7 @@ function archiveFiles(files) {
         setTimeout(() => {
             loader.close();
             if (data.success) {
-                showToast('Files archived successfully!', 'success');
+                showToast('Files archived.', 'success');
                 selectedFiles = [];
                 updateSelectedFiles();
                 setTimeout(() => location.reload(), 1000);
@@ -644,7 +682,7 @@ function archiveFiles(files) {
     .catch(error => {
         loader.close();
         console.error('Error:', error);
-        showToast('An error occurred while creating the archive', 'error');
+        showToast('Something went wrong.', 'error');
     });
 }
 
@@ -673,10 +711,10 @@ confirmMassDeleteBtn.addEventListener('click', async function() {
 
   try {
     await Promise.all(deletePromises);
-    loader.updateProgress(100, 'Files deleted successfully!');
+    loader.updateProgress(100, 'Files deleted.');
     setTimeout(() => {
       loader.close();
-      showToast(`${selectedFiles.length} files deleted successfully`, 'success');
+      showToast(`${selectedFiles.length} files deleted.`, 'success');
       setTimeout(() => window.location.reload(), 1000);
     }, 500);
   } catch (error) {
@@ -779,7 +817,7 @@ function openCreateFileModal() {
             loader.updateProgress(100, 'Files extracted successfully!');
             setTimeout(() => {
                 loader.close();
-                showToast('File extracted successfully', 'success');
+                showToast('File extracted.', 'success');
                 setTimeout(() => location.reload(), 1000);
             }, 500);
         } else {
@@ -965,7 +1003,7 @@ function openCreateFileModal() {
             loader.updateProgress(100, 'File uploaded successfully!');
             setTimeout(() => {
               loader.close();
-              showToast(`File ${fileName} uploaded successfully`, 'success');
+               showToast(`File ${fileName} uploaded.`, 'success');
               setTimeout(() => location.reload(), 1000);
             }, 500);
           } else {
@@ -1009,7 +1047,7 @@ function openCreateFileModal() {
       } catch (error) {
         loader.close();
         console.error('Error uploading file:', error);
-        showToast('An error occurred while uploading the file', 'error');
+         showToast('Something went wrong.', 'error');
       }
     } catch (error) {
       loader.close();
@@ -1211,7 +1249,7 @@ function openCreateFileModal() {
       });
       loader.close();
       if (res.ok) {
-        showToast('Renamed successfully', 'success');
+        showToast('Renamed.', 'success');
         setTimeout(() => location.reload(), 800);
       } else {
         showToast('Failed to rename', 'error');
@@ -1221,7 +1259,124 @@ function openCreateFileModal() {
 
   // ── Copy path ─────────────────────────────────────────────────────────────
   function copyFilePath(path) {
-    navigator.clipboard.writeText(path).then(() => showToast('Path copied', 'success'));
+    navigator.clipboard.writeText(path).then(() => showToast('Copied!', 'success'));
+  }
+
+  // ── Dismiss selection ────────────────────────────────────────────────────
+  document.getElementById('dismissSelectionBtn')?.addEventListener('click', () => {
+    document.querySelectorAll('.file-checkbox').forEach(cb => {
+      cb.checked = false;
+      const row = cb.closest('tr');
+      if (row) row.classList.remove('is-selected');
+    });
+    selectedFiles = [];
+    updateSelectedFiles();
+  });
+
+  // ── Keyboard shortcuts ───────────────────────────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    // Ctrl/Cmd+A — select all
+    if ((e.ctrlKey || e.metaKey) && e.key === 'a' && !e.target.closest('input, textarea')) {
+      e.preventDefault();
+      document.querySelectorAll('.file-checkbox').forEach(cb => {
+        cb.checked = true;
+        const row = cb.closest('tr');
+        if (row) row.classList.add('is-selected');
+        const name = cb.dataset.filename;
+        if (name && !selectedFiles.includes(name)) selectedFiles.push(name);
+      });
+      updateSelectedFiles();
+    }
+    // Escape — deselect all
+    if (e.key === 'Escape' && selectedFiles.length > 0) {
+      document.querySelectorAll('.file-checkbox').forEach(cb => {
+        cb.checked = false;
+        cb.closest('tr')?.classList.remove('is-selected');
+      });
+      selectedFiles = [];
+      updateSelectedFiles();
+    }
+    // Delete — mass delete selected
+    if (e.key === 'Delete' && selectedFiles.length > 0 && !e.target.closest('input, textarea')) {
+      document.getElementById('massDeleteBtn')?.click();
+    }
+  });
+
+  // ── File search/filter ───────────────────────────────────────────────────
+  (function initFileSearch() {
+    const input   = document.getElementById('fileSearchInput');
+    const clearBtn = document.getElementById('clearFileSearch');
+    if (!input) return;
+
+    input.addEventListener('input', () => {
+      const q = input.value.toLowerCase().trim();
+      clearBtn.classList.toggle('hidden', !q);
+      document.querySelectorAll('tbody tr.al-file-row').forEach(row => {
+        const name = row.querySelector('td:nth-child(2)')?.textContent?.toLowerCase() ?? '';
+        row.style.display = (!q || name.includes(q)) ? '' : 'none';
+      });
+    });
+
+    clearBtn.addEventListener('click', () => {
+      input.value = '';
+      input.dispatchEvent(new Event('input'));
+      input.focus();
+    });
+  })();
+
+  // ── Move file modal ──────────────────────────────────────────────────────
+  function openMoveModal(name, path) {
+    document.getElementById('moveSourcePath').value = path;
+    document.getElementById('moveDestPath').value   = '';
+    const modal = document.getElementById('moveModal');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.querySelector('div').classList.remove('scale-95');
+    modal.querySelector('div').classList.add('scale-100');
+    setTimeout(() => document.getElementById('moveDestPath').focus(), 80);
+  }
+  function closeMoveModal() {
+    const modal = document.getElementById('moveModal');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    modal.querySelector('div').classList.remove('scale-100');
+    modal.querySelector('div').classList.add('scale-95');
+  }
+  async function confirmMove() {
+    const src  = document.getElementById('moveSourcePath').value;
+    const dest = document.getElementById('moveDestPath').value.trim();
+    if (!dest) { showToast('Enter a destination path.', 'error'); return; }
+    try {
+      const res = await fetch(`/server/<%- server.UUID %>/files/rename`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
+        body:    JSON.stringify({ oldPath: src, newPath: dest }),
+      });
+      if (!res.ok) throw new Error('Move failed');
+      closeMoveModal();
+      showToast('File moved.', 'success');
+      setTimeout(() => location.reload(), 700);
+    } catch {
+      showToast('Move failed — check the destination path.', 'error');
+    }
+  }
+
+  // ── Duplicate file ───────────────────────────────────────────────────────
+  async function duplicateFile(name, path) {
+    const ext  = name.includes('.') ? '.' + name.split('.').pop() : '';
+    const base = name.includes('.') ? name.slice(0, name.lastIndexOf('.')) : name;
+    const dir  = path.includes('/') ? path.slice(0, path.lastIndexOf('/') + 1) : '';
+    const dest = `${dir}${base}_copy${ext}`;
+    try {
+      const res = await fetch(`/server/<%- server.UUID %>/files/copy`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'csrf-token': document.querySelector('meta[name="csrf-token"]')?.content || '' },
+        body:    JSON.stringify({ location: path }),
+      });
+      if (!res.ok) throw new Error('Copy failed');
+      showToast(`Duplicated as ${dest.split('/').pop()}.`, 'success');
+      setTimeout(() => location.reload(), 700);
+    } catch {
+      showToast('Duplicate failed.', 'error');
+    }
   }
 
   // ── toggleDropdown: position fixed dropdown at click coords ───────────────

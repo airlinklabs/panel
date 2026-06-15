@@ -9,7 +9,7 @@
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
           <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminCreateUserTitle %></h1>
-          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminCreateUserText %></p>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminCreateUserText || 'Every great panel needs people. Let\'s add one.' %></p>
         </div>
       </div>
 
@@ -65,7 +65,7 @@
 
             <div class="sm:col-span-2 flex justify-end">
               <button id="createuserBtn" type="button" class="rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-800 px-5 py-2 text-sm font-medium shadow-md transition disabled:opacity-40 disabled:cursor-not-allowed">
-                <%= req.translations.create %>
+                <%= req.translations.create || 'Create user' %>
               </button>
             </div>
           </div>
@@ -172,7 +172,7 @@
         loader.updateProgress(100, 'User created successfully!');
         setTimeout(() => {
           loader.close();
-          showToast('User created successfully!', 'success');
+          showToast('User added. Welcome to the team.', 'success');
           setTimeout(() => { window.location.href = '/admin/users?err=none'; }, 1000);
         }, 500);
       } else {

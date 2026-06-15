@@ -419,7 +419,7 @@
       .then(r => r.json())
       .then(d => {
         if (!d.success) throw new Error(d.error || 'Failed');
-        showToast('Saved', 'success');
+        showToast('Settings saved. Looking good.', 'success');
       })
       .catch(err => showToast(err.message || 'Failed', 'error'))
       .finally(() => { if (btn) { btn.disabled = false; btn.textContent = orig; } });
@@ -486,7 +486,7 @@
       .then(d => {
         if (!d.success) throw new Error(d.error || 'Failed');
         document.getElementById('banIpInput').value = '';
-        showToast('IP banned', 'success');
+        showToast('IP banned. Bye bye.', 'success');
         setTimeout(() => location.reload(), 800);
       })
       .catch(err => showToast(err.message || 'Failed', 'error'));
@@ -499,7 +499,7 @@
       .then(r => r.json())
       .then(d => {
         if (!d.success) throw new Error(d.error || 'Failed');
-        showToast('IP unbanned', 'success');
+        showToast('IP unbanned. Welcome back.', 'success');
         setTimeout(() => location.reload(), 800);
       })
       .catch(err => showToast(err.message || 'Failed', 'error'));
@@ -516,10 +516,10 @@
         fetch('/admin/settings/reset', { method: 'POST' })
           .then(r => r.json())
           .then(d => {
-            if (d.success) { showToast('Settings reset', 'success'); setTimeout(() => location.reload(), 1200); }
+            if (d.success) { showToast('Settings reset to defaults.', 'success'); setTimeout(() => location.reload(), 1200); }
             else showToast(d.error || 'Failed', 'error');
           })
-          .catch(() => showToast('Failed', 'error'));
+           .catch(() => showToast('Something went wrong.', 'error'));
       },
     });
   });

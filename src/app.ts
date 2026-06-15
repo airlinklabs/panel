@@ -33,6 +33,7 @@ import { initEggCatalogue } from './handlers/eggCatalogueService';
 import crypto from 'crypto';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import icon from './utils/icon';
 import hpp from 'hpp';
 import fs from 'fs';
 import csrfProtection, {
@@ -363,7 +364,7 @@ app.use(
       secure: useSecureCookie,
       httpOnly: true,
       sameSite: 'strict',
-      maxAge: 3600000 * 72, // 3 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   }),
 );
@@ -439,6 +440,7 @@ declare const global: GlobalWithCustomProperties;
 app.use((_req, res, next) => {
   res.locals.name = name;
   res.locals.airlinkVersion = airlinkVersion;
+  res.locals.icon = icon;
   global.uiComponentStore = uiComponentStore;
   global.appName = name;
   global.airlinkVersion = airlinkVersion;

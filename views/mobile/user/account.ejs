@@ -13,9 +13,7 @@
       </div>
       <a href="/credits"
         class="flex items-center gap-1.5 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-white/5 px-3 py-2 text-xs font-medium text-neutral-600 dark:text-neutral-400 shadow-sm dark:shadow-none transition shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
-          <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 0 1 .67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 1 1-.671-1.34l.041-.022ZM12 9a.75.75 0 1 0 0-1.5A.75.75 0 0 0 12 9Z" clip-rule="evenodd" />
-        </svg>
+        <%- icon('circle-alert', { class: 'w-3.5 h-3.5' }) %>
         Credits
       </a>
     </div>
@@ -47,7 +45,7 @@
 
       <form id="change-username-form" action="/change-username" method="POST" class="mb-4">
         <%- include('../components/csrf') %>
-        <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.username || 'Username' %></label>
+        <label class="flex items-center gap-1.5 text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%- icon('user', { class: 'w-3 h-3' }) %> <%= req.translations.username || 'Username' %></label>
         <div class="flex gap-2">
           <input id="username" type="text" name="username" placeholder="<%= user.username %>"
             class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white transition">
@@ -61,7 +59,7 @@
 
       <form id="change-email-form" class="mb-4">
         <%- include('../components/csrf') %>
-        <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.email || 'Email' %></label>
+        <label class="flex items-center gap-1.5 text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%- icon('mail', { class: 'w-3 h-3' }) %> <%= req.translations.email || 'Email' %></label>
         <div class="flex gap-2">
           <input id="email" type="email" name="email" placeholder="<%= user.email %>"
             class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white transition">
@@ -74,7 +72,7 @@
 
       <form id="change-description-form" class="p-3 rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5 mb-4">
         <%- include('../components/csrf') %>
-        <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.description || 'Description' %></label>
+        <label class="flex items-center gap-1.5 text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%- icon('file-text', { class: 'w-3 h-3' }) %> <%= req.translations.description || 'Description' %></label>
         <textarea id="description" name="description" rows="3"
           class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white resize-none transition"
           placeholder="<%= user.description %>"><%= user.description %></textarea>
@@ -85,7 +83,7 @@
 
       <form id="change-password-form" class="p-3 rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5">
         <%- include('../components/csrf') %>
-        <p class="text-xs font-medium text-neutral-800 dark:text-white mb-3"><%= req.translations.changePassword || 'Change password' %></p>
+        <p class="flex items-center gap-1.5 text-xs font-medium text-neutral-800 dark:text-white mb-3"><%- icon('lock', { class: 'w-3 h-3' }) %> <%= req.translations.changePassword || 'Change password' %></p>
         <div id="current-password-feedback" class="text-xs text-neutral-400 mb-1.5"><%= req.translations.checking || 'Checking...' %></div>
         <input id="currentPassword" type="password" name="currentPassword" placeholder="Current password"
           class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-700/20 placeholder-neutral-400 text-neutral-800 dark:text-white mb-3 transition">
@@ -165,20 +163,20 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const input = e.target.querySelector('#username');
     const { ok, text } = await post('/update-username', { newUsername: input.value.trim() });
-    if (ok) { showToast('Username updated', 'success'); input.placeholder = input.value.trim(); } else showToast(text);
+    if (ok) { showToast('Username updated.', 'success'); input.placeholder = input.value.trim(); } else showToast(text);
   });
 
   document.getElementById('change-email-form')?.addEventListener('submit', async e => {
     e.preventDefault();
     const { ok, text } = await post('/change-email', { email: e.target.querySelector('#email').value.trim() });
-    if (ok) showToast('Email updated', 'success'); else showToast(text);
+    if (ok) showToast('Email updated.', 'success'); else showToast(text);
   });
 
   document.getElementById('change-description-form')?.addEventListener('submit', async e => {
     e.preventDefault();
     const el = e.target.querySelector('#description');
     const { ok, text } = await post('/update-description', { description: el.value.trim() });
-    if (ok) { showToast('Description updated', 'success'); el.placeholder = el.value.trim(); } else showToast(text);
+    if (ok) { showToast('Description updated.', 'success'); el.placeholder = el.value.trim(); } else showToast(text);
   });
 
   document.getElementById('change-password-form')?.addEventListener('submit', async e => {
@@ -187,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
       currentPassword: e.target.querySelector('#currentPassword').value,
       newPassword:     e.target.querySelector('#newPassword').value,
     });
-    if (ok) { showToast('Password updated', 'success'); setTimeout(() => location.href = '/login?err=UpdatedCredentials', 1500); } else showToast(text);
+    if (ok) { showToast('Password updated.', 'success'); setTimeout(() => location.href = '/login?err=UpdatedCredentials', 1500); } else showToast(text);
   });
 
   const uInput = document.getElementById('username');
@@ -229,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const lang = e.target.querySelector('#language').value;
     const res = await fetch('/set-language', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken }, body: JSON.stringify({ language: lang }) });
-    if (res.ok) { showToast('Language saved', 'success'); setTimeout(() => location.reload(), 1400); } else showToast('Failed', 'error');
+    if (res.ok) { showToast('Language saved.', 'success'); setTimeout(() => location.reload(), 1400); } else showToast('Something went wrong.', 'error');
   });
 
   const avatarInput   = document.getElementById('avatar-input');
@@ -247,8 +245,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('remove-avatar-btn')?.addEventListener('click', async () => {
     const res = await fetch('/remove-avatar', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken } });
-    if (res.ok) { avatarPreview.src = 'https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(user.username) %>'; showToast('Removed', 'success'); setTimeout(() => location.reload(), 1200); }
-    else showToast('Failed', 'error');
+    if (res.ok) { avatarPreview.src = 'https://api.dicebear.com/9.x/thumbs/svg?seed=<%= encodeURIComponent(user.username) %>'; showToast('Profile picture removed.', 'success'); setTimeout(() => location.reload(), 1200); }
+    else showToast('Something went wrong.', 'error');
   });
 
   function openCropPopup(dataUrl, csrf) {
@@ -358,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (res.ok) {
             const { avatar } = await res.json();
             avatarPreview.src = avatar + '?t=' + Date.now();
-            showToast('Profile picture updated', 'success');
+             showToast('Profile picture updated.', 'success');
             close();
           } else showToast('Failed to upload', 'error');
         } catch { showToast('Failed to upload', 'error'); }

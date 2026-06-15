@@ -6,7 +6,7 @@
   <div class="px-4 py-5">
     <div class="mb-5">
       <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminCreateUserTitle %></h1>
-      <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminCreateUserText %></p>
+      <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminCreateUserText || 'Every great panel needs people. Let\'s add one.' %></p>
     </div>
 
     <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4 space-y-4">
@@ -48,7 +48,7 @@
       </div>
 
       <button id="createuserBtn" type="button" class="w-full rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-800 px-4 py-2.5 text-sm font-medium shadow-md transition hover:bg-neutral-700 dark:hover:bg-neutral-200">
-        <%= req.translations.create %>
+        <%= req.translations.create || 'Create user' %>
       </button>
 
     </div>

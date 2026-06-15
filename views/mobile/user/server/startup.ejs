@@ -186,11 +186,11 @@
         .then(function(data) {
           btn.textContent = orig; btn.disabled = false;
           if (data.success !== false) { showToast(successMsg, 'success'); setTimeout(function() { window.location.reload(); }, 1500); }
-          else { showToast(data.error || 'Failed', 'error'); }
+          else { showToast(data.error || 'Something went wrong.', 'error'); }
         })
         .catch(function(err) {
           btn.textContent = orig; btn.disabled = false;
-          showToast(err.error || err.message || 'Failed', 'error');
+          showToast(err.error || err.message || 'Something went wrong.', 'error');
         });
       });
     }

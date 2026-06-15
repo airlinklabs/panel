@@ -249,7 +249,7 @@
           if (response.ok) {
             setPayload(payload);
             renderPortRequirements();
-            showToast('Settings saved', 'success');
+             showToast('Settings saved. Looking good.', 'success');
           } else {
             return response.json().then(data => { throw new Error(data.error || 'Failed to update image'); });
           }

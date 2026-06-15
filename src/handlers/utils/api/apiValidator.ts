@@ -35,7 +35,8 @@ export const apiValidator = (requiredPermission?: string) => {
       const keyData = await prisma.apiKey.findUnique({ where: { key: lookupKey } });
 
       if (!keyData) {
-        res.status(401).json({ error: 'Unauthorized: Invalid API Key' });
+        await new Promise(r => setTimeout(r, 200));
+        res.status(403).json({ error: 'Invalid API key' });
         return;
       }
 

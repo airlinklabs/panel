@@ -108,6 +108,9 @@
   .dark .btn-ghost { border-color: rgba(255,255,255,0.1); color: #737373; }
   .btn-ghost:hover { background: #f5f5f5; }
   .dark .btn-ghost:hover { background: rgba(255,255,255,0.05); }
+
+  @keyframes al-view-in { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+  .al-view-entering { animation: al-view-in 0.18s cubic-bezier(0.16,1,0.3,1) both; }
 </style>
 
 <main class="h-screen m-auto">
@@ -126,22 +129,22 @@
           <div class="flex items-center gap-2">
             <% if (canCreateServer) { %>
             <a href="/create-server" class="flex min-h-10 items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm font-medium hover:bg-neutral-700 dark:hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-white focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4"><path fill-rule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd"/></svg>
+              <%- icon('plus', { class: 'h-4 w-4' }) %>
               New server
             </a>
             <% } %>
             <button id="newFolderBtn" class="flex min-h-10 items-center gap-1.5 px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 text-sm font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"/></svg>
+              <%- icon('folder-plus', { class: 'h-4 w-4', strokeWidth: 1.5 }) %>
               New folder
             </button>
             <% if (servers && servers.length > 0) { %>
             <div class="flex items-center gap-1 bg-neutral-100 dark:bg-neutral-800/60 p-1 rounded-xl border border-neutral-200 dark:border-white/5">
               <button id="gridViewBtn" class="view-toggle-btn min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 active">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                <%- icon('grid-2x2', { class: 'h-4 w-4' }) %>
                 Grid
               </button>
               <button id="listViewBtn" class="view-toggle-btn min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                <%- icon('list', { class: 'h-4 w-4' }) %>
                 List
               </button>
             </div>
@@ -152,13 +155,13 @@
         <!-- Alerts -->
         <% if (req.query.err === 'NOTACTIVEYET') { %>
         <div class="rounded-xl bg-amber-50 dark:bg-amber-800/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-5">
-          <p class="text-sm font-medium text-amber-700 dark:text-amber-400"><%= req.translations.awaitingInstallation || 'Awaiting Installation' %></p>
+          <p class="text-sm font-medium text-amber-700 dark:text-amber-400"><%= req.translations.awaitingInstallation || "This server's still getting its act together. Check back in a moment." %></p>
           <p class="text-xs text-amber-600 dark:text-amber-400/60 mt-0.5"><%= req.translations.awaitingInstallationDesc || "The server isn't installed yet or is in a failed state." %></p>
         </div>
         <% } %>
         <% if (req.query.err === 'SERVER_LIMIT_REACHED') { %>
         <div class="rounded-xl bg-amber-50 dark:bg-amber-800/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-5">
-          <p class="text-sm font-medium text-amber-700 dark:text-amber-400">Server limit reached</p>
+          <p class="text-sm font-medium text-amber-700 dark:text-amber-400">You've hit your server limit — talk to your admin if you need more room.</p>
           <p class="text-xs text-amber-600 dark:text-amber-400/60 mt-0.5">You have reached the maximum number of servers allowed.</p>
         </div>
         <% } %>
@@ -172,10 +175,8 @@
 
         <% if (servers.length === 0 && (!folders || folders.length === 0)) { %>
         <div class="flex flex-col items-center justify-center mt-32 text-center">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-16 w-16 text-neutral-200 dark:text-neutral-700 mb-4">
-            <path fill-rule="evenodd" d="M11.622 1.602a.75.75 0 0 1 .756 0l2.25 1.313a.75.75 0 0 1-.756 1.295L12 3.118 10.128 4.21a.75.75 0 1 1-.756-1.295l2.25-1.313ZM5.898 5.81a.75.75 0 0 1-.27 1.025l-1.14.665 1.14.665a.75.75 0 1 1-.756 1.295L3.75 8.806v.944a.75.75 0 0 1-1.5 0V7.5a.75.75 0 0 1 .372-.648l2.25-1.312a.75.75 0 0 1 1.026.27Zm12.204 0a.75.75 0 0 1 1.026-.27l2.25 1.312a.75.75 0 0 1 .372.648v2.25a.75.75 0 0 1-1.5 0v-.944l-1.122.654a.75.75 0 1 1-.756-1.295l1.14-.665-1.14-.665a.75.75 0 0 1-.27-1.025Zm-9 5.25a.75.75 0 0 1 1.026-.27L12 11.882l1.872-1.092a.75.75 0 1 1 .756 1.295l-1.878 1.096V15a.75.75 0 0 1-1.5 0v-1.82l-1.878-1.095a.75.75 0 0 1-.27-1.025Z" clip-rule="evenodd"/>
-          </svg>
-          <h2 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.noServersYet || 'No servers yet' %></h2>
+          <%- icon('server', { class: 'h-16 w-16 text-neutral-200 dark:text-neutral-700 mb-4' }) %>
+          <h2 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.noServersYet || "It's quiet here — suspiciously quiet." %></h2>
           <p class="text-sm text-neutral-500 mt-1">
             <% if (user.isAdmin) { %><a href="/admin/servers/create" class="text-blue-500"><%= req.translations.createOneNow || 'Create one now' %></a>
             <% } else if (canCreateServer) { %><a href="/create-server" class="text-blue-500">Create your first server</a>
@@ -198,9 +199,7 @@
               data-folder-id="<%= folder.id %>"
               data-folder-name="<%= folder.name %>"
               data-folder-members='<%= JSON.stringify(folder.members.map(m => m.serverUUID)) %>'>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-amber-500 shrink-0">
-                <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 12h-15a4.483 4.483 0 0 0-3 1.146Z"/>
-              </svg>
+              <%- icon('folder', { class: 'h-5 w-5 text-amber-500 shrink-0', fill: 'currentColor' }) %>
               <div class="min-w-0 flex-1">
                 <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= folder.name %></p>
                 <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5"><%= folder.members.length %> server<%= folder.members.length !== 1 ? 's' : '' %></p>
@@ -253,11 +252,11 @@
               <div class="flex gap-3 mb-3">
                 <div class="flex-1 bg-neutral-100 dark:bg-neutral-700/30 rounded-lg px-3 py-2">
                   <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">RAM</p>
-                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsage %>%</p>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= Math.round(server.ramUsage) %>%</p>
                 </div>
                 <div class="flex-1 bg-neutral-100 dark:bg-neutral-700/30 rounded-lg px-3 py-2">
                   <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">CPU</p>
-                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.cpuUsage %>%</p>
+                  <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= Math.round(server.cpuUsage) %>%</p>
                 </div>
                 <div class="flex-1 bg-neutral-100 dark:bg-neutral-700/30 rounded-lg px-3 py-2">
                   <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">Used</p>
@@ -310,8 +309,8 @@
                   </span>
                 </td>
                 <td class="px-3 py-3.5 text-sm text-neutral-600 dark:text-neutral-300"><%= server.owner ? server.owner.username : 'Unknown' %></td>
-                <td class="px-3 py-3.5 text-sm text-neutral-600 dark:text-neutral-300"><%= server.ramUsage %>%</td>
-                <td class="px-3 py-3.5 text-sm text-neutral-600 dark:text-neutral-300"><%= server.cpuUsage %>%</td>
+                <td class="px-3 py-3.5 text-sm text-neutral-600 dark:text-neutral-300"><%= Math.round(server.ramUsage) %>%</td>
+                <td class="px-3 py-3.5 text-sm text-neutral-600 dark:text-neutral-300"><%= Math.round(server.cpuUsage) %>%</td>
               </tr>
               <% }); %>
             </tbody>
@@ -338,9 +337,7 @@
 
 <!-- Drag ghost element -->
 <div id="drag-ghost" style="display:none;">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;color:#f59e0b;flex-shrink:0;">
-    <path fill-rule="evenodd" d="M2.25 6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 12h-15a4.483 4.483 0 0 0-3 1.146V6Z" clip-rule="evenodd"/>
-  </svg>
+  <%- icon('folder', { class: 'w-3.5 h-3.5 text-amber-500 shrink-0', fill: 'currentColor' }) %>
   <span id="drag-ghost-name"></span>
 </div>
 
@@ -351,12 +348,10 @@
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white" id="folderPopupTitle"></h2>
       <div class="flex items-center gap-1">
         <button id="deleteFolderBtn" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 text-red-600 dark:text-red-400 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" title="Delete folder" aria-label="Delete folder">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-3.5 h-3.5">
-            <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd"/>
-          </svg>
+          <%- icon('trash-2', { class: 'w-3.5 h-3.5', strokeWidth: 1.5 }) %>
         </button>
         <button id="closeFolderPopup" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-300 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500" aria-label="Close folder">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+          <%- icon('x', { class: 'w-4 h-4' }) %>
         </button>
       </div>
     </div>
@@ -412,10 +407,14 @@
     gridViewBtn.addEventListener('click', () => { switchView('grid'); localStorage.setItem('serverViewPreference', 'grid'); });
     listViewBtn.addEventListener('click', () => { switchView('list'); localStorage.setItem('serverViewPreference', 'list'); });
     function switchView(which) {
+      const target = which === 'grid' ? gridView : listView;
       gridView.classList.toggle('hidden', which !== 'grid');
       listView.classList.toggle('hidden', which !== 'list');
       gridViewBtn.classList.toggle('active', which === 'grid');
       listViewBtn.classList.toggle('active', which === 'list');
+      target.classList.remove('al-view-entering');
+      void target.offsetWidth;
+      target.classList.add('al-view-entering');
     }
   }
 
@@ -456,7 +455,7 @@
     const d = await r.json();
     confirmNewFolder.disabled = false;
     if (d.success) location.reload();
-    else showToast(d.error || 'Failed to create folder', 'error');
+    else showToast(d.error || 'Something went wrong.', 'error');
   });
 
   // ── Folder popup (click to open) ──────────────────────────
@@ -506,7 +505,7 @@
             const r = await fetch('/api/folders/servers/' + uuid, { method: 'DELETE' });
             const d = await r.json();
             if (d.success) { showToast('Removed from folder.', 'success'); setTimeout(() => location.reload(), 600); }
-            else showToast(d.error || 'Failed', 'error');
+            else showToast(d.error || 'Something went wrong.', 'error');
           });
           folderPopupContent.appendChild(row);
         });
@@ -546,7 +545,7 @@
     const d = await r.json();
     confirmDeleteFolder.disabled = false;
     deleteFolderOverlay.classList.remove('open');
-    if (d.success) location.reload(); else showToast(d.error || 'Failed to delete folder', 'error');
+    if (d.success) location.reload(); else showToast(d.error || "Couldn't delete the folder.", 'error');
   });
 
   // ── Drag-and-drop: server card → folder ───────────────────
@@ -623,7 +622,7 @@
       });
       const d = await r.json();
       if (d.success) { showToast('"' + dragName + '" added to folder.', 'success'); setTimeout(() => location.reload(), 700); }
-      else showToast(d.error || 'Failed', 'error');
+      else showToast(d.error || 'Something went wrong.', 'error');
     });
   });
 
@@ -637,7 +636,7 @@
       if (allFolders.length === 1) {
         const r = await fetch('/api/folders/' + allFolders[0].id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: uuid }) });
         const d = await r.json();
-        if (d.success) location.reload(); else showToast(d.error || 'Failed', 'error');
+        if (d.success) location.reload(); else showToast(d.error || 'Something went wrong.', 'error');
         return;
       }
       // Multiple folders: show pick dialog
@@ -650,7 +649,7 @@
       e.stopPropagation();
       const r = await fetch('/api/folders/servers/' + btn.dataset.uuid, { method: 'DELETE' });
       const d = await r.json();
-      if (d.success) location.reload(); else showToast(d.error || 'Failed', 'error');
+      if (d.success) location.reload(); else showToast(d.error || 'Something went wrong.', 'error');
     });
   });
 
@@ -667,7 +666,7 @@
       btn.addEventListener('click', async () => {
         const r = await fetch('/api/folders/' + f.id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID }) });
         const d = await r.json();
-        if (d.success) location.reload(); else showToast(d.error || 'Failed', 'error');
+        if (d.success) location.reload(); else showToast(d.error || 'Something went wrong.', 'error');
       });
       folderPopupContent.appendChild(btn);
     });

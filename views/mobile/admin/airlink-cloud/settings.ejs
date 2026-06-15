@@ -67,7 +67,7 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
 
     const data = await res.json();
     if (data.success) {
-      showToast('Settings saved successfully!', 'success');
+      showToast('Settings saved. Looking good.', 'success');
     } else {
       showToast(data.error || 'Failed to save settings.', 'error');
     }

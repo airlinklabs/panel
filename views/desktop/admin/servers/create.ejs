@@ -11,7 +11,7 @@
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
             <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminCreateServerTitle %></h1>
-            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminCreateServerText %></p>
+            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminCreateServerText || 'Spin up something new. Naming it is half the fun.' %></p>
         </div>
       </div>
 
@@ -26,23 +26,21 @@
                 <div class="flex items-center space-x-2">
                     <input id="serverName" name="name" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server">
                     <div class="flex-shrink-0 p-2 mb-1 -ml-5" onclick="generateRandomName()">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-neutral-500 dark:text-neutral-300">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
-                        </svg>
+                        <%- icon('refresh-cw', { size: 16, class: 'text-neutral-500 dark:text-neutral-300' }) %>
                     </div>
                 </div>
             </div>
 
               <div>
                 <label for="serverDescription" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                  <%- icon('file-text', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.description %>:</label>
                 <input id="serverDescription" name="description" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server description">
               </div>
 
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <%- icon('user', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.user %>:</label>
                 <select id="serverUser" name="ownerId" class="hidden">
                   <% users.forEach(user => { %>
@@ -54,7 +52,7 @@
 
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><path d="M6 18h.01"/><path d="M10 18h.01"/></svg>
+                  <%- icon('server', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Node %>:
                 </label>
                 <select id="serverNode" name="nodeId" class="hidden">
@@ -75,7 +73,7 @@
             <div class="grid grid-cols-3 gap-4">
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+                  <%- icon('cpu', { size: 14, class: 'shrink-0' }) %>
                   CPU:
                 </label>
                 <input type="hidden" id="serverCPU" name="Cpu" value="100">
@@ -92,7 +90,7 @@
 
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 19v-3"/><path d="M10 19v-3"/><path d="M14 19v-3"/><path d="M18 19v-3"/><path d="M8 11V9"/><path d="M16 11V9"/><path d="M12 11V9"/><path d="M2 15h20"/><path d="M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1.1a2 2 0 0 0 0 3.837V15H2v-3.063a2 2 0 0 0 0-3.837Z"/></svg>
+                  <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
                   Memory:
                 </label>
                 <!-- hidden field always holds MB value sent to backend -->
@@ -110,7 +108,7 @@
 
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+                  <%- icon('database', { size: 14, class: 'shrink-0' }) %>
                   Storage:
                 </label>
                 <!-- hidden field always holds MB value sent to backend -->
@@ -132,7 +130,7 @@
             <div class="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                  <%- icon('box', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Image %>:</label>
                 <select id="serverImage" name="imageId" class="hidden">
                   <% images.forEach(image => { %>
@@ -146,7 +144,7 @@
 
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+                  <%- icon('box', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.DockerImage %>:</label>
                 <select id="dockerImage" name="dockerImage" class="hidden">
                   <option value="" disabled selected>Select a Docker image</option>
@@ -156,11 +154,11 @@
 
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8z"/></svg>
+                  <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Ports %>:</label>
                 <input type="hidden" id="serverPorts" name="Ports">
           <button type="button" id="assignPortsBtn" class="mt-2 mb-4 w-full inline-flex items-center gap-2 rounded-xl bg-neutral-100 dark:bg-neutral-700/30 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white px-4 py-2.5 text-sm font-medium border border-neutral-200 dark:border-white/5 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8z"/></svg>
+            <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
             Assign ports
           </button>
               </div>
@@ -169,9 +167,7 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between">
                   <div class="flex items-center mb-2 md:mb-0">
                     <div class="flex-shrink-0 mr-3">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
+                      <%- icon('pencil', { size: 24, class: 'text-blue-500' }) %>
                     </div>
                     <div>
                       <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
@@ -189,7 +185,7 @@
 
             <div class="collapsible-row no-anim" id="variablesSectionRow"><div><div id="variablesSection">
               <h2 class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-300 text-md font-semibold mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                <%- icon('settings', { size: 14, class: 'shrink-0' }) %>
                 Variables</h2>
 
               <div class="grid grid-cols-4 gap-4 mb-6" id="variablesContainer">
@@ -201,7 +197,7 @@
             <!-- Submit Button -->
             <div class="col-span-2">
                 <button type="submit" class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
-                    <%= req.translations.create %>
+                    <%= req.translations.create || 'Create server' %>
                   </button>
               </div>
           </form>
@@ -216,7 +212,7 @@
     <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700/60 px-5 py-4">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
       <button type="button" id="closePortsModal" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>
     <div class="p-5">
@@ -537,7 +533,7 @@
           loader.updateProgress(100, 'Server created successfully!');
           setTimeout(() => {
             loader.close();
-            showToast('Server created successfully!', 'success');
+            showToast('Server deployed. Go make something cool.', 'success');
             setTimeout(() => {
               window.location.href = '/admin/servers?err=none';
             }, 1000);
