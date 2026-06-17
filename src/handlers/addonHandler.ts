@@ -1,28 +1,47 @@
 import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
-import { Express, Router } from 'express';
+import express, { Express, Router } from 'express';
 import { uiComponentStore, SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from './uiComponentHandler';
+import { slotRegistry, SlotId } from './addonSlotRegistry';
+import { commandRegistry, scheduler, RegisteredCommand, ScheduledTask } from './addonCommands';
+import { createConfigStore, AddonConfigStore } from './addonConfigStore';
+import { parseAddonManifest, AddonManifestV2, isVersionInRange } from './addonManifest';
+import { registerAddonPermission, clearAddonPermissions } from './permissions';
 import prisma from '../db';
 import type { PrismaClient } from '../generated/prisma/client';
 import logger from './logger';
+import { isAuthenticated } from './utils/auth/authUtil';
+import { apiValidator } from './utils/api/apiValidator';
+import csrfProtection from './utils/security/csrfProtection';
 
+let _appInstance: Express | null = null;
 
-interface MigrationTemplate {
-  name: string;
-  sql: string;
+export function setAppInstance(app: Express): void {
+  _appInstance = app;
 }
 
-interface AddonPackageJson {
-  name: string;
-  version: string;
-  description?: string;
-  author?: string;
-  main?: string;
-  router?: string;
-  enabled?: boolean;
-  migrations?: MigrationTemplate[];
-  dontfuckinganimateme?: boolean;
+function getApp(): Express {
+  if (!_appInstance) throw new Error('App instance not initialized');
+  return _appInstance;
+}
+
+function buildTailwind() {
+  exec('npx tailwindcss -i ./public/tw.css -o ./public/styles.css', (error, stdout, stderr) => {
+    if (error) {
+      logger.error('Tailwind build failed:', error.message);
+      return;
+    }
+    if (stderr) logger.warn('Tailwind reported warnings', { stderr: stderr.trim() });
+  });
+}
+
+export interface AddonLifecycleHooks {
+  onInstall?: () => Promise<void> | void;
+  onEnable?: () => Promise<void> | void;
+  onDisable?: () => Promise<void> | void;
+  onUpdate?: (previousVersion: string) => Promise<void> | void;
+  onUninstall?: () => Promise<void> | void;
 }
 
 export interface AddonAPI {
@@ -43,9 +62,11 @@ export interface AddonAPI {
   desktopViewsPath: string;
   mobileViewsPath: string;
 
-  renderView: (viewName: string, data?: any, isMobile?: boolean) => string;
+  renderView: (viewName: string, data?: any, isMobile?: boolean) => Promise<string>;
 
   getComponentPath: (componentPath: string) => string;
+
+  config: AddonConfigStore;
 
   ui: {
     addSidebarItem: (item: SidebarItem) => void;
@@ -62,22 +83,265 @@ export interface AddonAPI {
     addServerSectionItem: (sectionId: string, item: ServerSectionItem) => void;
     removeServerSectionItem: (sectionId: string, itemId: string) => void;
     getServerSectionItems: (sectionId: string) => ServerSectionItem[];
+
+    registerSlot: (slotId: SlotId, render: (locals: Record<string, unknown>) => string | Promise<string>) => void;
+    unregisterSlot: (slotId: SlotId) => void;
+    registerDashboardWrapper: (render: (locals: Record<string, unknown>) => string | Promise<string>) => void;
+    unregisterDashboardWrapper: () => void;
+    registerAdminWrapper: (render: (locals: Record<string, unknown>) => string | Promise<string>) => void;
+    unregisterAdminWrapper: () => void;
+  };
+
+  commands: {
+    register: (command: RegisteredCommand) => void;
+  };
+
+  schedule: {
+    register: (task: ScheduledTask) => void;
+  };
+
+  permissions: {
+    register: (permission: string) => boolean;
+  };
+
+  middleware: {
+    isAuthenticated: typeof isAuthenticated;
+    apiValidator: typeof apiValidator;
+    csrfProtection: typeof csrfProtection;
+  };
+
+  assetsUrl: string;
+}
+
+interface LoadedAddon {
+  router: Router;
+  routerPath: string;
+  staticPath?: string;
+  manifest?: AddonManifestV2;
+  hooks?: AddonLifecycleHooks;
+  version?: string;
+}
+
+const loadedAddons = new Map<string, LoadedAddon>();
+const addonMutexes = new Map<string, Promise<void>>();
+
+async function withAddonLock<T>(slug: string, fn: () => Promise<T>): Promise<T> {
+  const prev = addonMutexes.get(slug) ?? Promise.resolve();
+  let release!: () => void;
+  const wait = new Promise<void>(r => { release = r; });
+  const chain = prev.then(() => wait).then(fn);
+  const entry = chain.then(() => {}, () => {});
+  addonMutexes.set(slug, entry);
+  try {
+    return await chain;
+  } finally {
+    release();
+    if (addonMutexes.get(slug) === entry) {
+      addonMutexes.delete(slug);
+    }
+  }
+}
+
+function trackRequireCache(_addonPath: string): () => string[] {
+  const before = new Set(Object.keys(require.cache));
+  return () => {
+    const after = Object.keys(require.cache);
+    return after.filter(key => !before.has(key));
   };
 }
 
-function buildTailwind() {
-  exec('npx tailwindcss -i ./public/tw.css -o ./public/styles.css', (error, stdout, stderr) => {
-    if (error) {
-      logger.error('Tailwind build failed:', error.message);
-      return;
-    }
-    if (stderr) logger.warn('Tailwind reported warnings', { stderr: stderr.trim() });
-  });
+function containPath(baseDir: string, targetPath: string): boolean {
+  const realBase = fs.realpathSync(baseDir);
+  let resolved: string;
+  try {
+    resolved = fs.realpathSync(targetPath);
+  } catch {
+    resolved = path.resolve(baseDir, targetPath);
+  }
+  return resolved.startsWith(realBase + path.sep) || resolved === realBase;
 }
 
-export async function loadAddons(app: Express | any) {
+function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifestV2): AddonAPI {
+  const addonViewsPath = path.join(addonPath, 'views');
+  const addonDesktopViewsPath = path.join(addonViewsPath, 'desktop');
+  const addonMobileViewsPath = path.join(addonViewsPath, 'mobile');
+
+  return {
+    registerRoute: (routePath: string, router: Router) => {
+      getApp().use(routePath, router);
+    },
+    logger,
+    prisma,
+    addonPath,
+    viewsPath: addonViewsPath,
+    desktopViewsPath: addonDesktopViewsPath,
+    mobileViewsPath: addonMobileViewsPath,
+    getComponentPath: (componentPath: string) => {
+      return path.join(__dirname, '../..', componentPath);
+    },
+    utils: {
+      isUserAdmin: async (userId: number) => {
+        try {
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          return user?.isAdmin === true;
+        } catch (error) {
+          logger.error('Error checking if user is admin:', error);
+          return false;
+        }
+      },
+      getServerById: async (serverId: number) => {
+        try {
+          return await prisma.server.findUnique({
+            where: { id: serverId },
+            include: { node: true, image: true, owner: true },
+          });
+        } catch (error) {
+          logger.error('Error getting server by ID:', error);
+          return null;
+        }
+      },
+      getServerByUUID: async (uuid: string) => {
+        try {
+          return await prisma.server.findUnique({
+            where: { UUID: uuid },
+            include: { node: true, image: true, owner: true },
+          });
+        } catch (error) {
+          logger.error('Error getting server by UUID:', error);
+          return null;
+        }
+      },
+      getServerPorts: (server: any) => {
+        try {
+          if (!server.Ports) return [];
+          return JSON.parse(server.Ports);
+        } catch (error) {
+          logger.error('Error parsing server ports:', error);
+          return [];
+        }
+      },
+      getPrimaryPort: (server: any) => {
+        try {
+          if (!server.Ports) return null;
+          const ports = JSON.parse(server.Ports);
+          return ports.find((port: any) => port.primary === true);
+        } catch (error) {
+          logger.error('Error getting primary port:', error);
+          return null;
+        }
+      },
+    },
+    renderView: async (viewName: string, data: any = {}, isMobile: boolean = false): Promise<string> => {
+      const ejs = require('ejs');
+      const viewportDir = isMobile ? addonMobileViewsPath : addonDesktopViewsPath;
+      const viewportPath = path.join(viewportDir, viewName);
+      const fallbackPath = path.join(addonViewsPath, viewName);
+      const viewPath = fs.existsSync(viewportPath) ? viewportPath : fallbackPath;
+
+      if (!fs.existsSync(viewPath)) {
+        throw new Error(`View ${viewName} not found in addon ${slug}`);
+      }
+
+      return new Promise<string>((resolve, reject) => {
+        ejs.renderFile(viewPath, data, {}, (err: any, str: string) => {
+          if (err) {
+            logger.error(`Error rendering view ${viewName}:`, err);
+            reject(err);
+          } else {
+            resolve(str);
+          }
+        });
+      });
+    },
+    config: createConfigStore(slug),
+    ui: {
+      addSidebarItem: (item: SidebarItem) => uiComponentStore.addSidebarItem(item, slug),
+      removeSidebarItem: (id: string) => uiComponentStore.removeSidebarItem(id),
+      getSidebarItems: (section?: string, isAdmin?: boolean) => uiComponentStore.getSidebarItems(section, isAdmin),
+      addServerMenuItem: (item: ServerMenuItem) => uiComponentStore.addServerMenuItem(item, slug),
+      removeServerMenuItem: (id: string) => uiComponentStore.removeServerMenuItem(id),
+      getServerMenuItems: (feature?: string) => uiComponentStore.getServerMenuItems(feature),
+      addServerSection: (section: ServerSection) => uiComponentStore.addServerSection(section, slug),
+      removeServerSection: (id: string) => uiComponentStore.removeServerSection(id),
+      getServerSections: () => uiComponentStore.getServerSections(),
+      addServerSectionItem: (sectionId: string, item: ServerSectionItem) => uiComponentStore.addServerSectionItem(sectionId, item),
+      removeServerSectionItem: (sectionId: string, itemId: string) => uiComponentStore.removeServerSectionItem(sectionId, itemId),
+      getServerSectionItems: (sectionId: string) => uiComponentStore.getServerSectionItems(sectionId),
+      registerSlot: (slotId: SlotId, render: (locals: Record<string, unknown>) => string | Promise<string>) => {
+        slotRegistry.register(slotId, slug, render);
+      },
+      unregisterSlot: (slotId: SlotId) => {
+        slotRegistry.unregister(slotId, slug);
+      },
+      registerDashboardWrapper: (render: (locals: Record<string, unknown>) => string | Promise<string>) => {
+        slotRegistry.register('layout.dashboard.wrapper', slug, render);
+      },
+      unregisterDashboardWrapper: () => {
+        slotRegistry.unregister('layout.dashboard.wrapper', slug);
+      },
+      registerAdminWrapper: (render: (locals: Record<string, unknown>) => string | Promise<string>) => {
+        slotRegistry.register('layout.admin.wrapper', slug, render);
+      },
+      unregisterAdminWrapper: () => {
+        slotRegistry.unregister('layout.admin.wrapper', slug);
+      },
+    },
+    commands: {
+      register: (command: RegisteredCommand) => {
+        commandRegistry.register(slug, command);
+      },
+    },
+    schedule: {
+      register: (task: ScheduledTask) => {
+        scheduler.register(slug, task);
+      },
+    },
+    permissions: {
+      register: (permission: string) => {
+        return registerAddonPermission(slug, permission);
+      },
+    },
+    middleware: {
+      isAuthenticated,
+      apiValidator,
+      csrfProtection,
+    },
+    assetsUrl: `/addon-assets/${slug}`,
+  };
+}
+
+function setupStaticAssetServing(appExpress: Express, slug: string, addonPath: string): string | undefined {
+  const publicPath = path.join(addonPath, 'public');
+  if (!fs.existsSync(publicPath)) return undefined;
+
+  const realAddonPath = fs.realpathSync(addonPath);
+  const realPublicPath = fs.realpathSync(publicPath);
+
+  if (!realPublicPath.startsWith(realAddonPath + path.sep)) {
+    logger.warn(`Addon "${slug}" public path escapes addon directory, skipping static serving`);
+    return undefined;
+  }
+
+  const mountPath = `/addon-assets/${slug}`;
+  appExpress.use(mountPath, express.static(publicPath));
+  return mountPath;
+}
+
+function removeStaticAssetServing(appExpress: Express, mountPath: string): void {
+  const routerStack = (appExpress as any)._router?.stack;
+  if (!routerStack) return;
+
+  for (let i = routerStack.length - 1; i >= 0; i--) {
+    const layer = routerStack[i];
+    if (layer?.route?.path === mountPath || layer?.regexp?.test?.(mountPath)) {
+      routerStack.splice(i, 1);
+    }
+  }
+}
+
+export async function loadAddons(appExpress: Express | any) {
   for (const [slug] of loadedAddons.entries()) {
-    unloadAddon(app, slug);
+    await unloadAddon(appExpress, slug);
   }
 
   const addonsDir = path.join(__dirname, '../../storage/addons');
@@ -106,9 +370,7 @@ export async function loadAddons(app: Express | any) {
 
       if (missingAddons.length > 0) {
         for (const addon of missingAddons) {
-          await prisma.addon.delete({
-            where: { id: addon.id }
-          });
+          await prisma.addon.delete({ where: { id: addon.id } });
           logger.info(`Removed addon ${addon.name} (${addon.slug}) from database because it no longer exists in the filesystem`);
         }
       }
@@ -117,389 +379,248 @@ export async function loadAddons(app: Express | any) {
     }
   }
 
-  if (addonFolders.length > 0) {
-    for (const folder of addonFolders) {
-      const addonPath = path.join(addonsDir, folder);
-      const packageJsonPath = path.join(addonPath, 'package.json');
+  const dependencyGraph = new Map<string, { manifest: AddonManifestV2; folder: string }>();
+  const parseResults = new Map<string, ReturnType<typeof parseAddonManifest>>();
 
+  for (const folder of addonFolders) {
+    const addonPath = path.join(addonsDir, folder);
+    const packageJsonPath = path.join(addonPath, 'package.json');
+
+    const result = parseAddonManifest(packageJsonPath, folder);
+    parseResults.set(folder, result);
+
+    if (result.success) {
+      dependencyGraph.set(folder, { manifest: result.manifest, folder });
+    } else {
+      logger.warn(`Addon ${folder}: ${(result as { error: string }).error}`);
+    }
+  }
+
+  const loadOrder = topologicalSort(dependencyGraph);
+
+  for (const folder of loadOrder) {
+    const result = parseResults.get(folder);
+    if (!result || !result.success) continue;
+
+    const addonPath = path.join(addonsDir, folder);
+    const manifest = result.manifest;
+
+    let addonEnabled = manifest.enabled !== false;
+
+    if (addonTableExists) {
       try {
-        if (!fs.existsSync(packageJsonPath)) {
-          logger.warn(`Addon ${folder} missing package.json, skipping`);
-          continue;
-        }
+        let addonRecord = await prisma.addon.findUnique({ where: { slug: folder } });
 
-        const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf-8');
-        const packageJson: AddonPackageJson = JSON.parse(packageJsonContent);
-
-        let addonEnabled = packageJson.enabled !== false;
-
-        if (addonTableExists) {
-          try {
-            let addonRecord = await prisma.addon.findUnique({
-              where: { slug: folder }
-            });
-
-            if (!addonRecord) {
-              // This is a new addon, apply migrations if it's enabled
-              if (packageJson.enabled !== false) {
-                const migrationResult = await applyAddonMigrations(folder, packageJson);
-                if (!migrationResult.success) {
-                  logger.error(`Failed to apply migrations for new addon ${packageJson.name}:`, migrationResult.message);
-                  // Continue with installation but disable the addon
-                  addonEnabled = false;
-                }
-              }
-
-              addonRecord = await prisma.addon.create({
-                data: {
-                  name: packageJson.name,
-                  slug: folder,
-                  description: packageJson.description || '',
-                  version: packageJson.version,
-                  author: packageJson.author || '',
-                  enabled: addonEnabled,
-                  mainFile: packageJson.main || 'index.ts'
-                }
-              });
-              logger.info(`Added addon ${packageJson.name} to database`);
-            } else {
-              await prisma.addon.update({
-                where: { id: addonRecord.id },
-                data: {
-                  name: packageJson.name,
-                  description: packageJson.description || '',
-                  version: packageJson.version,
-                  author: packageJson.author || '',
-                  mainFile: packageJson.main || 'index.ts'
-                }
-              });
-
-              addonEnabled = addonRecord.enabled;
-            }
-
-            if (!addonEnabled) {
-              logger.info(`Addon ${packageJson.name} is disabled, skipping`);
-              continue;
-            }
-          } catch (error) {
-            logger.error(`Database error for addon ${folder}:`, error);
-          }
-        }
-
-        const mainFile = packageJson.main || 'index.ts';
-        const mainFilePath = path.join(addonPath, mainFile);
-
-        if (!fs.existsSync(mainFilePath)) {
-          logger.warn(`Addon ${packageJson.name} is missing main file (${mainFile}), skipping`);
-          continue;
-        }
-
-        const addonViewsPath = path.join(addonPath, 'views');
-        const addonDesktopViewsPath = path.join(addonViewsPath, 'desktop');
-        const addonMobileViewsPath = path.join(addonViewsPath, 'mobile');
-
-        if (!fs.existsSync(addonViewsPath)) {
-          fs.mkdirSync(addonViewsPath, { recursive: true });
-        }
-        if (!fs.existsSync(addonDesktopViewsPath)) {
-          fs.mkdirSync(addonDesktopViewsPath, { recursive: true });
-        }
-        if (!fs.existsSync(addonMobileViewsPath)) {
-          fs.mkdirSync(addonMobileViewsPath, { recursive: true });
-        }
-
-        const addonRouter = Router();
-        const addonAPI: AddonAPI = {
-          registerRoute: (routePath, router) => {
-            app.use(routePath, router);
-          },
-          logger,
-          prisma,
-          addonPath,
-          viewsPath: addonViewsPath,
-          desktopViewsPath: addonDesktopViewsPath,
-          mobileViewsPath: addonMobileViewsPath,
-          getComponentPath: (componentPath: string) => {
-            return path.join(__dirname, '../..', componentPath);
-          },
-          ui: {
-            addSidebarItem: (item: SidebarItem) => uiComponentStore.addSidebarItem(item, folder),
-            removeSidebarItem: (id: string) => uiComponentStore.removeSidebarItem(id),
-            getSidebarItems: (section?: string, isAdmin?: boolean) => uiComponentStore.getSidebarItems(section, isAdmin),
-            addServerMenuItem: (item: ServerMenuItem) => uiComponentStore.addServerMenuItem(item, folder),
-            removeServerMenuItem: (id: string) => uiComponentStore.removeServerMenuItem(id),
-            getServerMenuItems: (feature?: string) => uiComponentStore.getServerMenuItems(feature),
-            addServerSection: (section: ServerSection) => uiComponentStore.addServerSection(section, folder),
-            removeServerSection: (id: string) => uiComponentStore.removeServerSection(id),
-            getServerSections: () => uiComponentStore.getServerSections(),
-            addServerSectionItem: (sectionId: string, item: ServerSectionItem) => uiComponentStore.addServerSectionItem(sectionId, item),
-            removeServerSectionItem: (sectionId: string, itemId: string) => uiComponentStore.removeServerSectionItem(sectionId, itemId),
-            getServerSectionItems: (sectionId: string) => uiComponentStore.getServerSectionItems(sectionId)
-          },
-          renderView: (viewName: string, data: any = {}, isMobile: boolean = false) => {
-            const ejs = require('ejs');
-            const viewportDir = isMobile ? addonMobileViewsPath : addonDesktopViewsPath;
-            const viewportPath = path.join(viewportDir, viewName);
-            const fallbackPath = path.join(addonViewsPath, viewName);
-            const viewPath = fs.existsSync(viewportPath) ? viewportPath : fallbackPath;
-
-            try {
-              if (!fs.existsSync(viewPath)) {
-                throw new Error(`View ${viewName} not found in addon ${packageJson.name}`);
-              }
-
-              return ejs.renderFile(viewPath, data, {}, (err: any, str: string) => {
-                if (err) {
-                  logger.error(`Error rendering view ${viewName}:`, err);
-                  return `Error rendering view: ${err.message}`;
-                }
-                return str;
-              });
-            } catch (error: any) {
-              logger.error(`Error rendering view ${viewName}:`, error);
-              return `Error rendering view: ${error.message}`;
-            }
-          },
-          utils: {
-            isUserAdmin: async (userId: number) => {
-              try {
-                const user = await prisma.users.findUnique({
-                  where: { id: userId }
-                });
-                return user?.isAdmin === true;
-              } catch (error) {
-                logger.error('Error checking if user is admin:', error);
-                return false;
-              }
-            },
-
-            getServerById: async (serverId: number) => {
-              try {
-                return await prisma.server.findUnique({
-                  where: { id: serverId },
-                  include: {
-                    node: true,
-                    image: true,
-                    owner: true,
-                  }
-                });
-              } catch (error) {
-                logger.error('Error getting server by ID:', error);
-                return null;
-              }
-            },
-            getServerByUUID: async (uuid: string) => {
-              try {
-                return await prisma.server.findUnique({
-                  where: { UUID: uuid },
-                  include: {
-                    node: true,
-                    image: true,
-                    owner: true,
-                  }
-                });
-              } catch (error) {
-                logger.error('Error getting server by UUID:', error);
-                return null;
-              }
-            },
-            getServerPorts: (server: any) => {
-              try {
-                if (!server.Ports) return [];
-                return JSON.parse(server.Ports);
-              } catch (error) {
-                logger.error('Error parsing server ports:', error);
-                return [];
-              }
-            },
-            getPrimaryPort: (server: any) => {
-              try {
-                if (!server.Ports) return null;
-                const ports = JSON.parse(server.Ports);
-                return ports.find((port: any) => port.primary === true);
-              } catch (error) {
-                logger.error('Error getting primary port:', error);
-                return null;
-              }
+        if (!addonRecord) {
+          if (addonEnabled) {
+            const migrationResult = await applyAddonMigrations(folder, manifest);
+            if (!migrationResult.success) {
+              logger.error(`Failed to apply migrations for new addon ${manifest.name}:`, migrationResult.message);
+              addonEnabled = false;
             }
           }
-        };
 
-        try {
-          const addonModule = require(mainFilePath);
-          const routerPath = packageJson.router || '/';
-          const animationsDisabled = packageJson.dontfuckinganimateme === true;
-
-          // Inject a flag into res.locals for every request handled by this addon
-          // so views can know whether to apply the global entrance animation
-          addonRouter.use((_req: any, res: any, next: any) => {
-            res.locals.addonAnimationsDisabled = animationsDisabled;
-            next();
+          addonRecord = await prisma.addon.create({
+            data: {
+              name: manifest.name,
+              slug: folder,
+              description: manifest.description || '',
+              version: manifest.version,
+              author: manifest.author || '',
+              enabled: addonEnabled,
+              mainFile: manifest.main || 'index.ts',
+            },
+          });
+          logger.info(`Added addon ${manifest.name} to database`);
+        } else {
+          await prisma.addon.update({
+            where: { id: addonRecord.id },
+            data: {
+              name: manifest.name,
+              description: manifest.description || '',
+              version: manifest.version,
+              author: manifest.author || '',
+              mainFile: manifest.main || 'index.ts',
+            },
           });
 
-          if (typeof addonModule === 'function') {
-            addonModule(addonRouter, addonAPI);
-            Object.defineProperty(addonRouter, 'name', { value: `router_${folder}` });
-            app.use(routerPath, addonRouter);
-            loadedAddons.set(folder, { router: addonRouter, path: routerPath });
-          } else if (addonModule.default && typeof addonModule.default === 'function') {
-            addonModule.default(addonRouter, addonAPI);
-            Object.defineProperty(addonRouter, 'name', { value: `router_${folder}` });
-            app.use(routerPath, addonRouter);
-            loadedAddons.set(folder, { router: addonRouter, path: routerPath });
-          } else {
-            logger.error(`Invalid main export for addon ${packageJson.name}`, null);
-          }
-        } catch (error: any) {
-          logger.error(`Failed to initialize addon ${packageJson.name}:`, error.message);
+          addonEnabled = addonRecord.enabled;
         }
-      } catch (error: any) {
-        logger.error(`Failed to load addon from folder ${folder}:`, error.message);
+
+        if (!addonEnabled) {
+          logger.info(`Addon ${manifest.name} is disabled, skipping`);
+          continue;
+        }
+      } catch (error) {
+        logger.error(`Database error for addon ${folder}:`, error);
       }
+    }
+
+    if (manifest.engines?.panel) {
+      const panelVersion = require('../../package.json').version;
+      if (!isVersionInRange(panelVersion, manifest.engines.panel)) {
+        logger.warn(`Addon ${manifest.name} targets panel ${manifest.engines.panel}, running panel ${panelVersion}`);
+      }
+    }
+
+    if (manifest.permissions) {
+      for (const perm of manifest.permissions) {
+        registerAddonPermission(folder, perm);
+      }
+    }
+
+    const mainFile = manifest.main || 'index.ts';
+    const mainFilePath = path.join(addonPath, mainFile);
+
+    if (!fs.existsSync(mainFilePath)) {
+      logger.warn(`Addon ${manifest.name} is missing main file (${mainFile}), skipping`);
+      continue;
+    }
+
+    if (!containPath(addonPath, mainFilePath)) {
+      logger.warn(`Addon ${manifest.name} main file escapes addon directory, skipping`);
+      continue;
+    }
+
+    const addonViewsPath = path.join(addonPath, 'views');
+    const addonDesktopViewsPath = path.join(addonViewsPath, 'desktop');
+    const addonMobileViewsPath = path.join(addonViewsPath, 'mobile');
+
+    if (!fs.existsSync(addonViewsPath)) fs.mkdirSync(addonViewsPath, { recursive: true });
+    if (!fs.existsSync(addonDesktopViewsPath)) fs.mkdirSync(addonDesktopViewsPath, { recursive: true });
+    if (!fs.existsSync(addonMobileViewsPath)) fs.mkdirSync(addonMobileViewsPath, { recursive: true });
+
+    const addonRouter = Router();
+    const addonAPI = buildAddonAPI(folder, addonPath, manifest);
+    const animationsDisabled = manifest.dontfuckinganimateme === true;
+
+    addonRouter.use((_req: any, res: any, next: any) => {
+      res.locals.addonAnimationsDisabled = animationsDisabled;
+      res.locals.addonSlug = folder;
+      next();
+    });
+
+    const cacheTracker = trackRequireCache(addonPath);
+
+    try {
+      let addonModule: any;
+      try {
+        addonModule = require(mainFilePath);
+      } finally {
+        cacheTracker();
+      }
+
+      const routerPath = manifest.router || '/';
+
+      let hooks: AddonLifecycleHooks | undefined;
+
+      if (typeof addonModule === 'function') {
+        const result = addonModule(addonRouter, addonAPI);
+        if (result && typeof result === 'object') {
+          hooks = result as AddonLifecycleHooks;
+        }
+      } else if (addonModule.default && typeof addonModule.default === 'function') {
+        const result = addonModule.default(addonRouter, addonAPI);
+        if (result && typeof result === 'object') {
+          hooks = result as AddonLifecycleHooks;
+        }
+      } else {
+        logger.error(`Invalid main export for addon ${manifest.name}`);
+        continue;
+      }
+
+      const staticPath = setupStaticAssetServing(appExpress, folder, addonPath);
+
+      Object.defineProperty(addonRouter, 'name', { value: `router_${folder}` });
+      appExpress.use(routerPath, addonRouter);
+      loadedAddons.set(folder, {
+        router: addonRouter,
+        routerPath,
+        staticPath: staticPath ?? undefined,
+        manifest,
+        hooks,
+        version: manifest.version,
+      });
+
+      if (addonTableExists) {
+        try {
+          const addonRecord = await prisma.addon.findUnique({ where: { slug: folder } });
+          if (addonRecord && hooks?.onInstall) {
+            const existingMigrations = await prisma.$queryRaw<{ migrationName: string }[]>`
+              SELECT migrationName FROM AddonMigration WHERE addonSlug = ${folder}
+            `;
+            if (existingMigrations.length === 0) {
+              await safeHookCall(folder, 'onInstall', () => hooks!.onInstall!());
+            }
+          }
+        } catch {
+          // best-effort lifecycle
+        }
+      }
+
+      logger.info(`Loaded addon: ${manifest.name} (${folder})`);
+    } catch (error: any) {
+      logger.error(`Failed to initialize addon ${manifest.name}:`, error.message);
     }
   }
 
   buildTailwind();
 }
 
-/**
- * Apply migrations defined in an addon's package.json
- * @param slug The addon slug
- * @param packageJson The addon's package.json content
- */
-async function applyAddonMigrations(slug: string, packageJson: AddonPackageJson) {
-  if (!packageJson.migrations || packageJson.migrations.length === 0) {
-    return { success: true, message: 'No migrations to apply' };
-  }
-
-  logger.info(`Applying ${packageJson.migrations.length} migrations for addon ${packageJson.name}`);
-
+async function safeHookCall(slug: string, hookName: string, fn: () => Promise<void> | void): Promise<void> {
   try {
-    // Create a migrations table for addons if it doesn't exist
-    await prisma.$executeRaw`
-      CREATE TABLE IF NOT EXISTS AddonMigration (
-        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-        addonSlug TEXT NOT NULL,
-        migrationName TEXT NOT NULL,
-        appliedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(addonSlug, migrationName)
-      )
-    `;
-
-    // Get already applied migrations for this addon
-    const appliedMigrations = await prisma.$queryRaw<{ migrationName: string }[]>`
-      SELECT migrationName FROM AddonMigration WHERE addonSlug = ${slug}
-    `;
-    const appliedMigrationNames = appliedMigrations.map(m => m.migrationName);
-
-    const pendingMigrations = packageJson.migrations.filter(
-      migration => !appliedMigrationNames.includes(migration.name)
-    );
-
-    if (pendingMigrations.length === 0) {
-      logger.info(`No new migrations to apply for addon ${packageJson.name}`);
-      return { success: true, message: 'No new migrations to apply' };
-    }
-
-    logger.info(`Found ${pendingMigrations.length} pending migrations for addon ${packageJson.name}`);
-
-    // Apply each migration that hasn't been applied yet
-    for (const migration of pendingMigrations) {
-      try {
-        logger.info(`Applying migration ${migration.name} for addon ${packageJson.name}...`);
-
-        // Execute the migration SQL
-        await prisma.$executeRawUnsafe(migration.sql);
-
-        // Record the migration as applied
-        await prisma.$executeRaw`
-          INSERT INTO AddonMigration (addonSlug, migrationName)
-          VALUES (${slug}, ${migration.name})
-        `;
-
-        logger.info(`Successfully applied migration ${migration.name} for addon ${packageJson.name}`);
-      } catch (error: any) {
-        logger.error(`Failed to apply migration ${migration.name}:`, error.message);
-        return { success: false, message: `Failed to apply migration ${migration.name}: ${error.message}` };
-      }
-    }
-
-    return {
-      success: true,
-      message: `Successfully applied ${pendingMigrations.length} migrations for addon ${packageJson.name}`,
-      migrationsApplied: pendingMigrations.length
-    };
-  } catch (error: any) {
-    logger.error(`Failed to apply migrations for addon ${packageJson.name}:`, error.message);
-    return { success: false, message: `Failed to apply migrations: ${error.message}` };
+    await fn();
+  } catch (err: any) {
+    logger.error(`Addon "${slug}" hook "${hookName}" failed:`, err.message);
   }
 }
 
 export async function toggleAddonStatus(slug: string, enabled: boolean) {
-  try {
+  return withAddonLock(slug, async () => {
     try {
-      await prisma.$queryRaw`SELECT 1 FROM Addon LIMIT 1`;
-    } catch {
-      logger.warn('Addon table does not exist yet. Run migrations to create it.');
-      return { success: false, message: 'Addon table does not exist yet' };
-    }
+      try {
+        await prisma.$queryRaw`SELECT 1 FROM Addon LIMIT 1`;
+      } catch {
+        logger.warn('Addon table does not exist yet. Run migrations to create it.');
+        return { success: false, message: 'Addon table does not exist yet' };
+      }
 
-    const addon = await prisma.addon.findUnique({
-      where: { slug }
-    });
+      const addon = await prisma.addon.findUnique({ where: { slug } });
+      if (!addon) throw new Error(`Addon ${slug} not found`);
 
-    if (!addon) {
-      throw new Error(`Addon ${slug} not found`);
-    }
+      const loaded = loadedAddons.get(slug);
 
-    // If enabling the addon, apply migrations
-    let migrationsApplied = 0;
-    if (enabled && !addon.enabled) {
-      const addonsDir = path.join(__dirname, '../../storage/addons');
-      const addonPath = path.join(addonsDir, slug);
-      const packageJsonPath = path.join(addonPath, 'package.json');
+      if (enabled && !addon.enabled) {
+        if (loaded?.hooks?.onEnable) {
+          await safeHookCall(slug, 'onEnable', () => loaded.hooks!.onEnable!());
+        }
 
-      if (fs.existsSync(packageJsonPath)) {
-        try {
-          const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf-8');
-          const packageJson: AddonPackageJson = JSON.parse(packageJsonContent);
-
-          if (packageJson.migrations && packageJson.migrations.length > 0) {
-            logger.info(`Checking migrations for addon ${packageJson.name} before enabling...`);
-            const migrationResult = await applyAddonMigrations(slug, packageJson);
-
-            if (!migrationResult.success) {
-              logger.error(`Failed to enable addon ${packageJson.name} due to migration errors:`, migrationResult.message);
-              return { success: false, message: `Failed to enable addon: ${migrationResult.message}` };
-            }
-
-            if (migrationResult.migrationsApplied) {
-              migrationsApplied = migrationResult.migrationsApplied;
-              logger.info(`Applied ${migrationsApplied} migrations for addon ${packageJson.name}`);
-            }
+        if (loaded?.manifest?.migrations && loaded.manifest.migrations.length > 0) {
+          const migrationResult = await applyAddonMigrations(slug, loaded.manifest);
+          if (!migrationResult.success) {
+            return { success: false, message: `Failed to enable: ${migrationResult.message}` };
           }
-        } catch (error: any) {
-          logger.error(`Failed to read package.json for addon ${slug}:`, error.message);
-          // Continue with enabling the addon even if we can't read the package.json
         }
       }
+
+      if (!enabled && addon.enabled) {
+        const loaded = loadedAddons.get(slug);
+        if (loaded?.hooks?.onDisable) {
+          await safeHookCall(slug, 'onDisable', () => loaded.hooks!.onDisable!());
+        }
+      }
+
+      await prisma.addon.update({ where: { id: addon.id }, data: { enabled } });
+
+      return {
+        success: true,
+        message: `Addon ${addon.name} ${enabled ? 'enabled' : 'disabled'} successfully`,
+      };
+    } catch (error: any) {
+      logger.error('Failed to toggle addon status:', error.message);
+      return { success: false, message: `Failed to toggle addon status: ${error.message}` };
     }
-
-    await prisma.addon.update({
-      where: { id: addon.id },
-      data: { enabled }
-    });
-
-    const statusText = enabled ? 'enabled' : 'disabled';
-    const message = migrationsApplied > 0
-      ? `Addon ${addon.name} ${statusText} successfully with ${migrationsApplied} migrations applied`
-      : `Addon ${addon.name} ${statusText} successfully`;
-
-    return { success: true, message, migrationsApplied };
-  } catch (error: any) {
-    logger.error('Failed to toggle addon status:', error.message);
-    return { success: false, message: `Failed to toggle addon status: ${error.message}` };
-  }
+  });
 }
 
 export async function getAllAddons() {
@@ -510,93 +631,186 @@ export async function getAllAddons() {
       logger.warn('Addon table does not exist yet. Run migrations to create it.');
       return [];
     }
-
-    return await prisma.addon.findMany({
-      orderBy: { name: 'asc' }
-    });
+    return await prisma.addon.findMany({ orderBy: { name: 'asc' } });
   } catch (error: any) {
     logger.error('Failed to get addons:', error.message);
     return [];
   }
 }
 
-const loadedAddons: Map<string, { router: Router, path: string }> = new Map();
-
-function unloadAddon(app: Express | any, slug: string) {
+function unloadAddon(app: Express | any, slug: string): void {
   const addon = loadedAddons.get(slug);
-  if (addon) {
-    const routerStack = (app as any)._router.stack;
-    const routerIndex = routerStack.findIndex((layer: any) =>
-      layer.handle && layer.handle.name === `router_${slug}`);
+  if (!addon) return;
 
-    if (routerIndex !== -1) {
-      routerStack.splice(routerIndex, 1);
-      logger.info(`Unloaded addon: ${slug}`);
+  const routerStack = (app as any)._router?.stack;
+  if (routerStack) {
+    for (let i = routerStack.length - 1; i >= 0; i--) {
+      const layer = routerStack[i];
+      if (layer?.handle?.name === `router_${slug}`) {
+        routerStack.splice(i, 1);
+        break;
+      }
     }
-
-    uiComponentStore.clearAddonItems(slug);
-    loadedAddons.delete(slug);
   }
+
+  if (addon.staticPath) {
+    removeStaticAssetServing(app, addon.staticPath);
+  }
+
+  uiComponentStore.clearAddonItems(slug);
+  slotRegistry.clearAddonSlots(slug);
+  commandRegistry.clearAddonCommands(slug);
+  scheduler.clearAddonTimers(slug);
+  clearAddonPermissions(slug);
+
+  loadedAddons.delete(slug);
+  logger.info(`Unloaded addon: ${slug}`);
 }
 
 export async function reloadAddons(app: Express | any) {
   logger.info('Reloading addons...');
-  let migrationsApplied = 0;
+
+  for (const [slug] of loadedAddons.entries()) {
+    unloadAddon(app, slug);
+  }
+
+  await loadAddons(app);
+
+  return { success: true, message: 'Addons reloaded successfully' };
+}
+
+async function applyAddonMigrations(slug: string, manifest: AddonManifestV2) {
+  if (!manifest.migrations || manifest.migrations.length === 0) {
+    return { success: true, message: 'No migrations to apply' };
+  }
+
+  logger.info(`Applying ${manifest.migrations.length} migrations for addon ${manifest.name}`);
 
   try {
-    const addons = await prisma.addon.findMany();
+    await prisma.$executeRaw`
+      CREATE TABLE IF NOT EXISTS AddonMigration (
+        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+        addonSlug TEXT NOT NULL,
+        migrationName TEXT NOT NULL,
+        appliedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(addonSlug, migrationName)
+      )
+    `;
 
-    const enabledAddons = addons.filter(addon => addon.enabled);
-    const disabledAddons = addons.filter(addon => !addon.enabled);
+    const appliedMigrations = await prisma.$queryRaw<{ migrationName: string }[]>`
+      SELECT migrationName FROM AddonMigration WHERE addonSlug = ${slug}
+    `;
+    const appliedNames = new Set(appliedMigrations.map(m => m.migrationName));
 
-    if (enabledAddons.length > 0) {
-      logger.info(`Enabled addons: ${enabledAddons.map(a => a.name).join(', ')}`);
+    const pending = manifest.migrations.filter(m => !appliedNames.has(m.name));
 
-      for (const addon of enabledAddons) {
-        const addonsDir = path.join(__dirname, '../../storage/addons');
-        const addonPath = path.join(addonsDir, addon.slug);
-        const packageJsonPath = path.join(addonPath, 'package.json');
+    if (pending.length === 0) {
+      return { success: true, message: 'No new migrations to apply' };
+    }
 
-        if (fs.existsSync(packageJsonPath)) {
-          try {
-            const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf-8');
-            const packageJson: AddonPackageJson = JSON.parse(packageJsonContent);
+    for (const migration of pending) {
+      try {
+        await prisma.$transaction(async (tx) => {
+          await tx.$executeRawUnsafe(migration.sql);
+          await tx.$executeRaw`
+            INSERT INTO AddonMigration (addonSlug, migrationName)
+            VALUES (${slug}, ${migration.name})
+          `;
+        });
+        logger.info(`Applied migration ${migration.name} for addon ${manifest.name}`);
+      } catch (error: any) {
+        logger.error(`Failed to apply migration ${migration.name}:`, error.message);
+        return { success: false, message: `Failed to apply migration ${migration.name}: ${error.message}` };
+      }
+    }
 
-            if (packageJson.migrations && packageJson.migrations.length > 0) {
-              const migrationResult = await applyAddonMigrations(addon.slug, packageJson);
-              if (migrationResult.success && migrationResult.migrationsApplied) {
-                migrationsApplied += migrationResult.migrationsApplied;
-              } else if (!migrationResult.success) {
-                logger.error(`Failed to apply migrations for addon ${addon.name}:`, migrationResult.message);
-              }
-            }
-          } catch (error: any) {
-            logger.error(`Failed to read package.json for addon ${addon.slug}:`, error.message);
-          }
+    return {
+      success: true,
+      message: `Applied ${pending.length} migrations for addon ${manifest.name}`,
+      migrationsApplied: pending.length,
+    };
+  } catch (error: any) {
+    logger.error(`Failed to apply migrations for addon ${manifest.name}:`, error.message);
+    return { success: false, message: `Failed to apply migrations: ${error.message}` };
+  }
+}
+
+function topologicalSort(graph: Map<string, { manifest: AddonManifestV2; folder: string }>): string[] {
+  const visited = new Set<string>();
+  const visiting = new Set<string>();
+  const order: string[] = [];
+
+  function visit(folder: string) {
+    if (visited.has(folder)) return;
+    if (visiting.has(folder)) {
+      logger.warn(`Circular dependency detected involving addon "${folder}"`);
+      return;
+    }
+    visiting.add(folder);
+
+    const node = graph.get(folder);
+    if (node?.manifest.dependencies) {
+      for (const dep of node.manifest.dependencies) {
+        if (graph.has(dep.identifier)) {
+          visit(dep.identifier);
         }
       }
     }
 
-    if (disabledAddons.length > 0) {
-      logger.info(`Disabled addons: ${disabledAddons.map(a => a.name).join(', ')}`);
-    }
-
-    for (const addon of disabledAddons) {
-      if (loadedAddons.has(addon.slug)) {
-        unloadAddon(app, addon.slug);
-      }
-    }
-  } catch (error) {
-    logger.error('Failed to get addons:', error);
-    return { success: false, message: 'Failed to reload addons due to database error' };
+    visiting.delete(folder);
+    visited.add(folder);
+    order.push(folder);
   }
 
-  // Reload all addons
-  await loadAddons(app);
+  for (const folder of graph.keys()) {
+    visit(folder);
+  }
 
-  const message = migrationsApplied > 0
-    ? `Addons reloaded successfully with ${migrationsApplied} migrations applied`
-    : 'Addons reloaded successfully';
+  return order;
+}
 
-  return { success: true, message, migrationsApplied };
+export async function uninstallAddon(slug: string, app: Express | any) {
+  return withAddonLock(slug, async () => {
+    const loaded = loadedAddons.get(slug);
+
+    if (loaded?.hooks?.onUninstall) {
+      await safeHookCall(slug, 'onUninstall', () => loaded.hooks!.onUninstall!());
+    }
+
+    const addonRecord = await prisma.addon.findUnique({ where: { slug } });
+    if (addonRecord) {
+      const manifest = loaded?.manifest;
+      if (manifest?.migrations) {
+        const appliedMigrations = await prisma.$queryRaw<{ migrationName: string }[]>`
+          SELECT migrationName FROM AddonMigration WHERE addonSlug = ${slug}
+        `;
+        const appliedNames = new Set(appliedMigrations.map(m => m.migrationName));
+
+        const reversible = manifest.migrations
+          .filter(m => m.down && appliedNames.has(m.name))
+          .reverse();
+
+        for (const migration of reversible) {
+          try {
+            await prisma.$executeRawUnsafe(migration.down!);
+            logger.info(`Rolled back migration ${migration.name} for addon ${slug}`);
+          } catch (err: any) {
+            logger.error(`Failed to roll back migration ${migration.name}:`, err.message);
+          }
+        }
+      }
+
+      await prisma.addonSetting.deleteMany({ where: { addonSlug: slug } });
+      await prisma.$executeRaw`DELETE FROM AddonMigration WHERE addonSlug = ${slug}`;
+      await prisma.addon.delete({ where: { slug } });
+    }
+
+    unloadAddon(app, slug);
+
+    const addonsDir = path.join(__dirname, '../../storage/addons');
+    const targetDir = path.join(addonsDir, slug);
+    if (fs.existsSync(targetDir) && containPath(addonsDir, targetDir)) {
+      fs.rmSync(targetDir, { recursive: true, force: true });
+    }
+  });
 }

@@ -396,6 +396,7 @@ export const ModelName = {
   LoginHistory: 'LoginHistory',
   PlayerStats: 'PlayerStats',
   Addon: 'Addon',
+  AddonSetting: 'AddonSetting',
   Backup: 'Backup',
   SftpCredential: 'SftpCredential'
 } as const
@@ -413,7 +414,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "session" | "server" | "images" | "node" | "settings" | "serverFolder" | "serverFolderMember" | "apiKey" | "loginHistory" | "playerStats" | "addon" | "backup" | "sftpCredential"
+    modelProps: "users" | "session" | "server" | "images" | "node" | "settings" | "serverFolder" | "serverFolderMember" | "apiKey" | "loginHistory" | "playerStats" | "addon" | "addonSetting" | "backup" | "sftpCredential"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1305,6 +1306,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AddonSetting: {
+      payload: Prisma.$AddonSettingPayload<ExtArgs>
+      fields: Prisma.AddonSettingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AddonSettingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddonSettingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AddonSettingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddonSettingPayload>
+        }
+        findFirst: {
+          args: Prisma.AddonSettingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddonSettingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AddonSettingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddonSettingPayload>
+        }
+        findMany: {
+          args: Prisma.AddonSettingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddonSettingPayload>[]
+        }
+        create: {
+          args: Prisma.AddonSettingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddonSettingPayload>
+        }
+        createMany: {
+          args: Prisma.AddonSettingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AddonSettingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddonSettingPayload>[]
+        }
+        delete: {
+          args: Prisma.AddonSettingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddonSettingPayload>
+        }
+        update: {
+          args: Prisma.AddonSettingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddonSettingPayload>
+        }
+        deleteMany: {
+          args: Prisma.AddonSettingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AddonSettingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AddonSettingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddonSettingPayload>[]
+        }
+        upsert: {
+          args: Prisma.AddonSettingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AddonSettingPayload>
+        }
+        aggregate: {
+          args: Prisma.AddonSettingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAddonSetting>
+        }
+        groupBy: {
+          args: Prisma.AddonSettingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AddonSettingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AddonSettingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AddonSettingCountAggregateOutputType> | number
+        }
+      }
+    }
     Backup: {
       payload: Prisma.$BackupPayload<ExtArgs>
       fields: Prisma.BackupFieldRefs
@@ -1700,6 +1775,17 @@ export const AddonScalarFieldEnum = {
 export type AddonScalarFieldEnum = (typeof AddonScalarFieldEnum)[keyof typeof AddonScalarFieldEnum]
 
 
+export const AddonSettingScalarFieldEnum = {
+  id: 'id',
+  addonSlug: 'addonSlug',
+  key: 'key',
+  value: 'value',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AddonSettingScalarFieldEnum = (typeof AddonSettingScalarFieldEnum)[keyof typeof AddonSettingScalarFieldEnum]
+
+
 export const BackupScalarFieldEnum = {
   id: 'id',
   UUID: 'UUID',
@@ -1913,6 +1999,7 @@ export type GlobalOmitConfig = {
   loginHistory?: Prisma.LoginHistoryOmit
   playerStats?: Prisma.PlayerStatsOmit
   addon?: Prisma.AddonOmit
+  addonSetting?: Prisma.AddonSettingOmit
   backup?: Prisma.BackupOmit
   sftpCredential?: Prisma.SftpCredentialOmit
 }

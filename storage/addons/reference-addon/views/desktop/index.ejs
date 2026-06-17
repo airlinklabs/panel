@@ -1,0 +1,92 @@
+<%- include('../../components/header', { title: 'Reference Addon' }) %>
+<%- include('../../components/toast') %>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <div class="w-60 h-full"><%- include('../../components/template') %></div>
+    <div class="flex-1 p-6 overflow-y-auto pt-16">
+
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-white">Reference Addon</h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= greeting %></p>
+        </div>
+      </div>
+
+      <div class="px-8 mt-5 space-y-6">
+        <div class="rounded-xl bg-neutral-900 p-6 border border-neutral-800">
+          <h2 class="text-lg font-medium text-white mb-4">Add New Item</h2>
+          <form action="/reference-addon/add" method="POST" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-neutral-300 mb-1">Name</label>
+              <input type="text" name="name" required
+                class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                placeholder="Enter item name">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-neutral-300 mb-1">Description</label>
+              <input type="text" name="description"
+                class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                placeholder="Enter description (optional)">
+            </div>
+            <button type="submit"
+              class="rounded-xl bg-white hover:bg-neutral-200 text-neutral-800 px-4 py-2 text-sm font-medium shadow-lg transition">
+              Add Item
+            </button>
+          </form>
+        </div>
+
+        <div class="rounded-xl bg-neutral-900 p-6 border border-neutral-800">
+          <h2 class="text-lg font-medium text-white mb-4">Items <span class="text-sm text-neutral-400 font-normal">(<%= items.length %> / <%= maxItems %> max)</span></h2>
+          <% if (items && items.length > 0) { %>
+            <div class="space-y-3">
+              <% items.forEach(function(item) { %>
+                <div class="flex items-center justify-between bg-neutral-800 rounded-xl p-4">
+                  <div>
+                    <p class="text-sm font-medium text-white"><%= item.name %></p>
+                    <% if (item.description) { %>
+                      <p class="text-xs text-neutral-400 mt-0.5"><%= item.description %></p>
+                    <% } %>
+                    <p class="text-xs text-neutral-500 mt-1"><%= new Date(item.createdAt).toLocaleString() %></p>
+                  </div>
+                  <form action="/reference-addon/delete/<%= item.id %>" method="POST" class="ml-4">
+                    <button type="submit"
+                      class="rounded-xl bg-red-600 hover:bg-red-500 px-3 py-1.5 text-xs font-medium text-white shadow transition">
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              <% }); %>
+            </div>
+          <% } else { %>
+            <p class="text-sm text-neutral-500">No items yet. Add your first item above!</p>
+          <% } %>
+        </div>
+
+        <div class="rounded-xl bg-neutral-900 p-6 border border-neutral-800">
+          <h2 class="text-lg font-medium text-white mb-4">Capabilities</h2>
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div class="bg-neutral-800 rounded-xl p-3">
+              <p class="text-neutral-400">Scheduled Tasks</p>
+              <p class="text-white font-medium">Enabled</p>
+            </div>
+            <div class="bg-neutral-800 rounded-xl p-3">
+              <p class="text-neutral-400">Commands</p>
+              <p class="text-white font-medium">hello, count-items</p>
+            </div>
+            <div class="bg-neutral-800 rounded-xl p-3">
+              <p class="text-neutral-400">Permissions</p>
+              <p class="text-white font-medium">view, manage</p>
+            </div>
+            <div class="bg-neutral-800 rounded-xl p-3">
+              <p class="text-neutral-400">API Endpoints</p>
+              <p class="text-white font-medium">/api/items</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/footer') %>

@@ -24,31 +24,6 @@
       </div>
     </a>
 
-    <!-- Server sub-page highlight (shown when on /server/:uuid/* pages) -->
-    <div id="server-sidebar-highlight" class="hidden px-4 py-3 border-b border-neutral-200/30 dark:border-white/5">
-      <div class="flex items-center gap-2 mb-2">
-        <%- icon('server', { class: 'w-4 h-4 text-neutral-500 dark:text-neutral-400' }) %>
-        <span id="server-sidebar-name" class="text-sm font-medium text-neutral-800 dark:text-white truncate"></span>
-      </div>
-      <div class="relative ml-4">
-        <div class="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-neutral-300 dark:from-neutral-600 to-transparent"></div>
-        <div id="server-sidebar-links" class="space-y-1 pl-4">
-          <a href="#" class="flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-all duration-150 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5">
-            <%- icon('terminal', { class: 'w-3 h-3' }) %>
-            <span>Console</span>
-          </a>
-          <a href="#" class="flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-all duration-150 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5">
-            <%- icon('folder', { class: 'w-3 h-3' }) %>
-            <span>Files</span>
-          </a>
-          <a href="#" class="flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-all duration-150 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5">
-            <%- icon('settings', { class: 'w-3 h-3' }) %>
-            <span>Settings</span>
-          </a>
-        </div>
-      </div>
-    </div>
-
     <!-- Scrollable nav -->
     <nav class="flex-1 overflow-y-auto">
       <ul role="list" class="py-2">
@@ -75,6 +50,13 @@
                 </a>
               </li>
             <% }); } %>
+
+            <!-- Server sub-page tree (shown when on /server/:uuid/* pages) -->
+            <li id="server-sidebar-highlight" class="hidden">
+              <div class="pl-10 pr-4 py-1 flex items-center gap-2">
+                <span id="server-sidebar-name" class="text-sm text-neutral-500 dark:text-neutral-400 truncate"></span>
+              </div>
+            </li>
 
             <% if (user.isAdmin === true) { %>
               <p class="pl-8 text-neutral-600 dark:text-neutral-400 text-xs font-medium pt-6 pb-2"><span><%= req.translations.navAdminPanel || 'Admin Panel' %></span></p>
@@ -185,8 +167,7 @@
   function updateServerSidebar(path) {
     var highlight = document.getElementById('server-sidebar-highlight');
     var serverName = document.getElementById('server-sidebar-name');
-    var serverLinks = document.getElementById('server-sidebar-links');
-    if (!highlight || !serverName || !serverLinks) return;
+    if (!highlight || !serverName) return;
 
     var match = path.match(/^\/server\/([^\/]+)/);
     if (match) {
@@ -196,18 +177,11 @@
       highlight.style.transform = 'translateY(-8px)';
       highlight.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
       
-      serverName.textContent = uuid.substring(0, 8) + '...';
-      
-      var links = serverLinks.querySelectorAll('a');
-      links.forEach(function(link) {
-        var href = link.getAttribute('href');
-        var isActive = path === href || path.startsWith(href + '/');
-        link.classList.toggle('bg-neutral-200', isActive);
-        link.classList.toggle('dark:bg-white/10', isActive);
-        link.classList.toggle('text-neutral-900', isActive);
-        link.classList.toggle('dark:text-white', isActive);
-        link.classList.toggle('font-medium', isActive);
-      });
+      serverName.textContent = '...';
+      fetch('/api/client/servers/' + uuid + '/name')
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function(d) { serverName.textContent = d.name || uuid.substring(0, 8); })
+        .catch(function() { serverName.textContent = uuid.substring(0, 8); });
       
       requestAnimationFrame(function() {
         highlight.style.opacity = '1';

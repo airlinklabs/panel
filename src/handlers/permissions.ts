@@ -1,6 +1,4 @@
-const permissions: Permission[] = [];
-
-export type Permission =
+type CorePermission =
   | 'server.*'
   | 'server.view'
   | 'server.start'
@@ -44,10 +42,48 @@ export type Permission =
   | 'airlink.api.settings.read'
   | 'airlink.api.settings.update';
 
+export type Permission = CorePermission | `addon.${string}`;
+
+const permissions: Permission[] = [];
+const addonPermissionRegistry = new Map<string, string[]>();
+
 export function registerPermission(permission: Permission): void {
   if (!permissions.includes(permission)) {
     permissions.push(permission);
   }
+}
+
+export function registerAddonPermission(addonSlug: string, permission: string): boolean {
+  const expectedNs = `addon.${addonSlug}.`;
+  if (!permission.startsWith(expectedNs)) {
+    logger.warn(`Addon "${addonSlug}" tried to register permission outside its namespace: "${permission}"`);
+    return false;
+  }
+
+  const typed = permission as Permission;
+  if (!permissions.includes(typed)) {
+    permissions.push(typed);
+  }
+
+  const existing = addonPermissionRegistry.get(addonSlug) ?? [];
+  if (!existing.includes(permission)) {
+    existing.push(permission);
+    addonPermissionRegistry.set(addonSlug, existing);
+  }
+
+  return true;
+}
+
+export function clearAddonPermissions(addonSlug: string): void {
+  const perms = addonPermissionRegistry.get(addonSlug);
+  if (!perms) return;
+
+  for (const perm of perms) {
+    const idx = permissions.indexOf(perm as Permission);
+    if (idx !== -1) permissions.splice(idx, 1);
+  }
+
+  addonPermissionRegistry.delete(addonSlug);
 }
 
 export function hasPermission(userPerms: Permission[], required: Permission): boolean {
@@ -60,6 +96,8 @@ export function hasPermission(userPerms: Permission[], required: Permission): bo
     return false;
   });
 }
+
+import logger from './logger';
 
 registerPermission('airlink.api.keys.view');
 registerPermission('airlink.api.keys.create');

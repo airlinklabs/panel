@@ -70,14 +70,12 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
     </li>
     <% } %>
 
-    <% if (user.isAdmin === true) { %>
     <li class="flex-1">
-      <a href="/admin/menu" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400" data-match-prefix="/admin">
-        <%- icon('grid', { size: 18, class: 'shrink-0' }) %>
-        <span class="text-[10px] font-medium"><%= req.translations.navAdmin || 'Admin' %></span>
+      <a href="/menu" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400" data-match-prefix="/menu">
+        <%- icon('menu', { size: 18, class: 'shrink-0' }) %>
+        <span class="text-[10px] font-medium"><%= req.translations.navMenu || 'Menu' %></span>
       </a>
     </li>
-    <% } %>
 
     <li class="flex-1">
       <a href="/logout" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400">

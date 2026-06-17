@@ -63,6 +63,7 @@ export const ModelName = {
   LoginHistory: 'LoginHistory',
   PlayerStats: 'PlayerStats',
   Addon: 'Addon',
+  AddonSetting: 'AddonSetting',
   Backup: 'Backup',
   SftpCredential: 'SftpCredential'
 } as const
@@ -289,6 +290,17 @@ export const AddonScalarFieldEnum = {
 } as const
 
 export type AddonScalarFieldEnum = (typeof AddonScalarFieldEnum)[keyof typeof AddonScalarFieldEnum]
+
+
+export const AddonSettingScalarFieldEnum = {
+  id: 'id',
+  addonSlug: 'addonSlug',
+  key: 'key',
+  value: 'value',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AddonSettingScalarFieldEnum = (typeof AddonSettingScalarFieldEnum)[keyof typeof AddonSettingScalarFieldEnum]
 
 
 export const BackupScalarFieldEnum = {
