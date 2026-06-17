@@ -48,18 +48,44 @@ export default function (router: Router, api: AddonApi) {
       const user = await resolveUser(req);
       const s = await settings.get();
       const panelSettings = await prisma.settings.findUnique({ where: { id: 1 } });
+      const query = (req.query.q as string) || '';
+      const type = (req.query.type as string) || 'all';
+      const index = (req.query.index as string) || 'relevance';
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      let results: any = null;
+      let totalHits = 0;
+
+      if (query || type !== 'all') {
+        try {
+          const searchResult = await modrinth.search(query, type, 20, offset, index);
+          results = searchResult;
+          totalHits = searchResult.total_hits;
+        } catch (err: any) {
+          logger.error('[Modrinth] Search error:', err.message);
+        }
+      } else {
+        try {
+          const trending = await modrinth.search('', 'mod', 12, 0, 'downloads');
+          results = trending;
+          totalHits = trending.total_hits;
+        } catch (err: any) {
+          logger.error('[Modrinth] Trending error:', err.message);
+        }
+      }
+
       const html = await api.renderView('browse.ejs', {
         title: 'Browse',
         user: user || {},
         settings: s,
         panelTitle: panelSettings?.title || 'AirLink',
         nonce: res.locals.cspNonce || '',
-        query: req.query.q || '',
-        type: req.query.type || 'all',
-        index: req.query.index || 'relevance',
-        offset: parseInt(req.query.offset as string) || 0,
-        results: null,
-        totalHits: 0,
+        query,
+        type,
+        index,
+        offset,
+        results,
+        totalHits,
       }, isMobile);
       res.send(html);
     } catch (err: any) {

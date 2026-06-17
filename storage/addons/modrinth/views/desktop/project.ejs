@@ -1,154 +1,97 @@
-<%- include('../components/header', { title: project ? project.title : 'Project', user: user }) %>
+<div class="flex-1 flex flex-col overflow-hidden">
+  <div class="flex-1 overflow-y-auto no-scrollbar">
+    <div class="max-w-4xl mx-auto px-6 py-8">
 
-<main class="h-screen flex">
-  <div class="w-60 h-full flex-shrink-0">
-    <%- include('../components/template') %>
-  </div>
+      <% if (!project) { %>
+      <div class="text-center py-20">
+        <p class="text-sm text-neutral-500 dark:text-neutral-400">Project not found</p>
+        <a href="/modrinth" class="text-xs text-neutral-400 dark:text-neutral-500 mt-2 inline-block hover:text-neutral-600 dark:hover:text-neutral-300">Back to browse</a>
+      </div>
+      <% } else { %>
 
-  <div class="flex-1 flex flex-col overflow-hidden pt-16">
-    <div class="flex-1 overflow-y-auto no-scrollbar">
-      <div class="max-w-4xl mx-auto px-6 py-8">
-
-        <% if (!project) { %>
-        <div class="text-center py-20">
-          <p class="text-sm text-neutral-500 dark:text-neutral-400">Project not found</p>
-          <a href="/modrinth" class="text-xs text-neutral-400 dark:text-neutral-500 mt-2 inline-block hover:text-neutral-600 dark:hover:text-neutral-300">Back to browse</a>
-        </div>
+      <div class="flex items-start gap-5 mb-8">
+        <% if (project.icon_url) { %>
+        <img src="<%= project.icon_url %>" alt="" class="w-20 h-20 rounded-2xl object-cover bg-neutral-200 dark:bg-neutral-700 shrink-0">
         <% } else { %>
-
-        <!-- Header -->
-        <div class="flex items-start gap-5 mb-8">
-          <% if (project.icon_url) { %>
-          <img src="<%= project.icon_url %>" alt="" class="w-20 h-20 rounded-2xl object-cover bg-neutral-200 dark:bg-neutral-700 shrink-0">
-          <% } else { %>
-          <div class="w-20 h-20 rounded-2xl bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center shrink-0">
-            <svg class="w-10 h-10 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        <div class="w-20 h-20 rounded-2xl bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center shrink-0">
+          <svg class="w-10 h-10 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        </div>
+        <% } %>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-semibold text-neutral-800 dark:text-white truncate"><%= project.title %></h1>
+            <span class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-neutral-200/50 dark:bg-white/10 text-neutral-600 dark:text-neutral-400 shrink-0"><%= project.project_type %></span>
           </div>
-          <% } %>
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-2">
-              <h1 class="text-xl font-semibold text-neutral-800 dark:text-white truncate"><%= project.title %></h1>
-              <span class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-neutral-200/50 dark:bg-white/10 text-neutral-600 dark:text-neutral-400 shrink-0"><%= project.project_type %></span>
-            </div>
-            <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">by <%= project.author %></p>
-            <p class="text-sm text-neutral-600 dark:text-neutral-300 mt-2"><%= project.description %></p>
-            <div class="flex items-center gap-4 mt-3 text-xs text-neutral-400 dark:text-neutral-500">
-              <span class="flex items-center gap-1">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                <%= project.downloads.toLocaleString() %> downloads
-              </span>
-              <span class="flex items-center gap-1">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                <%= project.follows %> followers
-              </span>
-              <% if (project.license) { %>
-              <span><%= project.license %></span>
+          <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1"><%= project.description %></p>
+          <div class="flex items-center gap-4 mt-3 text-xs text-neutral-400 dark:text-neutral-500">
+            <span class="flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              <%= project.downloads.toLocaleString() %> downloads
+            </span>
+            <span class="flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+              <%= project.follows %> followers
+            </span>
+            <% if (project.license) { %><span><%= project.license %></span><% } %>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2 mb-8">
+        <% if (project.source_url) { %>
+        <a href="<%= project.source_url %>" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/10 transition">Source</a>
+        <% } %>
+        <% if (project.issues_url) { %>
+        <a href="<%= project.issues_url %>" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/10 transition">Issues</a>
+        <% } %>
+        <% if (project.wiki_url) { %>
+        <a href="<%= project.wiki_url %>" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/10 transition">Wiki</a>
+        <% } %>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+          <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5 mb-6">
+            <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-3">About</h3>
+            <div class="text-sm text-neutral-600 dark:text-neutral-300 prose prose-sm dark:prose-invert max-w-none" id="project-body"></div>
+          </div>
+          <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5">
+            <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-3">Versions</h3>
+            <div class="space-y-2" id="versions-list">
+              <% if (versions && versions.length > 0) { %>
+              <% versions.slice(0, 10).forEach(function(v) { %>
+              <div class="flex items-center justify-between p-3 rounded-lg bg-white/5 dark:bg-white/[0.03] border border-neutral-200/20 dark:border-white/[0.03]">
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= v.name %></p>
+                  <p class="text-xs text-neutral-500 dark:text-neutral-400"><%= v.version_number %> &middot; <%= v.game_versions.join(', ') %></p>
+                </div>
+                <button onclick="installVersion('<%= v.id %>')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-neutral-800 dark:bg-white/10 text-white hover:bg-neutral-700 dark:hover:bg-white/15 transition shrink-0 ml-3">Install</button>
+              </div>
+              <% }); %>
+              <% } else { %>
+              <p class="text-xs text-neutral-400 dark:text-neutral-500">No versions available</p>
               <% } %>
             </div>
           </div>
         </div>
-
-        <!-- Links -->
-        <div class="flex flex-wrap gap-2 mb-8">
-          <% if (project.source_url) { %>
-          <a href="<%= project.source_url %>" target="_blank" rel="noopener"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/10 transition">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-            Source
-          </a>
-          <% } %>
-          <% if (project.issues_url) { %>
-          <a href="<%= project.issues_url %>" target="_blank" rel="noopener"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/10 transition">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            Issues
-          </a>
-          <% } %>
-          <% if (project.wiki_url) { %>
-          <a href="<%= project.wiki_url %>" target="_blank" rel="noopener"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/10 transition">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-            Wiki
-          </a>
-          <% } %>
-          <% if (project.discord_url) { %>
-          <a href="<%= project.discord_url %>" target="_blank" rel="noopener"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/10 transition">
-            Discord
-          </a>
-          <% } %>
-        </div>
-
-        <!-- Side info -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div class="lg:col-span-2">
-            <!-- Description -->
-            <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5 mb-6">
-              <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-3">About</h3>
-              <div class="text-sm text-neutral-600 dark:text-neutral-300 prose prose-sm dark:prose-invert max-w-none" id="project-body"></div>
-            </div>
-
-            <!-- Versions -->
-            <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5">
-              <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-3">Versions</h3>
-              <div class="space-y-2" id="versions-list">
-                <% if (versions && versions.length > 0) { %>
-                <% versions.slice(0, 10).forEach(function(v) { %>
-                <div class="flex items-center justify-between p-3 rounded-lg bg-white/5 dark:bg-white/[0.03] border border-neutral-200/20 dark:border-white/[0.03]">
-                  <div class="min-w-0">
-                    <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= v.name %></p>
-                    <p class="text-xs text-neutral-500 dark:text-neutral-400">
-                      <%= v.version_number %> &middot; <%= v.game_versions.join(', ') %> &middot; <%= v.loaders.join(', ') %>
-                    </p>
-                  </div>
-                  <button onclick="installVersion('<%= v.id %>')"
-                    class="px-3 py-1.5 text-xs font-medium rounded-lg bg-neutral-800 dark:bg-white/10 text-white dark:text-white hover:bg-neutral-700 dark:hover:bg-white/15 transition shrink-0 ml-3">
-                    Install
-                  </button>
-                </div>
-                <% }); %>
-                <% if (versions.length > 10) { %>
-                <p class="text-xs text-neutral-400 dark:text-neutral-500 text-center pt-2">Showing 10 of <%= versions.length %> versions</p>
-                <% } %>
-                <% } else { %>
-                <p class="text-xs text-neutral-400 dark:text-neutral-500">No versions available</p>
-                <% } %>
-              </div>
+        <div class="space-y-4">
+          <% if (project.categories && project.categories.length > 0) { %>
+          <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-4">
+            <h4 class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-2">Categories</h4>
+            <div class="flex flex-wrap gap-1.5">
+              <% project.categories.forEach(function(cat) { %>
+              <span class="px-2 py-0.5 text-[10px] rounded-full bg-neutral-200/50 dark:bg-white/10 text-neutral-600 dark:text-neutral-400"><%= cat %></span>
+              <% }); %>
             </div>
           </div>
-
-          <!-- Sidebar -->
-          <div class="space-y-4">
-            <% if (project.client_side || project.server_side) { %>
-            <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-4">
-              <h4 class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-2">Sides</h4>
-              <div class="space-y-1 text-sm text-neutral-700 dark:text-neutral-300">
-                <% if (project.client_side) { %><p>Client: <%= project.client_side %></p><% } %>
-                <% if (project.server_side) { %><p>Server: <%= project.server_side %></p><% } %>
-              </div>
-            </div>
-            <% } %>
-
-            <% if (project.categories && project.categories.length > 0) { %>
-            <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-4">
-              <h4 class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-2">Categories</h4>
-              <div class="flex flex-wrap gap-1.5">
-                <% project.categories.forEach(function(cat) { %>
-                <span class="px-2 py-0.5 text-[10px] rounded-full bg-neutral-200/50 dark:bg-white/10 text-neutral-600 dark:text-neutral-400"><%= cat %></span>
-                <% }); %>
-              </div>
-            </div>
-            <% } %>
-          </div>
+          <% } %>
         </div>
-
-        <% } %>
       </div>
+      <% } %>
     </div>
   </div>
-</main>
+</div>
 
-<!-- Server selection modal -->
 <div id="install-modal" class="fixed inset-0 z-50 hidden">
   <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeInstallModal()"></div>
   <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md rounded-2xl bg-white dark:bg-[#1c1c1c] border border-neutral-200/30 dark:border-white/5 p-6 shadow-2xl">
@@ -186,12 +129,8 @@ function loadServers() {
         return;
       }
       el.innerHTML = data.servers.map(function(s) {
-        return '<button onclick="doInstall(' + s.UUID + ')" class="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 hover:bg-neutral-100 dark:hover:bg-white/[0.08] transition text-left">' +
-          '<div class="w-8 h-8 rounded-lg bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center shrink-0">' +
-          '<svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"/></svg>' +
-          '</div>' +
-          '<div class="min-w-0"><p class="text-sm font-medium text-neutral-800 dark:text-white truncate">' + s.name + '</p></div>' +
-          '</button>';
+        return '<button onclick="doInstall(\'' + s.UUID + '\')" class="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 hover:bg-neutral-100 dark:hover:bg-white/[0.08] transition text-left">' +
+          '<div class="min-w-0"><p class="text-sm font-medium text-neutral-800 dark:text-white truncate">' + s.name + '</p></div></button>';
       }).join('');
     });
 }
@@ -200,15 +139,12 @@ function doInstall(serverUUID) {
   if (!currentVersionId) return;
   var projectId = '<%= project ? project.id : '' %>';
   closeInstallModal();
-
   fetch('/modrinth/api/install', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ serverId: serverUUID, projectId: projectId, versionId: currentVersionId })
   }).then(function(r) { return r.json(); })
-    .then(function(d) {
-      if (d.error) alert(d.error);
-    });
+    .then(function(d) { if (d.error) alert(d.error); });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -221,5 +157,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-<%- include('../components/footer') %>

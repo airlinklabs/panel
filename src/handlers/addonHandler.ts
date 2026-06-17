@@ -242,7 +242,7 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
         throw new Error(`View ${viewName} not found in addon ${slug}`);
       }
 
-      return new Promise<string>((resolve, reject) => {
+      const content = await new Promise<string>((resolve, reject) => {
         ejs.renderFile(viewPath, data, {}, (err: any, str: string) => {
           if (err) {
             logger.error(`Error rendering view ${viewName}:`, err);
@@ -252,6 +252,48 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
           }
         });
       });
+
+      const viewsBase = isMobile
+        ? path.join(__dirname, '../../views/mobile')
+        : path.join(__dirname, '../../views/desktop');
+      const headerPath = path.join(viewsBase, 'components/header.ejs');
+      const footerPath = path.join(viewsBase, 'components/footer.ejs');
+      const templatePath = path.join(viewsBase, 'components/template.ejs');
+
+      const hasHeader = fs.existsSync(headerPath);
+      const hasFooter = fs.existsSync(footerPath);
+      const hasTemplate = fs.existsSync(templatePath);
+
+      if (!hasHeader && !hasFooter) return content;
+
+      let header = '';
+      if (hasHeader) {
+        header = await new Promise<string>((resolve, reject) => {
+          ejs.renderFile(headerPath, data, {}, (err: any, str: string) => {
+            if (err) { resolve(''); } else { resolve(str); }
+          });
+        });
+      }
+
+      let template = '';
+      if (hasTemplate) {
+        template = await new Promise<string>((resolve, reject) => {
+          ejs.renderFile(templatePath, data, {}, (err: any, str: string) => {
+            if (err) { resolve(''); } else { resolve(str); }
+          });
+        });
+      }
+
+      let footer = '';
+      if (hasFooter) {
+        footer = await new Promise<string>((resolve, reject) => {
+          ejs.renderFile(footerPath, data, {}, (err: any, str: string) => {
+            if (err) { resolve(''); } else { resolve(str); }
+          });
+        });
+      }
+
+      return `${header}\n${template}\n<div id="colcont" class="lg:pl-56">\n<div class="fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center bg-white/8 dark:bg-[#141414]/8 backdrop-blur-xl border-b border-neutral-200/30 dark:border-white/5 px-4">\n<div class="flex items-center gap-3">\n<a href="/modrinth" class="text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">Modrinth</a>\n<svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>\n<span class="text-sm text-neutral-800 dark:text-white font-medium">${data.title || ''}</span>\n</div>\n</div>\n<div class="pt-16">${content}</div>\n</div>\n${footer}`;
     },
     config: createConfigStore(slug),
     ui: {
