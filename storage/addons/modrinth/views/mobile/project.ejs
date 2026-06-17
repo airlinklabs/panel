@@ -1,0 +1,153 @@
+<%- include('../../components/header', { title: project ? project.title : 'Project', user: user }) %>
+
+<main class="">
+  <%- include('../../components/template') %>
+
+  <div class="px-4 py-4">
+    <% if (!project) { %>
+    <div class="text-center py-16">
+      <p class="text-sm text-neutral-500 dark:text-neutral-400">Project not found</p>
+      <a href="/modrinth" class="text-xs text-neutral-400 mt-2 inline-block">Back</a>
+    </div>
+    <% } else { %>
+
+    <!-- Header -->
+    <div class="flex items-start gap-3 mb-4">
+      <% if (project.icon_url) { %>
+      <img src="<%= project.icon_url %>" alt="" class="w-16 h-16 rounded-xl object-cover bg-neutral-200 dark:bg-neutral-700 shrink-0">
+      <% } else { %>
+      <div class="w-16 h-16 rounded-xl bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center shrink-0">
+        <svg class="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+      </div>
+      <% } %>
+      <div class="min-w-0 flex-1">
+        <h1 class="text-base font-semibold text-neutral-800 dark:text-white truncate"><%= project.title %></h1>
+        <p class="text-xs text-neutral-500 dark:text-neutral-400">by <%= project.author %></p>
+        <div class="flex items-center gap-3 mt-1 text-[10px] text-neutral-400 dark:text-neutral-500">
+          <span><%= project.downloads.toLocaleString() %> downloads</span>
+          <span><%= project.follows %> follows</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-sm text-neutral-600 dark:text-neutral-300 mb-4"><%= project.description %></p>
+
+    <!-- Links -->
+    <div class="flex flex-wrap gap-1.5 mb-4">
+      <% if (project.source_url) { %>
+      <a href="<%= project.source_url %>" target="_blank" class="px-2.5 py-1 text-[10px] rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-500 dark:text-neutral-400">Source</a>
+      <% } %>
+      <% if (project.issues_url) { %>
+      <a href="<%= project.issues_url %>" target="_blank" class="px-2.5 py-1 text-[10px] rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-500 dark:text-neutral-400">Issues</a>
+      <% } %>
+      <% if (project.wiki_url) { %>
+      <a href="<%= project.wiki_url %>" target="_blank" class="px-2.5 py-1 text-[10px] rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-500 dark:text-neutral-400">Wiki</a>
+      <% } %>
+      <% if (project.discord_url) { %>
+      <a href="<%= project.discord_url %>" target="_blank" class="px-2.5 py-1 text-[10px] rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-500 dark:text-neutral-400">Discord</a>
+      <% } %>
+    </div>
+
+    <!-- Sides -->
+    <% if (project.client_side || project.server_side) { %>
+    <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-3 mb-4">
+      <div class="flex gap-4 text-xs text-neutral-600 dark:text-neutral-300">
+        <% if (project.client_side) { %><span>Client: <%= project.client_side %></span><% } %>
+        <% if (project.server_side) { %><span>Server: <%= project.server_side %></span><% } %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Versions -->
+    <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-2">Versions</h3>
+    <div class="space-y-2">
+      <% if (versions && versions.length > 0) { %>
+      <% versions.slice(0, 15).forEach(function(v) { %>
+      <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-3">
+        <div class="flex items-center justify-between">
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= v.name %></p>
+            <p class="text-[10px] text-neutral-500 dark:text-neutral-400">
+              <%= v.version_number %> &middot; <%= v.game_versions.slice(0, 2).join(', ') %> &middot; <%= v.loaders.join(', ') %>
+            </p>
+          </div>
+          <button onclick="installVersion('<%= v.id %>')"
+            class="px-3 py-1.5 text-xs font-medium rounded-lg bg-neutral-800 dark:bg-white/10 text-white shrink-0 ml-2 active:scale-95 transition-transform">
+            Install
+          </button>
+        </div>
+      </div>
+      <% }); %>
+      <% if (versions.length > 15) { %>
+      <p class="text-[10px] text-neutral-400 text-center">Showing 15 of <%= versions.length %></p>
+      <% } %>
+      <% } else { %>
+      <p class="text-xs text-neutral-400">No versions available</p>
+      <% } %>
+    </div>
+
+    <% } %>
+  </div>
+</main>
+
+<!-- Server selection bottom sheet -->
+<div id="server-sheet-backdrop" class="fixed inset-0 z-40 bg-black/50 opacity-0 pointer-events-none transition-opacity"></div>
+<div id="server-sheet" class="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#1c1c1c] rounded-t-2xl translate-y-full transition-transform duration-300 ease-out">
+  <div class="px-4 pt-4 pb-2">
+    <div class="w-10 h-1 bg-neutral-300 dark:bg-neutral-600 rounded-full mx-auto mb-3"></div>
+    <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3">Select Server</p>
+    <div id="server-list" class="space-y-2 max-h-60 overflow-y-auto pb-4"></div>
+  </div>
+</div>
+
+<script nonce="<%- nonce %>">
+var currentVersionId = null;
+
+function installVersion(versionId) {
+  currentVersionId = versionId;
+  document.getElementById('server-sheet').classList.remove('translate-y-full');
+  document.getElementById('server-sheet-backdrop').classList.remove('opacity-0', 'pointer-events-none');
+  loadServers();
+}
+
+function closeSheet() {
+  document.getElementById('server-sheet').classList.add('translate-y-full');
+  document.getElementById('server-sheet-backdrop').classList.add('opacity-0', 'pointer-events-none');
+}
+
+document.getElementById('server-sheet-backdrop').addEventListener('click', closeSheet);
+
+function loadServers() {
+  fetch('/modrinth/api/servers')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var el = document.getElementById('server-list');
+      if (!data.servers || data.servers.length === 0) {
+        el.innerHTML = '<p class="text-xs text-neutral-400">No servers found</p>';
+        return;
+      }
+      el.innerHTML = data.servers.map(function(s) {
+        return '<button onclick="doInstall(\'' + s.UUID + '\')" class="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 active:scale-[0.98] transition text-left">' +
+          '<div class="min-w-0"><p class="text-sm font-medium text-neutral-800 dark:text-white truncate">' + s.name + '</p></div>' +
+          '</button>';
+      }).join('');
+    });
+}
+
+function doInstall(serverUUID) {
+  if (!currentVersionId) return;
+  var projectId = '<%= project ? project.id : "" %>';
+  closeSheet();
+  fetch('/modrinth/api/install', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ serverId: serverUUID, projectId: projectId, versionId: currentVersionId })
+  }).then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.error) alert(d.error);
+      else window.location.href = '/modrinth/progress/' + serverUUID + '/' + projectId;
+    });
+}
+</script>
+
+<%- include('../../components/footer') %>

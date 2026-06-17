@@ -1,0 +1,98 @@
+<%- include('../../components/header', { title: 'Modrinth Store', user: user }) %>
+
+<main class="">
+  <%- include('../../components/template') %>
+
+  <% if (settings && settings.showWarningBanner) { %>
+  <div class="mx-4 mt-3 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2.5 flex items-center gap-2">
+    <svg class="w-4 h-4 text-amber-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+    </svg>
+    <span class="text-xs text-amber-400 font-medium"><%= settings.warningTitle %></span>
+    <span class="text-xs text-amber-300/70"><%= settings.warningMessage %></span>
+  </div>
+  <% } %>
+
+  <div class="px-4 py-4">
+    <!-- Search -->
+    <form method="GET" action="/modrinth" class="mb-4">
+      <div class="flex gap-2">
+        <div class="relative flex-1">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text" name="q" value="<%= query || '' %>" placeholder="Search..."
+            class="w-full pl-10 pr-3 py-2.5 bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-xl text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none">
+        </div>
+        <button type="submit" class="px-4 py-2.5 bg-neutral-800 dark:bg-white/10 text-white rounded-xl text-sm font-medium">Go</button>
+      </div>
+      <div class="flex gap-1.5 mt-2 overflow-x-auto no-scrollbar">
+        <% ['all','mod','modpack','plugin','shader','resourcepack','datapack'].forEach(function(t) { %>
+        <a href="/modrinth?q=<%= query || '' %>&type=<%= t %>"
+          class="px-3 py-1 text-xs rounded-full border whitespace-nowrap transition <%= (type || 'all') === t ? 'bg-neutral-800 dark:bg-white/15 text-white border-neutral-700 dark:border-white/10' : 'bg-white/5 dark:bg-white/5 text-neutral-500 dark:text-neutral-400 border-neutral-200/30 dark:border-white/5' %>">
+          <%= t === 'all' ? 'All' : t.charAt(0).toUpperCase() + t.slice(1) %>
+        </a>
+        <% }); %>
+      </div>
+    </form>
+
+    <!-- Results -->
+    <% if (results && results.hits && results.hits.length > 0) { %>
+    <div class="space-y-2.5">
+      <% results.hits.forEach(function(hit) { %>
+      <a href="/modrinth/project/<%= hit.project_id %>"
+        class="block rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-3.5 active:scale-[0.98] transition-transform">
+        <div class="flex items-start gap-3">
+          <% if (hit.icon_url) { %>
+          <img src="<%= hit.icon_url %>" alt="" class="w-11 h-11 rounded-lg object-cover bg-neutral-200 dark:bg-neutral-700 shrink-0">
+          <% } else { %>
+          <div class="w-11 h-11 rounded-lg bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          </div>
+          <% } %>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= hit.title %></h3>
+              <span class="px-1.5 py-0.5 text-[9px] font-medium rounded-full bg-neutral-200/50 dark:bg-white/10 text-neutral-500 dark:text-neutral-400 shrink-0"><%= hit.project_type %></span>
+            </div>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 truncate mt-0.5"><%= hit.author %></p>
+            <p class="text-xs text-neutral-500/70 dark:text-neutral-400/70 mt-1 line-clamp-1"><%= hit.description %></p>
+            <div class="flex items-center gap-3 mt-1.5 text-[10px] text-neutral-400 dark:text-neutral-500">
+              <span><%= hit.downloads.toLocaleString() %> downloads</span>
+              <span><%= hit.follows %> follows</span>
+            </div>
+          </div>
+        </div>
+      </a>
+      <% }); %>
+    </div>
+
+    <!-- Pagination -->
+    <% if (totalHits > 20) { %>
+    <div class="flex items-center justify-center gap-2 mt-6">
+      <% if (offset > 0) { %>
+      <a href="?q=<%= query || '' %>&type=<%= type || 'all' %>&index=<%= index || 'relevance' %>&offset=<%= Math.max(0, offset - 20) %>"
+        class="px-3 py-1.5 text-xs rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-500 dark:text-neutral-400">Prev</a>
+      <% } %>
+      <span class="text-[10px] text-neutral-400"><%= Math.floor(offset / 20) + 1 %>/<%= Math.ceil(totalHits / 20) %></span>
+      <% if (offset + 20 < totalHits) { %>
+      <a href="?q=<%= query || '' %>&type=<%= type || 'all' %>&index=<%= index || 'relevance' %>&offset=<%= offset + 20 %>"
+        class="px-3 py-1.5 text-xs rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-500 dark:text-neutral-400">Next</a>
+      <% } %>
+    </div>
+    <% } %>
+
+    <% } else if (query) { %>
+    <div class="text-center py-16">
+      <p class="text-sm text-neutral-500 dark:text-neutral-400">No results for "<%= query %>"</p>
+    </div>
+    <% } else { %>
+    <div class="text-center py-16">
+      <svg class="w-10 h-10 text-neutral-300 dark:text-neutral-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+      <p class="text-sm text-neutral-500 dark:text-neutral-400">Search Modrinth</p>
+    </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('../../components/footer') %>

@@ -1,0 +1,150 @@
+<%- include('../../components/header', { title: 'Modrinth Admin', user: user }) %>
+
+<main class="h-screen flex">
+  <div class="w-60 h-full flex-shrink-0">
+    <%- include('../../components/template') %>
+  </div>
+
+  <div class="flex-1 flex flex-col overflow-hidden pt-16">
+    <div class="flex-1 overflow-y-auto no-scrollbar">
+      <div class="max-w-3xl mx-auto px-6 py-8">
+
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h1 class="text-base font-medium text-neutral-800 dark:text-white">Modrinth Settings</h1>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Configure the Modrinth store addon</p>
+          </div>
+          <button id="saveBtn" onclick="saveSettings()"
+            class="px-4 py-2 text-sm font-medium rounded-xl bg-neutral-800 dark:bg-white/10 text-white dark:text-white hover:bg-neutral-700 dark:hover:bg-white/15 transition">
+            Save
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Warning Banner -->
+          <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Warning Banner</h3>
+                <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Show a warning on the browse page</p>
+              </div>
+              <button id="warningToggle" onclick="toggleWarning()"
+                class="relative w-10 h-6 rounded-full bg-neutral-200 dark:bg-neutral-700 transition-colors">
+                <span class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white dark:bg-neutral-300 shadow transition-transform"></span>
+              </button>
+            </div>
+            <div id="warningFields" class="hidden space-y-3 mt-4">
+              <div>
+                <label class="text-xs text-neutral-500 dark:text-neutral-400 mb-1 block">Title</label>
+                <input id="warningTitle" type="text" value=""
+                  class="w-full px-3 py-2 text-sm bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-lg text-neutral-800 dark:text-white focus:outline-none transition">
+              </div>
+              <div>
+                <label class="text-xs text-neutral-500 dark:text-neutral-400 mb-1 block">Message</label>
+                <input id="warningMessage" type="text" value=""
+                  class="w-full px-3 py-2 text-sm bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-lg text-neutral-800 dark:text-white focus:outline-none transition">
+              </div>
+            </div>
+          </div>
+
+          <!-- Disabled Types -->
+          <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5">
+            <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-1">Disabled Project Types</h3>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-3">Comma-separated types to hide (e.g. shader,mod)</p>
+            <input id="disabledTypes" type="text" value=""
+              class="w-full px-3 py-2 text-sm bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-lg text-neutral-800 dark:text-white focus:outline-none transition"
+              placeholder="shader,mod">
+          </div>
+
+          <!-- Blocked Projects -->
+          <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5">
+            <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-1">Blocked Projects</h3>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-3">Comma-separated project IDs to block installs for</p>
+            <input id="blockedProjects" type="text" value=""
+              class="w-full px-3 py-2 text-sm bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-lg text-neutral-800 dark:text-white focus:outline-none transition"
+              placeholder="project-id-1,project-id-2">
+          </div>
+
+          <!-- Cache -->
+          <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5">
+            <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-1">Cache</h3>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-3">Clear cached Modrinth API responses</p>
+            <button onclick="clearCache()"
+              class="px-4 py-2 text-sm font-medium rounded-lg bg-neutral-200/50 dark:bg-white/5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-300/50 dark:hover:bg-white/10 transition border border-neutral-200/30 dark:border-white/5">
+              Clear Cache
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<script nonce="<%- nonce %>">
+var currentSettings = {};
+
+function loadSettings() {
+  fetch('/modrinth/api/config')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      currentSettings = data.settings || {};
+      document.getElementById('warningTitle').value = currentSettings.warningTitle || '';
+      document.getElementById('warningMessage').value = currentSettings.warningMessage || '';
+      document.getElementById('disabledTypes').value = (currentSettings.disabledProjectTypes || []).join(',');
+      document.getElementById('blockedProjects').value = (currentSettings.blockedProjects || []).join(',');
+      setWarningToggle(currentSettings.showWarningBanner || false);
+    });
+}
+
+function setWarningToggle(on) {
+  var btn = document.getElementById('warningToggle');
+  var fields = document.getElementById('warningFields');
+  if (on) {
+    btn.classList.add('bg-neutral-800', 'dark:bg-white/20');
+    btn.classList.remove('bg-neutral-200', 'dark:bg-neutral-700');
+    btn.querySelector('span').style.transform = 'translateX(16px)';
+    fields.classList.remove('hidden');
+  } else {
+    btn.classList.remove('bg-neutral-800', 'dark:bg-white/20');
+    btn.classList.add('bg-neutral-200', 'dark:bg-neutral-700');
+    btn.querySelector('span').style.transform = '';
+    fields.classList.add('hidden');
+  }
+}
+
+function toggleWarning() {
+  var on = !currentSettings.showWarningBanner;
+  currentSettings.showWarningBanner = on;
+  setWarningToggle(on);
+}
+
+function saveSettings() {
+  var body = {
+    showWarningBanner: currentSettings.showWarningBanner || false,
+    warningTitle: document.getElementById('warningTitle').value,
+    warningMessage: document.getElementById('warningMessage').value,
+    disabledProjectTypes: document.getElementById('disabledTypes').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean),
+    blockedProjects: document.getElementById('blockedProjects').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean),
+  };
+
+  fetch('/modrinth/api/config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.error) alert('Error: ' + d.error);
+    });
+}
+
+function clearCache() {
+  fetch('/modrinth/api/cache/clear', { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function() { alert('Cache cleared'); });
+}
+
+loadSettings();
+</script>
+
+<%- include('../../components/footer') %>

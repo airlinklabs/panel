@@ -1,0 +1,88 @@
+{
+  "name": "Modrinth Store",
+  "identifier": "modrinth",
+  "version": "2.0.0",
+  "description": "Browse and install mods, modpacks, plugins, shaders, and more from Modrinth",
+  "author": "AirLinkLabs",
+  "main": "src/index.ts",
+  "router": "/modrinth",
+  "engines": {
+    "panel": ">=1.0.0"
+  },
+  "permissions": [
+    "addon.modrinth.view",
+    "addon.modrinth.install",
+    "addon.modrinth.manage"
+  ],
+  "capabilities": {
+    "wrapsDashboard": false,
+    "wrapsAdminLayout": false,
+    "runsRawSql": true,
+    "registersSchedules": true
+  },
+  "settingsSchema": [
+    {
+      "key": "showWarningBanner",
+      "type": "boolean",
+      "label": "Show Warning Banner",
+      "default": false,
+      "description": "Display a warning banner on the browse page"
+    },
+    {
+      "key": "warningTitle",
+      "type": "string",
+      "label": "Warning Title",
+      "default": "Notice",
+      "description": "Title text for the warning banner"
+    },
+    {
+      "key": "warningMessage",
+      "type": "string",
+      "label": "Warning Message",
+      "default": "",
+      "description": "Body text for the warning banner"
+    },
+    {
+      "key": "disabledProjectTypes",
+      "type": "string",
+      "label": "Disabled Project Types",
+      "default": "",
+      "description": "Comma-separated project types to hide (e.g. shader,mod)"
+    },
+    {
+      "key": "blockedProjects",
+      "type": "string",
+      "label": "Blocked Projects",
+      "default": "",
+      "description": "Comma-separated project IDs to block installs for"
+    }
+  ],
+  "dependencies": {
+    "adm-zip": "^0.5.17",
+    "express": "^5.2.1",
+    "zod": "^4.4.3"
+  },
+  "migrations": [
+    {
+      "name": "create_modrinth_cache_table",
+      "sql": "CREATE TABLE IF NOT EXISTS ModrinthCache (cacheKey TEXT PRIMARY KEY, data TEXT NOT NULL, expiresAt DATETIME NOT NULL)",
+      "down": "DROP TABLE IF EXISTS ModrinthCache"
+    },
+    {
+      "name": "create_modrinth_installations_table",
+      "sql": "CREATE TABLE IF NOT EXISTS ModrinthInstallation (id INTEGER PRIMARY KEY AUTOINCREMENT, projectId TEXT NOT NULL, projectType TEXT NOT NULL, projectName TEXT, versionId TEXT, serverId TEXT, status TEXT NOT NULL CHECK (status IN ('completed', 'failed', 'blocked', 'in_progress')), error TEXT, installedAt DATETIME DEFAULT CURRENT_TIMESTAMP, createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)",
+      "down": "DROP TABLE IF EXISTS ModrinthInstallation"
+    },
+    {
+      "name": "create_modrinth_indexes",
+      "sql": "CREATE INDEX IF NOT EXISTS idx_modrinth_install_status ON ModrinthInstallation(status); CREATE INDEX IF NOT EXISTS idx_modrinth_install_project ON ModrinthInstallation(projectId, status); CREATE INDEX IF NOT EXISTS idx_modrinth_install_server ON ModrinthInstallation(serverId); CREATE INDEX IF NOT EXISTS idx_modrinth_install_date ON ModrinthInstallation(installedAt)",
+      "down": "DROP INDEX IF EXISTS idx_modrinth_install_status; DROP INDEX IF EXISTS idx_modrinth_install_project; DROP INDEX IF EXISTS idx_modrinth_install_server; DROP INDEX IF EXISTS idx_modrinth_install_date"
+    }
+  ],
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.8",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.9.3",
+    "typescript": "^6.0.3"
+  }
+}

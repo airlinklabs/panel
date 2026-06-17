@@ -1,0 +1,103 @@
+<%- include('../../components/header', { title: 'Installing...', user: user }) %>
+
+<main class="">
+  <%- include('../../components/template') %>
+
+  <div class="px-4 py-4">
+    <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5">
+      <h2 class="text-base font-medium text-neutral-800 dark:text-white mb-1">Installing...</h2>
+      <p id="progress-project" class="text-xs text-neutral-500 dark:text-neutral-400 mb-4"></p>
+
+      <div class="w-full h-2 rounded-full bg-neutral-200/50 dark:bg-white/5 overflow-hidden mb-3">
+        <div id="progress-bar" class="h-full rounded-full bg-neutral-800 dark:bg-white/20 transition-all duration-300" style="width: 0%"></div>
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 mb-4">
+        <span id="progress-stage">Initializing...</span>
+        <span id="progress-pct">0%</span>
+      </div>
+
+      <div id="progress-stats" class="grid grid-cols-4 gap-2 mb-4 hidden">
+        <div class="text-center p-2 rounded-lg bg-white/5 dark:bg-white/[0.03]">
+          <p id="stat-total" class="text-base font-medium text-neutral-800 dark:text-white">0</p>
+          <p class="text-[9px] text-neutral-400">Total</p>
+        </div>
+        <div class="text-center p-2 rounded-lg bg-white/5 dark:bg-white/[0.03]">
+          <p id="stat-done" class="text-base font-medium text-green-600 dark:text-green-400">0</p>
+          <p class="text-[9px] text-neutral-400">Done</p>
+        </div>
+        <div class="text-center p-2 rounded-lg bg-white/5 dark:bg-white/[0.03]">
+          <p id="stat-skipped" class="text-base font-medium text-yellow-600 dark:text-yellow-400">0</p>
+          <p class="text-[9px] text-neutral-400">Skipped</p>
+        </div>
+        <div class="text-center p-2 rounded-lg bg-white/5 dark:bg-white/[0.03]">
+          <p id="stat-failed" class="text-base font-medium text-red-600 dark:text-red-400">0</p>
+          <p class="text-[9px] text-neutral-400">Failed</p>
+        </div>
+      </div>
+
+      <div id="progress-current" class="hidden mb-3">
+        <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">Current:</p>
+        <p id="progress-current-mod" class="text-xs text-neutral-700 dark:text-neutral-300 truncate"></p>
+      </div>
+
+      <div id="progress-errors" class="hidden">
+        <p class="text-[10px] text-red-500 dark:text-red-400 font-medium mb-1">Errors</p>
+        <div id="progress-errors-list" class="space-y-0.5 max-h-32 overflow-y-auto"></div>
+      </div>
+
+      <div id="progress-done" class="hidden text-center py-3">
+        <p id="progress-done-text" class="text-sm font-medium text-neutral-800 dark:text-white"></p>
+        <a href="/modrinth" class="text-xs text-neutral-400 mt-1 inline-block">Back to browse</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script nonce="<%- nonce %>">
+var pollInterval = null;
+
+function getStageLabel(s) {
+  return { initializing:'Preparing...', downloading:'Downloading...', processing:'Processing...', installing_mods:'Installing mods...', installing_overrides:'Installing overrides...', finalizing:'Finalizing...', completed:'Done', failed:'Failed' }[s] || s;
+}
+
+function poll() {
+  fetch('/modrinth/api/progress')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var list = data.progress || [];
+      if (list.length === 0) { document.getElementById('progress-stage').textContent = 'Waiting...'; return; }
+      var p = list[list.length - 1];
+      document.getElementById('progress-project').textContent = p.projectName || '';
+      document.getElementById('progress-bar').style.width = p.overall + '%';
+      document.getElementById('progress-stage').textContent = getStageLabel(p.stage);
+      document.getElementById('progress-pct').textContent = p.overall + '%';
+      if (p.total > 0) {
+        document.getElementById('progress-stats').classList.remove('hidden');
+        document.getElementById('stat-total').textContent = p.total;
+        document.getElementById('stat-done').textContent = p.done;
+        document.getElementById('stat-skipped').textContent = p.skipped;
+        document.getElementById('stat-failed').textContent = p.failed;
+      }
+      if (p.currentMod) {
+        document.getElementById('progress-current').classList.remove('hidden');
+        document.getElementById('progress-current-mod').textContent = p.currentMod;
+      }
+      if (p.errors && p.errors.length > 0) {
+        document.getElementById('progress-errors').classList.remove('hidden');
+        document.getElementById('progress-errors-list').innerHTML = p.errors.map(function(e) {
+          return '<p class="text-[10px] text-red-400">' + e + '</p>';
+        }).join('');
+      }
+      if (p.stage === 'completed' || p.stage === 'failed') {
+        clearInterval(pollInterval);
+        document.getElementById('progress-done').classList.remove('hidden');
+        document.getElementById('progress-done-text').textContent = p.stage === 'completed' ? 'Complete!' : 'Failed';
+      }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() { poll(); pollInterval = setInterval(poll, 1500); });
+</script>
+
+<%- include('../../components/footer') %>

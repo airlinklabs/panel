@@ -1,0 +1,138 @@
+<%- include(components.header, { title: 'Installing...', user: user }) %>
+
+<main class="h-screen flex">
+  <div class="w-60 h-full flex-shrink-0">
+    <%- include(components.template) %>
+  </div>
+
+  <div class="flex-1 flex flex-col overflow-hidden pt-16">
+    <div class="flex-1 overflow-y-auto no-scrollbar">
+      <div class="max-w-2xl mx-auto px-6 py-8">
+
+        <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-6">
+          <h2 class="text-base font-medium text-neutral-800 dark:text-white mb-1">Installing...</h2>
+          <p id="progress-project" class="text-xs text-neutral-500 dark:text-neutral-400 mb-4"></p>
+
+          <!-- Progress bar -->
+          <div class="w-full h-2 rounded-full bg-neutral-200/50 dark:bg-white/5 overflow-hidden mb-4">
+            <div id="progress-bar" class="h-full rounded-full bg-neutral-800 dark:bg-white/20 transition-all duration-300" style="width: 0%"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 mb-6">
+            <span id="progress-stage">Initializing...</span>
+            <span id="progress-pct">0%</span>
+          </div>
+
+          <!-- Stats -->
+          <div id="progress-stats" class="grid grid-cols-4 gap-3 mb-6 hidden">
+            <div class="text-center p-2 rounded-lg bg-white/5 dark:bg-white/[0.03]">
+              <p id="stat-total" class="text-lg font-medium text-neutral-800 dark:text-white">0</p>
+              <p class="text-[10px] text-neutral-400">Total</p>
+            </div>
+            <div class="text-center p-2 rounded-lg bg-white/5 dark:bg-white/[0.03]">
+              <p id="stat-done" class="text-lg font-medium text-green-600 dark:text-green-400">0</p>
+              <p class="text-[10px] text-neutral-400">Done</p>
+            </div>
+            <div class="text-center p-2 rounded-lg bg-white/5 dark:bg-white/[0.03]">
+              <p id="stat-skipped" class="text-lg font-medium text-yellow-600 dark:text-yellow-400">0</p>
+              <p class="text-[10px] text-neutral-400">Skipped</p>
+            </div>
+            <div class="text-center p-2 rounded-lg bg-white/5 dark:bg-white/[0.03]">
+              <p id="stat-failed" class="text-lg font-medium text-red-600 dark:text-red-400">0</p>
+              <p class="text-[10px] text-neutral-400">Failed</p>
+            </div>
+          </div>
+
+          <!-- Current mod -->
+          <div id="progress-current" class="hidden mb-4">
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-1">Current:</p>
+            <p id="progress-current-mod" class="text-sm text-neutral-700 dark:text-neutral-300 truncate"></p>
+          </div>
+
+          <!-- Errors -->
+          <div id="progress-errors" class="hidden">
+            <p class="text-xs text-red-500 dark:text-red-400 font-medium mb-2">Errors</p>
+            <div id="progress-errors-list" class="space-y-1 max-h-40 overflow-y-auto"></div>
+          </div>
+
+          <!-- Done -->
+          <div id="progress-done" class="hidden text-center py-4">
+            <p id="progress-done-text" class="text-sm font-medium text-neutral-800 dark:text-white"></p>
+            <a href="/modrinth" class="text-xs text-neutral-400 dark:text-neutral-500 mt-2 inline-block hover:text-neutral-600 dark:hover:text-neutral-300">Back to browse</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<script nonce="<%- nonce %>">
+var pollInterval = null;
+
+function getStageLabel(stage) {
+  var labels = {
+    initializing: 'Preparing...',
+    downloading: 'Downloading...',
+    processing: 'Processing...',
+    installing_mods: 'Installing mods...',
+    installing_overrides: 'Installing overrides...',
+    finalizing: 'Finalizing...',
+    completed: 'Complete',
+    failed: 'Failed'
+  };
+  return labels[stage] || stage;
+}
+
+function poll() {
+  fetch('/modrinth/api/progress')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var list = data.progress || [];
+      if (list.length === 0) {
+        document.getElementById('progress-stage').textContent = 'Waiting for installation to start...';
+        return;
+      }
+
+      var p = list[list.length - 1];
+      document.getElementById('progress-project').textContent = p.projectName || '';
+      document.getElementById('progress-bar').style.width = p.overall + '%';
+      document.getElementById('progress-stage').textContent = getStageLabel(p.stage);
+      document.getElementById('progress-pct').textContent = p.overall + '%';
+
+      if (p.total > 0) {
+        document.getElementById('progress-stats').classList.remove('hidden');
+        document.getElementById('stat-total').textContent = p.total;
+        document.getElementById('stat-done').textContent = p.done;
+        document.getElementById('stat-skipped').textContent = p.skipped;
+        document.getElementById('stat-failed').textContent = p.failed;
+      }
+
+      if (p.currentMod) {
+        document.getElementById('progress-current').classList.remove('hidden');
+        document.getElementById('progress-current-mod').textContent = p.currentMod;
+      }
+
+      if (p.errors && p.errors.length > 0) {
+        document.getElementById('progress-errors').classList.remove('hidden');
+        document.getElementById('progress-errors-list').innerHTML = p.errors.map(function(e) {
+          return '<p class="text-xs text-red-400 dark:text-red-500">' + e + '</p>';
+        }).join('');
+      }
+
+      if (p.stage === 'completed' || p.stage === 'failed') {
+        clearInterval(pollInterval);
+        document.getElementById('progress-done').classList.remove('hidden');
+        document.getElementById('progress-done-text').textContent =
+          p.stage === 'completed' ? 'Installation complete!' : 'Installation failed';
+      }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  poll();
+  pollInterval = setInterval(poll, 1500);
+});
+</script>
+
+<%- include(components.footer) %>
