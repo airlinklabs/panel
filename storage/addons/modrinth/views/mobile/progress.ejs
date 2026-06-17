@@ -1,7 +1,7 @@
-<%- include('../../components/header', { title: 'Installing...', user: user }) %>
+<%- include('../components/header', { title: 'Installing...', user: user }) %>
 
 <main class="">
-  <%- include('../../components/template') %>
+  <%- include('../components/template') %>
 
   <div class="px-4 py-4">
     <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5">
@@ -100,4 +100,4 @@ function poll() {
 document.addEventListener('DOMContentLoaded', function() { poll(); pollInterval = setInterval(poll, 1500); });
 </script>
 
-<%- include('../../components/footer') %>
+<%- include('../components/footer') %>

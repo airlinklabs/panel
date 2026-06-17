@@ -1,8 +1,8 @@
-<%- include('../../components/header', { title: 'Modrinth Admin', user: user }) %>
+<%- include('../components/header', { title: 'Modrinth Admin', user: user }) %>
 
 <main class="h-screen flex">
   <div class="w-60 h-full flex-shrink-0">
-    <%- include('../../components/template') %>
+    <%- include('../components/template') %>
   </div>
 
   <div class="flex-1 flex flex-col overflow-hidden pt-16">
@@ -147,4 +147,4 @@ function clearCache() {
 loadSettings();
 </script>
 
-<%- include('../../components/footer') %>
+<%- include('../components/footer') %>

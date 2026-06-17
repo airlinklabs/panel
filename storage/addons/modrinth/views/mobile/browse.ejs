@@ -1,7 +1,7 @@
-<%- include('../../components/header', { title: 'Modrinth Store', user: user }) %>
+<%- include('../components/header', { title: 'Modrinth Store', user: user }) %>
 
 <main class="">
-  <%- include('../../components/template') %>
+  <%- include('../components/template') %>
 
   <% if (settings && settings.showWarningBanner) { %>
   <div class="mx-4 mt-3 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2.5 flex items-center gap-2">
@@ -95,4 +95,4 @@
   </div>
 </main>
 
-<%- include('../../components/footer') %>
+<%- include('../components/footer') %>
