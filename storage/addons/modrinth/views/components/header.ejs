@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html class="h-full" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof panelTitle !== 'undefined' ? panelTitle : 'AirLink' %> - <%= title %></title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/layout-animations.css">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,300,600,400,700&display=swap" rel="stylesheet">
+    <script nonce="<%- nonce %>">
+    (function(){
+      var d=false;
+      try{var s=localStorage.getItem('theme');if(s==='dark')d=true;else if(!s)d=window.matchMedia('(prefers-color-scheme: dark)').matches;}catch(e){}
+      if(d)document.documentElement.classList.add('dark');
+    })();
+    </script>
+    <style>
+      html, body, * { scrollbar-width: none; -ms-overflow-style: none; }
+      ::-webkit-scrollbar { display: none; }
+      html, body { transition: background-color 0.25s ease-in, color 0.25s ease-in; }
+    </style>
+</head>
+<body style="font-family: 'General Sans'" class="bg-neutral-50 dark:bg-[#141414] h-full text-neutral-800 dark:text-white">
