@@ -34,7 +34,13 @@
 
 <%
 const allSidebarItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
-const sidebarItems = allSidebarItems.filter(function(item) { return item.id !== 'account'; });
+var _addonUrls = (typeof addonUrls !== 'undefined' && addonUrls) ? addonUrls : [];
+var _isAddonPage = _addonUrls.length > 0 && _addonUrls.some(function(u) { return (req.path || '').startsWith(u); });
+var sidebarItems = allSidebarItems.filter(function(item) {
+  if (item.id === 'account') return false;
+  if (_isAddonPage && _addonUrls.some(function(u) { return item.url.startsWith(u); })) return false;
+  return true;
+});
 const mainNavItems = sidebarItems.slice(0, 3);
 const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 %>

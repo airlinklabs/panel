@@ -14,6 +14,7 @@
       var allItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
       var adminItems = [
         { url: '/admin/overview', label: req.translations.navOverview || 'Overview', desc: req.translations.adminMenuOverviewDesc || 'Panel stats and activity', iconId: 'grid' },
+        { url: '/admin/analytics', label: req.translations.navAnalytics || 'Analytics', desc: req.translations.adminMenuAnalyticsDesc || 'Server analytics', iconId: 'bar-chart' },
         { url: '/admin/settings', label: req.translations.navSettings || 'Settings', desc: req.translations.adminMenuSettingsDesc || 'Panel configuration', iconId: 'settings' },
         { url: '/admin/servers', label: req.translations.navServers || 'Servers', desc: req.translations.adminMenuServersDesc || 'Manage all servers', iconId: 'server' },
         { url: '/admin/users', label: req.translations.navUsers || 'Users', desc: req.translations.adminMenuUsersDesc || 'Manage accounts', iconId: 'users' },
