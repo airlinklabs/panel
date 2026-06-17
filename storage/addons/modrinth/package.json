@@ -4,7 +4,7 @@
   "version": "2.0.0",
   "description": "Browse and install mods, modpacks, plugins, shaders, and more from Modrinth",
   "author": "AirLinkLabs",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "router": "/modrinth",
   "engines": {
     "panel": ">=1.0.0"
@@ -57,11 +57,7 @@
       "description": "Comma-separated project IDs to block installs for"
     }
   ],
-  "dependencies": {
-    "adm-zip": "^0.5.17",
-    "express": "^5.2.1",
-    "zod": "^4.4.3"
-  },
+  "dependencies": [],
   "migrations": [
     {
       "name": "create_modrinth_cache_table",
@@ -74,15 +70,24 @@
       "down": "DROP TABLE IF EXISTS ModrinthInstallation"
     },
     {
-      "name": "create_modrinth_indexes",
-      "sql": "CREATE INDEX IF NOT EXISTS idx_modrinth_install_status ON ModrinthInstallation(status); CREATE INDEX IF NOT EXISTS idx_modrinth_install_project ON ModrinthInstallation(projectId, status); CREATE INDEX IF NOT EXISTS idx_modrinth_install_server ON ModrinthInstallation(serverId); CREATE INDEX IF NOT EXISTS idx_modrinth_install_date ON ModrinthInstallation(installedAt)",
-      "down": "DROP INDEX IF EXISTS idx_modrinth_install_status; DROP INDEX IF EXISTS idx_modrinth_install_project; DROP INDEX IF EXISTS idx_modrinth_install_server; DROP INDEX IF EXISTS idx_modrinth_install_date"
+      "name": "create_modrinth_index_status",
+      "sql": "CREATE INDEX IF NOT EXISTS idx_modrinth_install_status ON ModrinthInstallation(status)",
+      "down": "DROP INDEX IF EXISTS idx_modrinth_install_status"
+    },
+    {
+      "name": "create_modrinth_index_project",
+      "sql": "CREATE INDEX IF NOT EXISTS idx_modrinth_install_project ON ModrinthInstallation(projectId, status)",
+      "down": "DROP INDEX IF EXISTS idx_modrinth_install_project"
+    },
+    {
+      "name": "create_modrinth_index_server",
+      "sql": "CREATE INDEX IF NOT EXISTS idx_modrinth_install_server ON ModrinthInstallation(serverId)",
+      "down": "DROP INDEX IF EXISTS idx_modrinth_install_server"
+    },
+    {
+      "name": "create_modrinth_index_date",
+      "sql": "CREATE INDEX IF NOT EXISTS idx_modrinth_install_date ON ModrinthInstallation(installedAt)",
+      "down": "DROP INDEX IF EXISTS idx_modrinth_install_date"
     }
-  ],
-  "devDependencies": {
-    "@types/adm-zip": "^0.5.8",
-    "@types/express": "^5.0.6",
-    "@types/node": "^25.9.3",
-    "typescript": "^6.0.3"
-  }
+  ]
 }

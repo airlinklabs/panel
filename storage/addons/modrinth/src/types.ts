@@ -196,5 +196,6 @@ export interface AddonApi {
     csrfProtection: any;
   };
   viewsPath: string;
+  renderView: (viewName: string, data?: any, isMobile?: boolean) => Promise<string>;
   getComponentPath: (p: string) => string;
 }

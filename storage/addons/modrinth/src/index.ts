@@ -33,6 +33,42 @@ export default function (router: Router, api: AddonApi) {
   const routes = createRoutes(api, modrinth, settings);
   router.use('/', routes);
 
+  router.get('/', async (req: any, res: any) => {
+    try {
+      const isMobile = req.session?.device === 'mobile';
+      const s = await settings.get();
+      const html = await api.renderView('browse.ejs', { settings: s }, isMobile);
+      res.send(html);
+    } catch (err: any) {
+      logger.error('[Modrinth] Browse render error:', err.message);
+      res.status(500).send('Render error');
+    }
+  });
+
+  router.get('/admin/config', async (req: any, res: any) => {
+    try {
+      const isMobile = req.session?.device === 'mobile';
+      const s = await settings.get();
+      const html = await api.renderView('admin.ejs', { settings: s }, isMobile);
+      res.send(html);
+    } catch (err: any) {
+      logger.error('[Modrinth] Admin render error:', err.message);
+      res.status(500).send('Render error');
+    }
+  });
+
+  router.get('/project/:id', async (req: any, res: any) => {
+    try {
+      const isMobile = req.session?.device === 'mobile';
+      const project = await modrinth.getProject(req.params.id);
+      const html = await api.renderView('project.ejs', { project }, isMobile);
+      res.send(html);
+    } catch (err: any) {
+      logger.error('[Modrinth] Project render error:', err.message);
+      res.status(500).send('Render error');
+    }
+  });
+
   logger.info('[Modrinth] Initialized');
 
   return {
