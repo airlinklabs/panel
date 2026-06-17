@@ -13,7 +13,7 @@ const coreModule: Module = {
   info: {
     name: 'Core Module',
     description: 'This file is for all core functionality.',
-    version: '1.0.0',
+    version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
     license: 'MIT',

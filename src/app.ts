@@ -22,7 +22,7 @@ import compression from 'compression';
 import { translationMiddleware } from './handlers/utils/core/translation';
 import PrismaSessionStore from './handlers/sessionStore';
 import { settingsLoader } from './handlers/settingsLoader';
-import { loadAddons } from './handlers/addonHandler';
+import { loadAddons, setAppInstance } from './handlers/addonHandler';
 import {
   initializeDefaultUIComponents,
   uiComponentStore,
@@ -559,6 +559,7 @@ app.use(errorPageHandler);
     // Initialize default UI components
     initializeDefaultUIComponents();
     await loadModules(app, airlinkVersion, Number(port), expressWsInstance);
+    setAppInstance(app);
     await loadAddons(app);
 
     app.use(notFoundHandler);

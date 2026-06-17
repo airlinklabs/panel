@@ -41,7 +41,7 @@ const userCreateServerModule: Module = {
   info: {
     name: 'User Create Server Module',
     description: 'Allows users to create their own servers within admin-defined limits.',
-    version: '1.0.0',
+    version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirlinkLab',
     license: 'MIT',
