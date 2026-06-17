@@ -120,8 +120,8 @@ const addonsModule: Module = {
   info: {
     name: 'Admin Addons Module',
     description: 'This file is for admin functionality of the Addons.',
-    version: '2.0.0',
-    moduleVersion: '2.0.0',
+    version: '1.0.0',
+    moduleVersion: '1.0.0',
     author: 'AirLinkLab',
     license: 'MIT',
   },
