@@ -90,6 +90,15 @@ class UIComponentStore {
 
     return [...items].sort((a, b) => b.priority - a.priority);
   }
+
+  public getAddonSidebarIds(): Set<string> {
+    const ids = new Set<string>();
+    for (const reg of this.addonItemRegistry.values()) {
+      for (const id of reg.sidebarIds) ids.add(id);
+    }
+    return ids;
+  }
+
   public addServerMenuItem(item: ServerMenuItem, addonSlug?: string): void {
     const existingIndex = this.serverMenuItems.findIndex(i => i.id === item.id);
     if (existingIndex !== -1) {
