@@ -1,58 +1,277 @@
-<div class="px-4 py-4">
-  <% if (settings && settings.showWarningBanner) { %>
-  <div class="mb-3 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2.5 flex items-center gap-2">
-    <svg class="w-4 h-4 text-amber-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-    <span class="text-xs text-amber-400 font-medium"><%= settings.warningTitle %></span>
-    <span class="text-xs text-amber-300/70"><%= settings.warningMessage %></span>
+<style>
+  ::-webkit-scrollbar { display: none; }
+  .search-input {
+    background: transparent; border: 1px solid transparent; outline: none;
+    font-size: 13px; color: #171717; width: 100%; padding: 8px 12px;
+    border-radius: 9px; transition: border-color 0.15s;
+  }
+  .dark .search-input { color: #e5e5e5; }
+  .search-input:focus { border-color: #a3a3a3; }
+  .dark .search-input:focus { border-color: rgba(255,255,255,0.25); }
+  .search-input::placeholder { color: #a3a3a3; }
+  .type-chip {
+    display: inline-flex; align-items: center; padding: 6px 12px;
+    border-radius: 9px; font-size: 12px; font-weight: 500; cursor: pointer;
+    border: 1px solid #e5e5e5; background: transparent; color: #737373;
+    transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+  }
+  .dark .type-chip { border-color: rgba(255,255,255,0.1); color: #a3a3a3; }
+  .type-chip.active { background: #059669; color: white; border-color: #059669; }
+  .dark .type-chip.active { background: #10b981; color: white; border-color: #10b981; }
+  .result-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px; border-radius: 12px;
+    border: 1px solid #e5e5e5; background: white;
+    text-decoration: none; color: inherit;
+    transition: transform 0.1s;
+  }
+  .dark .result-card { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.07); }
+  .result-card:active { transform: scale(0.98); }
+  .project-icon {
+    width: 56px; height: 56px; border-radius: 10px; object-fit: cover;
+    background: #f5f5f5; border: 1px solid #e5e5e5; flex-shrink: 0;
+  }
+  .dark .project-icon { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+  .type-badge {
+    display: inline-flex; padding: 1px 6px; border-radius: 5px;
+    font-size: 9px; font-weight: 600; text-transform: uppercase;
+  }
+</style>
+
+<% const hasDisabledTypes = settings && settings.disabledProjectTypes && settings.disabledProjectTypes.length > 0;
+   const hasBlockedProjects = settings && settings.blockedProjects && settings.blockedProjects.length > 0;
+   const shouldShowWarning = settings && settings.modrinthInstallationWarning && (hasDisabledTypes || hasBlockedProjects); %>
+
+<div class="px-4 pt-4 pb-20">
+
+  <!-- Warning banner -->
+  <% if (shouldShowWarning) { %>
+  <div class="rounded-xl bg-amber-50 dark:bg-amber-800/10 border border-amber-200 dark:border-amber-500/20 px-3 py-2 mb-4">
+    <div class="flex items-start gap-2">
+      <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+      </svg>
+      <div>
+        <p class="font-medium text-amber-700 dark:text-amber-400 text-xs"><%= settings.warningTitle || 'Notice' %></p>
+        <% if (settings.warningMessage) { %>
+        <p class="text-amber-600 dark:text-amber-400/60 text-[11px] mt-0.5"><%= settings.warningMessage %></p>
+        <% } %>
+        <div class="flex gap-1.5 mt-1 flex-wrap">
+          <% if (hasDisabledTypes) { %><span class="text-[10px] text-amber-600 bg-amber-100 dark:bg-amber-500/20 dark:text-amber-400 px-2 py-0.5 rounded">Disabled: <%= settings.disabledProjectTypes.join(', ') %></span><% } %>
+          <% if (hasBlockedProjects) { %><span class="text-[10px] text-amber-600 bg-amber-100 dark:bg-amber-500/20 dark:text-amber-400 px-2 py-0.5 rounded"><%= settings.blockedProjects.length %> blocked</span><% } %>
+        </div>
+      </div>
+    </div>
   </div>
   <% } %>
 
-  <form method="GET" action="/modrinth" class="mb-4">
-    <div class="flex gap-2">
-      <div class="relative flex-1">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        <input type="text" name="q" value="<%= query || '' %>" placeholder="Search..." class="w-full pl-10 pr-3 py-2.5 bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-xl text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none">
+  <!-- Search bar (sticky) -->
+  <div class="sticky top-14 z-30 bg-white dark:bg-[#141414] -mx-4 px-4 pb-3 border-b border-neutral-200 dark:border-white/5">
+    <form method="GET" action="/modrinth" id="searchForm">
+      <div class="flex gap-2 mb-2">
+        <div class="flex-1 relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+          <input type="text" name="q" value="<%= query %>" placeholder="Search Modrinth..." autocomplete="off"
+            class="w-full pl-9 pr-4 py-2.5 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white text-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <button type="submit" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium transition-colors min-w-[56px]">
+          Go
+        </button>
       </div>
-      <button type="submit" class="px-4 py-2.5 bg-neutral-800 dark:bg-white/10 text-white rounded-xl text-sm font-medium">Go</button>
-    </div>
-    <div class="flex gap-1.5 mt-2 overflow-x-auto no-scrollbar">
-      <% ['all','mod','modpack','plugin','shader','resourcepack','datapack'].forEach(function(t) { %>
-      <a href="/modrinth?q=<%= query || '' %>&type=<%= t %>" class="px-3 py-1 text-xs rounded-full border whitespace-nowrap transition <%= (type || 'all') === t ? 'bg-neutral-800 dark:bg-white/15 text-white border-neutral-700 dark:border-white/10' : 'bg-white/5 dark:bg-white/5 text-neutral-500 dark:text-neutral-400 border-neutral-200/30 dark:border-white/5' %>"><%= t === 'all' ? 'All' : t.charAt(0).toUpperCase() + t.slice(1) %></a>
-      <% }); %>
-    </div>
-  </form>
 
+      <!-- Type filter chips -->
+      <div class="flex gap-2 overflow-x-auto no-scrollbar">
+        <% const typeFilters = [
+          { value: 'all', label: 'All' },
+          { value: 'mod', label: 'Mods' },
+          { value: 'modpack', label: 'Modpacks' },
+          { value: 'resourcepack', label: 'Resources' },
+          { value: 'shader', label: 'Shaders' },
+          { value: 'plugin', label: 'Plugins' },
+          { value: 'datapack', label: 'Datapacks' },
+        ];
+        typeFilters.forEach(function(f) {
+          const isDisabled = hasDisabledTypes && settings.disabledProjectTypes.includes(f.value);
+          const isActive = type === f.value || (!type && f.value === 'all');
+        %>
+        <button type="submit" name="type" value="<%= f.value %>"
+          class="type-chip <%= isActive ? 'active' : '' %> <%= isDisabled ? 'opacity-40 cursor-not-allowed' : '' %>"
+          <%= isDisabled ? 'disabled' : '' %>>
+          <%= f.label %><%= isDisabled ? ' (off)' : '' %>
+        </button>
+        <% }); %>
+      </div>
+    </form>
+  </div>
+
+  <!-- Results -->
   <% if (results && results.hits && results.hits.length > 0) { %>
+  <% const currentPage = page || Math.floor((results.offset || 0) / 20) + 1;
+     const totalPages = Math.ceil((results.total_hits || 0) / 20); %>
+
+  <div class="flex items-center justify-between mb-3 mt-3">
+    <div>
+      <% if (query) { %>
+      <p class="text-sm font-medium text-neutral-900 dark:text-white">Results for "<span class="text-emerald-500"><%= query %></span>"</p>
+      <% } else { %>
+      <p class="text-sm font-medium text-neutral-900 dark:text-white">Popular Projects</p>
+      <% } %>
+      <p class="text-xs text-neutral-500 mt-0.5"><%= results.hits.length %> shown<% if (shouldShowWarning) { %> <span class="text-amber-400">(filtered)</span><% } %></p>
+    </div>
+    <button onclick="openProgressModal()" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+      </svg>
+      Status
+    </button>
+  </div>
+
+  <!-- Card list -->
   <div class="space-y-2.5">
-    <% results.hits.forEach(function(hit) { %>
-    <a href="/modrinth/project/<%= hit.project_id %>" class="block rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-3.5 active:scale-[0.98] transition-transform">
-      <div class="flex items-start gap-3">
+    <% results.hits.forEach(function(hit) {
+      const isProjectTypeDisabled = hasDisabledTypes && settings.disabledProjectTypes.includes(hit.project_type);
+      const isProjectBlocked = hasBlockedProjects && settings.blockedProjects.includes(hit.project_id);
+      const isDisabled = isProjectTypeDisabled || isProjectBlocked;
+    %>
+    <a href="/modrinth/project/<%= hit.project_id %>"
+      class="result-card<%= isDisabled ? ' opacity-50' : '' %>">
+
+      <div class="project-icon relative flex-shrink-0">
         <% if (hit.icon_url) { %>
-        <img src="<%= hit.icon_url %>" alt="" class="w-11 h-11 rounded-lg object-cover bg-neutral-200 dark:bg-neutral-700 shrink-0">
+        <img src="<%= hit.icon_url %>" alt="<%= hit.title %>" class="w-full h-full object-cover rounded-[10px]" loading="lazy">
         <% } else { %>
-        <div class="w-11 h-11 rounded-lg bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center shrink-0"><svg class="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div>
+        <div class="w-full h-full flex items-center justify-center rounded-[10px]">
+          <svg class="w-7 h-7 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+          </svg>
+        </div>
         <% } %>
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2">
-            <h3 class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= hit.title %></h3>
-            <span class="px-1.5 py-0.5 text-[9px] font-medium rounded-full bg-neutral-200/50 dark:bg-white/10 text-neutral-500 dark:text-neutral-400 shrink-0"><%= hit.project_type %></span>
-          </div>
-          <p class="text-xs text-neutral-500/70 dark:text-neutral-400/70 mt-1 line-clamp-1"><%= hit.description %></p>
-          <div class="flex items-center gap-3 mt-1.5 text-[10px] text-neutral-400 dark:text-neutral-500">
-            <span><%= hit.downloads.toLocaleString() %> downloads</span>
-            <span><%= hit.follows %> follows</span>
-          </div>
+      </div>
+
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-2">
+          <p class="font-medium text-sm text-neutral-900 dark:text-white truncate"><%= hit.title %></p>
+          <span class="flex-shrink-0 px-1.5 py-0.5 text-[9px] font-semibold uppercase rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+            <%= hit.project_type %>
+          </span>
+        </div>
+        <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 line-clamp-2"><%= hit.description %></p>
+        <div class="flex items-center gap-3 mt-1.5 text-[10px] text-neutral-400">
+          <span class="flex items-center gap-1">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"></path>
+            </svg>
+            <%= (hit.downloads || 0).toLocaleString() %>
+          </span>
+          <span class="flex items-center gap-1">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+            </svg>
+            <%= (hit.follows || 0).toLocaleString() %>
+          </span>
+          <% if (isDisabled) { %>
+          <span class="text-red-400"><%= isProjectTypeDisabled ? 'Type disabled' : 'Blocked' %></span>
+          <% } %>
         </div>
       </div>
+
+      <svg class="w-4 h-4 text-neutral-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
     </a>
     <% }); %>
   </div>
-  <% } else if (query) { %>
-  <div class="text-center py-16"><p class="text-sm text-neutral-500 dark:text-neutral-400">No results for "<%= query %>"</p></div>
-  <% } else { %>
-  <div class="text-center py-16">
-    <svg class="w-10 h-10 text-neutral-300 dark:text-neutral-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-    <p class="text-sm text-neutral-500 dark:text-neutral-400">Search Modrinth</p>
+
+  <!-- Pagination -->
+  <% if (totalPages > 1) { %>
+  <div class="flex justify-center items-center gap-2 mt-5">
+    <% if (currentPage > 1) { %>
+    <a href="/modrinth?<%= query ? 'q=' + encodeURIComponent(query) + '&' : '' %>type=<%= type || '' %>&index=<%= index || '' %>&page=<%= currentPage - 1 %>"
+      class="px-4 py-2 text-sm bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg border border-neutral-200 dark:border-neutral-700">
+      Prev
+    </a>
+    <% } %>
+    <span class="text-sm text-neutral-500"><%= currentPage %> / <%= totalPages %></span>
+    <% if (currentPage < totalPages) { %>
+    <a href="/modrinth?<%= query ? 'q=' + encodeURIComponent(query) + '&' : '' %>type=<%= type || '' %>&index=<%= index || '' %>&page=<%= currentPage + 1 %>"
+      class="px-4 py-2 text-sm bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-lg border border-neutral-200 dark:border-neutral-700">
+      Next
+    </a>
+    <% } %>
   </div>
   <% } %>
+
+  <% } else if (query) { %>
+  <!-- No results -->
+  <div class="text-center py-16">
+    <div class="w-14 h-14 mx-auto mb-4 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center">
+      <svg class="w-7 h-7 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+    </div>
+    <p class="font-medium text-neutral-900 dark:text-white">No results for "<%= query %>"</p>
+    <p class="text-sm text-neutral-500 mt-1"><% if (shouldShowWarning) { %>Some content is filtered by admin.<% } else { %>Try different terms.<% } %></p>
+    <a href="/modrinth" class="inline-block mt-4 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium">Browse All</a>
+  </div>
+
+  <% } else { %>
+  <!-- Default search prompt -->
+  <div class="text-center py-16">
+    <div class="w-14 h-14 mx-auto mb-4 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center">
+      <svg class="w-7 h-7 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+    </div>
+    <p class="font-medium text-neutral-900 dark:text-white">Search Modrinth</p>
+    <p class="text-sm text-neutral-500 mt-1">Find mods, modpacks, shaders, and more.</p>
+  </div>
+  <% } %>
+
+  <!-- Footer -->
+  <div class="mt-8 pt-4 border-t border-neutral-200/40 dark:border-white/5 flex flex-col items-center gap-1.5 text-[10px] text-neutral-400 dark:text-neutral-500 text-center">
+    <div class="flex items-center gap-1">
+      <span>Modrinth store by</span>
+      <a href="https://github.com/g-flame-oss" target="_blank" class="text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors">g-flame</a>
+      <span>&middot;</span>
+      <span>Panel by</span>
+      <a href="https://github.com/AirlinkLabs" target="_blank" class="text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors">AirlinkLabs</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="https://github.com/g-flame-oss/airlink-addons" target="_blank" class="hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors">GitHub</a>
+      <a href="https://github.com/g-flame-oss/airlink-addons/blob/modrinth-addon/LICENSE" target="_blank" class="hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors">License</a>
+      <a href="https://discord.gg/TQzUeg2wJx" target="_blank" class="hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors">Discord</a>
+    </div>
+  </div>
+
 </div>
+
+<%- include('progress') %>
+<%- include('../../../../../views/mobile/components/toast') %>
+
+<style>
+  .no-scrollbar { overflow: auto; -ms-overflow-style: none; scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+</style>
+
+<script nonce="<%- nonce %>">
+  (function() {
+    var settings = <%- JSON.stringify(settings || {}) %>;
+    var form = document.getElementById('searchForm');
+    if (!form) return;
+
+    form.addEventListener('submit', function(e) {
+      var activeType = document.querySelector('input[name="type"]:focus');
+      if (!activeType) return;
+      var selected = activeType.value;
+      if (selected !== 'all' && settings && settings.disabledProjectTypes && settings.disabledProjectTypes.includes(selected)) {
+        e.preventDefault();
+        showToast(selected + ' projects are disabled by admin', 'error', 5000);
+      }
+    });
+  })();
+</script>

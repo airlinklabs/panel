@@ -10,6 +10,7 @@ export interface SidebarItem {
   permissions?: string[];
   isActive?: (path: string) => boolean;
   isAdminItem?: boolean;
+  isAddon?: boolean;
 }
 
 export interface ServerMenuItem {
@@ -57,15 +58,16 @@ class UIComponentStore {
   }
 
   public addSidebarItem(item: SidebarItem, addonSlug?: string): void {
-    const existingIndex = this.sidebarItems.findIndex(i => i.id === item.id);
+    const resolved: SidebarItem = addonSlug ? { ...item, isAddon: true } : item;
+    const existingIndex = this.sidebarItems.findIndex(i => i.id === resolved.id);
     if (existingIndex !== -1) {
-      this.sidebarItems[existingIndex] = item;
+      this.sidebarItems[existingIndex] = resolved;
     } else {
-      this.sidebarItems.push(item);
+      this.sidebarItems.push(resolved);
     }
     if (addonSlug) {
       const reg = this.ensureAddonRegistry(addonSlug);
-      if (!reg.sidebarIds.includes(item.id)) reg.sidebarIds.push(item.id);
+      if (!reg.sidebarIds.includes(resolved.id)) reg.sidebarIds.push(resolved.id);
     }
   }
 

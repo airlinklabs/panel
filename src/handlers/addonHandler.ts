@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
-import express, { Express, Router } from 'express';
+import express, { Express, Router, Request, Response, NextFunction } from 'express';
 import { uiComponentStore, SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from './uiComponentHandler';
 import { slotRegistry, SlotId } from './addonSlotRegistry';
 import { commandRegistry, scheduler, RegisteredCommand, ScheduledTask } from './addonCommands';
@@ -15,6 +15,80 @@ import { isAuthenticated } from './utils/auth/authUtil';
 import { apiValidator } from './utils/api/apiValidator';
 import csrfProtection from './utils/security/csrfProtection';
 
+// ── Security Utilities ──────────────────────────────────────────
+
+/** Allowed SQL verbs for addon migrations (CREATE/ALTER/DROP TABLE, CREATE INDEX) */
+const ALLOWED_MIGRATION_SQL = /^\s*(CREATE\s+(TABLE|INDEX)\s+(IF\s+NOT\s+EXISTS\s+)?|ALTER\s+TABLE\s+|DROP\s+(TABLE|INDEX)\s+(IF\s+EXISTS\s+)?)\S/i;
+
+/**
+ * Sanitize a user-provided path to prevent directory traversal.
+ * Returns the resolved absolute path if it stays within baseDir, or null if it escapes.
+ */
+function sanitizePath(baseDir: string, userPath: string): string | null {
+  const realBase = fs.realpathSync(baseDir);
+  let resolved: string;
+  try {
+    resolved = fs.realpathSync(path.resolve(baseDir, userPath));
+  } catch {
+    resolved = path.resolve(baseDir, userPath);
+  }
+  if (resolved.startsWith(realBase + path.sep) || resolved === realBase) {
+    return resolved;
+  }
+  return null;
+}
+
+/**
+ * Validate a URL is safe to fetch: must be HTTPS and from an allowed domain.
+ */
+function validateUrl(urlStr: string, allowedDomains: string[]): boolean {
+  try {
+    const url = new URL(urlStr);
+    if (url.protocol !== 'https:') return false;
+    if (allowedDomains.length > 0 && !allowedDomains.some(d => url.hostname === d || url.hostname.endsWith('.' + d))) {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Escape HTML entities for safe injection into HTML context */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+/** Escape a string for safe use inside a JavaScript string literal in an HTML script tag */
+function escapeJsString(str: string): string {
+  return str
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/<\//g, '<\\/');
+}
+
+/** Create auth middleware bound to the panel's auth system */
+function createRequireAuth(isAdmin?: boolean, permission?: string) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    isAuthenticated(isAdmin, permission)(req, res, next);
+  };
+}
+
+/** Create CSRF protection middleware */
+function createRequireCsrf() {
+  return (req: Request, res: Response, next: NextFunction) => {
+    csrfProtection(req, res, next);
+  };
+}
+
 let _appInstance: Express | null = null;
 
 export function setAppInstance(app: Express): void {
@@ -27,7 +101,10 @@ function getApp(): Express {
 }
 
 function buildTailwind() {
-  exec('npx tailwindcss -i ./public/tw.css -o ./public/styles.css', (error, stdout, stderr) => {
+  const tailwindBin = path.join(__dirname, '../../node_modules/.bin/tailwindcss');
+  const fallbackNpx = 'npx tailwindcss';
+  const cmd = fs.existsSync(tailwindBin) ? tailwindBin : fallbackNpx;
+  exec(`${cmd} -i ./public/tw.css -o ./public/styles.css`, (error, stdout, stderr) => {
     if (error) {
       logger.error('Tailwind build failed:', error.message);
       return;
@@ -44,6 +121,30 @@ export interface AddonLifecycleHooks {
   onUninstall?: () => Promise<void> | void;
 }
 
+/** Server data returned by addon API utils (includes relations) */
+export type AddonServerData = Awaited<ReturnType<PrismaClient['server']['findUnique']>> & {
+  node?: { id: number; name: string; address: string; port: number; key: string } | null;
+  image?: { id: number; UUID: string; name: string | null; dockerImages: string | null } | null;
+  owner?: { id: number; username: string | null; email: string; avatar: string | null } | null;
+};
+
+/** Port entry parsed from Server.Ports JSON */
+export interface AddonServerPort {
+  port: number;
+  primary?: boolean;
+  [key: string]: unknown;
+}
+
+/** View data passed to addon EJS templates */
+export interface AddonViewData extends Record<string, unknown> {
+  title?: string;
+  user?: { id: number; username: string | null; email: string; avatar: string | null; isAdmin: boolean; description?: string | null };
+  settings?: Record<string, unknown>;
+  req?: { translations: Record<string, string>; path: string; query: Record<string, string>; session?: Record<string, unknown> };
+  nonce?: string;
+  [key: string]: unknown;
+}
+
 export interface AddonAPI {
   registerRoute: (path: string, router: Router) => void;
   logger: typeof logger;
@@ -51,10 +152,26 @@ export interface AddonAPI {
 
   utils: {
     isUserAdmin: (userId: number) => Promise<boolean>;
-    getServerById: (serverId: number) => Promise<any>;
-    getServerByUUID: (uuid: string) => Promise<any>;
-    getServerPorts: (server: any) => any[];
-    getPrimaryPort: (server: any) => any;
+    getServerById: (serverId: number) => Promise<AddonServerData | null>;
+    getServerByUUID: (uuid: string) => Promise<AddonServerData | null>;
+    getServerPorts: (server: AddonServerData) => AddonServerPort[];
+    getPrimaryPort: (server: AddonServerData) => AddonServerPort | null;
+  };
+
+  /** Security utilities for safe file operations and URL fetching */
+  security: {
+    /** Resolve a user path within a base directory. Returns null if path escapes. */
+    sanitizePath: (baseDir: string, userPath: string) => string | null;
+    /** Validate a URL is HTTPS and from allowed domains. Empty allowedDomains = any HTTPS. */
+    validateUrl: (url: string, allowedDomains?: string[]) => boolean;
+    /** Escape HTML entities for safe injection into HTML */
+    escapeHtml: (str: string) => string;
+    /** Escape a string for safe use inside a JS string literal in a <script> tag */
+    escapeJsString: (str: string) => string;
+    /** Create auth middleware (wraps panel's isAuthenticated) */
+    requireAuth: (isAdmin?: boolean, permission?: string) => (req: Request, res: Response, next: NextFunction) => void;
+    /** Create CSRF protection middleware */
+    requireCsrf: () => (req: Request, res: Response, next: NextFunction) => void;
   };
 
   addonPath: string;
@@ -62,7 +179,7 @@ export interface AddonAPI {
   desktopViewsPath: string;
   mobileViewsPath: string;
 
-  renderView: (viewName: string, data?: any, isMobile?: boolean) => Promise<string>;
+  renderView: (viewName: string, data?: AddonViewData, isMobile?: boolean) => Promise<string>;
 
   getComponentPath: (componentPath: string) => string;
 
@@ -194,7 +311,7 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
           return await prisma.server.findUnique({
             where: { id: serverId },
             include: { node: true, image: true, owner: true },
-          });
+          }) as AddonServerData | null;
         } catch (error) {
           logger.error('Error getting server by ID:', error);
           return null;
@@ -205,33 +322,41 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
           return await prisma.server.findUnique({
             where: { UUID: uuid },
             include: { node: true, image: true, owner: true },
-          });
+          }) as AddonServerData | null;
         } catch (error) {
           logger.error('Error getting server by UUID:', error);
           return null;
         }
       },
-      getServerPorts: (server: any) => {
+      getServerPorts: (server: AddonServerData) => {
         try {
           if (!server.Ports) return [];
-          return JSON.parse(server.Ports);
+          return JSON.parse(server.Ports) as AddonServerPort[];
         } catch (error) {
           logger.error('Error parsing server ports:', error);
           return [];
         }
       },
-      getPrimaryPort: (server: any) => {
+      getPrimaryPort: (server: AddonServerData) => {
         try {
           if (!server.Ports) return null;
-          const ports = JSON.parse(server.Ports);
-          return ports.find((port: any) => port.primary === true);
+          const ports = JSON.parse(server.Ports) as AddonServerPort[];
+          return ports.find(port => port.primary === true) ?? null;
         } catch (error) {
           logger.error('Error getting primary port:', error);
           return null;
         }
       },
     },
-    renderView: async (viewName: string, data: any = {}, isMobile: boolean = false): Promise<string> => {
+    security: {
+      sanitizePath,
+      validateUrl: (url: string, allowedDomains: string[] = []) => validateUrl(url, allowedDomains),
+      escapeHtml,
+      escapeJsString,
+      requireAuth: (isAdmin?: boolean, permission?: string) => createRequireAuth(isAdmin, permission),
+      requireCsrf: () => createRequireCsrf(),
+    },
+    renderView: async (viewName: string, data: AddonViewData = {}, isMobile: boolean = false): Promise<string> => {
       const ejs = require('ejs');
       const viewportDir = isMobile ? addonMobileViewsPath : addonDesktopViewsPath;
       const viewportPath = path.join(viewportDir, viewName);
@@ -242,11 +367,17 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
         throw new Error(`View ${viewName} not found in addon ${slug}`);
       }
 
-      let panelSettings: any = {};
+      let panelSettings: Record<string, unknown> = {};
       try {
         const row = await (prisma as any).settings.findUnique({ where: { id: 1 } });
         if (row) panelSettings = row;
       } catch (_) {}
+
+      // Inject all template vars into data so addon views (and their includes) have access
+      data.nonce = data.nonce || '';
+      data.settings = { ...panelSettings, ...(data.settings || {}) };
+      data.user = data.user || { id: 0, username: 'Guest', email: '', avatar: null, isAdmin: false, description: '' };
+      data.req = data.req || { translations: {}, path: '', query: {} };
 
       const content = await new Promise<string>((resolve, reject) => {
         ejs.renderFile(viewPath, data, {}, (err: any, str: string) => {
@@ -272,15 +403,15 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
 
       if (!hasHeader && !hasFooter) return content;
 
-      const templateData: any = {
+      const templateData: AddonViewData & { regularMenuItems: SidebarItem[]; adminMenuItems: SidebarItem[]; addonSidebarIds: Set<string>; addonUrls: string[]; icon: (name: string, opts?: Record<string, unknown>) => string } = {
         ...data,
         settings: { ...panelSettings, ...(data.settings || {}) },
-        user: data.user || {},
-        req: data.req || { translations: {}, path: '' },
+        user: data.user!,
+        req: data.req!,
         nonce: data.nonce || '',
         regularMenuItems: uiComponentStore.getSidebarItems(undefined, false),
         adminMenuItems: uiComponentStore.getSidebarItems('admin', true),
-        addonSidebarIds: Array.from(uiComponentStore.getAddonSidebarIds()),
+        addonSidebarIds: uiComponentStore.getAddonSidebarIds(),
         addonUrls: uiComponentStore.getSidebarItems(undefined, false)
           .filter(item => uiComponentStore.getAddonSidebarIds().has(item.id))
           .map(item => item.url),
@@ -338,15 +469,10 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
         });
       }
 
-      if (template) {
-        const colcontClose = template.indexOf('</div>\n<script');
-        if (colcontClose !== -1) {
-          const insertPoint = colcontClose;
-          return `${header}\n${template.slice(0, insertPoint)}\n${content}\n${template.slice(insertPoint)}\n${footer}`;
-        }
+      if (isMobile) {
+        return `${header}\n<main id="page-content" class="">\n${template}\n${content}\n</main>\n${footer}`;
       }
-
-      return `${header}\n${template}\n${content}\n${footer}`;
+      return `${header}\n<main class="min-h-screen m-auto"><div class="flex min-h-screen"><div class="w-60 h-full">\n${template}\n</div><div id="page-content" class="flex-1 overflow-y-auto pt-16">\n${content}\n</div></div></main>\n${footer}`;
     },
     config: createConfigStore(slug),
     ui: {
@@ -804,6 +930,11 @@ async function applyAddonMigrations(slug: string, manifest: AddonManifestV2) {
     }
 
     for (const migration of pending) {
+      // Validate migration SQL — only allow safe DDL verbs
+      if (!ALLOWED_MIGRATION_SQL.test(migration.sql)) {
+        logger.error(`Migration "${migration.name}" rejected: SQL does not match allowed DDL pattern`);
+        return { success: false, message: `Migration "${migration.name}" contains disallowed SQL. Only CREATE TABLE, CREATE INDEX, ALTER TABLE, and DROP are permitted.` };
+      }
       try {
         await prisma.$transaction(async (tx) => {
           await tx.$executeRawUnsafe(migration.sql);
@@ -886,6 +1017,11 @@ export async function uninstallAddon(slug: string, app: Express | any) {
           .reverse();
 
         for (const migration of reversible) {
+          // Validate rollback SQL too
+          if (!ALLOWED_MIGRATION_SQL.test(migration.down!)) {
+            logger.warn(`Rollback migration "${migration.name}" rejected: disallowed SQL pattern`);
+            continue;
+          }
           try {
             await prisma.$executeRawUnsafe(migration.down!);
             logger.info(`Rolled back migration ${migration.name} for addon ${slug}`);

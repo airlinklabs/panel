@@ -1,148 +1,368 @@
-<div class="flex-1 flex flex-col overflow-hidden">
+<style>
+  * { scrollbar-width: none; -ms-overflow-style: none; }
+  *::-webkit-scrollbar { display: none; }
+  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .search-input {
+    background: transparent; border: 1px solid transparent; outline: none;
+    font-size: 13px; color: #171717; width: 100%; padding: 8px 12px;
+    border-radius: 9px; transition: border-color 0.15s;
+  }
+  .dark .search-input { color: #e5e5e5; }
+  .search-input:focus { border-color: #a3a3a3; }
+  .dark .search-input:focus { border-color: rgba(255,255,255,0.25); }
+  .search-input::placeholder { color: #a3a3a3; }
+  .quick-filter {
+    display: inline-flex; align-items: center; padding: 5px 12px;
+    border-radius: 999px; font-size: 12px; font-weight: 500; cursor: pointer;
+    border: 1px solid #e5e5e5; background: transparent; color: #737373;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .dark .quick-filter { border-color: rgba(255,255,255,0.1); color: #a3a3a3; }
+  .quick-filter:hover { background: #171717; color: white; border-color: #171717; }
+  .dark .quick-filter:hover { background: white; color: #0a0a0a; border-color: white; }
+  .result-card {
+    display: flex; flex-direction: column; gap: 0; padding: 0; border-radius: 12px;
+    border: 1px solid #e5e5e5; background: white; cursor: pointer;
+    transition: all 0.15s; text-decoration: none; color: inherit; overflow: hidden;
+  }
+  .dark .result-card { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.07); }
+  .result-card:hover { border-color: #d4d4d4; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .dark .result-card:hover { border-color: rgba(255,255,255,0.15); }
+  .result-card.list-mode { flex-direction: row; align-items: center; padding: 10px; gap: 14px; }
+  .result-card .card-icon-wrap {
+    width: 100%; aspect-ratio: 1; background: #f5f5f5; border-bottom: 1px solid #e5e5e5;
+    display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;
+  }
+  .dark .result-card .card-icon-wrap { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+  .result-card.list-mode .card-icon-wrap { width: 64px; height: 64px; border-radius: 10px; border: 1px solid #e5e5e5; border-bottom: none; aspect-ratio: unset; }
+  .dark .result-card.list-mode .card-icon-wrap { border-color: rgba(255,255,255,0.1); }
+  .result-card .card-icon-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .type-badge {
+    display: inline-flex; padding: 2px 8px; border-radius: 6px;
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 40px; padding: 8px 16px; border-radius: 9px; font-size: 13px; font-weight: 500;
+    background: #171717; color: white; border: none; cursor: pointer; transition: background 0.12s;
+  }
+  .dark .btn-primary { background: white; color: #0a0a0a; }
+  .btn-primary:hover { background: #333; }
+  .dark .btn-primary:hover { background: #e5e5e5; }
+  .view-btn {
+    padding: 8px; border-radius: 8px; transition: all 0.15s; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .view-btn.active { background: #171717; color: white; }
+  .dark .view-btn.active { background: white; color: #0a0a0a; }
+  .view-btn:not(.active) { background: transparent; color: #a3a3a3; }
+  .view-btn:not(.active):hover { color: #171717; }
+  .dark .view-btn:not(.active):hover { color: white; }
+  .page-btn {
+    min-width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 9px; font-size: 13px; font-weight: 500; text-decoration: none;
+    transition: all 0.15s; border: 1px solid transparent;
+  }
+  .page-btn.active { background: #171717; color: white; border-color: #171717; }
+  .dark .page-btn.active { background: white; color: #0a0a0a; border-color: white; }
+  .page-btn:not(.active) { background: transparent; color: #737373; border-color: #e5e5e5; }
+  .dark .page-btn:not(.active) { color: #a3a3a3; border-color: rgba(255,255,255,0.1); }
+  .page-btn:not(.active):hover { border-color: #a3a3a3; color: #171717; }
+  .dark .page-btn:not(.active):hover { border-color: rgba(255,255,255,0.2); color: white; }
+  .page-btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+  .category-chip {
+    display: inline-flex; padding: 2px 8px; border-radius: 6px;
+    font-size: 10px; font-weight: 500; background: #f5f5f5; color: #737373; border: 1px solid #e5e5e5;
+  }
+  .dark .category-chip { background: rgba(255,255,255,0.05); color: #a3a3a3; border-color: rgba(255,255,255,0.1); }
+</style>
+
+<% const hasDisabledTypes = settings && settings.disabledProjectTypes && settings.disabledProjectTypes.length > 0;
+   const hasBlockedProjects = settings && settings.blockedProjects && settings.blockedProjects.length > 0; %>
+
+<div class="px-12 pt-6 pb-8 max-w-6xl">
+
   <% if (settings && settings.showWarningBanner) { %>
-  <div class="flex-shrink-0 bg-amber-500/10 border-b border-amber-500/20 px-6 py-2.5 flex items-center gap-3">
-    <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-    </svg>
-    <span class="text-amber-400 font-medium text-sm"><%= settings.warningTitle %></span>
-    <span class="text-amber-300/70 text-sm"><%= settings.warningMessage %></span>
+  <div class="rounded-xl bg-amber-50 dark:bg-amber-800/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-5">
+    <div class="flex items-center gap-2 mb-0.5">
+      <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+      </svg>
+      <p class="text-sm font-medium text-amber-700 dark:text-amber-400"><%= settings.warningTitle || 'Notice' %></p>
+      <% if (hasDisabledTypes) { %><span class="text-xs text-amber-600 bg-amber-100 dark:bg-amber-500/20 dark:text-amber-400 px-2 py-0.5 rounded">Disabled: <%= settings.disabledProjectTypes.join(', ') %></span><% } %>
+      <% if (hasBlockedProjects) { %><span class="text-xs text-amber-600 bg-amber-100 dark:bg-amber-500/20 dark:text-amber-400 px-2 py-0.5 rounded"><%= settings.blockedProjects.length %> blocked</span><% } %>
+    </div>
+    <% if (settings.warningMessage) { %>
+    <p class="text-xs text-amber-600 dark:text-amber-400/60 mt-0.5 ml-6"><%= settings.warningMessage %></p>
+    <% } %>
   </div>
   <% } %>
 
-  <div class="flex-shrink-0 border-b border-neutral-200/30 dark:border-white/5 px-6 py-4">
-    <form method="GET" action="/modrinth">
-      <div class="flex gap-2.5">
-        <div class="relative flex-1">
-          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-          <input type="text" name="q" value="<%= query || '' %>"
-            placeholder="Search mods, modpacks, plugins..."
-            class="w-full pl-10 pr-4 py-2.5 bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-xl text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-300/20 transition-colors">
-        </div>
-        <select name="type" class="px-3 py-2.5 bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-xl text-sm text-neutral-800 dark:text-white focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-300/20 transition-colors min-w-[130px]">
-          <option value="all" <%= (type || 'all') === 'all' ? 'selected' : '' %>>All types</option>
-          <option value="mod" <%= type === 'mod' ? 'selected' : '' %>>Mods</option>
-          <option value="modpack" <%= type === 'modpack' ? 'selected' : '' %>>Modpacks</option>
-          <option value="resourcepack" <%= type === 'resourcepack' ? 'selected' : '' %>>Resource Packs</option>
-          <option value="shader" <%= type === 'shader' ? 'selected' : '' %>>Shaders</option>
-          <option value="plugin" <%= type === 'plugin' ? 'selected' : '' %>>Plugins</option>
-          <option value="datapack" <%= type === 'datapack' ? 'selected' : '' %>>Data Packs</option>
-        </select>
-        <select name="index" class="px-3 py-2.5 bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-xl text-sm text-neutral-800 dark:text-white focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-300/20 transition-colors min-w-[120px]">
-          <option value="relevance" <%= (index || 'relevance') === 'relevance' ? 'selected' : '' %>>Relevance</option>
-          <option value="downloads" <%= index === 'downloads' ? 'selected' : '' %>>Downloads</option>
-          <option value="follows" <%= index === 'follows' ? 'selected' : '' %>>Follows</option>
-          <option value="newest" <%= index === 'newest' ? 'selected' : '' %>>Newest</option>
-          <option value="updated" <%= index === 'updated' ? 'selected' : '' %>>Updated</option>
-        </select>
-        <button type="submit" class="px-5 py-2.5 bg-neutral-800 dark:bg-white/10 hover:bg-neutral-700 dark:hover:bg-white/15 text-white rounded-xl text-sm font-medium transition-colors">Search</button>
+  <!-- Search -->
+  <form method="GET" action="/modrinth" class="mb-4">
+    <div class="flex gap-3 items-center">
+      <div class="flex-1 flex items-center bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-neutral-200/60 dark:border-white/5 rounded-xl px-3">
+        <svg class="h-4 w-4 text-neutral-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input name="q" type="search" class="search-input" placeholder="Search mods, modpacks, shaders..." value="<%= query %>">
       </div>
-    </form>
-  </div>
-
-  <div class="flex-1 overflow-y-auto no-scrollbar">
-    <div class="px-6 py-5">
-
-      <% if (results && results.hits && results.hits.length > 0) { %>
-      <div class="flex items-center justify-between mb-5">
-        <div>
-          <% if (query) { %>
-          <h2 class="text-base font-medium text-neutral-800 dark:text-white">Results for "<span class="text-neutral-500 dark:text-neutral-400"><%= query %></span>"</h2>
-          <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5"><%= totalHits %> results found</p>
-          <% } else { %>
-          <h2 class="text-base font-medium text-neutral-800 dark:text-white">Browse Modrinth</h2>
-          <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5"><%= totalHits %> projects</p>
-          <% } %>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        <% results.hits.forEach(function(hit) { %>
-        <a href="/modrinth/project/<%= hit.project_id %>"
-          class="group block rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-4 hover:bg-neutral-100 dark:hover:bg-white/[0.08] transition-all duration-200">
-          <div class="flex items-start gap-3">
-            <% if (hit.icon_url) { %>
-            <img src="<%= hit.icon_url %>" alt="" class="w-12 h-12 rounded-lg object-cover bg-neutral-200 dark:bg-neutral-700 shrink-0">
-            <% } else { %>
-            <div class="w-12 h-12 rounded-lg bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center shrink-0">
-              <svg class="w-6 h-6 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-            </div>
-            <% } %>
-            <div class="min-w-0 flex-1">
-              <h3 class="text-sm font-medium text-neutral-800 dark:text-white truncate group-hover:text-neutral-900 dark:group-hover:text-white"><%= hit.title %></h3>
-              <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 truncate"><%= hit.author %></p>
-            </div>
-            <span class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-neutral-200/50 dark:bg-white/10 text-neutral-600 dark:text-neutral-400 shrink-0"><%= hit.project_type %></span>
-          </div>
-          <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-3 line-clamp-2"><%= hit.description %></p>
-          <div class="flex items-center gap-4 mt-3 text-[11px] text-neutral-400 dark:text-neutral-500">
-            <span class="flex items-center gap-1">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-              <%= hit.downloads.toLocaleString() %>
-            </span>
-            <span class="flex items-center gap-1">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-              <%= hit.follows %>
-            </span>
-            <% if (hit.categories && hit.categories.length > 0) { %>
-            <span class="truncate"><%= hit.categories.slice(0, 3).join(', ') %></span>
-            <% } %>
-          </div>
-        </a>
+      <select name="type" class="min-h-10 px-3 py-2 rounded-xl border border-neutral-200/60 dark:border-white/5 bg-white/80 dark:bg-white/5 backdrop-blur-xl text-sm text-neutral-700 dark:text-neutral-300 outline-none">
+        <option value="">All Types</option>
+        <% const typeOptions = [
+          { value: 'mod', label: 'Mods' },
+          { value: 'modpack', label: 'Modpacks' },
+          { value: 'plugin', label: 'Plugins' },
+          { value: 'shader', label: 'Shaders' },
+          { value: 'resourcepack', label: 'Resource Packs' },
+          { value: 'datapack', label: 'Data Packs' }
+        ];
+        typeOptions.forEach(function(opt) {
+          var disabled = hasDisabledTypes && settings.disabledProjectTypes.includes(opt.value);
+        %>
+        <option value="<%= opt.value %>" <%= type === opt.value ? 'selected' : '' %> <%= disabled ? 'disabled' : '' %>><%= opt.label %><%= disabled ? ' (disabled)' : '' %></option>
         <% }); %>
-      </div>
+      </select>
+      <select name="index" class="min-h-10 px-3 py-2 rounded-xl border border-neutral-200/60 dark:border-white/5 bg-white/80 dark:bg-white/5 backdrop-blur-xl text-sm text-neutral-700 dark:text-neutral-300 outline-none">
+        <option value="relevance" <%= index === 'relevance' ? 'selected' : '' %>>Relevance</option>
+        <option value="downloads" <%= index === 'downloads' ? 'selected' : '' %>>Downloads</option>
+        <option value="follows" <%= index === 'follows' ? 'selected' : '' %>>Followers</option>
+        <option value="newest" <%= index === 'newest' ? 'selected' : '' %>>Newest</option>
+        <option value="updated" <%= index === 'updated' ? 'selected' : '' %>>Updated</option>
+      </select>
+      <button type="submit" class="btn-primary">Search</button>
+    </div>
 
-      <% if (totalHits > 20) { %>
-      <div class="flex items-center justify-center gap-2 mt-8">
-        <% if (offset > 0) { %>
-        <a href="?q=<%= query || '' %>&type=<%= type || 'all' %>&index=<%= index || 'relevance' %>&offset=<%= Math.max(0, offset - 20) %>"
-          class="px-3 py-1.5 text-sm rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/10 transition">Previous</a>
-        <% } %>
-        <span class="text-xs text-neutral-500 dark:text-neutral-400">Page <%= Math.floor(offset / 20) + 1 %> of <%= Math.ceil(totalHits / 20) %></span>
-        <% if (offset + 20 < totalHits) { %>
-        <a href="?q=<%= query || '' %>&type=<%= type || 'all' %>&index=<%= index || 'relevance' %>&offset=<%= offset + 20 %>"
-          class="px-3 py-1.5 text-sm rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/10 transition">Next</a>
-        <% } %>
-      </div>
-      <% } %>
+    <div class="flex gap-2 mt-3">
+      <% ['Technology', 'Adventure', 'Optimization', 'Decoration', 'Magic', 'Food'].forEach(function(filter) { %>
+      <button type="button" class="quick-filter" data-category="<%= filter.toLowerCase() %>">
+        <%= filter %>
+      </button>
+      <% }); %>
+    </div>
+  </form>
 
-      <% } else if (query) { %>
-      <div class="text-center py-20">
-        <svg class="w-12 h-12 text-neutral-300 dark:text-neutral-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        <p class="text-sm text-neutral-500 dark:text-neutral-400">No results for "<span class="text-neutral-700 dark:text-neutral-300"><%= query %></span>"</p>
-        <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-1">Try different keywords or check your filters</p>
-      </div>
+  <!-- Results -->
+  <% if (results && results.hits && results.hits.length > 0) { %>
+  <% const currentPage = Math.floor(results.offset / 20) + 1;
+     const totalPages = Math.ceil(results.total_hits / 20); %>
+
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <% if (query) { %>
+      <h2 class="text-base font-medium text-neutral-800 dark:text-white">Results for "<span class="text-emerald-600 dark:text-emerald-400"><%= query %></span>"</h2>
       <% } else { %>
-      <div class="mb-8">
-        <h2 class="text-base font-medium text-neutral-800 dark:text-white mb-4">Trending</h2>
-        <p class="text-xs text-neutral-500 dark:text-neutral-400">Search for mods, modpacks, shaders, and more to get started.</p>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-          <a href="/modrinth?q=&type=mod&index=downloads" class="block rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-4 hover:bg-neutral-100 dark:hover:bg-white/[0.08] transition-all">
-            <div class="flex items-center gap-2 mb-2">
-              <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-              <span class="text-sm font-medium text-neutral-800 dark:text-white">Mods</span>
-            </div>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400">Most downloaded mods</p>
-          </a>
-          <a href="/modrinth?q=&type=modpack&index=downloads" class="block rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-4 hover:bg-neutral-100 dark:hover:bg-white/[0.08] transition-all">
-            <div class="flex items-center gap-2 mb-2">
-              <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-              <span class="text-sm font-medium text-neutral-800 dark:text-white">Modpacks</span>
-            </div>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400">Popular modpacks</p>
-          </a>
-          <a href="/modrinth?q=&type=shader&index=downloads" class="block rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-4 hover:bg-neutral-100 dark:hover:bg-white/[0.08] transition-all">
-            <div class="flex items-center gap-2 mb-2">
-              <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-              <span class="text-sm font-medium text-neutral-800 dark:text-white">Shaders</span>
-            </div>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400">Top shaders</p>
-          </a>
-        </div>
-      </div>
+      <h2 class="text-base font-medium text-neutral-800 dark:text-white">Popular projects</h2>
       <% } %>
+      <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5"><%= results.hits.length %> of <%= results.total_hits.toLocaleString() %><% if (hasDisabledTypes || hasBlockedProjects) { %> <span class="text-amber-500">(filtered)</span><% } %></p>
+    </div>
 
+    <div class="flex items-center gap-2.5">
+      <a href="/modrinth/installed" class="flex items-center gap-2 px-3 py-2 rounded-xl border border-neutral-200/60 dark:border-white/5 bg-white/80 dark:bg-white/5 backdrop-blur-xl text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+        </svg>
+        Installations
+      </a>
+      <div class="flex border border-neutral-200/60 dark:border-white/5 rounded-xl overflow-hidden bg-white/80 dark:bg-white/5 backdrop-blur-xl">
+        <button type="button" id="gridViewBtn" class="view-btn active" title="Grid view">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+        </button>
+        <button type="button" id="listViewBtn" class="view-btn" title="List view">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+        </button>
+      </div>
     </div>
   </div>
+
+  <div id="resultsContainer" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <% results.hits.forEach(function(hit) {
+      var typeDisabled = hasDisabledTypes && settings.disabledProjectTypes.includes(hit.project_type);
+      var isBlocked = hasBlockedProjects && settings.blockedProjects.includes(hit.project_id);
+      var isDisabled = typeDisabled || isBlocked;
+    %>
+    <a href="/modrinth/project/<%= hit.project_id %>" class="result-card group<%= isDisabled ? ' opacity-50' : '' %>">
+      <div class="card-icon-wrap relative">
+        <% if (hit.icon_url) { %>
+        <img src="<%= hit.icon_url %>" alt="<%= hit.title %>" class="group-hover:scale-105 transition-transform duration-300" loading="lazy">
+        <% } else { %>
+        <svg class="w-12 h-12 text-neutral-300 dark:text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+        </svg>
+        <% } %>
+        <div class="absolute top-2 right-2">
+          <span class="type-badge <%= hit.project_type === 'mod' ? 'bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400' : hit.project_type === 'modpack' ? 'bg-purple-50 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400' : hit.project_type === 'plugin' ? 'bg-orange-50 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400' : hit.project_type === 'shader' ? 'bg-cyan-50 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400' : 'bg-neutral-100 dark:bg-neutral-700/40 text-neutral-600 dark:text-neutral-400' %>"><%= hit.project_type %></span>
+        </div>
+        <% if (isDisabled) { %>
+        <div class="absolute top-2 left-2">
+          <span class="px-1.5 py-0.5 text-xs font-medium bg-red-500/80 text-white rounded-md backdrop-blur-sm"><%= typeDisabled ? 'Disabled' : 'Blocked' %></span>
+        </div>
+        <% } %>
+      </div>
+
+      <div class="p-3 flex flex-col flex-1">
+        <div class="flex items-center gap-2 mb-1">
+          <h3 class="text-sm font-medium text-neutral-800 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"><%= hit.title %></h3>
+        </div>
+        <p class="text-xs text-neutral-500 dark:text-neutral-400 line-clamp-2 mb-2 flex-1"><%= hit.description %></p>
+        <div class="flex items-center justify-between text-[10px] text-neutral-400 dark:text-neutral-500 mb-2">
+          <div class="flex items-center gap-2.5">
+            <span class="flex items-center gap-1">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path></svg>
+              <%= (hit.downloads || 0).toLocaleString() %>
+            </span>
+            <span class="flex items-center gap-1">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
+              <%= (hit.follows || 0).toLocaleString() %>
+            </span>
+          </div>
+          <span><%= new Date(hit.date_modified).toLocaleDateString() %></span>
+        </div>
+        <% if (hit.categories && hit.categories.length > 0) { %>
+        <div class="flex flex-wrap gap-1">
+          <% hit.categories.slice(0, 3).forEach(function(cat) { %><span class="category-chip"><%= cat %></span><% }); %>
+          <% if (hit.categories.length > 3) { %><span class="category-chip">+<%= hit.categories.length - 3 %></span><% } %>
+        </div>
+        <% } %>
+      </div>
+    </a>
+    <% }); %>
+  </div>
+
+  <!-- Pagination -->
+  <% if (totalPages > 1) { %>
+  <div class="flex justify-center items-center gap-1.5 mt-8">
+    <% if (currentPage > 1) { %>
+    <a href="/modrinth?q=<%= encodeURIComponent(query) %>&type=<%= type %>&index=<%= index %>&offset=<%= Math.max(0, results.offset - 20) %>" class="page-btn">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    </a>
+    <% } else { %>
+    <span class="page-btn" disabled>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    </span>
+    <% } %>
+    <% var startPage = Math.max(1, currentPage - 2); var endPage = Math.min(totalPages, currentPage + 2);
+       if (startPage > 1) { %>
+    <a href="/modrinth?q=<%= encodeURIComponent(query) %>&type=<%= type %>&index=<%= index %>&offset=0" class="page-btn">1</a>
+    <% if (startPage > 2) { %><span class="text-xs text-neutral-400 dark:text-neutral-500 px-1">...</span><% } %>
+    <% }
+       for (var i = startPage; i <= endPage; i++) {
+         var pageOffset = (i - 1) * 20;
+    %>
+    <% if (i === currentPage) { %>
+    <span class="page-btn active"><%= i %></span>
+    <% } else { %>
+    <a href="/modrinth?q=<%= encodeURIComponent(query) %>&type=<%= type %>&index=<%= index %>&offset=<%= pageOffset %>" class="page-btn"><%= i %></a>
+    <% } %>
+    <% }
+       if (endPage < totalPages) { %>
+    <% if (endPage < totalPages - 1) { %><span class="text-xs text-neutral-400 dark:text-neutral-500 px-1">...</span><% } %>
+    <a href="/modrinth?q=<%= encodeURIComponent(query) %>&type=<%= type %>&index=<%= index %>&offset=<%= (totalPages - 1) * 20 %>" class="page-btn"><%= totalPages %></a>
+    <% } %>
+    <% if (currentPage < totalPages) { %>
+    <a href="/modrinth?q=<%= encodeURIComponent(query) %>&type=<%= type %>&index=<%= index %>&offset=<%= results.offset + 20 %>" class="page-btn">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    </a>
+    <% } else { %>
+    <span class="page-btn" disabled>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    </span>
+    <% } %>
+  </div>
+  <% } %>
+
+  <% } else if (query) { %>
+  <div class="flex flex-col items-center justify-center mt-32 text-center">
+    <div class="w-16 h-16 rounded-full bg-neutral-100 dark:bg-white/5 border border-neutral-200/60 dark:border-white/5 flex items-center justify-center mb-4">
+      <svg class="h-7 w-7 text-neutral-300 dark:text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    </div>
+    <h2 class="text-base font-medium text-neutral-800 dark:text-white mb-1">No results for "<%= query %>"</h2>
+    <p class="text-sm text-neutral-500 dark:text-neutral-400 mb-4"><% if (hasDisabledTypes || hasBlockedProjects) { %>Some types may be filtered.<% } else { %>Try different search terms.<% } %></p>
+    <button onclick="document.querySelector('input[name=q]').value=''; document.querySelector('form').submit();" class="btn-primary">Browse all</button>
+  </div>
+  <% } else { %>
+  <div class="flex flex-col items-center justify-center mt-32 text-center">
+    <div class="w-16 h-16 rounded-full bg-neutral-100 dark:bg-white/5 border border-neutral-200/60 dark:border-white/5 flex items-center justify-center mb-4">
+      <svg class="h-7 w-7 text-neutral-300 dark:text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    </div>
+    <h2 class="text-base font-medium text-neutral-800 dark:text-white">Search Modrinth</h2>
+    <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">Find mods, modpacks, plugins, shaders, and more.</p>
+  </div>
+  <% } %>
+
+  <!-- Footer -->
+  <div class="mt-10 pt-5 border-t border-neutral-200/40 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-400 dark:text-neutral-500">
+    <div class="flex items-center gap-1.5">
+      <span>Modrinth store by</span>
+      <a href="https://github.com/g-flame-oss" target="_blank" class="text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors">g-flame</a>
+      <span>&middot;</span>
+      <span>Panel by</span>
+      <a href="https://github.com/AirlinkLabs" target="_blank" class="text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors">AirlinkLabs</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="https://github.com/g-flame-oss/airlink-addons" target="_blank" class="hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors">GitHub</a>
+      <a href="https://github.com/g-flame-oss/airlink-addons/blob/modrinth-addon/LICENSE" target="_blank" class="hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors">License</a>
+      <a href="https://discord.gg/TQzUeg2wJx" target="_blank" class="hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors">Discord</a>
+    </div>
+  </div>
+
 </div>
+
+<%- include('progress') %>
+<%- include('../../../../../views/desktop/components/toast') %>
+
+<script nonce="<%- nonce %>">
+  document.addEventListener('DOMContentLoaded', function() {
+    setupQuickFilters();
+    setupViewToggle();
+    setupFormValidation();
+  });
+
+  function setupQuickFilters() {
+    document.querySelectorAll('.quick-filter').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelector('input[name="q"]').value = this.dataset.category;
+        this.closest('form').submit();
+      });
+    });
+  }
+
+  function setupViewToggle() {
+    var gridBtn = document.getElementById('gridViewBtn');
+    var listBtn = document.getElementById('listViewBtn');
+    var container = document.getElementById('resultsContainer');
+    if (!gridBtn || !listBtn || !container) return;
+
+    gridBtn.addEventListener('click', function() {
+      container.className = 'grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
+      container.querySelectorAll('.result-card').forEach(function(card) {
+        card.classList.remove('list-mode');
+      });
+      gridBtn.classList.add('active');
+      listBtn.classList.remove('active');
+    });
+
+    listBtn.addEventListener('click', function() {
+      container.className = 'space-y-2';
+      container.querySelectorAll('.result-card').forEach(function(card) {
+        card.classList.add('list-mode');
+      });
+      listBtn.classList.add('active');
+      gridBtn.classList.remove('active');
+    });
+  }
+
+  function setupFormValidation() {
+    var form = document.querySelector('form[action="/modrinth"]');
+    var typeSelect = document.querySelector('select[name="type"]');
+    if (!form || !typeSelect) return;
+    var settings = <%- JSON.stringify(settings || {}) %>;
+    form.addEventListener('submit', function(e) {
+      var selected = typeSelect.value;
+      if (selected && settings && settings.disabledProjectTypes && settings.disabledProjectTypes.includes(selected)) {
+        e.preventDefault();
+        showToast(selected + ' projects are disabled by admin', 'error', 5000);
+        typeSelect.value = '';
+      }
+    });
+  }
+</script>

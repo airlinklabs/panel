@@ -1,8 +1,8 @@
 {
   "name": "Modrinth Store",
   "identifier": "modrinth",
-  "version": "2.0.0",
-  "description": "Browse and install mods, modpacks, plugins, shaders, and more from Modrinth",
+  "version": "3.0.0",
+  "description": "Browse and install mods, modpacks, plugins, shaders, resource packs, and datapacks from Modrinth",
   "author": "AirLinkLabs",
   "main": "dist/index.js",
   "router": "/modrinth",
@@ -17,7 +17,7 @@
   "capabilities": {
     "wrapsDashboard": false,
     "wrapsAdminLayout": false,
-    "runsRawSql": true,
+    "runsRawSql": false,
     "registersSchedules": true
   },
   "settingsSchema": [

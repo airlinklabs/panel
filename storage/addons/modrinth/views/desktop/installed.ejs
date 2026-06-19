@@ -1,0 +1,327 @@
+<style>
+  ::-webkit-scrollbar { display: none; }
+  .type-badge {
+    display: inline-flex; padding: 2px 8px; border-radius: 6px;
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 600;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    min-height: 36px; padding: 6px 14px; border-radius: 9px; font-size: 12px; font-weight: 500;
+    background: #171717; color: white; border: none; cursor: pointer; transition: background 0.12s;
+    text-decoration: none;
+  }
+  .dark .btn-primary { background: white; color: #0a0a0a; }
+  .btn-primary:hover { background: #333; }
+  .dark .btn-primary:hover { background: #e5e5e5; }
+  .btn-secondary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    min-height: 36px; padding: 6px 14px; border-radius: 9px; font-size: 12px; font-weight: 500;
+    background: transparent; color: #525252; border: 1px solid #e5e5e5; cursor: pointer; transition: all 0.12s;
+    text-decoration: none;
+  }
+  .dark .btn-secondary { color: #a3a3a3; border-color: rgba(255,255,255,0.1); }
+  .btn-secondary:hover { background: #f5f5f5; border-color: #d4d4d4; }
+  .dark .btn-secondary:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
+  .btn-danger {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    min-height: 36px; padding: 6px 14px; border-radius: 9px; font-size: 12px; font-weight: 500;
+    background: transparent; color: #dc2626; border: 1px solid #fca5a5; cursor: pointer; transition: all 0.12s;
+  }
+  .dark .btn-danger { border-color: rgba(220,38,38,0.3); color: #f87171; }
+  .btn-danger:hover { background: #fef2f2; }
+  .dark .btn-danger:hover { background: rgba(220,38,38,0.1); }
+  .btn-update {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    min-height: 36px; padding: 6px 14px; border-radius: 9px; font-size: 12px; font-weight: 500;
+    background: #2563eb; color: white; border: none; cursor: pointer; transition: background 0.12s;
+  }
+  .btn-update:hover { background: #1d4ed8; }
+  .inst-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px; border-radius: 12px; border: 1px solid #e5e5e5;
+    background: white; transition: all 0.15s;
+  }
+  .dark .inst-row { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.07); }
+  .inst-row:hover { border-color: #d4d4d4; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .dark .inst-row:hover { border-color: rgba(255,255,255,0.15); }
+  .inst-icon {
+    width: 52px; height: 52px; border-radius: 10px; flex-shrink: 0;
+    background: #f5f5f5; border: 1px solid #e5e5e5; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .dark .inst-icon { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+  .inst-icon img { width: 100%; height: 100%; object-fit: cover; }
+</style>
+
+<div class="px-12 pt-6 pb-8 max-w-5xl">
+
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-1.5 text-xs text-neutral-400 dark:text-neutral-500 mb-5">
+    <a href="/modrinth" class="hover:text-neutral-700 dark:hover:text-white transition-colors">Modrinth store</a>
+    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    <span class="text-neutral-600 dark:text-neutral-300"><%= server.name %></span>
+    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    <span class="text-neutral-800 dark:text-white font-medium">Installed</span>
+  </nav>
+
+  <!-- Server Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-4">
+      <div>
+        <div class="flex items-center gap-2.5 mb-0.5">
+          <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= server.name %></h1>
+          <% if (server.status === 'running') { %>
+          <span class="status-badge bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">Online</span>
+          <% } else if (server.status === 'starting' || server.status === 'stopping') { %>
+          <span class="status-badge bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400">Starting</span>
+          <% } else if (server.status === 'installing') { %>
+          <span class="status-badge bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400">Installing</span>
+          <% } else { %>
+          <span class="status-badge bg-neutral-100 dark:bg-neutral-700/40 text-neutral-500 dark:text-neutral-400">Offline</span>
+          <% } %>
+        </div>
+        <p class="text-sm text-neutral-500 dark:text-neutral-400"><%= server.description || 'Modrinth installed mods' %></p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2.5">
+      <a href="/server/<%= server.UUID %>" class="btn-secondary">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.573-1.066z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        Panel
+      </a>
+      <a href="/modrinth/installed" class="btn-primary">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+        Installations
+      </a>
+      <a href="/modrinth" class="btn-primary">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        Browse Store
+      </a>
+    </div>
+  </div>
+
+  <!-- Updates Banner -->
+  <% if (updates && updates.length > 0) { %>
+  <div class="rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-500/20 px-4 py-3 mb-5">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="p-1.5 bg-blue-100 dark:bg-blue-500/20 rounded-lg">
+          <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-blue-700 dark:text-blue-300"><%= updates.length %> update<%= updates.length !== 1 ? 's' : '' %> available</p>
+          <p class="text-xs text-blue-600/70 dark:text-blue-400/50">Updates ready to install for your installed mods</p>
+        </div>
+      </div>
+      <button onclick="installAllUpdates()" class="btn-update">Update All</button>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- Installations List -->
+  <% if (installations && installations.length > 0) { %>
+  <div class="space-y-2.5">
+    <% installations.forEach(function(inst) { %>
+    <div class="inst-row" id="inst-<%= inst.projectId %>">
+      <!-- Project Icon -->
+      <div class="inst-icon">
+        <% if (inst.iconUrl) { %>
+        <img src="<%= inst.iconUrl %>" alt="<%= inst.projectName %>" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="hidden w-full h-full items-center justify-center">
+          <svg class="w-6 h-6 text-neutral-300 dark:text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+        </div>
+        <% } else { %>
+        <svg class="w-6 h-6 text-neutral-300 dark:text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+        <% } %>
+      </div>
+
+      <!-- Info -->
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-2 mb-0.5">
+          <a href="/modrinth/project/<%= inst.projectId %>" class="text-sm font-medium text-neutral-800 dark:text-white truncate hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"><%= inst.projectName || inst.projectId %></a>
+          <span class="type-badge <%= inst.projectType === 'mod' ? 'bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400' : inst.projectType === 'modpack' ? 'bg-purple-50 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400' : inst.projectType === 'plugin' ? 'bg-orange-50 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400' : inst.projectType === 'shader' ? 'bg-cyan-50 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400' : inst.projectType === 'resourcepack' ? 'bg-pink-50 dark:bg-pink-500/20 text-pink-600 dark:text-pink-400' : 'bg-neutral-100 dark:bg-neutral-700/40 text-neutral-600 dark:text-neutral-400' %>"><%= inst.projectType %></span>
+          <span class="status-badge <%= inst.status === 'completed' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : inst.status === 'failed' ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400' : inst.status === 'in_progress' ? 'bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400' : 'bg-neutral-100 dark:bg-neutral-700/40 text-neutral-600 dark:text-neutral-400' %>">
+            <% if (inst.status === 'completed') { %>
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+            <% } else if (inst.status === 'failed') { %>
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            <% } else if (inst.status === 'in_progress') { %>
+            <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><circle class="opacity-75" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="31.4 31.4" stroke-dashoffset="0"></circle></svg>
+            <% } else { %>
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path></svg>
+            <% } %>
+            <%= inst.status %>
+          </span>
+        </div>
+        <div class="flex items-center gap-2 text-[11px] text-neutral-400 dark:text-neutral-500">
+          <% if (inst.versionName) { %>
+          <span class="flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+            v<%= inst.versionName %>
+          </span>
+          <span>&middot;</span>
+          <% } %>
+          <span class="flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <%= inst.installedAt ? new Date(inst.installedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unknown' %>
+          </span>
+        </div>
+        <% if (inst.error) { %>
+        <div class="mt-1.5 text-xs text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-500/10 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+          <span class="truncate"><%= inst.error %></span>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-2 shrink-0">
+        <% const hasUpdate = updates && updates.some(function(u) { return u.projectId === inst.projectId; }); %>
+        <% if (hasUpdate) { %>
+        <button onclick="updateMod('<%= inst.projectId %>')" class="btn-update" title="Update available">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          Update
+        </button>
+        <% } %>
+        <% if (inst.status === 'completed') { %>
+        <a href="/modrinth/project/<%= inst.projectId %>" class="btn-secondary" title="View on Modrinth">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+          View
+        </a>
+        <button onclick="uninstallMod('<%= inst.projectId %>', '<%= (inst.projectName || inst.projectId).replace(/'/g, "\\'") %>', '<%= inst.projectType %>')" class="btn-danger" title="Uninstall">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+          Uninstall
+        </button>
+        <% } else if (inst.status === 'in_progress') { %>
+        <button onclick="openProgressModal('<%= server.UUID %>', '<%= inst.projectId %>')" class="btn-secondary">
+          <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><circle class="opacity-75" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="31.4 31.4" stroke-dashoffset="0"></circle></svg>
+          Progress
+        </button>
+        <% } %>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+
+  <% } else { %>
+  <!-- Empty State -->
+  <div class="flex flex-col items-center justify-center mt-32 text-center">
+    <div class="w-20 h-20 rounded-2xl bg-neutral-100 dark:bg-white/5 border border-neutral-200/60 dark:border-white/5 flex items-center justify-center mb-4">
+      <svg class="h-10 w-10 text-neutral-200 dark:text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+      </svg>
+    </div>
+    <h2 class="text-base font-medium text-neutral-800 dark:text-white mb-1">No mods installed</h2>
+    <p class="text-sm text-neutral-500 dark:text-neutral-400 mb-4">Browse Modrinth to find mods, modpacks, and plugins for this server.</p>
+    <a href="/modrinth" class="btn-primary">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      Browse Modrinth
+    </a>
+  </div>
+  <% } %>
+
+  <!-- Footer -->
+  <div class="mt-10 pt-5 border-t border-neutral-200/40 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-400 dark:text-neutral-500">
+    <div class="flex items-center gap-1.5">
+      <span>Modrinth store by</span>
+      <a href="https://github.com/g-flame-oss" target="_blank" class="text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors">g-flame</a>
+      <span>&middot;</span>
+      <span>Panel by</span>
+      <a href="https://github.com/AirlinkLabs" target="_blank" class="text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors">AirlinkLabs</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="https://github.com/g-flame-oss/airlink-addons" target="_blank" class="hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors">GitHub</a>
+      <a href="https://github.com/g-flame-oss/airlink-addons/blob/modrinth-addon/LICENSE" target="_blank" class="hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors">License</a>
+      <a href="https://discord.gg/TQzUeg2wJx" target="_blank" class="hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors">Discord</a>
+    </div>
+  </div>
+
+</div>
+
+<%- include('progress') %>
+<%- include('../../../../../views/desktop/components/toast') %>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var serverId = '<%= server.UUID %>';
+
+  function getCsrfToken() {
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.content : '';
+  }
+
+  async function postJson(url, body) {
+    var headers = { 'Content-Type': 'application/json' };
+    var csrf = getCsrfToken();
+    if (csrf) headers['X-CSRF-Token'] = csrf;
+    var res = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(body) });
+    return res.json();
+  }
+
+  window.uninstallMod = async function(projectId, projectName, projectType) {
+    if (!confirm('Uninstall "' + projectName + '"?\n\nThis will remove all files for this ' + projectType + '.')) return;
+    try {
+      var data = await postJson('/modrinth/api/uninstall', {
+        serverId: serverId,
+        projectId: projectId,
+        projectName: projectName,
+        projectType: projectType
+      });
+      if (data.success) {
+        showToast('"' + projectName + '" uninstalled', 'success');
+        setTimeout(function() { location.reload(); }, 1200);
+      } else {
+        showToast(data.error || 'Uninstall failed', 'error');
+      }
+    } catch (e) {
+      showToast('Uninstall failed — network error', 'error');
+    }
+  };
+
+  window.updateMod = async function(projectId) {
+    try {
+      var toast = showToast('Updating project...', 'loading');
+      var data = await postJson('/modrinth/api/install', {
+        serverId: serverId,
+        projectId: projectId
+      });
+      if (toast && toast.close) toast.close();
+      if (data.success) {
+        showToast('Update started', 'success');
+        document.dispatchEvent(new CustomEvent('modrinth:installation:started', {
+          detail: { serverId: serverId, projectId: projectId }
+        }));
+      } else {
+        showToast(data.error || 'Update failed', 'error');
+      }
+    } catch (e) {
+      showToast('Update failed — network error', 'error');
+    }
+  };
+
+  window.installAllUpdates = async function() {
+    var updatesData = <%- JSON.stringify(updates || []) %>;
+    if (!updatesData.length) return;
+    try {
+      var toast = showToast('Starting updates for ' + updatesData.length + ' project(s)...', 'loading');
+      for (var i = 0; i < updatesData.length; i++) {
+        await postJson('/modrinth/api/install', {
+          serverId: serverId,
+          projectId: updatesData[i].projectId,
+          versionId: updatesData[i].versionId
+        });
+      }
+      if (toast && toast.close) toast.close();
+      showToast(updatesData.length + ' update(s) queued', 'success');
+      document.dispatchEvent(new CustomEvent('modrinth:installation:started', {
+        detail: { serverId: serverId, projectId: updatesData[0].projectId }
+      }));
+    } catch (e) {
+      showToast('Some updates failed — network error', 'error');
+    }
+  };
+})();
+</script>

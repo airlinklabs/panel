@@ -1,159 +1,770 @@
-<div class="flex-1 flex flex-col overflow-hidden">
-  <div class="flex-1 overflow-y-auto no-scrollbar">
-    <div class="max-w-4xl mx-auto px-6 py-8">
+<style>
+  * { scrollbar-width: none; -ms-overflow-style: none; }
+  *::-webkit-scrollbar { display: none; }
+  .version-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; border-radius: 10px; border: 1px solid #e5e5e5;
+    background: white; transition: all 0.15s;
+  }
+  .dark .version-row { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.07); }
+  .version-row:hover { border-color: #d4d4d4; }
+  .dark .version-row:hover { border-color: rgba(255,255,255,0.15); }
+  .type-badge {
+    display: inline-flex; padding: 2px 8px; border-radius: 6px;
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 40px; padding: 8px 16px; border-radius: 9px; font-size: 13px; font-weight: 500;
+    background: #171717; color: white; border: none; cursor: pointer; transition: background 0.12s;
+  }
+  .dark .btn-primary { background: white; color: #0a0a0a; }
+  .btn-primary:hover { background: #333; }
+  .dark .btn-primary:hover { background: #e5e5e5; }
+  .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 32px; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 500;
+    background: transparent; color: #737373; border: 1px solid #e5e5e5; cursor: pointer; transition: background 0.12s;
+  }
+  .dark .btn-ghost { border-color: rgba(255,255,255,0.1); color: #737373; }
+  .btn-ghost:hover { background: #f5f5f5; }
+  .dark .btn-ghost:hover { background: rgba(255,255,255,0.05); }
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 60;
+    background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal-box {
+    background: white; border: 1px solid #e5e5e5; border-radius: 16px;
+    width: 100%; max-width: 480px; max-height: 80vh;
+    display: flex; flex-direction: column; overflow: hidden;
+    transform: scale(0.96); opacity: 0;
+    transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), opacity 0.2s;
+  }
+  .dark .modal-box { background: #1c1c1c; border-color: rgba(255,255,255,0.08); }
+  .modal-overlay.open .modal-box { transform: scale(1); opacity: 1; }
+  .modal-overlay.wide .modal-box { max-width: 680px; }
+  .markdown-body h1 { font-size: 1.35rem; font-weight: 600; margin: 1.2rem 0 0.6rem; color: #171717; }
+  .dark .markdown-body h1 { color: white; }
+  .markdown-body h2 { font-size: 1.15rem; font-weight: 600; margin: 1rem 0 0.5rem; color: #171717; }
+  .dark .markdown-body h2 { color: white; }
+  .markdown-body h3 { font-size: 1.05rem; font-weight: 600; margin: 0.8rem 0 0.4rem; color: #171717; }
+  .dark .markdown-body h3 { color: white; }
+  .markdown-body p { font-size: 13px; line-height: 1.7; color: #525252; margin: 0.6rem 0; }
+  .dark .markdown-body p { color: #a3a3a3; }
+  .markdown-body a { color: #2563eb; text-decoration: underline; }
+  .dark .markdown-body a { color: #60a5fa; }
+  .markdown-body code { background: #f5f5f5; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+  .dark .markdown-body code { background: rgba(255,255,255,0.1); }
+  .markdown-body pre { background: #f5f5f5; padding: 12px; border-radius: 8px; overflow-x: auto; margin: 0.6rem 0; border: 1px solid #e5e5e5; }
+  .dark .markdown-body pre { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); }
+  .markdown-body pre code { background: transparent; padding: 0; }
+  .markdown-body ul, .markdown-body ol { padding-left: 1.5rem; margin: 0.6rem 0; }
+  .markdown-body ul { list-style: disc; }
+  .markdown-body ol { list-style: decimal; }
+  .markdown-body li { font-size: 13px; color: #525252; margin-bottom: 0.3rem; line-height: 1.6; }
+  .dark .markdown-body li { color: #a3a3a3; }
+  .markdown-body blockquote { border-left: 3px solid #d4d4d4; padding-left: 1rem; margin: 0.8rem 0; color: #737373; font-style: italic; }
+  .dark .markdown-body blockquote { border-left-color: #404040; }
+  .markdown-body img { max-width: 100%; border-radius: 8px; margin: 0.8rem 0; border: 1px solid #e5e5e5; }
+  .dark .markdown-body img { border-color: rgba(255,255,255,0.08); }
+  .server-option {
+    display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+    border-radius: 10px; border: 1px solid #e5e5e5; cursor: pointer;
+    transition: all 0.15s; background: white;
+  }
+  .dark .server-option { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.07); }
+  .server-option:hover { border-color: #a3a3a3; }
+  .dark .server-option:hover { border-color: rgba(255,255,255,0.2); }
+  .server-option.selected { border-color: #10b981; box-shadow: 0 0 0 2px rgba(16,185,129,0.25); }
+  .dark .server-option.selected { border-color: #10b981; box-shadow: 0 0 0 2px rgba(16,185,129,0.2); }
+</style>
 
-      <% if (!project) { %>
-      <div class="text-center py-20">
-        <p class="text-sm text-neutral-500 dark:text-neutral-400">Project not found</p>
-        <a href="/modrinth" class="text-xs text-neutral-400 dark:text-neutral-500 mt-2 inline-block hover:text-neutral-600 dark:hover:text-neutral-300">Back to browse</a>
+<div class="px-6 lg:px-12 pt-6 pb-8 max-w-6xl">
+
+  <!-- Breadcrumb -->
+  <div class="mb-5">
+    <a href="/modrinth" class="inline-flex items-center text-sm text-neutral-400 hover:text-neutral-700 dark:hover:text-white transition-colors group">
+      <svg class="w-4 h-4 mr-1.5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      Back to store
+    </a>
+  </div>
+
+  <!-- Top bar -->
+  <div class="flex items-center justify-between mb-6">
+    <div></div>
+    <button onclick="openProgressModal()" class="btn-ghost gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+      </svg>
+      Installations
+    </button>
+  </div>
+
+  <!-- Blocked warning -->
+  <% if (isBlocked) { %>
+  <div class="rounded-xl bg-red-50 dark:bg-red-800/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-5">
+    <p class="text-sm font-medium text-red-700 dark:text-red-400">This project has been blocked by an administrator.</p>
+  </div>
+  <% } %>
+
+  <!-- Project Header -->
+  <div class="flex items-start gap-5 mb-6">
+    <% if (project.icon_url) { %>
+    <img src="<%= project.icon_url %>" alt="" class="w-20 h-20 rounded-2xl object-cover border border-neutral-200 dark:border-white/10 shrink-0" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div class="w-20 h-20 bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-2xl items-center justify-center shrink-0" style="display:none;">
+      <svg class="w-10 h-10 text-neutral-300 dark:text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+    </div>
+    <% } else { %>
+    <div class="w-20 h-20 bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-2xl flex items-center justify-center shrink-0">
+      <svg class="w-10 h-10 text-neutral-300 dark:text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+    </div>
+    <% } %>
+    <div class="min-w-0 flex-1">
+      <div class="flex items-center gap-2 mb-1 flex-wrap">
+        <h1 class="text-xl font-semibold text-neutral-800 dark:text-white truncate"><%= project.title %></h1>
+        <span class="type-badge <%= project.project_type === 'mod' ? 'bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400' : project.project_type === 'modpack' ? 'bg-purple-50 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400' : project.project_type === 'plugin' ? 'bg-orange-50 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400' : 'bg-neutral-100 dark:bg-neutral-700/40 text-neutral-600 dark:text-neutral-400' %>"><%= project.project_type %></span>
       </div>
-      <% } else { %>
-
-      <div class="flex items-start gap-5 mb-8">
-        <% if (project.icon_url) { %>
-        <img src="<%= project.icon_url %>" alt="" class="w-20 h-20 rounded-2xl object-cover bg-neutral-200 dark:bg-neutral-700 shrink-0">
-        <% } else { %>
-        <div class="w-20 h-20 rounded-2xl bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center shrink-0">
-          <svg class="w-10 h-10 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-        </div>
-        <% } %>
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2">
-            <h1 class="text-xl font-semibold text-neutral-800 dark:text-white truncate"><%= project.title %></h1>
-            <span class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-neutral-200/50 dark:bg-white/10 text-neutral-600 dark:text-neutral-400 shrink-0"><%= project.project_type %></span>
-          </div>
-          <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1"><%= project.description %></p>
-          <div class="flex items-center gap-4 mt-3 text-xs text-neutral-400 dark:text-neutral-500">
-            <span class="flex items-center gap-1">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-              <%= project.downloads.toLocaleString() %> downloads
-            </span>
-            <span class="flex items-center gap-1">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-              <%= project.follows %> followers
-            </span>
-            <% if (project.license) { %><span><%= project.license %></span><% } %>
-          </div>
-        </div>
+      <p class="text-sm text-neutral-500 dark:text-neutral-400 mb-3 leading-relaxed"><%= project.description %></p>
+      <div class="flex items-center gap-4 text-xs text-neutral-400 dark:text-neutral-500 flex-wrap">
+        <span class="flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/></svg>
+          <%= project.downloads.toLocaleString() %> downloads
+        </span>
+        <span class="flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
+          <%= project.follows %> followers
+        </span>
+        <span>Updated <%= new Date(project.date_modified).toLocaleDateString() %></span>
       </div>
-
-      <div class="flex flex-wrap gap-2 mb-8">
-        <% if (project.source_url) { %>
-        <a href="<%= project.source_url %>" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/10 transition">Source</a>
-        <% } %>
-        <% if (project.issues_url) { %>
-        <a href="<%= project.issues_url %>" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/10 transition">Issues</a>
-        <% } %>
-        <% if (project.wiki_url) { %>
-        <a href="<%= project.wiki_url %>" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/10 transition">Wiki</a>
-        <% } %>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2">
-          <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5 mb-6">
-            <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-3">About</h3>
-            <div class="text-sm text-neutral-600 dark:text-neutral-300 prose prose-sm dark:prose-invert max-w-none" id="project-body"></div>
-          </div>
-          <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5">
-            <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-3">Versions</h3>
-            <div class="space-y-2" id="versions-list">
-              <% if (versions && versions.length > 0) { %>
-              <% versions.slice(0, 10).forEach(function(v) { %>
-              <div class="flex items-center justify-between p-3 rounded-lg bg-white/5 dark:bg-white/[0.03] border border-neutral-200/20 dark:border-white/[0.03]">
-                <div class="min-w-0">
-                  <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= v.name %></p>
-                  <p class="text-xs text-neutral-500 dark:text-neutral-400"><%= v.version_number %> &middot; <%= v.game_versions.join(', ') %></p>
-                </div>
-                <button onclick="installVersion('<%= v.id %>')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-neutral-800 dark:bg-white/10 text-white hover:bg-neutral-700 dark:hover:bg-white/15 transition shrink-0 ml-3">Install</button>
-              </div>
-              <% }); %>
-              <% } else { %>
-              <p class="text-xs text-neutral-400 dark:text-neutral-500">No versions available</p>
-              <% } %>
-            </div>
-          </div>
-        </div>
-        <div class="space-y-4">
-          <% if (project.categories && project.categories.length > 0) { %>
-          <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-4">
-            <h4 class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-2">Categories</h4>
-            <div class="flex flex-wrap gap-1.5">
-              <% project.categories.forEach(function(cat) { %>
-              <span class="px-2 py-0.5 text-[10px] rounded-full bg-neutral-200/50 dark:bg-white/10 text-neutral-600 dark:text-neutral-400"><%= cat %></span>
-              <% }); %>
-            </div>
-          </div>
-          <% } %>
-        </div>
+      <% if (project.categories && Array.isArray(project.categories) && project.categories.length > 0) { %>
+      <div class="flex flex-wrap gap-1.5 mt-3">
+        <% project.categories.forEach(function(cat) { %>
+        <span class="px-2 py-0.5 text-[10px] font-medium bg-neutral-100 dark:bg-white/5 text-neutral-500 dark:text-neutral-400 border border-neutral-200 dark:border-white/5 rounded-full"><%= cat %></span>
+        <% }); %>
       </div>
       <% } %>
     </div>
   </div>
+
+  <!-- Body + Sidebar layout -->
+  <div class="flex gap-6">
+
+    <!-- Body -->
+    <div class="flex-1 min-w-0">
+      <div class="bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-neutral-200/50 dark:border-white/5 rounded-2xl p-6">
+        <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-4">Description</h2>
+        <% if (project.body) { %>
+        <div id="project-body" class="markdown-body text-neutral-600 dark:text-neutral-400 text-sm leading-relaxed"><%= project.body %></div>
+        <% } else { %>
+        <p class="text-sm text-neutral-500 dark:text-neutral-400"><%= project.description %></p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Details sidebar -->
+    <div class="w-72 flex-shrink-0 space-y-4">
+
+      <!-- Details card -->
+      <div class="bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-neutral-200/50 dark:border-white/5 rounded-2xl p-5">
+        <h3 class="text-sm font-semibold text-neutral-800 dark:text-white mb-3">Details</h3>
+        <div class="space-y-2.5 text-sm">
+          <% if (project.license && project.license.name) { %>
+          <div class="flex justify-between items-center">
+            <span class="text-neutral-500 dark:text-neutral-400">License</span>
+            <span class="text-neutral-700 dark:text-neutral-300 text-xs bg-neutral-100 dark:bg-white/5 px-2 py-0.5 rounded"><%= project.license.name %></span>
+          </div>
+          <% } %>
+          <% if (project.client_side) { %>
+          <div class="flex justify-between items-center">
+            <span class="text-neutral-500 dark:text-neutral-400">Client side</span>
+            <span class="text-neutral-700 dark:text-neutral-300 text-xs capitalize bg-neutral-100 dark:bg-white/5 px-2 py-0.5 rounded"><%= project.client_side %></span>
+          </div>
+          <% } %>
+          <% if (project.server_side) { %>
+          <div class="flex justify-between items-center">
+            <span class="text-neutral-500 dark:text-neutral-400">Server side</span>
+            <span class="text-neutral-700 dark:text-neutral-300 text-xs capitalize bg-neutral-100 dark:bg-white/5 px-2 py-0.5 rounded"><%= project.server_side %></span>
+          </div>
+          <% } %>
+          <% if (project.published) { %>
+          <div class="flex justify-between items-center">
+            <span class="text-neutral-500 dark:text-neutral-400">Published</span>
+            <span class="text-neutral-600 dark:text-neutral-400 text-xs"><%= new Date(project.published).toLocaleDateString() %></span>
+          </div>
+          <% } %>
+        </div>
+        <% const hasLinks = project.source_url || project.issues_url || project.wiki_url || project.discord_url; %>
+        <% if (hasLinks) { %>
+        <div class="mt-4 pt-4 border-t border-neutral-200/50 dark:border-white/5 space-y-1">
+          <% if (project.source_url) { %>
+          <a href="<%= project.source_url %>" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633z" clip-rule="evenodd"/></svg>
+            Source code
+          </a>
+          <% } %>
+          <% if (project.issues_url) { %>
+          <a href="<%= project.issues_url %>" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Issues
+          </a>
+          <% } %>
+          <% if (project.wiki_url) { %>
+          <a href="<%= project.wiki_url %>" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253"/></svg>
+            Wiki
+          </a>
+          <% } %>
+          <% if (project.discord_url) { %>
+          <a href="<%= project.discord_url %>" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+            Discord
+          </a>
+          <% } %>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Versions card -->
+      <div class="bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-neutral-200/50 dark:border-white/5 rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-semibold text-neutral-800 dark:text-white">Versions</h3>
+        </div>
+        <% if (versions && Array.isArray(versions) && versions.length > 0) { %>
+        <div class="space-y-2 max-h-96 overflow-y-auto" id="versions-container">
+          <% versions.slice(0, 5).forEach(function(v) { %>
+          <div class="version-row">
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-medium text-neutral-800 dark:text-white truncate"><%= v.name %></p>
+              <div class="flex items-center gap-2 text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">
+                <span class="font-mono"><%= v.version_number %></span>
+                <span class="<%= v.version_type === 'release' ? 'text-emerald-500' : v.version_type === 'beta' ? 'text-amber-500' : 'text-red-500' %>"><%= v.version_type %></span>
+              </div>
+              <% if (v.game_versions && v.game_versions.length > 0) { %>
+              <div class="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">
+                MC: <% v.game_versions.slice(0, 3).forEach(function(gv, idx) { %><span class="font-mono"><%= gv %></span><% if (idx < Math.min(2, v.game_versions.length - 1)) { %><span class="text-neutral-300 dark:text-neutral-600">, </span><% } %><% }); %><% if (v.game_versions.length > 3) { %> +<%= v.game_versions.length - 3 %><% } %>
+              </div>
+              <% } %>
+              <% if (v.loaders && v.loaders.length > 0) { %>
+              <div class="flex flex-wrap gap-1 mt-1">
+                <% v.loaders.forEach(function(ld) { %><span class="font-mono text-[10px] bg-neutral-100 dark:bg-white/5 text-neutral-500 dark:text-neutral-400 px-1.5 py-0.5 rounded"><%= ld %></span><% }); %>
+              </div>
+              <% } %>
+            </div>
+            <% if (!isBlocked) { %>
+            <button onclick="installVersion('<%= project.id %>', '<%= v.id %>')" class="btn-primary text-xs min-h-8 px-3 shrink-0 install-button">Install</button>
+            <% } else { %>
+            <span class="text-xs text-neutral-400">Blocked</span>
+            <% } %>
+          </div>
+          <% }); %>
+        </div>
+        <% if (versions.length > 5) { %>
+        <button onclick="showAllVersions()" class="w-full mt-3 py-2 text-xs font-medium text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white bg-neutral-100 dark:bg-white/5 hover:bg-neutral-200 dark:hover:bg-white/10 border border-neutral-200 dark:border-white/5 rounded-lg transition-colors">
+          View all <%= versions.length %> versions
+        </button>
+        <% } %>
+        <% } else { %>
+        <div class="text-center py-6">
+          <p class="text-neutral-400 dark:text-neutral-500 text-sm">No versions available</p>
+        </div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="mt-8 pt-5 border-t border-neutral-200/50 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-400 dark:text-neutral-500">
+    <div class="flex items-center gap-1.5">
+      <span>Modrinth store by</span>
+      <a href="https://github.com/g-flame-oss" target="_blank" class="text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors">g-flame</a>
+      <span>&bull;</span>
+      <span>Panel by</span>
+      <a href="https://github.com/AirlinkLabs" target="_blank" class="text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors">AirlinkLabs</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="https://github.com/g-flame-oss/airlink-addons" target="_blank" class="hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors">GitHub</a>
+      <a href="https://github.com/g-flame-oss/airlink-addons/blob/modrinth-addon/LICENSE" target="_blank" class="hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors">License</a>
+      <a href="https://discord.gg/TQzUeg2wJx" target="_blank" class="hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors">Discord</a>
+    </div>
+  </div>
+
 </div>
 
-<div id="install-modal" class="fixed inset-0 z-50 hidden">
-  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeInstallModal()"></div>
-  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md rounded-2xl bg-white dark:bg-[#1c1c1c] border border-neutral-200/30 dark:border-white/5 p-6 shadow-2xl">
-    <h3 class="text-base font-medium text-neutral-800 dark:text-white mb-4">Select Server</h3>
-    <div id="server-list" class="space-y-2 max-h-60 overflow-y-auto">
-      <p class="text-sm text-neutral-400 dark:text-neutral-500">Loading servers...</p>
+<!-- All Versions Modal -->
+<div class="modal-overlay wide" id="allVersionsModal">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="allVersionsTitle">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-neutral-200/50 dark:border-white/5">
+      <h3 class="text-sm font-semibold text-neutral-800 dark:text-white" id="allVersionsTitle">All versions</h3>
+      <button onclick="closeAllVersionsModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-500 dark:text-neutral-300 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
     </div>
-    <div class="flex justify-end mt-4">
-      <button onclick="closeInstallModal()" class="px-4 py-2 text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Cancel</button>
+    <div id="allVersionsList" class="p-4 space-y-2 overflow-y-auto flex-1 max-h-[60vh]"></div>
+  </div>
+</div>
+
+<!-- Server Selection Modal -->
+<div class="modal-overlay" id="installModal">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="installModalTitle">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200/50 dark:border-white/5">
+      <h2 class="text-sm font-semibold text-neutral-800 dark:text-white" id="installModalTitle">Select Server</h2>
+      <button onclick="closeInstallModal()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-500 dark:text-neutral-300 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-4 space-y-2" id="serverList">
+      <p class="text-sm text-neutral-400">Loading servers...</p>
+    </div>
+    <div class="flex justify-end gap-2 px-5 py-4 border-t border-neutral-200/50 dark:border-white/5">
+      <button onclick="closeInstallModal()" class="btn-ghost text-xs min-h-8 px-4">Cancel</button>
+      <button id="confirmInstall" onclick="doConfirmInstall()" class="btn-primary text-xs min-h-8 px-4 bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-600 dark:hover:bg-emerald-500" style="color:#fff">Install</button>
     </div>
   </div>
 </div>
 
+<!-- Progress Modal (inline) -->
+<div id="progress-container" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  <div class="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col relative border border-neutral-200/50 dark:border-white/5">
+    <div id="modal-header" class="bg-neutral-100 dark:bg-neutral-800 p-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div id="header-icon" class="p-2 bg-emerald-600/20 rounded-lg">
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-neutral-800 dark:text-white">Installation Status</h3>
+          <p id="progress-project-name" class="text-xs text-emerald-400 font-medium"></p>
+        </div>
+      </div>
+      <button onclick="closeProgressModal()" class="p-2 bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 rounded-lg text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-4 space-y-3">
+      <div id="progress-empty" class="text-center py-12 hidden">
+        <p class="text-base text-neutral-800 dark:text-white font-semibold mb-1">No active installations</p>
+        <p class="text-xs text-neutral-400">Install a modpack to see progress here.</p>
+      </div>
+      <div id="progress-wrapper" class="hidden space-y-3">
+        <div id="critical-error-container" class="hidden bg-red-50 dark:bg-red-900/30 border-2 border-red-200 dark:border-red-500/50 rounded-lg p-4">
+          <div class="flex items-start gap-3 mb-3">
+            <svg class="w-6 h-6 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+            <div class="flex-1">
+              <h4 class="text-base font-bold text-red-400 mb-1">Installation Failed</h4>
+              <p id="critical-error-message" class="text-sm text-red-200 mb-2"></p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-3">
+          <div class="flex items-start gap-3 mb-3">
+            <div class="p-1.5 bg-emerald-600/20 rounded">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p id="progress-stage-text" class="text-neutral-800 dark:text-white font-semibold text-sm mb-0.5">Preparing</p>
+              <p id="progress-stage-subtext" class="text-neutral-500 dark:text-neutral-400 text-xs">Setting up environment</p>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-emerald-400 font-mono font-bold" id="timer-display">00:00</div>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="relative bg-neutral-200 dark:bg-neutral-950 rounded-full h-2.5 overflow-hidden">
+              <div id="progress-bar-overall" class="progress-bar-fill rounded-full" style="width: 0%;"></div>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span id="progress-percentage-overall" class="text-emerald-400 font-bold">0%</span>
+              <span class="text-neutral-500">Overall</span>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-4 gap-2">
+          <div class="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-2 text-center">
+            <div class="text-xl font-bold text-neutral-800 dark:text-white" id="stat-total">0</div>
+            <div class="text-xs text-neutral-400">Total</div>
+          </div>
+          <div class="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-2 text-center">
+            <div class="text-xl font-bold text-emerald-400" id="stat-completed">0</div>
+            <div class="text-xs text-neutral-400">Done</div>
+          </div>
+          <div class="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-2 text-center">
+            <div class="text-xl font-bold text-amber-400" id="stat-skipped">0</div>
+            <div class="text-xs text-neutral-400">Skip</div>
+          </div>
+          <div class="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-2 text-center">
+            <div class="text-xl font-bold text-red-400" id="stat-failed">0</div>
+            <div class="text-xs text-neutral-400">Fail</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, #10b981, #059669);
+    transition: width 0.5s ease-out; position: relative;
+  }
+  .progress-bar-fill::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: progress-shimmer 2s infinite;
+  }
+  .progress-bar-fill.failed { background: linear-gradient(90deg, #dc2626, #991b1b); }
+  @keyframes progress-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+</style>
+
+<%- include('../../../../../views/desktop/components/toast') %>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 <script nonce="<%- nonce %>">
-var currentVersionId = null;
+(function() {
+  var allVersions = <%- JSON.stringify(Array.isArray(versions) ? versions : []) %>;
+  var selectedProjectId = '<%= project && project.id ? project.id : "" %>';
+  var selectedVersionId = null;
+  var selectedServerId = null;
 
-function installVersion(versionId) {
-  currentVersionId = versionId;
-  document.getElementById('install-modal').classList.remove('hidden');
-  loadServers();
-}
+  // Render markdown body
+  document.addEventListener('DOMContentLoaded', function() {
+    var bodyEl = document.getElementById('project-body');
+    if (bodyEl && typeof marked !== 'undefined') {
+      var md = bodyEl.textContent.trim();
+      if (md) bodyEl.innerHTML = marked.parse(md);
+    }
+  });
 
-function closeInstallModal() {
-  document.getElementById('install-modal').classList.add('hidden');
-  currentVersionId = null;
-}
+  // Escape HTML
+  function escapeHtml(text) {
+    if (typeof text !== 'string') return String(text || '');
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
 
-function loadServers() {
-  fetch('/modrinth/api/servers')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var el = document.getElementById('server-list');
-      if (!data.servers || data.servers.length === 0) {
-        el.innerHTML = '<p class="text-sm text-neutral-400">No servers found</p>';
+  // Modal helpers
+  function openModal(id) {
+    var el = document.getElementById(id);
+    if (el) { el.classList.add('open'); }
+  }
+  function closeModal(id) {
+    var el = document.getElementById(id);
+    if (el) { el.classList.remove('open'); }
+  }
+
+  // Status class for server badges
+  function getStatusClass(status) {
+    if (status === 'running') return 'bg-emerald-100 dark:bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-600/20';
+    if (status === 'suspended') return 'bg-red-100 dark:bg-red-600/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-600/20';
+    return 'bg-neutral-100 dark:bg-white/5 text-neutral-500 dark:text-neutral-400 border border-neutral-200 dark:border-white/10';
+  }
+
+  // Show all versions modal
+  window.showAllVersions = function() {
+    var container = document.getElementById('allVersionsList');
+    container.innerHTML = '';
+
+    if (!allVersions || allVersions.length === 0) {
+      container.innerHTML = '<p class="text-neutral-400 text-sm text-center py-8">No versions available</p>';
+      openModal('allVersionsModal');
+      return;
+    }
+
+    allVersions.forEach(function(version) {
+      var gameVersions = Array.isArray(version.game_versions) ? version.game_versions : [];
+      var loaders = Array.isArray(version.loaders) ? version.loaders : [];
+
+      var div = document.createElement('div');
+      div.className = 'version-row';
+
+      var html = '<div class="min-w-0 flex-1">';
+      html += '<div class="flex items-center gap-2 mb-1">';
+      html += '<span class="text-xs font-medium text-neutral-800 dark:text-white truncate">' + escapeHtml(version.name || 'Unknown') + '</span>';
+      html += '<span class="type-badge ' + (version.version_type === 'release' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : version.version_type === 'beta' ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400' : 'bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-400') + '">' + escapeHtml(version.version_type || 'release') + '</span>';
+      html += '</div>';
+      html += '<div class="text-[10px] text-neutral-400 dark:text-neutral-500 font-mono mb-1">' + escapeHtml(version.version_number || '') + '</div>';
+
+      if (gameVersions.length > 0) {
+        html += '<div class="text-[10px] text-neutral-400 dark:text-neutral-500 mb-1">MC: ';
+        gameVersions.slice(0, 3).forEach(function(v, idx) {
+          html += '<span class="font-mono">' + escapeHtml(v) + '</span>';
+          if (idx < Math.min(2, gameVersions.length - 1)) html += '<span class="text-neutral-300 dark:text-neutral-600">, </span>';
+        });
+        if (gameVersions.length > 3) html += ' <span>+' + (gameVersions.length - 3) + '</span>';
+        html += '</div>';
+      }
+      if (loaders.length > 0) {
+        html += '<div class="flex flex-wrap gap-1">';
+        loaders.forEach(function(l) {
+          html += '<span class="font-mono text-[10px] bg-neutral-100 dark:bg-white/5 text-neutral-500 dark:text-neutral-400 px-1.5 py-0.5 rounded">' + escapeHtml(l) + '</span>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+
+      html += '<button onclick="installVersion(\'' + escapeHtml(selectedProjectId) + '\', \'' + escapeHtml(version.id) + '\')" class="btn-primary text-xs min-h-8 px-3 shrink-0 install-button">Install</button>';
+      html += '</div>';
+      div.innerHTML = html;
+      container.appendChild(div);
+    });
+
+    openModal('allVersionsModal');
+  };
+
+  window.closeAllVersionsModal = function() { closeModal('allVersionsModal'); };
+
+  // Install flow: version → server select → confirm
+  window.installVersion = function(projectId, versionId) {
+    if (!projectId || !versionId) { showToast('Invalid project or version', 'error'); return; }
+    selectedProjectId = projectId;
+    selectedVersionId = versionId;
+    selectedServerId = null;
+
+    closeModal('allVersionsModal');
+    loadServers();
+  };
+
+  window.openInstallModal = function(versionId) {
+    selectedVersionId = versionId;
+    selectedServerId = null;
+    loadServers();
+  };
+
+  async function loadServers() {
+    openModal('installModal');
+    var list = document.getElementById('serverList');
+    list.innerHTML = '<p class="text-sm text-neutral-400">Loading servers...</p>';
+    document.getElementById('confirmInstall').disabled = true;
+
+    try {
+      var res = await fetch('/modrinth/api/servers', { credentials: 'include', headers: { 'Accept': 'application/json' } });
+      var data = await res.json();
+      var servers = data.servers || data.data || [];
+      if (!servers || servers.length === 0) {
+        list.innerHTML = '<p class="text-sm text-neutral-400">No servers available.</p>';
         return;
       }
-      el.innerHTML = data.servers.map(function(s) {
-        return '<button onclick="doInstall(\'' + s.UUID + '\')" class="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 hover:bg-neutral-100 dark:hover:bg-white/[0.08] transition text-left">' +
-          '<div class="min-w-0"><p class="text-sm font-medium text-neutral-800 dark:text-white truncate">' + s.name + '</p></div></button>';
-      }).join('');
-    });
-}
-
-function doInstall(serverUUID) {
-  if (!currentVersionId) return;
-  var projectId = '<%= project ? project.id : '' %>';
-  closeInstallModal();
-  fetch('/modrinth/api/install', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ serverId: serverUUID, projectId: projectId, versionId: currentVersionId })
-  }).then(function(r) { return r.json(); })
-    .then(function(d) { if (d.error) alert(d.error); });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  var body = '<%= project && project.body ? project.body.replace(/'/g, "\\'").replace(/\n/g, "\\n") : "" %>';
-  if (body && typeof marked !== 'undefined') {
-    document.getElementById('project-body').innerHTML = marked.parse(body);
-  } else if (body) {
-    document.getElementById('project-body').textContent = body;
+      list.innerHTML = '';
+      servers.forEach(function(s) {
+        var div = document.createElement('div');
+        div.className = 'server-option';
+        div.innerHTML = '<div class="min-w-0 flex-1"><p class="text-sm font-medium text-neutral-800 dark:text-white truncate">' + escapeHtml(s.name || 'Unnamed') + '</p>' +
+          (s.description ? '<p class="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5">' + escapeHtml(s.description) + '</p>' : '') +
+          '</div>' +
+          '<span class="text-[10px] px-2 py-0.5 rounded font-medium flex-shrink-0 ' + getStatusClass(s.status) + '">' + escapeHtml(s.status || 'unknown') + '</span>';
+        div.addEventListener('click', function() {
+          document.querySelectorAll('#serverList .server-option').forEach(function(el) { el.classList.remove('selected'); });
+          div.classList.add('selected');
+          selectedServerId = s.UUID || s.id;
+          document.getElementById('confirmInstall').disabled = false;
+        });
+        list.appendChild(div);
+      });
+    } catch(e) {
+      list.innerHTML = '<p class="text-sm text-red-500">Failed to load servers.</p>';
+    }
   }
-});
+
+  window.closeInstallModal = function() {
+    closeModal('installModal');
+    selectedServerId = null;
+    selectedVersionId = null;
+  };
+
+  window.doConfirmInstall = async function() {
+    if (!selectedServerId || !selectedVersionId) { showToast('Select a server first', 'error'); return; }
+    var btn = document.getElementById('confirmInstall');
+    btn.textContent = 'Installing...';
+    btn.disabled = true;
+
+    try {
+      var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+      var headers = { 'Content-Type': 'application/json' };
+      if (csrfMeta) headers['x-csrf-token'] = csrfMeta.content;
+
+      var res = await fetch('/modrinth/api/install', {
+        method: 'POST',
+        headers: headers,
+        credentials: 'include',
+        body: JSON.stringify({
+          serverId: selectedServerId,
+          projectId: selectedProjectId,
+          versionId: selectedVersionId
+        })
+      });
+      var data = await res.json();
+      if (data.success) {
+        showToast('Installation started!', 'success');
+        closeInstallModal();
+        window.location.href = '/modrinth/installed/' + selectedServerId;
+      } else {
+        showToast(data.error || 'Installation failed', 'error');
+      }
+    } catch(e) {
+      showToast('Installation failed', 'error');
+    } finally {
+      btn.textContent = 'Install';
+      btn.disabled = false;
+    }
+  };
+
+  // Progress modal
+  var progressInterval = null;
+  var timerInterval = null;
+  var startTime = null;
+
+  function updateTimer() {
+    if (!startTime) return;
+    var elapsed = Math.floor((Date.now() - startTime) / 1000);
+    var mins = Math.floor(elapsed / 60);
+    var secs = elapsed % 60;
+    var display = document.getElementById('timer-display');
+    if (display) display.textContent = String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+  }
+
+  async function fetchAndRenderProgress() {
+    var wrapper = document.getElementById('progress-wrapper');
+    var empty = document.getElementById('progress-empty');
+    if (!wrapper || !empty) return;
+
+    try {
+      var res = await fetch('/modrinth/api/progress', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Network error');
+      var result = await res.json();
+
+      if (!result.success || !result.active) {
+        wrapper.classList.add('hidden');
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      var data = result.data || (result.installations && result.installations[0]);
+      if (!data) {
+        wrapper.classList.add('hidden');
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+      wrapper.classList.remove('hidden');
+
+      var projectNameEl = document.getElementById('progress-project-name');
+      if (projectNameEl) projectNameEl.textContent = 'Installing: ' + (data.projectName || 'Modpack');
+
+      var stageTextEl = document.getElementById('progress-stage-text');
+      var stageSubtextEl = document.getElementById('progress-stage-subtext');
+      if (stageTextEl) stageTextEl.textContent = data.stageMessage || 'Processing...';
+
+      var progressValue = Math.min(Math.max(Math.round(data.overallProgress || 0), 0), 100);
+      var progressBar = document.getElementById('progress-bar-overall');
+      var progressPct = document.getElementById('progress-percentage-overall');
+      if (progressBar) progressBar.style.width = progressValue + '%';
+      if (progressPct) progressPct.textContent = progressValue + '%';
+
+      if (data.stage === 'failed' && progressBar) {
+        progressBar.classList.add('failed');
+        progressPct.className = 'text-red-400 font-bold';
+      } else if (progressBar) {
+        progressBar.classList.remove('failed');
+        progressPct.className = 'text-emerald-400 font-bold';
+      }
+
+      var totalEl = document.getElementById('stat-total');
+      var completedEl = document.getElementById('stat-completed');
+      var skippedEl = document.getElementById('stat-skipped');
+      var failedEl = document.getElementById('stat-failed');
+      if (totalEl) totalEl.textContent = data.totalMods || 0;
+      if (completedEl) completedEl.textContent = data.completedMods || 0;
+      if (skippedEl) skippedEl.textContent = data.skippedMods || 0;
+      if (failedEl) failedEl.textContent = data.failedMods || 0;
+
+      var errContainer = document.getElementById('critical-error-container');
+      var errMessage = document.getElementById('critical-error-message');
+      if (data.stage === 'failed' && errContainer && errMessage) {
+        errContainer.classList.remove('hidden');
+        errMessage.textContent = data.error || 'Unknown error';
+      } else if (errContainer) {
+        errContainer.classList.add('hidden');
+      }
+
+      if (!startTime && data.elapsedTime) startTime = Date.now() - data.elapsedTime;
+      if (!timerInterval) timerInterval = setInterval(updateTimer, 1000);
+      updateTimer();
+
+      if (data.stage === 'completed' || data.stage === 'failed') {
+        stopProgressPolling();
+      }
+    } catch(e) {
+      wrapper.classList.add('hidden');
+      empty.classList.remove('hidden');
+    }
+  }
+
+  function startProgressPolling() {
+    startTime = null;
+    var container = document.getElementById('progress-container');
+    if (container) container.classList.remove('hidden');
+    var empty = document.getElementById('progress-empty');
+    var wrapper = document.getElementById('progress-wrapper');
+    if (empty) empty.classList.add('hidden');
+    if (wrapper) wrapper.classList.add('hidden');
+
+    requestAnimationFrame(function() {
+      fetchAndRenderProgress();
+      if (progressInterval) clearInterval(progressInterval);
+      progressInterval = setInterval(fetchAndRenderProgress, 1500);
+    });
+  }
+
+  function stopProgressPolling() {
+    if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  }
+
+  window.openProgressModal = function() { startProgressPolling(); };
+
+  window.closeProgressModal = function() {
+    var container = document.getElementById('progress-container');
+    if (container) container.classList.add('hidden');
+    stopProgressPolling();
+    var bar = document.getElementById('progress-bar-overall');
+    var pct = document.getElementById('progress-percentage-overall');
+    if (bar) { bar.style.width = '0%'; bar.classList.remove('failed'); }
+    if (pct) { pct.textContent = '0%'; pct.className = 'text-emerald-400 font-bold'; }
+    var errContainer = document.getElementById('critical-error-container');
+    if (errContainer) errContainer.classList.add('hidden');
+    startTime = null;
+  };
+
+  // Escape key closes modals
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeInstallModal();
+      closeAllVersionsModal();
+      closeProgressModal();
+    }
+  });
+
+  // Backdrop click closes modals
+  ['allVersionsModal', 'installModal'].forEach(function(id) {
+    var modal = document.getElementById(id);
+    if (modal) modal.addEventListener('click', function(e) {
+      if (e.target === this) closeModal(id);
+    });
+  });
+  var progressContainer = document.getElementById('progress-container');
+  if (progressContainer) progressContainer.addEventListener('click', function(e) {
+    if (e.target === this) closeProgressModal();
+  });
+})();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>

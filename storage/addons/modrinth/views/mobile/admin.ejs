@@ -1,64 +1,275 @@
-<div class="px-4 py-4">
-  <div class="mb-4">
-    <h1 class="text-base font-medium text-neutral-800 dark:text-white">Modrinth Settings</h1>
-    <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Configure the store addon</p>
+<style>
+  ::-webkit-scrollbar { display: none; }
+  .setting-card {
+    padding: 14px; border-radius: 12px; border: 1px solid #e5e5e5;
+    background: white; margin-bottom: 12px;
+  }
+  .dark .setting-card { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.07); }
+  .btn-primary {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 38px; padding: 8px 16px; border-radius: 9px; font-size: 13px; font-weight: 500;
+    background: #171717; color: white; border: none; cursor: pointer; width: 100%;
+    transition: opacity 0.15s;
+  }
+  .dark .btn-primary { background: white; color: #0a0a0a; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 38px; padding: 8px 16px; border-radius: 9px; font-size: 13px; font-weight: 500;
+    background: transparent; color: #737373; border: 1px solid #e5e5e5;
+    cursor: pointer; width: 100%; transition: opacity 0.15s;
+  }
+  .dark .btn-secondary { border-color: rgba(255,255,255,0.1); color: #a3a3a3; }
+  .btn-danger {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 38px; padding: 8px 16px; border-radius: 9px; font-size: 13px; font-weight: 500;
+    background: transparent; color: #dc2626; border: 1px solid #fca5a5;
+    cursor: pointer; width: 100%; transition: opacity 0.15s;
+  }
+  .dark .btn-danger { border-color: rgba(220,38,38,0.3); color: #f87171; }
+  .editor-textarea {
+    width: 100%; height: 240px; padding: 12px; border-radius: 10px;
+    background: #f5f5f5; border: 1px solid #e5e5e5;
+    font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px;
+    color: #171717; resize: vertical; outline: none; line-height: 1.6;
+    transition: border-color 0.15s;
+  }
+  .dark .editor-textarea {
+    background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1);
+    color: #e5e5e5;
+  }
+  .editor-textarea:focus { border-color: #a3a3a3; }
+  .dark .editor-textarea:focus { border-color: rgba(255,255,255,0.2); }
+  .save-status {
+    display: none; margin-bottom: 10px; padding: 10px 12px;
+    border-radius: 9px; font-size: 11px; line-height: 1.4;
+  }
+  .save-status.show { display: block; }
+  .save-status.success { background: rgba(16,185,129,0.08); color: #059669; border: 1px solid rgba(16,185,129,0.15); }
+  .dark .save-status.success { background: rgba(16,185,129,0.1); color: #34d399; border-color: rgba(16,185,129,0.2); }
+  .save-status.error { background: rgba(239,68,68,0.08); color: #dc2626; border: 1px solid rgba(239,68,68,0.15); }
+  .dark .save-status.error { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.2); }
+</style>
+
+<!-- Top nav -->
+<div class="sticky top-14 z-30 bg-white dark:bg-[#141414] border-b border-neutral-200 dark:border-white/5 px-4 py-2.5 flex items-center justify-between">
+  <div class="flex items-center gap-1.5 text-xs text-neutral-500">
+    <a href="/modrinth" class="text-emerald-600 dark:text-emerald-400">Store</a>
+    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+    <span>Admin</span>
   </div>
-
-  <div class="space-y-3">
-    <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-4">
-      <div class="flex items-center justify-between mb-2">
-        <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Warning Banner</h3>
-        <button id="warningToggle" onclick="toggleWarning()" class="relative w-10 h-6 rounded-full bg-neutral-200 dark:bg-neutral-700 transition-colors">
-          <span class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white dark:bg-neutral-300 shadow transition-transform"></span>
-        </button>
-      </div>
-      <div id="warningFields" class="hidden space-y-2 mt-3">
-        <input id="warningTitle" type="text" placeholder="Title" class="w-full px-3 py-2 text-sm bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-lg text-neutral-800 dark:text-white focus:outline-none">
-        <input id="warningMessage" type="text" placeholder="Message" class="w-full px-3 py-2 text-sm bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-lg text-neutral-800 dark:text-white focus:outline-none">
-      </div>
-    </div>
-
-    <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-4">
-      <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-1">Disabled Types</h3>
-      <input id="disabledTypes" type="text" placeholder="shader,mod" class="w-full px-3 py-2 text-sm bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-lg text-neutral-800 dark:text-white focus:outline-none">
-    </div>
-
-    <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-4">
-      <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-1">Blocked Projects</h3>
-      <input id="blockedProjects" type="text" placeholder="id1,id2" class="w-full px-3 py-2 text-sm bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-lg text-neutral-800 dark:text-white focus:outline-none">
-    </div>
-
-    <button onclick="clearCache()" class="w-full py-2.5 text-sm font-medium rounded-xl bg-neutral-200/50 dark:bg-white/5 text-neutral-600 dark:text-neutral-400 border border-neutral-200/30 dark:border-white/5 active:scale-[0.98] transition">Clear Cache</button>
-    <button onclick="saveSettings()" class="w-full py-2.5 text-sm font-medium rounded-xl bg-neutral-800 dark:bg-white/10 text-white active:scale-[0.98] transition">Save Settings</button>
-  </div>
+  <button onclick="window.location.href='/modrinth/progress'" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium">
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+    Status
+  </button>
 </div>
 
+<div class="px-4 py-4 space-y-4">
+
+  <!-- File status -->
+  <div class="setting-card">
+    <p class="text-sm font-medium text-neutral-900 dark:text-white mb-2">Settings File</p>
+    <div id="file-status" class="text-xs text-neutral-500">Loading...</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-3 gap-2">
+    <div class="setting-card text-center">
+      <div class="text-lg font-bold text-emerald-600 dark:text-emerald-400" id="stat-installs">&mdash;</div>
+      <div class="text-[10px] text-neutral-400 mt-0.5">Installs</div>
+    </div>
+    <div class="setting-card text-center">
+      <div class="text-lg font-bold text-blue-600 dark:text-blue-400" id="stat-projects">&mdash;</div>
+      <div class="text-[10px] text-neutral-400 mt-0.5">Projects</div>
+    </div>
+    <div class="setting-card text-center">
+      <div class="text-lg font-bold text-red-500" id="stat-blocked">&mdash;</div>
+      <div class="text-[10px] text-neutral-400 mt-0.5">Blocked</div>
+    </div>
+  </div>
+
+  <!-- JSON Editor -->
+  <div class="setting-card">
+    <div class="flex items-center justify-between mb-3">
+      <p class="text-sm font-medium text-neutral-900 dark:text-white">Configuration</p>
+      <div class="flex gap-2">
+        <button onclick="loadCurrentSettings()" class="px-3 py-1.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-lg text-xs font-medium">Reload</button>
+        <button onclick="saveSettings()" id="saveBtn" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium">Save</button>
+      </div>
+    </div>
+    <div id="save-status" class="save-status"></div>
+    <textarea id="settingsEditor" class="editor-textarea" placeholder="Loading settings..."></textarea>
+    <p class="text-[10px] text-neutral-400 mt-2">Edit JSON directly. Press Save when done.</p>
+  </div>
+
+  <!-- Field reference -->
+  <div class="setting-card">
+    <p class="text-sm font-medium text-neutral-900 dark:text-white mb-3">Field Reference</p>
+    <div class="space-y-2 text-xs">
+      <div class="flex gap-2">
+        <code class="text-emerald-600 dark:text-emerald-400 font-mono flex-shrink-0">modrinthInstallationWarning</code>
+        <span class="text-neutral-500">boolean &mdash; show warning banner</span>
+      </div>
+      <div class="flex gap-2">
+        <code class="text-emerald-600 dark:text-emerald-400 font-mono flex-shrink-0">warningTitle</code>
+        <span class="text-neutral-500">string &mdash; banner title text</span>
+      </div>
+      <div class="flex gap-2">
+        <code class="text-emerald-600 dark:text-emerald-400 font-mono flex-shrink-0">warningMessage</code>
+        <span class="text-neutral-500">string &mdash; banner body text</span>
+      </div>
+      <div class="flex gap-2">
+        <code class="text-emerald-600 dark:text-emerald-400 font-mono flex-shrink-0">disabledProjectTypes</code>
+        <span class="text-neutral-500">string[] &mdash; e.g. ["mod", "shader"]</span>
+      </div>
+      <div class="flex gap-2">
+        <code class="text-emerald-600 dark:text-emerald-400 font-mono flex-shrink-0">blockedProjects</code>
+        <span class="text-neutral-500">string[] &mdash; project IDs to block</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cache -->
+  <div class="setting-card">
+    <p class="text-sm font-medium text-neutral-900 dark:text-white mb-1">Cache</p>
+    <p class="text-xs text-neutral-500 mb-3">Clears all cached Modrinth API responses.</p>
+    <button onclick="clearCache()" class="btn-danger">Clear Cache</button>
+  </div>
+
+  <!-- Credits -->
+  <div class="text-center py-4">
+    <p class="text-[10px] text-neutral-400 dark:text-neutral-600">Modrinth Store &bull; Powered by <a href="https://modrinth.com" target="_blank" class="text-emerald-600 dark:text-emerald-400">Modrinth</a></p>
+  </div>
+
+</div>
+
+<%- include('./progress') %>
+<%- include('../../../../../views/mobile/components/toast') %>
+
 <script nonce="<%- nonce %>">
-var currentSettings = {};
-function loadSettings() {
-  fetch('/modrinth/api/config').then(function(r) { return r.json(); }).then(function(data) {
-    currentSettings = data.settings || {};
-    document.getElementById('warningTitle').value = currentSettings.warningTitle || '';
-    document.getElementById('warningMessage').value = currentSettings.warningMessage || '';
-    document.getElementById('disabledTypes').value = (currentSettings.disabledProjectTypes || []).join(',');
-    document.getElementById('blockedProjects').value = (currentSettings.blockedProjects || []).join(',');
-    setWarningToggle(currentSettings.showWarningBanner || false);
+(function() {
+  /* ---- helpers ---- */
+  function getCsrf() {
+    var m = document.querySelector('meta[name="csrf-token"]');
+    return m ? m.content : null;
+  }
+  function headers(json) {
+    var h = {};
+    if (json) h['Content-Type'] = 'application/json';
+    var t = getCsrf();
+    if (t) h['X-CSRF-Token'] = t;
+    return h;
+  }
+  function showSaveStatus(msg, type) {
+    var el = document.getElementById('save-status');
+    el.textContent = msg;
+    el.className = 'save-status show ' + type;
+    setTimeout(function() { el.className = 'save-status'; }, 5000);
+  }
+
+  /* ---- load config into editor ---- */
+  window.loadCurrentSettings = async function() {
+    try {
+      var res = await fetch('/modrinth/api/config', { credentials: 'include' });
+      var data = await res.json();
+      if (data.success && data.data) {
+        document.getElementById('settingsEditor').value = JSON.stringify(data.data, null, 2);
+        showToast('Settings reloaded', 'success');
+      } else {
+        showSaveStatus(data.error || 'Failed to load settings', 'error');
+      }
+    } catch(e) {
+      showSaveStatus('Failed to load settings', 'error');
+    }
+  };
+
+  /* ---- save config ---- */
+  window.saveSettings = async function() {
+    var editor = document.getElementById('settingsEditor');
+    var btn = document.getElementById('saveBtn');
+    var parsed;
+    try {
+      parsed = JSON.parse(editor.value);
+    } catch(e) {
+      showSaveStatus('Invalid JSON \u2014 check syntax', 'error');
+      return;
+    }
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+    try {
+      var res = await fetch('/modrinth/admin/config', {
+        method: 'POST',
+        headers: headers(true),
+        body: JSON.stringify(parsed)
+      });
+      var data = await res.json();
+      if (data.success) {
+        showSaveStatus('Settings saved successfully', 'success');
+        showToast('Settings saved', 'success');
+        loadFileStatus();
+      } else {
+        showSaveStatus(data.error || 'Save failed', 'error');
+      }
+    } catch(e) {
+      showSaveStatus('Request failed', 'error');
+    } finally {
+      btn.textContent = 'Save';
+      btn.disabled = false;
+    }
+  };
+
+  /* ---- file status ---- */
+  async function loadFileStatus() {
+    try {
+      var res = await fetch('/modrinth/api/file-status');
+      var data = await res.json();
+      var el = document.getElementById('file-status');
+      if (data.success && data.data.exists) {
+        el.innerHTML = '<span class="text-emerald-500">File exists</span> &bull; ' + data.data.size + ' bytes &bull; Modified ' + new Date(data.data.lastModified).toLocaleString();
+      } else {
+        el.innerHTML = '<span class="text-amber-500">File not created yet</span> &mdash; will be created on first save';
+      }
+    } catch(e) {
+      document.getElementById('file-status').textContent = 'Could not load file status';
+    }
+  }
+
+  /* ---- statistics ---- */
+  async function loadStatistics() {
+    try {
+      var res = await fetch('/modrinth/api/statistics');
+      var data = await res.json();
+      if (data.success) {
+        document.getElementById('stat-installs').textContent = data.data.totalInstallations;
+        document.getElementById('stat-projects').textContent = data.data.activeProjects;
+        document.getElementById('stat-blocked').textContent = data.data.blockedInstallations;
+      }
+    } catch(e) {}
+  }
+
+  /* ---- clear cache ---- */
+  window.clearCache = async function() {
+    try {
+      var res = await fetch('/modrinth/api/cache/clear', {
+        method: 'POST',
+        headers: headers(false)
+      });
+      var data = await res.json();
+      if (data.success) {
+        showToast('Cache cleared', 'success');
+      } else {
+        showToast(data.error || 'Failed', 'error');
+      }
+    } catch(e) {
+      showToast('Request failed', 'error');
+    }
+  };
+
+  /* ---- init ---- */
+  document.addEventListener('DOMContentLoaded', function() {
+    loadCurrentSettings();
+    loadFileStatus();
+    loadStatistics();
   });
-}
-function setWarningToggle(on) {
-  var btn = document.getElementById('warningToggle');
-  var fields = document.getElementById('warningFields');
-  if (on) { btn.classList.add('bg-neutral-800'); btn.classList.remove('bg-neutral-200'); btn.querySelector('span').style.transform = 'translateX(16px)'; fields.classList.remove('hidden'); }
-  else { btn.classList.remove('bg-neutral-800'); btn.classList.add('bg-neutral-200'); btn.querySelector('span').style.transform = ''; fields.classList.add('hidden'); }
-}
-function toggleWarning() { currentSettings.showWarningBanner = !currentSettings.showWarningBanner; setWarningToggle(currentSettings.showWarningBanner); }
-function saveSettings() {
-  fetch('/modrinth/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ showWarningBanner: currentSettings.showWarningBanner || false, warningTitle: document.getElementById('warningTitle').value, warningMessage: document.getElementById('warningMessage').value,
-      disabledProjectTypes: document.getElementById('disabledTypes').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean),
-      blockedProjects: document.getElementById('blockedProjects').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean) })
-  }).then(function(r) { return r.json(); }).then(function(d) { if (d.error) alert('Error: ' + d.error); else alert('Saved'); });
-}
-function clearCache() { fetch('/modrinth/api/cache/clear', { method: 'POST' }).then(function(r) { return r.json(); }).then(function() { alert('Cache cleared'); }); }
-loadSettings();
+})();
 </script>

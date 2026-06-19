@@ -1,104 +1,597 @@
-<div class="flex-1 flex flex-col overflow-hidden">
-  <div class="flex-1 overflow-y-auto no-scrollbar">
-    <div class="max-w-2xl mx-auto px-6 py-8">
+<div id="progress-container" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  <div class="bg-neutral-900 rounded-xl shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col relative">
 
-      <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-6">
-        <h2 class="text-base font-medium text-neutral-800 dark:text-white mb-1">Installing...</h2>
-        <p id="progress-project" class="text-xs text-neutral-500 dark:text-neutral-400 mb-4"></p>
-
-        <div class="w-full h-2 rounded-full bg-neutral-200/50 dark:bg-white/5 overflow-hidden mb-4">
-          <div id="progress-bar" class="h-full rounded-full bg-neutral-800 dark:bg-white/20 transition-all duration-300" style="width: 0%"></div>
+    <!-- Header -->
+    <div id="modal-header" class="bg-neutral-800 p-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div id="header-icon" class="p-2 bg-emerald-600/20 rounded-lg">
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
         </div>
-
-        <div class="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 mb-6">
-          <span id="progress-stage">Initializing...</span>
-          <span id="progress-pct">0%</span>
-        </div>
-
-        <div id="progress-stats" class="grid grid-cols-4 gap-3 mb-6 hidden">
-          <div class="text-center p-2 rounded-lg bg-white/5 dark:bg-white/[0.03]">
-            <p id="stat-total" class="text-lg font-medium text-neutral-800 dark:text-white">0</p>
-            <p class="text-[10px] text-neutral-400">Total</p>
-          </div>
-          <div class="text-center p-2 rounded-lg bg-white/5 dark:bg-white/[0.03]">
-            <p id="stat-done" class="text-lg font-medium text-green-600 dark:text-green-400">0</p>
-            <p class="text-[10px] text-neutral-400">Done</p>
-          </div>
-          <div class="text-center p-2 rounded-lg bg-white/5 dark:bg-white/[0.03]">
-            <p id="stat-skipped" class="text-lg font-medium text-yellow-600 dark:text-yellow-400">0</p>
-            <p class="text-[10px] text-neutral-400">Skipped</p>
-          </div>
-          <div class="text-center p-2 rounded-lg bg-white/5 dark:bg-white/[0.03]">
-            <p id="stat-failed" class="text-lg font-medium text-red-600 dark:text-red-400">0</p>
-            <p class="text-[10px] text-neutral-400">Failed</p>
-          </div>
-        </div>
-
-        <div id="progress-current" class="hidden mb-4">
-          <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-1">Current:</p>
-          <p id="progress-current-mod" class="text-sm text-neutral-700 dark:text-neutral-300 truncate"></p>
-        </div>
-
-        <div id="progress-errors" class="hidden">
-          <p class="text-xs text-red-500 dark:text-red-400 font-medium mb-2">Errors</p>
-          <div id="progress-errors-list" class="space-y-1 max-h-40 overflow-y-auto"></div>
-        </div>
-
-        <div id="progress-done" class="hidden text-center py-4">
-          <p id="progress-done-text" class="text-sm font-medium text-neutral-800 dark:text-white"></p>
-          <a href="/modrinth" class="text-xs text-neutral-400 dark:text-neutral-500 mt-2 inline-block hover:text-neutral-600 dark:hover:text-neutral-300">Back to browse</a>
+        <div>
+          <h3 class="text-base font-bold text-white">Installation Status</h3>
+          <p id="progress-project-name" class="text-xs text-emerald-400 font-medium"> </p>
         </div>
       </div>
 
+      <button onclick="closeProgressModal()" class="p-2 bg-neutral-700 hover:bg-neutral-600 rounded-lg text-neutral-400 hover:text-white transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+
+      <!-- Empty State -->
+      <div id="progress-empty" class="text-center py-12">
+        <div class="inline-flex p-4 bg-neutral-800 rounded-xl mb-3">
+          <svg class="w-12 h-12 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+          </svg>
+        </div>
+        <p class="text-base text-white font-semibold mb-1">Nothing to see here..</p>
+        <p class="text-xs text-neutral-400">Seriously there is nothing to see here move on!</p>
+      </div>
+
+      <!-- Progress State -->
+      <div id="progress-wrapper" class="hidden space-y-3">
+
+        <!-- Critical Error Display -->
+        <div id="critical-error-container" class="hidden bg-red-900/30 border-2 border-red-500/50 rounded-lg p-4">
+          <div class="flex items-start gap-3 mb-3">
+            <svg class="w-6 h-6 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+            </svg>
+            <div class="flex-1">
+              <h4 class="text-base font-bold text-red-400 mb-1">Installation Failed</h4>
+              <p id="critical-error-message" class="text-sm text-red-200 mb-2"></p>
+              <details class="text-xs text-red-300">
+                <summary class="cursor-pointer hover:text-red-200 font-medium mb-1">Error Details</summary>
+                <pre id="critical-error-details" class="mt-2 p-2 bg-black/30 rounded text-xs overflow-x-auto whitespace-pre-wrap"></pre>
+              </details>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage & Progress -->
+        <div class="bg-neutral-800 rounded-lg p-3">
+          <div class="flex items-start gap-3 mb-3">
+            <div class="p-1.5 bg-emerald-600/20 rounded">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p id="progress-stage-text" class="text-white font-semibold text-sm mb-0.5">Preparing</p>
+              <p id="progress-stage-subtext" class="text-neutral-400 text-xs">Setting up environment</p>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-emerald-400 font-mono font-bold" id="timer-display">00:00</div>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="space-y-2">
+            <div class="relative bg-neutral-950 rounded-full h-2.5 overflow-hidden">
+              <div id="progress-bar-overall" class="progress-bar-fill rounded-full" style="width: 0%;">
+                <div class="progress-bar-glow"></div>
+              </div>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span id="progress-percentage-overall" class="text-emerald-400 font-bold">0%</span>
+              <span class="text-neutral-500">Overall</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-4 gap-2">
+          <div class="bg-neutral-800 rounded-lg p-2 text-center">
+            <div class="text-xl font-bold text-white" id="stat-total">0</div>
+            <div class="text-xs text-neutral-400">Total</div>
+          </div>
+          <div class="bg-neutral-800 rounded-lg p-2 text-center">
+            <div class="text-xl font-bold text-emerald-400" id="stat-completed">0</div>
+            <div class="text-xs text-neutral-400">Done</div>
+          </div>
+          <div class="bg-neutral-800 rounded-lg p-2 text-center">
+            <div class="text-xl font-bold text-amber-400" id="stat-skipped">0</div>
+            <div class="text-xs text-neutral-400">Skip</div>
+          </div>
+          <div class="bg-neutral-800 rounded-lg p-2 text-center">
+            <div class="text-xl font-bold text-red-400" id="stat-failed">0</div>
+            <div class="text-xs text-neutral-400">Fail</div>
+          </div>
+        </div>
+
+        <!-- Current Mod -->
+        <div id="current-mod-container" class="hidden bg-blue-900/20 rounded-lg p-2">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-blue-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <div class="flex-1 min-w-0">
+              <div class="text-xs text-blue-300 font-medium">Processing</div>
+              <div id="current-mod-name" class="text-xs text-white truncate">mod.jar</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Critical Errors List -->
+        <div id="critical-errors-container" class="hidden bg-red-900/20 border border-red-500/30 rounded-lg p-3">
+          <div class="flex items-center gap-2 mb-2">
+            <svg class="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+            </svg>
+            <h4 class="text-xs font-bold text-red-400 uppercase">Critical Errors</h4>
+            <span id="critical-errors-count" class="ml-auto text-xs font-bold text-red-400"></span>
+          </div>
+          <div id="critical-errors-list" class="space-y-1 text-xs max-h-40 overflow-y-auto custom-scrollbar"></div>
+        </div>
+
+        <!-- Mod List -->
+        <div class="bg-neutral-800 rounded-lg p-3">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="text-xs font-bold text-white uppercase">Mod Status</h4>
+            <button id="toggle-mod-list" class="text-xs text-emerald-400 hover:text-emerald-300 font-medium">Show All</button>
+          </div>
+          <div id="mod-list" class="space-y-1 max-h-48 overflow-y-auto custom-scrollbar"></div>
+        </div>
+
+        <!-- Warnings -->
+        <div id="warnings-container" class="hidden bg-amber-900/20 rounded-lg p-3">
+          <div class="flex items-center gap-2 mb-2">
+            <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+            <h4 class="text-xs font-bold text-amber-400 uppercase">Warnings</h4>
+          </div>
+          <div id="warnings-list" class="space-y-1 text-xs max-h-32 overflow-y-auto custom-scrollbar"></div>
+        </div>
+
+      </div>
     </div>
   </div>
 </div>
 
+<style>
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #262626;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #404040;
+    border-radius: 2px;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #059669);
+    transition: width 0.5s ease-out;
+    position: relative;
+  }
+
+  .progress-bar-glow {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 2s infinite;
+  }
+
+  .progress-bar-fill.failed {
+    background: linear-gradient(90deg, #dc2626, #991b1b);
+  }
+</style>
+
 <script nonce="<%- nonce %>">
-var pollInterval = null;
+  (function() {
+    const POLL_INTERVAL = 1500;
+    let progressInterval = null;
+    let timerInterval = null;
+    let startTime = null;
+    let modListExpanded = false;
+    let manuallyOpened = false;
+    let currentServerId = null;
+    let currentProjectId = null;
 
-function getStageLabel(stage) {
-  var labels = {
-    initializing: 'Preparing...', downloading: 'Downloading...', processing: 'Processing...',
-    installing_mods: 'Installing mods...', installing_overrides: 'Installing overrides...',
-    finalizing: 'Finalizing...', completed: 'Complete', failed: 'Failed'
-  };
-  return labels[stage] || stage;
-}
+    function updateTimer() {
+      if (!startTime) return;
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const mins = Math.floor(elapsed / 60);
+      const secs = elapsed % 60;
+      const display = document.getElementById('timer-display');
+      if (display) display.textContent = String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+    }
 
-function poll() {
-  fetch('/modrinth/api/progress')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var list = data.progress || [];
-      if (list.length === 0) { document.getElementById('progress-stage').textContent = 'Waiting...'; return; }
-      var p = list[list.length - 1];
-      document.getElementById('progress-project').textContent = p.projectName || '';
-      document.getElementById('progress-bar').style.width = p.overall + '%';
-      document.getElementById('progress-stage').textContent = getStageLabel(p.stage);
-      document.getElementById('progress-pct').textContent = p.overall + '%';
-      if (p.total > 0) {
-        document.getElementById('progress-stats').classList.remove('hidden');
-        document.getElementById('stat-total').textContent = p.total;
-        document.getElementById('stat-done').textContent = p.done;
-        document.getElementById('stat-skipped').textContent = p.skipped;
-        document.getElementById('stat-failed').textContent = p.failed;
+    function getStatusIcon(status) {
+      const icons = {
+        completed: '✓',
+        downloading: '↓',
+        failed: '✗',
+        skipped: '–',
+        pending: '⋯'
+      };
+      return icons[status] || icons.pending;
+    }
+
+    function getStatusColor(status) {
+      const colors = {
+        completed: 'bg-emerald-900/30 text-emerald-400',
+        downloading: 'bg-blue-900/30 text-blue-400',
+        failed: 'bg-red-900/30 text-red-400',
+        skipped: 'bg-amber-900/30 text-amber-400',
+        pending: 'bg-neutral-800 text-neutral-500'
+      };
+      return colors[status] || colors.pending;
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = String(text);
+      return div.innerHTML;
+    }
+
+    function updateHeaderForFailure(isFailed) {
+      const header = document.getElementById('modal-header');
+      const icon = document.getElementById('header-icon');
+      const projectName = document.getElementById('progress-project-name');
+
+      if (!header || !icon) return;
+
+      if (isFailed) {
+        header.className = 'bg-red-900/50 p-4 flex items-center justify-between';
+        icon.className = 'p-2 bg-red-600/20 rounded-lg';
+        icon.innerHTML = '<svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+        if (projectName) projectName.className = 'text-xs text-red-400 font-medium';
+      } else {
+        header.className = 'bg-neutral-800 p-4 flex items-center justify-between';
+        icon.className = 'p-2 bg-emerald-600/20 rounded-lg';
+        icon.innerHTML = '<svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>';
+        if (projectName) projectName.className = 'text-xs text-emerald-400 font-medium';
       }
-      if (p.currentMod) {
-        document.getElementById('progress-current').classList.remove('hidden');
-        document.getElementById('progress-current-mod').textContent = p.currentMod;
+    }
+
+    function renderCriticalErrors(errors) {
+      const container = document.getElementById('critical-errors-container');
+      const list = document.getElementById('critical-errors-list');
+      const count = document.getElementById('critical-errors-count');
+
+      if (!container || !list || !count) return;
+
+      if (!errors || errors.length === 0) {
+        container.classList.add('hidden');
+        return;
       }
-      if (p.errors && p.errors.length > 0) {
-        document.getElementById('progress-errors').classList.remove('hidden');
-        document.getElementById('progress-errors-list').innerHTML = p.errors.map(function(e) { return '<p class="text-xs text-red-400 dark:text-red-500">' + e + '</p>'; }).join('');
+
+      container.classList.remove('hidden');
+      count.textContent = errors.length;
+
+      list.innerHTML = errors.slice(0, 10).map(function(err) {
+        return '<div class="p-2 bg-red-900/20 border border-red-500/20 rounded text-red-200 font-mono">' + escapeHtml(err) + '</div>';
+      }).join('');
+
+      if (errors.length > 10) {
+        list.innerHTML += '<div class="text-center text-red-400 text-xs py-1">+' + (errors.length - 10) + ' more errors</div>';
       }
-      if (p.stage === 'completed' || p.stage === 'failed') {
-        clearInterval(pollInterval);
-        document.getElementById('progress-done').classList.remove('hidden');
-        document.getElementById('progress-done-text').textContent = p.stage === 'completed' ? 'Installation complete!' : 'Installation failed';
+    }
+
+    function renderMainError(error, errorDetails) {
+      const container = document.getElementById('critical-error-container');
+      const message = document.getElementById('critical-error-message');
+      const details = document.getElementById('critical-error-details');
+
+      if (!container || !message) return;
+
+      if (!error) {
+        container.classList.add('hidden');
+        return;
+      }
+
+      container.classList.remove('hidden');
+      message.textContent = error;
+
+      if (details && errorDetails) {
+        details.textContent = errorDetails;
+        details.parentElement.classList.remove('hidden');
+      } else if (details) {
+        details.parentElement.classList.add('hidden');
+      }
+    }
+
+    function renderModList(mods, showAll) {
+      const modList = document.getElementById('mod-list');
+      if (!modList) return;
+
+      const sortedMods = mods.slice().sort(function(a, b) {
+        const order = {
+          downloading: 0,
+          failed: 1,
+          completed: 2,
+          skipped: 3,
+          pending: 4
+        };
+        return (order[a.status] || 5) - (order[b.status] || 5);
+      });
+
+      const modsToShow = showAll ? sortedMods : sortedMods.filter(function(m) { return m.status !== 'pending'; }).slice(0, 15);
+
+      if (modsToShow.length === 0) {
+        modList.innerHTML = '<div class="text-center text-neutral-500 text-xs py-4">No mods yet...</div>';
+        return;
+      }
+
+      modList.innerHTML = modsToShow.map(function(mod) {
+        return '<div class="flex items-center gap-2 p-2 rounded ' + getStatusColor(mod.status) + ' text-xs">' +
+          '<span class="font-bold">' + getStatusIcon(mod.status) + '</span>' +
+          '<span class="flex-1 truncate font-medium">' + escapeHtml(mod.name || 'Unknown') + '</span>' +
+          (mod.error ? '<span class="text-red-400 text-xs" title="' + escapeHtml(mod.error) + '">⚠</span>' : '') +
+          '</div>';
+      }).join('');
+
+      var hiddenCount = sortedMods.length - modsToShow.length;
+      if (!showAll && hiddenCount > 0) {
+        modList.innerHTML += '<button id="show-more-mods" class="w-full text-xs text-emerald-400 font-medium py-2 hover:bg-emerald-600/10 rounded mt-1">+' + hiddenCount + ' more</button>';
+        var btn = document.getElementById('show-more-mods');
+        if (btn) btn.addEventListener('click', function() {
+          modListExpanded = true;
+          renderModList(mods, true);
+        });
+      }
+    }
+
+    async function fetchAndRenderProgress() {
+      var container = document.getElementById('progress-container');
+      var wrapper = document.getElementById('progress-wrapper');
+      var empty = document.getElementById('progress-empty');
+      if (!container || !wrapper || !empty) return;
+
+      try {
+        var url = (currentServerId && currentProjectId) ?
+          '/modrinth/api/progress/' + currentServerId + '/' + currentProjectId :
+          '/modrinth/api/progress';
+
+        var res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error('Network error');
+        var result = await res.json();
+
+        if (!result.success || !result.active) {
+          wrapper.classList.add('hidden');
+          empty.classList.remove('hidden');
+          return;
+        }
+
+        var data = result.data || (result.installations && result.installations[0]);
+        if (!data) {
+          wrapper.classList.add('hidden');
+          empty.classList.remove('hidden');
+          return;
+        }
+
+        empty.classList.add('hidden');
+        wrapper.classList.remove('hidden');
+
+        updateHeaderForFailure(data.stage === 'failed');
+
+        var projectNameEl = document.getElementById('progress-project-name');
+        if (projectNameEl) projectNameEl.textContent = 'Installing: ' + (data.projectName || 'Modpack');
+
+        var stageTextEl = document.getElementById('progress-stage-text');
+        var stageSubtextEl = document.getElementById('progress-stage-subtext');
+        if (stageTextEl) stageTextEl.textContent = data.stageMessage || 'Processing...';
+        if (stageSubtextEl) {
+          var stageDesc = {
+            initializing: 'Preparing environment',
+            downloading: 'Downloading files',
+            processing: 'Extracting files',
+            installing_mods: 'Installing mods',
+            installing_overrides: 'Applying overrides',
+            finalizing: 'Finalizing',
+            completed: 'Complete!',
+            failed: 'Error occurred'
+          };
+          stageSubtextEl.textContent = stageDesc[data.stage] || 'Please wait...';
+        }
+
+        var progressValue = Math.min(Math.max(Math.round(data.overallProgress || 0), 0), 100);
+
+        var progressBar = document.getElementById('progress-bar-overall');
+        var progressPct = document.getElementById('progress-percentage-overall');
+
+        if (progressBar && progressPct) {
+          progressBar.style.width = progressValue + '%';
+          progressPct.textContent = progressValue + '%';
+
+          if (data.stage === 'failed') {
+            progressBar.classList.add('failed');
+            progressPct.className = 'text-red-400 font-bold';
+          } else {
+            progressBar.classList.remove('failed');
+            progressPct.className = 'text-emerald-400 font-bold';
+          }
+        }
+
+        var totalEl = document.getElementById('stat-total');
+        var completedEl = document.getElementById('stat-completed');
+        var skippedEl = document.getElementById('stat-skipped');
+        var failedEl = document.getElementById('stat-failed');
+
+        if (totalEl) totalEl.textContent = data.totalMods || 0;
+        if (completedEl) completedEl.textContent = data.completedMods || 0;
+        if (skippedEl) skippedEl.textContent = data.skippedMods || 0;
+        if (failedEl) failedEl.textContent = data.failedMods || 0;
+
+        var currentModContainer = document.getElementById('current-mod-container');
+        var currentModName = document.getElementById('current-mod-name');
+        if (data.currentMod && currentModContainer && currentModName) {
+          currentModContainer.classList.remove('hidden');
+          currentModName.textContent = data.currentMod;
+        } else if (currentModContainer) {
+          currentModContainer.classList.add('hidden');
+        }
+
+        if (data.stage === 'failed') {
+          renderMainError(data.error, data.errorDetails);
+        } else {
+          renderMainError(null, null);
+        }
+
+        if (Array.isArray(data.criticalErrors)) {
+          renderCriticalErrors(data.criticalErrors);
+        }
+
+        if (Array.isArray(data.mods) && data.mods.length > 0) {
+          renderModList(data.mods, modListExpanded);
+        }
+
+        var warningsContainer = document.getElementById('warnings-container');
+        var warningsList = document.getElementById('warnings-list');
+        if (Array.isArray(data.warnings) && data.warnings.length > 0 && warningsContainer && warningsList) {
+          warningsContainer.classList.remove('hidden');
+          warningsList.innerHTML = data.warnings.slice(0, 8).map(function(w) {
+            return '<div class="p-2 bg-amber-900/10 rounded text-neutral-300">' + escapeHtml(w) + '</div>';
+          }).join('');
+        } else if (warningsContainer) {
+          warningsContainer.classList.add('hidden');
+        }
+
+        if (!startTime && data.elapsedTime) {
+          startTime = Date.now() - data.elapsedTime;
+        }
+        if (!timerInterval) {
+          timerInterval = setInterval(updateTimer, 1000);
+        }
+        updateTimer();
+
+        if (data.stage === 'completed' || data.stage === 'failed') {
+          if (!manuallyOpened) {
+            stopProgressPolling();
+            setTimeout(function() {
+              if (data.stage === 'completed') {
+                if (typeof showToast === 'function') {
+                  showToast('Installation completed!', 'success', 3000);
+                }
+              } else {
+                if (typeof showToast === 'function') {
+                  showToast('Installation failed: ' + (data.error || 'Unknown error'), 'error', 5000);
+                }
+              }
+              setTimeout(function() {
+                if (data.stage === 'completed') {
+                  closeProgressModal();
+                }
+                if (typeof loadBackups === 'function') loadBackups();
+              }, 3000);
+            }, 1500);
+          } else {
+            stopProgressPolling();
+          }
+        }
+
+      } catch (err) {
+        console.error('Progress fetch error:', err);
+        var wrapper = document.getElementById('progress-wrapper');
+        var empty = document.getElementById('progress-empty');
+        if (wrapper) wrapper.classList.add('hidden');
+        if (empty) empty.classList.remove('hidden');
+      }
+    }
+
+    function startProgressPolling(serverId, projectId, manual) {
+      currentServerId = serverId || null;
+      currentProjectId = projectId || null;
+      startTime = null;
+      modListExpanded = false;
+      manuallyOpened = manual || false;
+
+      var container = document.getElementById('progress-container');
+      if (container) container.classList.remove('hidden');
+
+      requestAnimationFrame(function() {
+        fetchAndRenderProgress();
+        if (progressInterval) clearInterval(progressInterval);
+        progressInterval = setInterval(fetchAndRenderProgress, POLL_INTERVAL);
+      });
+    }
+
+    function stopProgressPolling() {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    window.openProgressModal = function(serverId, projectId) {
+      startProgressPolling(serverId, projectId, true);
+    };
+
+    window.closeProgressModal = function() {
+      var container = document.getElementById('progress-container');
+      if (container) container.classList.add('hidden');
+      stopProgressPolling();
+
+      var bar = document.getElementById('progress-bar-overall');
+      var pct = document.getElementById('progress-percentage-overall');
+      var wrapper = document.getElementById('progress-wrapper');
+      var empty = document.getElementById('progress-empty');
+
+      if (bar) {
+        bar.style.width = '0%';
+        bar.classList.remove('failed');
+      }
+      if (pct) {
+        pct.textContent = '0%';
+        pct.className = 'text-emerald-400 font-bold';
+      }
+      if (wrapper) wrapper.classList.add('hidden');
+      if (empty) empty.classList.remove('hidden');
+
+      updateHeaderForFailure(false);
+      renderMainError(null, null);
+      renderCriticalErrors([]);
+
+      startTime = null;
+      modListExpanded = false;
+      manuallyOpened = false;
+      currentServerId = null;
+      currentProjectId = null;
+    };
+
+    document.addEventListener('click', function(e) {
+      if (e.target && (e.target.id === 'toggle-mod-list' || e.target.closest('#toggle-mod-list'))) {
+        modListExpanded = !modListExpanded;
+        var btn = document.getElementById('toggle-mod-list');
+        if (btn) btn.textContent = modListExpanded ? 'Show Less' : 'Show All';
+        fetchAndRenderProgress();
       }
     });
-}
 
-document.addEventListener('DOMContentLoaded', function() { poll(); pollInterval = setInterval(poll, 1500); });
+    document.addEventListener('modrinth:installation:started', function(event) {
+      var detail = event.detail || {};
+      if (detail.serverId && detail.projectId) {
+        startProgressPolling(detail.serverId, detail.projectId, false);
+      }
+    });
+
+  })();
 </script>

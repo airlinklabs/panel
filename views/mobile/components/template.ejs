@@ -38,6 +38,7 @@ var _addonUrls = (typeof addonUrls !== 'undefined' && addonUrls) ? addonUrls : [
 var _isAddonPage = _addonUrls.length > 0 && _addonUrls.some(function(u) { return (req.path || '').startsWith(u); });
 var sidebarItems = allSidebarItems.filter(function(item) {
   if (item.id === 'account') return false;
+  if (item.isAddon) return false;
   if (_isAddonPage && _addonUrls.some(function(u) { return item.url.startsWith(u); })) return false;
   return true;
 });

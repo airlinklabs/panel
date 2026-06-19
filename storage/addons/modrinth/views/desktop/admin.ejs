@@ -1,136 +1,517 @@
-<div class="flex-1 flex flex-col overflow-hidden">
-  <div class="flex-1 overflow-y-auto no-scrollbar">
-    <div class="max-w-3xl mx-auto px-6 py-8">
+<style>
+  * { scrollbar-width: none; -ms-overflow-style: none; }
+  *::-webkit-scrollbar { display: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+  .toggle {
+    position: relative; width: 40px; height: 22px; cursor: pointer; flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle .slider {
+    position: absolute; inset: 0; border-radius: 11px;
+    background: #e5e5e5; transition: background 0.2s;
+  }
+  .dark .toggle .slider { background: rgba(255,255,255,0.15); }
+  .toggle input:checked + .slider { background: #059669; }
+  .dark .toggle input:checked + .slider { background: #10b981; }
+  .toggle .slider::before {
+    content: ''; position: absolute; left: 2px; top: 2px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: white; transition: transform 0.2s;
+  }
+  .dark .toggle .slider::before { background: #171717; }
+  .toggle input:checked + .slider::before { transform: translateX(18px); }
+  .progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, #10b981, #059669);
+    transition: width 0.5s ease-out; position: relative;
+  }
+  .progress-bar-glow {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: shimmer 2s infinite;
+  }
+  .progress-bar-fill.failed { background: linear-gradient(90deg, #dc2626, #991b1b); }
+  @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: #262626; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #404040; border-radius: 2px; }
+</style>
 
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h1 class="text-base font-medium text-neutral-800 dark:text-white">Modrinth Settings</h1>
-          <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Configure the Modrinth store addon</p>
+<div class="px-6 lg:px-12 pt-6 pb-8 max-w-7xl mx-auto">
+
+  <!-- Breadcrumb + Header bar -->
+  <div class="flex items-center justify-between mb-5">
+    <nav class="flex items-center gap-2 text-sm">
+      <a href="/modrinth" class="text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors">Modrinth store</a>
+      <svg class="w-3.5 h-3.5 text-neutral-400 dark:text-neutral-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+      <span class="text-neutral-800 dark:text-neutral-300 font-medium">Admin config</span>
+    </nav>
+    <button onclick="openProgressModal()" class="flex items-center gap-2 px-3 py-1.5 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+      Installations
+    </button>
+  </div>
+
+  <!-- Stats cards -->
+  <div class="grid grid-cols-3 gap-3 mb-5">
+    <div class="rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800/20 p-4">
+      <p class="text-[10px] text-neutral-400 dark:text-neutral-500 mb-1">Total Installs</p>
+      <p class="text-lg font-semibold text-neutral-800 dark:text-white"><%= stats.totalInstalls %></p>
+    </div>
+    <div class="rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800/20 p-4">
+      <p class="text-[10px] text-neutral-400 dark:text-neutral-500 mb-1">Active Projects</p>
+      <p class="text-lg font-semibold text-neutral-800 dark:text-white"><%= stats.activeProjects %></p>
+    </div>
+    <div class="rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800/20 p-4">
+      <p class="text-[10px] text-neutral-400 dark:text-neutral-500 mb-1">Blocked</p>
+      <p class="text-lg font-semibold text-neutral-800 dark:text-white"><%= stats.blocked %></p>
+    </div>
+  </div>
+
+  <!-- File status bar -->
+  <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 mb-5">
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <h2 class="text-sm font-semibold text-neutral-900 dark:text-white">Config file</h2>
+        <p class="text-neutral-500 text-xs mt-0.5">Stored at <code class="text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded font-mono">modrinth-settings.json</code></p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="refreshFileStatus()" class="px-3 py-1.5 text-xs bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white border border-neutral-200 dark:border-neutral-700 rounded-lg transition-colors">Refresh</button>
+        <button onclick="loadCurrentSettings()" class="px-3 py-1.5 text-xs bg-emerald-50 dark:bg-emerald-600/20 hover:bg-emerald-100 dark:hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-600/30 rounded-lg transition-colors">Reload settings</button>
+      </div>
+    </div>
+    <div id="fileStatus" class="flex items-center gap-2 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg text-sm text-neutral-500">
+      <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+      Loading file status...
+    </div>
+  </div>
+
+  <!-- Two-column layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+    <!-- Left column: Settings + Reference -->
+    <div class="space-y-5">
+
+      <!-- Settings card -->
+      <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl">
+        <div class="px-5 py-4 border-b border-neutral-200 dark:border-neutral-800">
+          <h2 class="text-sm font-semibold text-neutral-900 dark:text-white">Settings</h2>
+          <p class="text-neutral-500 text-xs mt-0.5">Toggle warning and manage disabled types</p>
         </div>
-        <button id="saveBtn" onclick="saveSettings()"
-          class="px-4 py-2 text-sm font-medium rounded-xl bg-neutral-800 dark:bg-white/10 text-white dark:text-white hover:bg-neutral-700 dark:hover:bg-white/15 transition">
-          Save
-        </button>
+        <div class="p-5 space-y-5">
+
+          <!-- Warning toggle -->
+          <div>
+            <label class="flex items-center gap-3 cursor-pointer select-none">
+              <label class="toggle">
+                <input type="checkbox" id="enableWarning">
+                <span class="slider"></span>
+              </label>
+              <span class="text-sm text-neutral-700 dark:text-neutral-300">Show installation warning banner</span>
+            </label>
+          </div>
+
+          <!-- Warning title + message -->
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5" for="warningTitle">Warning title</label>
+              <input type="text" id="warningTitle" placeholder="Installation Temporarily Disabled" class="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:border-emerald-500 transition-colors">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1.5" for="warningMessage">Warning message</label>
+              <textarea id="warningMessage" rows="2" placeholder="Installations are temporarily disabled..." class="w-full px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:border-emerald-500 transition-colors resize-none"></textarea>
+            </div>
+          </div>
+
+          <!-- Disabled project types -->
+          <div>
+            <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2">Disabled project types <span class="text-neutral-400 dark:text-neutral-600 font-normal">(click to toggle)</span></p>
+            <div id="projectTypeButtons" class="flex flex-wrap gap-2"></div>
+          </div>
+
+          <!-- Blocked projects -->
+          <div>
+            <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2">Blocked projects</p>
+            <div class="flex gap-2 mb-3">
+              <input type="text" id="newProjectId" placeholder="Project ID (e.g. fabric-api)" class="flex-1 px-3 py-2 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:border-emerald-500 transition-colors">
+              <button onclick="addBlockedProject()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition-colors">Add</button>
+            </div>
+            <div id="blockedProjectsList" class="space-y-1.5"></div>
+          </div>
+
+          <!-- Apply to JSON -->
+          <div class="pt-4 border-t border-neutral-200 dark:border-neutral-800">
+            <button onclick="applyEasySettings()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition-colors">Apply to JSON</button>
+          </div>
+        </div>
       </div>
 
-      <div class="space-y-4">
-        <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Warning Banner</h3>
-              <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Show a warning on the browse page</p>
-            </div>
-            <button id="warningToggle" onclick="toggleWarning()"
-              class="relative w-10 h-6 rounded-full bg-neutral-200 dark:bg-neutral-700 transition-colors">
-              <span class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white dark:bg-neutral-300 shadow transition-transform"></span>
-            </button>
+      <!-- Config reference card -->
+      <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-neutral-900 dark:text-white mb-4">Configuration reference</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div>
+            <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2">Schema</p>
+            <pre class="bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg p-4 text-xs text-neutral-600 dark:text-neutral-400 font-mono overflow-x-auto"><code>{
+  "modrinthInstallationWarning": false,
+  "warningTitle": "Installation Disabled",
+  "warningMessage": "Details here.",
+  "disabledProjectTypes": ["mod", "shader"],
+  "blockedProjects": ["fabric-api"]
+}</code></pre>
           </div>
-          <div id="warningFields" class="hidden space-y-3 mt-4">
-            <div>
-              <label class="text-xs text-neutral-500 dark:text-neutral-400 mb-1 block">Title</label>
-              <input id="warningTitle" type="text" value=""
-                class="w-full px-3 py-2 text-sm bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-lg text-neutral-800 dark:text-white focus:outline-none transition">
-            </div>
-            <div>
-              <label class="text-xs text-neutral-500 dark:text-neutral-400 mb-1 block">Message</label>
-              <input id="warningMessage" type="text" value=""
-                class="w-full px-3 py-2 text-sm bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-lg text-neutral-800 dark:text-white focus:outline-none transition">
+          <div>
+            <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2">Project types</p>
+            <div class="space-y-1.5">
+              <% [
+                { type: 'mod', desc: 'Client/server modifications' },
+                { type: 'modpack', desc: 'Collections of mods' },
+                { type: 'resourcepack', desc: 'Texture and sound packs' },
+                { type: 'shader', desc: 'Graphics enhancements' },
+                { type: 'datapack', desc: 'Data-driven mechanics' },
+                { type: 'plugin', desc: 'Server plugins' }
+              ].forEach(function(item) { %>
+              <div class="flex items-center justify-between py-1.5 px-2 rounded-lg bg-neutral-50 dark:bg-neutral-800/50 text-xs">
+                <code class="text-emerald-600 dark:text-emerald-400 font-mono"><%= item.type %></code>
+                <span class="text-neutral-500"><%= item.desc %></span>
+              </div>
+              <% }); %>
             </div>
           </div>
         </div>
-
-        <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5">
-          <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-1">Disabled Project Types</h3>
-          <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-3">Comma-separated types to hide (e.g. shader,mod)</p>
-          <input id="disabledTypes" type="text" value=""
-            class="w-full px-3 py-2 text-sm bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-lg text-neutral-800 dark:text-white focus:outline-none transition"
-            placeholder="shader,mod">
-        </div>
-
-        <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5">
-          <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-1">Blocked Projects</h3>
-          <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-3">Comma-separated project IDs to block installs for</p>
-          <input id="blockedProjects" type="text" value=""
-            class="w-full px-3 py-2 text-sm bg-white/5 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 rounded-lg text-neutral-800 dark:text-white focus:outline-none transition"
-            placeholder="project-id-1,project-id-2">
-        </div>
-
-        <div class="rounded-xl bg-white/8 dark:bg-white/5 border border-neutral-200/30 dark:border-white/5 p-5">
-          <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-1">Cache</h3>
-          <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-3">Clear cached Modrinth API responses</p>
-          <button onclick="clearCache()"
-            class="px-4 py-2 text-sm font-medium rounded-lg bg-neutral-200/50 dark:bg-white/5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-300/50 dark:hover:bg-white/10 transition border border-neutral-200/30 dark:border-white/5">
-            Clear Cache
-          </button>
+        <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg text-xs text-blue-700 dark:text-blue-300/80 space-y-1">
+          <p><span class="text-blue-700 dark:text-blue-300 font-medium">disabledProjectTypes</span> — hides that type entirely from browse results</p>
+          <p><span class="text-blue-700 dark:text-blue-300 font-medium">blockedProjects</span> — keeps project visible but disables install button</p>
+          <p><span class="text-blue-700 dark:text-blue-300 font-medium">Project IDs</span> — from Modrinth URLs, e.g. modrinth.com/mod/<span class="font-medium">fabric-api</span></p>
         </div>
       </div>
 
     </div>
+
+    <!-- Right column: JSON editor -->
+    <div>
+      <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl">
+        <div class="px-5 py-4 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+          <div>
+            <h2 class="text-sm font-semibold text-neutral-900 dark:text-white">JSON editor</h2>
+            <p class="text-neutral-500 text-xs mt-0.5">Edit config directly — validated before saving</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="formatJson()" class="px-3 py-1.5 text-xs bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white border border-neutral-200 dark:border-neutral-700 rounded-lg transition-colors">Format</button>
+            <button onclick="validateJson()" class="px-3 py-1.5 text-xs bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white border border-neutral-200 dark:border-neutral-700 rounded-lg transition-colors">Validate</button>
+            <button onclick="resetToDefaults()" class="px-3 py-1.5 text-xs bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white border border-neutral-200 dark:border-neutral-700 rounded-lg transition-colors">Reset</button>
+          </div>
+        </div>
+        <div class="p-5">
+          <textarea id="jsonEditor" rows="20" spellcheck="false" placeholder="Loading..." class="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg text-sm text-neutral-800 dark:text-neutral-200 font-mono leading-relaxed focus:outline-none focus:border-emerald-500 transition-colors resize-none no-scrollbar"></textarea>
+          <div class="flex items-center justify-between mt-2 text-xs text-neutral-500 dark:text-neutral-600">
+            <div class="flex items-center gap-4">
+              <span id="jsonValid" class="hidden text-emerald-600 dark:text-emerald-500">Valid JSON</span>
+              <span id="jsonInvalid" class="hidden text-red-500">Invalid JSON</span>
+              <span id="characterCount">0 characters</span>
+            </div>
+            <span>Ctrl+S to save</span>
+          </div>
+        </div>
+        <div class="px-5 py-4 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+          <div class="flex gap-2">
+            <button onclick="loadTemplate('restrictive')" class="px-3 py-1.5 text-xs bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white border border-neutral-200 dark:border-neutral-700 rounded-lg transition-colors">Restrictive template</button>
+            <button onclick="loadTemplate('permissive')" class="px-3 py-1.5 text-xs bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white border border-neutral-200 dark:border-neutral-700 rounded-lg transition-colors">Permissive template</button>
+          </div>
+          <button onclick="saveSettings()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition-colors">Save config</button>
+        </div>
+      </div>
+    </div>
+
   </div>
+
+  <!-- Footer -->
+  <div class="pt-5 mt-5 border-t border-neutral-200 dark:border-neutral-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-400 dark:text-neutral-600">
+    <div class="flex items-center gap-1.5">
+      <span>Modrinth store by</span>
+      <a href="https://github.com/g-flame-oss" target="_blank" class="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">g-flame</a>
+      <span>&bull;</span>
+      <span>Panel by</span>
+      <a href="https://github.com/AirlinkLabs" target="_blank" class="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">AirlinkLabs</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="https://github.com/g-flame-oss/airlink-addons" target="_blank" class="hover:text-neutral-900 dark:hover:text-neutral-300 transition-colors">GitHub</a>
+      <a href="https://github.com/g-flame-oss/airlink-addons/blob/modrinth-addon/LICENSE" target="_blank" class="hover:text-neutral-900 dark:hover:text-neutral-300 transition-colors">License</a>
+      <a href="https://discord.gg/TQzUeg2wJx" target="_blank" class="hover:text-neutral-900 dark:hover:text-neutral-300 transition-colors">Discord</a>
+    </div>
+  </div>
+
 </div>
 
+<%- include('../../../../../views/desktop/components/toast') %>
+<%- include('progress') %>
+
 <script nonce="<%- nonce %>">
-var currentSettings = {};
+(function() {
+  var currentSettings = <%- JSON.stringify(settings || {}) %>;
+  var PROJECT_TYPES = ['mod', 'modpack', 'resourcepack', 'shader', 'datapack', 'plugin'];
 
-function loadSettings() {
-  fetch('/modrinth/api/config')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      currentSettings = data.settings || {};
-      document.getElementById('warningTitle').value = currentSettings.warningTitle || '';
-      document.getElementById('warningMessage').value = currentSettings.warningMessage || '';
-      document.getElementById('disabledTypes').value = (currentSettings.disabledProjectTypes || []).join(',');
-      document.getElementById('blockedProjects').value = (currentSettings.blockedProjects || []).join(',');
-      setWarningToggle(currentSettings.showWarningBanner || false);
+  document.addEventListener('DOMContentLoaded', function() {
+    loadCurrentSettings();
+    refreshFileStatus();
+    setupProjectTypeButtons();
+    setupJsonEditor();
+    document.getElementById('newProjectId').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') addBlockedProject();
     });
-}
+  });
 
-function setWarningToggle(on) {
-  var btn = document.getElementById('warningToggle');
-  var fields = document.getElementById('warningFields');
-  if (on) {
-    btn.classList.add('bg-neutral-800', 'dark:bg-white/20');
-    btn.classList.remove('bg-neutral-200', 'dark:bg-neutral-700');
-    btn.querySelector('span').style.transform = 'translateX(16px)';
-    fields.classList.remove('hidden');
-  } else {
-    btn.classList.remove('bg-neutral-800', 'dark:bg-white/20');
-    btn.classList.add('bg-neutral-200', 'dark:bg-neutral-700');
-    btn.querySelector('span').style.transform = '';
-    fields.classList.add('hidden');
+  /* ── CSRF ── */
+  function getCsrfToken() {
+    var el = document.querySelector('meta[name="csrf-token"]');
+    return el ? el.content : '';
   }
-}
 
-function toggleWarning() {
-  var on = !currentSettings.showWarningBanner;
-  currentSettings.showWarningBanner = on;
-  setWarningToggle(on);
-}
+  /* ── Project type buttons ── */
+  function setupProjectTypeButtons() {
+    var container = document.getElementById('projectTypeButtons');
+    if (!container) return;
+    container.innerHTML = '';
+    PROJECT_TYPES.forEach(function(type) {
+      var btn = document.createElement('button');
+      btn.setAttribute('data-type', type);
+      btn.className = 'project-type-btn px-3 py-1.5 text-xs border rounded-lg font-medium transition-colors bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:border-neutral-400 dark:hover:border-neutral-500';
+      btn.textContent = type;
+      btn.addEventListener('click', function() { toggleProjectType(type); });
+      container.appendChild(btn);
+    });
+  }
 
-function saveSettings() {
-  var body = {
-    showWarningBanner: currentSettings.showWarningBanner || false,
-    warningTitle: document.getElementById('warningTitle').value,
-    warningMessage: document.getElementById('warningMessage').value,
-    disabledProjectTypes: document.getElementById('disabledTypes').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean),
-    blockedProjects: document.getElementById('blockedProjects').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean),
+  function updateProjectTypeButtons() {
+    try {
+      var settings = JSON.parse(document.getElementById('jsonEditor').value);
+      var disabled = settings.disabledProjectTypes || [];
+      document.querySelectorAll('.project-type-btn').forEach(function(btn) {
+        var type = btn.getAttribute('data-type');
+        if (disabled.includes(type)) {
+          btn.className = 'project-type-btn px-3 py-1.5 text-xs border rounded-lg font-medium transition-colors bg-red-50 dark:bg-red-600/20 border-red-200 dark:border-red-600/40 text-red-600 dark:text-red-400';
+        } else {
+          btn.className = 'project-type-btn px-3 py-1.5 text-xs border rounded-lg font-medium transition-colors bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:border-neutral-400 dark:hover:border-neutral-500';
+        }
+      });
+    } catch (e) {}
+  }
+
+  function toggleProjectType(type) {
+    try {
+      var settings = JSON.parse(document.getElementById('jsonEditor').value);
+      if (!Array.isArray(settings.disabledProjectTypes)) settings.disabledProjectTypes = [];
+      var idx = settings.disabledProjectTypes.indexOf(type);
+      if (idx > -1) { settings.disabledProjectTypes.splice(idx, 1); } else { settings.disabledProjectTypes.push(type); }
+      updateJsonEditor(settings);
+      updateProjectTypeButtons();
+    } catch (e) { showToast('Could not parse JSON', 'error'); }
+  }
+
+  /* ── Blocked projects ── */
+  function addBlockedProject() {
+    var input = document.getElementById('newProjectId');
+    var id = input.value.trim();
+    if (!id) { showToast('Enter a project ID', 'error'); return; }
+    try {
+      var settings = JSON.parse(document.getElementById('jsonEditor').value);
+      if (!Array.isArray(settings.blockedProjects)) settings.blockedProjects = [];
+      if (settings.blockedProjects.includes(id)) { showToast('Already blocked', 'warning'); return; }
+      settings.blockedProjects.push(id);
+      updateJsonEditor(settings);
+      updateBlockedProjectsList();
+      input.value = '';
+      showToast('"' + id + '" added to blocked list', 'success');
+    } catch (e) { showToast('Could not parse JSON', 'error'); }
+  }
+
+  function removeBlockedProject(id) {
+    try {
+      var settings = JSON.parse(document.getElementById('jsonEditor').value);
+      if (!Array.isArray(settings.blockedProjects)) return;
+      var idx = settings.blockedProjects.indexOf(id);
+      if (idx > -1) { settings.blockedProjects.splice(idx, 1); updateJsonEditor(settings); updateBlockedProjectsList(); }
+    } catch (e) { showToast('Could not update', 'error'); }
+  }
+
+  function updateBlockedProjectsList() {
+    var container = document.getElementById('blockedProjectsList');
+    if (!container) return;
+    try {
+      var settings = JSON.parse(document.getElementById('jsonEditor').value);
+      var list = settings.blockedProjects || [];
+      if (list.length === 0) {
+        container.innerHTML = '<p class="text-xs text-neutral-400 dark:text-neutral-600 italic">No blocked projects</p>';
+        return;
+      }
+      container.innerHTML = list.map(function(id) {
+        return '<div class="flex items-center justify-between p-2.5 bg-red-50 dark:bg-red-600/10 border border-red-200 dark:border-red-600/20 rounded-lg">' +
+          '<code class="text-xs font-mono text-red-600 dark:text-red-400">' + escapeHtml(id) + '</code>' +
+          '<button onclick="removeBlockedProject(\'' + escapeHtml(id) + '\')" class="text-neutral-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">' +
+          '<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></button></div>';
+      }).join('');
+    } catch (e) {}
+  }
+
+  /* ── Apply easy settings to JSON ── */
+  function applyEasySettings() {
+    try {
+      var settings = JSON.parse(document.getElementById('jsonEditor').value);
+      settings.modrinthInstallationWarning = document.getElementById('enableWarning').checked;
+      settings.warningTitle = document.getElementById('warningTitle').value.trim() || 'Installation Temporarily Disabled';
+      settings.warningMessage = document.getElementById('warningMessage').value.trim() || '';
+      updateJsonEditor(settings);
+      showToast('Settings applied to JSON', 'success');
+    } catch (e) { showToast('Could not parse JSON', 'error'); }
+  }
+
+  /* ── Load from API ── */
+  function loadCurrentSettings() {
+    fetch('/modrinth/api/config', { credentials: 'include' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success && data.data) {
+          currentSettings = data.data;
+          updateJsonEditor(currentSettings);
+          updateEasyUI(currentSettings);
+          updateProjectTypeButtons();
+          updateBlockedProjectsList();
+        }
+      })
+      .catch(function() {
+        if (currentSettings) {
+          updateJsonEditor(currentSettings);
+          updateEasyUI(currentSettings);
+          updateProjectTypeButtons();
+          updateBlockedProjectsList();
+        }
+      });
+  }
+
+  function updateEasyUI(s) {
+    var w = document.getElementById('enableWarning');
+    var t = document.getElementById('warningTitle');
+    var m = document.getElementById('warningMessage');
+    if (w) w.checked = !!s.modrinthInstallationWarning;
+    if (t) t.value = s.warningTitle || '';
+    if (m) m.value = s.warningMessage || '';
+  }
+
+  /* ── JSON editor ── */
+  function updateJsonEditor(s) {
+    var editor = document.getElementById('jsonEditor');
+    editor.value = JSON.stringify(s, null, 2);
+    updateCharacterCount();
+  }
+
+  function setupJsonEditor() {
+    var editor = document.getElementById('jsonEditor');
+    editor.addEventListener('input', updateCharacterCount);
+    editor.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveSettings(); }
+      if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); formatJson(); }
+    });
+  }
+
+  function updateCharacterCount() {
+    var editor = document.getElementById('jsonEditor');
+    document.getElementById('characterCount').textContent = editor.value.length + ' characters';
+    document.getElementById('jsonValid').classList.add('hidden');
+    document.getElementById('jsonInvalid').classList.add('hidden');
+  }
+
+  function formatJson() {
+    var editor = document.getElementById('jsonEditor');
+    try {
+      editor.value = JSON.stringify(JSON.parse(editor.value), null, 2);
+      updateCharacterCount();
+      showToast('JSON formatted', 'success');
+    } catch (e) { showToast('Invalid JSON — cannot format', 'error'); }
+  }
+
+  function validateJson() {
+    var editor = document.getElementById('jsonEditor');
+    try {
+      JSON.parse(editor.value);
+      document.getElementById('jsonValid').classList.remove('hidden');
+      document.getElementById('jsonInvalid').classList.add('hidden');
+      showToast('JSON is valid', 'success');
+    } catch (e) {
+      document.getElementById('jsonValid').classList.add('hidden');
+      document.getElementById('jsonInvalid').classList.remove('hidden');
+      showToast(e.message, 'error');
+    }
+  }
+
+  function resetToDefaults() {
+    var defaults = { modrinthInstallationWarning: false, warningTitle: 'Installation Temporarily Disabled', warningMessage: 'Installations are temporarily disabled.', disabledProjectTypes: [], blockedProjects: [] };
+    updateJsonEditor(defaults);
+    updateEasyUI(defaults);
+    updateProjectTypeButtons();
+    updateBlockedProjectsList();
+    showToast('Defaults loaded', 'info');
+  }
+
+  function loadTemplate(type) {
+    var templates = {
+      restrictive: { modrinthInstallationWarning: true, warningTitle: 'Installation Disabled', warningMessage: 'Mod installation is currently restricted.', disabledProjectTypes: ['shader', 'resourcepack'], blockedProjects: [] },
+      permissive: { modrinthInstallationWarning: false, warningTitle: '', warningMessage: '', disabledProjectTypes: [], blockedProjects: [] }
+    };
+    var t = templates[type];
+    if (!t) return;
+    updateJsonEditor(t);
+    updateEasyUI(t);
+    updateProjectTypeButtons();
+    updateBlockedProjectsList();
+    showToast(type + ' template loaded', 'success');
+  }
+
+  /* ── Save ── */
+  window.saveSettings = async function() {
+    var editor = document.getElementById('jsonEditor');
+    var parsed;
+    try { parsed = JSON.parse(editor.value); } catch (e) { showToast('Invalid JSON — fix before saving', 'error'); return; }
+    try {
+      var headers = { 'Content-Type': 'application/json' };
+      var csrf = getCsrfToken();
+      if (csrf) headers['X-CSRF-Token'] = csrf;
+      var res = await fetch('/modrinth/api/config', {
+        method: 'POST',
+        headers: headers,
+        credentials: 'include',
+        body: JSON.stringify(parsed)
+      });
+      var data = await res.json();
+      if (data.success) { showToast('Configuration saved', 'success'); }
+      else { showToast(data.error || 'Save failed', 'error'); }
+    } catch (e) { showToast('Save failed', 'error'); }
   };
 
-  fetch('/modrinth/api/config', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  }).then(function(r) { return r.json(); })
-    .then(function(d) {
-      if (d.error) alert('Error: ' + d.error);
-    });
-}
+  /* ── File status ── */
+  function refreshFileStatus() {
+    fetch('/modrinth/api/file-status', { credentials: 'include' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var el = document.getElementById('fileStatus');
+        if (data.success && data.data) {
+          var f = data.data;
+          el.innerHTML = '<div class="flex items-center gap-2"><div class="w-2 h-2 bg-emerald-500 rounded-full"></div><span class="text-sm text-neutral-700 dark:text-neutral-300">File found</span></div>' +
+            (f.size ? '<span class="text-xs text-neutral-400 dark:text-neutral-600 ml-4">' + f.size + ' bytes</span>' : '') +
+            (f.lastModified ? '<span class="text-xs text-neutral-400 dark:text-neutral-600 ml-2">Modified ' + new Date(f.lastModified).toLocaleString() + '</span>' : '');
+        } else {
+          el.innerHTML = '<div class="flex items-center gap-2"><div class="w-2 h-2 bg-amber-500 rounded-full"></div><span class="text-sm text-neutral-500 dark:text-neutral-400">File not found — will be created on save</span></div>';
+        }
+      })
+      .catch(function() {
+        document.getElementById('fileStatus').innerHTML = '<div class="flex items-center gap-2"><div class="w-2 h-2 bg-red-500 rounded-full"></div><span class="text-sm text-neutral-500">Could not check file status</span></div>';
+      });
+  }
 
-function clearCache() {
-  fetch('/modrinth/api/cache/clear', { method: 'POST' })
-    .then(function(r) { return r.json(); })
-    .then(function() { alert('Cache cleared'); });
-}
+  /* ── Util ── */
+  function escapeHtml(text) {
+    if (typeof text !== 'string') return String(text || '');
+    var d = document.createElement('div'); d.textContent = text; return d.innerHTML;
+  }
 
-loadSettings();
+})();
 </script>
