@@ -3,12 +3,13 @@ import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
+import { refreshSecurityCache } from '../../handlers/securityCache';
 
 const adminModule: Module = {
   info: {
     name: 'Admin Security Module',
     description: 'Security settings for the panel.',
-    version: '1.0.0',
+    version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
     license: 'MIT',
@@ -42,6 +43,7 @@ const adminModule: Module = {
             where: { id: 1 },
             data: { rateLimitEnabled: enabled, rateLimitRpm: rpm },
           });
+          await refreshSecurityCache();
 
           res.json({ success: true });
         } catch (error) {
@@ -71,6 +73,7 @@ const adminModule: Module = {
           if (!banned.includes(cleanIp)) {
             banned.push(cleanIp);
             await prisma.settings.update({ where: { id: 1 }, data: { bannedIps: JSON.stringify(banned) } });
+            await refreshSecurityCache();
           }
 
           res.json({ success: true, banned });
@@ -99,6 +102,7 @@ const adminModule: Module = {
 
           banned = banned.filter((b) => b !== ip);
           await prisma.settings.update({ where: { id: 1 }, data: { bannedIps: JSON.stringify(banned) } });
+          await refreshSecurityCache();
 
           res.json({ success: true, banned });
         } catch (error) {

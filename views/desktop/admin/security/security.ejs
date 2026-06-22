@@ -32,7 +32,7 @@
             </div>
             <div>
               <label for="rateLimitRpm" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Requests per minute</label>
-              <input type="number" id="rateLimitRpm" name="rateLimitRpm" min="1" max="10000" value="<%= settings ? settings.rateLimitRpm : 100 %>"
+              <input type="number" id="rateLimitRpm" name="rateLimitRpm" min="1" max="10000" value="<%= settings ? settings.rateLimitRpm : 500 %>"
                 class="w-40 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
             </div>
             <div class="pt-1">
@@ -82,84 +82,6 @@
 
 <%- include('../../components/toast') %>
 
-<script nonce="<%- nonce %>">
-  // Rate limit form
-  document.getElementById('form-rate-limit').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const enabled = document.getElementById('rateLimitEnabled').checked;
-    const rpm = document.getElementById('rateLimitRpm').value;
-    try {
-      const r = await fetch('/admin/security/rate-limit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rateLimitEnabled: enabled, rateLimitRpm: rpm }),
-      });
-      const data = await r.json();
-      if (data.success) showToast('Rate limit settings saved. Breathe easy.', 'success');
-      else showToast(data.error || 'Failed to save.', 'error');
-    } catch {
-      showToast('An error occurred.', 'error');
-    }
-  });
-
-  // Ban IP
-  document.getElementById('ban-ip-btn').addEventListener('click', async () => {
-    const ip = document.getElementById('ban-ip-input').value.trim();
-    if (!ip) return;
-    try {
-      const r = await fetch('/admin/security/ban-ip', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ip }),
-      });
-      const data = await r.json();
-      if (data.success) {
-        document.getElementById('ban-ip-input').value = '';
-        showToast(`${ip} has been banned.`, 'success');
-        setTimeout(() => location.reload(), 800);
-      } else {
-        showToast(data.error || 'Failed to ban IP.', 'error');
-      }
-    } catch {
-      showToast('An error occurred.', 'error');
-    }
-  });
-
-  // Allow enter key in IP input
-  document.getElementById('ban-ip-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('ban-ip-btn').click();
-  });
-
-  // Unban IP
-  document.querySelectorAll('.unban-btn').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const li = btn.closest('li');
-      const ip = li.dataset.ip;
-      try {
-        const r = await fetch('/admin/security/unban-ip', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ip }),
-        });
-        const data = await r.json();
-        if (data.success) {
-          li.remove();
-          showToast(`${ip} has been unbanned.`, 'success');
-          if (document.querySelectorAll('#banned-list li').length === 0) {
-            const list = document.getElementById('banned-list');
-            if (list) {
-              list.insertAdjacentHTML('afterend', '<p id="no-bans-msg" class="text-xs text-neutral-400">No IPs are currently banned.</p>');
-              list.remove();
-            }
-          }
-        } else {
-          showToast(data.error || 'Failed to unban IP.', 'error');
-        }
-      } catch {
-        showToast('An error occurred.', 'error');
-      }
-    });
-  });
-</script>
+<script nonce="<%- nonce %>" src="/javascript/admin-security.js"></script>
 
 <%- include('../../components/footer') %>

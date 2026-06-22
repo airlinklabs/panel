@@ -3,6 +3,7 @@ import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
+import { refreshSecurityCache } from '../../handlers/securityCache';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -115,7 +116,7 @@ async function saveSettings(data: Record<string, any>) {
       allowRegistration:     false,
       uploadLimit:           100,
       rateLimitEnabled:      true,
-      rateLimitRpm:          100,
+      rateLimitRpm:          500,
       bannedIps:             '[]',
       allowUserCreateServer: false,
       allowUserDeleteServer: false,
@@ -137,8 +138,8 @@ const adminModule: Module = {
   info: {
     name:          'Admin Settings Module',
     description:   'Settings management for the admin panel.',
-    version:       '1.0.0',
-    moduleVersion: '1.0.0',
+    version:       '2.0.0',
+    moduleVersion: '2.0.0',
     author:        'AirlinkLab',
     license:       'MIT',
   },
@@ -327,6 +328,7 @@ const adminModule: Module = {
             securityData.virusTotalApiKey = req.body.virusTotalApiKey.trim() || null;
           }
           await saveSettings(securityData);
+          await refreshSecurityCache();
           res.json({ success: true });
         } catch (error) {
           logger.error('Error saving security settings:', error);

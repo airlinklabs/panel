@@ -18,7 +18,7 @@ export const settingsLoader = async () => {
           allowRegistration:     false,
           uploadLimit:           100,
           rateLimitEnabled:      true,
-          rateLimitRpm:          100,
+          rateLimitRpm:          500,
           bannedIps:             '[]',
           allowUserCreateServer: false,
           allowUserDeleteServer: false,

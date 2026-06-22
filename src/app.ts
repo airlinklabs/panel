@@ -303,50 +303,27 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 // hpp removed: Express 5 handles parameter pollution natively
 
-// IP ban middleware — checked before rate limiting
-app.use(async (req, res, next) => {
-  try {
-    const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-    if (!settings) return next();
+import { refreshSecurityCache, getSecurityCache } from './handlers/securityCache';
 
-    let banned: string[] = [];
-    try {
-      banned = JSON.parse(settings.bannedIps || '[]');
-    } catch {
-      banned = [];
-    }
+// Initial load + refresh every 30 seconds
+refreshSecurityCache();
+setInterval(refreshSecurityCache, 30_000);
 
-    const clientIp = req.ip || req.socket.remoteAddress || '';
-    if (banned.includes(clientIp)) {
-      return renderErrorPage(req, res, 403, 'Your IP address is blocked from this panel.');
-    }
-  } catch {
-    // DB not ready yet — allow through
+// IP ban middleware — uses cached list, no per-request DB hit
+app.use((req, res, next) => {
+  const clientIp = req.ip || req.socket.remoteAddress || '';
+  if (getSecurityCache().bannedIps.includes(clientIp)) {
+    return renderErrorPage(req, res, 403, 'Your IP address is blocked from this panel.');
   }
   next();
 });
 
-// Dynamic rate limiter — window and max read from DB on each request
+// Rate limiter — uses cached settings, no per-request DB hit
 app.use(
   rateLimit({
     windowMs: 60 * 1000,
-    max: async () => {
-      try {
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-        if (!settings || !settings.rateLimitEnabled) return 0; // 0 = disabled in express-rate-limit
-        return settings.rateLimitRpm;
-      } catch {
-        return 100;
-      }
-    },
-    skip: async (_req) => {
-      try {
-        const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-        return !settings?.rateLimitEnabled;
-      } catch {
-        return false;
-      }
-    },
+    max: () => { const c = getSecurityCache(); return c.rateLimitEnabled ? c.rateLimitRpm : 0; },
+    skip: () => !getSecurityCache().rateLimitEnabled,
     standardHeaders: true,
     legacyHeaders: false,
   }),
