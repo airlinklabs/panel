@@ -16,7 +16,7 @@ const folderModule: Module = {
   info: {
     name: 'Folder System Module',
     description: 'DB-backed folders for organizing servers on the dashboard.',
-    version: '1.0.0',
+    version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirlinkLab',
     license: 'MIT',

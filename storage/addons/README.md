@@ -1,89 +1,111 @@
 # AirLink Panel Addons
 
-This directory contains addons for AirLink Panel. Addons can extend the functionality of the panel with custom features.
+This directory contains addons for AirLink Panel. Addons extend the panel with custom features, routes, and UI.
 
 ## Creating an Addon
 
-1. Create a new directory in this folder with your addon's slug (e.g., `my-addon`)
-2. Create a `package.json` file with your addon's metadata
-3. Create an entry point file (default: `index.ts`)
-4. Implement your addon's functionality
+1. Create a new directory here with your addon's slug
+2. Create a `package.json` with the v2 manifest format
+3. Create an `index.ts` entry point
+4. Restart the panel or click "Reload" in the admin
 
 ## Addon Structure
 
 ```
 my-addon/
-├── package.json
-├── index.ts
-└── views/
-    └── my-view.ejs
+├── package.json       # v2 manifest
+├── index.ts           # Entry point
+├── views/             # EJS templates
+│   ├── desktop/
+│   └── mobile/
+├── public/            # Static assets
+└── lib/               # Additional modules
 ```
 
-## Package.json Format
+## Package.json (v2 Manifest)
 
 ```json
 {
   "name": "My Addon",
+  "identifier": "my-addon",
   "version": "1.0.0",
-  "description": "Description of my addon",
+  "description": "Description",
   "author": "Your Name",
   "main": "index.ts",
   "router": "/my-addon",
+  "engines": { "panel": ">=1.0.0" },
+  "permissions": ["addon.my-addon.view"],
+  "capabilities": { "runsRawSql": true },
+  "settingsSchema": [
+    { "key": "greeting", "type": "string", "label": "Greeting", "default": "Hello!" }
+  ],
+  "dependencies": [],
   "migrations": [
-    {
-      "name": "create_my_table",
-      "sql": "CREATE TABLE IF NOT EXISTS MyTable (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL)"
-    }
+    { "name": "create_table", "sql": "CREATE TABLE IF NOT EXISTS ...", "down": "DROP TABLE IF EXISTS ..." }
   ]
 }
 ```
 
-## Database Migrations
-
-Addons can define database migrations in the `package.json` file. These migrations are automatically applied when the addon is enabled.
-
-Each migration should have:
-- `name`: A unique name for the migration
-- `sql`: The SQL statement to execute
-
-Migrations are applied in the order they are defined in the array. Once a migration has been applied, it will not be applied again, even if the addon is disabled and re-enabled.
-
-For more information about migrations, see the [addon-migrations.md](../docs/addon-migrations.md) documentation.
-
 ## Entry Point
-
-The entry point file (default: `index.ts`) should export a function that takes a router and an API object:
 
 ```typescript
 import { Router } from 'express';
+import path from 'path';
 
-interface AddonAPI {
-  registerRoute: (path: string, router: Router) => void;
-  logger: any;
-  prisma: any;
-  addonPath: string;
-  viewsPath: string;
-  renderView: (viewName: string, data?: any) => string;
-  getComponentPath: (componentPath: string) => string;
-  // ... other API methods
-}
+export default function (router: Router, api: any) {
+  const { logger, prisma, config, ui, commands, permissions, middleware } = api;
 
-export default function(router: Router, api: AddonAPI) {
-  const { logger, prisma } = api;
+  // Register permissions
+  permissions.register('addon.my-addon.view');
 
-  logger.info('My Addon initialized');
+  // Register commands
+  commands.register({ name: 'hello', description: 'Say hello', handler: () => 'Hello!' });
 
+  // Register slots
+  ui.registerSlot('dashboard.home.afterContent', () => '<div>My content</div>');
+
+  // Read settings
+  const greeting = await config.get('greeting');
+
+  // Define routes
   router.get('/', async (req, res) => {
-    res.render(path.join(api.viewsPath, 'my-view.ejs'), {
-      user: req.session?.user,
-      req,
-      settings: await prisma.settings.findUnique({ where: { id: 1 } }),
-      components: {
-        header: api.getComponentPath('views/components/header'),
-        template: api.getComponentPath('views/components/template'),
-        footer: api.getComponentPath('views/components/footer')
-      }
-    });
+    res.render(path.join(api.viewsPath, 'index.ejs'), { user: req.session?.user });
   });
+
+  // API route with auth
+  const apiRouter = Router();
+  apiRouter.get('/data', middleware.apiValidator('addon.my-addon.view'), (req, res) => {
+    res.json({ success: true });
+  });
+  api.registerRoute('/my-addon/api', apiRouter);
+
+  // Return lifecycle hooks
+  return {
+    onInstall: () => logger.info('Installed'),
+    onEnable: () => logger.info('Enabled'),
+    onDisable: () => logger.info('Disabled'),
+    onUpdate: (prev) => logger.info(`Updated from ${prev}`),
+    onUninstall: async () => { await config.deleteAll(); },
+  };
 }
 ```
+
+## Key Concepts
+
+- **Settings**: Use `api.config.get/set/delete` — no custom tables needed for config
+- **Slots**: Use `api.ui.registerSlot()` to inject content into panel pages
+- **Commands**: Use `api.commands.register()` for admin-triggered actions
+- **Scheduler**: Use `api.schedule.register()` for periodic tasks
+- **Permissions**: Namespaced as `addon.<identifier>.*`
+- **Static Assets**: Place in `public/`, served at `/addon-assets/<identifier>/`
+- **Lifecycle Hooks**: Return an object with `onInstall`, `onEnable`, `onDisable`, `onUpdate`, `onUninstall`
+- **Dependencies**: Declare in `dependencies` array, loaded in order
+- **Version Check**: Use `engines.panel` for compatibility warnings
+
+## Reference Addon
+
+See `reference-addon/` for a complete working example that exercises every v2 capability.
+
+## Security
+
+**Addons are not sandboxed.** Only install from trusted sources. See `docs/addons.md` for the full trust model.

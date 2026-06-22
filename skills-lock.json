@@ -43,6 +43,12 @@
       "skillPath": "skills/caveman-stats/SKILL.md",
       "computedHash": "47ce2de3d6cb39a75047b5c962e4eb3da15594e7397c94103e9a104d42626553"
     },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/impeccable/SKILL.md",
+      "computedHash": "f2a6bed082dd9bf7bf8b9244e6ac6eb80fc24ed8446425effe213655662dcab9"
+    },
     "maintainable-typescript": {
       "source": "miguelspizza/skills",
       "sourceType": "github",

@@ -1,16 +1,14 @@
 # AirLink Panel Addon Quick Start Guide
 
-This guide will help you quickly create your first addon for AirLink Panel.
+This guide walks through building your first addon using the v2 addon system.
 
 ## Prerequisites
 
 - AirLink Panel installed and running
-- Basic knowledge of JavaScript/TypeScript
+- Basic knowledge of TypeScript
 - Familiarity with Express.js
 
 ## Step 1: Create the Addon Directory
-
-Create a new directory in the `panel/storage/addons/` folder with your addon's slug:
 
 ```bash
 mkdir -p panel/storage/addons/my-first-addon/views
@@ -18,162 +16,175 @@ mkdir -p panel/storage/addons/my-first-addon/views
 
 ## Step 2: Create package.json
 
-Create a `package.json` file in your addon directory:
-
 ```json
 {
   "name": "My First Addon",
+  "identifier": "my-first-addon",
   "version": "1.0.0",
   "description": "My first AirLink Panel addon",
   "author": "Your Name",
   "main": "index.ts",
-  "router": "/my-first-addon"
+  "router": "/my-first-addon",
+  "engines": {
+    "panel": ">=1.0.0"
+  },
+  "permissions": [
+    "addon.my-first-addon.view"
+  ],
+  "settingsSchema": [
+    {
+      "key": "message",
+      "type": "string",
+      "label": "Welcome Message",
+      "default": "Hello from My First Addon!",
+      "description": "A welcome message shown on the page"
+    }
+  ],
+  "migrations": [
+    {
+      "name": "create_notes_table",
+      "sql": "CREATE TABLE IF NOT EXISTS MyFirstAddonNotes (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, content TEXT NOT NULL, createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)",
+      "down": "DROP TABLE IF EXISTS MyFirstAddonNotes"
+    }
+  ]
 }
 ```
 
 ## Step 3: Create the Entry Point
 
-Create an `index.ts` file in your addon directory:
-
 ```typescript
 import { Router } from 'express';
 import path from 'path';
 
-export default function(router: Router, api: any) {
-  const { logger, prisma } = api;
+export default function (router: Router, api: any) {
+  const { logger, prisma, config, ui, commands, permissions } = api;
 
   logger.info('My First Addon initialized');
 
-  // Add a route
-  router.get('/', async (req: any, res: any) => {
-    try {
-      const userCount = await prisma.users.count();
-      const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+  // Register permissions
+  permissions.register('addon.my-first-addon.view');
 
-      res.render(path.join(api.viewsPath, 'index.ejs'), {
-        user: req.session?.user,
-        req,
-        userCount,
-        settings,
-        components: {
-          header: api.getComponentPath('views/components/header'),
-          template: api.getComponentPath('views/components/template'),
-          footer: api.getComponentPath('views/components/footer')
-        }
-      });
-    } catch (error) {
-      logger.error('Error in my first addon:', error);
-      res.status(500).send('An error occurred');
-    }
+  // Register a command
+  commands.register({
+    name: 'greet',
+    description: 'Prints the welcome message',
+    handler: async () => {
+      return await config.get('message') || 'Hello!';
+    },
   });
 
-  // Add an API route
-  router.get('/api/hello', (req, res) => {
-    res.json({
-      success: true,
-      message: 'Hello from My First Addon!',
-      timestamp: new Date().toISOString()
+  // Register a slot — inject content into the dashboard
+  ui.registerSlot('dashboard.home.afterContent', async () => {
+    const message = await config.get('message') || 'Hello from My First Addon!';
+    return `<div class="mx-8 mt-4 rounded-xl bg-neutral-900 p-4 border border-neutral-800">
+      <p class="text-sm text-neutral-300">${message}</p>
+    </div>`;
+  });
+
+  // Main page
+  router.get('/', async (req: any, res: any) => {
+    const user = req.session?.user;
+    if (!user) return res.redirect('/login');
+
+    const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+    const message = await config.get('message') || 'Hello from My First Addon!';
+
+    let notes: any[] = [];
+    try {
+      notes = await prisma.$queryRaw`SELECT * FROM MyFirstAddonNotes ORDER BY createdAt DESC`;
+    } catch { /* table might not exist yet */ }
+
+    res.render(path.join(api.viewsPath, 'index.ejs'), {
+      user, req, settings, message, notes,
+      components: api.getComponents(),  // Get all components for default viewport
     });
   });
+
+  // Add a note
+  router.post('/add', async (req: any, res: any) => {
+    const user = req.session?.user;
+    if (!user) return res.status(401).json({ success: false });
+
+    const { content } = req.body;
+    if (!content) return res.status(400).json({ success: false });
+
+    await prisma.$executeRaw`INSERT INTO MyFirstAddonNotes (content) VALUES (${content})`;
+    res.redirect('/my-first-addon');
+  });
+
+  // Return lifecycle hooks
+  return {
+    onInstall: () => logger.info('My First Addon installed!'),
+    onEnable: () => logger.info('My First Addon enabled!'),
+    onDisable: () => logger.info('My First Addon disabled!'),
+    onUninstall: async () => {
+      await config.deleteAll();
+      logger.info('My First Addon uninstalled, config cleaned up');
+    },
+  };
 }
 ```
 
 ## Step 4: Create a View
 
-Create a view file at `views/index.ejs`:
+Create `views/index.ejs`:
 
 ```html
 <%- include(components.header, { title: 'My First Addon', user: user }) %>
 
 <main class="h-screen m-auto">
   <div class="flex h-screen">
-    <!-- Sidebar -->
-    <div class="w-60 h-full">
-      <%- include(components.template) %>
-    </div>
-    <!-- Content -->
+    <div class="w-60 h-full"><%- include(components.template) %></div>
     <div class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
           <h1 class="text-base font-medium leading-6 text-white">My First Addon</h1>
-          <p class="mt-1 tracking-tight text-sm text-neutral-500">Welcome to my first AirLink Panel addon!</p>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= message %></p>
         </div>
       </div>
       <div class="px-8 mt-5">
-        <div class="rounded-xl bg-neutral-900 p-6">
-          <h2 class="text-lg font-medium text-white mb-4">User Count</h2>
-          <p class="text-3xl font-bold text-white"><%= userCount %></p>
-          <p class="text-sm text-neutral-400 mt-1">Total registered users</p>
-          
-          <div class="mt-6">
-            <h3 class="text-lg font-medium text-white mb-4">API Example</h3>
-            <p class="text-sm text-neutral-400 mb-2">This addon provides an API endpoint at <code>/my-first-addon/api/hello</code></p>
-            <button id="fetchApiBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200">
-              Fetch API Data
-            </button>
-            <pre id="apiResult" class="mt-4 bg-neutral-800 p-4 rounded-lg text-neutral-300 text-sm hidden"></pre>
-          </div>
+        <div class="rounded-xl bg-neutral-900 p-6 border border-neutral-800">
+          <h2 class="text-lg font-medium text-white mb-4">Add Note</h2>
+          <form action="/my-first-addon/add" method="POST" class="mb-6">
+            <input type="text" name="content" required
+              class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-white text-sm"
+              placeholder="Write a note...">
+            <button type="submit" class="mt-2 rounded-xl bg-white hover:bg-neutral-200 text-neutral-800 px-4 py-2 text-sm font-medium">Add</button>
+          </form>
+          <h2 class="text-lg font-medium text-white mb-4">Notes</h2>
+          <% if (notes.length > 0) { %>
+            <% notes.forEach(function(note) { %>
+              <div class="bg-neutral-800 rounded-xl p-3 mb-2">
+                <p class="text-sm text-white"><%= note.content %></p>
+                <p class="text-xs text-neutral-500 mt-1"><%= new Date(note.createdAt).toLocaleString() %></p>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <p class="text-sm text-neutral-500">No notes yet.</p>
+          <% } %>
         </div>
       </div>
     </div>
   </div>
 </main>
 
-<script>
-  document.getElementById('fetchApiBtn').addEventListener('click', async () => {
-    try {
-      const response = await fetch('/my-first-addon/api/hello');
-      const data = await response.json();
-
-      const resultElement = document.getElementById('apiResult');
-      resultElement.textContent = JSON.stringify(data, null, 2);
-      resultElement.classList.remove('hidden');
-    } catch (error) {
-      console.error('Error fetching API data:', error);
-      alert('Failed to fetch API data');
-    }
-  });
-</script>
-
 <%- include(components.footer) %>
 ```
 
 ## Step 5: Enable Your Addon
 
-1. Restart the AirLink Panel server
-2. Go to the admin panel at `/admin/addons`
-3. Your addon should appear in the list
-4. Make sure it's enabled
-5. Visit your addon at `/my-first-addon`
+1. Restart the panel
+2. Go to `/admin/addons`
+3. Find "My First Addon" and click Enable
+4. Visit `/my-first-addon`
 
 ## Next Steps
 
-Now that you have a basic addon working, you can:
+- Add more [UI slots](addons.md#ui-slots) to inject content into other pages
+- Use [scheduled tasks](addons.md#scheduled-tasks) for periodic maintenance
+- Register [commands](addons.md#commands) for admin-triggered actions
+- See the [reference addon](../storage/addons/reference-addon) for a complete working example
 
-1. Add database migrations to create custom tables
-2. Add UI components to the sidebar or server menu
-3. Create more complex features using the Addon API
-4. Style your addon using Tailwind CSS (already included in the panel)
+## Important: Trust Model
 
-## Learn More
-
-For more detailed information, check out these resources:
-
-- [Complete Addon Documentation](addons.md)
-- [Database Migrations Guide](addon-migrations.md)
-- [Example Addons](../storage/addons/test-addon)
-
-## Troubleshooting
-
-If your addon doesn't appear in the admin panel:
-
-1. Check the server logs for errors
-2. Make sure your `package.json` is valid JSON
-3. Verify that your entry point file exists and exports a function
-4. Restart the panel server
-
-If you see errors when accessing your addon:
-
-1. Check the server logs for detailed error messages
-2. Verify that your routes are defined correctly
-3. Make sure your view files exist and have the correct paths
+**Addons are not sandboxed.** Only install addons from sources you trust. Addons have full database and system access.

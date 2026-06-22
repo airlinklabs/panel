@@ -19,7 +19,7 @@ const airlinkCloudModule: Module = {
   info: {
     name: 'Airlink Cloud Module',
     description: 'Airlink Cloud integration settings.',
-    version: '1.0.0',
+    version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirlinkLab',
     license: 'MIT',
