@@ -8,29 +8,29 @@
   .cs-trigger {
     display: flex; align-items: center; justify-content: space-between;
     width: 100%; padding: 9px 14px; border-radius: 10px; cursor: pointer;
-    font-size: 14px; border: 1px solid #e5e5e5;
-    background: #f5f5f5; color: #171717;
+    font-size: 14px; border: 1px solid var(--theme-border, #e5e5e5);
+    background: var(--theme-bg-secondary, #f5f5f5); color: var(--theme-text-strong, #171717);
     transition: background 0.15s, border-color 0.15s;
   }
-  .dark .cs-trigger { background: rgba(255,255,255,0.06); color: #e5e5e5; border-color: rgba(255,255,255,0.08); }
-  .cs-trigger:hover { background: #ebebeb; border-color: #d4d4d4; }
-  .dark .cs-trigger:hover { background: rgba(255,255,255,0.09); }
-  .cs-trigger.open { border-color: #a3a3a3; }
-  .dark .cs-trigger.open { border-color: rgba(255,255,255,0.2); }
+  .dark .cs-trigger { background: var(--theme-bg-secondary, rgba(255,255,255,0.06)); color: var(--theme-text, #e5e5e5); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
+  .cs-trigger:hover { background: var(--theme-bg-hover, #ebebeb); border-color: var(--theme-border, #d4d4d4); }
+  .dark .cs-trigger:hover { background: var(--theme-bg-hover, rgba(255,255,255,0.09)); }
+  .cs-trigger.open { border-color: var(--theme-border, #a3a3a3); }
+  .dark .cs-trigger.open { border-color: var(--theme-border, rgba(255,255,255,0.2)); }
   .cs-trigger svg { width: 14px; height: 14px; opacity: 0.4; transition: transform 0.18s; flex-shrink: 0; }
   .cs-trigger.open svg { transform: rotate(180deg); }
   .cs-placeholder { opacity: 0.45; }
   .cs-dropdown {
     position: absolute; top: calc(100% + 5px); left: 0; right: 0; z-index: 9999;
-    background: #fff; border: 1px solid #e5e5e5; border-radius: 10px;
+    background: var(--theme-bg-card, #fff); border: 1px solid var(--theme-border, #e5e5e5); border-radius: 10px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.1); overflow: hidden;
     max-height: 200px; overflow-y: auto;
     animation: cs-open 0.14s cubic-bezier(0.16,1,0.3,1);
   }
-  .dark .cs-dropdown { background: #1e1e1e; border-color: rgba(255,255,255,0.08); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  .dark .cs-dropdown { background: var(--theme-bg-card, #1e1e1e); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
   @keyframes cs-open { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
-  .cs-option { padding: 9px 14px; font-size: 13px; cursor: pointer; color: #171717; transition: background 0.1s; }
-  .dark .cs-option { color: #e5e5e5; }
+  .cs-option { padding: 9px 14px; font-size: 13px; cursor: pointer; color: var(--theme-text-strong, #171717); transition: background 0.1s; }
+  .dark .cs-option { color: var(--theme-text, #e5e5e5); }
   .cs-option:hover { background: rgba(0,0,0,0.05); }
   .dark .cs-option:hover { background: rgba(255,255,255,0.06); }
   .cs-option.selected { background: rgba(0,0,0,0.06); font-weight: 500; }
@@ -40,53 +40,53 @@
   /* ── Form field ──────────────────────────────────────────── */
   .form-input {
     width: 100%; padding: 9px 14px; border-radius: 10px;
-    border: 1px solid #e5e5e5; background: #f5f5f5;
-    font-size: 14px; color: #171717; outline: none;
+    border: 1px solid var(--theme-border, #e5e5e5); background: var(--theme-bg-secondary, #f5f5f5);
+    font-size: 14px; color: var(--theme-text-strong, #171717); outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
     box-sizing: border-box; font-family: inherit;
   }
-  .dark .form-input { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); color: #e5e5e5; }
-  .form-input:focus { border-color: #a3a3a3; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
-  .dark .form-input:focus { border-color: rgba(255,255,255,0.2); box-shadow: 0 0 0 3px rgba(255,255,255,0.04); }
-  .form-input::placeholder { color: #a3a3a3; }
-  .form-input.invalid { border-color: #f87171; }
+  .dark .form-input { background: var(--theme-bg-secondary, rgba(255,255,255,0.06)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); color: var(--theme-text, #e5e5e5); }
+  .form-input:focus { border-color: var(--theme-border, #a3a3a3); box-shadow: 0 0 0 3px var(--theme-border-subtle, rgba(0,0,0,0.05)); }
+  .dark .form-input:focus { border-color: var(--theme-border, rgba(255,255,255,0.2)); box-shadow: 0 0 0 3px var(--theme-border-subtle, rgba(255,255,255,0.04)); }
+  .form-input::placeholder { color: var(--theme-text-placeholder, #a3a3a3); }
+  .form-input.invalid { border-color: var(--theme-danger, #f87171); }
 
-  .form-label { display: block; font-size: 13px; font-weight: 500; color: #525252; margin-bottom: 6px; }
-  .dark .form-label { color: #a3a3a3; }
+  .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--theme-text-muted, #525252); margin-bottom: 6px; }
+  .dark .form-label { color: var(--theme-text, #a3a3a3); }
 
   /* ── Resource stepper ────────────────────────────────────── */
-  .stepper { display: flex; align-items: center; gap: 0; border: 1px solid #e5e5e5; border-radius: 10px; overflow: hidden; background: #f5f5f5; }
-  .dark .stepper { border-color: rgba(255,255,255,0.08); background: rgba(255,255,255,0.06); }
+  .stepper { display: flex; align-items: center; gap: 0; border: 1px solid var(--theme-border, #e5e5e5); border-radius: 10px; overflow: hidden; background: var(--theme-bg-secondary, #f5f5f5); }
+  .dark .stepper { border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); background: var(--theme-bg-secondary, rgba(255,255,255,0.06)); }
   .stepper-btn {
     padding: 9px 13px; background: none; border: none; cursor: pointer;
-    font-size: 16px; color: #525252; transition: background 0.1s;
+    font-size: 16px; color: var(--theme-text-muted, #525252); transition: background 0.1s;
     flex-shrink: 0; line-height: 1;
   }
-  .dark .stepper-btn { color: #a3a3a3; }
-  .stepper-btn:hover { background: rgba(0,0,0,0.06); }
-  .dark .stepper-btn:hover { background: rgba(255,255,255,0.07); }
+  .dark .stepper-btn { color: var(--theme-text, #a3a3a3); }
+  .stepper-btn:hover { background: var(--theme-bg-hover, rgba(0,0,0,0.06)); }
+  .dark .stepper-btn:hover { background: var(--theme-bg-hover, rgba(255,255,255,0.07)); }
   .stepper-input {
     flex: 1; text-align: center; border: none; background: none; outline: none;
-    font-size: 14px; font-weight: 500; color: #171717; padding: 9px 4px;
+    font-size: 14px; font-weight: 500; color: var(--theme-text-strong, #171717); padding: 9px 4px;
     font-family: inherit; min-width: 0;
   }
-  .dark .stepper-input { color: #e5e5e5; }
+  .dark .stepper-input { color: var(--theme-text, #e5e5e5); }
 
   /* ── Confirm dialog ──────────────────────────────────────── */
   .confirm-overlay {
     position: fixed; inset: 0; z-index: 100;
-    background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+    background: var(--theme-overlay, rgba(0,0,0,0.45)); backdrop-filter: blur(4px);
     display: flex; align-items: center; justify-content: center; padding: 16px;
     opacity: 0; pointer-events: none; transition: opacity 0.2s;
   }
   .confirm-overlay.open { opacity: 1; pointer-events: auto; }
   .confirm-box {
-    background: white; border: 1px solid #e5e5e5; border-radius: 14px;
+    background: var(--theme-bg-card, white); border: 1px solid var(--theme-border, #e5e5e5); border-radius: 14px;
     width: 100%; max-width: 360px; padding: 22px;
     transform: scale(0.96); opacity: 0;
     transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), opacity 0.2s;
   }
-  .dark .confirm-box { background: #1c1c1c; border-color: rgba(255,255,255,0.08); }
+  .dark .confirm-box { background: var(--theme-bg-card, #1c1c1c); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
   .confirm-overlay.open .confirm-box { transform: scale(1); opacity: 1; }
 </style>
 
@@ -276,280 +276,6 @@
 <%- include('../components/toast') %>
 <%- include('../components/loadingPopup') %>
 
-<script nonce="<%- nonce %>">
-(function () {
-
-  /* ── Custom select builder ──────────────────────────────── */
-  function buildCustomSelect(container) {
-    const select = document.getElementById(container.dataset.for);
-    if (!select) return;
-
-    const trigger  = document.createElement('div');
-    trigger.className = 'cs-trigger';
-    const label = document.createElement('span');
-    label.className = 'cs-label';
-    trigger.appendChild(label);
-
-    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    arrow.setAttribute('viewBox', '0 0 24 24'); arrow.setAttribute('fill', 'none');
-    arrow.setAttribute('stroke', 'currentColor'); arrow.setAttribute('stroke-width', '2');
-    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round');
-    p.setAttribute('d', 'M19 9l-7 7-7-7');
-    arrow.appendChild(p); trigger.appendChild(arrow);
-
-    const dropdown = document.createElement('div');
-    dropdown.className = 'cs-dropdown';
-    dropdown.style.display = 'none';
-
-    container.appendChild(trigger);
-    container.appendChild(dropdown);
-
-    function syncLabel() {
-      const sel = select.options[select.selectedIndex];
-      if (sel && !sel.disabled && sel.value) {
-        label.textContent = sel.text;
-        label.classList.remove('cs-placeholder');
-      } else {
-        const ph = Array.from(select.options).find(o => o.disabled && o.selected);
-        label.textContent = ph ? ph.text : 'Select…';
-        label.classList.add('cs-placeholder');
-      }
-      Array.from(dropdown.children).forEach(item => {
-        item.classList.toggle('selected', item.dataset.value === select.value);
-      });
-    }
-
-    function syncFromSelect() {
-      dropdown.innerHTML = '';
-      Array.from(select.options).forEach(opt => {
-        const item = document.createElement('div');
-        item.className = 'cs-option' + (opt.disabled ? ' disabled' : '');
-        item.textContent = opt.text;
-        item.dataset.value = opt.value;
-        if (!opt.disabled) {
-          item.addEventListener('click', e => {
-            e.stopPropagation();
-            select.value = opt.value;
-            select.dispatchEvent(new Event('change', { bubbles: true }));
-            syncLabel();
-            close();
-          });
-        }
-        dropdown.appendChild(item);
-      });
-      syncLabel();
-    }
-
-    function open() {
-      document.querySelectorAll('.cs-dropdown').forEach(d => {
-        if (d !== dropdown) { d.style.display = 'none'; d.parentElement.querySelector('.cs-trigger')?.classList.remove('open'); }
-      });
-      dropdown.style.display = 'block';
-      trigger.classList.add('open');
-      syncFromSelect();
-    }
-
-    function close() {
-      dropdown.style.display = 'none';
-      trigger.classList.remove('open');
-    }
-
-    trigger.addEventListener('click', e => {
-      e.stopPropagation();
-      dropdown.style.display === 'none' ? open() : close();
-    });
-
-    document.addEventListener('click', close);
-
-    const obs = new MutationObserver(syncFromSelect);
-    obs.observe(select, { childList: true, subtree: true, attributes: true });
-    select.addEventListener('change', syncLabel);
-    syncFromSelect();
-  }
-
-  document.querySelectorAll('.custom-select').forEach(buildCustomSelect);
-
-  /* ── Image → docker variant cascade ────────────────────── */
-  document.getElementById('imageId').addEventListener('change', function () {
-    const opt = this.options[this.selectedIndex];
-    const raw = opt.dataset.docker;
-    const docker = document.getElementById('dockerImage');
-    docker.innerHTML = '';
-    const ph = document.createElement('option');
-    ph.value = ''; ph.textContent = 'Select variant'; ph.disabled = true; ph.selected = true;
-    docker.appendChild(ph);
-    if (raw) {
-      try {
-        JSON.parse(raw).forEach(obj => {
-          Object.keys(obj).forEach(key => {
-            const o = document.createElement('option');
-            o.value = key; o.textContent = key;
-            docker.appendChild(o);
-          });
-        });
-      } catch {}
-    }
-    docker.dispatchEvent(new Event('change', { bubbles: true }));
-    updateRequiredPorts();
-  });
-
-  function getRequiredPorts() {
-    const image = document.getElementById('imageId');
-    const opt = image.options[image.selectedIndex];
-    try { return JSON.parse(opt?.dataset.portRequirements || '[]'); } catch { return []; }
-  }
-
-  function updateRequiredPorts() {
-    const ports = getRequiredPorts();
-    document.getElementById('assignPortsLabel').textContent = ports.length ? `Assign ports (${ports.length})` : 'Assign ports';
-  }
-
-  document.getElementById('assignPortsBtn').addEventListener('click', () => {
-    const ports = getRequiredPorts();
-    const list = document.getElementById('requiredPortsList');
-    list.innerHTML = '';
-    if (!ports.length) {
-      list.innerHTML = '<p class="text-xs text-neutral-500">This image does not require ports.</p>';
-    } else {
-      ports.forEach((port, index) => {
-        const row = document.createElement('div');
-        row.className = 'grid grid-cols-2 gap-2 rounded-lg border border-neutral-200 dark:border-white/10 p-3 text-xs text-neutral-600 dark:text-neutral-300';
-        row.innerHTML = `<span>${port.name || `Port ${index + 1}`}</span><span class="font-mono text-right">internal ${port.internalPort || ''}</span>`;
-        list.appendChild(row);
-      });
-    }
-    document.getElementById('portsOverlay').classList.add('open');
-  });
-  document.getElementById('portsOk').addEventListener('click', () => document.getElementById('portsOverlay').classList.remove('open'));
-
-  /* ── Stepper buttons ────────────────────────────────────── */
-  document.querySelectorAll('.stepper-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const input = document.getElementById(btn.dataset.target);
-      const step  = parseInt(btn.dataset.step || '1');
-      const min   = parseInt(btn.dataset.min  || input.min  || '0');
-      const max   = parseInt(btn.dataset.max  || input.max  || '999999');
-      let val = parseInt(input.value) || 0;
-      val = btn.dataset.action === 'inc' ? Math.min(max, val + step) : Math.max(min, val - step);
-      input.value = val;
-      input.dispatchEvent(new Event('input')); // trigger MB sync
-    });
-  });
-
-  // MB/GB unit sync — hidden #Memory and #Storage always hold MB values
-  function syncUnit(displayId, unitId, hiddenId) {
-    const display = document.getElementById(displayId);
-    const unit    = document.getElementById(unitId);
-    const hidden  = document.getElementById(hiddenId);
-    function update() {
-      hidden.value = Math.round(parseFloat(display.value || 0) * parseInt(unit.value));
-    }
-    display.addEventListener('input', update);
-    unit.addEventListener('change', function() {
-      const prevMult = this.value === '1024' ? 1 : 1024;
-      const newMult  = parseInt(this.value);
-      if (prevMult !== newMult) display.value = Math.round(parseFloat(display.value || 0) * prevMult / newMult) || 1;
-      update();
-    });
-    update();
-  }
-  syncUnit('MemoryDisplay',  'MemoryUnit',  'Memory');
-  syncUnit('StorageDisplay', 'StorageUnit', 'Storage');
-
-  /* ── Confirm dialog ─────────────────────────────────────── */
-  const overlay      = document.getElementById('confirmOverlay');
-  const confirmTitle = document.getElementById('confirmTitle');
-  const confirmBody  = document.getElementById('confirmBody');
-  const confirmOk    = document.getElementById('confirmOk');
-  const confirmCancel = document.getElementById('confirmCancel');
-  let confirmResolve = null;
-
-  function showConfirm(title, body) {
-    return new Promise(resolve => {
-      confirmTitle.textContent = title;
-      confirmBody.textContent  = body;
-      overlay.classList.add('open');
-      confirmResolve = resolve;
-    });
-  }
-
-  confirmOk.addEventListener('click', () => { overlay.classList.remove('open'); if (confirmResolve) confirmResolve(true); });
-  confirmCancel.addEventListener('click', () => { overlay.classList.remove('open'); if (confirmResolve) confirmResolve(false); });
-  overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.classList.remove('open'); if (confirmResolve) confirmResolve(false); } });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { overlay.classList.remove('open'); if (confirmResolve) confirmResolve(false); } });
-
-  /* ── Create button ──────────────────────────────────────── */
-  document.getElementById('createBtn').addEventListener('click', async function () {
-    const btn     = this;
-    const errBox  = document.getElementById('errorMsg');
-    const errText = document.getElementById('errorText');
-    errBox.classList.add('hidden');
-
-    const name        = document.getElementById('serverName').value.trim();
-    const description = document.getElementById('serverDescription').value.trim();
-    const nodeId      = document.getElementById('nodeId').value;
-    const imageId     = document.getElementById('imageId').value;
-    const dockerImage = document.getElementById('dockerImage').value;
-    const Memory      = parseInt(document.getElementById('Memory').value);
-    const Cpu         = parseInt(document.getElementById('Cpu').value);
-    const Storage     = parseInt(document.getElementById('Storage').value);
-
-    // Client-side validation with custom dialog
-    if (!name) {
-      errText.textContent = 'Server name is required.';
-      errBox.classList.remove('hidden');
-      document.getElementById('serverName').focus();
-      return;
-    }
-    if (!nodeId) {
-      errText.textContent = 'Select a node.';
-      errBox.classList.remove('hidden');
-      return;
-    }
-    if (!imageId) {
-      errText.textContent = 'Select an image.';
-      errBox.classList.remove('hidden');
-      return;
-    }
-    if (!dockerImage) {
-      errText.textContent = 'Select a docker variant.';
-      errBox.classList.remove('hidden');
-      return;
-    }
-
-    const ok = await showConfirm(
-      'Create server?',
-      `"${name}" will be created and queued for installation. This may take a moment.`
-    );
-    if (!ok) return;
-
-    const loader = showLoadingPopup('Creating server', 'Setting everything up…');
-    loader.updateProgress(10, 'Sending request…');
-
-    try {
-      const r = await fetch('/create-server', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description, nodeId, imageId, dockerImage, Memory, Cpu, Storage }),
-      });
-      const d = await r.json();
-      if (d.success) {
-        loader.updateProgress(100, 'Done!');
-        setTimeout(() => { loader.close(); window.location.href = '/server/' + d.serverUUID; }, 600);
-      } else {
-        loader.close();
-        errText.textContent = d.error || 'Something went wrong.';
-        errBox.classList.remove('hidden');
-      }
-    } catch {
-      loader.close();
-      errText.textContent = 'Network error. Try again.';
-      errBox.classList.remove('hidden');
-    }
-  });
-
-})();
-</script>
+<script nonce="<%- nonce %>" src="/javascript/create-server.js"></script>
 
 <%- include('../components/footer') %>

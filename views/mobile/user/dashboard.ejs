@@ -9,14 +9,26 @@
         <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.userDashboardTitle %></h1>
         <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.userDashboardText %></p>
       </div>
-      <% if (canCreateServer) { %>
-      <a href="/create-server" class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition active:scale-95">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5">
-          <path fill-rule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
-        </svg>
-        New
-      </a>
-      <% } %>
+      <div class="flex items-center gap-2">
+        <% if (servers && servers.length > 0) { %>
+        <div id="viewToggle" class="flex items-center gap-0.5 bg-neutral-100 dark:bg-neutral-800/60 p-0.5 rounded-lg border border-neutral-200 dark:border-white/5">
+          <button id="gridViewBtn" class="p-1.5 rounded-md text-neutral-500 dark:text-neutral-400 transition" aria-label="Grid view">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          </button>
+          <button id="listViewBtn" class="p-1.5 rounded-md text-neutral-500 dark:text-neutral-400 transition" aria-label="List view">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+          </button>
+        </div>
+        <% } %>
+        <% if (canCreateServer) { %>
+        <a href="/create-server" class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition active:scale-95">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5">
+            <path fill-rule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
+          </svg>
+          New
+        </a>
+        <% } %>
+      </div>
     </div>
 
     <% if (req.query.err === "NOTACTIVEYET") { %>
@@ -83,7 +95,8 @@
         </p>
       </div>
     <% } else { %>
-      <div class="space-y-3" id="serverGrid">
+      <!-- Grid view -->
+      <div id="gridView" class="space-y-3">
         <% let mServerIdx = 0; servers.forEach(server => { %>
         <%
           const inFolder = folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID));
@@ -139,6 +152,37 @@
               </div>
             </a>
           </div>
+        <% }); %>
+      </div>
+
+      <!-- List view -->
+      <div id="listView" class="hidden space-y-1">
+        <% let lServerIdx = 0; servers.forEach(server => { %>
+        <%
+          const inFolderL = folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID));
+          if (inFolderL) return;
+        %>
+          <a href="../server/<%= server.UUID %>" class="table-row-animate flex items-center gap-3 bg-white dark:bg-neutral-800/30 rounded-xl border border-neutral-200 dark:border-white/5 px-3 py-2.5 active:scale-[0.98] transition-transform"
+            style="--i:<%= lServerIdx++ %>">
+            <span class="relative flex h-2 w-2 shrink-0">
+              <% if (server.status === 'running') { %>
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <% } else { %>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+              <% } %>
+            </span>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= server.name %></p>
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
+              <span class="text-xs text-neutral-500 dark:text-neutral-400"><%= server.ramUsage %>% RAM</span>
+              <span class="text-[10px] font-medium px-1.5 py-0.5 rounded
+                <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400' %>">
+                <%= server.status === 'running' ? 'On' : 'Off' %>
+              </span>
+            </div>
+          </a>
         <% }); %>
       </div>
 
@@ -238,180 +282,12 @@
   body { overscroll-behavior: none; }
 </style>
 
+<div id="dashboard-data" class="hidden"></div>
 <script nonce="<%- nonce %>">
-(function () {
-  // Disable context menu on mobile
-  document.addEventListener('contextmenu', e => e.preventDefault());
-
-  const allFolders = <%- JSON.stringify(folders || []) %>;
-  const allServers = <%- JSON.stringify((allServers || []).map(s => ({ UUID: s.UUID, name: s.name, status: s.status }))) %>;
-
-  // New folder
-  const newFolderBtn     = document.getElementById('newFolderBtn');
-  const newFolderDialog  = document.getElementById('newFolderDialog');
-  const newFolderName    = document.getElementById('newFolderName');
-  const cancelNewFolder  = document.getElementById('cancelNewFolder');
-  const confirmNewFolder = document.getElementById('confirmNewFolder');
-
-  newFolderBtn?.addEventListener('click', () => { newFolderName.value = ''; newFolderDialog.classList.remove('hidden'); setTimeout(() => newFolderName.focus(), 80); });
-  cancelNewFolder?.addEventListener('click', () => newFolderDialog.classList.add('hidden'));
-  newFolderName?.addEventListener('keydown', e => { if (e.key === 'Enter') confirmNewFolder.click(); });
-
-  confirmNewFolder?.addEventListener('click', async () => {
-    const name = newFolderName.value.trim();
-    if (!name) return;
-    confirmNewFolder.disabled = true;
-    const r = await fetch('/api/folders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
-    const d = await r.json();
-    confirmNewFolder.disabled = false;
-    if (d.success) location.reload(); else showToast(d.error || 'Something went wrong.', 'error');
-  });
-
-  // Open folder popup (tap folder card)
-  document.querySelectorAll('.folder-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const memberUUIDs = JSON.parse(card.dataset.folderMembers || '[]');
-      const folderName  = card.dataset.folderName;
-      activeFolderId    = card.dataset.folderId;
-      const serversIn   = allServers.filter(s => memberUUIDs.includes(s.UUID));
-
-      document.getElementById('folderOverlayTitle').textContent = folderName;
-      const content = document.getElementById('folderOverlayContent');
-      content.innerHTML = '';
-
-      if (serversIn.length === 0) {
-        content.innerHTML = '<p class="text-sm text-neutral-500">No servers in this folder.</p>';
-      } else {
-        serversIn.forEach(s => {
-          const row = document.createElement('div');
-          row.className = 'flex items-center gap-2 bg-neutral-50 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 rounded-xl px-3 py-2.5';
-          const running = s.status === 'running';
-          row.innerHTML = `
-            <a href="/server/${s.UUID}" class="flex items-center gap-2 flex-1 min-w-0 active:opacity-60">
-              <span class="text-sm font-medium text-neutral-800 dark:text-white truncate">${s.name}</span>
-              <span class="ml-auto shrink-0 text-[10px] font-medium px-2 py-0.5 rounded-md ${running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400'}">${running ? 'Running' : 'Stopped'}</span>
-            </a>
-            <button data-uuid="${s.UUID}" class="mob-remove-btn shrink-0 p-2 rounded-lg text-neutral-400 active:bg-red-50 dark:active:bg-red-500/10 active:text-red-500 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" width="14" height="14">
-                <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd"/>
-              </svg>
-            </button>`;
-          row.querySelector('.mob-remove-btn').addEventListener('click', async (e) => {
-            e.preventDefault();
-            const uuid = e.currentTarget.dataset.uuid;
-            const r = await fetch('/api/folders/servers/' + uuid, { method: 'DELETE' });
-            const d = await r.json();
-            if (d.success) { document.getElementById('folderOverlay').classList.add('hidden'); showToast('Removed.', 'success'); setTimeout(() => location.reload(), 600); }
-            else showToast(d.error || 'Something went wrong.', 'error');
-          });
-          content.appendChild(row);
-        });
-      }
-
-      document.getElementById('folderOverlay').classList.remove('hidden');
-    });
-  });
-
-  document.getElementById('closeFolderOverlay')?.addEventListener('click', () => document.getElementById('folderOverlay').classList.add('hidden'));
-
-  // Delete folder
-  let activeFolderId = null;
-
-  document.getElementById('deleteFolderBtn')?.addEventListener('click', () => {
-    document.getElementById('folderOverlay').classList.add('hidden');
-    document.getElementById('deleteFolderSheet').classList.remove('hidden');
-  });
-
-  document.getElementById('cancelDeleteFolder')?.addEventListener('click', () => {
-    document.getElementById('deleteFolderSheet').classList.add('hidden');
-  });
-
-  document.getElementById('confirmDeleteFolder')?.addEventListener('click', async () => {
-    if (!activeFolderId) return;
-    const btn = document.getElementById('confirmDeleteFolder');
-    btn.disabled = true;
-    const r = await fetch('/api/folders/' + activeFolderId, { method: 'DELETE' });
-    const d = await r.json();
-    btn.disabled = false;
-    document.getElementById('deleteFolderSheet').classList.add('hidden');
-    if (d.success) location.reload(); else showToast(d.error || "Couldn't delete the folder.", 'error');
-  });
-
-  // Long-press on server cards
-  let longPressTimer = null;
-  let activeServerUUID = null;
-  let activeServerName = null;
-
-  function showLongPressSheet(uuid, name) {
-    activeServerUUID = uuid;
-    activeServerName = name;
-    document.getElementById('longPressServerName').textContent = name;
-
-    const inFolder = allFolders.some(f => f.members.some(m => m.serverUUID === uuid));
-    document.getElementById('lpRemoveFromFolder').classList.toggle('hidden', !inFolder);
-
-    document.getElementById('longPressSheet').classList.remove('hidden');
-  }
-
-  document.querySelectorAll('.server-card').forEach(card => {
-    const uuid = card.dataset.serverUuid;
-    const name = card.dataset.serverName;
-
-    card.addEventListener('touchstart', e => {
-      longPressTimer = setTimeout(() => {
-        longPressTimer = null;
-        showLongPressSheet(uuid, name);
-      }, 500);
-    }, { passive: true });
-
-    card.addEventListener('touchend', () => {
-      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-    });
-
-    card.addEventListener('touchmove', () => {
-      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-    });
-  });
-
-  document.getElementById('lpCancel')?.addEventListener('click', () => document.getElementById('longPressSheet').classList.add('hidden'));
-
-  // Move to folder from long press
-  document.getElementById('lpMoveToFolder')?.addEventListener('click', () => {
-    document.getElementById('longPressSheet').classList.add('hidden');
-    showFolderPickDialog(activeServerUUID);
-  });
-
-  // Remove from folder
-  document.getElementById('lpRemoveFromFolder')?.addEventListener('click', async () => {
-    document.getElementById('longPressSheet').classList.add('hidden');
-    const r = await fetch('/api/folders/servers/' + activeServerUUID, { method: 'DELETE' });
-    const d = await r.json();
-    if (d.success) location.reload(); else showToast(d.error || 'Something went wrong.', 'error');
-  });
-
-  function showFolderPickDialog(uuid) {
-    const list = document.getElementById('folderPickList');
-    list.innerHTML = '';
-    if (allFolders.length === 0) {
-      list.innerHTML = '<p class="text-sm text-neutral-500">No folders yet. Create one first.</p>';
-    } else {
-      allFolders.forEach(f => {
-        const b = document.createElement('button');
-        b.className = 'w-full flex items-center gap-2.5 px-3 py-3 rounded-xl bg-neutral-50 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 text-left active:scale-[0.98] transition-transform';
-        b.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-amber-500 shrink-0"><path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 12h-15a4.483 4.483 0 0 0-3 1.146Z"/></svg><span class="text-sm text-neutral-800 dark:text-white">${f.name}</span>`;
-        b.addEventListener('click', async () => {
-          const r = await fetch('/api/folders/' + f.id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: uuid }) });
-          const d = await r.json();
-          if (d.success) location.reload(); else showToast(d.error || 'Something went wrong.', 'error');
-        });
-        list.appendChild(b);
-      });
-    }
-    document.getElementById('addToFolderDialog').classList.remove('hidden');
-  }
-
-  document.getElementById('cancelAddToFolder')?.addEventListener('click', () => document.getElementById('addToFolderDialog').classList.add('hidden'));
-})();
+  document.getElementById('dashboard-data').dataset.folders = '<%- JSON.stringify(folders || []).replace(/'/g, "\\'") %>';
+  document.getElementById('dashboard-data').dataset.servers = '<%- JSON.stringify((allServers || []).map(s => ({ UUID: s.UUID, name: s.name, status: s.status }))).replace(/'/g, "\\'") %>';
 </script>
+
+<script nonce="<%- nonce %>" src="/javascript/dashboard-mobile.js"></script>
 
 <%- include('../components/footer') %>

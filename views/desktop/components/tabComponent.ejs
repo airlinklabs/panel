@@ -21,35 +21,35 @@
 
 <style>
 .tab-button {
-  color: #737373;
+  color: var(--theme-text-muted, #737373);
 }
 .tab-button:hover {
-  color: #171717;
-  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--theme-text-strong, #171717);
+  background-color: var(--theme-bg-active-nav, rgba(0, 0, 0, 0.05));
 }
 .tab-button--active {
-  background-color: #ffffff;
-  color: #171717;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  background-color: var(--theme-bg-input, #ffffff);
+  color: var(--theme-text-strong, #171717);
+  box-shadow: 0 1px 3px var(--theme-border-subtle, rgba(0,0,0,0.1));
 }
 .tab-button--active:hover {
-  background-color: #ffffff;
-  color: #171717;
+  background-color: var(--theme-bg-input, #ffffff);
+  color: var(--theme-text-strong, #171717);
 }
 .dark .tab-button {
-  color: #a3a3a3;
+  color: var(--theme-text, #a3a3a3);
 }
 .dark .tab-button:hover {
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--theme-text-strong, #ffffff);
+  background-color: var(--theme-bg-hover, rgba(255, 255, 255, 0.08));
 }
 .dark .tab-button--active {
-  background-color: rgba(255, 255, 255, 0.18);
-  color: #ffffff;
+  background-color: var(--theme-bg-active-nav, rgba(255, 255, 255, 0.18));
+  color: var(--theme-text-strong, #ffffff);
   box-shadow: none;
 }
 .dark .tab-button--active:hover {
-  background-color: rgba(255, 255, 255, 0.18);
+  background-color: var(--theme-bg-active-nav, rgba(255, 255, 255, 0.18));
 }
 </style>
 <% } %>

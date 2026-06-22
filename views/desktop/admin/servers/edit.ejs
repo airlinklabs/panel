@@ -512,36 +512,36 @@
 .cs-trigger {
     display: flex; align-items: center; justify-content: space-between;
     width: 100%; padding: 8px 16px; border-radius: 12px; cursor: pointer;
-    font-size: 14px; border: 1px solid rgba(0,0,0,0.07);
-    background: rgba(180,180,180,0.1);
-    color: #1a1a1a; transition: background 0.15s, border-color 0.15s;
+    font-size: 14px; border: 1px solid var(--theme-border-subtle, rgba(0,0,0,0.07));
+    background: var(--theme-bg-secondary, rgba(180,180,180,0.1));
+    color: var(--theme-text-strong, #1a1a1a); transition: background 0.15s, border-color 0.15s;
 }
-.dark .cs-trigger { background: rgba(80,80,80,0.2); color: #fff; border-color: rgba(255,255,255,0.05); }
-.cs-trigger:hover { background: rgba(180,180,180,0.18); }
-.dark .cs-trigger:hover { background: rgba(255,255,255,0.05); }
-.cs-trigger.open { border-color: rgba(0,0,0,0.15); }
-.dark .cs-trigger.open { border-color: rgba(255,255,255,0.12); }
+.dark .cs-trigger { background: var(--theme-bg-secondary, rgba(80,80,80,0.2)); color: var(--theme-text, #fff); border-color: var(--theme-border-subtle, rgba(255,255,255,0.05)); }
+.cs-trigger:hover { background: var(--theme-bg-hover, rgba(180,180,180,0.18)); }
+.dark .cs-trigger:hover { background: var(--theme-bg-hover, rgba(255,255,255,0.05)); }
+.cs-trigger.open { border-color: var(--theme-border, rgba(0,0,0,0.15)); }
+.dark .cs-trigger.open { border-color: var(--theme-border-subtle, rgba(255,255,255,0.12)); }
 .cs-trigger svg { width: 14px; height: 14px; opacity: 0.45; transition: transform 0.18s; flex-shrink: 0; }
 .cs-trigger.open svg { transform: rotate(180deg); }
 .cs-placeholder { opacity: 0.4; }
 .cs-dropdown {
     position: absolute; top: calc(100% + 5px); left: 0; right: 0; z-index: 200;
-    background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.1); overflow: hidden;
+    background: var(--theme-bg-card, #fff); border: 1px solid var(--theme-border-subtle, rgba(0,0,0,0.1)); border-radius: 12px;
+    box-shadow: 0 8px 24px var(--theme-shadow-md, rgba(0,0,0,0.1)); overflow: hidden;
     max-height: 220px; overflow-y: auto;
     animation: cs-open 0.15s cubic-bezier(0.16,1,0.3,1);
 }
-.dark .cs-dropdown { background: #1e1e1e; border-color: rgba(255,255,255,0.08); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+.dark .cs-dropdown { background: var(--theme-bg-card, #1e1e1e); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); box-shadow: 0 8px 24px var(--theme-shadow-md, rgba(0,0,0,0.4)); }
 @keyframes cs-open { from { opacity:0; transform: translateY(-4px); } to { opacity:1; transform: translateY(0); } }
 .cs-option {
     padding: 8px 14px; font-size: 13px; cursor: pointer;
-    color: #1a1a1a; transition: background 0.1s;
+    color: var(--theme-text-strong, #1a1a1a); transition: background 0.1s;
 }
-.dark .cs-option { color: #e5e5e5; }
-.cs-option:hover { background: rgba(0,0,0,0.05); }
-.dark .cs-option:hover { background: rgba(255,255,255,0.06); }
-.cs-option.selected { background: rgba(0,0,0,0.07); font-weight: 500; }
-.dark .cs-option.selected { background: rgba(255,255,255,0.08); }
+.dark .cs-option { color: var(--theme-text, #e5e5e5); }
+.cs-option:hover { background: var(--theme-bg-hover, rgba(0,0,0,0.05)); }
+.dark .cs-option:hover { background: var(--theme-bg-hover, rgba(255,255,255,0.06)); }
+.cs-option.selected { background: var(--theme-bg-active, rgba(0,0,0,0.07)); font-weight: 500; }
+.dark .cs-option.selected { background: var(--theme-bg-hover, rgba(255,255,255,0.08)); }
 .cs-option.disabled { opacity: 0.35; cursor: default; pointer-events: none; }
 
 @keyframes al-modal-in  { from { opacity:0; transform:scale(0.96) translateY(6px); } to { opacity:1; transform:scale(1) translateY(0); } }
@@ -657,22 +657,4 @@
 })();
 </script>
 
-<script nonce="<%- nonce %>">
-(function () {
-  const display = document.getElementById('serverCPUDisplay');
-  const hidden  = document.getElementById('serverCPU');
-  const unit    = document.getElementById('serverCPUUnit');
-
-  function syncHidden() {
-    const val = parseFloat(display.value) || 0;
-    hidden.value = unit.value === 'cores'
-      ? String(Math.round(val * 100))
-      : String(Math.round(val));
-  }
-
-  unit.addEventListener('change', syncHidden);
-  display.addEventListener('input', syncHidden);
-
-  syncHidden();
-})();
-</script>
+<script nonce="<%- nonce %>" src="/javascript/server-edit-cpu.js"></script>

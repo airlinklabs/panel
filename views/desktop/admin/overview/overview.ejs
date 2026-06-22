@@ -1,4 +1,4 @@
-<%- include('../../components/header', { title: req.translations.adminOverviewTitle || 'Overview' }) %>
+<%- include('../../components/header', { title: req.translations.adminOverviewTitle || 'About' }) %>
 
 <main class="min-h-screen m-auto">
   <div class="flex min-h-screen">
@@ -9,32 +9,44 @@
       <div class="px-12 pt-6 pb-8">
 
         <div class="mb-6">
-          <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminOverviewTitle %></h1>
-          <p class="text-sm text-neutral-500 mt-0.5"><%= req.translations.adminOverviewText %></p>
+          <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminOverviewTitle || 'About' %></h1>
+          <p class="text-sm text-neutral-500 mt-0.5"><%= req.translations.adminOverviewText || 'Panel information and credits.' %></p>
         </div>
 
         <!-- Stats grid -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-            <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.users || 'Users' %></p>
-            <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= userCount %></p>
-            <p class="text-xs text-neutral-500 mt-1"><%= req.translations.totalRegisteredUsers || 'Registered' %></p>
-          </div>
-          <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-            <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.instances || 'Servers' %></p>
-            <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= instanceCount %></p>
-            <p class="text-xs text-neutral-500 mt-1">Active instances</p>
-          </div>
-          <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-            <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.nodes || 'Nodes' %></p>
-            <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= nodeCount %></p>
-            <p class="text-xs text-neutral-500 mt-1">Connected nodes</p>
-          </div>
-          <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-            <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.images || 'Images' %></p>
-            <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= imageCount %></p>
-            <p class="text-xs text-neutral-500 mt-1">Available images</p>
-          </div>
+          <a href="/admin/users" class="group rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-[10px] text-neutral-500 uppercase tracking-wider"><%= req.translations.users || 'Users' %></p>
+              <span class="text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-colors"><%- icon('arrow-right', { size: 14 }) %></span>
+            </div>
+            <p class="text-3xl font-bold text-neutral-800 dark:text-white tabular-nums"><%= userCount %></p>
+            <p class="text-xs text-neutral-500 mt-1.5"><%= req.translations.totalRegisteredUsers || 'Registered' %></p>
+          </a>
+          <a href="/admin/servers" class="group rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-[10px] text-neutral-500 uppercase tracking-wider"><%= req.translations.instances || 'Servers' %></p>
+              <span class="text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-colors"><%- icon('arrow-right', { size: 14 }) %></span>
+            </div>
+            <p class="text-3xl font-bold text-neutral-800 dark:text-white tabular-nums"><%= instanceCount %></p>
+            <p class="text-xs text-neutral-500 mt-1.5">Active instances</p>
+          </a>
+          <a href="/admin/nodes" class="group rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-[10px] text-neutral-500 uppercase tracking-wider"><%= req.translations.nodes || 'Nodes' %></p>
+              <span class="text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-colors"><%- icon('arrow-right', { size: 14 }) %></span>
+            </div>
+            <p class="text-3xl font-bold text-neutral-800 dark:text-white tabular-nums"><%= nodeCount %></p>
+            <p class="text-xs text-neutral-500 mt-1.5">Connected nodes</p>
+          </a>
+          <a href="/admin/images" class="group rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-[10px] text-neutral-500 uppercase tracking-wider"><%= req.translations.images || 'Images' %></p>
+              <span class="text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-colors"><%- icon('arrow-right', { size: 14 }) %></span>
+            </div>
+            <p class="text-3xl font-bold text-neutral-800 dark:text-white tabular-nums"><%= imageCount %></p>
+            <p class="text-xs text-neutral-500 mt-1.5">Available images</p>
+          </a>
         </div>
 
         <!-- Panel info + update card -->
@@ -129,111 +141,9 @@
 <%- include('../../components/toast') %>
 <%- include('../../components/footer') %>
 
-<script nonce="<%- nonce %>">
-  const currentVersion = '<%= airlinkVersion %>';
-  document.querySelectorAll('.current-version').forEach(el => el.textContent = currentVersion);
-  const versionInline = document.getElementById('current-version-inline');
-  if (versionInline) versionInline.textContent = currentVersion;
-  const versionById = document.getElementById('current-version');
-  if (versionById) versionById.textContent = currentVersion;
+<div id="page-data" style="display:none"
+  data-airlink-version="<%= airlinkVersion %>"
+  data-running-latest-version="<%= req.translations.runningLatestVersion %>"
+></div>
 
-  document.getElementById('checkUpdateBtn').addEventListener('click', async () => {
-    const statusDiv = document.getElementById('updateStatus');
-    statusDiv.innerHTML = '<span class="text-neutral-500">Checking...</span>';
-    statusDiv.classList.remove('hidden');
-
-    try {
-      const response = await fetch('/admin/check-update');
-      const data = await response.json();
-      const updateBtn = document.getElementById('performUpdateBtn');
-      const updateInfo = document.getElementById('updateInfo');
-
-      if (data.hasUpdate) {
-        statusDiv.innerHTML = '<span class="text-amber-600 dark:text-amber-400">Update available — v' + data.latestVersion + '</span>';
-        fadeIn(statusDiv);
-        updateBtn.classList.remove('hidden');
-        updateBtn.classList.add('inline-flex');
-        fadeIn(updateBtn);
-        if (data.updateInfo) {
-          updateInfo.innerHTML = '<p class="text-xs text-neutral-500">' + data.updateInfo + '</p>';
-          updateInfo.classList.remove('hidden');
-          fadeIn(updateInfo);
-        }
-      } else {
-        statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400"><%= req.translations.runningLatestVersion %></span>';
-        fadeIn(statusDiv);
-        updateBtn.classList.add('hidden');
-        updateInfo.classList.add('hidden');
-      }
-    } catch (error) {
-      statusDiv.innerHTML = '<span class="text-red-500">Failed to check for updates.</span>';
-      fadeIn(statusDiv);
-    }
-  });
-
-  document.getElementById('performUpdateBtn').addEventListener('click', async () => {
-    window.modal.confirm({
-      title: 'Install Update',
-      body: 'The panel will perform the update and restart the server.',
-      confirmLabel: 'Install',
-      danger: false,
-      onConfirm: async () => {
-        const statusDiv = document.getElementById('updateStatus');
-        statusDiv.innerHTML = '<span class="text-neutral-500">Installing...</span>';
-        fadeIn(statusDiv);
-        try {
-          const response = await fetch('/admin/perform-update', { method: 'POST' });
-          const data = await response.json();
-          showToast(data.message || 'Update complete. Restarting.', 'success');
-          statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400">Update successful. Restarting...</span>';
-          fadeIn(statusDiv);
-          setTimeout(() => window.location.reload(), 5000);
-        } catch (error) {
-          statusDiv.innerHTML = '<span class="text-red-500">Update failed.</span>';
-          fadeIn(statusDiv);
-          showToast('Update failed. Check the logs.', 'error');
-        }
-      }
-    });
-  });
-
-  function fadeIn(el) {
-    el.style.transition = 'none';
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(4px)';
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        el.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
-        el.style.opacity = '1';
-        el.style.transform = 'translateY(0)';
-        setTimeout(function() {
-          el.style.transition = '';
-          el.style.opacity = '';
-          el.style.transform = '';
-        }, 220);
-      });
-    });
-  }
-
-  async function measureApiLatency() {
-    try {
-      const start = performance.now();
-      const response = await fetch('/api/v1/ping');
-      const latency = Math.round(performance.now() - start);
-      if (response.ok) {
-        document.getElementById('apiLatency').textContent = latency + ' ms';
-        const bar = document.getElementById('latencyBar');
-        bar.style.width = Math.min((latency / 500) * 100, 100) + '%';
-        bar.classList.remove('bg-emerald-500', 'bg-amber-500', 'bg-red-500', 'bg-neutral-400', 'dark:bg-neutral-500');
-        if (latency < 100) bar.classList.add('bg-emerald-500');
-        else if (latency < 300) bar.classList.add('bg-amber-500');
-        else bar.classList.add('bg-red-500');
-      }
-    } catch (error) {
-      document.getElementById('apiLatency').textContent = 'Error';
-    }
-  }
-
-  measureApiLatency();
-  setInterval(measureApiLatency, 30000);
-</script>
+<script nonce="<%- nonce %>" src="/javascript/admin-overview.js"></script>

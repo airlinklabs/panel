@@ -199,97 +199,18 @@
 <%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
 
-<script nonce="<%- nonce %>">
-  document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('editUserForm');
-    const isAdminToggle = document.getElementById('isAdmin');
-    const adminStatusLabel = document.getElementById('adminStatusLabel');
+<div id="page-data" style="display:none"
+  data-user-id="<%= dataUser.id %>"
+  data-enabled-text="<%= req.translations.enabled || 'Enabled' %>"
+  data-disabled-text="<%= req.translations.disabled || 'Disabled' %>"
+  data-passwords-do-not-match="<%= req.translations.passwordsDoNotMatch || 'Passwords do not match' %>"
+  data-updating-user="<%= req.translations.updatingUser || 'Updating User' %>"
+  data-processing-user-update="<%= req.translations.processingUserUpdate || 'Processing user update...' %>"
+  data-sending-user-information="<%= req.translations.sendingUserInformation || 'Sending user information...' %>"
+  data-user-updated-successfully="<%= req.translations.userUpdatedSuccessfully || 'User updated successfully!' %>"
+  data-error-updating-user="<%= req.translations.errorUpdatingUser || 'Error updating user' %>"
+></div>
 
-    // Update admin status label when toggle changes
-    isAdminToggle.addEventListener('change', function() {
-      adminStatusLabel.textContent = this.checked
-        ? '<%= req.translations.enabled || "Enabled" %>'
-        : '<%= req.translations.disabled || "Disabled" %>';
-    });
-
-    // Handle form submission
-    form.addEventListener('submit', async function(e) {
-      e.preventDefault();
-
-      // Validate passwords match if new password is provided
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
-
-      if (password && password !== confirmPassword) {
-        showToast('<%= req.translations.passwordsDoNotMatch || "Passwords do not match" %>', 'error');
-        return;
-      }
-
-      // Collect form data
-      const formData = new FormData(form);
-      const data = {};
-
-      for (const [key, value] of formData.entries()) {
-        // Skip confirmPassword as it's not needed for the API
-        if (key !== 'confirmPassword') {
-          data[key] = value;
-        }
-      }
-
-      // Handle checkbox value
-      data.isAdmin = isAdminToggle.checked;
-
-      // Handle server limit — send null if blank so the backend clears the override
-      const serverLimitVal = document.getElementById('serverLimit').value;
-      data.serverLimit = serverLimitVal === '' ? null : parseInt(serverLimitVal, 10);
-
-      const maxMemoryVal = document.getElementById('maxMemory').value;
-      data.maxMemory = maxMemoryVal === '' ? null : parseInt(maxMemoryVal, 10);
-
-      const maxCpuVal = document.getElementById('maxCpu').value;
-      data.maxCpu = maxCpuVal === '' ? null : parseInt(maxCpuVal, 10);
-
-      const maxStorageVal = document.getElementById('maxStorage').value;
-      data.maxStorage = maxStorageVal === '' ? null : parseInt(maxStorageVal, 10);
-
-      // Show loading popup
-      const loader = showLoadingPopup('<%= req.translations.updatingUser || "Updating User" %>', '<%= req.translations.processingUserUpdate || "Processing user update..." %>');
-      loader.updateProgress(20, '<%= req.translations.sendingUserInformation || "Sending user information..." %>');
-
-      try {
-        // Send update request
-        const response = await fetch('/admin/users/update/<%= dataUser.id %>/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
-
-        const responseData = await response.json();
-
-        if (responseData.error) {
-          loader.close();
-          showToast(responseData.error, 'error');
-        } else {
-          loader.updateProgress(100, '<%= req.translations.userUpdatedSuccessfully || "User updated successfully!" %>');
-          setTimeout(() => {
-            loader.close();
-            showToast(responseData.message || '<%= req.translations.userUpdatedSuccessfully || "User updated successfully" %>', 'success');
-
-            // Redirect back to users list after a short delay
-            setTimeout(() => {
-              window.location.href = '/admin/users';
-            }, 1000);
-          }, 500);
-        }
-      } catch (error) {
-        loader.close();
-        console.error('Error:', error);
-        showToast('<%= req.translations.errorUpdatingUser || "Error updating user" %>', 'error');
-      }
-    });
-  });
-</script>
+<script nonce="<%- nonce %>" src="/javascript/admin-user-edit.js"></script>
 
 <%- include('../../components/footer') %>

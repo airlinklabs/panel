@@ -9,6 +9,7 @@
     <title><%= settings.title %> - <%= title %></title>
     <link rel="stylesheet" href="/styles.css">
     <link rel="stylesheet" href="/layout-animations.css">
+    <link rel="stylesheet" href="/styles/motion.css">
     <link rel="icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
     <link rel="shortcut icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
     <% if (settings.lightTheme && settings.lightTheme !== 'default') { %>
@@ -17,8 +18,6 @@
     <% if (settings.darkTheme && settings.darkTheme !== 'default') { %>
     <link rel="stylesheet" href="<%= settings.darkTheme %>" id="dark-theme-css" data-theme-mode="dark">
     <% } %>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.fontshare.com">
     <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,300,600,400,700&display=swap" rel="stylesheet">
     <script nonce="<%- nonce %>" src="/js/csrf.js"></script>

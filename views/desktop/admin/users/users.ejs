@@ -73,8 +73,8 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
-            <% users.forEach(function(user) { %>
-              <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors clickable-row cursor-pointer" onclick="handleRowClick(event, '/admin/users/view/<%= user.id %>/')">
+            <% let userIdx = 0; users.forEach(function(user) { %>
+              <tr style="--i:<%= userIdx++ %>" class="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors clickable-row cursor-pointer" onclick="handleRowClick(event, '/admin/users/view/<%= user.id %>/')">
                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                   <div class="flex items-center gap-3">
                     <div class="relative shrink-0">
@@ -124,55 +124,11 @@
 
 <%- include('../../components/toast')%>
 
-<script nonce="<%- nonce %>">
-  function handleRowClick(event, url) {
-    if (!event.target.closest('button, a')) {
-      window.location = url;
-    }
-  }
+<div id="page-data" style="display:none"
+  data-delete-user-title="<%= req.translations.deleteUser || 'Delete User' %>"
+  data-delete-user-body="<%= req.translations.areYouSureDeleteUser || 'Are you sure you want to delete this user?' %>"
+></div>
 
-  document.getElementById('createButton').addEventListener('click', () => {
-    location.href = '/admin/users/create';
-  });
-
-  function deleteUser(userId) {
-    window.modal.confirm({
-      title: '<%= req.translations.deleteUser || "Delete User" %>',
-      body: '<%= req.translations.areYouSureDeleteUser || "Are you sure you want to delete this user?" %>',
-      danger: true,
-      confirmLabel: 'Yeah, delete it',
-      onConfirm: () => {
-        fetch(`/admin/users/delete/${userId}`, { method: 'DELETE' })
-          .then(response => {
-            if (response.ok) {
-              location.reload();
-            } else {
-              showToast('Failed to delete user.', 'error');
-            }
-          })
-          .catch(() => showToast('Failed to delete user.', 'error'));
-      }
-    });
-  }
-
-  (function staggerRows() {
-    var rows = document.querySelectorAll('#userTable tbody tr');
-    rows.forEach(function(row, i) {
-      row.style.opacity = '0';
-      row.style.transform = 'translateY(5px)';
-      row.style.transition = 'none';
-      setTimeout(function() {
-        row.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
-        row.style.opacity = '1';
-        row.style.transform = 'translateY(0)';
-        setTimeout(function() {
-          row.style.transition = '';
-          row.style.opacity = '';
-          row.style.transform = '';
-        }, 200);
-      }, i * 30);
-    });
-  })();
-</script>
+<script nonce="<%- nonce %>" src="/javascript/admin-users-users.js"></script>
 
 <%- include('../../components/footer') %>

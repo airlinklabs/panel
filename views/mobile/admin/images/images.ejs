@@ -27,8 +27,8 @@
 
     <!-- Image cards -->
     <div class="space-y-2">
-      <% images.forEach(function(image) { %>
-        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <% let imgIdx = 0; images.forEach(function(image) { %>
+        <div class="grid-item-animate rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3" style="--i:<%= imgIdx++ %>">
           <div class="flex items-center gap-3 mb-3">
             <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 flex items-center justify-center shrink-0">
               <%- icon('image', { size: 16, class: 'text-neutral-500 shrink-0' }) %>

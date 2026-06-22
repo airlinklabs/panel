@@ -24,31 +24,6 @@
       </div>
     </a>
 
-    <!-- Server sub-page highlight (shown when on /server/:uuid/* pages) -->
-    <div id="server-sidebar-highlight" class="hidden px-4 py-3 border-b border-neutral-200/30 dark:border-white/5">
-      <div class="flex items-center gap-2 mb-2">
-        <%- icon('server', { class: 'w-4 h-4 text-neutral-500 dark:text-neutral-400' }) %>
-        <span id="server-sidebar-name" class="text-sm font-medium text-neutral-800 dark:text-white truncate"></span>
-      </div>
-      <div class="relative ml-4">
-        <div class="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-neutral-300 dark:from-neutral-600 to-transparent"></div>
-        <div id="server-sidebar-links" class="space-y-1 pl-4">
-          <a href="#" class="flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-all duration-150 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5">
-            <%- icon('terminal', { class: 'w-3 h-3' }) %>
-            <span>Console</span>
-          </a>
-          <a href="#" class="flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-all duration-150 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5">
-            <%- icon('folder', { class: 'w-3 h-3' }) %>
-            <span>Files</span>
-          </a>
-          <a href="#" class="flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg transition-all duration-150 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5">
-            <%- icon('settings', { class: 'w-3 h-3' }) %>
-            <span>Settings</span>
-          </a>
-        </div>
-      </div>
-    </div>
-
     <!-- Scrollable nav -->
     <nav class="flex-1 overflow-y-auto">
       <ul role="list" class="py-2">
@@ -69,7 +44,7 @@
               sidebarItems.forEach(item => {
             %>
               <li class="nav-item">
-                <a href="<%= item.url %>" class="nav-link mt-1 text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200">
+                <a href="<%= item.url %>" class="nav-link mt-1 text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200"<% if (item.matchPrefix) { %> data-match-prefix="<%= item.matchPrefix %>"<% } %>>
                   <%- item.icon %>
                   <span><%= item.label %></span>
                 </a>
@@ -181,52 +156,11 @@
     }
   }
 
-  // Server sub-page sidebar highlight
-  function updateServerSidebar(path) {
-    var highlight = document.getElementById('server-sidebar-highlight');
-    var serverName = document.getElementById('server-sidebar-name');
-    var serverLinks = document.getElementById('server-sidebar-links');
-    if (!highlight || !serverName || !serverLinks) return;
-
-    var match = path.match(/^\/server\/([^\/]+)/);
-    if (match) {
-      var uuid = match[1];
-      highlight.classList.remove('hidden');
-      highlight.style.opacity = '0';
-      highlight.style.transform = 'translateY(-8px)';
-      highlight.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
-      
-      serverName.textContent = uuid.substring(0, 8) + '...';
-      
-      var links = serverLinks.querySelectorAll('a');
-      links.forEach(function(link) {
-        var href = link.getAttribute('href');
-        var isActive = path === href || path.startsWith(href + '/');
-        link.classList.toggle('bg-neutral-200', isActive);
-        link.classList.toggle('dark:bg-white/10', isActive);
-        link.classList.toggle('text-neutral-900', isActive);
-        link.classList.toggle('dark:text-white', isActive);
-        link.classList.toggle('font-medium', isActive);
-      });
-      
-      requestAnimationFrame(function() {
-        highlight.style.opacity = '1';
-        highlight.style.transform = 'translateY(0)';
-      });
-    } else {
-      highlight.style.opacity = '0';
-      highlight.style.transform = 'translateY(-8px)';
-      setTimeout(function() { highlight.classList.add('hidden'); }, 200);
-    }
-  }
-
   document.addEventListener('DOMContentLoaded', function () {
     markSpecialLinks(window.location.pathname);
-    updateServerSidebar(window.location.pathname);
   });
   document.addEventListener('al:navigated', function () {
     markSpecialLinks(window.location.pathname);
-    updateServerSidebar(window.location.pathname);
   });
 })();
 </script>

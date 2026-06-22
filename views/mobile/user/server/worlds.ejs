@@ -31,7 +31,7 @@
     <%- include('../../components/serverTemplate', { features: ['players', 'worlds'] }) %>
 
     <div class="collapsible-row no-anim<% if (worlds.length > 0) { %> open<% } %>" id="serverTableRow"><div><div class="space-y-2" id="serverTable">
-      <% worlds.forEach(function(world) { %>
+      <% let wIdx = 0; worlds.forEach(function(world) { %>
         <%
           var iconPath = '/assets/world_icons/overworld.png';
           if (world.name === 'world_nether' || world.name.includes('nether')) {
@@ -40,7 +40,7 @@
             iconPath = '/assets/world_icons/end.png';
           }
         %>
-        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 flex items-center justify-between gap-3">
+        <div class="grid-item-animate rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 flex items-center justify-between gap-3" style="--i:<%= wIdx++ %>">
           <div class="flex items-center gap-3 min-w-0">
             <img class="w-9 h-9 rounded-lg border border-neutral-200 dark:border-neutral-600 shrink-0" src="<%= iconPath %>" alt="World icon" />
             <div class="min-w-0">

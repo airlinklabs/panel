@@ -57,8 +57,8 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700 bg-white dark:bg-neutral-800">
-              <% worlds.forEach(function(world) { %>
-                <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors">
+              <% let worldIdx = 0; worlds.forEach(function(world) { %>
+                <tr style="--i:<%= worldIdx++ %>" class="hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors">
                   <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                     <div class="flex items-center">
                       <div class="mr-5 flex-shrink-0">

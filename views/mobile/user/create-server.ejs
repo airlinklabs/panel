@@ -5,52 +5,52 @@
 
   .form-input {
     width: 100%; padding: 11px 14px; border-radius: 12px;
-    border: 1px solid #e5e5e5; background: #f9fafb;
-    font-size: 15px; color: #171717; outline: none;
+    border: 1px solid var(--theme-border, #e5e5e5); background: var(--theme-bg-input, #f9fafb);
+    font-size: 15px; color: var(--theme-text-strong, #171717); outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
     box-sizing: border-box; font-family: inherit;
     -webkit-appearance: none;
   }
-  html.dark .form-input { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); color: #e5e5e5; }
-  .form-input:focus { border-color: #a3a3a3; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
-  html.dark .form-input:focus { border-color: rgba(255,255,255,0.2); box-shadow: 0 0 0 3px rgba(255,255,255,0.04); }
-  .form-input::placeholder { color: #a3a3a3; }
+  html.dark .form-input { background: var(--theme-bg-input, rgba(255,255,255,0.06)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); color: var(--theme-text, #e5e5e5); }
+  .form-input:focus { border-color: var(--theme-border, #a3a3a3); box-shadow: 0 0 0 3px var(--theme-border-subtle, rgba(0,0,0,0.05)); }
+  html.dark .form-input:focus { border-color: var(--theme-border-subtle, rgba(255,255,255,0.2)); box-shadow: 0 0 0 3px var(--theme-border-subtle, rgba(255,255,255,0.04)); }
+  .form-input::placeholder { color: var(--theme-text-placeholder, #a3a3a3); }
   .form-input:disabled { opacity: 0.4; }
 
-  .form-label { display: block; font-size: 12px; font-weight: 500; color: #737373; margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.04em; }
-  html.dark .form-label { color: #737373; }
+  .form-label { display: block; font-size: 12px; font-weight: 500; color: var(--theme-text-muted, #737373); margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.04em; }
+  html.dark .form-label { color: var(--theme-text-muted, #737373); }
 
   /* stepper */
-  .stepper { display: flex; align-items: stretch; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden; background: #f9fafb; }
-  html.dark .stepper { border-color: rgba(255,255,255,0.08); background: rgba(255,255,255,0.06); }
+  .stepper { display: flex; align-items: stretch; border: 1px solid var(--theme-border, #e5e5e5); border-radius: 12px; overflow: hidden; background: var(--theme-bg-input, #f9fafb); }
+  html.dark .stepper { border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); background: var(--theme-bg-secondary, rgba(255,255,255,0.06)); }
   .stepper-btn {
     padding: 12px 16px; background: none; border: none; cursor: pointer;
-    font-size: 18px; color: #525252; transition: background 0.1s; flex-shrink: 0; line-height: 1;
+    font-size: 18px; color: var(--theme-text-muted, #525252); transition: background 0.1s; flex-shrink: 0; line-height: 1;
     -webkit-tap-highlight-color: transparent;
   }
-  html.dark .stepper-btn { color: #a3a3a3; }
-  .stepper-btn:active { background: rgba(0,0,0,0.08); }
-  html.dark .stepper-btn:active { background: rgba(255,255,255,0.08); }
+  html.dark .stepper-btn { color: var(--theme-text, #a3a3a3); }
+  .stepper-btn:active { background: var(--theme-bg-hover, rgba(0,0,0,0.08)); }
+  html.dark .stepper-btn:active { background: var(--theme-bg-hover, rgba(255,255,255,0.08)); }
   .stepper-input {
     flex: 1; text-align: center; border: none; background: none; outline: none;
-    font-size: 15px; font-weight: 600; color: #171717; padding: 12px 4px;
+    font-size: 15px; font-weight: 600; color: var(--theme-text-strong, #171717); padding: 12px 4px;
     font-family: inherit; min-width: 0; -webkit-appearance: none;
   }
-  html.dark .stepper-input { color: #e5e5e5; }
+  html.dark .stepper-input { color: var(--theme-text, #e5e5e5); }
 
   /* confirm sheet */
   .sheet-overlay {
     position: fixed; inset: 0; z-index: 60;
-    background: rgba(0,0,0,0.45);
+    background: var(--theme-overlay, rgba(0,0,0,0.45));
     display: flex; align-items: flex-end;
     opacity: 0; pointer-events: none; transition: opacity 0.2s;
   }
   .sheet-overlay.open { opacity: 1; pointer-events: auto; }
   .sheet-box {
-    background: white; border-radius: 20px 20px 0 0; width: 100%; padding: 20px 20px 32px;
+    background: var(--theme-bg-card, white); border-radius: 20px 20px 0 0; width: 100%; padding: 20px 20px 32px;
     transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
   }
-  html.dark .sheet-box { background: #1c1c1c; }
+  html.dark .sheet-box { background: var(--theme-bg-card, #1c1c1c); }
   .sheet-overlay.open .sheet-box { transform: translateY(0); }
 </style>
 

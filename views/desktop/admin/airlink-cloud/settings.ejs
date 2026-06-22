@@ -51,35 +51,9 @@
   </div>
 </main>
 
-<script nonce="<%- nonce %>">
-document.getElementById('saveBtn').addEventListener('click', async () => {
-  const apiKey = document.getElementById('airlinkCloudApiKey').value;
-  const backupEnabled = document.getElementById('airlinkCloudBackupEnabled').checked;
+<div id="page-data" style="display:none" data-csrf-token="<%= req.csrfToken() %>"></div>
 
-  try {
-    const res = await fetch('/admin/airlink-cloud', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': '<%= req.csrfToken() %>'
-      },
-      body: JSON.stringify({
-        airlinkCloudApiKey: apiKey,
-        airlinkCloudBackupEnabled: backupEnabled
-      })
-    });
-
-    const data = await res.json();
-    if (data.success) {
-      showToast('Settings saved. Looking good.', 'success');
-    } else {
-      showToast(data.error || 'Failed to save settings.', 'error');
-    }
-  } catch (err) {
-    showToast('An error occurred while saving settings.', 'error');
-  }
-});
-</script>
+<script nonce="<%- nonce %>" src="/javascript/admin-airlink-cloud-settings.js"></script>
 
 <%- include('../../components/footer') %>
 <%- include('../../components/toast') %>

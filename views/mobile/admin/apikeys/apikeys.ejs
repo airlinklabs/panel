@@ -30,8 +30,8 @@
           <p class="text-sm text-neutral-500">No API keys yet. The robots can't connect without them.</p>
         </div>
       <% } else { %>
-        <% apiKeys.forEach(apiKey => { %>
-          <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+        <% let keyIdx = 0; apiKeys.forEach(apiKey => { %>
+          <div class="grid-item-animate rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3" style="--i:<%= keyIdx++ %>">
             <div class="flex items-start gap-3 mb-3">
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 mb-0.5">

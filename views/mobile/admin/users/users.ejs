@@ -46,8 +46,8 @@
 
     <!-- User cards -->
     <div class="space-y-2">
-      <% users.forEach(function(user) { %>
-        <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <% let userIdx = 0; users.forEach(function(user) { %>
+        <div class="grid-item-animate rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3" style="--i:<%= userIdx++ %>">
           <div class="flex items-center gap-3 mb-3">
             <div class="relative shrink-0">
               <img class="h-9 w-9 rounded-lg" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="">

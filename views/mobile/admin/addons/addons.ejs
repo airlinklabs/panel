@@ -37,6 +37,8 @@
   .dark .a-badge-enabled  { background: rgba(34,197,94,0.12); color: #4ade80; }
   .a-badge-disabled { background: #f5f5f5; color: #737373; }
   .dark .a-badge-disabled { background: rgba(255,255,255,0.06); color: #525252; }
+  .a-badge-notenabled { background: rgba(245,158,11,0.1); color: #b45309; }
+  .dark .a-badge-notenabled { background: rgba(245,158,11,0.12); color: #fbbf24; }
 
   .a-grid {
     display: grid;
@@ -121,7 +123,7 @@
         <% if (addons && addons.length > 0) { %>
           <div class="a-grid" id="addonGrid">
             <% let aIdx = 0; addons.forEach(function(addon) { %>
-              <div class="a-card"
+              <div class="a-card grid-item-animate"
                 style="--i:<%= aIdx++ %>"
                 data-slug="<%= addon.slug %>"
                 data-search="<%= (addon.name + ' ' + (addon.description||'') + ' ' + (addon.author||'')).toLowerCase() %>">
@@ -131,8 +133,8 @@
                   <div class="a-icon">
                     <%- icon('box', { size: 16, class: 'text-neutral-600 shrink-0' }) %>
                   </div>
-                  <span class="status-badge a-badge <%= addon.enabled ? 'a-badge-enabled' : 'a-badge-disabled' %>">
-                    <%= addon.enabled ? 'Enabled' : 'Disabled' %>
+                  <span class="status-badge a-badge <%= addon.hasDisabledPh ? 'a-badge-notenabled' : (addon.enabled ? 'a-badge-enabled' : 'a-badge-disabled') %>">
+                    <%= addon.hasDisabledPh ? 'Not enabled' : (addon.enabled ? 'Enabled' : 'Disabled') %>
                   </span>
                 </div>
 

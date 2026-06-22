@@ -60,8 +60,8 @@
                     </tr>
                   </thead>
                   <tbody id="backups-table-body" class="bg-white dark:bg-neutral-800 divide-y divide-neutral-200 dark:divide-neutral-700">
-                    <% backups.forEach(backup => { %>
-                      <tr data-backup-id="<%= backup.UUID %>">
+                    <% let backupIdx = 0; backups.forEach(backup => { %>
+                      <tr style="--i:<%= backupIdx++ %>" data-backup-id="<%= backup.UUID %>">
                         <td class="px-6 py-4 whitespace-nowrap">
                           <div class="text-sm font-medium text-neutral-900 dark:text-white">
                             <%= backup.name %>

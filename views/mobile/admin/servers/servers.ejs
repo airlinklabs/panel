@@ -74,8 +74,9 @@
 
     <!-- Server cards -->
     <div class="space-y-2">
-      <% servers.forEach(function(server) { %>
-      <div class="server-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 cursor-pointer"
+      <% let srvIdx = 0; servers.forEach(function(server) { %>
+      <div class="grid-item-animate server-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 cursor-pointer"
+        style="--i:<%= srvIdx++ %>"
         data-id="<%= server.id %>" data-uuid="<%= server.UUID %>">
 
         <div class="flex items-center gap-3 mb-3">

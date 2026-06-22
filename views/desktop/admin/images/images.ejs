@@ -5,32 +5,32 @@
   ::-webkit-scrollbar { display: none; }
   .modal-overlay {
     position: fixed; inset: 0; z-index: 50;
-    background: rgba(0,0,0,0.5);
+    background: var(--theme-overlay, rgba(0,0,0,0.5));
     display: flex; align-items: center; justify-content: center; padding: 16px;
     opacity: 0; pointer-events: none; transition: opacity 0.25s;
   }
   .modal-overlay.open { opacity: 1; pointer-events: auto; }
   .modal-box {
-    background: #fff; border: 1px solid #e5e5e5; border-radius: 12px;
+    background: var(--theme-bg-card, #fff); border: 1px solid var(--theme-border, #e5e5e5); border-radius: 12px;
     width: 100%; max-width: 460px;
     transform: scale(0.96); opacity: 0;
     transition: transform 0.25s, opacity 0.25s;
   }
-  html.dark .modal-box { background: #1c1c1c; border-color: rgba(255,255,255,0.08); }
+  html.dark .modal-box { background: var(--theme-bg-card, #1c1c1c); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
   .modal-overlay.open .modal-box { transform: scale(1); opacity: 1; }
-  .field-label { font-size: 11px; font-weight: 500; color: #737373; display: block; margin-bottom: 5px; }
-  html.dark .field-label { color: #a3a3a3; }
+  .field-label { font-size: 11px; font-weight: 500; color: var(--theme-text-muted, #737373); display: block; margin-bottom: 5px; }
+  html.dark .field-label { color: var(--theme-text, #a3a3a3); }
   .field-input {
-    width: 100%; border-radius: 9px; border: 1px solid #e5e5e5;
-    background: #fafafa; padding: 8px 12px;
-    font-size: 13px; color: #171717; outline: none;
+    width: 100%; border-radius: 9px; border: 1px solid var(--theme-border, #e5e5e5);
+    background: var(--theme-bg-input, #fafafa); padding: 8px 12px;
+    font-size: 13px; color: var(--theme-text-strong, #171717); outline: none;
     transition: border-color 0.15s; box-sizing: border-box; font-family: inherit;
   }
-  html.dark .field-input { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); color: #e5e5e5; }
-  .field-input:focus { border-color: #a3a3a3; }
-  html.dark .field-input:focus { border-color: rgba(255,255,255,0.25); }
-  .field-input::placeholder { color: #a3a3a3; }
-  html.dark .field-input::placeholder { color: #525252; }
+  html.dark .field-input { background: var(--theme-bg-hover, rgba(255,255,255,0.04)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.1)); color: var(--theme-text, #e5e5e5); }
+  .field-input:focus { border-color: var(--theme-border, #a3a3a3); }
+  html.dark .field-input:focus { border-color: var(--theme-border-subtle, rgba(255,255,255,0.25)); }
+  .field-input::placeholder { color: var(--theme-text-placeholder, #a3a3a3); }
+  html.dark .field-input::placeholder { color: var(--theme-text-muted, #525252); }
   @media (max-width: 640px) { .col-hide { display: none; } }
 </style>
 
@@ -145,57 +145,6 @@
   </div>
 </div>
 
-<script nonce="<%- nonce %>">
-function handleRowClick(e, url) { if (!e.target.closest('button,a')) window.location = url; }
-
-function openCreate() { document.getElementById('createOverlay').classList.add('open'); }
-function closeCreate() { document.getElementById('createOverlay').classList.remove('open'); }
-document.getElementById('createOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeCreate(); });
-
-let _deleteId = null;
-function openDelete(id, name) {
-  _deleteId = id;
-  document.getElementById('deleteMsg').textContent = '"' + name + '" will be permanently removed.';
-  document.getElementById('deleteOverlay').classList.add('open');
-}
-function closeDelete() { document.getElementById('deleteOverlay').classList.remove('open'); _deleteId = null; }
-document.getElementById('deleteOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeDelete(); });
-document.getElementById('deleteConfirm').addEventListener('click', async function() {
-  if (!_deleteId) return;
-  this.textContent = 'Deleting…'; this.disabled = true;
-  const res = await fetch('/admin/images/delete/' + _deleteId, { method: 'DELETE' });
-  if (res.ok) { showToast('Image deleted.', 'success'); setTimeout(() => location.reload(), 700); }
-  else { showToast('Failed.', 'error'); this.textContent = 'Delete'; this.disabled = false; closeDelete(); }
-});
-
-document.getElementById('imageFilterInput')?.addEventListener('input', function() {
-  const q = this.value.toLowerCase().trim();
-  let n = 0;
-  document.querySelectorAll('.img-row').forEach(r => {
-    const match = !q || r.dataset.search.includes(q);
-    r.style.display = match ? '' : 'none';
-    if (match) n++;
-  });
-  const el = document.getElementById('noResults');
-  if (el) el.classList.toggle('hidden', n > 0 || !q);
-});
-
-document.getElementById('uploadBtn').addEventListener('click', function() {
-  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json'; inp.click();
-  inp.onchange = function() {
-    const f = this.files[0]; if (!f) return;
-    const r = new FileReader();
-    r.onload = function(e) {
-      try { JSON.parse(e.target.result); } catch { showToast('Invalid JSON.', 'error'); return; }
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', '/admin/images/upload', true);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.onload = () => xhr.status === 200 ? (showToast('Image uploaded.', 'success'), setTimeout(() => location.reload(), 800)) : showToast('Upload failed.', 'error');
-      xhr.send(e.target.result);
-    };
-    r.readAsText(f);
-  };
-});
-</script>
+<script nonce="<%- nonce %>" src="/javascript/admin-images.js"></script>
 
 <%- include('../../components/footer') %>

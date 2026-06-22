@@ -11,14 +11,12 @@
     width: 100%; max-width: 460px; flex-shrink: 0;
     display: flex; flex-direction: column; justify-content: center;
     padding: 48px 40px;
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border-right: 1px solid rgba(0,0,0,0.08);
+    background: var(--theme-bg-card, #fff);
+    border-right: 1px solid var(--theme-border, #e5e5e5);
   }
   html.dark .auth-panel {
-    background: rgba(20,20,20,0.08);
-    border-right-color: rgba(255,255,255,0.08);
+    background: var(--theme-bg-card, #141414);
+    border-right-color: var(--theme-border-subtle, rgba(255,255,255,0.08));
   }
   .auth-image {
     flex: 1;
@@ -33,53 +31,53 @@
 
   .auth-input {
     width: 100%; padding: 10px 14px; border-radius: 10px;
-    border: 1px solid #e5e5e5; background: #f9fafb;
-    font-size: 14px; color: #171717; outline: none;
+    border: 1px solid var(--theme-border, #e5e5e5); background: var(--theme-bg-input, #f9fafb);
+    font-size: 14px; color: var(--theme-text-strong, #171717); outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
     box-sizing: border-box; font-family: inherit;
   }
   html.dark .auth-input {
-    background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.08); color: #e5e5e5;
+    background: var(--theme-bg-input, rgba(255,255,255,0.08)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); color: var(--theme-text, #e5e5e5);
   }
-  .auth-input:focus { border-color: #a3a3a3; box-shadow: 0 0 0 3px rgba(0,0,0,0.06); }
-  html.dark .auth-input:focus { border-color: rgba(255,255,255,0.08); box-shadow: 0 0 0 3px rgba(255,255,255,0.08); }
-  .auth-input::placeholder { color: #a3a3a3; }
-  html.dark .auth-input::placeholder { color: #525252; }
-  .auth-input.invalid { border-color: #f87171 !important; }
+  .auth-input:focus { border-color: var(--theme-border, #a3a3a3); box-shadow: 0 0 0 3px var(--theme-border-subtle, rgba(0,0,0,0.06)); }
+  html.dark .auth-input:focus { border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); box-shadow: 0 0 0 3px var(--theme-border-subtle, rgba(255,255,255,0.08)); }
+  .auth-input::placeholder { color: var(--theme-text-placeholder, #a3a3a3); }
+  html.dark .auth-input::placeholder { color: var(--theme-text-muted, #525252); }
+  .auth-input.invalid { border-color: var(--theme-danger, #f87171) !important; }
 
-  .auth-label { display: block; font-size: 13px; font-weight: 500; color: #525252; margin-bottom: 6px; }
-  html.dark .auth-label { color: #a3a3a3; }
+  .auth-label { display: block; font-size: 13px; font-weight: 500; color: var(--theme-text-muted, #525252); margin-bottom: 6px; }
+  html.dark .auth-label { color: var(--theme-text, #a3a3a3); }
 
   .auth-submit {
     width: 100%; padding: 11px; border-radius: 10px;
-    background: #171717; color: white; font-size: 14px; font-weight: 500;
+    background: var(--theme-text-strong, #171717); color: var(--theme-accent-text, white); font-size: 14px; font-weight: 500;
     border: none; cursor: pointer; transition: background 0.15s;
     font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px;
   }
-  html.dark .auth-submit { background: white; color: #0a0a0a; }
-  .auth-submit:hover:not(:disabled) { background: #404040; }
-  html.dark .auth-submit:hover:not(:disabled) { background: #e5e5e5; }
+  html.dark .auth-submit { background: var(--theme-bg-input, white); color: var(--theme-bg, #0a0a0a); }
+  .auth-submit:hover:not(:disabled) { background: var(--theme-bg-hover, #404040); }
+  html.dark .auth-submit:hover:not(:disabled) { background: var(--theme-bg-hover, #e5e5e5); }
   .auth-submit:disabled { opacity: 0.6; cursor: default; }
 
   .pw-wrapper { position: relative; }
   .pw-toggle {
     position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-    background: none; border: none; cursor: pointer; padding: 0; color: #a3a3a3; line-height: 0;
+    background: none; border: none; cursor: pointer; padding: 0; color: var(--theme-text-muted, #a3a3a3); line-height: 0;
   }
-  .pw-toggle:hover { color: #737373; }
-  html.dark .pw-toggle:hover { color: #d4d4d4; }
+  .pw-toggle:hover { color: var(--theme-text-nav, #737373); }
+  html.dark .pw-toggle:hover { color: var(--theme-text-strong, #d4d4d4); }
 
-  .pw-strength { height: 3px; border-radius: 2px; background: #e5e5e5; margin-top: 8px; overflow: hidden; }
-  html.dark .pw-strength { background: rgba(255,255,255,0.08); }
+  .pw-strength { height: 3px; border-radius: 2px; background: var(--theme-border, #e5e5e5); margin-top: 8px; overflow: hidden; }
+  html.dark .pw-strength { background: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
   .pw-bar { height: 100%; border-radius: 2px; width: 0%; transition: width 0.28s ease, background 0.28s ease; }
-  .pw-hint { font-size: 11px; color: #a3a3a3; margin-top: 5px; min-height: 14px; transition: color 0.2s; }
+  .pw-hint { font-size: 11px; color: var(--theme-text-muted, #a3a3a3); margin-top: 5px; min-height: 14px; transition: color 0.2s; }
 
   .spinner {
     width: 15px; height: 15px; flex-shrink: 0;
-    border: 2px solid rgba(255,255,255,0.08); border-top-color: white;
+    border: 2px solid var(--theme-border-subtle, rgba(255,255,255,0.08)); border-top-color: var(--theme-accent-text, white);
     border-radius: 50%; animation: spin 0.65s linear infinite; display: none;
   }
-  html.dark .spinner { border-color: rgba(0,0,0,0.25); border-top-color: #0a0a0a; }
+  html.dark .spinner { border-color: var(--theme-border, rgba(0,0,0,0.25)); border-top-color: var(--theme-bg, #0a0a0a); }
   .auth-submit.loading .spinner { display: block; }
   .auth-submit.loading .btn-label { display: none; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -175,7 +173,7 @@
   pwInput.addEventListener('input', function () {
     var v = pwInput.value;
     var score = [v.length >= 8, /[A-Za-z]/.test(v), /[0-9]/.test(v), /[^A-Za-z0-9]/.test(v)].filter(Boolean).length;
-    var colors = ['#ef4444','#f97316','#eab308','#22c55e'];
+    var colors = ['var(--theme-danger,#ef4444)','var(--theme-warning,#f97316)','var(--theme-warning,#eab308)','var(--theme-success,#22c55e)'];
     var labels = ['Too short','Weak','Fair','Strong'];
     var widths = ['25%','50%','75%','100%'];
     var bar  = document.getElementById('pwBar');

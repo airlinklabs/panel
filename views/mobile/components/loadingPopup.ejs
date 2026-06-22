@@ -1,110 +1,27 @@
 <style>
-  /* Loading overlay — minimal, defers to pl-overlay styling */
-  #airlinkLoadingOverlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    background: rgba(10, 10, 10, 0.82);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s ease;
-  }
-  #airlinkLoadingOverlay.al-visible {
-    opacity: 1;
-    pointer-events: auto;
-  }
-  #airlinkLoadingOverlay .al-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #ffffff;
-    letter-spacing: -0.01em;
-    text-align: center;
-    max-width: 260px;
-    line-height: 1.4;
-  }
-  #airlinkLoadingOverlay .al-message {
-    font-size: 12px;
-    color: #a3a3a3;
-    text-align: center;
-    max-width: 260px;
-    margin-top: -8px;
-    line-height: 1.5;
-    min-height: 16px;
-  }
-  .al-spinner {
-    width: 32px;
-    height: 32px;
-    border: 2.5px solid rgba(255,255,255,0.15);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: al-spin 0.8s linear infinite;
-  }
-  @keyframes al-spin { to { transform: rotate(360deg); } }
-  #alStepsList {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    min-width: 200px;
-    max-height: 100px;
-    overflow: hidden;
-  }
-  .al-step {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: #737373;
-    opacity: 0;
-    transform: translateY(4px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-  }
-  .al-step.al-step-visible { opacity: 1; transform: translateY(0); }
-  .al-step.al-step-done    { color: #6ee7b7; }
-  .al-step.al-step-error   { color: #f87171; }
-
-  /* Inline action feedback bar */
   #actionFeedback {
-    display: none;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--af-color, #6b7280);
-    transition: opacity 0.3s ease;
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+    z-index: 9999; display: flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 500;
+    background: var(--theme-bg-card, #fff); color: var(--theme-text-strong, #171717);
+    border: 1px solid var(--theme-border, #e5e5e5);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s;
   }
-  #actionFeedback.visible { display: flex; }
-  #actionFeedback.fading  { opacity: 0; }
-  .af-spinner, .popup-spinner {
-    width: 12px;
-    height: 12px;
-    border: 1.5px solid transparent;
-    border-top-color: currentColor;
-    border-radius: 50%;
-    animation: al-spin 0.65s linear infinite;
-    flex-shrink: 0;
+  html.dark #actionFeedback {
+    background: var(--theme-bg-card, #1c1c1c);
+    border-color: var(--theme-border-subtle, rgba(255,255,255,0.08));
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
   }
-  .popup-spinner { width: 15px; height: 15px; border-width: 2px; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .al-spinner, .af-spinner, .popup-spinner { animation: none; }
-    #airlinkLoadingOverlay { transition-duration: 0.01ms; }
+  #actionFeedback.visible { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  #actionFeedback.fading  { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  .af-spinner {
+    width: 13px; height: 13px; border: 2px solid var(--theme-border, #e5e5e5);
+    border-top-color: var(--theme-text-muted, #6b7280); border-radius: 50%;
+    animation: af-spin 0.6s linear infinite;
   }
+  @keyframes af-spin { to { transform: rotate(360deg); } }
 </style>
-
-<div id="airlinkLoadingOverlay" role="status" aria-live="polite" aria-label="Loading">
-  <div class="al-spinner"></div>
-  <div style="text-align:center;">
-    <p id="alOverlayTitle" class="al-title">Loading...</p>
-    <p id="alOverlayMessage" class="al-message"></p>
-  </div>
-  <div id="alStepsList" aria-live="polite"></div>
-</div>
 
 <div id="actionFeedback" aria-live="polite">
   <span class="af-spinner" id="afSpinner"></span>
@@ -118,63 +35,16 @@
 (function () {
   if (window.loadingPopupSystem) return;
 
-  var overlay = document.getElementById('airlinkLoadingOverlay');
-  var titleEl = document.getElementById('alOverlayTitle');
-  var msgEl   = document.getElementById('alOverlayMessage');
-  var stepsEl = document.getElementById('alStepsList');
-  var stepCount = 0;
-
-  function open(title) {
-    stepCount = 0;
-    stepsEl.innerHTML = '';
-    titleEl.textContent = title || 'Loading...';
-    msgEl.textContent = '';
-    overlay.classList.add('al-visible');
-  }
-
-  function close() {
-    overlay.classList.remove('al-visible');
-  }
-
-  function addStep(text, type) {
-    stepCount++;
-    var step = document.createElement('div');
-    step.className = 'al-step' + (type === 'done' ? ' al-step-done' : type === 'error' ? ' al-step-error' : '');
-    var iconSvg = type === 'done'
-      ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'
-      : type === 'error'
-      ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
-      : '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/></svg>';
-    step.innerHTML = iconSvg + '<span>' + text + '</span>';
-    stepsEl.appendChild(step);
-    requestAnimationFrame(function () { step.classList.add('al-step-visible'); });
-  }
-
-  function setIcon(state) {
-    if (state === 'done' || state === 'error') {
-      var spinner = overlay.querySelector('.al-spinner');
-      if (spinner) spinner.style.display = 'none';
-    }
-  }
-
+  // Loading popup disabled — panel uses page-loader overlay instead
   window.loadingPopupSystem = {
-    open: open, close: close, addStep: addStep, setIcon: setIcon,
-    setProgress: function (pct, msg) { if (msg !== undefined) msgEl.textContent = msg; },
-    setMessage: function (msg) { msgEl.textContent = msg; }
+    open: function () {}, close: function () {}, addStep: function () {},
+    setIcon: function () {}, setProgress: function () {}, setMessage: function () {}
   };
-
-  window.showLoadingPopup = function (title, msg) {
-    open(title);
-    if (msg) msgEl.textContent = msg;
-    return {
-      updateProgress: function (pct, m) { window.loadingPopupSystem.setProgress(pct, m); },
-      updateMessage:  function (m)      { window.loadingPopupSystem.setMessage(m); },
-      close:          function ()       { window.loadingPopupSystem.close(); }
-    };
+  window.showLoadingPopup = function () {
+    return { updateProgress: function () {}, updateMessage: function () {}, close: function () {} };
   };
-  window.hideLoadingPopup = close;
+  window.hideLoadingPopup = function () {};
 
-  // Inline action feedback
   var afFadeTimer = null;
   window.actionFeedback = {
     show: function (msg) {
@@ -183,7 +53,7 @@
       if (!bar) return;
       document.getElementById('afSpinner').classList.remove('hidden');
       document.getElementById('afCheck').classList.add('hidden');
-      bar.style.setProperty('--af-color', 'var(--color-neutral-500, #6b7280)');
+      bar.style.setProperty('--af-color', 'var(--theme-text-muted, #6b7280)');
       document.getElementById('afText').textContent = msg + '...';
       bar.classList.remove('fading');
       bar.classList.add('visible');
@@ -193,7 +63,7 @@
       if (!bar) return;
       document.getElementById('afSpinner').classList.add('hidden');
       document.getElementById('afCheck').classList.remove('hidden');
-      bar.style.setProperty('--af-color', '#10b981');
+      bar.style.setProperty('--af-color', 'var(--theme-success, #10b981)');
       document.getElementById('afText').textContent = msg;
       bar.classList.remove('fading');
       afFadeTimer = setTimeout(function () {

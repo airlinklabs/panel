@@ -166,8 +166,8 @@
               </thead>
               <tbody class="divide-y divide-neutral-100 dark:divide-white/5">
                 <% if (loginHistory && loginHistory.length > 0) { %>
-                  <% loginHistory.forEach(login => { %>
-                  <tr class="hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors">
+                  <% let loginIdx = 0; loginHistory.forEach(login => { %>
+                  <tr style="--i:<%= loginIdx++ %>" class="hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors">
                     <td class="px-4 py-3 text-neutral-700 dark:text-neutral-300 whitespace-nowrap"><%= new Date(login.timestamp).toLocaleString() %></td>
                     <td class="px-4 py-3 text-neutral-500 dark:text-neutral-400 whitespace-nowrap font-mono text-xs"><%= login.ipAddress || 'Unknown' %></td>
                     <td class="px-4 py-3 text-neutral-400 text-xs truncate max-w-[260px]"><%= login.userAgent || 'Unknown' %></td>
