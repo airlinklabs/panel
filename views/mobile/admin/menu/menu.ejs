@@ -1,120 +1,90 @@
-<%- include('../../components/header', { title: 'Admin' }) %>
+<%- include('../../components/header', { title: 'Menu' }) %>
+
+<style>
+  @keyframes menu-fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .menu-item-animate {
+    opacity: 0;
+    animation: menu-fade-up 0.35s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+</style>
 
 <main class="">
   <%- include('../../components/template') %>
 
   <div class="px-4 py-5">
     <div class="mb-5">
-      <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminMenuTitle || 'Admin Panel' %></h1>
-      <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminMenuSubtitle || 'Manage your panel' %></p>
+      <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.menuTitle || 'Menu' %></h1>
+      <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.menuSubtitle || 'Navigation and tools' %></p>
     </div>
 
     <div class="space-y-2">
+      <%
+      var allItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
+      var adminItems = [
+        { url: '/admin/overview', label: req.translations.navOverview || 'Overview', desc: req.translations.adminMenuOverviewDesc || 'Panel stats and activity', iconId: 'grid' },
+        { url: '/admin/analytics', label: req.translations.navAnalytics || 'Analytics', desc: req.translations.adminMenuAnalyticsDesc || 'Server analytics', iconId: 'bar-chart' },
+        { url: '/admin/settings', label: req.translations.navSettings || 'Settings', desc: req.translations.adminMenuSettingsDesc || 'Panel configuration', iconId: 'settings' },
+        { url: '/admin/servers', label: req.translations.navServers || 'Servers', desc: req.translations.adminMenuServersDesc || 'Manage all servers', iconId: 'server' },
+        { url: '/admin/users', label: req.translations.navUsers || 'Users', desc: req.translations.adminMenuUsersDesc || 'Manage accounts', iconId: 'users' },
+        { url: '/admin/nodes', label: req.translations.navNodes || 'Nodes', desc: req.translations.adminMenuNodesDesc || 'Daemon nodes', iconId: 'network' },
+        { url: '/admin/images', label: req.translations.navImages || 'Images', desc: req.translations.adminMenuImagesDesc || 'Docker images', iconId: 'box' },
+        { url: '/admin/addons', label: req.translations.navAddons || 'Addons', desc: req.translations.adminMenuAddonsDesc || 'Extensions and plugins', iconId: 'puzzle' },
+        { url: '/admin/airlink-cloud', label: req.translations.navAirlinkCloud || 'Airlink Cloud', desc: 'Cloud storage integration', iconId: 'cloud' },
+        { url: '/admin/apikeys', label: req.translations.navApiKeys || 'API Keys', desc: req.translations.adminMenuApiKeysDesc || 'Access tokens', iconId: 'key' }
+      ];
+      var addonItems = adminMenuItems || [];
+      var _itemIdx = 0;
+      %>
 
-      <a href="/admin/overview" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 active:scale-[0.98] transition-transform duration-100">
+      <% allItems.forEach(function(item) { %>
+      <a href="<%= item.url %>" class="menu-item-animate flex items-center gap-3 px-4 py-3 rounded-xl bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 active:scale-[0.98] transition-transform duration-100" style="animation-delay: <%= (_itemIdx++ * 40) %>ms">
         <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center shrink-0">
-          <%- icon('grid', { size: 18, class: 'text-neutral-600 shrink-0' }) %>
+          <div class="w-5 h-5 flex items-center justify-center [&>svg]:w-5 [&>svg]:h-5 [&>svg]:shrink-0"><%- item.icon %></div>
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.navOverview || 'Overview' %></p>
-          <p class="text-xs text-neutral-500 truncate"><%= req.translations.adminMenuOverviewDesc || 'Panel stats and activity' %></p>
+          <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= item.label %></p>
         </div>
         <%- icon('chevron-right', { size: 16, class: 'text-neutral-400 shrink-0' }) %>
       </a>
+      <% }); %>
 
-      <a href="/admin/settings" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 active:scale-[0.98] transition-transform duration-100">
+      <% if (user.isAdmin === true) { %>
+      <p class="menu-item-animate text-xs font-medium text-neutral-500 dark:text-neutral-400 pt-4 pb-1" style="animation-delay: <%= (_itemIdx++ * 40) %>ms"><%= req.translations.navAdminPanel || 'Admin Panel' %></p>
+      <% adminItems.forEach(function(item) { %>
+      <a href="<%= item.url %>" class="menu-item-animate flex items-center gap-3 px-4 py-3 rounded-xl bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 active:scale-[0.98] transition-transform duration-100" style="animation-delay: <%= (_itemIdx++ * 40) %>ms">
         <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center shrink-0">
-          <%- icon('settings', { size: 18, class: 'text-neutral-600 shrink-0' }) %>
+          <%- icon(item.iconId, { size: 18, class: 'text-neutral-600 shrink-0' }) %>
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.navSettings || 'Settings' %></p>
-          <p class="text-xs text-neutral-500 truncate"><%= req.translations.adminMenuSettingsDesc || 'Panel configuration' %></p>
+          <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= item.label %></p>
+          <p class="text-xs text-neutral-500 truncate"><%= item.desc %></p>
         </div>
         <%- icon('chevron-right', { size: 16, class: 'text-neutral-400 shrink-0' }) %>
       </a>
-
-      <a href="/admin/servers" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 active:scale-[0.98] transition-transform duration-100">
-        <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center shrink-0">
-          <%- icon('server', { size: 18, class: 'text-neutral-600 shrink-0' }) %>
+      <% }); %>
+      <% } else { %>
+      <p class="menu-item-animate text-xs font-medium text-neutral-500 dark:text-neutral-400 pt-4 pb-1" style="animation-delay: <%= (_itemIdx++ * 40) %>ms"><%= req.translations.navAdminPanel || 'Admin Panel' %></p>
+      <% adminItems.forEach(function(item) { %>
+      <div class="menu-item-animate flex items-center gap-3 px-4 py-3 rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-100 dark:border-neutral-700/10 opacity-40 pointer-events-none" style="animation-delay: <%= (_itemIdx++ * 40) %>ms">
+        <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-700/30 flex items-center justify-center shrink-0">
+          <%- icon(item.iconId, { size: 18, class: 'text-neutral-400 shrink-0' }) %>
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.navServers || 'Servers' %></p>
-          <p class="text-xs text-neutral-500 truncate"><%= req.translations.adminMenuServersDesc || 'Manage all servers' %></p>
+          <p class="text-sm font-medium text-neutral-500 dark:text-neutral-500"><%= item.label %></p>
+          <p class="text-xs text-neutral-400 truncate"><%= item.desc %></p>
         </div>
-        <%- icon('chevron-right', { size: 16, class: 'text-neutral-400 shrink-0' }) %>
-      </a>
+        <%- icon('lock', { size: 16, class: 'text-neutral-400 shrink-0' }) %>
+      </div>
+      <% }); %>
+      <% } %>
 
-      <a href="/admin/users" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 active:scale-[0.98] transition-transform duration-100">
-        <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center shrink-0">
-          <%- icon('users', { size: 18, class: 'text-neutral-600 shrink-0' }) %>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.navUsers || 'Users' %></p>
-          <p class="text-xs text-neutral-500 truncate"><%= req.translations.adminMenuUsersDesc || 'Manage accounts' %></p>
-        </div>
-        <%- icon('chevron-right', { size: 16, class: 'text-neutral-400 shrink-0' }) %>
-      </a>
-
-      <a href="/admin/nodes" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 active:scale-[0.98] transition-transform duration-100">
-        <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center shrink-0">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-600 dark:text-neutral-300">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0 4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0-5.571 3-5.571-3" />
-          </svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.navNodes || 'Nodes' %></p>
-          <p class="text-xs text-neutral-500 truncate"><%= req.translations.adminMenuNodesDesc || 'Daemon nodes' %></p>
-        </div>
-        <%- icon('chevron-right', { size: 16, class: 'text-neutral-400 shrink-0' }) %>
-      </a>
-
-      <a href="/admin/images" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 active:scale-[0.98] transition-transform duration-100">
-        <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center shrink-0">
-          <%- icon('image', { size: 18, class: 'text-neutral-600 shrink-0' }) %>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.navImages || 'Images' %></p>
-          <p class="text-xs text-neutral-500 truncate"><%= req.translations.adminMenuImagesDesc || 'Docker images' %></p>
-        </div>
-        <%- icon('chevron-right', { size: 16, class: 'text-neutral-400 shrink-0' }) %>
-      </a>
-
-      <a href="/admin/addons" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 active:scale-[0.98] transition-transform duration-100">
-        <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center shrink-0">
-          <%- icon('box', { size: 18, class: 'text-neutral-600 shrink-0' }) %>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.navAddons || 'Addons' %></p>
-          <p class="text-xs text-neutral-500 truncate"><%= req.translations.adminMenuAddonsDesc || 'Extensions and plugins' %></p>
-        </div>
-        <%- icon('chevron-right', { size: 16, class: 'text-neutral-400 shrink-0' }) %>
-      </a>
-
-      <a href="/admin/airlink-cloud" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 active:scale-[0.98] transition-transform duration-100">
-        <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center shrink-0">
-          <%- icon('cloud', { size: 18, class: 'text-neutral-600 shrink-0' }) %>
-        </div>
-        <div class="flex-1 min-w-0">
-           <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.navAirlinkCloud || 'Airlink Cloud' %></p>
-           <p class="text-xs text-neutral-500 truncate">Cloud storage integration</p>
-         </div>
-        <%- icon('chevron-right', { size: 16, class: 'text-neutral-400 shrink-0' }) %>
-      </a>
-
-      <a href="/admin/apikeys" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 active:scale-[0.98] transition-transform duration-100">
-        <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center shrink-0">
-          <%- icon('key', { size: 18, class: 'text-neutral-600 shrink-0' }) %>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.navApiKeys || 'API Keys' %></p>
-          <p class="text-xs text-neutral-500 truncate"><%= req.translations.adminMenuApiKeysDesc || 'Access tokens' %></p>
-        </div>
-        <%- icon('chevron-right', { size: 16, class: 'text-neutral-400 shrink-0' }) %>
-      </a>
-
-      <% if (adminMenuItems && adminMenuItems.length > 0) {
-        adminMenuItems.forEach(item => { %>
-      <a href="<%= item.url %>" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 active:scale-[0.98] transition-transform duration-100">
+      <% if (addonItems.length > 0) { %>
+      <p class="menu-item-animate text-xs font-medium text-neutral-500 dark:text-neutral-400 pt-4 pb-1" style="animation-delay: <%= (_itemIdx++ * 40) %>ms"><%= req.translations.navAddons || 'Addons' %></p>
+      <% addonItems.forEach(function(item) { %>
+      <a href="<%= item.url %>" class="menu-item-animate flex items-center gap-3 px-4 py-3 rounded-xl bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/30 active:scale-[0.98] transition-transform duration-100" style="animation-delay: <%= (_itemIdx++ * 40) %>ms">
         <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center shrink-0 overflow-hidden">
           <div class="w-5 h-5 flex items-center justify-center [&>svg]:w-5 [&>svg]:h-5 [&>svg]:shrink-0">
             <%- item.icon %>
@@ -125,7 +95,8 @@
         </div>
         <%- icon('chevron-right', { size: 16, class: 'text-neutral-400 shrink-0' }) %>
       </a>
-      <% }); } %>
+      <% }); %>
+      <% } %>
 
     </div>
   </div>
