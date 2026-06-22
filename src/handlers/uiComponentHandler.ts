@@ -10,6 +10,8 @@ export interface SidebarItem {
   permissions?: string[];
   isActive?: (path: string) => boolean;
   isAdminItem?: boolean;
+  isAddon?: boolean;
+  matchPrefix?: string;
 }
 
 export interface ServerMenuItem {
@@ -57,15 +59,16 @@ class UIComponentStore {
   }
 
   public addSidebarItem(item: SidebarItem, addonSlug?: string): void {
-    const existingIndex = this.sidebarItems.findIndex(i => i.id === item.id);
+    const resolved: SidebarItem = addonSlug ? { ...item, isAddon: true } : item;
+    const existingIndex = this.sidebarItems.findIndex(i => i.id === resolved.id);
     if (existingIndex !== -1) {
-      this.sidebarItems[existingIndex] = item;
+      this.sidebarItems[existingIndex] = resolved;
     } else {
-      this.sidebarItems.push(item);
+      this.sidebarItems.push(resolved);
     }
     if (addonSlug) {
       const reg = this.ensureAddonRegistry(addonSlug);
-      if (!reg.sidebarIds.includes(item.id)) reg.sidebarIds.push(item.id);
+      if (!reg.sidebarIds.includes(resolved.id)) reg.sidebarIds.push(resolved.id);
     }
   }
 
@@ -90,6 +93,15 @@ class UIComponentStore {
 
     return [...items].sort((a, b) => b.priority - a.priority);
   }
+
+  public getAddonSidebarIds(): Set<string> {
+    const ids = new Set<string>();
+    for (const reg of this.addonItemRegistry.values()) {
+      for (const id of reg.sidebarIds) ids.add(id);
+    }
+    return ids;
+  }
+
   public addServerMenuItem(item: ServerMenuItem, addonSlug?: string): void {
     const existingIndex = this.serverMenuItems.findIndex(i => i.id === item.id);
     if (existingIndex !== -1) {
@@ -189,7 +201,8 @@ export function initializeDefaultUIComponents(): void {
     label: 'Servers',
     icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 mt-0.5"><path d="M12.378 1.602a.75.75 0 0 0-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03ZM21.75 7.93l-9 5.25v9l8.628-5.032a.75.75 0 0 0 .372-.648V7.93ZM11.25 22.18v-9l-9-5.25v8.57a.75.75 0 0 0 .372.648l8.628 5.033Z" /></svg>',
     url: '/',
-    priority: 100
+    priority: 100,
+    matchPrefix: '/server'
   });
 
   uiComponentStore.addServerMenuItem({

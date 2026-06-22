@@ -8,8 +8,10 @@ import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
-import { getAllAddons, toggleAddonStatus, reloadAddons, loadAddons } from '../../handlers/addonHandler';
-import { registerPermission } from '../../handlers/permissions';
+import { getAllAddons, toggleAddonStatus, reloadAddons, loadAddons, uninstallAddon } from '../../handlers/addonHandler';
+import { commandRegistry } from '../../handlers/addonCommands';
+import { registerPermission, Permission } from '../../handlers/permissions';
+import { parseAddonManifest } from '../../handlers/addonManifest';
 import { getParamAsString } from '../../utils/typeHelpers';
 
 const execFileAsync = promisify(execFile);
@@ -19,6 +21,8 @@ registerPermission('airlink.admin.addons.toggle');
 registerPermission('airlink.admin.addons.reload');
 registerPermission('airlink.admin.addons.store');
 registerPermission('airlink.admin.addons.install');
+registerPermission('airlink.admin.addons.settings' as Permission);
+registerPermission('airlink.admin.addons.commands' as Permission);
 
 const ADDONS_REPO_OWNER = 'airlinklabs';
 const ADDONS_REPO_NAME  = 'addons';
@@ -32,6 +36,8 @@ const ALLOWED_CMD_PREFIXES = [
   'mv ', 'cp ', 'mkdir ',
 ];
 
+const PATH_LIKE_BINS = new Set(['cp', 'mv', 'mkdir']);
+
 function isSafeCommand(cmd: string): boolean {
   const c = cmd.trim();
   return ALLOWED_CMD_PREFIXES.some(p => c === p.trimEnd() || c.startsWith(p));
@@ -40,6 +46,22 @@ function isSafeCommand(cmd: string): boolean {
 function parseCommand(cmd: string): { bin: string; args: string[] } {
   const parts = cmd.trim().split(/\s+/);
   return { bin: parts[0], args: parts.slice(1) };
+}
+
+function validateCommandArgs(bin: string, args: string[], workDir: string): { safe: boolean; error?: string } {
+  if (!PATH_LIKE_BINS.has(bin)) return { safe: true };
+
+  for (const arg of args) {
+    if (arg.startsWith('-')) continue;
+    const resolved = path.resolve(workDir, arg);
+    if (!resolved.startsWith(workDir + path.sep) && resolved !== workDir) {
+      return {
+        safe: false,
+        error: `Path traversal detected in argument "${arg}" resolves outside work directory`,
+      };
+    }
+  }
+  return { safe: true };
 }
 
 interface InstallManifest {
@@ -71,10 +93,16 @@ async function* runInstall(
       return;
     }
 
+    const { bin, args } = parseCommand(cmd);
+    const argCheck = validateCommandArgs(bin, args, workDir);
+    if (!argCheck.safe) {
+      yield { type: 'error', message: argCheck.error! };
+      return;
+    }
+
     yield { type: 'cmd', step: `Step ${key}`, cmd };
 
     try {
-      const { bin, args } = parseCommand(cmd);
       const { stdout, stderr } = await execFileAsync(bin, args, { cwd: workDir });
       const output = (stdout + stderr).trim();
       if (output) yield { type: 'output', step: `Step ${key}`, cmd, output };
@@ -92,8 +120,8 @@ const addonsModule: Module = {
   info: {
     name: 'Admin Addons Module',
     description: 'This file is for admin functionality of the Addons.',
-    version: '1.0.0',
-    moduleVersion: '1.0.0',
+    version: '2.0.0',
+    moduleVersion: '2.0.0',
     author: 'AirLinkLab',
     license: 'MIT',
   },
@@ -120,7 +148,17 @@ const addonsModule: Module = {
             addonTableExists = false;
           }
 
-          res.render('admin/addons/addons', { user, req, settings, addons, addonTableExists, errorMessage: {} });
+          const addonsWithMeta = addons.map(addon => {
+            const addonsDir = path.join(__dirname, '../../../storage/addons');
+            const addonDir = path.join(addonsDir, addon.slug);
+            const packageJsonPath = path.join(addonDir, 'package.json');
+            const result = parseAddonManifest(packageJsonPath, addon.slug);
+            const hasDisabledPh = fs.existsSync(path.join(addonDir, 'disabled.ph'));
+            if (!result.success) return { ...addon, manifest: null, hasDisabledPh };
+            return { ...addon, manifest: result.manifest, hasDisabledPh };
+          });
+
+          res.render('admin/addons/addons', { user, req, settings, addons: addonsWithMeta, addonTableExists, errorMessage: {} });
         } catch (error) {
           logger.error('Error fetching addons:', error);
           return res.redirect('/admin/overview');
@@ -136,46 +174,6 @@ const addonsModule: Module = {
           const addons = await getAllAddons();
           res.json({ success: true, addons });
         } catch (error: any) {
-          res.status(500).json({ success: false, message: error.message });
-        }
-      }
-    );
-
-    router.post(
-      '/admin/addons/toggle/:slug',
-      isAuthenticated(true, 'airlink.admin.addons.toggle'),
-      async (req: Request, res: Response) => {
-        try {
-          const { slug } = req.params;
-          const enabledBool = req.body.enabled === 'true' || req.body.enabled === true;
-          const result = await toggleAddonStatus(getParamAsString(slug), enabledBool);
-
-          if (result.success) {
-            const reloadResult = await reloadAddons(req.app);
-            res.json({
-              success: true,
-              message: result.message,
-              migrationsApplied: (result.migrationsApplied || 0) + (reloadResult.migrationsApplied || 0),
-            });
-          } else {
-            res.status(500).json({ success: false, message: result.message || 'Failed to update addon status' });
-          }
-        } catch (error: any) {
-          logger.error('Error toggling addon status:', error);
-          res.status(500).json({ success: false, message: error.message });
-        }
-      }
-    );
-
-    router.post(
-      '/admin/addons/reload',
-      isAuthenticated(true, 'airlink.admin.addons.reload'),
-      async (req: Request, res: Response) => {
-        try {
-          const result = await reloadAddons(req.app);
-          res.json({ success: result.success, message: result.message, migrationsApplied: result.migrationsApplied || 0 });
-        } catch (error: any) {
-          logger.error('Error reloading addons:', error);
           res.status(500).json({ success: false, message: error.message });
         }
       }
@@ -232,7 +230,7 @@ const addonsModule: Module = {
                     headers: { 'User-Agent': 'airlink-panel' },
                   });
                   if (instRes.ok) installManifest = await instRes.json() as InstallManifest;
-                } catch { /* addon manifest fetch is best-effort */ }
+                } catch { /* best-effort */ }
 
                 return {
                   id: folder.name,
@@ -374,7 +372,6 @@ const addonsModule: Module = {
             );
           } catch (cloneErr: any) {
             const msg: string = ((cloneErr.stdout || '') + (cloneErr.stderr || '')).trim() || cloneErr.message;
-            // Detect cases where git is waiting for credentials despite the env flag
             if (msg.toLowerCase().includes('username') || msg.toLowerCase().includes('authentication')) {
               send({ type: 'error', message: 'Clone failed: repository requires authentication' });
             } else {
@@ -416,33 +413,186 @@ const addonsModule: Module = {
       }
     );
 
+    router.get(
+      '/admin/addons/:slug',
+      isAuthenticated(true, 'airlink.admin.addons.view'),
+      async (req: Request, res: Response) => {
+        try {
+          const slug = getParamAsString(req.params.slug);
+          const addon = await prisma.addon.findUnique({ where: { slug } });
+          if (!addon) return res.status(404).json({ success: false, message: 'Addon not found' });
+
+          const addonsDir = path.join(__dirname, '../../../storage/addons');
+          const packageJsonPath = path.join(addonsDir, slug, 'package.json');
+          const result = parseAddonManifest(packageJsonPath, slug);
+
+          const commands = commandRegistry.getAddonCommands(slug).map(c => ({ name: c.name, description: c.description }));
+
+          const allSettings = await prisma.addonSetting.findMany({ where: { addonSlug: slug } });
+          const settingsMap: Record<string, string> = {};
+          for (const s of allSettings) settingsMap[s.key] = s.value;
+
+          res.json({
+            success: true,
+            addon,
+            manifest: result.success ? result.manifest : null,
+            commands,
+            settings: settingsMap,
+          });
+        } catch (error: any) {
+          res.status(500).json({ success: false, message: error.message });
+        }
+      }
+    );
+
     router.post(
-      '/admin/addons/store/uninstall',
+      '/admin/addons/toggle/:slug',
+      isAuthenticated(true, 'airlink.admin.addons.toggle'),
+      async (req: Request, res: Response) => {
+        try {
+          const slug = getParamAsString(req.params.slug);
+          const enabledBool = req.body.enabled === 'true' || req.body.enabled === true;
+          const result = await toggleAddonStatus(slug, enabledBool);
+
+          if (result.success) {
+            await reloadAddons(req.app);
+            res.json({ success: true, message: result.message });
+          } else {
+            res.status(500).json({ success: false, message: result.message || 'Failed to update addon status' });
+          }
+        } catch (error: any) {
+          logger.error('Error toggling addon status:', error);
+          res.status(500).json({ success: false, message: error.message });
+        }
+      }
+    );
+
+    router.post(
+      '/admin/addons/reload',
+      isAuthenticated(true, 'airlink.admin.addons.reload'),
+      async (req: Request, res: Response) => {
+        try {
+          const result = await reloadAddons(req.app);
+          res.json({ success: result.success, message: result.message });
+        } catch (error: any) {
+          logger.error('Error reloading addons:', error);
+          res.status(500).json({ success: false, message: error.message });
+        }
+      }
+    );
+
+    router.post(
+      '/admin/addons/settings/:slug',
+      isAuthenticated(true, 'airlink.admin.addons.settings'),
+      async (req: Request, res: Response) => {
+        try {
+          const slug = getParamAsString(req.params.slug);
+          const addon = await prisma.addon.findUnique({ where: { slug } });
+          if (!addon) return res.status(404).json({ success: false, message: 'Addon not found' });
+
+          const addonsDir = path.join(__dirname, '../../../storage/addons');
+          const packageJsonPath = path.join(addonsDir, slug, 'package.json');
+          const result = parseAddonManifest(packageJsonPath, slug);
+          if (!result.success || !result.manifest.settingsSchema) {
+            return res.status(400).json({ success: false, message: 'Addon has no settings schema' });
+          }
+
+          const schema = result.manifest.settingsSchema;
+          const updates: Record<string, string> = {};
+
+          for (const field of schema) {
+            if (field.key in req.body) {
+              let value = req.body[field.key];
+              if (field.type === 'boolean') {
+                value = value === 'true' || value === true ? 'true' : 'false';
+              } else if (field.type === 'number') {
+                const num = Number(value);
+                if (isNaN(num)) continue;
+                value = String(num);
+              } else {
+                value = String(value);
+              }
+              updates[field.key] = value;
+            }
+          }
+
+          for (const [key, value] of Object.entries(updates)) {
+            await prisma.addonSetting.upsert({
+              where: { addonSlug_key: { addonSlug: slug, key } },
+              create: { addonSlug: slug, key, value },
+              update: { value },
+            });
+          }
+
+          res.json({ success: true, message: 'Settings saved' });
+        } catch (error: any) {
+          res.status(500).json({ success: false, message: error.message });
+        }
+      }
+    );
+
+    router.post(
+      '/admin/addons/command/:slug/:command',
+      isAuthenticated(true, 'airlink.admin.addons.commands'),
+      async (req: Request, res: Response) => {
+        try {
+          const slug = getParamAsString(req.params.slug);
+          const command = getParamAsString(req.params.command);
+          const args = req.body.args || [];
+          const key = `${slug}:${command}`;
+          const result = await commandRegistry.execute(key, args);
+          res.json({ success: true, output: result });
+        } catch (error: any) {
+          res.status(500).json({ success: false, message: error.message });
+        }
+      }
+    );
+
+    router.post(
+      '/admin/addons/capability/:slug',
+      isAuthenticated(true, 'airlink.admin.addons.settings'),
+      async (req: Request, res: Response) => {
+        try {
+          const slug = getParamAsString(req.params.slug);
+          const { capability, enabled } = req.body;
+
+          const validCapabilities = ['wrapsDashboard', 'wrapsAdminLayout', 'runsRawSql', 'registersSchedules'];
+          if (!validCapabilities.includes(capability)) {
+            return res.status(400).json({ success: false, message: 'Invalid capability' });
+          }
+
+          await prisma.addonSetting.upsert({
+            where: { addonSlug_key: { addonSlug: slug, key: `capability.${capability}` } },
+            create: { addonSlug: slug, key: `capability.${capability}`, value: enabled ? 'true' : 'false' },
+            update: { value: enabled ? 'true' : 'false' },
+          });
+
+          res.json({ success: true, message: `Capability "${capability}" ${enabled ? 'enabled' : 'disabled'}` });
+        } catch (error: any) {
+          res.status(500).json({ success: false, message: error.message });
+        }
+      }
+    );
+
+    router.post(
+      '/admin/addons/uninstall/:slug',
       isAuthenticated(true, 'airlink.admin.addons.install'),
       async (req: Request, res: Response) => {
         try {
-          const { slug } = req.body;
-
-          if (!slug || !/^[a-z0-9][a-z0-9-_]*$/i.test(slug)) {
-            return res.status(400).json({ success: false, message: 'Invalid addon slug' });
+          const slug = getParamAsString(req.params.slug);
+          const confirm = req.body.confirm;
+          if (!confirm) {
+            return res.status(400).json({ success: false, message: 'Confirmation required. Pass { "confirm": true } to proceed with uninstallation.' });
           }
 
           const addonsDir = path.join(__dirname, '../../../storage/addons');
           const targetDir = path.join(addonsDir, slug);
 
-          if (!targetDir.startsWith(addonsDir + path.sep)) {
-            return res.status(400).json({ success: false, message: 'Invalid slug' });
-          }
-
           if (!fs.existsSync(targetDir)) {
             return res.status(404).json({ success: false, message: 'Addon not found' });
           }
 
-          try {
-            await prisma.addon.delete({ where: { slug } });
-          } catch { /* best-effort cleanup */ }
-
-          fs.rmSync(targetDir, { recursive: true, force: true });
+          await uninstallAddon(slug, req.app);
           await reloadAddons(req.app);
 
           res.json({ success: true, message: `Addon "${slug}" uninstalled` });

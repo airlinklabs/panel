@@ -100,6 +100,11 @@ export type PlayerStats = Prisma.PlayerStatsModel
  */
 export type Addon = Prisma.AddonModel
 /**
+ * Model AddonSetting
+ * 
+ */
+export type AddonSetting = Prisma.AddonSettingModel
+/**
  * Model Backup
  * 
  */

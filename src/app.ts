@@ -22,7 +22,7 @@ import compression from 'compression';
 import { translationMiddleware } from './handlers/utils/core/translation';
 import PrismaSessionStore from './handlers/sessionStore';
 import { settingsLoader } from './handlers/settingsLoader';
-import { loadAddons } from './handlers/addonHandler';
+import { loadAddons, setAppInstance } from './handlers/addonHandler';
 import {
   initializeDefaultUIComponents,
   uiComponentStore,
@@ -126,8 +126,8 @@ function getAddonDirs(): string[] {
 
     const viewName = path.basename(file);
 
-    for (const addonDir of getAddonDirs()) {
-      const addonViewPath = path.join(addonViewsDir, addonDir, 'views', viewName);
+    if (data?.addonSlug) {
+      const addonViewPath = path.join(addonViewsDir, data.addonSlug, 'views', viewName);
       if (fs.existsSync(addonViewPath)) {
         return originalRenderFile(addonViewPath, data, options, callback);
       }
@@ -136,6 +136,14 @@ function getAddonDirs(): string[] {
     const mainViewPath = path.join(viewsPath, viewName);
     if (fs.existsSync(mainViewPath)) {
       return originalRenderFile(mainViewPath, data, options, callback);
+    }
+
+    for (const addonDir of getAddonDirs()) {
+      if (data?.addonSlug && addonDir === data.addonSlug) continue;
+      const addonViewPath = path.join(addonViewsDir, addonDir, 'views', viewName);
+      if (fs.existsSync(addonViewPath)) {
+        return originalRenderFile(addonViewPath, data, options, callback);
+      }
     }
 
     return originalRenderFile(file, data, options, callback);
@@ -488,7 +496,28 @@ app.use((_req, res, next) => {
 
     const prefixedViewPath = path.join(viewsPath, prefixedView + '.ejs');
     if (!fs.existsSync(prefixedViewPath) && !view.startsWith('desktop/') && !view.startsWith('mobile/')) {
+      if ((opts as any).addonSlug) {
+        const addonSlug = (opts as any).addonSlug as string;
+        const viewportSubdir = isMobileViewport ? 'mobile' : 'desktop';
+        const addonViewportPath = path.join(addonViewsDir, addonSlug, 'views', viewportSubdir, view + '.ejs');
+        const addonFallbackPath = path.join(addonViewsDir, addonSlug, 'views', view + '.ejs');
+        const addonViewPath = fs.existsSync(addonViewportPath) ? addonViewportPath : addonFallbackPath;
+        if (fs.existsSync(addonViewPath)) {
+          const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
+          (ejs as any).renderFile(addonViewPath, data, {}, (err: Error | null, html: string) => {
+            if (err) {
+              if (typeof callback === 'function') return callback(err);
+              return res.status(500).send('View render error: ' + err.message);
+            }
+            if (typeof callback === 'function') return callback(null, html);
+            res.send(html);
+          });
+          return;
+        }
+      }
+
       for (const addonDir of getAddonDirs()) {
+        if ((opts as any).addonSlug && addonDir === (opts as any).addonSlug) continue;
         const viewportSubdir = isMobileViewport ? 'mobile' : 'desktop';
         const addonViewportPath = path.join(addonViewsDir, addonDir, 'views', viewportSubdir, view + '.ejs');
         const addonFallbackPath = path.join(addonViewsDir, addonDir, 'views', view + '.ejs');
@@ -530,6 +559,7 @@ app.use(errorPageHandler);
     // Initialize default UI components
     initializeDefaultUIComponents();
     await loadModules(app, airlinkVersion, Number(port), expressWsInstance);
+    setAppInstance(app);
     await loadAddons(app);
 
     app.use(notFoundHandler);

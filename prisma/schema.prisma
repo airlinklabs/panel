@@ -206,6 +206,16 @@ model Addon {
   updatedAt   DateTime @updatedAt
 }
 
+model AddonSetting {
+  id        Int      @id @default(autoincrement())
+  addonSlug String
+  key       String
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@unique([addonSlug, key])
+}
+
 model Backup {
   id            Int      @id @default(autoincrement())
   UUID          String   @unique @default(uuid())
