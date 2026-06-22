@@ -67,21 +67,21 @@ input[type="checkbox"].cb-anim {
 /* Consistent checkbox appearance across light/dark modes.
    Only applies to visible checkboxes — sr-only ones are intentionally hidden. */
 input[type="checkbox"]:not(.sr-only) {
-  background-color: #ffffff;
-  border-color: #d1d5db;
+  background-color: var(--theme-bg-card, #ffffff);
+  border-color: var(--theme-border, #d1d5db);
 }
 
 .dark input[type="checkbox"]:not(.sr-only) {
-  background-color: #171717;
-  border-color: rgba(255,255,255,0.15);
+  background-color: var(--theme-bg-card, #171717);
+  border-color: var(--theme-border-subtle, rgba(255,255,255,0.15));
 }
 
 input[type="checkbox"]:not(.sr-only):checked {
-  background-color: #404040;
-  border-color: #404040;
+  background-color: var(--theme-text-muted, #404040);
+  border-color: var(--theme-text-muted, #404040);
 }
 
 .dark input[type="checkbox"]:not(.sr-only):checked {
-  background-color: #ffffff;
-  border-color: #ffffff;
+  background-color: var(--theme-accent-text, #ffffff);
+  border-color: var(--theme-accent-text, #ffffff);
 }

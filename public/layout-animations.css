@@ -188,9 +188,21 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Admin table rows load-in ─────────────────────────────────────────────*/
+/* ── All table rows load-in ──────────────────────────────────────────────*/
 .img-row,
-.addon-row {
+.addon-row,
+.file-row,
+.world-row,
+.user-row,
+.server-row,
+.node-row,
+.apikey-row,
+.image-row,
+.player-row,
+.login-row,
+.backup-row,
+.table-row-animate,
+tbody tr {
   animation: row-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(var(--i, 0) * 30ms);
 }
@@ -199,6 +211,47 @@
   from { opacity: 0; transform: translateX(-4px); }
   to   { opacity: 1; transform: translateX(0); }
 }
+
+/* ── All grid items load-in ─────────────────────────────────────────────*/
+.grid-item-animate {
+  animation: card-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+/* ── Skeleton shimmer ───────────────────────────────────────────────────*/
+@keyframes skeleton-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--theme-bg-input, #f3f4f6) 25%,
+    var(--theme-bg-hover, #e5e7eb) 50%,
+    var(--theme-bg-input, #f3f4f6) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.dark .skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+}
+
+.skeleton-text     { height: 12px; width: 60%; }
+.skeleton-text-sm  { height: 10px; width: 40%; }
+.skeleton-title    { height: 16px; width: 80%; }
+.skeleton-avatar   { width: 36px; height: 36px; border-radius: 50%; }
+.skeleton-card     { height: 80px; width: 100%; }
+.skeleton-row      { height: 48px; width: 100%; margin-bottom: 4px; }
 
 /* ── Stats cards load-in ──────────────────────────────────────────────────*/
 .stats-card {

@@ -1,0 +1,116 @@
+/* ── Motion System ─────────────────────────────────────────────────── */
+/* Adaptive UI animations: fade, slide, scale with stagger support */
+
+@keyframes motion-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes motion-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes motion-slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes motion-slide-down {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes motion-slide-left {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes motion-slide-right {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes motion-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes motion-scale-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+@keyframes motion-blur-in {
+  from { opacity: 0; filter: blur(4px); }
+  to { opacity: 1; filter: blur(0); }
+}
+
+/* ── Base animation class ────────────────────────────────────────── */
+
+[data-animate] {
+  opacity: 0;
+  will-change: opacity, transform, filter;
+}
+
+[data-animate].motion-visible {
+  animation-duration: 350ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+}
+
+[data-animate].motion-hidden {
+  opacity: 0;
+}
+
+/* ── Animation type mappings ─────────────────────────────────────── */
+
+[data-animate="fade"].motion-visible { animation-name: motion-fade-in; }
+[data-animate="fade-up"].motion-visible { animation-name: motion-slide-up; }
+[data-animate="fade-down"].motion-visible { animation-name: motion-slide-down; }
+[data-animate="slide-left"].motion-visible { animation-name: motion-slide-left; }
+[data-animate="slide-right"].motion-visible { animation-name: motion-slide-right; }
+[data-animate="scale"].motion-visible { animation-name: motion-scale-in; }
+[data-animate="blur"].motion-visible { animation-name: motion-blur-in; }
+
+/* ── Exit animations (JS-triggered) ──────────────────────────────── */
+
+.motion-exit-fade { animation-name: motion-fade-out; animation-duration: 200ms; }
+.motion-exit-scale { animation-name: motion-scale-out; animation-duration: 200ms; }
+
+/* ── Stagger delays ──────────────────────────────────────────────── */
+
+[data-animate-delay="0"] { animation-delay: 0ms; }
+[data-animate-delay="1"] { animation-delay: 50ms; }
+[data-animate-delay="2"] { animation-delay: 100ms; }
+[data-animate-delay="3"] { animation-delay: 150ms; }
+[data-animate-delay="4"] { animation-delay: 200ms; }
+[data-animate-delay="5"] { animation-delay: 250ms; }
+[data-animate-delay="6"] { animation-delay: 300ms; }
+[data-animate-delay="7"] { animation-delay: 350ms; }
+[data-animate-delay="8"] { animation-delay: 400ms; }
+
+/* ── Reduced motion ──────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  [data-animate] {
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
+/* ── Group animations (container children) ───────────────────────── */
+
+[data-animate-group] > * {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+[data-animate-group].motion-visible > * {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+  animation-name: motion-slide-up;
+}
