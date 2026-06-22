@@ -1,0 +1,145 @@
+<%- include(components.header, { title: title, user: user }) %>
+
+<main id="page-content" class="">
+  <%- include(components.template) %>
+  <div class="px-4 pt-5 pb-24">
+    <div>
+      <h1 class="text-base font-medium text-neutral-800 dark:text-white">Modrinth</h1>
+      <p class="mt-0.5 text-sm text-neutral-500">Manage Modrinth integration settings.</p>
+    </div>
+
+    <div class="mt-4">
+
+      <!-- Tab bar -->
+      <div class="flex gap-0.5 mb-6 border-b border-neutral-200 dark:border-neutral-700/40">
+        <button type="button" data-tab="general"  class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">General</button>
+        <button type="button" data-tab="warning"  class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Warning</button>
+        <button type="button" data-tab="advanced" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Advanced</button>
+      </div>
+
+      <!-- ── GENERAL ──────────────────────────────────────────────── -->
+      <div data-tab-panel="general" class="tab-panel space-y-5 hidden">
+
+        <!-- File status -->
+        <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+          <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Config file</h2>
+          <div class="px-5 py-5">
+            <div class="flex items-center justify-between mb-4">
+              <p class="text-xs text-neutral-500">modrinth-settings.json</p>
+              <div class="flex gap-2">
+                <button onclick="refreshFileStatus()" type="button" class="rounded-xl border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white px-3 py-1.5 text-xs font-medium transition">Refresh</button>
+                <button onclick="loadCurrentSettings()" type="button" class="rounded-xl border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white px-3 py-1.5 text-xs font-medium transition">Reload</button>
+              </div>
+            </div>
+            <div id="fileStatus" class="flex items-center gap-2 p-3 bg-neutral-50 dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 text-sm text-neutral-500">
+              <div class="w-2 h-2 bg-neutral-400 rounded-full animate-pulse"></div>
+              Loading...
+            </div>
+          </div>
+        </div>
+
+        <!-- JSON editor -->
+        <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+          <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Configuration</h2>
+          <div class="px-5 py-5">
+            <textarea id="jsonEditor" rows="12" spellcheck="false" placeholder="Loading..."
+              class="w-full px-4 py-3 bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-neutral-600/30 rounded-xl text-sm text-neutral-800 dark:text-white font-mono leading-relaxed focus:outline-none focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 transition-colors resize-none"></textarea>
+            <div class="flex items-center justify-between mt-2 text-xs text-neutral-400">
+              <div class="flex items-center gap-3">
+                <span id="jsonValid" class="hidden text-emerald-600 dark:text-emerald-400">Valid</span>
+                <span id="jsonInvalid" class="hidden text-red-500">Invalid</span>
+                <span id="characterCount">0 chars</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="formatJson()" type="button" class="text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Format</button>
+                <button onclick="validateJson()" type="button" class="text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Validate</button>
+              </div>
+            </div>
+          </div>
+          <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex items-center justify-between">
+            <button onclick="resetToDefaults()" type="button" class="rounded-xl border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white px-4 py-2 text-sm font-medium transition">Reset</button>
+            <button onclick="saveSettings()" type="button" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-5 py-2 text-sm font-medium shadow-sm transition">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── WARNING ──────────────────────────────────────────────── -->
+      <div data-tab-panel="warning" class="tab-panel hidden space-y-5">
+
+        <!-- Toggle -->
+        <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+          <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Installation warning</h2>
+          <div class="px-5 py-5 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-neutral-700 dark:text-white">Show warning banner</p>
+              <p class="text-xs text-neutral-500 mt-0.5">Display before users install mods.</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="enableWarning" class="sr-only peer">
+              <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+          <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Warning content</h2>
+          <div class="px-5 py-5 space-y-5">
+            <div>
+              <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Title</label>
+              <input type="text" id="warningTitle" placeholder="Installation Temporarily Disabled"
+                class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Message</label>
+              <textarea id="warningMessage" rows="3" placeholder="Installations are temporarily disabled..."
+                class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors resize-none"></textarea>
+            </div>
+          </div>
+          <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
+            <button onclick="applyEasySettings()" type="button" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-5 py-2 text-sm font-medium shadow-sm transition">Apply</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ADVANCED ─────────────────────────────────────────────── -->
+      <div data-tab-panel="advanced" class="tab-panel hidden space-y-5">
+
+        <!-- Disabled types -->
+        <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+          <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Disabled project types</h2>
+          <p class="text-xs text-neutral-500 px-5 pt-3">Hide content types from browse.</p>
+          <div class="px-5 py-5">
+            <div id="projectTypeButtons" class="flex flex-wrap gap-2"></div>
+          </div>
+        </div>
+
+        <!-- Blocked projects -->
+        <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+          <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Blocked projects</h2>
+          <p class="text-xs text-neutral-500 px-5 pt-3">Disable install button for specific projects.</p>
+          <div class="px-5 py-5 space-y-4">
+            <div class="flex gap-3">
+              <input type="text" id="newProjectId" placeholder="Project ID"
+                class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors flex-1">
+              <button onclick="addBlockedProject()" type="button" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium shadow-sm transition whitespace-nowrap">Add</button>
+            </div>
+            <div id="blockedProjectsList" class="space-y-2"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<%- include(components.toast) %>
+
+<!-- Data bridge -->
+<div id="page-data" class="hidden"
+  data-modrinth-settings="<%- JSON.stringify(modrinthSettings || {}) %>">
+</div>
+
+<script src="/javascript/modrinth-admin.js" nonce="<%- nonce %>"></script>
+
+<%- include(components.footer) %>

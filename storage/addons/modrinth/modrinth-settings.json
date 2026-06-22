@@ -1,0 +1,7 @@
+{
+  "modrinthInstallationWarning": false,
+  "warningTitle": "Installation Temporarily Disabled",
+  "warningMessage": "Installations are temporarily disabled due to technical issues in the backend.",
+  "disabledProjectTypes": [],
+  "blockedProjects": []
+}
