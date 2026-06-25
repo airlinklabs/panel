@@ -398,7 +398,9 @@ export const ModelName = {
   Addon: 'Addon',
   AddonSetting: 'AddonSetting',
   Backup: 'Backup',
-  SftpCredential: 'SftpCredential'
+  SftpCredential: 'SftpCredential',
+  EggCatalog: 'EggCatalog',
+  CategoryMD: 'CategoryMD'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -414,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "session" | "server" | "images" | "node" | "settings" | "serverFolder" | "serverFolderMember" | "apiKey" | "loginHistory" | "playerStats" | "addon" | "addonSetting" | "backup" | "sftpCredential"
+    modelProps: "users" | "session" | "server" | "images" | "node" | "settings" | "serverFolder" | "serverFolderMember" | "apiKey" | "loginHistory" | "playerStats" | "addon" | "addonSetting" | "backup" | "sftpCredential" | "eggCatalog" | "categoryMD"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1528,6 +1530,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EggCatalog: {
+      payload: Prisma.$EggCatalogPayload<ExtArgs>
+      fields: Prisma.EggCatalogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EggCatalogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EggCatalogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EggCatalogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EggCatalogPayload>
+        }
+        findFirst: {
+          args: Prisma.EggCatalogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EggCatalogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EggCatalogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EggCatalogPayload>
+        }
+        findMany: {
+          args: Prisma.EggCatalogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EggCatalogPayload>[]
+        }
+        create: {
+          args: Prisma.EggCatalogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EggCatalogPayload>
+        }
+        createMany: {
+          args: Prisma.EggCatalogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EggCatalogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EggCatalogPayload>[]
+        }
+        delete: {
+          args: Prisma.EggCatalogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EggCatalogPayload>
+        }
+        update: {
+          args: Prisma.EggCatalogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EggCatalogPayload>
+        }
+        deleteMany: {
+          args: Prisma.EggCatalogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EggCatalogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EggCatalogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EggCatalogPayload>[]
+        }
+        upsert: {
+          args: Prisma.EggCatalogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EggCatalogPayload>
+        }
+        aggregate: {
+          args: Prisma.EggCatalogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEggCatalog>
+        }
+        groupBy: {
+          args: Prisma.EggCatalogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EggCatalogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EggCatalogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EggCatalogCountAggregateOutputType> | number
+        }
+      }
+    }
+    CategoryMD: {
+      payload: Prisma.$CategoryMDPayload<ExtArgs>
+      fields: Prisma.CategoryMDFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CategoryMDFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryMDPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CategoryMDFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryMDPayload>
+        }
+        findFirst: {
+          args: Prisma.CategoryMDFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryMDPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CategoryMDFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryMDPayload>
+        }
+        findMany: {
+          args: Prisma.CategoryMDFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryMDPayload>[]
+        }
+        create: {
+          args: Prisma.CategoryMDCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryMDPayload>
+        }
+        createMany: {
+          args: Prisma.CategoryMDCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CategoryMDCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryMDPayload>[]
+        }
+        delete: {
+          args: Prisma.CategoryMDDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryMDPayload>
+        }
+        update: {
+          args: Prisma.CategoryMDUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryMDPayload>
+        }
+        deleteMany: {
+          args: Prisma.CategoryMDDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CategoryMDUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CategoryMDUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryMDPayload>[]
+        }
+        upsert: {
+          args: Prisma.CategoryMDUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryMDPayload>
+        }
+        aggregate: {
+          args: Prisma.CategoryMDAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCategoryMD>
+        }
+        groupBy: {
+          args: Prisma.CategoryMDGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CategoryMDGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CategoryMDCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CategoryMDCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1814,6 +1964,37 @@ export const SftpCredentialScalarFieldEnum = {
 export type SftpCredentialScalarFieldEnum = (typeof SftpCredentialScalarFieldEnum)[keyof typeof SftpCredentialScalarFieldEnum]
 
 
+export const EggCatalogScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  author: 'author',
+  category: 'category',
+  group: 'group',
+  subGroup: 'subGroup',
+  downloadUrl: 'downloadUrl',
+  filePath: 'filePath',
+  eggData: 'eggData',
+  readme: 'readme',
+  fullReadme: 'fullReadme',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EggCatalogScalarFieldEnum = (typeof EggCatalogScalarFieldEnum)[keyof typeof EggCatalogScalarFieldEnum]
+
+
+export const CategoryMDScalarFieldEnum = {
+  id: 'id',
+  category: 'category',
+  groupName: 'groupName',
+  markdown: 'markdown',
+  html: 'html',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CategoryMDScalarFieldEnum = (typeof CategoryMDScalarFieldEnum)[keyof typeof CategoryMDScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2002,6 +2183,8 @@ export type GlobalOmitConfig = {
   addonSetting?: Prisma.AddonSettingOmit
   backup?: Prisma.BackupOmit
   sftpCredential?: Prisma.SftpCredentialOmit
+  eggCatalog?: Prisma.EggCatalogOmit
+  categoryMD?: Prisma.CategoryMDOmit
 }
 
 /* Types for Logging */

@@ -1,0 +1,185 @@
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0e1726;
+            font-family: 'Inter', sans-serif;
+            color: #e2e8f0;
+        }
+
+        .bg-theme-card {
+            background-color: #111c2d;
+        }
+
+        .bg-theme-body {
+            background-color: #0e1726;
+        }
+
+        .text-theme-l {
+            color: #94a3b8;
+        }
+
+        .text-theme-d {
+            color: #475569;
+        }
+
+        .bg-theme-btn {
+            background-color: #3b82f6;
+        }
+
+        .bg-theme-btn:hover {
+            background-color: #2563eb;
+        }
+
+        .bg-theme-nav {
+            background-color: #111c2d;
+        }
+
+        .bg-theme-input {
+            background-color: #1e293b;
+        }
+
+        .card-shadow {
+            box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.43);
+        }
+
+        .btn-shadow {
+            box-shadow: 0px 0px 3px 1px rgba(0,0,0,0.23);
+        }
+
+        .step-active {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .step-inactive {
+            background-color: #1e293b;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<% if (isMobileViewport) { %>
+    <%- include('../components/template', { body: 'user/create-server' }) %>
+
+    <main id="page-content" class="">
+        <%- include('../components/header', { name: user.name, avatar: user.avatar }) %>
+        <section class="px-4 py-5">
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="data-animate-card bg-theme-card card-shadow rounded p-4">
+                        <h3 class="text-white fw-bold mb-4">Create Server</h3>
+
+                        <div class="d-flex align-items-center justify-content-center mb-4">
+                            <div class="step-active rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">1</div>
+                            <div class="flex-fill border-top mx-2" style="border-top: 2px solid #334155;"></div>
+                            <div class="step-inactive rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">2</div>
+                            <div class="flex-fill border-top mx-2" style="border-top: 2px solid #334155;"></div>
+                            <div class="step-inactive rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">3</div>
+                        </div>
+
+                        <form action="/api/servers/create" method="POST">
+                            <div class="mb-3">
+                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Server Name</label><input type="text" name="name" required class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
+                            </div>
+                            <div class="mb-3">
+                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Server Type</label><select name="serverType" required class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full"><option value="paper">Paper</option><option value="purpur">Purpur</option><option value="spigot">Spigot</option><option value="vanilla">Vanilla</option><option value="forge">Forge</option><option value="fabric">Fabric</option></select></div>
+                            </div>
+                            <div class="mb-3">
+                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Version</label><select name="serverVersion" required class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full"><option value="1.21">1.21</option><option value="1.20.6">1.20.6</option><option value="1.20.4">1.20.4</option></select></div>
+                            </div>
+                            <div class="mb-3">
+                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">RAM (MB)</label><input type="number" name="ram" value="1024" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
+                            </div>
+                            <div class="mb-3">
+                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">CPU (cores)</label><input type="number" name="cpu" value="1" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
+                            </div>
+                            <div class="mb-3">
+                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Disk (MB)</label><input type="number" name="disk" value="10240" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
+                            </div>
+                            <button type="submit" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90 w-100 btn-shadow">Create Server</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+<% } else { %>
+    <%- include('../components/template', { body: 'user/create-server' }) %>
+
+    <main class="h-screen m-auto">
+        <div class="flex h-screen">
+            <%- include('../components/template') %>
+            <section id="page-content" class="flex-1 overflow-y-auto">
+                <%- include('../components/header', { name: user.name, avatar: user.avatar }) %>
+                <div class="p-6">
+                    <div class="max-w-2xl mx-auto">
+                        <div class="data-animate-card bg-theme-card card-shadow rounded-lg p-6">
+                            <h3 class="text-white font-bold text-lg mb-6">Create Server</h3>
+
+                            <div class="flex items-center justify-center mb-6">
+                                <div class="step-active rounded-full flex items-center justify-center mr-2" style="width: 32px; height: 32px;">1</div>
+                                <div class="flex-1 border-t" style="border-top: 2px solid #334155;"></div>
+                                <div class="step-inactive rounded-full flex items-center justify-center mx-2" style="width: 32px; height: 32px;">2</div>
+                                <div class="flex-1 border-t" style="border-top: 2px solid #334155;"></div>
+                                <div class="step-inactive rounded-full flex items-center justify-center" style="width: 32px; height: 32px;">3</div>
+                            </div>
+
+                            <form action="/api/servers/create" method="POST">
+                                <div class="grid grid-cols-2 gap-4 mb-6">
+                                    <div>
+                                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Server Name</label><input type="text" name="name" required class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
+                                    </div>
+                                    <div>
+                                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Server Type</label><select name="serverType" required class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full"><option value="paper">Paper</option><option value="purpur">Purpur</option><option value="spigot">Spigot</option><option value="vanilla">Vanilla</option><option value="forge">Forge</option><option value="fabric">Fabric</option></select></div>
+                                    </div>
+                                    <div>
+                                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Version</label><select name="serverVersion" required class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full"><option value="1.21">1.21</option><option value="1.20.6">1.20.6</option><option value="1.20.4">1.20.4</option></select></div>
+                                    </div>
+                                    <div>
+                                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">RAM (MB)</label><input type="number" name="ram" value="1024" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
+                                    </div>
+                                    <div>
+                                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">CPU (cores)</label><input type="number" name="cpu" value="1" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
+                                    </div>
+                                    <div>
+                                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Disk (MB)</label><input type="number" name="disk" value="10240" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90 btn-shadow">Create Server</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+<% } %>
+
+<script nonce="<%- nonce %>">
+    function updateOptions() {
+        const type = document.getElementById('serverType').value;
+        const versionSelect = document.getElementById('serverVersion');
+        versionSelect.innerHTML = '';
+
+        const versions = {
+            paper: ['1.21', '1.20.6', '1.20.4', '1.20.2', '1.20.1'],
+            purpur: ['1.21', '1.20.6', '1.20.4'],
+            spigot: ['1.21', '1.20.6', '1.20.4'],
+            vanilla: ['1.21', '1.20.6', '1.20.4'],
+            forge: ['1.21', '1.20.6', '1.20.4'],
+            fabric: ['1.21', '1.20.6', '1.20.4']
+        };
+
+        (versions[type] || []).forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v;
+            opt.textContent = v;
+            versionSelect.appendChild(opt);
+        });
+    }
+
+    document.getElementById('serverType').addEventListener('change', updateOptions);
+</script>

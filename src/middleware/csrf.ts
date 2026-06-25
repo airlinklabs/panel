@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { doubleCsrf } from 'csrf-csrf';
 import crypto from 'crypto';
-import logger from '../../logger';
+import logger from '../services/logger';
 
 function ensureCsrfSessionId(req: Request): string {
   const session = req.session as { csrfSessionId?: string } | undefined;

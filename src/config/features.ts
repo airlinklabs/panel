@@ -1,8 +1,8 @@
 import axios from 'axios';
 import prisma from '../db';
-import { checkNodeStatus } from './utils/node/nodeStatus';
-import logger from './logger';
-import { daemonSchemeSync } from './utils/core/daemonRequest';
+import { checkNodeStatus } from '../services/nodeStatus';
+import logger from '../services/logger';
+import { daemonSchemeSync } from '../services/daemonRequest';
 
 interface ServerInfo {
   serverUUID: string;

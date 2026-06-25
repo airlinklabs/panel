@@ -1,8 +1,8 @@
 import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import { Module } from '../../core/moduleInit';
 import prisma from '../../db';
-import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import logger from '../../handlers/logger';
+import { isAuthenticated } from '../../middleware/auth';
+import logger from '../../services/logger';
 
 const getAuthenticatedUserId = (req: Request): number => {
   const userId = req.session.user?.id;

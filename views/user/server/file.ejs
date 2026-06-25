@@ -1,0 +1,99 @@
+<%- include('../../components/header', { title: 'File Editor' }) %>
+
+<% if (isMobileViewport) { %>
+<main id="page-content">
+    <%- include('../../components/template') %>
+    <section class="px-4 py-5">
+        <%- include('../../components/serverHeader', { server: server, req: req }) %>
+        <div class="mt-4">
+            <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-3 mb-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <a href="/server/<%= server.shortID %>/files" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition shrink-0">
+                            <%- icon('arrow-left', { size: 16 }) %>
+                        </a>
+                        <span class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= file.name %></span>
+                    </div>
+                    <div class="flex gap-1.5 shrink-0">
+                        <button class="rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 text-[11px] font-medium transition" onclick="saveFile()">Save</button>
+                        <button class="rounded-lg bg-red-600 hover:bg-red-500 text-white px-2.5 py-1 text-[11px] font-medium transition" onclick="deleteFile()">Delete</button>
+                    </div>
+                </div>
+            </div>
+            <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-3">
+                <div id="editor" style="min-height: 300px;"><%= file.content %></div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<% } else { %>
+<main class="h-screen m-auto">
+    <div class="flex h-screen">
+        <%- include('../../components/template') %>
+        <section id="page-content" class="flex-1 overflow-y-auto pt-16">
+            <div class="px-8 pt-4">
+                <%- include('../../components/serverHeader', { server: server, req: req }) %>
+            </div>
+            <div class="p-6">
+                <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4 mb-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <a href="/server/<%= server.shortID %>/files" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition shrink-0">
+                                <%- icon('arrow-left', { size: 16 }) %>
+                            </a>
+                            <span class="text-sm font-medium text-neutral-800 dark:text-white"><%= file.name %></span>
+                        </div>
+                        <div class="flex gap-2 shrink-0">
+                            <button class="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 text-xs font-medium transition" onclick="saveFile()">Save</button>
+                            <button class="rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 text-xs font-medium transition" onclick="deleteFile()">Delete</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+                    <div id="editor" style="min-height: 400px;"><%= file.content %></div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+<% } %>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/footer') %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/ace.js"></script>
+<script nonce="<%- nonce %>">
+    const editor = ace.edit("editor");
+    editor.setTheme("ace/theme/monokai");
+    editor.session.setMode("ace/mode/text");
+    editor.setFontSize(14);
+    editor.setOptions({
+        maxLines: Infinity,
+        minLines: 20
+    });
+
+    function saveFile() {
+        fetch('/api/servers/<%= server.shortID %>/files/<%= file.path %>', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: editor.getValue() })
+        }).then(res => {
+            if (res.ok) {
+                showToast('File saved successfully', 'success');
+            } else {
+                showToast('Failed to save file', 'error');
+            }
+        });
+    }
+
+    function deleteFile() {
+        if (!confirm('Are you sure you want to delete this file?')) return;
+        fetch('/api/servers/<%= server.shortID %>/files/<%= file.path %>', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+            if (res.ok) window.location.href = '/server/<%= server.shortID %>/files';
+        });
+    }
+</script>

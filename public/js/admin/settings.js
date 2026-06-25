@@ -13,7 +13,16 @@
       btn.classList.toggle('text-neutral-500',   !on);
       btn.classList.toggle('dark:text-neutral-400', !on);
     });
-    tabPanels.forEach(p => p.classList.toggle('hidden', p.dataset.tabPanel !== id));
+    tabPanels.forEach(p => {
+      const show = p.dataset.tabPanel === id;
+      p.classList.toggle('hidden', !show);
+      if (show) {
+        void p.offsetHeight;
+        if (typeof window.staggerAnimate === 'function') {
+          window.staggerAnimate(p);
+        }
+      }
+    });
     try { localStorage.setItem('settings_tab', id); } catch {}
   }
 

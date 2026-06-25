@@ -1,0 +1,648 @@
+<%- include('../../components/header', { title: req.translations.adminImagesTitle || 'Images' }) %>
+
+<% if (isMobileViewport) { %>
+<style>
+  .store-badge { display:inline-flex;align-items:center;padding:2px 8px;border-radius:9999px;font-size:10px;font-weight:500;white-space:nowrap; }
+  .cat-game        { background:#ede9fe; color:#6d28d9; }
+  .cat-application { background:#e0f2fe; color:#0369a1; }
+  .cat-generic     { background:#dcfce7; color:#15803d; }
+  .dark .cat-game        { background:rgba(139,92,246,0.15); color:#a78bfa; }
+  .dark .cat-application { background:rgba(14,165,233,0.15);  color:#38bdf8; }
+  .dark .cat-generic     { background:rgba(34,197,94,0.15);   color:#4ade80; }
+  .sk { border-radius:10px; animation:sk-pulse 1.4s ease-in-out infinite; }
+  html:not(.dark) .sk { background:#f0f0f0; }
+  html.dark .sk { background:rgba(255,255,255,0.05); }
+  @keyframes sk-pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  .cat-btn-active  { background:#171717 !important; color:#fff !important; border-color:transparent !important; }
+  .dark .cat-btn-active { background:#fff !important; color:#0a0a0a !important; }
+</style>
+
+<main id="page-content" class="">
+  <%- include('../../components/template') %>
+  <%- include('../../components/toast') %>
+
+  <div class="px-4 py-5">
+    <div class="flex items-start justify-between mb-5">
+      <div>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminImagesTitle %></h1>
+        <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminImagesText %></p>
+      </div>
+      <div class="flex gap-2 shrink-0">
+        <button type="button" id="uploadimage" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Upload</button>
+        <button type="button" onclick="openModal('createModal')" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Create</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 mb-5">
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+        <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Images</p>
+        <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= images.length %></p>
+        <p class="text-xs text-neutral-500 mt-1">installed</p>
+      </div>
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+        <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Categories</p>
+        <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= [...new Set(images.map(i => i.category || 'other'))].length %></p>
+        <p class="text-xs text-neutral-500 mt-1">unique</p>
+      </div>
+    </div>
+
+    <!-- Tab bar -->
+    <div class="flex gap-0.5 mb-5 border-b border-neutral-200 dark:border-neutral-700/40">
+      <button type="button" data-tab="images" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">My Images</button>
+      <button type="button" data-tab="store"  class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Store</button>
+    </div>
+
+    <!-- ── MY IMAGES ──────────────────────────────────────────────────── -->
+    <div data-tab-panel="images" class="tab-panel">
+      <div class="space-y-2">
+        <% let imgIdx = 0; images.forEach(function(image) { %>
+          <div data-animate-card class="grid-item-animate rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3" style="--i:<%= imgIdx++ %>">
+            <div class="flex items-center gap-3 mb-3">
+              <div data-animate-card class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 flex items-center justify-center shrink-0">
+                <%- icon('image', { size: 16, class: 'text-neutral-500 shrink-0' }) %>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= image.name %></p>
+                <p class="text-xs text-neutral-500 truncate">by <%= image.author %></p>
+              </div>
+              <p class="text-xs text-neutral-500 shrink-0"><%= new Date(image.createdAt).toLocaleDateString() %></p>
+            </div>
+            <div class="flex gap-2 justify-end">
+              <a href="/admin/images/edit/<%= image.id %>">
+                <button type="button" class="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-blue-500 transition">Edit</button>
+              </a>
+              <a href="/admin/images/export/<%= image.id %>">
+                <button type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Export</button>
+              </a>
+              <button onclick="deleteImage('<%= image.id %>')" type="button" class="rounded-lg bg-red-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-red-500 transition">Delete</button>
+            </div>
+          </div>
+        <% }); %>
+
+        <% if (images.length === 0) { %>
+          <div class="py-16 text-center">
+            <%- icon('image', { size: 16, class: 'text-neutral-700 shrink-0' }) %>
+            <p class="text-sm text-neutral-500">No images yet</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- ── STORE ──────────────────────────────────────────────────────── -->
+    <div data-tab-panel="store" class="tab-panel hidden">
+
+      <div class="relative mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+        </svg>
+        <input id="searchInput" type="text" placeholder="Search images…"
+          class="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-neutral-200 dark:border-neutral-700/50
+                 bg-white dark:bg-neutral-800/50 text-neutral-800 dark:text-white
+                 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+      </div>
+
+      <div id="catBar" class="flex gap-1.5 mb-2 overflow-x-auto pb-1">
+        <button data-cat="all"         class="cat-btn store-badge bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 border border-transparent cursor-pointer shrink-0">All</button>
+        <button data-cat="game"        class="cat-btn store-badge bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700/50 cursor-pointer shrink-0">Games</button>
+        <button data-cat="application" class="cat-btn store-badge bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700/50 cursor-pointer shrink-0">Apps</button>
+        <button data-cat="generic"     class="cat-btn store-badge bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700/50 cursor-pointer shrink-0">Generic</button>
+      </div>
+
+      <div id="groupBar" class="flex gap-1.5 mb-3 overflow-x-auto pb-1"></div>
+
+      <div class="flex items-center gap-2 mb-3 min-h-[20px]">
+        <span id="statusText" class="text-xs text-neutral-400">Loading catalogue…</span>
+        <span id="loadingDot" class="inline-block w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shrink-0"></span>
+      </div>
+
+      <div id="skeletons" class="space-y-2">
+        <% for (let i = 0; i < 6; i++) { %>
+        <div data-animate-card class="rounded-xl border border-neutral-200 dark:border-neutral-700/30 p-4 flex flex-col gap-2.5 bg-white dark:bg-neutral-800/20">
+          <div class="sk h-4 w-2/3"></div>
+          <div class="sk h-3 w-full"></div>
+          <div class="sk h-3 w-3/4"></div>
+        </div>
+        <% } %>
+      </div>
+
+      <div id="sections" class="hidden space-y-6"></div>
+
+      <div id="emptyState" class="hidden py-16 flex flex-col items-center text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-9 h-9 text-neutral-300 dark:text-neutral-600 mb-2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+        </svg>
+        <p class="text-sm font-medium text-neutral-500">No images match</p>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<div id="installModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-end">
+  <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 rounded-t-2xl w-full p-5">
+    <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-0.5" id="modalTitle">Install image</h2>
+    <p class="text-xs text-neutral-500 mb-4" id="modalSubtitle">Add this image to your panel.</p>
+    <div id="modalError" class="hidden mb-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3">
+      <p class="text-xs text-red-600 dark:text-red-400" id="modalErrorText"></p>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="closeInstallModal()" class="flex-1 py-2.5 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-white text-sm font-medium transition">Cancel</button>
+      <button id="confirmBtn" onclick="confirmInstall()" class="flex-1 py-2.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm font-medium transition">Install</button>
+    </div>
+  </div>
+</div>
+
+<div id="createModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60">
+  <div data-animate-card class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-2xl w-full shadow-xl max-h-[92vh] overflow-y-auto">
+    <div class="flex items-start justify-between px-4 pt-4 pb-3 border-b border-neutral-100 dark:border-white/5">
+      <div>
+        <p class="text-sm font-semibold text-neutral-800 dark:text-white">Create Image</p>
+        <p class="text-xs text-neutral-500 mt-0.5">Configure Docker images and variables after creation.</p>
+      </div>
+      <button onclick="closeModal('createModal')" class="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition ml-3">
+        <%- icon('x', { size: 14, class: 'shrink-0' }) %>
+      </button>
+    </div>
+    <form action="/admin/images/create" method="POST" class="px-4 py-4 space-y-3">
+      <div class="flex flex-col gap-1">
+        <label for="m-create-name" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+          Name <span class="text-red-500">*</span>
+        </label>
+        <input type="text" id="m-create-name" name="name" placeholder="e.g. Minecraft Java" required
+          class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-100 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="flex flex-col gap-1">
+          <label for="m-create-author" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Author</label>
+          <input type="text" id="m-create-author" name="author" placeholder="github.com/you"
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-100 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="m-create-authorName" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Author Name</label>
+          <input type="text" id="m-create-authorName" name="authorName" placeholder="Your Name"
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-100 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label for="m-create-startup" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+          Startup Command <span class="text-red-500">*</span>
+        </label>
+        <input type="text" id="m-create-startup" name="startup" placeholder="java -Xms128M -jar server.jar" required
+          class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-100 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition font-mono">
+        <p class="text-xs text-neutral-400 dark:text-neutral-500">Use <code class="px-1 py-0.5 rounded bg-neutral-100 dark:bg-neutral-700 font-mono text-neutral-500 dark:text-neutral-300">$ALVKT(VAR)</code> for variables.</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label for="m-create-description" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Description</label>
+        <textarea id="m-create-description" name="description" rows="2" placeholder="What does this image run?"
+          class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-100 dark:bg-neutral-800 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition resize-none"></textarea>
+      </div>
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-3 py-2.5 flex items-start gap-2.5">
+        <%- icon('play-circle', { size: 14, class: 'text-neutral-400 shrink-0' }) %>
+        <p class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">You'll be taken to the editor to add Docker images, variables, and scripts after creation.</p>
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button type="button" onclick="closeModal('createModal')"
+          class="flex-1 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+          Cancel
+        </button>
+        <button type="submit"
+          class="flex-1 rounded-xl bg-neutral-900 dark:bg-white px-4 py-2.5 text-sm font-medium text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+          Create &amp; Edit
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script nonce="<%- nonce %>">
+  // ── Tab switching ─────────────────────────────────────────────────────
+  (function () {
+    var tabBtns   = document.querySelectorAll('.tab-btn');
+    var tabPanels = document.querySelectorAll('.tab-panel');
+    function activate(id) {
+      tabBtns.forEach(function (btn) {
+        var on = btn.dataset.tab === id;
+        btn.classList.toggle('border-neutral-800', on);
+        btn.classList.toggle('dark:border-white',  on);
+        btn.classList.toggle('text-neutral-800',   on);
+        btn.classList.toggle('dark:text-white',    on);
+        btn.classList.toggle('border-transparent', !on);
+        btn.classList.toggle('text-neutral-500',   !on);
+        btn.classList.toggle('dark:text-neutral-400', !on);
+      });
+      tabPanels.forEach(function (p) {
+        p.classList.toggle('hidden', p.dataset.tabPanel !== id);
+      });
+      if (id === 'store' && !window._storeLoaded) { window._storeLoaded = true; loadCatalogue(); }
+    }
+    tabBtns.forEach(function (btn) { btn.addEventListener('click', function () { activate(btn.dataset.tab); }); });
+    activate('images');
+  })();
+
+  // ── Image store ───────────────────────────────────────────────────────
+  var CAT_COLORS = { game:'cat-game', application:'cat-application', generic:'cat-generic' };
+  var CAT_LABELS = { game:'Game', application:'App', generic:'Generic' };
+  var allStoreImages=[], activeCat='all', activeGroup='all', searchQuery='', pendingEgg=null;
+
+  function storeEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function storeCap(s){ return s.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); }
+
+  async function loadCatalogue() {
+    storeSetStatus('Loading catalogue…', true);
+    try {
+      var res = await fetch('/admin/images/store/catalogue');
+      if (!res.ok) throw new Error(res.status);
+      var data = await res.json();
+      allStoreImages = data.images || [];
+      var skel = document.getElementById('skeletons');
+      if (skel) skel.remove();
+      storeBuildGroupBar(); storeRender();
+      var age = data.builtAt ? Math.round((Date.now()-data.builtAt)/60000) : 0;
+      storeSetStatus(allStoreImages.length + ' images · ' + (age < 1 ? 'fresh' : age+'m old'), false);
+    } catch(err) { storeSetStatus('Failed to load catalogue.', false); }
+  }
+
+  function storeBuildGroupBar() {
+    var bar = document.getElementById('groupBar');
+    var groups = [];
+    var seen = {};
+    allStoreImages.filter(function(i){return activeCat==='all'||i.category===activeCat;}).forEach(function(i){
+      if (!seen[i.group]) { seen[i.group] = true; groups.push(i.group); }
+    });
+    groups.sort();
+    bar.innerHTML = '';
+    bar.appendChild(storeMkGroupBtn('all','All',activeGroup==='all'));
+    groups.forEach(function(g){ bar.appendChild(storeMkGroupBtn(g,storeCap(g),activeGroup===g)); });
+  }
+
+  function storeMkGroupBtn(val,label,active) {
+    var b = document.createElement('button');
+    b.dataset.group = val;
+    b.className = 'store-badge cursor-pointer transition shrink-0 ' + (active ? 'bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-900 border border-transparent' : 'bg-white dark:bg-neutral-800/60 text-neutral-500 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700/40');
+    b.textContent = label;
+    b.addEventListener('click',function(){ activeGroup=val; storeBuildGroupBar(); storeRender(); });
+    return b;
+  }
+
+  function storeApplyFilters() {
+    var q = searchQuery.trim().toLowerCase();
+    return allStoreImages.filter(function(img) {
+      if (activeCat!=='all' && img.category!==activeCat) return false;
+      if (activeGroup!=='all' && img.group!==activeGroup) return false;
+      if (q) { var hay=(img.name+' '+img.description+' '+img.readme+' '+img.author+' '+img.group).toLowerCase(); if(!hay.includes(q)) return false; }
+      return true;
+    });
+  }
+
+  function storeRender() {
+    var visible = storeApplyFilters();
+    var sections = document.getElementById('sections');
+    var empty = document.getElementById('emptyState');
+    sections.innerHTML = '';
+    if (visible.length===0 && allStoreImages.length>0) { sections.classList.add('hidden'); empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden'); sections.classList.remove('hidden');
+    var isGrouped = !searchQuery.trim() && activeGroup==='all';
+    if (isGrouped) {
+      var grouped = new Map();
+      visible.forEach(function(img) { if(!grouped.has(img.group)) grouped.set(img.group,[]); grouped.get(img.group).push(img); });
+      Array.from(grouped.entries()).sort(function(a,b){return a[0].localeCompare(b[0]);}).forEach(function(entry){sections.appendChild(storeBuildSection(storeCap(entry[0]),entry[1]));});
+    } else {
+      sections.appendChild(storeBuildSection(null,visible));
+    }
+  }
+
+  function storeBuildSection(title, images) {
+    var wrap = document.createElement('div');
+    if (title) {
+      var h = document.createElement('div');
+      h.className = 'flex items-center gap-2 mb-2';
+      h.innerHTML = '<h2 class="text-xs font-semibold text-neutral-600 dark:text-neutral-400 uppercase tracking-wider">'+storeEsc(title)+'</h2><span class="text-xs text-neutral-400">'+images.length+'</span><div class="flex-1 h-px bg-neutral-100 dark:bg-neutral-800"></div>';
+      wrap.appendChild(h);
+    }
+    var list = document.createElement('div');
+    list.className = 'space-y-2';
+    images.forEach(function(img){ list.appendChild(storeBuildCard(img)); });
+    wrap.appendChild(list);
+    return wrap;
+  }
+
+  function storeBuildCard(img) {
+    var color = CAT_COLORS[img.category]||'bg-neutral-100 text-neutral-600';
+    var label = CAT_LABELS[img.category]||img.category;
+    var desc = (img.readme&&img.readme.length>20?img.readme:img.description)||'';
+    var short = desc.length>90 ? desc.slice(0,88)+'…' : desc;
+    var el = document.createElement('div');
+    el.className = 'rounded-xl border border-neutral-200 dark:border-neutral-800/40 bg-white dark:bg-neutral-800/20 p-4 flex flex-col gap-2 transition hover:bg-neutral-50 dark:hover:bg-neutral-700/20';
+    el.innerHTML =
+      '<div class="flex items-start justify-between gap-2">'+
+        '<p class="text-sm font-medium text-neutral-800 dark:text-white leading-snug">'+storeEsc(img.name)+'</p>'+
+        '<span class="store-badge '+color+' shrink-0">'+label+'</span>'+
+      '</div>'+
+      (img.subGroup&&img.subGroup!==img.group?'<p class="text-[10px] text-neutral-400 font-mono">'+storeEsc(img.subGroup)+'</p>':'')+
+      (short?'<p class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">'+storeEsc(short)+'</p>':'')+
+      '<button class="store-install-btn mt-1 w-full py-2 rounded-xl border border-neutral-200 dark:border-neutral-800/40 bg-white dark:bg-neutral-800/20 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 text-neutral-700 dark:text-neutral-300 text-xs font-medium transition">Install</button>';
+    el.querySelector('.store-install-btn').addEventListener('click',function(){storeOpenModal(img);});
+    return el;
+  }
+
+  function storeSetStatus(msg,loading) {
+    var el = document.getElementById('statusText');
+    if (el) el.textContent=msg;
+    var dot=document.getElementById('loadingDot');
+    if(dot) dot.style.display=loading?'':'none';
+  }
+
+  var searchEl = document.getElementById('searchInput');
+  if (searchEl) searchEl.addEventListener('input',function(){ searchQuery=this.value; storeRender(); });
+
+  document.querySelectorAll('.cat-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      activeCat=btn.dataset.cat; activeGroup='all';
+      document.querySelectorAll('.cat-btn').forEach(function(b){
+        var on=b.dataset.cat===activeCat;
+        b.className='cat-btn store-badge cursor-pointer transition shrink-0 '+(on?'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 border border-transparent':'bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700/50');
+      });
+      storeBuildGroupBar(); storeRender();
+    });
+  });
+
+  function storeOpenModal(img) {
+    pendingEgg={name:img.name,egg:img.egg};
+    document.getElementById('modalTitle').textContent='Install "'+img.name+'"';
+    document.getElementById('modalSubtitle').textContent=img.subGroup?'from '+img.subGroup:'Add this image to your panel.';
+    document.getElementById('modalError').classList.add('hidden');
+    var btn=document.getElementById('confirmBtn'); btn.disabled=false; btn.textContent='Install';
+    document.getElementById('installModal').classList.remove('hidden');
+  }
+  function closeInstallModal() { document.getElementById('installModal').classList.add('hidden'); pendingEgg=null; }
+  document.getElementById('installModal').addEventListener('click',function(e){ if(e.target===document.getElementById('installModal')) closeInstallModal(); });
+
+  async function confirmInstall() {
+    if(!pendingEgg) return;
+    var btn=document.getElementById('confirmBtn'); btn.disabled=true; btn.textContent='Installing…';
+    document.getElementById('modalError').classList.add('hidden');
+    try {
+      var res=await fetch('/admin/images/store/install',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pendingEgg.egg)});
+      var body=await res.json();
+      if(!res.ok){ document.getElementById('modalErrorText').textContent=body.error||'Failed.'; document.getElementById('modalError').classList.remove('hidden'); btn.disabled=false; btn.textContent='Install'; return; }
+      closeInstallModal(); showToast('"'+pendingEgg.name+'" installed. Nice.','success');
+    } catch(err){ document.getElementById('modalErrorText').textContent=err.message||'Network error.'; document.getElementById('modalError').classList.remove('hidden'); btn.disabled=false; btn.textContent='Install'; }
+  }
+
+  // ── Create / Upload / Delete (existing) ───────────────────────────────
+  function openModal(id) {
+    var el = document.getElementById(id);
+    el.classList.remove('hidden');
+    el.classList.add('flex');
+  }
+
+  function closeModal(id) {
+    var el = document.getElementById(id);
+    el.classList.add('hidden');
+    el.classList.remove('flex');
+  }
+
+  function showConfirmModal(title, message, onConfirm) {
+    var modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-end justify-center opacity-0 pointer-events-none transition-opacity duration-200';
+    modal.innerHTML = '\
+      <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 rounded-t-2xl p-5 w-full translate-y-full transition-transform duration-200 shadow-2xl">\
+        <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">'+title+'</h2>\
+        <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-5">'+message+'</p>\
+        <div class="flex gap-2">\
+          <button id="modalCancel" class="flex-1 py-2.5 text-sm font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300">Cancel</button>\
+          <button id="modalConfirm" class="flex-1 py-2.5 text-sm font-medium rounded-xl bg-red-600 text-white">Delete</button>\
+        </div>\
+      </div>';
+    document.body.appendChild(modal);
+    requestAnimationFrame(function() {
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.querySelector('div').classList.remove('translate-y-full');
+      modal.querySelector('div').classList.add('translate-y-0');
+    });
+    var close = function() { modal.classList.add('opacity-0'); setTimeout(function(){ document.body.removeChild(modal); }, 200); };
+    modal.querySelector('#modalCancel').addEventListener('click', close);
+    modal.querySelector('#modalConfirm').addEventListener('click', function() { close(); onConfirm(); });
+  }
+
+  function deleteImage(imageId) {
+    showConfirmModal('Delete image', 'This will permanently remove the image and cannot be undone.', async function() {
+      try {
+        var response = await fetch('/admin/images/delete/'+imageId, { method: 'DELETE' });
+        if (response.ok) {
+          showToast('Image deleted.', 'success');
+          setTimeout(function(){ location.reload(); }, 800);
+        } else {
+          var msg = await response.text();
+          showToast(msg || 'Failed to delete image', 'error');
+        }
+      } catch(e) {
+        showToast('Something went wrong.', 'error');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('uploadimage').addEventListener('click', function() {
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.click();
+      input.addEventListener('change', function(event) {
+        var file = event.target.files[0];
+        if (!file || file.type !== 'application/json') {
+          showToast('Please select a JSON file', 'error');
+          return;
+        }
+        showToast('Uploading...', 'info');
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            JSON.parse(e.target.result);
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/admin/images/upload', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function() {
+              if (xhr.status === 200) {
+                var res = JSON.parse(xhr.responseText);
+                showToast(res.message || 'Image uploaded.', 'success');
+                setTimeout(function(){ location.reload(); }, 800);
+              } else {
+                try {
+                  var err = JSON.parse(xhr.responseText);
+                  showToast(err.error || 'Upload failed', 'error');
+                } catch(e2) { showToast('Upload failed', 'error'); }
+              }
+            };
+            xhr.onerror = function() { showToast('Network error', 'error'); };
+            xhr.send(e.target.result);
+          } catch (err) {
+            showToast('Invalid JSON: ' + err.message, 'error');
+          }
+        };
+        reader.readAsText(file);
+      });
+    });
+  });
+</script>
+
+<% } else { %>
+<style>
+  ::-webkit-scrollbar { display: none; }
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 50;
+    background: var(--theme-overlay, rgba(0,0,0,0.5));
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal-box {
+    background: var(--theme-bg-card, #fff); border: 1px solid var(--theme-border, #e5e5e5); border-radius: 12px;
+    width: 100%; max-width: 460px;
+    transform: scale(0.96); opacity: 0;
+    transition: transform 0.25s, opacity 0.25s;
+  }
+  html.dark .modal-box { background: var(--theme-bg-card, #1c1c1c); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
+  .modal-overlay.open .modal-box { transform: scale(1); opacity: 1; }
+  .field-label { font-size: 11px; font-weight: 500; color: var(--theme-text-muted, #737373); display: block; margin-bottom: 5px; }
+  html.dark .field-label { color: var(--theme-text, #a3a3a3); }
+  .field-input {
+    width: 100%; border-radius: 9px; border: 1px solid var(--theme-border, #e5e5e5);
+    background: var(--theme-bg-input, #fafafa); padding: 8px 12px;
+    font-size: 13px; color: var(--theme-text-strong, #171717); outline: none;
+    transition: border-color 0.15s; box-sizing: border-box; font-family: inherit;
+  }
+  html.dark .field-input { background: var(--theme-bg-hover, rgba(255,255,255,0.04)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.1)); color: var(--theme-text, #e5e5e5); }
+  .field-input:focus { border-color: var(--theme-border, #a3a3a3); }
+  html.dark .field-input:focus { border-color: var(--theme-border-subtle, rgba(255,255,255,0.25)); }
+  .field-input::placeholder { color: var(--theme-text-placeholder, #a3a3a3); }
+  html.dark .field-input::placeholder { color: var(--theme-text-muted, #525252); }
+  @media (max-width: 640px) { .col-hide { display: none; } }
+</style>
+
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <div class="w-60 h-full"><%- include('../../components/template') %></div>
+    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
+
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <%- include('../../components/pageTitle', { title: 'Images', description: 'Manage server images installed on this panel' }) %>
+        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-2 flex-wrap">
+          <button type="button" id="uploadBtn" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Upload JSON</button>
+          <button type="button" onclick="openCreate()" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">New Image</button>
+          <a href="/admin/images/store"><button type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Browse Store</button></a>
+        </div>
+      </div>
+
+      <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mx-8 mt-6">
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Images</h2>
+          <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= images.length %></p>
+          <p class="text-sm text-neutral-400 mt-2">installed on this panel</p>
+        </div>
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Categories</h2>
+          <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= [...new Set(images.map(i => i.category || 'other'))].length %></p>
+          <p class="text-sm text-neutral-400 mt-2">unique categories</p>
+        </div>
+      </div>
+
+      <div class="mx-8 mt-6 flex border-b border-neutral-200 dark:border-neutral-800">
+        <span class="px-1 py-2.5 mr-5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px">Installed <span class="ml-1 text-xs text-neutral-400"><%= images.length %></span></span>
+        <a href="/admin/images/store" class="px-1 py-2.5 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">Store</a>
+      </div>
+
+      <% if (images.length === 0) { %>
+      <div class="flex flex-col items-center justify-center py-24 text-center">
+        <p class="text-sm text-neutral-500">No images installed yet.</p>
+        <a href="/admin/images/store"><button type="button" class="mt-4 border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Browse Store</button></a>
+      </div>
+      <% } else { %>
+
+      <div class="mx-8 mt-5 mb-1">
+        <input id="imageFilterInput" type="text" placeholder="Filter images…" class="w-56 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
+      </div>
+
+      <div class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40">
+        <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
+          <thead class="bg-neutral-50 dark:bg-neutral-800/50">
+            <tr>
+              <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Name</th>
+              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white col-hide">Author</th>
+              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white col-hide">Created</th>
+              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20" id="tableBody">
+            <% let imgIdx = 0; images.forEach(function(image) { %>
+            <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer img-row"
+                style="--i:<%= imgIdx++ %>"
+                data-search="<%= (image.name + ' ' + (image.author||'')).toLowerCase() %>"
+                onclick="handleRowClick(event, '/admin/images/edit/<%= image.id %>')">
+              <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-white"><%= image.name %></td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400 col-hide"><%= image.author || '—' %></td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400 col-hide"><%= new Date(image.createdAt).toLocaleDateString() %></td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm">
+                <div class="flex gap-2">
+                  <a href="/admin/images/edit/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Edit</button></a>
+                  <a href="/admin/images/export/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Export</button></a>
+                  <button onclick="event.stopPropagation(); openDelete('<%= image.id %>', '<%= image.name %>')" type="button" class="rounded-xl bg-red-600 hover:bg-red-500 px-3 py-2 text-sm font-medium shadow-sm transition">
+                    <%- icon('trash-2', { size: 16, class: 'text-white shrink-0' }) %>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+        <div id="noResults" class="hidden py-10 text-center text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-800/20">No images match your search.</div>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="createOverlay">
+  <div class="modal-box">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5">
+      <div>
+        <p class="text-sm font-semibold text-neutral-800 dark:text-white">New Image</p>
+        <p class="text-xs text-neutral-500 mt-0.5">Configure Docker images and variables after creation.</p>
+      </div>
+      <button onclick="closeCreate()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
+        <%- icon('x', { size: 16, class: 'shrink-0' }) %>
+      </button>
+    </div>
+    <form action="/admin/images/create" method="POST" class="p-5 flex flex-col gap-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="col-span-2"><label class="field-label">Name <span class="text-red-500">*</span></label><input class="field-input" type="text" name="name" required placeholder="e.g. Minecraft Java"></div>
+        <div><label class="field-label">Author</label><input class="field-input" type="text" name="author" placeholder="e.g. github.com/you"></div>
+        <div><label class="field-label">Author Name</label><input class="field-input" type="text" name="authorName" placeholder="Your Name"></div>
+        <div class="col-span-2"><label class="field-label">Startup Command <span class="text-red-500">*</span></label><input class="field-input" type="text" name="startup" required placeholder="java -Xms128M -jar server.jar" style="font-family:ui-monospace,monospace;font-size:12px;"></div>
+        <div class="col-span-2"><label class="field-label">Description</label><textarea class="field-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button type="button" onclick="closeCreate()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition">Cancel</button>
+        <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 text-sm font-medium shadow-lg transition">Create & Edit</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="deleteOverlay">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="p-5">
+      <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Delete image?</p>
+      <p id="deleteMsg" class="text-xs text-neutral-500 mb-5"></p>
+      <div class="flex gap-2">
+        <button onclick="closeDelete()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition">Cancel</button>
+        <button id="deleteConfirm" class="flex-1 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-medium shadow-sm transition">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script nonce="<%- nonce %>" src="/js/admin/images.js"></script>
+<% } %>
+
+<%- include('../../components/footer') %>

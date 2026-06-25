@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { daemonSchemeSync } from '../core/daemonRequest';
+import { daemonSchemeSync } from './daemonRequest';
 
 interface ServerInfo {
   nodeAddress: string;

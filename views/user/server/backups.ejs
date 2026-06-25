@@ -1,0 +1,257 @@
+<% if (isMobileViewport) { %>
+<%- include('../../components/header', { title: 'Backups' }) %>
+<main id="page-content">
+    <%- include('../../components/template') %>
+    <section class="px-4 py-5">
+        <%- include('../../components/serverHeader', { server: server, req: req }) %>
+        <%- include('../../components/serverTemplate') %>
+        <div class="mt-4">
+            <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-medium text-neutral-800 dark:text-white">Backups</h2>
+                    <button type="button" onclick="openCreateBackupModal()" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">New Backup</button>
+                </div>
+                <div id="backups-list" class="space-y-2">
+                    <% if (backups.length === 0) { %>
+                        <p class="text-xs text-neutral-500 text-center py-4">No backups found.</p>
+                    <% } else { %>
+                        <% backups.forEach(backup => { %>
+                            <div class="data-animate-card rounded-xl bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 p-3" data-backup-id="<%= backup.id %>">
+                                <div class="flex items-center justify-between">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= backup.name %></p>
+                                        <p class="text-[10px] text-neutral-500">
+                                            <%= backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : 'Unknown size' %>
+                                            &middot; <%= new Date(backup.createdAt).toLocaleString() %>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-1.5 mt-2">
+                                    <button type="button" onclick="downloadBackup('<%= backup.id %>')" class="flex-1 inline-flex items-center justify-center font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 cursor-pointer">Download</button>
+                                    <button type="button" onclick="restoreBackup('<%= backup.id %>', '<%= backup.name %>')" class="flex-1 inline-flex items-center justify-center font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-green-600 text-white hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 cursor-pointer">Restore</button>
+                                    <button type="button" onclick="deleteBackup('<%= backup.id %>', '<%= backup.name %>')" class="flex-1 inline-flex items-center justify-center font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 cursor-pointer">Delete</button>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/loadingPopup') %>
+<%- include('../../components/modal') %>
+<%- include('../../components/footer') %>
+
+<% } else { %>
+<%- include('../../components/header', { title: 'Backups' }) %>
+<main class="h-screen m-auto">
+    <div class="flex h-screen">
+        <%- include('../../components/template') %>
+        <section id="page-content" class="flex-1 overflow-y-auto pt-16">
+            <div class="px-8 pt-4">
+                <%- include('../../components/serverHeader', { server: server, req: req }) %>
+            </div>
+            <%- include('../../components/serverTemplate') %>
+            <div class="p-6">
+                <div class="data-animate-card bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Backups</h2>
+                        <button type="button" onclick="openCreateBackupModal()" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">New Backup</button>
+                    </div>
+                    <div id="backups-list" class="space-y-3">
+                        <% if (backups.length === 0) { %>
+                            <p class="text-sm text-neutral-500 text-center py-8">No backups found.</p>
+                        <% } else { %>
+                            <% backups.forEach(backup => { %>
+                                <div class="data-animate-card rounded-xl bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 p-4" data-backup-id="<%= backup.id %>">
+                                    <div class="flex items-center justify-between">
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= backup.name %></p>
+                                            <p class="text-xs text-neutral-500">
+                                                <%= backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : 'Unknown size' %>
+                                                &middot; <%= new Date(backup.createdAt).toLocaleString() %>
+                                            </p>
+                                        </div>
+                                        <div class="flex gap-2 shrink-0">
+                                            <button type="button" onclick="downloadBackup('<%= backup.id %>')" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Download</button>
+                                            <button type="button" onclick="restoreBackup('<%= backup.id %>', '<%= backup.name %>')" class="rounded-lg bg-green-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-green-700">Restore</button>
+                                            <button type="button" onclick="deleteBackup('<%= backup.id %>', '<%= backup.name %>')" class="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700">Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/loadingPopup') %>
+<%- include('../../components/modal') %>
+<%- include('../../components/footer') %>
+<% } %>
+
+<!-- Create Backup Modal -->
+<div id="createBackupModal" class="fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="absolute inset-0 bg-black/50" onclick="closeCreateBackupModal()"></div>
+    <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-2xl w-full mx-4 max-w-sm transform scale-95 transition-transform duration-200">
+        <div class="px-5 pt-5 pb-4 border-b border-neutral-200 dark:border-neutral-700/60">
+            <p class="text-sm font-semibold text-neutral-800 dark:text-white">Create Backup</p>
+            <p class="text-xs text-neutral-500 mt-0.5">Choose a name for this backup.</p>
+        </div>
+        <div class="px-5 py-4">
+            <div><input type="text" name="backupName" id="backupName" placeholder="Backup name" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800/50 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
+        </div>
+        <div class="flex gap-2 px-5 pb-5 justify-end">
+            <button type="button" onclick="closeCreateBackupModal()" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Cancel</button>
+            <button type="button" onclick="confirmCreateBackup()" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Create</button>
+        </div>
+    </div>
+</div>
+
+<script nonce="<%- nonce %>">
+var serverShortID = '<%= server.shortID %>';
+
+function openCreateBackupModal() {
+    var modal = document.getElementById('createBackupModal');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.querySelector('.relative').classList.remove('scale-95');
+    modal.querySelector('.relative').classList.add('scale-100');
+    document.getElementById('backupName').focus();
+}
+
+function closeCreateBackupModal() {
+    var modal = document.getElementById('createBackupModal');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    modal.querySelector('.relative').classList.remove('scale-100');
+    modal.querySelector('.relative').classList.add('scale-95');
+    document.getElementById('backupName').value = '';
+}
+
+function handleBackupNameKeyPress(e) {
+    if (e.key === 'Enter') { e.preventDefault(); confirmCreateBackup(); }
+}
+
+async function confirmCreateBackup() {
+    var name = document.getElementById('backupName').value.trim();
+    if (!name) { showToast('Please enter a backup name.', 'error'); return; }
+    closeCreateBackupModal();
+    var loader = showLoadingPopup('Creating backup', 'Please wait...');
+    try {
+        var res = await fetch('/api/servers/' + serverShortID + '/backups', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name })
+        });
+        var data = await res.json();
+        loader.close();
+        if (data.success || res.ok) {
+            showToast('Backup created successfully.', 'success');
+            addBackupRow(data.backup || data);
+        } else {
+            showToast(data.error || 'Failed to create backup.', 'error');
+        }
+    } catch(err) {
+        loader.close();
+        showToast('Failed to create backup.', 'error');
+    }
+}
+
+function downloadBackup(id) {
+    window.location.href = '/api/servers/' + serverShortID + '/backups/' + id + '/download';
+}
+
+function restoreBackup(id, name) {
+    window.modal.confirm({
+        title: 'Restore Backup',
+        body: 'Restore "' + name + '"? This will replace all current server files and cannot be undone.',
+        danger: true,
+        confirmLabel: 'Restore',
+        onConfirm: function() {
+            var loader = showLoadingPopup('Restoring backup', 'This may take a few minutes...');
+            fetch('/api/servers/' + serverShortID + '/backups/' + id + '/restore', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                loader.close();
+                if (data.success) {
+                    showToast('Backup restored successfully.', 'success');
+                } else {
+                    showToast(data.error || 'Failed to restore backup.', 'error');
+                }
+            })
+            .catch(function() {
+                loader.close();
+                showToast('Failed to restore backup.', 'error');
+            });
+        }
+    });
+}
+
+function deleteBackup(id, name) {
+    window.modal.confirm({
+        title: 'Delete Backup',
+        body: 'Delete "' + name + '"? This cannot be undone.',
+        danger: true,
+        confirmLabel: 'Delete',
+        onConfirm: function() {
+            var loader = showLoadingPopup('Deleting backup', 'Please wait...');
+            fetch('/api/servers/' + serverShortID + '/backups/' + id, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                loader.close();
+                if (data.success) {
+                    showToast('Backup deleted.', 'success');
+                    var row = document.querySelector('[data-backup-id="' + id + '"]');
+                    if (row) row.remove();
+                    var list = document.getElementById('backups-list');
+                    if (list && list.querySelectorAll('[data-backup-id]').length === 0) {
+                        list.innerHTML = '<p class="text-xs text-neutral-500 text-center py-4">No backups found.</p>';
+                    }
+                } else {
+                    showToast(data.error || 'Failed to delete backup.', 'error');
+                }
+            })
+            .catch(function() {
+                loader.close();
+                showToast('Failed to delete backup.', 'error');
+            });
+        }
+    });
+}
+
+function addBackupRow(backup) {
+    var list = document.getElementById('backups-list');
+    if (!list) return;
+    var emptyMsg = list.querySelector('p.text-neutral-500');
+    if (emptyMsg) emptyMsg.remove();
+    var div = document.createElement('div');
+    div.className = 'data-animate-card rounded-xl bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 p-3';
+    div.setAttribute('data-backup-id', backup.id);
+    var sizeText = backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : 'Unknown size';
+    div.innerHTML =
+        '<div class="flex items-center justify-between">' +
+            '<div class="min-w-0">' +
+                '<p class="text-sm font-medium text-neutral-800 dark:text-white truncate">' + backup.name + '</p>' +
+                '<p class="text-[10px] text-neutral-500">' + sizeText + ' &middot; Just created</p>' +
+            '</div>' +
+        '</div>' +
+        '<div class="flex gap-1.5 mt-2">' +
+            '<button class="flex-1 inline-flex items-center justify-center font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 cursor-pointer" onclick="downloadBackup(\'' + backup.id + '\')">Download</button>' +
+            '<button class="flex-1 inline-flex items-center justify-center font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-green-600 text-white hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 cursor-pointer" onclick="restoreBackup(\'' + backup.id + '\', \'' + backup.name.replace(/'/g, "\\'") + '\')">Restore</button>' +
+            '<button class="flex-1 inline-flex items-center justify-center font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 cursor-pointer" onclick="deleteBackup(\'' + backup.id + '\', \'' + backup.name.replace(/'/g, "\\'") + '\')">Delete</button>' +
+        '</div>';
+    list.prepend(div);
+}
+</script>

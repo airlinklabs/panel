@@ -1,0 +1,49 @@
+
+> Airlink@2.2.183 prestart /workspaces/panel
+> prisma generate
+
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+
+✔ Generated Prisma Client (7.8.0) to ./src/generated/prisma in 285ms
+
+
+> Airlink@2.2.183 start /workspaces/panel
+> prisma generate && node dist/app.js
+
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+
+✔ Generated Prisma Client (7.8.0) to ./src/generated/prisma in 404ms
+
+
+ WARN  [43m[37m[1m WARN [0m [env] optional env var TRUST_PROXY is not set (see example.env)                 [2m02:36:38[0m
+
+ℹ [44m[37m[1m INFO [0m [34mDatabase connected[0m                                                     [2m02:36:39[0m
+                                              
+  /$$$$$$ /$$         /$$/$$         /$$      
+ /$$__  $|__/        | $|__/        | $$      
+| $$  \ $$/$$ /$$$$$$| $$/$$/$$$$$$$| $$   /$$
+| $$$$$$$| $$/$$__  $| $| $| $$__  $| $$  /$$/
+| $$__  $| $| $$  \__| $| $| $$  \ $| $$$$$$/ 
+| $$  | $| $| $$     | $| $| $$  | $| $$_  $$ 
+| $$  | $| $| $$     | $| $| $$  | $| $$ \  $$
+|__/  |__|__|__/     |__|__|__/  |__|__/  \__/
+                                              
+---Airlink Panel - By Airlinklabs MIT LICENSE---
++-------------------------------------------------------+
+|Initializing - Loading core modules and components.    |
+|Loaded 28 modules, skipped 1, errors 0                 |
+|Server running on http://localhost:3000                |
++-------------------------------------------------------+
+ℹ [44m[37m[1m INFO [0m [34mAddon Modrinth store is disabled, skipping[0m                             [2m02:36:39[0m
+ℹ [44m[37m[1m INFO [0m [34mPlayer stats collection started (interval: 300 seconds)[0m                [2m02:36:39[0m
+ℹ [44m[37m[1m INFO [0m [34mCatalog: loaded 542 images from catalog file[0m                           [2m02:36:39[0m
+ℹ [44m[37m[1m INFO [0m [34mCatalog: found 544 egg files across 2 sources[0m                          [2m02:36:40[0m
+
+ WARN  [43m[37m[1m WARN [0m Tailwind reported warnings { stderr: '≈ tailwindcss v4.3.1\n\nDone in 478ms' }  [2m02:36:40[0m
+
+ℹ [44m[37m[1m INFO [0m [34mCatalog: saved 542 images to /workspaces/panel/storage/eggs/catalog-cache.json[0m[2m02:37:06[0m
+ℹ [44m[37m[1m INFO [0m [34mCatalog: built -- 542 images[0m                                           [2m02:37:06[0m

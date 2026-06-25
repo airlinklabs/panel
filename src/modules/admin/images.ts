@@ -1,15 +1,15 @@
 import { Router, Request, Response } from 'express';
 import prisma from '../../db';
-import { Module } from '../../handlers/moduleInit';
-import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import logger from '../../handlers/logger';
-import { getCatalogue, forceRefresh } from '../../handlers/eggCatalogueService';
+import { Module } from '../../core/moduleInit';
+import { isAuthenticated } from '../../middleware/auth';
+import logger from '../../services/logger';
+import { getCatalogueFromDb, forceRefresh, getCategoryMd } from '../../services/eggCatalog';
 import {
   isPterodactylEgg,
   parseEgg,
   normalizeEggForDb,
   validateEggData,
-} from '../../handlers/utils/egg/eggParser';
+} from '../../utils/egg/parser';
 
 function normalizeImageData(raw: Record<string, unknown>) {
   if (isPterodactylEgg(raw)) {
@@ -358,20 +358,34 @@ const adminModule: Module = {
       },
     );
 
-    // Catalogue endpoint — reads from the in-memory catalogue built by
-    // eggCatalogueService (which cloned the repos on startup). Zero GitHub
-    // calls at request time.
+    // Catalogue endpoint — reads from SQLite (synced by eggCatalogueService)
     router.get(
       '/admin/images/store/catalogue',
       isAuthenticated(true),
       async (_req: Request, res: Response) => {
         try {
-          const data = getCatalogue();
+          const images = await getCatalogueFromDb();
           res.setHeader('Cache-Control', 'private, max-age=300');
-          res.status(200).json(data);
+          res.status(200).json({ images, builtAt: Date.now() });
         } catch (error) {
           logger.error('Error serving store catalogue:', error);
           res.status(500).json({ error: 'Failed to load store catalogue.' });
+        }
+      },
+    );
+
+    // Category markdown endpoint
+    router.get(
+      '/admin/images/store/category-md/:category',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const data = await getCategoryMd(String(req.params.category));
+          if (!data) return res.status(404).json({ error: 'Category not found' });
+          res.json(data);
+        } catch (error) {
+          logger.error('Error serving category MD:', error);
+          res.status(500).json({ error: 'Failed to load category markdown.' });
         }
       },
     );

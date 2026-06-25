@@ -1,16 +1,16 @@
 import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import { Module } from '../../core/moduleInit';
 import prisma from '../../db';
-import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import logger from '../../handlers/logger';
-import { queueer } from '../../handlers/queueer';
+import { isAuthenticated } from '../../middleware/auth';
+import logger from '../../services/logger';
+import { queueer } from '../../services/queue';
 import axios from 'axios';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { daemonSchemeSync } from '../../services/daemonRequest';
 import {
   getUsedExternalPorts,
   parseImagePortRequirements,
   serializeServerPorts,
-} from '../../handlers/utils/server/ports';
+} from '../../services/ports';
 
 function pickAvailablePorts(allocatedPorts: number[], usedPorts: number[], count: number): number[] {
   const picked: number[] = [];

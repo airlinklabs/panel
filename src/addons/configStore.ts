@@ -1,5 +1,5 @@
 import prisma from '../db';
-import logger from './logger';
+import logger from '../services/logger';
 
 export interface AddonConfigStore {
   get(key: string): Promise<string | null>;

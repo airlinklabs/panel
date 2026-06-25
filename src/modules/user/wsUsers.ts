@@ -1,8 +1,8 @@
 import { Router, Request } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { WebSocket } from 'ws';
-import logger from '../../handlers/logger';
+import logger from '../../services/logger';
 
 export const onlineUsers: Set<string> = new Set();
 export const userTimeouts: Map<string, NodeJS.Timeout> = new Map();

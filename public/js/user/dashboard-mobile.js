@@ -1,6 +1,8 @@
 (function () {
   document.addEventListener('contextmenu', e => e.preventDefault());
 
+  let activeFolderId = null;
+
   // ── Grid / List view toggle ──────────────────────────────────────────
   const gridView  = document.getElementById('gridView');
   const listView  = document.getElementById('listView');
@@ -98,8 +100,6 @@
 
   document.getElementById('closeFolderOverlay')?.addEventListener('click', () => document.getElementById('folderOverlay').classList.add('hidden'));
 
-  let activeFolderId = null;
-
   document.getElementById('deleteFolderBtn')?.addEventListener('click', () => {
     document.getElementById('folderOverlay').classList.add('hidden');
     document.getElementById('deleteFolderSheet').classList.remove('hidden');
@@ -118,6 +118,35 @@
     btn.disabled = false;
     document.getElementById('deleteFolderSheet').classList.add('hidden');
     if (d.success) location.reload(); else showToast(d.error || "Couldn't delete the folder.", 'error');
+  });
+
+  document.getElementById('renameFolderBtnMobile')?.addEventListener('click', () => {
+    document.getElementById('folderOverlay').classList.add('hidden');
+    const input = document.getElementById('renameFolderNameMobile');
+    input.value = document.getElementById('folderOverlayTitle').textContent;
+    document.getElementById('renameFolderSheet').classList.remove('hidden');
+    setTimeout(() => { input.focus(); input.select(); }, 80);
+  });
+
+  document.getElementById('cancelRenameFolderMobile')?.addEventListener('click', () => {
+    document.getElementById('renameFolderSheet').classList.add('hidden');
+  });
+
+  document.getElementById('confirmRenameFolderMobile')?.addEventListener('click', async () => {
+    if (!activeFolderId) return;
+    const newName = document.getElementById('renameFolderNameMobile').value.trim();
+    if (!newName) return;
+    const btn = document.getElementById('confirmRenameFolderMobile');
+    btn.disabled = true;
+    const r = await fetch('/api/folders/' + activeFolderId, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newName }),
+    });
+    const d = await r.json();
+    btn.disabled = false;
+    document.getElementById('renameFolderSheet').classList.add('hidden');
+    if (d.success) location.reload(); else showToast(d.error || "Couldn't rename the folder.", 'error');
   });
 
   let longPressTimer = null;
@@ -191,4 +220,69 @@
   }
 
   document.getElementById('cancelAddToFolder')?.addEventListener('click', () => document.getElementById('addToFolderDialog').classList.add('hidden'));
+
+  // ── Add servers to folder picker (mobile) ──────────────────
+  const addServersBtnMobile = document.getElementById('addServersToFolderBtnMobile');
+  const mobileAddServersSheet = document.getElementById('mobileAddServersSheet');
+  const mobileCancelAddServers = document.getElementById('mobileCancelAddServers');
+  const mobileServerPickerList = document.getElementById('mobileServerPickerList');
+  const mobileServerPickerSearch = document.getElementById('mobileServerPickerSearch');
+
+  function renderMobileServerPicker(filter) {
+    const q = (filter || '').toLowerCase();
+    mobileServerPickerList.innerHTML = '';
+    const memberUUIDs = allFolders.find(f => String(f.id) === String(activeFolderId))?.members?.map(m => m.serverUUID) || [];
+
+    const filtered = allServers.filter(s => {
+      if (q && !s.name.toLowerCase().includes(q)) return false;
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      mobileServerPickerList.innerHTML = '<p class="text-sm text-neutral-500 py-4 text-center">No servers found.</p>';
+      return;
+    }
+
+    filtered.forEach(s => {
+      const inFolder = memberUUIDs.includes(s.UUID);
+      const row = document.createElement('label');
+      row.className = 'flex items-center gap-3 px-3 py-2.5 rounded-xl border border-neutral-200 dark:border-white/5 active:scale-[0.98] transition cursor-pointer';
+      row.innerHTML = `
+        <input type="checkbox" ${inFolder ? 'checked' : ''} data-uuid="${s.UUID}"
+          class="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-white bg-white dark:bg-neutral-800">
+        <span class="text-sm font-medium text-neutral-800 dark:text-white truncate flex-1">${s.name}</span>
+        <span class="text-[10px] font-medium px-1.5 py-0.5 rounded ${s.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400'}">${s.status === 'running' ? 'Running' : 'Stopped'}</span>`;
+      const cb = row.querySelector('input');
+      cb.addEventListener('change', async () => {
+        if (cb.checked) {
+          const r = await fetch('/api/folders/' + activeFolderId + '/servers', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ serverUUID: s.UUID }),
+          });
+          const d = await r.json();
+          if (!d.success) { cb.checked = false; showToast(d.error || 'Failed.', 'error'); }
+          else showToast('"' + s.name + '" added.', 'success');
+        } else {
+          const r = await fetch('/api/folders/servers/' + s.UUID, { method: 'DELETE' });
+          const d = await r.json();
+          if (!d.success) { cb.checked = true; showToast(d.error || 'Failed.', 'error'); }
+          else showToast('"' + s.name + '" removed.', 'success');
+        }
+      });
+      mobileServerPickerList.appendChild(row);
+    });
+  }
+
+  addServersBtnMobile?.addEventListener('click', () => {
+    document.getElementById('folderOverlay').classList.add('hidden');
+    renderMobileServerPicker();
+    mobileAddServersSheet.classList.remove('hidden');
+  });
+
+  mobileCancelAddServers?.addEventListener('click', () => {
+    mobileAddServersSheet.classList.add('hidden');
+    location.reload();
+  });
+
+  mobileServerPickerSearch?.addEventListener('input', () => renderMobileServerPicker(mobileServerPickerSearch.value));
 })();

@@ -1,19 +1,19 @@
 import { Router, Request, Response } from 'express';
 import type { Prisma, Users, settings as PanelSettings } from '../../generated/prisma/client';
-import { Module } from '../../handlers/moduleInit';
-import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
-import logger from '../../handlers/logger';
+import { Module } from '../../core/moduleInit';
+import { isAuthenticatedForServer } from '../../middleware/serverAuth';
+import logger from '../../services/logger';
 import axios from 'axios';
 import multer from 'multer';
-import { checkEulaStatus, isWorld } from '../../handlers/features';
-import { checkForServerInstallation } from '../../handlers/checkForServerInstallation';
-import { queueer } from '../../handlers/queueer';
-import { getServerStatus } from '../../handlers/utils/server/serverStatus';
+import { checkEulaStatus, isWorld } from '../../config/features';
+import { checkForServerInstallation } from '../../core/serverCheck';
+import { queueer } from '../../services/queue';
+import { getServerStatus } from '../../services/serverStatus';
 import { getParamAsString } from '../../utils/typeHelpers';
 import prisma from '../../db';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
-import { AirlinkCloudClient } from '../../handlers/utils/core/airlinkCloud';
-import { getPrimaryExternalPort, portsToDaemonString } from '../../handlers/utils/server/ports';
+import { daemonSchemeSync } from '../../services/daemonRequest';
+import { AirlinkCloudClient } from '../../services/airlinkCloud';
+import { getPrimaryExternalPort, portsToDaemonString } from '../../services/ports';
 
 declare global {
   var serverStoppingStates: { [key: string]: boolean };
@@ -1870,9 +1870,8 @@ const dashboardModule: Module = {
           if (acceptsJson) {
             res.status(200).json({ success: true });
           } else {
-            res.redirect(
-              `/server/${serverId}/startup?success=true&message=Startup+command+updated+successfully`,
-            );
+            req.flashToast('Startup command updated successfully', 'success');
+            res.redirect(`/server/${serverId}/startup`);
           }
         } catch (error) {
           logger.error(
@@ -1883,9 +1882,8 @@ const dashboardModule: Module = {
           if (acceptsJson) {
             res.status(500).json({ error: 'Failed to update startup command' });
           } else {
-            res.redirect(
-              `/server/${serverId}/startup?error=true&message=Failed+to+update+startup+command`,
-            );
+            req.flashToast('Failed to update startup command', 'error');
+            res.redirect(`/server/${serverId}/startup`);
           }
         }
       },
@@ -2027,9 +2025,8 @@ const dashboardModule: Module = {
           if (acceptsJson) {
             res.status(200).json({ success: true });
           } else {
-            res.redirect(
-              `/server/${serverId}/startup?success=true&message=Docker+image+updated+successfully`,
-            );
+            req.flashToast('Docker image updated successfully', 'success');
+            res.redirect(`/server/${serverId}/startup`);
           }
         } catch (error) {
           logger.error(
@@ -2041,9 +2038,8 @@ const dashboardModule: Module = {
           if (acceptsJson) {
             res.status(500).json({ error: 'Failed to update Docker image' });
           } else {
-            res.redirect(
-              `/server/${serverId}/startup?error=true&message=Failed+to+update+Docker+image`,
-            );
+            req.flashToast('Failed to update Docker image', 'error');
+            res.redirect(`/server/${serverId}/startup`);
           }
         }
       },
@@ -2198,9 +2194,8 @@ const dashboardModule: Module = {
           if (acceptsJson) {
             res.status(200).json({ success: true });
           } else {
-            res.redirect(
-              `/server/${serverId}/startup?success=true&message=Server+variables+updated+successfully`,
-            );
+            req.flashToast('Server variables updated successfully', 'success');
+            res.redirect(`/server/${serverId}/startup`);
           }
         } catch (error) {
           logger.error(
@@ -2213,9 +2208,8 @@ const dashboardModule: Module = {
               .status(500)
               .json({ error: 'Failed to update server variables' });
           } else {
-            res.redirect(
-              `/server/${serverId}/startup?error=true&message=Failed+to+update+server+variables`,
-            );
+            req.flashToast('Failed to update server variables', 'error');
+            res.redirect(`/server/${serverId}/startup`);
           }
         }
       },

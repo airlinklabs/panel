@@ -1,10 +1,10 @@
 import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import { Module } from '../../core/moduleInit';
 import prisma from '../../db';
-import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import { getUser } from '../../handlers/utils/user/user';
+import { isAuthenticated } from '../../middleware/auth';
+import { getUser } from '../../services/user';
 import bcrypt from 'bcryptjs';
-import logger from '../../handlers/logger';
+import logger from '../../services/logger';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';

@@ -105,9 +105,7 @@ function renderResults(items, term) {
 
 async function doSearch(term) {
   if (!term) {
-    searchResults.classList.add('hidden');
-    searchInput.setAttribute('aria-expanded', 'false');
-    searchInput.setAttribute('aria-activedescendant', '');
+    showSuggestions();
     return;
   }
   searchResults.classList.remove('hidden');
@@ -121,6 +119,43 @@ async function doSearch(term) {
   } catch {
     renderResults(navItems, term);
   }
+}
+
+function showSuggestions() {
+  searchResults.innerHTML = '';
+  activeIndex = -1;
+  searchInput.setAttribute('aria-activedescendant', '');
+
+  var links = Array.from(navLinks).filter(function(link) {
+    if (isAdmin) return true;
+    return !((link.getAttribute('href') || '').startsWith('/admin'));
+  }).slice(0, 8);
+
+  if (!links.length) {
+    searchResults.classList.add('hidden');
+    return;
+  }
+
+  var hdr = document.createElement('p');
+  hdr.className = 'text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-3 pt-3 pb-1';
+  hdr.textContent = 'Quick links';
+  searchResults.appendChild(hdr);
+
+  links.forEach(function(link) {
+    var row = document.createElement('a');
+    row.href = link.href || '#';
+    row.className = 'search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer';
+    var icon = link.querySelector('svg');
+    if (icon) { var ic = icon.cloneNode(true); ic.className = 'w-4 h-4 text-neutral-400 shrink-0'; row.appendChild(ic); }
+    var span = document.createElement('span');
+    span.className = 'flex-1 truncate';
+    span.textContent = link.textContent.trim();
+    row.appendChild(span);
+    searchResults.appendChild(row);
+  });
+
+  searchResults.classList.remove('hidden');
+  searchInput.setAttribute('aria-expanded', 'true');
 }
 
 function updateActiveResult() {
@@ -141,9 +176,7 @@ searchInput.addEventListener('input', function() {
   lastQuery = term;
   clearTimeout(searchTimeout);
   if (!term) {
-    searchResults.classList.add('hidden');
-    searchInput.setAttribute('aria-expanded', 'false');
-    searchInput.setAttribute('aria-activedescendant', '');
+    showSuggestions();
     return;
   }
   searchTimeout = setTimeout(function() { doSearch(term); }, 150);

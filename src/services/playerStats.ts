@@ -10,7 +10,7 @@
 import prisma from '../db';
 import axios from 'axios';
 import logger from './logger';
-import { daemonSchemeSync } from './utils/core/daemonRequest';
+import { daemonSchemeSync } from './daemonRequest';
 
 
 // Interval in milliseconds (5 minutes)

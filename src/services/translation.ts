@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
-import logger from '../../logger';
+import logger from './logger';
 
 const translationCache = new Map<string, Record<string, unknown>>();
 
@@ -12,11 +12,11 @@ function loadTranslations(lang: string): Record<string, unknown> {
 
   const langPath = path.join(
     __dirname,
-    `../../../../storage/lang/${lang}/lang.json`,
+    `../../storage/lang/${lang}/lang.json`,
   );
   const fallbackPath = path.join(
     __dirname,
-    '../../../../storage/lang/en/lang.json',
+    '../../storage/lang/en/lang.json',
   );
 
   try {

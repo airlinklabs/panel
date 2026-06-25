@@ -1,0 +1,215 @@
+<% if (isMobileViewport) { %>
+<div class="overflow-x-auto border-b border-neutral-200 dark:border-white/5 mb-4 -mx-4 px-4">
+  <nav class="flex gap-1 min-w-max pb-1">
+    <%
+    const rawMenuItems = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
+    const isAdmin = (typeof user !== 'undefined' && user && user.isAdmin === true);
+    const menuItems = rawMenuItems.filter(item => !(item.isAdminItem && !isAdmin));
+    if (!menuItems || menuItems.length === 0) {
+    %>
+    <a href="/server/<%= server.UUID %>" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false">Console</a>
+    <a href="/server/<%= server.UUID %>/files" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false">Files</a>
+    <% if (features.includes('players')) { %>
+    <a href="/server/<%= server.UUID %>/players" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false">Players</a>
+    <% } %>
+    <% if (features.includes('worlds')) { %>
+    <a href="/server/<%= server.UUID %>/worlds" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false">Worlds</a>
+    <% } %>
+    <a href="/server/<%= server.UUID %>/startup" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false">Startup</a>
+    <a href="/server/<%= server.UUID %>/backups" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false">Backups</a>
+    <a href="/server/<%= server.UUID %>/settings" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false">Settings</a>
+    <% } else {
+      menuItems.forEach(item => {
+        if (item.feature && !features.includes(item.feature)) return;
+        const url = (item.url || '#')
+          .replace(':uuid', server.UUID)
+          .replace(':id', server.id);
+    %>
+    <a href="<%= url %>" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false"><%= item.label %></a>
+    <% }); } %>
+  </nav>
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var currentPath = window.location.pathname.replace(/\/$/, '');
+  document.querySelectorAll('.nav-link2').forEach(function(link) {
+    var href = link.getAttribute('href');
+    if (!href) return;
+    if (href.replace(/\/$/, '') === currentPath) {
+      link.classList.add('bg-neutral-100', 'dark:bg-white/10', 'border-neutral-200', 'dark:border-neutral-700/30', 'text-neutral-900', 'dark:text-white', 'font-medium');
+      // Scroll active tab into view within the strip only, not the whole page
+      var strip = link.closest('.overflow-x-auto');
+      if (strip) {
+        var linkLeft = link.offsetLeft;
+        var linkWidth = link.offsetWidth;
+        var stripWidth = strip.offsetWidth;
+        strip.scrollLeft = linkLeft - (stripWidth / 2) + (linkWidth / 2);
+      }
+    }
+  });
+})();
+</script>
+
+<% if (global.uiComponentStore) {
+  const serverSections = global.uiComponentStore.getServerSections(server.UUID);
+  if (serverSections && serverSections.length > 0) {
+    serverSections.forEach(section => { %>
+  <%- section.content %>
+<% }); } } %>
+
+<% } else { %>
+
+<div class="mt-6 ml-8 mb-8">
+    <div>
+       <div class="hidden relative sm:block">
+          <nav class="flex relative">
+             <ul role="list" class="flex min-w-full mt-1.5 flex-none gap-x-2 text-sm font-normal leading-6 text-neutral-600 dark:text-neutral-400">
+                <%
+                const rawMenuItems = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
+                const isAdmin = (typeof user !== 'undefined' && user && user.isAdmin === true);
+                const menuItems = rawMenuItems.filter(item => {
+                  if (item.isAdminItem && !isAdmin) return false;
+                  return true;
+                });
+                if (!menuItems || menuItems.length === 0) {
+                %>
+                <li class="transition">
+                   <a href="/server/<%= server.UUID %>" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
+                    <%- icon('terminal', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
+                     Console
+                  </a>
+                </li>
+                <li class="transition">
+                   <a href="/server/<%= server.UUID %>/files" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
+                    <%- icon('folder', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
+                      Files
+                   </a>
+                </li>
+                <% if (features.includes('players')) { %>
+                <li class="transition">
+                  <a href="/server/<%= server.UUID %>/players" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
+                    <%- icon('users', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
+                     Players
+                  </a>
+               </li>
+               <% } %>
+               <% if (features.includes('worlds')) { %>
+                <li class="transition">
+                  <a href="/server/<%= server.UUID %>/worlds" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
+                    <%- icon('globe', { class: 'size-5 mb-0.5 inline-flex mr-1', strokeWidth: 1.5 }) %>
+                     Worlds
+                  </a>
+               </li>
+               <% } %>
+               <li class="transition">
+                <a href="/server/<%= server.UUID %>/startup" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
+                 <%- icon('play', { class: 'size-5 mb-0.5 inline-flex mr-1', strokeWidth: 1.5 }) %>
+
+                   Startup
+                </a>
+             </li>
+             <li class="transition">
+                <a href="/server/<%= server.UUID %>/settings" class="nav-link2 py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
+                 <%- icon('settings', { class: 'size-5 mb-0.5 inline-flex mr-1' }) %>
+                   Settings
+                </a>
+             </li>
+
+             <% } else {
+                menuItems.forEach(item => {
+                  if (item.feature && !features.includes(item.feature)) return;
+                  const url = (item.url || '#')
+                    .replace(':uuid', server.UUID)
+                    .replace(':id', server.id);
+             %>
+                <li class="transition flex-shrink-0">
+                  <a href="<%= url %>" class="nav-link2 whitespace-nowrap py-2 px-3 transition border hover:bg-neutral-100 dark:hover:bg-white/5 border-transparent hover:text-neutral-900 dark:hover:text-white hover:shadow rounded-xl data-[active=true]:bg-neutral-200 data-[active=true]:border-neutral-300 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:border-neutral-300/20 data-[active=true]:text-neutral-900 dark:data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm">
+                    <%- item.icon %>
+                    <%= item.label %>
+                  </a>
+                </li>
+             <% }); } %>
+             </ul>
+          </nav>
+       </div>
+    </div>
+ </div>
+
+ <!-- Server Sections -->
+ <% if (global.uiComponentStore) {
+    const sections = global.uiComponentStore.getServerSections();
+
+    if (sections && sections.length > 0) {
+ %>
+ <div class="px-8 mt-8">
+    <% sections.forEach(section => { %>
+      <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-300 dark:border-neutral-800/20 mb-6">
+        <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white"><%= section.title %></h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <%
+            const items = section.items || [];
+
+            items.forEach(item => {
+              let value = item.value;
+
+              if (value.includes(':uuid')) value = value.replace(':uuid', server.UUID);
+              if (value.includes(':id')) value = value.replace(':id', server.id);
+              if (value.includes(':address')) {
+                const primaryPort = server.Ports ? JSON.parse(server.Ports).find(p => p.primary) : null;
+                const portNumber = primaryPort ? (primaryPort.externalPort || String(primaryPort.Port || '').split(':')[0]) : '';
+                value = value.replace(':address', `${server.node.address}:${portNumber}`);
+              }
+              if (value.includes(':image')) value = value.replace(':image', server.image.name || 'Unknown');
+              if (value.includes(':node')) value = value.replace(':node', server.node.name);
+              if (value.includes(':memory')) value = value.replace(':memory', `${server.Memory} MB`);
+              if (value.includes(':cpu')) value = value.replace(':cpu', `${server.Cpu}%`);
+              if (value.includes(':disk')) value = value.replace(':disk', `${server.Storage} MB`);
+          %>
+            <div>
+              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= item.label %></h3>
+              <% if (item.type === 'link') { %>
+                <a href="<%= item.url %>" class="text-neutral-400 hover:text-neutral-300 transition"><%= value %></a>
+              <% } else if (item.type === 'button') { %>
+                <button onclick="<%= item.onClick %>" class="text-neutral-400 hover:text-neutral-300 transition"><%= value %></button>
+              <% } else { %>
+                <p class="text-neutral-400"><%= value %></p>
+              <% } %>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    <% }); %>
+ </div>
+ <% } } %>
+
+ <script nonce="<%- nonce %>">
+   document.addEventListener("DOMContentLoaded", function() {
+     var currentPagePath = window.location.pathname;
+     var navLinks2 = document.querySelectorAll('.nav-link2');
+
+     function updateActiveLink() {
+       var activeLink = null;
+       navLinks2.forEach(function(link) {
+         link.setAttribute('data-active', 'false');
+         if (currentPagePath.startsWith(link.getAttribute('href'))) {
+           activeLink = link;
+         }
+       });
+
+       if (activeLink) {
+         activeLink.setAttribute('data-active', 'true');
+       }
+     }
+
+     updateActiveLink();
+
+     window.addEventListener('popstate', function() {
+       currentPagePath = window.location.pathname;
+       updateActiveLink();
+     });
+   });
+ </script>
+
+<% } %>

@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import axios from 'axios';
 import type { InternalAxiosRequestConfig } from 'axios';
 import { URL } from 'url';
-import prisma from '../../../db';
+import prisma from '../db';
 
 const SIGNATURE_WINDOW_S = 30;
 

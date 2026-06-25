@@ -5,14 +5,14 @@
 // to string in the proxy path — TUI escape sequences are binary data.
 
 import { Router, Request } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { WebSocket } from 'ws';
 import axios from 'axios';
-import { isAuthenticatedForServerWS } from '../../handlers/utils/auth/serverAuthUtil';
-import logger from '../../handlers/logger';
+import { isAuthenticatedForServerWS } from '../../middleware/serverAuth';
+import logger from '../../services/logger';
 import { getParamAsString } from '../../utils/typeHelpers';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { daemonSchemeSync } from '../../services/daemonRequest';
 
 function wsScheme(): 'ws' | 'wss' {
   return daemonSchemeSync() === 'https' ? 'wss' : 'ws';

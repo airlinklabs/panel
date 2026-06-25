@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs';
 import prisma from '../../db';
 import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
-import logger from '../../handlers/logger';
+import { Module } from '../../core/moduleInit';
+import logger from '../../services/logger';
 import rateLimit from 'express-rate-limit';
 
 declare module 'express-session' {
@@ -185,7 +185,8 @@ const authServiceModule: Module = {
 
     // ── GET /logout ──────────────────────────────────────────────────────────
     router.get('/logout', (req: Request, res: Response) => {
-      res.clearCookie('connect.sid');
+      const cookieName = (req.session?.cookie as any)?.name || 'al.sid';
+      res.clearCookie(cookieName);
       if (req.session) {
         req.session.destroy(() => res.redirect('/login'));
       } else {

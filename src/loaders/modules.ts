@@ -1,7 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
-import logger from './logger';
+import logger from '../services/logger';
 import chalk from 'chalk';
 
 const isDebugMode = process.env.DEBUG === 'true';

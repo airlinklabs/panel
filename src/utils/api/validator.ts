@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import prisma from '../../../db';
-import logger from '../../logger';
+import prisma from '../../db';
+import logger from '../../services/logger';
 import crypto from 'crypto';
 
 function sha256(value: string): string {

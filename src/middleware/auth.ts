@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import prisma from '../../../db';
-import { renderErrorPage } from '../../errorPages';
+import prisma from '../db';
+import { renderErrorPage } from './errorHandler';
 
 export const isAuthenticated =
   (isAdminRequired = false, requiredPermission: string | null = null) =>

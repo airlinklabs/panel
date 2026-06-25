@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import { Module } from '../../core/moduleInit';
 import prisma from '../../db';
-import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
+import { isAuthenticated } from '../../middleware/auth';
 import { onlineUsers } from '../user/wsUsers';
-import logger from '../../handlers/logger';
+import logger from '../../services/logger';
 import bcrypt from 'bcryptjs';
 import { getParamAsNumber } from '../../utils/typeHelpers';
 
@@ -166,7 +166,11 @@ const adminModule: Module = {
           const dataUser = await prisma.users.findUnique({
             where: { id: getParamAsNumber(req.params.id) },
             include: {
-              servers: true
+              servers: true,
+              loginHistory: {
+                orderBy: { timestamp: 'desc' },
+                take: 20
+              }
             }
           });
           if (!dataUser) {

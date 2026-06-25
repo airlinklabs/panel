@@ -92,3 +92,13 @@ export type Backup = Prisma.BackupModel
  * 
  */
 export type SftpCredential = Prisma.SftpCredentialModel
+/**
+ * Model EggCatalog
+ * 
+ */
+export type EggCatalog = Prisma.EggCatalogModel
+/**
+ * Model CategoryMD
+ * 
+ */
+export type CategoryMD = Prisma.CategoryMDModel

@@ -3,7 +3,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import logger from '../handlers/logger';
+import logger from '../services/logger';
 
 type ValidationTarget = 'body' | 'params' | 'query';
 

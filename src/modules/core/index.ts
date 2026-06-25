@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
-import logger from '../../handlers/logger';
+import { Module } from '../../core/moduleInit';
+import logger from '../../services/logger';
 import os from 'os';
 import prisma from '../../db';
-import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
+import { checkNodeStatus } from '../../services/nodeStatus';
 
 const coreModule: Module = {
   info: {

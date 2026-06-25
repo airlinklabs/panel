@@ -1,4 +1,4 @@
-import logger from './logger';
+import logger from '../services/logger';
 import prisma from '../db';
 
 const SESSION_WRITE_TEST_ID = '__database_loader_write_test__';

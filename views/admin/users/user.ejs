@@ -1,0 +1,359 @@
+<%- include('../../components/header', { title: dataUser.username }) %>
+
+<% if (isMobileViewport) { %>
+<main id="page-content" class="">
+  <%- include('../../components/template') %>
+  <%- include('../../components/toast') %>
+
+  <div class="px-4 py-5 space-y-4">
+    <div class="flex items-center justify-between mb-2">
+      <div>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= dataUser.username %></h1>
+        <p class="text-xs text-neutral-500 mt-0.5"><%= dataUser.email %></p>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="/admin/users/edit/<%= dataUser.id %>" class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 px-3 py-2 text-xs font-medium text-white transition shrink-0">
+          <%- icon('pencil', { size: 14, class: 'shrink-0' }) %>
+          Edit
+        </a>
+        <button onclick="adminDeleteUser('<%= dataUser.id %>')" class="inline-flex items-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-500 px-3 py-2 text-xs font-medium text-white transition shrink-0">
+          <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
+          Delete
+        </button>
+      </div>
+    </div>
+
+    <!-- Profile card -->
+    <div data-animate-card class="rounded-2xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+      <div class="flex items-center gap-4 mb-4 pb-4 border-b border-neutral-200 dark:border-white/5">
+        <div class="relative shrink-0">
+          <img class="h-14 w-14 rounded-xl object-cover border border-neutral-200 dark:border-white/10"
+            src="<%= dataUser.avatar ? dataUser.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(dataUser.username) %>" alt="">
+          <% if (onlineUsers && onlineUsers.has(dataUser.username)) { %>
+            <span class="absolute -bottom-0.5 -right-0.5 flex h-3 w-3">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white dark:border-[#141414]"></span>
+            </span>
+          <% } %>
+        </div>
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-neutral-800 dark:text-white"><%= dataUser.username %></p>
+          <p class="text-xs text-neutral-500 truncate"><%= dataUser.email %></p>
+          <span class="inline-flex items-center rounded-md mt-1 px-2 py-0.5 text-[10px] font-medium
+            <%= dataUser.isAdmin ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400' %>">
+            <%= dataUser.isAdmin ? 'Admin' : 'User' %>
+          </span>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="rounded-xl bg-white dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-3 py-2">
+          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-0.5">Servers</p>
+          <p class="text-lg font-semibold text-neutral-800 dark:text-white"><%= dataUser.servers ? dataUser.servers.length : 0 %></p>
+        </div>
+        <div class="rounded-xl bg-white dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-3 py-2">
+          <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-0.5">Role</p>
+          <p class="text-lg font-semibold text-neutral-800 dark:text-white"><%= dataUser.isAdmin ? 'Admin' : 'User' %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- User details -->
+    <div data-animate-card class="rounded-2xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3">User Information</p>
+      <div class="space-y-3">
+        <div>
+          <p class="text-xs text-neutral-500">Username</p>
+          <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= dataUser.username %></p>
+        </div>
+        <div>
+          <p class="text-xs text-neutral-500">Email</p>
+          <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= dataUser.email %></p>
+        </div>
+        <div>
+          <p class="text-xs text-neutral-500">Description</p>
+          <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= dataUser.description || 'No description' %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Servers -->
+    <div data-animate-card class="rounded-2xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-sm font-medium text-neutral-800 dark:text-white">Servers</p>
+        <span class="text-xs text-neutral-500"><%= dataUser.servers ? dataUser.servers.length : 0 %> total</span>
+      </div>
+      <% if (dataUser.servers && dataUser.servers.length > 0) { %>
+        <div class="space-y-2">
+          <% dataUser.servers.forEach(function(server) { %>
+            <div class="flex items-center justify-between rounded-xl bg-white dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-3 py-2.5">
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= server.name %></p>
+                <p class="text-[10px] text-neutral-500 font-mono truncate"><%= server.UUID %></p>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0 ml-2">
+                <a href="/server/<%= server.UUID %>" class="rounded-lg bg-neutral-100 dark:bg-neutral-700/50 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">
+                  <%- icon('external-link', { size: 14, class: 'shrink-0' }) %>
+                </a>
+                <a href="/admin/servers/edit/<%= server.id %>" class="rounded-lg bg-neutral-100 dark:bg-neutral-700/50 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">
+                  <%- icon('pencil', { size: 14, class: 'shrink-0' }) %>
+                </a>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <p class="text-sm text-neutral-400 text-center py-4">No servers assigned</p>
+      <% } %>
+    </div>
+
+    <!-- Login history -->
+    <div data-animate-card class="rounded-2xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3">Login History</p>
+      <% if (dataUser.loginHistory && dataUser.loginHistory.length > 0) { %>
+        <div class="space-y-2">
+          <% dataUser.loginHistory.slice(0, 10).forEach(function(login) { %>
+            <div class="rounded-xl bg-white dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-3 py-2.5">
+              <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300"><%= new Date(login.timestamp).toLocaleString() %></p>
+              <p class="text-[11px] text-neutral-500 font-mono mt-0.5"><%= login.ipAddress || 'Unknown IP' %></p>
+              <p class="text-[11px] text-neutral-400 truncate mt-0.5"><%= login.userAgent || 'Unknown device' %></p>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <p class="text-sm text-neutral-400 text-center py-4">No login history</p>
+      <% } %>
+    </div>
+  </div>
+</main>
+
+<% } else { %>
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= dataUser.username %></h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= dataUser.email %></p>
+        </div>
+        <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none flex gap-2">
+          <a href="/admin/users/edit/<%= dataUser.id %>" class="inline-flex items-center gap-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-3 py-2 text-sm font-medium transition">
+            <%- icon('pencil', { size: 15, class: 'shrink-0' }) %>
+            Edit User
+          </a>
+          <button onclick="adminDeleteUser('<%= dataUser.id %>')" class="inline-flex items-center gap-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-sm font-medium transition">
+            <%- icon('trash-2', { size: 15, class: 'shrink-0' }) %>
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <div class="px-8 mt-5 grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        <!-- Left column: profile + info -->
+        <div class="lg:col-span-1 space-y-5">
+          <!-- Profile -->
+          <div data-animate-card class="bg-neutral-50 dark:bg-white/5 rounded-2xl border border-neutral-200 dark:border-white/5 p-5">
+            <div class="flex items-center gap-4 mb-4 pb-4 border-b border-neutral-200 dark:border-white/5">
+              <div class="relative shrink-0">
+                <img class="h-16 w-16 rounded-xl object-cover border border-neutral-200 dark:border-white/10"
+                  src="<%= dataUser.avatar ? dataUser.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(dataUser.username) %>" alt="">
+                <% if (onlineUsers && onlineUsers.has(dataUser.username)) { %>
+                  <span class="absolute -bottom-0.5 -right-0.5 flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white dark:border-neutral-900"></span>
+                  </span>
+                <% } %>
+              </div>
+              <div class="min-w-0">
+                <p class="text-base font-semibold text-neutral-800 dark:text-white"><%= dataUser.username %></p>
+                <p class="text-sm text-neutral-500 truncate"><%= dataUser.email %></p>
+                <span class="inline-flex items-center rounded-md mt-1 px-2 py-0.5 text-xs font-medium
+                  <%= dataUser.isAdmin ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400' %>">
+                  <%= dataUser.isAdmin ? 'Admin' : 'User' %>
+                </span>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="rounded-xl bg-white dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-3 py-2.5">
+                <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-0.5">Servers</p>
+                <p class="text-xl font-semibold text-neutral-800 dark:text-white"><%= dataUser.servers ? dataUser.servers.length : 0 %></p>
+              </div>
+              <div class="rounded-xl bg-white dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 px-3 py-2.5">
+                <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-0.5">Logins</p>
+                <p class="text-xl font-semibold text-neutral-800 dark:text-white"><%= dataUser.loginHistory ? dataUser.loginHistory.length : 0 %></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- User details -->
+          <div data-animate-card class="bg-neutral-50 dark:bg-white/5 rounded-2xl border border-neutral-200 dark:border-white/5 p-5">
+            <p class="text-sm font-medium text-neutral-800 dark:text-white mb-4">User Information</p>
+            <div class="space-y-3">
+              <div>
+                <p class="text-xs text-neutral-500 dark:text-neutral-400">Username</p>
+                <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= dataUser.username %></p>
+              </div>
+              <div>
+                <p class="text-xs text-neutral-500 dark:text-neutral-400">Email</p>
+                <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= dataUser.email %></p>
+              </div>
+              <div>
+                <p class="text-xs text-neutral-500 dark:text-neutral-400">Description</p>
+                <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= dataUser.description || 'No description provided' %></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column: servers + history -->
+        <div class="lg:col-span-2 space-y-5">
+
+          <!-- Servers -->
+          <div data-animate-card class="bg-neutral-50 dark:bg-white/5 rounded-2xl border border-neutral-200 dark:border-white/5 p-5">
+            <div class="flex items-center justify-between mb-4">
+              <p class="text-sm font-medium text-neutral-800 dark:text-white">Servers</p>
+              <span class="text-xs text-neutral-500"><%= dataUser.servers ? dataUser.servers.length : 0 %> total</span>
+            </div>
+            <% if (dataUser.servers && dataUser.servers.length > 0) { %>
+              <div class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-white/5">
+                <table class="min-w-full text-sm divide-y divide-neutral-200 dark:divide-white/5">
+                  <thead class="bg-neutral-100 dark:bg-white/5">
+                    <tr>
+                      <th class="px-4 py-2.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">Name</th>
+                      <th class="px-4 py-2.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">UUID</th>
+                      <th class="px-4 py-2.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-neutral-100 dark:divide-white/5">
+                    <% dataUser.servers.forEach(function(server) { %>
+                      <tr class="hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors">
+                        <td class="px-4 py-3">
+                          <div class="flex items-center gap-2">
+                            <span class="relative flex h-2 w-2 shrink-0">
+                              <% if (server.Suspended) { %>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-neutral-400"></span>
+                              <% } else { %>
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                              <% } %>
+                            </span>
+                            <span class="font-medium text-neutral-800 dark:text-white"><%= server.name %></span>
+                          </div>
+                        </td>
+                        <td class="px-4 py-3 text-neutral-500 font-mono text-xs"><%= server.UUID %></td>
+                        <td class="px-4 py-3">
+                          <div class="flex items-center gap-1.5">
+                            <a href="/server/<%= server.UUID %>" title="Open"
+                              class="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+                              <%- icon('external-link', { size: 14, class: 'shrink-0' }) %>
+                            </a>
+                            <a href="/admin/servers/edit/<%= server.id %>" title="Edit"
+                              class="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+                              <%- icon('pencil', { size: 14, class: 'shrink-0' }) %>
+                            </a>
+                            <button type="button" onclick="adminRadarScan('<%= server.id %>', '<%= server.name %>')" title="Radar scan"
+                              class="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                              </svg>
+                            </button>
+                            <button type="button" onclick="adminDeleteServer('<%= server.id %>', '<%= server.name %>')" title="Delete"
+                              class="rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 p-1.5 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors">
+                              <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <div class="py-8 text-center">
+                <p class="text-sm text-neutral-400">No servers assigned to this user</p>
+              </div>
+            <% } %>
+          </div>
+
+          <!-- Login history -->
+          <div data-animate-card class="bg-neutral-50 dark:bg-white/5 rounded-2xl border border-neutral-200 dark:border-white/5 p-5">
+            <p class="text-sm font-medium text-neutral-800 dark:text-white mb-4">Login History</p>
+            <% if (dataUser.loginHistory && dataUser.loginHistory.length > 0) { %>
+              <div class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-white/5">
+                <table class="min-w-full text-sm divide-y divide-neutral-200 dark:divide-white/5">
+                  <thead class="bg-neutral-100 dark:bg-white/5">
+                    <tr>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">Date & Time</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">IP Address</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">Browser / Device</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-neutral-100 dark:divide-white/5">
+                    <% dataUser.loginHistory.forEach(function(login) { %>
+                      <tr class="hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors">
+                        <td class="px-4 py-3 text-neutral-700 dark:text-neutral-300 whitespace-nowrap"><%= new Date(login.timestamp).toLocaleString() %></td>
+                        <td class="px-4 py-3 text-neutral-500 dark:text-neutral-400 whitespace-nowrap font-mono text-xs"><%= login.ipAddress || 'Unknown' %></td>
+                        <td class="px-4 py-3 text-neutral-400 text-xs truncate max-w-[260px]"><%= login.userAgent || 'Unknown' %></td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <div class="py-8 text-center">
+                <p class="text-sm text-neutral-400">No login history available</p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<% } %>
+
+<script nonce="<%- nonce %>">
+function adminDeleteUser(userId) {
+  window.modal.confirm({
+    title: 'Delete User',
+    body: 'Are you sure you want to delete this user? This action cannot be undone.',
+    danger: true,
+    confirmLabel: 'Delete',
+    onConfirm: function () {
+      fetch('/admin/users/delete/' + userId, { method: 'DELETE' })
+        .then(function (r) {
+          if (r.ok) { window.location.href = '/admin/users'; }
+          else { showToast('Failed to delete user.', 'error'); }
+        })
+        .catch(function () { showToast('Failed to delete user.', 'error'); });
+    }
+  });
+}
+
+function adminDeleteServer(id, name) {
+  window.modal.confirm({
+    title: 'Delete Server',
+    body: 'Delete "' + name + '"? All data will be permanently removed.',
+    danger: true,
+    confirmLabel: 'Delete',
+    onConfirm: function () {
+      fetch('/admin/server/delete/' + id, { method: 'POST' })
+        .then(function () { window.location.reload(); })
+        .catch(function () { window.location.reload(); });
+    }
+  });
+}
+
+function adminRadarScan(serverId, serverName) {
+  if (typeof openRadarScanModal === 'function') {
+    openRadarScanModal(serverId, serverName);
+  } else {
+    showToast('Radar scan not available', 'info');
+  }
+}
+</script>
+
+<%- include('../../components/footer') %>

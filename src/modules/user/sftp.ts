@@ -1,11 +1,11 @@
 import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
-import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
+import { Module } from '../../core/moduleInit';
+import { isAuthenticatedForServer } from '../../middleware/serverAuth';
 import { getParamAsString } from '../../utils/typeHelpers';
 import prisma from '../../db';
 import axios from 'axios';
-import logger from '../../handlers/logger';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import logger from '../../services/logger';
+import { daemonSchemeSync } from '../../services/daemonRequest';
 import bcrypt from 'bcryptjs';
 
 

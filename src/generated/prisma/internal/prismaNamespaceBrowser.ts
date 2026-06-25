@@ -65,7 +65,9 @@ export const ModelName = {
   Addon: 'Addon',
   AddonSetting: 'AddonSetting',
   Backup: 'Backup',
-  SftpCredential: 'SftpCredential'
+  SftpCredential: 'SftpCredential',
+  EggCatalog: 'EggCatalog',
+  CategoryMD: 'CategoryMD'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -329,6 +331,37 @@ export const SftpCredentialScalarFieldEnum = {
 } as const
 
 export type SftpCredentialScalarFieldEnum = (typeof SftpCredentialScalarFieldEnum)[keyof typeof SftpCredentialScalarFieldEnum]
+
+
+export const EggCatalogScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  author: 'author',
+  category: 'category',
+  group: 'group',
+  subGroup: 'subGroup',
+  downloadUrl: 'downloadUrl',
+  filePath: 'filePath',
+  eggData: 'eggData',
+  readme: 'readme',
+  fullReadme: 'fullReadme',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EggCatalogScalarFieldEnum = (typeof EggCatalogScalarFieldEnum)[keyof typeof EggCatalogScalarFieldEnum]
+
+
+export const CategoryMDScalarFieldEnum = {
+  id: 'id',
+  category: 'category',
+  groupName: 'groupName',
+  markdown: 'markdown',
+  html: 'html',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CategoryMDScalarFieldEnum = (typeof CategoryMDScalarFieldEnum)[keyof typeof CategoryMDScalarFieldEnum]
 
 
 export const SortOrder = {

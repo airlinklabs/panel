@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { daemonSchemeSync } from '../core/daemonRequest';
-import logger from '../../logger';
+import { daemonSchemeSync } from './daemonRequest';
+import logger from './logger';
 
 interface Node {
   address: string;

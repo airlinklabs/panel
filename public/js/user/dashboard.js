@@ -157,6 +157,41 @@
     if (d.success) location.reload(); else showToast(d.error || "Couldn't delete the folder.", 'error');
   });
 
+  // ── Rename folder ──────────────────────────────────────────
+  const renameFolderBtn     = document.getElementById('renameFolderBtn');
+  const renameFolderOverlay = document.getElementById('renameFolderOverlay');
+  const renameFolderName    = document.getElementById('renameFolderName');
+  const cancelRenameFolder  = document.getElementById('cancelRenameFolder');
+  const confirmRenameFolder = document.getElementById('confirmRenameFolder');
+
+  renameFolderBtn.addEventListener('click', () => {
+    renameFolderName.value = folderPopupTitle.textContent;
+    delete folderPopupOverlay.dataset.open;
+    renameFolderOverlay.dataset.open = '';
+    setTimeout(() => { renameFolderName.focus(); renameFolderName.select(); }, 80);
+  });
+
+  cancelRenameFolder.addEventListener('click', () => delete renameFolderOverlay.dataset.open);
+  renameFolderOverlay.addEventListener('click', e => { if (e.target === renameFolderOverlay) delete renameFolderOverlay.dataset.open; });
+
+  renameFolderName.addEventListener('keydown', e => { if (e.key === 'Enter') confirmRenameFolder.click(); });
+
+  confirmRenameFolder.addEventListener('click', async () => {
+    if (!activeFolderId) return;
+    const newName = renameFolderName.value.trim();
+    if (!newName) return;
+    confirmRenameFolder.disabled = true;
+    const r = await fetch('/api/folders/' + activeFolderId, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newName }),
+    });
+    const d = await r.json();
+    confirmRenameFolder.disabled = false;
+    delete renameFolderOverlay.dataset.open;
+    if (d.success) location.reload(); else showToast(d.error || "Couldn't rename the folder.", 'error');
+  });
+
   // ── Drag-and-drop: server card → folder ───────────────────
   let dragUUID = null;
   let dragName = null;
@@ -280,6 +315,81 @@
       delete folderPopupOverlay.dataset.open;
       delete newFolderOverlay.dataset.open;
       delete deleteFolderOverlay.dataset.open;
+      delete addServersOverlay.dataset.open;
     }
   });
+
+  // ── Add servers to folder picker ──────────────────────────
+  const addServersBtn    = document.getElementById('addServersToFolderBtn');
+  const addServersOverlay = document.getElementById('addServersOverlay');
+  const cancelAddServers = document.getElementById('cancelAddServers');
+  const serverPickerList = document.getElementById('serverPickerList');
+  const serverPickerSearch = document.getElementById('serverPickerSearch');
+
+  addServersBtn?.addEventListener('click', () => {
+    if (!activeFolderId) return;
+    renderServerPicker();
+    addServersOverlay.dataset.open = '';
+  });
+
+  cancelAddServers?.addEventListener('click', () => {
+    delete addServersOverlay.dataset.open;
+    // Refresh to reflect changes
+    location.reload();
+  });
+
+  addServersOverlay?.addEventListener('click', e => {
+    if (e.target === addServersOverlay) {
+      delete addServersOverlay.dataset.open;
+      location.reload();
+    }
+  });
+
+  function renderServerPicker(filter) {
+    const q = (filter || '').toLowerCase();
+    serverPickerList.innerHTML = '';
+    const folderCard = document.querySelector(`.folder-card[data-folder-id="${activeFolderId}"]`);
+    const memberUUIDs = folderCard ? JSON.parse(folderCard.dataset.folderMembers || '[]') : [];
+
+    const filtered = allServers.filter(s => {
+      if (q && !s.name.toLowerCase().includes(q)) return false;
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      serverPickerList.innerHTML = '<p class="text-sm text-neutral-400 py-4 text-center">No servers found.</p>';
+      return;
+    }
+
+    filtered.forEach(s => {
+      const inFolder = memberUUIDs.includes(s.UUID);
+      const row = document.createElement('label');
+      row.className = 'flex items-center gap-3 px-3 py-2.5 rounded-xl border border-neutral-200 dark:border-white/5 hover:bg-neutral-50 dark:hover:bg-white/[0.03] cursor-pointer transition';
+      row.innerHTML = `
+        <input type="checkbox" ${inFolder ? 'checked' : ''} data-uuid="${s.UUID}"
+          class="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-white focus:ring-neutral-500 bg-white dark:bg-neutral-800">
+        <span class="text-sm font-medium text-neutral-800 dark:text-white truncate flex-1">${esc(s.name)}</span>
+        <span class="text-[10px] font-medium px-1.5 py-0.5 rounded ${s.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400'}">${s.status === 'running' ? 'Running' : 'Stopped'}</span>`;
+      const cb = row.querySelector('input');
+      cb.addEventListener('change', async () => {
+        if (cb.checked) {
+          const r = await fetch('/api/folders/' + activeFolderId + '/servers', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ serverUUID: s.UUID }),
+          });
+          const d = await r.json();
+          if (!d.success) { cb.checked = false; showToast(d.error || 'Failed.', 'error'); }
+          else showToast('"' + s.name + '" added.', 'success');
+        } else {
+          const r = await fetch('/api/folders/servers/' + s.UUID, { method: 'DELETE' });
+          const d = await r.json();
+          if (!d.success) { cb.checked = true; showToast(d.error || 'Failed.', 'error'); }
+          else showToast('"' + s.name + '" removed.', 'success');
+        }
+      });
+      serverPickerList.appendChild(row);
+    });
+  }
+
+  serverPickerSearch?.addEventListener('input', () => renderServerPicker(serverPickerSearch.value));
 })();

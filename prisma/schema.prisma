@@ -242,3 +242,31 @@ model SftpCredential {
   createdAt DateTime @default(now())
   server    Server   @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
 }
+
+model EggCatalog {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  author      String?
+  category    String
+  group       String
+  subGroup    String?
+  downloadUrl String
+  filePath    String   @unique
+  eggData     String
+  readme      String?
+  fullReadme  String?
+  updatedAt   DateTime @default(now())
+
+  @@index([category])
+  @@index([group])
+}
+
+model CategoryMD {
+  id        Int      @id @default(autoincrement())
+  category  String   @unique
+  groupName String
+  markdown  String
+  html      String
+  updatedAt DateTime @default(now())
+}

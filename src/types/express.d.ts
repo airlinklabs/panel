@@ -8,6 +8,7 @@ declare global {
       lang?: string;
       translations?: Record<string, unknown>;
       cookies?: Record<string, string>;
+      flashToast?: (message: string, type?: string) => void;
     }
   }
 }

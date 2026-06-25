@@ -154,7 +154,18 @@ function openGroup(group, imgs) {
     list.appendChild(row);
   });
 
-  document.getElementById('grpReadme').innerHTML = mdToHtml(imgs[0]?.groupReadme || '');
+  // Load category markdown
+  const readmeEl = document.getElementById('grpReadme');
+  readmeEl.innerHTML = '<p style="font-style:italic;color:#a3a3a3;font-size:12px;">Loading…</p>';
+  const catId = imgs[0]?.category || 'generic';
+  fetch('/admin/images/store/category-md/' + catId)
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (data && data.html) readmeEl.innerHTML = data.html;
+      else readmeEl.innerHTML = mdToHtml(imgs[0]?.groupReadme || '');
+    })
+    .catch(() => { readmeEl.innerHTML = mdToHtml(imgs[0]?.groupReadme || ''); });
+
   document.getElementById('groupOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }

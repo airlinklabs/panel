@@ -1,12 +1,12 @@
 import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import { Module } from '../../core/moduleInit';
 import prisma from '../../db';
-import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import logger from '../../handlers/logger';
+import { isAuthenticated } from '../../middleware/auth';
+import logger from '../../services/logger';
 import axios from 'axios';
-import { queueer } from '../../handlers/queueer';
+import { queueer } from '../../services/queue';
 import { getParamAsNumber } from '../../utils/typeHelpers';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { daemonSchemeSync } from '../../services/daemonRequest';
 import {
   getUsedExternalPorts,
   normalizeServerPorts,
@@ -14,7 +14,7 @@ import {
   parseServerPorts,
   serializeServerPorts,
   validatePortAssignments,
-} from '../../handlers/utils/server/ports';
+} from '../../services/ports';
 
 
 const adminModule: Module = {

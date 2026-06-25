@@ -149,7 +149,7 @@ export function spaMiddleware(req: Request, res: Response, next: NextFunction) {
 export function handleSPAPageRequest(originalRender: Function) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return function(this: Response, view: string, options?: any, callback?: Function) {
-    if (this.locals.isSPA) {
+    if (this.locals.isSPA && !this.locals.isFrameRequest) {
       const spaHandler = SPAHandler.getInstance();
 
       // Use SPA-specific template if it exists

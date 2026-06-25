@@ -1,6 +1,6 @@
 import express from 'express';
 import install from './install';
-import logger from '../logger';
+import logger from '../services/logger';
 
 const app = express();
 app.use(express.json());

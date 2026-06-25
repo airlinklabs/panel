@@ -1,0 +1,116 @@
+<style>
+  <% if (isMobileViewport) { %>
+  #actionFeedback {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+    z-index: 9999; display: flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 500;
+    background: var(--theme-bg-card, #fff); color: var(--theme-text-strong, #171717);
+    border: 1px solid var(--theme-border, #e5e5e5);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s;
+  }
+  html.dark #actionFeedback {
+    background: var(--theme-bg-card, #1c1c1c);
+    border-color: var(--theme-border-subtle, rgba(255,255,255,0.08));
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  #actionFeedback.visible { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  #actionFeedback.fading  { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  .af-spinner {
+    width: 13px; height: 13px; border: 2px solid var(--theme-border, #e5e5e5);
+    border-top-color: var(--theme-text-muted, #6b7280); border-radius: 50%;
+    animation: af-spin 0.6s linear infinite;
+  }
+  @keyframes af-spin { to { transform: rotate(360deg); } }
+  <% } else { %>
+  /* Inline action feedback bar */
+  #actionFeedback {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--af-color, var(--theme-text-muted, #6b7280));
+    transition: opacity 0.3s ease;
+  }
+  #actionFeedback.visible { display: flex; }
+  #actionFeedback.fading  { opacity: 0; }
+  .af-spinner {
+    width: 12px;
+    height: 12px;
+    border: 1.5px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: af-spin 0.65s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes af-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .af-spinner { animation: none; }
+  }
+  <% } %>
+</style>
+
+<div id="actionFeedback" aria-live="polite">
+  <span class="af-spinner" id="afSpinner"></span>
+  <svg id="afCheck" xmlns="http://www.w3.org/2000/svg" class="hidden" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+  <span id="afText"></span>
+</div>
+
+<% if (isMobileViewport) { %>
+<script nonce="<%- nonce %>">
+(function () {
+  if (window.loadingPopupSystem) return;
+
+  // Loading popup disabled — panel uses page-loader overlay instead
+  window.loadingPopupSystem = {
+    open: function () {}, close: function () {}, addStep: function () {},
+    setIcon: function () {}, setProgress: function () {}, setMessage: function () {}
+  };
+  window.showLoadingPopup = function () {
+    return { updateProgress: function () {}, updateMessage: function () {}, close: function () {} };
+  };
+  window.hideLoadingPopup = function () {};
+
+  var afFadeTimer = null;
+  window.actionFeedback = {
+    show: function (msg) {
+      if (afFadeTimer) { clearTimeout(afFadeTimer); afFadeTimer = null; }
+      var bar = document.getElementById('actionFeedback');
+      if (!bar) return;
+      document.getElementById('afSpinner').classList.remove('hidden');
+      document.getElementById('afCheck').classList.add('hidden');
+      bar.style.setProperty('--af-color', 'var(--theme-text-muted, #6b7280)');
+      document.getElementById('afText').textContent = msg + '...';
+      bar.classList.remove('fading');
+      bar.classList.add('visible');
+    },
+    done: function (msg) {
+      var bar = document.getElementById('actionFeedback');
+      if (!bar) return;
+      document.getElementById('afSpinner').classList.add('hidden');
+      document.getElementById('afCheck').classList.remove('hidden');
+      bar.style.setProperty('--af-color', 'var(--theme-success, #10b981)');
+      document.getElementById('afText').textContent = msg;
+      bar.classList.remove('fading');
+      afFadeTimer = setTimeout(function () {
+        bar.classList.add('fading');
+        setTimeout(function () {
+          bar.classList.remove('visible', 'fading');
+          document.getElementById('afSpinner').classList.remove('hidden');
+          document.getElementById('afCheck').classList.add('hidden');
+        }, 320);
+      }, 2200);
+    },
+    hide: function () {
+      if (afFadeTimer) { clearTimeout(afFadeTimer); afFadeTimer = null; }
+      var bar = document.getElementById('actionFeedback');
+      if (bar) bar.classList.remove('visible', 'fading');
+    }
+  };
+})();
+</script>
+<% } else { %>
+<script nonce="<%- nonce %>" src="/js/core/loading-popup.js"></script>
+<% } %>

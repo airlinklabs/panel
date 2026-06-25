@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import { Module } from '../../core/moduleInit';
 import prisma from '../../db';
-import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import logger from '../../handlers/logger';
-import { registerPermission } from '../../handlers/permissions';
+import { isAuthenticated } from '../../middleware/auth';
+import logger from '../../services/logger';
+import { registerPermission } from '../../core/permissions';
 import { getParamAsNumber } from '../../utils/typeHelpers';
 import crypto from 'crypto';
 

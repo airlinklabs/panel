@@ -78,4 +78,58 @@
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+  #active-background { transition: none !important; }
+  #al-progress       { transition: none !important; }
+}
+
+/* ── Sidebar active indicator spring ────────────────────────────────────── */
+#active-background {
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity   150ms ease,
+              width     200ms ease !important;
+}
+
+/* ── Card lift ───────────────────────────────────────────────────────────── */
+.al-card-lift {
+  transition: transform 200ms cubic-bezier(0.16,1,0.3,1),
+              box-shadow 200ms ease,
+              border-color 200ms ease;
+}
+.al-card-lift:hover { transform: translateY(-2px); }
+.al-card-lift:active { transform: translateY(0); }
+
+/* ── Button press ────────────────────────────────────────────────────────── */
+.al-btn, button[type="submit"], button[type="button"] {
+  transition: transform 80ms ease, filter 80ms ease, opacity 80ms ease;
+}
+button:active:not(:disabled), .al-btn:active:not(:disabled) {
+  transform: scale(0.97);
+  filter: brightness(0.9);
+}
+
+/* ── Progress bar (injected by transitions.js) ───────────────────────────── */
+#al-progress { will-change: transform; }
+
+/* ── Toast container ─────────────────────────────────────────────────────── */
+#toast-container { will-change: contents; }
+
+/* ── Data table ──────────────────────────────────────────────────────────── */
+.al-table-wrapper table { border-collapse: separate; border-spacing: 0; }
+
+/* ── Selection ───────────────────────────────────────────────────────────── */
+::selection { background: rgb(99 102 241 / 0.18); }
+
+/* ── Smooth scroll inside swapped panels ────────────────────────────────── */
+#page-content { scroll-behavior: smooth; }
+
+/* ── Skeleton pulse ──────────────────────────────────────────────────────── */
+.al-skeleton > * {
+  animation: al-skeleton-pulse 1.4s ease-in-out infinite;
+}
+.al-skeleton > *:nth-child(2) { animation-delay: 0.1s; }
+.al-skeleton > *:nth-child(3) { animation-delay: 0.2s; }
+.al-skeleton > *:nth-child(4) { animation-delay: 0.3s; }
+@keyframes al-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
 }

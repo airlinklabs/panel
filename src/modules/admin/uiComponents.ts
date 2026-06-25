@@ -1,4 +1,4 @@
-import { Module } from '../../handlers/moduleInit';
+import { Module } from '../../core/moduleInit';
 import { Router } from 'express';
 
 const uiComponentsModule: Module = {

@@ -1,8 +1,8 @@
 import { Router, Request, Response } from 'express';
-import { Module } from '../../../handlers/moduleInit';
+import { Module } from '../../../core/moduleInit';
 import prisma from '../../../db';
-import logger from '../../../handlers/logger';
-import { apiValidator } from '../../../handlers/utils/api/apiValidator';
+import logger from '../../../services/logger';
+import { apiValidator } from '../../../utils/api/validator';
 import { getParamAsString, getParamAsNumber } from '../../../utils/typeHelpers';
 import bcrypt from 'bcryptjs';
 import validator from 'validator';

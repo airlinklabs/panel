@@ -1,10 +1,10 @@
 import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import { Module } from '../../core/moduleInit';
 import prisma from '../../db';
-import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import logger from '../../handlers/logger';
-import { checkForUpdates, performUpdate } from '../../handlers/updater';
-import { registerPermission } from '../../handlers/permissions';
+import { isAuthenticated } from '../../middleware/auth';
+import logger from '../../services/logger';
+import { checkForUpdates, performUpdate } from '../../services/updater';
+import { registerPermission } from '../../core/permissions';
 
 
 registerPermission('airlink.admin.overview.main');

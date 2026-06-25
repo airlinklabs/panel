@@ -1,15 +1,15 @@
 import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import { Module } from '../../core/moduleInit';
 import prisma from '../../db';
-import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import logger from '../../handlers/logger';
+import { isAuthenticated } from '../../middleware/auth';
+import logger from '../../services/logger';
 import fs from 'fs/promises';
 import fsSync from 'fs';
 import path from 'path';
 import axios from 'axios';
 import FormData from 'form-data';
 import { getParamAsNumber } from '../../utils/typeHelpers';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { daemonSchemeSync } from '../../services/daemonRequest';
 
 
 // In-memory rate limiter respecting VT free tier: 4/min, 500/day

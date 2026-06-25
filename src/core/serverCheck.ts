@@ -1,7 +1,7 @@
 import axios from 'axios';
 import prisma from '../db';
-import { checkNodeStatus } from './utils/node/nodeStatus';
-import { daemonSchemeSync } from './utils/core/daemonRequest';
+import { checkNodeStatus } from '../services/nodeStatus';
+import { daemonSchemeSync } from '../services/daemonRequest';
 
 type CheckInstallationResult = {
   installed: boolean;

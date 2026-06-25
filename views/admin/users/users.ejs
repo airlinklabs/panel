@@ -1,0 +1,258 @@
+<%- include('../../components/header', { title: req.translations.adminUsersTitle || 'Users' }) %>
+
+<% if (isMobileViewport) { %>
+<main id="page-content" class="">
+  <%- include('../../components/template') %>
+  <%- include('../../components/toast') %>
+
+  <div class="px-4 py-5">
+    <div class="flex items-start justify-between mb-5">
+      <div>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminUsersTitle %></h1>
+        <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminUsersText %></p>
+      </div>
+      <button type="button" onclick="location.href='/admin/users/create'" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">New User</button>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 mb-5">
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+        <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.totalUsers || 'Total Users' %></p>
+        <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= users.length %></p>
+        <% if (onlineUsers.size > 0) { %>
+          <p class="text-xs text-emerald-500 mt-1"><%= onlineUsers.size %> online now</p>
+        <% } else { %>
+          <p class="text-xs text-neutral-500 mt-1">None online</p>
+        <% } %>
+      </div>
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+        <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.admins || 'Admins' %></p>
+        <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= users.filter(u => u.isAdmin).length %></p>
+        <p class="text-xs text-neutral-500 mt-1"><%= users.filter(u => !u.isAdmin).length %> regular</p>
+      </div>
+    </div>
+
+    <% if (req.query.err == "none") { %>
+      <div class="mb-4 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400"><%= req.translations.actionCompleted %></div>
+    <% } %>
+
+    <div class="space-y-2">
+      <% let userIdx = 0; users.forEach(function(user) { %>
+        <div data-animate-card class="grid-item-animate rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3" style="--i:<%= userIdx++ %>">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="relative shrink-0">
+              <img src="<%= user.avatar || 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="<%= user.username %>" class="h-10 w-10 rounded-xl object-cover">
+              <% if (onlineUsers.has(user.username)) { %>
+                <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 border-2 border-white dark:border-[#141414]"></span>
+                </span>
+              <% } %>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= user.username %></p>
+              <p class="text-xs text-neutral-500 truncate"><%= user.email || '—' %></p>
+            </div>
+            <% { const _bLabel = user.isAdmin ? 'Admin' : 'User'; const _bVar = user.isAdmin ? 'success' : 'warning'; %><span class="inline-flex items-center rounded-md <% if (_bVar === 'success') { %>bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400<% } else if (_bVar === 'danger') { %>bg-red-50 dark:bg-red-500/10 px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400<% } else if (_bVar === 'warning') { %>bg-amber-50 dark:bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-400<% } else if (_bVar === 'info') { %>bg-blue-50 dark:bg-blue-500/10 px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-400<% } %> shrink-0"><%= _bLabel %></span><% } %>
+          </div>
+          <div class="flex items-center justify-between">
+            <p class="text-xs text-neutral-500"><%= user.servers ? user.servers.length : 0 %> server<%= (user.servers && user.servers.length !== 1) ? 's' : '' %></p>
+            <div class="flex gap-1.5">
+              <a href="/admin/users/view/<%= user.id %>/">
+                <button type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">View</button>
+              </a>
+              <a href="/admin/users/edit/<%= user.id %>/">
+                <button type="button" class="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-blue-500 transition">Edit</button>
+              </a>
+              <button onclick="deleteUser('<%= user.id %>')" type="button" class="rounded-lg bg-red-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-red-500 transition">Remove</button>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</main>
+
+<script nonce="<%- nonce %>">
+  function deleteUser(userId) {
+    window.modal.confirm({
+      title: '<%= req.translations.deleteUser || "Delete User" %>',
+      body: '<%= req.translations.areYouSureDeleteUser || "Are you sure you want to delete this user?" %>',
+      danger: true,
+      confirmLabel: 'Yeah, delete it',
+      onConfirm: () => {
+        fetch(`/admin/users/delete/${userId}`, { method: 'DELETE' })
+          .then(response => {
+            if (response.ok) {
+              location.reload();
+            } else {
+              showToast('Failed to delete user.', 'error');
+            }
+          })
+          .catch(() => showToast('Failed to delete user.', 'error'));
+      }
+    });
+  }
+</script>
+
+<% } else { %>
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <div class="w-60 h-full">
+      <%- include('../../components/template') %>
+    </div>
+    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminUsersTitle %></h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminUsersText %></p>
+        </div>
+        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <div class="flex gap-2">
+            <button type="button" id="createButton" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90"><%= req.translations.createNewUser %></button>
+          </div>
+        </div>
+      </div>
+
+      <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.totalUsers %></h2>
+          <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= users.length %></p>
+          <% if (onlineUsers.size > 0) { %>
+            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.onlineUsers || 'Online Users' %>: <%= onlineUsers.size %></p>
+          <% } else { %>
+            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
+          <% } %>
+        </div>
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.admins || 'Admins' %></h2>
+            <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= users.filter(user => user.isAdmin).length %></p>
+            <% if (onlineUsers.size > 0) { %>
+              <p class="text-sm text-neutral-400 mt-2"><%= req.translations.onlineUsers || 'Online Admins' %>: <%= Array.from(onlineUsers).filter(username => users.some(user => user.username === username && user.isAdmin)).length %></p>
+            <% } else { %>
+              <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
+            <% } %>
+        </div>
+      </div>
+
+      <% if (req.query.err == "none") { %>
+        <div class="mt-6 ml-8 mr-8">
+          <div class="shadow-lg rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400"><%= req.translations.actionCompleted %></div>
+        </div>
+      <% } %>
+
+      <!-- Filter bar -->
+      <div id="userFilterBar" class="mx-8 mt-4"></div>
+
+      <div class="overflow-x-auto shadow-sm rounded-xl mx-8 mt-2 mb-8 border border-neutral-200 dark:border-neutral-800/40" id="userTable">
+        <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
+          <thead class="bg-neutral-50 dark:bg-neutral-800/50">
+            <tr>
+              <th scope="col" data-sort="name" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.name %></th>
+              <th scope="col" data-sort="role" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.role %></th>
+              <th scope="col" data-sort="instances" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.instances %></th>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.actions %></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
+            <% let userIdx = 0; users.forEach(function(user) { %>
+              <tr style="--i:<%= userIdx++ %>" class="user-row hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors clickable-row cursor-pointer"
+                data-name="<%= user.username.toLowerCase() %>"
+                data-role="<%= user.isAdmin ? 'admin' : 'user' %>"
+                data-instances="<%= user.servers ? user.servers.length : 0 %>"
+                onclick="handleRowClick(event, '/admin/users/view/<%= user.id %>/')">
+                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                  <div class="flex items-center gap-3">
+                    <div class="relative shrink-0">
+              <img src="<%= user.avatar || 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="<%= user.username %>" class="h-10 w-10 rounded-xl object-cover">
+                      <% if (onlineUsers.has(user.username)) { %>
+                        <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 border-2 border-white dark:border-neutral-900"></span>
+                        </span>
+                      <% } else { %>
+                        <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+                          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-neutral-400 border-2 border-white dark:border-neutral-900"></span>
+                        </span>
+                      <% } %>
+                    </div>
+                    <div class="font-medium text-neutral-800 dark:text-white"><%= user.username %></div>
+                  </div>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400">
+                  <% { const _bLabel = user.isAdmin ? 'Admin' : 'User'; const _bVar = user.isAdmin ? 'success' : 'warning'; %><span class="inline-flex items-center rounded-md <% if (_bVar === 'success') { %>bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400<% } else if (_bVar === 'warning') { %>bg-amber-50 dark:bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-400<% } %>"><%= _bLabel %></span><% } %>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400"><%= user.servers ? user.servers.length : 0 %></td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                  <div class="flex gap-2">
+                    <a href="/admin/users/view/<%= user.id %>/">
+                      <button type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">View</button>
+                    </a>
+                    <a href="/admin/users/edit/<%= user.id %>/">
+                      <button type="button" class="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-blue-500 transition">Edit</button>
+                    </a>
+                    <button onclick="deleteUser('<%= user.id %>')" type="button" class="rounded-lg bg-red-600 hover:bg-red-500 px-2.5 py-1.5 text-xs font-medium text-white transition" aria-label="Delete user">
+                      <%- icon('trash-2', { size: 14, class: 'text-white' }) %>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+      <div id="userEmptyState" class="hidden mx-8 py-12 text-center">
+        <p class="text-sm text-neutral-500 dark:text-neutral-400">No users match your filters.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/toast')%>
+
+<div id="page-data" style="display:none"
+  data-delete-user-title="<%= req.translations.deleteUser || 'Delete User' %>"
+  data-delete-user-body="<%= req.translations.areYouSureDeleteUser || 'Are you sure you want to delete this user?' %>"
+></div>
+
+<script nonce="<%- nonce %>" src="/js/admin/users.js"></script>
+<script nonce="<%- nonce %>" src="/js/core/filter-sort.js"></script>
+<script nonce="<%- nonce %>">
+(function () {
+  var table = document.getElementById('userTable');
+  if (!table) return;
+  var tbody = table.querySelector('tbody');
+  var rows = Array.from(tbody.querySelectorAll('tr.user-row'));
+  var emptyState = document.getElementById('userEmptyState');
+
+  AlFilter.enableTableSort(table);
+
+  AlFilter.buildFilterBar({
+    container: document.getElementById('userFilterBar'),
+    searchPlaceholder: 'Search users\u2026',
+    filters: [
+      { key: 'role', label: 'Role', defaultValue: 'all', currentValue: 'all', options: [
+        { value: 'all', label: 'All roles' },
+        { value: 'admin', label: 'Admin' },
+        { value: 'user', label: 'User' }
+      ]}
+    ],
+    onFilter: function (state) {
+      var visible = 0;
+      rows.forEach(function (row) {
+        var show = AlFilter.matchesRow(row, state, ['name', 'role']);
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      if (emptyState) emptyState.classList.toggle('hidden', visible > 0);
+    }
+  });
+
+  // Lazy loading - progressive reveal for large lists
+  if (rows.length > 25) {
+    AlFilter.enableProgressiveReveal(tbody, { batchSize: 25, itemSelector: 'tr.user-row' });
+  }
+})();
+</script>
+<% } %>
+
+<%- include('../../components/footer') %>

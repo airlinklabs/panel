@@ -15,7 +15,17 @@
       btn.classList.toggle('text-neutral-500',        !on);
       btn.classList.toggle('dark:text-neutral-400',   !on);
     });
-    tabPanels.forEach(p => p.classList.toggle('hidden', p.dataset.tabPanel !== id));
+    tabPanels.forEach(p => {
+      const show = p.dataset.tabPanel === id;
+      p.classList.toggle('hidden', !show);
+      if (show) {
+        // Force reflow so elements get dimensions before animation
+        void p.offsetHeight;
+        if (typeof window.staggerAnimate === 'function') {
+          window.staggerAnimate(p);
+        }
+      }
+    });
   }
 
   tabBtns.forEach(btn => btn.addEventListener('click', () => activateTab(btn.dataset.tab)));
@@ -172,6 +182,7 @@
     });
 
     const tbody = document.getElementById('ac-logins-table');
+    if (!tbody) return;
     tbody.innerHTML = (a.recentLogins || []).map(l => `
       <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition">
         <td class="px-5 py-3 text-xs font-mono text-neutral-500">#${l.userId}</td>
@@ -183,7 +194,7 @@
   async function load() {
     const icon    = document.getElementById('refreshIcon');
     const loading = document.getElementById('loading-state');
-    icon.classList.add('animate-spin');
+    if (icon) icon.classList.add('animate-spin');
     loading.classList.remove('hidden');
     tabPanels.forEach(p => p.classList.add('hidden'));
 
@@ -203,10 +214,10 @@
       loading.classList.add('hidden');
       showToast('Failed to load analytics', 'error');
     } finally {
-      icon.classList.remove('animate-spin');
+      if (icon) icon.classList.remove('animate-spin');
     }
   }
 
-  document.getElementById('refreshBtn').addEventListener('click', load);
+  document.getElementById('refreshBtn')?.addEventListener('click', load);
   load();
 })();

@@ -1,4 +1,4 @@
-import logger from './logger';
+import logger from '../services/logger';
 
 export const SLOT_IDS = [
   'dashboard.home.beforeContent',

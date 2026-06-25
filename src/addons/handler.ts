@@ -2,18 +2,18 @@ import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
 import express, { Express, Router, Request, Response, NextFunction } from 'express';
-import { uiComponentStore, SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from './uiComponentHandler';
-import { slotRegistry, SlotId } from './addonSlotRegistry';
-import { commandRegistry, scheduler, RegisteredCommand, ScheduledTask } from './addonCommands';
-import { createConfigStore, AddonConfigStore } from './addonConfigStore';
-import { parseAddonManifest, AddonManifestV2, isVersionInRange } from './addonManifest';
-import { registerAddonPermission, clearAddonPermissions } from './permissions';
+import { uiComponentStore, SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from '../core/uiComponents';
+import { slotRegistry, SlotId } from './slotRegistry';
+import { commandRegistry, scheduler, RegisteredCommand, ScheduledTask } from './commands';
+import { createConfigStore, AddonConfigStore } from './configStore';
+import { parseAddonManifest, AddonManifestV2, isVersionInRange } from './manifest';
+import { registerAddonPermission, clearAddonPermissions } from '../core/permissions';
 import prisma from '../db';
 import type { PrismaClient } from '../generated/prisma/client';
-import logger from './logger';
-import { isAuthenticated } from './utils/auth/authUtil';
-import { apiValidator } from './utils/api/apiValidator';
-import csrfProtection from './utils/security/csrfProtection';
+import logger from '../services/logger';
+import { isAuthenticated } from '../middleware/auth';
+import { apiValidator } from '../utils/api/validator';
+import csrfProtection from '../middleware/csrf';
 
 // ── Security Utilities ──────────────────────────────────────────
 
@@ -290,7 +290,7 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
   const addonMobileViewsPath = path.join(addonViewsPath, 'mobile');
 
   const panelViewsPath = path.join(__dirname, '../../views');
-  const { AddonComponentResolver } = require('./addonComponentResolver') as typeof import('./addonComponentResolver');
+  const { AddonComponentResolver } = require('./componentResolver') as typeof import('./componentResolver');
   const componentResolver = new AddonComponentResolver(panelViewsPath);
 
   return {
@@ -408,9 +408,7 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
         });
       });
 
-      const viewsBase = isMobile
-        ? path.join(__dirname, '../../views/mobile')
-        : path.join(__dirname, '../../views/desktop');
+      const viewsBase = path.join(__dirname, '../../views');
       const headerPath = path.join(viewsBase, 'components/header.ejs');
       const footerPath = path.join(viewsBase, 'components/footer.ejs');
       const templatePath = path.join(viewsBase, 'components/template.ejs');

@@ -11,25 +11,25 @@ import express, { Request, Response, NextFunction } from 'express';
 import prisma from './db';
 import path from 'path';
 import session from 'express-session';
-import { loadEnv } from './handlers/envLoader';
-import { databaseLoader } from './handlers/databaseLoader';
-import { loadModules } from './handlers/modulesLoader';
-import logger from './handlers/logger';
+import { loadEnv } from './config/env';
+import { databaseLoader } from './loaders/database';
+import { loadModules } from './loaders/modules';
+import logger from './services/logger';
 import config from '../storage/config.json';
 import cookieParser from 'cookie-parser';
 import expressWs from 'express-ws';
 import compression from 'compression';
-import { translationMiddleware } from './handlers/utils/core/translation';
-import PrismaSessionStore from './handlers/sessionStore';
-import { settingsLoader } from './handlers/settingsLoader';
-import { loadAddons, setAppInstance } from './handlers/addonHandler';
+import { translationMiddleware } from './services/translation';
+import PrismaSessionStore from './services/session';
+import { settingsLoader } from './config/settings';
+import { loadAddons, setAppInstance } from './addons/handler';
 import {
   initializeDefaultUIComponents,
   uiComponentStore,
-} from './handlers/uiComponentHandler';
-import { installDaemonRequestInterceptor } from './handlers/utils/core/daemonRequest';
-import { startPlayerStatsCollection } from './handlers/playerStatsCollector';
-import { initEggCatalogue } from './handlers/eggCatalogueService';
+} from './core/uiComponents';
+import { installDaemonRequestInterceptor } from './services/daemonRequest';
+import { startPlayerStatsCollection } from './services/playerStats';
+import { initEggCatalogue } from './services/eggCatalog';
 import crypto from 'crypto';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -40,19 +40,25 @@ import fs from 'fs';
 import csrfProtection, {
   handleCsrfError,
   addCsrfTokenToLocals,
-} from './handlers/utils/security/csrfProtection';
-import {
-  spaMiddleware,
-  handleSPAPageRequest,
-} from './handlers/spaHandler';
+} from './middleware/csrf';
+import { flashToastMiddleware } from './middleware/flashToast';
 import {
   errorPageHandler,
   notFoundHandler,
   renderErrorPage,
-} from './handlers/errorPages';
+} from './middleware/errorHandler';
 
 
 loadEnv();
+
+// Purge expired sessions from the database
+async function purgeExpiredSessions() {
+  try {
+    await prisma.session.deleteMany({ where: { expires: { lt: new Date() } } });
+  } catch {
+    // Best effort — session table may not exist yet during initial setup
+  }
+}
 
 // Set max listeners
 process.setMaxListeners(20);
@@ -62,10 +68,13 @@ const port = process.env.PORT || 3000;
 const name = process.env.NAME || 'AirLink';
 const airlinkVersion = config.meta.version;
 
-// Trust proxy when the panel is behind a reverse proxy (Nginx, Caddy, etc).
-// Reads from DB at startup — affects req.ip used by rate limiting and IP banning.
-// We set this before any middleware so the correct client IP flows through.
-(async () => {
+// Trust proxy — sync env var takes precedence; async DB read fills in if not set.
+if (process.env.TRUST_PROXY === '1' || process.env.TRUST_PROXY === 'true') {
+  app.set('trust proxy', 1);
+}
+
+// Async DB read for trust proxy (fallback if env var not set)
+;(async () => {
   try {
     const s = await prisma.settings.findUnique({ where: { id: 1 } });
     if (s?.behindReverseProxy) {
@@ -303,7 +312,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 // hpp removed: Express 5 handles parameter pollution natively
 
-import { refreshSecurityCache, getSecurityCache } from './handlers/securityCache';
+import { refreshSecurityCache, getSecurityCache } from './services/security';
 
 // Initial load + refresh every 30 seconds
 refreshSecurityCache();
@@ -326,6 +335,7 @@ app.use(
     skip: () => !getSecurityCache().rateLimitEnabled,
     standardHeaders: true,
     legacyHeaders: false,
+    validate: false,
   }),
 );
 
@@ -334,6 +344,7 @@ app.use(
 // Setting secure:true on a plain HTTP server causes browsers to silently drop
 // all session cookies, breaking login on local network setups.
 const useSecureCookie = process.env.URL?.startsWith('https://') ?? false;
+const sessionCookieName = useSecureCookie ? '__Host-al.sid' : 'al.sid';
 const sessionSecret = process.env.SESSION_SECRET;
 
 if (!sessionSecret && process.env.NODE_ENV === 'production') {
@@ -345,6 +356,7 @@ app.use(
     secret: sessionSecret || 'dev-only-insecure-secret-change-me',
     resave: false,
     saveUninitialized: false,
+    name: sessionCookieName,
     store: new PrismaSessionStore(),
     cookie: {
       secure: useSecureCookie,
@@ -384,9 +396,6 @@ app.use(cookieParser());
 // Load translation
 app.use(translationMiddleware);
 
-// SPA middleware for detecting AJAX requests
-app.use(spaMiddleware);
-
 // Apply CSRF protection to all routes except for API routes and WebSocket routes
 app.use((req, res, next) => {
   // Skip CSRF protection for WebSocket routes and API routes
@@ -407,6 +416,9 @@ app.use((req, res, next) => {
 // Handle CSRF errors
 app.use(handleCsrfError);
 
+// Flash toast support — req.flashToast('msg', 'type') before res.redirect()
+app.use(flashToastMiddleware);
+
 interface SidebarItem {
   id: string;
   label: string;
@@ -414,7 +426,7 @@ interface SidebarItem {
 }
 
 interface GlobalWithCustomProperties extends NodeJS.Global {
-  uiComponentStore: typeof import('./handlers/uiComponentHandler').uiComponentStore;
+  uiComponentStore: typeof import('./core/uiComponents').uiComponentStore;
   appName: string;
   airlinkVersion: string;
   adminMenuItems: SidebarItem[];
@@ -465,23 +477,29 @@ app.use((_req, res, next) => {
       return;
     }
 
-    const prefix = isMobileViewport ? 'mobile/' : 'desktop/';
-    const prefixedView =
-      view.startsWith('desktop/') || view.startsWith('mobile/')
-        ? view
-        : prefix + view;
+    // Views now live at views/ root. isMobileViewport is in res.locals for templates.
+    const rootViewPath = path.join(viewsPath, view + '.ejs');
+    const legacyDesktopPath = path.join(viewsPath, 'desktop/' + view + '.ejs');
+    const legacyMobilePath  = path.join(viewsPath, 'mobile/'  + view + '.ejs');
 
-    const prefixedViewPath = path.join(viewsPath, prefixedView + '.ejs');
-    if (!fs.existsSync(prefixedViewPath) && !view.startsWith('desktop/') && !view.startsWith('mobile/')) {
+    let resolvedView = view;
+    if (!fs.existsSync(rootViewPath)) {
+      if (fs.existsSync(legacyDesktopPath)) {
+        resolvedView = 'desktop/' + view;
+      } else if (fs.existsSync(legacyMobilePath)) {
+        resolvedView = 'mobile/' + view;
+      }
+      // If none exist, Express throws "view not found" — correct behaviour.
+    }
+
+    // Addon view fallback (unchanged)
+    if (!fs.existsSync(path.join(viewsPath, resolvedView + '.ejs'))) {
       if ((opts as any).addonSlug) {
         const addonSlug = (opts as any).addonSlug as string;
-        const viewportSubdir = isMobileViewport ? 'mobile' : 'desktop';
-        const addonViewportPath = path.join(addonViewsDir, addonSlug, 'views', viewportSubdir, view + '.ejs');
         const addonFallbackPath = path.join(addonViewsDir, addonSlug, 'views', view + '.ejs');
-        const addonViewPath = fs.existsSync(addonViewportPath) ? addonViewportPath : addonFallbackPath;
-        if (fs.existsSync(addonViewPath)) {
+        if (fs.existsSync(addonFallbackPath)) {
           const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-          (ejs as any).renderFile(addonViewPath, data, {}, (err: Error | null, html: string) => {
+          (ejs as any).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
             if (err) {
               if (typeof callback === 'function') return callback(err);
               return res.status(500).send('View render error: ' + err.message);
@@ -495,13 +513,10 @@ app.use((_req, res, next) => {
 
       for (const addonDir of getAddonDirs()) {
         if ((opts as any).addonSlug && addonDir === (opts as any).addonSlug) continue;
-        const viewportSubdir = isMobileViewport ? 'mobile' : 'desktop';
-        const addonViewportPath = path.join(addonViewsDir, addonDir, 'views', viewportSubdir, view + '.ejs');
         const addonFallbackPath = path.join(addonViewsDir, addonDir, 'views', view + '.ejs');
-        const addonViewPath = fs.existsSync(addonViewportPath) ? addonViewportPath : addonFallbackPath;
-        if (fs.existsSync(addonViewPath)) {
+        if (fs.existsSync(addonFallbackPath)) {
           const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-          (ejs as any).renderFile(addonViewPath, data, {}, (err: Error | null, html: string) => {
+          (ejs as any).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
             if (err) {
               if (typeof callback === 'function') return callback(err);
               return res.status(500).send('View render error: ' + err.message);
@@ -514,11 +529,8 @@ app.use((_req, res, next) => {
       }
     }
 
-    return originalRenderBase(prefixedView, opts, callback);
+    return originalRenderBase(resolvedView, opts, callback);
   };
-
-  const renderWithViewport = res.render;
-  res.render = handleSPAPageRequest(renderWithViewport);
 
   next();
 });
@@ -546,6 +558,9 @@ app.use(errorPageHandler);
       startPlayerStatsCollection();
       // Clone/pull egg repos on startup; auto-refreshes every 2 days
       initEggCatalogue().catch(err => logger.warn(`Store catalogue init failed: ${err?.message || err}`));
+      // Purge expired sessions at startup, then every 6 hours
+      purgeExpiredSessions();
+      setInterval(purgeExpiredSessions, 6 * 60 * 60 * 1000);
     });
 
     let shuttingDown = false;

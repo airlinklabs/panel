@@ -1,4 +1,4 @@
-import logger from './logger';
+import logger from '../services/logger';
 import prisma from '../db';
 
 export const settingsLoader = async () => {

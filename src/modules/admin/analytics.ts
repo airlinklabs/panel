@@ -1,11 +1,11 @@
 import { Router, Request, Response } from 'express';
-import { Module } from '../../handlers/moduleInit';
+import { Module } from '../../core/moduleInit';
 import prisma from '../../db';
-import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
-import logger from '../../handlers/logger';
+import { isAuthenticated } from '../../middleware/auth';
+import logger from '../../services/logger';
 import axios from 'axios';
-import { registerPermission } from '../../handlers/permissions';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { registerPermission } from '../../core/permissions';
+import { daemonSchemeSync } from '../../services/daemonRequest';
 
 
 registerPermission('airlink.admin.analytics.view');
