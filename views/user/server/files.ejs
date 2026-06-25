@@ -560,25 +560,25 @@ function isImageFile(filename) {
    <% } %>
   <!-- Move file modal (desktop only) -->
   <div id="moveModal" class="fixed inset-0 bg-black/50 z-[100] flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
-    <div class="data-animate-card bg-white dark:bg-[#1c1c1c] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-white/5 shadow-xl scale-95 transition-transform duration-200 sm:mx-4">
-      <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5">
+    <div class="data-animate-card bg-white dark:bg-neutral-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-neutral-700/40 shadow-xl scale-95 transition-transform duration-200 sm:mx-4">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
         <div>
           <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Move file</h2>
           <p class="text-xs text-neutral-500 mt-0.5">Enter the destination path. Use / for subdirectories.</p>
         </div>
-        <button onclick="closeMoveModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+        <button onclick="closeMoveModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">
           <%- icon('x', { size: 16 }) %>
         </button>
       </div>
       <div class="px-5 py-4">
         <input type="hidden" id="moveSourcePath">
         <input type="text" id="moveDestPath"
-          class="w-full px-3 py-2.5 rounded-xl text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono transition"
+          class="w-full px-3 py-2.5 rounded-xl text-sm bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/30 text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono transition"
           placeholder="path/to/destination/">
       </div>
       <div class="flex gap-2 px-5 pb-5 justify-end">
-        <button onclick="closeMoveModal()" class="px-4 py-2 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition">Cancel</button>
-        <button onclick="confirmMove()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">Move</button>
+        <button onclick="closeMoveModal()" class="px-4 py-2 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition active:scale-95">Cancel</button>
+        <button onclick="confirmMove()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition active:scale-95">Move</button>
       </div>
     </div>
   </div>
@@ -592,19 +592,19 @@ function isImageFile(filename) {
 
 <!-- Shared modals (work for both mobile and desktop) -->
 <div id="createFileModal" class="fixed inset-0 bg-black/50 z-[100] flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
-  <div class="data-animate-card bg-white dark:bg-[#1c1c1c] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-white/5 shadow-xl transform scale-95 transition-transform duration-200 sm:mx-4">
+  <div class="data-animate-card bg-white dark:bg-neutral-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-neutral-700/40 shadow-xl transform scale-95 transition-transform duration-200 sm:mx-4">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
       <div>
         <h2 id="createModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white">New File</h2>
         <p id="createModalHint" class="text-xs text-neutral-500 mt-0.5">Use / to create files inside new folders.</p>
       </div>
-      <button onclick="closeCreateFileModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+      <button onclick="closeCreateFileModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">
         <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>
     <div class="px-5 py-4">
       <input type="text" id="FileName" data-mode="file"
-        class="w-full px-3 py-2.5 rounded-xl text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono transition"
+        class="w-full px-3 py-2.5 rounded-xl text-sm bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/30 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono transition"
         placeholder="filename.txt or folder/filename.txt"
         onkeydown="handleFileNameKeyPress(event)">
       <p id="fileNamePreview" class="mt-2 text-xs font-mono hidden"></p>
@@ -616,8 +616,8 @@ function isImageFile(filename) {
   </div>
 </div>
 
-<div id="uploadFileModal" class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 backdrop-blur-sm">
-  <div class="data-animate-card bg-white dark:bg-[#1c1c1c] rounded-2xl p-5 sm:p-8 w-full max-w-md mx-4 transform scale-95 transition-transform duration-300 border border-neutral-200 dark:border-white/5 shadow-xl">
+<div id="uploadFileModal" class="fixed inset-0 bg-black/50 z-[100] flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 backdrop-blur-sm">
+  <div class="data-animate-card bg-white dark:bg-neutral-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-5 sm:p-8 transform scale-95 transition-transform duration-300 border border-neutral-200 dark:border-neutral-700/40 shadow-xl sm:mx-4">
     <h2 class="text-xl sm:text-2xl font-medium mb-1 text-neutral-800 dark:text-white">Upload File</h2>
     <p class="mb-6 text-sm text-neutral-600 dark:text-neutral-400">Select a file to upload to the current directory.</p>
     <div class="mb-4">
@@ -649,20 +649,20 @@ function isImageFile(filename) {
       </div>
     </div>
     <div class="flex justify-end gap-3">
-      <button onclick="closeUploadFileModal()" class="px-5 py-2 text-sm font-medium bg-neutral-100 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-600 transition">Cancel</button>
+      <button onclick="closeUploadFileModal()" class="px-5 py-2 text-sm font-medium bg-neutral-100 dark:bg-neutral-700/30 text-neutral-800 dark:text-neutral-200 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-600 transition">Cancel</button>
       <button id="uploadButton" class="rounded-xl bg-neutral-900 dark:bg-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white px-5 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2" disabled>Upload</button>
     </div>
   </div>
 </div>
 
-<div id="massDeleteModal" class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
-  <div class="bg-white dark:bg-[#1c1c1c] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-200">
+<div id="massDeleteModal" class="fixed inset-0 bg-black/50 z-[100] flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
+  <div class="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-sm sm:mx-4 transform scale-95 transition-transform duration-200">
     <div class="px-5 pt-5 pb-4">
       <p class="text-sm font-semibold text-neutral-800 dark:text-white">Confirm Mass Deletion</p>
       <p id="massDeleteMessage" class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed"></p>
     </div>
     <div class="flex gap-2 px-5 pb-5 justify-end">
-      <button onclick="closeMassDeleteModal()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
+      <button onclick="closeMassDeleteModal()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-100 dark:bg-neutral-700/30 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition">Cancel</button>
       <button id="confirmMassDelete" class="px-4 py-2 text-xs font-medium rounded-xl bg-red-600 hover:bg-red-500 text-white transition">Delete</button>
     </div>
   </div>
@@ -674,19 +674,19 @@ function isImageFile(filename) {
 
 <!-- Rename Modal -->
 <div id="renameModal" class="fixed inset-0 bg-black/50 z-[100] flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
-  <div class="data-animate-card bg-white dark:bg-[#1c1c1c] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-white/5 shadow-xl transform scale-95 transition-transform duration-200 sm:mx-4">
+  <div class="data-animate-card bg-white dark:bg-neutral-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-neutral-700/40 shadow-xl transform scale-95 transition-transform duration-200 sm:mx-4">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
       <div>
         <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Rename</h2>
         <p class="text-xs text-neutral-500 mt-0.5">Use / to move the file into a different folder.</p>
       </div>
-      <button onclick="closeRenameModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+      <button onclick="closeRenameModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">
         <%- icon('x', { class: 'w-4 h-4' }) %>
       </button>
     </div>
     <div class="px-5 py-4">
       <input type="text" id="newFileName"
-        class="w-full px-3 py-2.5 rounded-xl text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono transition"
+        class="w-full px-3 py-2.5 rounded-xl text-sm bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/30 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono transition"
         placeholder="new-name.txt or subfolder/new-name.txt">
       <p id="renamePreview" class="mt-2 text-xs font-mono hidden"></p>
     </div>
