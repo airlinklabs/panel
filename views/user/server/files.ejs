@@ -272,9 +272,7 @@ function isImageFile(filename) {
       <% } %>
     </div>
 
-    <!-- Modals and stuff -->
-
-   <!-- Floating Action Bar (only show when daemon is online) -->
+    <!-- Floating Action Bar (mobile) -->
    <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
    <div id="floatingActionBar" class="fixed left-0 right-0 bottom-16 bg-neutral-900 dark:bg-neutral-800 z-40 text-white py-3 px-4 transition-transform duration-200 ease-out flex justify-between items-center pointer-events-none translate-y-[calc(100%+80px)]">
     <span id="selectedFilesCount">0 files selected</span>
@@ -291,84 +289,6 @@ function isImageFile(filename) {
     </div>
 </div>
    <% } %>
- <!-- Mass Delete Confirmation Modal -->
- <div id="massDeleteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
-    <div class="bg-white dark:bg-[#1c1c1c] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-xl w-full mx-4 transform scale-95 transition-transform duration-200">
-      <div class="px-5 pt-5 pb-4">
-        <p class="text-sm font-semibold text-neutral-800 dark:text-white">Confirm Mass Deletion</p>
-        <p id="massDeleteMessage" class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed"></p>
-      </div>
-      <div class="flex gap-2 px-5 pb-5 justify-end">
-        <button onclick="closeMassDeleteModal()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
-        <button id="confirmMassDelete" class="px-4 py-2 text-xs font-medium rounded-xl bg-red-600 hover:bg-red-500 text-white transition">Delete</button>
-      </div>
-    </div>
- </div>
-    <!-- Create file / folder modal -->
-  <div id="createFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
-    <div class="data-animate-card bg-white dark:bg-[#1c1c1c] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-white/5 shadow-xl transform scale-95 transition-transform duration-200 sm:mx-4">
-      <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
-        <div>
-          <h2 id="createModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white">New File</h2>
-          <p id="createModalHint" class="text-xs text-neutral-500 mt-0.5">Use / to create files inside new folders.</p>
-        </div>
-        <button onclick="closeCreateFileModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
-          <%- icon('x', { size: 16, class: 'shrink-0' }) %>
-        </button>
-      </div>
-      <div class="px-5 py-4">
-        <input type="text" id="FileName" data-mode="file"
-          class="w-full px-3 py-2.5 rounded-xl text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono transition"
-          placeholder="filename.txt or folder/filename.txt"
-          onkeydown="handleFileNameKeyPress(event)">
-        <p id="fileNamePreview" class="mt-2 text-xs font-mono hidden"></p>
-      </div>
-      <div class="flex gap-2 px-5 pb-5 justify-end">
-        <button onclick="closeCreateFileModal()" class="px-4 py-2 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition active:scale-95">Cancel</button>
-        <button onclick="confirmCreateFile()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition active:scale-95">Create</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Upload file -->
-  <div id="uploadFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 backdrop-blur-sm">
-    <div class="data-animate-card bg-white dark:bg-[#1c1c1c] rounded-2xl p-5 w-full mx-4 transform scale-95 transition-transform duration-300 border border-neutral-200 dark:border-white/5 shadow-xl">
-        <h2 class="text-2xl font-medium mb-1 text-neutral-800 dark:text-white">Upload File</h2>
-        <p class="mb-6 text-neutral-600 dark:text-neutral-400">Select a file to upload to the current directory.</p>
-        <div class="mb-4">
-          <div class="mb-4">
-            <label for="fileInput" class="w-full px-3 py-6 border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-xl transition text-neutral-800 dark:text-neutral-300 text-center cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-700/50 block" id="dropZone">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-10 h-10 mx-auto mb-2 text-neutral-400 dark:text-neutral-500">
-                <path fill-rule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1-1.06 1.06l-3.22-3.22V16.5a.75.75 0 0 1-1.5 0V4.81L8.03 8.03a.75.75 0 0 1-1.06-1.06l4.5-4.5ZM3 15.75a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
-              </svg>
-              <p class="text-neutral-500 dark:text-neutral-400">Drag & drop a file here or click to browse</p>
-            </label>
-            <input type="file" id="fileInput" class="hidden" onchange="handleFileInputChange(event)">
-          </div>
-          <div id="filePreview" class="hidden">
-            <div class="flex items-center p-3 bg-neutral-100 dark:bg-neutral-700 rounded-xl">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mr-3 text-neutral-600 dark:text-neutral-400">
-                <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
-                <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-              </svg>
-              <div class="flex-1 truncate">
-                <p id="selectedFileName" class="font-medium text-neutral-800 dark:text-white truncate"></p>
-                <p id="selectedFileSize" class="text-sm text-neutral-500 dark:text-neutral-400"></p>
-              </div>
-              <button onclick="removeSelectedFile()" class="ml-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                  <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z" clip-rule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="flex justify-end space-x-4">
-          <button onclick="closeUploadFileModal()" class="px-5 py-2 bg-neutral-100 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-600 transition">Cancel</button>
-          <button id="uploadButton" class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2" disabled>Upload</button>
-        </div>
-    </div>
-  </div>
 
   </div>
 </main>
@@ -638,8 +558,8 @@ function isImageFile(filename) {
      </div>
    </div>
    <% } %>
-  <!-- Move file modal -->
-  <div id="moveModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
+  <!-- Move file modal (desktop only) -->
+  <div id="moveModal" class="fixed inset-0 bg-black/50 z-[100] flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
     <div class="data-animate-card bg-white dark:bg-[#1c1c1c] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-white/5 shadow-xl scale-95 transition-transform duration-200 sm:mx-4">
       <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5">
         <div>
@@ -663,81 +583,6 @@ function isImageFile(filename) {
     </div>
   </div>
 
-  <!-- Mass Delete Confirmation Modal -->
- <div id="massDeleteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
-    <div class="data-animate-card bg-white dark:bg-[#1c1c1c] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-200">
-      <div class="px-5 pt-5 pb-4">
-        <p class="text-sm font-semibold text-neutral-800 dark:text-white">Confirm Mass Deletion</p>
-        <p id="massDeleteMessage" class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed"></p>
-      </div>
-      <div class="flex gap-2 px-5 pb-5 justify-end">
-        <button onclick="closeMassDeleteModal()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
-        <button id="confirmMassDelete" class="px-4 py-2 text-xs font-medium rounded-xl bg-red-600 hover:bg-red-500 text-white transition">Delete</button>
-      </div>
-    </div>
- </div>
-    <!-- Create file / folder modal -->
-  <div id="createFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
-    <div class="data-animate-card bg-white dark:bg-[#1c1c1c] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-white/5 shadow-xl transform scale-95 transition-transform duration-200 sm:mx-4">
-      <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
-        <div>
-          <h2 id="createModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white">New File</h2>
-          <p id="createModalHint" class="text-xs text-neutral-500 mt-0.5">Use / to create files inside new folders.</p>
-        </div>
-        <button onclick="closeCreateFileModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
-          <%- icon('x', { class: 'w-4 h-4', strokeWidth: 2 }) %>
-        </button>
-      </div>
-      <div class="px-5 py-4">
-        <input type="text" id="FileName" data-mode="file"
-          class="w-full px-3 py-2.5 rounded-xl text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono transition"
-          placeholder="filename.txt or folder/filename.txt"
-          onkeydown="handleFileNameKeyPress(event)">
-        <p id="fileNamePreview" class="mt-2 text-xs font-mono hidden"></p>
-      </div>
-      <div class="flex gap-2 px-5 pb-5 justify-end">
-        <button onclick="closeCreateFileModal()" class="px-4 py-2 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition active:scale-95">Cancel</button>
-        <button onclick="confirmCreateFile()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition active:scale-95">Create</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Upload file -->
-  <div id="uploadFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 backdrop-blur-sm">
-    <div class="data-animate-card bg-white dark:bg-[#1c1c1c] rounded-2xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300 border border-neutral-200 dark:border-white/5 shadow-xl">
-        <h2 class="text-2xl font-medium mb-1 text-neutral-800">Upload File</h2>
-        <p class="mb-6 text-neutral-600">Select a file to upload to the current directory.</p>
-        <div class="mb-4">
-          <div class="mb-4">
-            <label for="fileInput" class="w-full px-3 py-6 border-2 border-dashed border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 transition text-neutral-800 text-center cursor-pointer hover:bg-neutral-50 block" id="dropZone">
-              <%- icon('upload', { class: 'w-10 h-10 mx-auto mb-2 text-neutral-400', fill: 'currentColor', strokeWidth: 1 }) %>
-              <p class="text-neutral-500">Drag & drop a file here or click to browse</p>
-            </label>
-            <input type="file" id="fileInput" class="hidden" onchange="handleFileInputChange(event)">
-          </div>
-          <div id="filePreview" class="hidden">
-            <div class="flex items-center p-3 bg-neutral-100 rounded-xl">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mr-3 text-neutral-600">
-                <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
-                <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-              </svg>
-              <div class="flex-1 truncate">
-                <p id="selectedFileName" class="font-medium text-neutral-800 truncate"></p>
-                <p id="selectedFileSize" class="text-sm text-neutral-500"></p>
-              </div>
-              <button onclick="removeSelectedFile()" class="ml-2 text-neutral-400 hover:text-neutral-600">
-                <%- icon('x', { class: 'w-5 h-5' }) %>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="flex justify-end space-x-4">
-          <button onclick="closeUploadFileModal()" class="px-5 py-2 bg-neutral-200 text-neutral-800 rounded-xl hover:bg-neutral-300 transition">Cancel</button>
-          <button id="uploadButton" class="w-full md:w-auto rounded-xl bg-neutral-800 dark:bg-neutral-950 hover:bg-neutral-700 dark:hover:bg-neutral-800 text-white px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2" disabled>Upload</button>
-        </div>
-    </div>
-  </div>
-
   
       </div><!-- /server-page-body -->
 
@@ -745,12 +590,90 @@ function isImageFile(filename) {
 </main>
 <% } %>
 
+<!-- Shared modals (work for both mobile and desktop) -->
+<div id="createFileModal" class="fixed inset-0 bg-black/50 z-[100] flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
+  <div class="data-animate-card bg-white dark:bg-[#1c1c1c] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-white/5 shadow-xl transform scale-95 transition-transform duration-200 sm:mx-4">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
+      <div>
+        <h2 id="createModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white">New File</h2>
+        <p id="createModalHint" class="text-xs text-neutral-500 mt-0.5">Use / to create files inside new folders.</p>
+      </div>
+      <button onclick="closeCreateFileModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+        <%- icon('x', { size: 16, class: 'shrink-0' }) %>
+      </button>
+    </div>
+    <div class="px-5 py-4">
+      <input type="text" id="FileName" data-mode="file"
+        class="w-full px-3 py-2.5 rounded-xl text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono transition"
+        placeholder="filename.txt or folder/filename.txt"
+        onkeydown="handleFileNameKeyPress(event)">
+      <p id="fileNamePreview" class="mt-2 text-xs font-mono hidden"></p>
+    </div>
+    <div class="flex gap-2 px-5 pb-5 justify-end">
+      <button onclick="closeCreateFileModal()" class="px-4 py-2 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition active:scale-95">Cancel</button>
+      <button onclick="confirmCreateFile()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition active:scale-95">Create</button>
+    </div>
+  </div>
+</div>
+
+<div id="uploadFileModal" class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 backdrop-blur-sm">
+  <div class="data-animate-card bg-white dark:bg-[#1c1c1c] rounded-2xl p-5 sm:p-8 w-full max-w-md mx-4 transform scale-95 transition-transform duration-300 border border-neutral-200 dark:border-white/5 shadow-xl">
+    <h2 class="text-xl sm:text-2xl font-medium mb-1 text-neutral-800 dark:text-white">Upload File</h2>
+    <p class="mb-6 text-sm text-neutral-600 dark:text-neutral-400">Select a file to upload to the current directory.</p>
+    <div class="mb-4">
+      <div class="mb-4">
+        <label for="fileInput" class="w-full px-3 py-6 border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-xl transition text-neutral-800 dark:text-neutral-300 text-center cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-700/50 block" id="dropZone">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-10 h-10 mx-auto mb-2 text-neutral-400 dark:text-neutral-500">
+            <path fill-rule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1-1.06 1.06l-3.22-3.22V16.5a.75.75 0 0 1-1.5 0V4.81L8.03 8.03a.75.75 0 0 1-1.06-1.06l4.5-4.5ZM3 15.75a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
+          </svg>
+          <p class="text-neutral-500 dark:text-neutral-400">Drag & drop a file here or click to browse</p>
+        </label>
+        <input type="file" id="fileInput" class="hidden" onchange="handleFileInputChange(event)">
+      </div>
+      <div id="filePreview" class="hidden">
+        <div class="flex items-center p-3 bg-neutral-100 dark:bg-neutral-700 rounded-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mr-3 text-neutral-600 dark:text-neutral-400">
+            <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
+            <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+          </svg>
+          <div class="flex-1 truncate">
+            <p id="selectedFileName" class="font-medium text-neutral-800 dark:text-white truncate"></p>
+            <p id="selectedFileSize" class="text-sm text-neutral-500 dark:text-neutral-400"></p>
+          </div>
+          <button onclick="removeSelectedFile()" class="ml-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+              <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-end gap-3">
+      <button onclick="closeUploadFileModal()" class="px-5 py-2 text-sm font-medium bg-neutral-100 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-600 transition">Cancel</button>
+      <button id="uploadButton" class="rounded-xl bg-neutral-900 dark:bg-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white px-5 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2" disabled>Upload</button>
+    </div>
+  </div>
+</div>
+
+<div id="massDeleteModal" class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
+  <div class="bg-white dark:bg-[#1c1c1c] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-200">
+    <div class="px-5 pt-5 pb-4">
+      <p class="text-sm font-semibold text-neutral-800 dark:text-white">Confirm Mass Deletion</p>
+      <p id="massDeleteMessage" class="text-xs text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed"></p>
+    </div>
+    <div class="flex gap-2 px-5 pb-5 justify-end">
+      <button onclick="closeMassDeleteModal()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
+      <button id="confirmMassDelete" class="px-4 py-2 text-xs font-medium rounded-xl bg-red-600 hover:bg-red-500 text-white transition">Delete</button>
+    </div>
+  </div>
+</div>
+
 <%- include('../../components/toast')%>
 <%- include('../../components/loadingPopup')%>
 <%- include('../../components/imageViewer')%>
 
 <!-- Rename Modal -->
-<div id="renameModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
+<div id="renameModal" class="fixed inset-0 bg-black/50 z-[100] flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
   <div class="data-animate-card bg-white dark:bg-[#1c1c1c] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-white/5 shadow-xl transform scale-95 transition-transform duration-200 sm:mx-4">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
       <div>
