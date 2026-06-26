@@ -15,7 +15,7 @@
     </div>
 
     <div class="grid grid-cols-2 gap-3 mb-5">
-      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.totalUsers || 'Total Users' %></p>
         <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= users.length %></p>
         <% if (onlineUsers.size > 0) { %>
@@ -24,7 +24,7 @@
           <p class="text-xs text-neutral-500 mt-1">None online</p>
         <% } %>
       </div>
-      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.admins || 'Admins' %></p>
         <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= users.filter(u => u.isAdmin).length %></p>
         <p class="text-xs text-neutral-500 mt-1"><%= users.filter(u => !u.isAdmin).length %> regular</p>
@@ -37,7 +37,7 @@
 
     <div class="space-y-2">
       <% let userIdx = 0; users.forEach(function(user) { %>
-        <div data-animate-card class="grid-item-animate rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3" style="--i:<%= userIdx++ %>">
+        <div data-animate-card class="grid-item-animate rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3" style="--i:<%= userIdx++ %>">
           <div class="flex items-center gap-3 mb-3">
             <div class="relative shrink-0">
               <img src="<%= user.avatar || 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="<%= user.username %>" class="h-10 w-10 rounded-xl object-cover">
@@ -114,7 +114,7 @@
       </div>
 
       <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
-        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.totalUsers %></h2>
           <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= users.length %></p>
           <% if (onlineUsers.size > 0) { %>
@@ -123,7 +123,7 @@
             <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
           <% } %>
         </div>
-        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.admins || 'Admins' %></h2>
             <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= users.filter(user => user.isAdmin).length %></p>
             <% if (onlineUsers.size > 0) { %>
@@ -153,7 +153,7 @@
               <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.actions %></th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
+          <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800">
             <% let userIdx = 0; users.forEach(function(user) { %>
               <tr style="--i:<%= userIdx++ %>" class="user-row hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors clickable-row cursor-pointer"
                 data-name="<%= user.username.toLowerCase() %>"

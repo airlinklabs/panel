@@ -41,7 +41,6 @@ const folderModule: Module = {
       }
     });
 
-    // Create a new folder
     router.post('/api/folders', isAuthenticated(), async (req: Request, res: Response) => {
       try {
         const userId = getAuthenticatedUserId(req);
@@ -95,7 +94,6 @@ const folderModule: Module = {
       }
     });
 
-    // Delete a folder (servers inside are unfoldered, not deleted)
     router.delete('/api/folders/:id', isAuthenticated(), async (req: Request, res: Response) => {
       try {
         const userId = getAuthenticatedUserId(req);
@@ -115,7 +113,6 @@ const folderModule: Module = {
       }
     });
 
-    // Add a server to a folder (moves it if it's in another folder)
     router.post('/api/folders/:id/servers', isAuthenticated(), async (req: Request, res: Response) => {
       try {
         const userId = getAuthenticatedUserId(req);
@@ -147,7 +144,6 @@ const folderModule: Module = {
       }
     });
 
-    // Remove a server from its folder
     router.delete('/api/folders/servers/:serverUUID', isAuthenticated(), async (req: Request, res: Response) => {
       try {
         const userId = getAuthenticatedUserId(req);

@@ -1,276 +1,115 @@
 /*
  * Example Theme — Dark Mode
  *
- * This file shows every CSS variable the panel theming system supports.
- * Copy this file, change the values, and point your theme's info.json at it.
+ * Only define CSS variables here. The panel loads theme-base.css
+ * automatically which handles all element selectors for you.
  *
- * Only override what you need — any variable you leave out falls back to
- * the panel's built-in defaults.
- *
- * HOW THE SYSTEM WORKS
- * --------------------
- * The panel has two CSS classes that control mode: no class = light,
- * `html.dark` = dark. Your dark.css is loaded when the user is in dark mode
- * and your light.css is loaded in light mode. Inside each file you define
- * CSS variables on :root and selectors that reference them.
- *
- * The panel's nav chrome (sidebar, mobile top bar, bottom nav) reads from
- * the variables below via the .mobile-top-bar, .mobile-bottom-nav,
- * #pc-sidebar, and #pc-sidebar2 selectors. Your variables flow through
- * automatically as long as you define them on :root.
+ * See THEME.md for the full variable reference.
  */
 
 :root {
-  /* ------------------------------------------------------------------ */
-  /* PAGE BACKGROUNDS                                                     */
-  /* ------------------------------------------------------------------ */
-
-  /* Main page background — the base canvas */
+  /* --- Page backgrounds --- */
   --theme-bg:               #0f0f0f;
-
-  /* Slightly lighter surface — used for sidebar, mobile bars, some cards */
   --theme-bg-secondary:     #1a1a1a;
-
-  /* Third-level depth — nested cards, hover states */
   --theme-bg-tertiary:      #222222;
-
-  /* Card / panel background */
   --theme-bg-card:          #1a1a1a;
-
-  /* Background when something is hovered */
   --theme-bg-hover:         #252525;
-
-  /* Input field background */
   --theme-bg-input:         #141414;
-
-  /* Active nav item fill (usually semi-transparent) */
   --theme-bg-active-nav:    rgba(255, 255, 255, 0.06);
 
-
-  /* ------------------------------------------------------------------ */
-  /* BORDERS                                                              */
-  /* ------------------------------------------------------------------ */
-
-  /* Standard border — used on cards, inputs, separators */
+  /* --- Borders --- */
   --theme-border:           #2a2a2a;
-
-  /* Very subtle border — sidebar inner dividers, barely-there lines */
   --theme-border-subtle:    rgba(255, 255, 255, 0.05);
-
-  /* Input field border */
   --theme-border-input:     #333333;
+  --theme-border-accent:    rgba(99, 102, 241, 0.30);
 
-
-  /* ------------------------------------------------------------------ */
-  /* TEXT                                                                 */
-  /* ------------------------------------------------------------------ */
-
-  /* Default body text */
+  /* --- Text --- */
   --theme-text:             #a3a3a3;
-
-  /* Bold / heading text — highest contrast */
   --theme-text-strong:      #f0f0f0;
-
-  /* Subdued text — captions, metadata, secondary labels */
   --theme-text-muted:       #666666;
-
-  /* Nav link text in the resting (non-active) state */
   --theme-text-nav:         #707070;
-
-  /* Nav link text when active or hovered */
   --theme-text-nav-active:  #f0f0f0;
-
-  /* Placeholder text inside inputs */
   --theme-text-placeholder: #555555;
+  --theme-text-code:        #a78bfa;
+  --theme-text-link:        #818cf8;
 
-
-  /* ------------------------------------------------------------------ */
-  /* ACCENT / BRAND                                                       */
-  /* ------------------------------------------------------------------ */
-
-  /* Primary accent colour — buttons, links, active highlights */
+  /* --- Accent / brand --- */
   --theme-accent:           #6366f1;
-
-  /* Accent on hover */
   --theme-accent-hover:     #818cf8;
-
-  /* Text that sits on top of the accent background */
   --theme-accent-text:      #ffffff;
+  --theme-accent-subtle:    rgba(99, 102, 241, 0.12);
 
-
-  /* ------------------------------------------------------------------ */
-  /* STATUS COLOURS                                                       */
-  /* ------------------------------------------------------------------ */
-
-  /* Success / online / running */
+  /* --- Status colours --- */
   --theme-success:          #22c55e;
-
-  /* Warning / starting / pending */
+  --theme-success-bg:       rgba(34, 197, 94, 0.12);
   --theme-warning:          #f59e0b;
-
-  /* Danger / error / stopped / offline */
+  --theme-warning-bg:       rgba(245, 158, 11, 0.12);
   --theme-danger:           #ef4444;
-
-  /* Info / neutral status */
+  --theme-danger-bg:        rgba(239, 68, 68, 0.12);
   --theme-info:             #3b82f6;
+  --theme-info-bg:          rgba(59, 130, 246, 0.12);
 
-
-  /* ------------------------------------------------------------------ */
-  /* NAV CHROME                                                           */
-  /* Applies to: desktop sidebar, mobile top bar, mobile bottom nav       */
-  /* ------------------------------------------------------------------ */
-
-  /* Background of the sidebar and mobile nav bars */
+  /* --- Nav chrome --- */
   --theme-nav-bg:           #111111;
-
-  /* Border between nav chrome and page content */
   --theme-nav-border:       #2a2a2a;
-
-  /* Nav icon and link text at rest */
   --theme-nav-text:         #606060;
-
-  /* Nav icon and link text when active or focused */
   --theme-nav-text-active:  #f0f0f0;
-
-  /* Nav icon colour specifically (if you want icons a different shade) */
   --theme-nav-icon:         #555555;
+  --theme-nav-icon-active:  #818cf8;
 
+  /* --- Table --- */
+  --theme-table-header-bg:  #161616;
+  --theme-table-row-hover:  rgba(99, 102, 241, 0.05);
+  --theme-table-divide:     #222222;
 
-  /* ------------------------------------------------------------------ */
-  /* THEME TOGGLE SWITCH                                                  */
-  /* ------------------------------------------------------------------ */
+  /* --- Badges / pills --- */
+  --theme-badge-neutral-bg:   rgba(163, 163, 163, 0.10);
+  --theme-badge-neutral-text: #a3a3a3;
+  --theme-badge-blue-bg:      rgba(99, 102, 241, 0.14);
+  --theme-badge-blue-text:    #a5b4fc;
 
-  /* The track the dot slides along */
+  /* --- Buttons --- */
+  --theme-btn-secondary-bg:     #1e1e1e;
+  --theme-btn-secondary-border: #2a2a2a;
+  --theme-btn-secondary-text:   #a3a3a3;
+  --theme-btn-secondary-hover:  #282828;
+
+  /* --- Toggle / switch --- */
   --theme-toggle-track:     #333333;
-
-  /* The sliding dot itself */
   --theme-toggle-dot:       #a3a3a3;
 
-
-  /* ------------------------------------------------------------------ */
-  /* SEARCH                                                               */
-  /* ------------------------------------------------------------------ */
-
-  /* Search input background */
+  /* --- Search --- */
   --theme-search-bg:        #141414;
-
-  /* Search input border */
   --theme-search-border:    #2a2a2a;
-
-  /* Search input text */
   --theme-search-text:      #a3a3a3;
-
-  /* Search results dropdown background */
   --theme-search-results:   #1a1a1a;
 
-
-  /* ------------------------------------------------------------------ */
-  /* SCROLLBAR                                                            */
-  /* Hidden by default in the panel. These apply if a browser shows one. */
-  /* ------------------------------------------------------------------ */
-
+  /* --- Scrollbar --- */
   --theme-scrollbar-track:  #0f0f0f;
   --theme-scrollbar-thumb:  #2a2a2a;
 
-
-  /* ------------------------------------------------------------------ */
-  /* LOGO BACKGROUND                                                      */
-  /* The small box behind the panel logo image in the nav                 */
-  /* ------------------------------------------------------------------ */
-
+  /* --- Logo background --- */
   --theme-logo-bg:          transparent;
-}
 
+  /* --- Code / terminal --- */
+  --theme-code-bg:          #0a0a0a;
+  --theme-code-text:        #a78bfa;
+  --theme-code-border:      #222222;
 
-/* ------------------------------------------------------------------ */
-/* SELECTORS                                                            */
-/* You do not need to change these — they wire the variables above      */
-/* to the actual elements in the panel. Edit variables, not selectors.  */
-/* ------------------------------------------------------------------ */
+  /* --- Typography --- */
+  --theme-font-family:      'General Sans', ui-sans-serif, system-ui, sans-serif;
 
-html.dark body {
-  background-color: var(--theme-bg) !important;
-  color: var(--theme-text) !important;
-}
+  /* --- Border radius --- */
+  --theme-radius:           0.75rem;
+  --theme-radius-lg:        1rem;
+  --theme-radius-root:      0;
 
-html.dark .dark\:bg-\[#141414\],
-html.dark [class*="dark:bg-neutral-9"],
-html.dark [class*="dark:bg-neutral-8"] {
-  background-color: var(--theme-bg-secondary) !important;
-}
+  /* --- Shadows --- */
+  --theme-shadow:           0 6px 12px -10px rgb(0 0 0 / 0.32);
+  --theme-shadow-lg:        0 8px 18px -14px rgb(0 0 0 / 0.34);
+  --theme-shadow-xl:        0 18px 44px -28px rgb(0 0 0 / 0.45);
 
-html.dark [class*="dark:bg-neutral-7"] {
-  background-color: var(--theme-bg-card) !important;
-}
-
-html.dark [class*="dark:bg-neutral-7\/20"],
-html.dark [class*="dark:bg-neutral-7\/10"],
-html.dark [class*="dark:bg-white\/5"] {
-  background-color: var(--theme-bg-input) !important;
-}
-
-html.dark [class*="dark:border-"] {
-  border-color: var(--theme-border) !important;
-}
-
-html.dark .dark\:text-white {
-  color: var(--theme-text-strong) !important;
-}
-
-html.dark .dark\:text-neutral-400,
-html.dark .dark\:text-neutral-300,
-html.dark .dark\:text-neutral-200 {
-  color: var(--theme-text-muted) !important;
-}
-
-html.dark #pc-sidebar,
-html.dark #pc-sidebar2 {
-  background-color: var(--theme-nav-bg) !important;
-  border-color: var(--theme-nav-border) !important;
-}
-
-html.dark .nav-link {
-  color: var(--theme-nav-text) !important;
-}
-
-html.dark .nav-link.active,
-html.dark .nav-link:hover {
-  color: var(--theme-nav-text-active) !important;
-}
-
-html.dark #active-background {
-  background-color: var(--theme-bg-active-nav) !important;
-  border-color: var(--theme-border-subtle) !important;
-}
-
-html.dark .mobile-top-bar,
-html.dark .mobile-bottom-nav {
-  background-color: var(--theme-nav-bg) !important;
-  border-color: var(--theme-nav-border) !important;
-}
-
-html.dark .mobile-nav-link {
-  color: var(--theme-nav-text) !important;
-}
-
-html.dark .mobile-nav-link.active-mobile {
-  color: var(--theme-nav-text-active) !important;
-}
-
-html.dark .mobile-more-sheet {
-  background-color: var(--theme-bg-secondary) !important;
-  border-color: var(--theme-nav-border) !important;
-}
-
-html.dark #searchResults {
-  background-color: var(--theme-search-results) !important;
-  border-color: var(--theme-border) !important;
-}
-
-html.dark #theme-toggle {
-  background-color: var(--theme-toggle-track) !important;
-}
-
-html.dark .logo-bg {
-  background-color: var(--theme-logo-bg) !important;
+  /* --- Transitions --- */
+  --theme-transition:       150ms;
+  --theme-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
 }

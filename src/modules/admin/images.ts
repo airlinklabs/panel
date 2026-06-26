@@ -34,9 +34,9 @@ function normalizeImageData(raw: Record<string, unknown>) {
     author: String(raw.author ?? ''),
     authorName: String(raw.authorName ?? ''),
     startup: String(raw.startup ?? ''),
-    stop: String((raw as any).stop ?? ''),
-    startup_done: String((raw as any).startup_done ?? ''),
-    config_files: String((raw as any).config_files ?? ''),
+    stop: String(raw.stop ?? ''),
+    startup_done: String(raw.startup_done ?? ''),
+    config_files: String(raw.config_files ?? ''),
     meta: JSON.stringify(raw.meta ?? {}),
     dockerImages: JSON.stringify(dockerImagesArray),
     info: JSON.stringify(raw.info ?? {}),
@@ -49,7 +49,6 @@ function normalizeImageData(raw: Record<string, unknown>) {
 const adminModule: Module = {
   info: {
     name: 'Admin Module for Images',
-    description: 'This file is for admin functionality.',
     version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
@@ -282,10 +281,10 @@ const adminModule: Module = {
             author: image.author,
             startup: image.startup,
             config: {
-              files: (() => { try { return JSON.parse((image as any).config_files || '{}'); } catch { return {}; } })(),
-              startup: { done: (image as any).startup_done || '' },
+              files: (() => { try { return JSON.parse(image.config_files || '{}'); } catch { return {}; } })(),
+              startup: { done: image.startup_done || '' },
               logs: {},
-              stop: (image as any).stop || 'stop',
+              stop: image.stop || 'stop',
             },
             docker_images: dockerImagesRaw,
             variables: (() => { try { return JSON.parse(image.variables || '[]'); } catch { return []; } })(),
@@ -294,10 +293,11 @@ const adminModule: Module = {
                 try {
                   const s = JSON.parse(image.scripts || '{}');
                   return s.installation || null;
-                } catch { return null; }
+                } catch { return null;
+                }
               })(),
             },
-            portRequirements: (() => { try { return JSON.parse((image as any).portRequirements || '[]'); } catch { return []; } })(),
+            portRequirements: (() => { try { return JSON.parse(image.portRequirements || '[]'); } catch { return []; } })(),
           };
 
           const filename = `${(image.name || 'image').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;

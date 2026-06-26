@@ -11,7 +11,7 @@
         <div class="space-y-4 mt-4">
 
             <!-- Startup command -->
-            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 overflow-hidden">
                 <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5 flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command</p>
@@ -31,7 +31,7 @@
                     <%- include('../../components/csrf') %>
                     <div class="p-4">
                         <textarea id="startCommand" name="startCommand" rows="3"
-                            class="w-full rounded-xl text-sm px-3 py-2 font-mono bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 text-neutral-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400 <%= !isStartupEditAllowed ? 'opacity-60 cursor-not-allowed' : '' %>"
+                            class="w-full rounded-xl text-sm px-3 py-2 font-mono bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-white/5 text-neutral-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400 <%= !isStartupEditAllowed ? 'opacity-60 cursor-not-allowed' : '' %>"
                             <%= !isStartupEditAllowed ? 'readonly' : '' %>><%= server.startup || server.StartCommand || '' %></textarea>
                         <p class="text-xs text-neutral-500 mt-2">
                             <% if (!isStartupEditAllowed) { %>
@@ -48,7 +48,7 @@
             </div>
 
             <!-- Docker image -->
-            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 overflow-hidden">
                 <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5 flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-neutral-800 dark:text-white">Docker Image</p>
@@ -84,7 +84,7 @@
             </div>
 
             <!-- Server variables -->
-            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 overflow-hidden">
                 <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
                     <p class="text-sm font-medium text-neutral-800 dark:text-white">Server Variables</p>
                     <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.serverVariablesDesc || 'Configure environment variables for your server.' %></p>
@@ -94,7 +94,7 @@
                     <div class="p-4 space-y-4">
                         <% if (typeof serverVariables !== 'undefined' && serverVariables && serverVariables.length > 0) { %>
                             <% serverVariables.forEach(function(variable, index) { %>
-                            <div class="rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5 p-3">
+                            <div class="rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-white/5 p-3">
                                 <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-0.5"><%= variable.name %></label>
                                 <p class="text-[10px] text-neutral-500 mb-2">ENV: <span class="font-mono"><%= variable.env %></span> &middot; type: <%= variable.type %></p>
                                 <% if (variable.type === 'boolean') { %>
@@ -137,7 +137,7 @@
             <div class="p-6 space-y-6">
 
                 <!-- Startup command -->
-                <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+                <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 overflow-hidden">
                     <div class="px-5 py-4 border-b border-neutral-200 dark:border-white/5 flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command</p>
@@ -174,7 +174,7 @@
                 </div>
 
                 <!-- Docker image -->
-                <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+                <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 overflow-hidden">
                     <div class="px-5 py-4 border-b border-neutral-200 dark:border-white/5 flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-neutral-800 dark:text-white">Docker Image</p>
@@ -210,7 +210,7 @@
                 </div>
 
                 <!-- Server variables -->
-                <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+                <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 overflow-hidden">
                     <div class="px-5 py-4 border-b border-neutral-200 dark:border-white/5">
                         <p class="text-sm font-medium text-neutral-800 dark:text-white">Server Variables</p>
                         <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.serverVariablesDesc || 'Configure environment variables for your server.' %></p>
@@ -220,7 +220,7 @@
                         <div class="p-5 space-y-4">
                             <% if (typeof serverVariables !== 'undefined' && serverVariables && serverVariables.length > 0) { %>
                                 <% serverVariables.forEach(function(variable, index) { %>
-                                <div class="rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5 p-4">
+                                <div class="rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-white/5 p-4">
                                     <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-0.5"><%= variable.name %></label>
                                     <p class="text-[10px] text-neutral-500 mb-2">ENV: <span class="font-mono"><%= variable.env %></span> &middot; type: <%= variable.type %></p>
                                     <% if (variable.type === 'boolean') { %>

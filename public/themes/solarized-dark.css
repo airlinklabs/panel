@@ -19,6 +19,8 @@
  *   blue    #268bd2
  *   cyan    #2aa198
  *   green   #859900
+ *
+ * Selectors are in theme-base.css — only define variables here.
  */
 
 :root {
@@ -77,10 +79,10 @@
   --theme-table-divide:     #0f3a47;
 
   /* --- Badges / pills --- */
-  --theme-badge-neutral-bg: rgba(131, 148, 150, 0.10);
+  --theme-badge-neutral-bg:   rgba(131, 148, 150, 0.10);
   --theme-badge-neutral-text: #586e75;
-  --theme-badge-blue-bg:    rgba(38, 139, 210, 0.14);
-  --theme-badge-blue-text:  #5aafde;
+  --theme-badge-blue-bg:      rgba(38, 139, 210, 0.14);
+  --theme-badge-blue-text:    #5aafde;
 
   /* --- Buttons --- */
   --theme-btn-secondary-bg:     #0a3545;
@@ -109,263 +111,21 @@
   --theme-code-bg:          #021e28;
   --theme-code-text:        #2aa198;
   --theme-code-border:      #0f3a47;
-}
 
-/* ------------------------------------------------------------------ */
-/* Base                                                                  */
-/* ------------------------------------------------------------------ */
+  /* --- Typography --- */
+  --theme-font-family:      'General Sans', ui-sans-serif, system-ui, sans-serif;
 
-html.dark body {
-  background-color: var(--theme-bg) !important;
-  color: var(--theme-text) !important;
-}
+  /* --- Border radius --- */
+  --theme-radius:           0.75rem;
+  --theme-radius-lg:        1rem;
+  --theme-radius-root:      0;
 
-/* ------------------------------------------------------------------ */
-/* Backgrounds                                                           */
-/* ------------------------------------------------------------------ */
+  /* --- Shadows --- */
+  --theme-shadow:           0 6px 12px -10px rgb(0 0 0 / 0.32);
+  --theme-shadow-lg:        0 8px 18px -14px rgb(0 0 0 / 0.34);
+  --theme-shadow-xl:        0 18px 44px -28px rgb(0 0 0 / 0.45);
 
-html.dark .dark\:bg-\[#141414\],
-html.dark [class*="dark:bg-neutral-9"],
-html.dark [class*="dark:bg-neutral-8"] {
-  background-color: var(--theme-bg-secondary) !important;
-}
-
-html.dark [class*="dark:bg-neutral-7"] {
-  background-color: var(--theme-bg-card) !important;
-}
-
-html.dark [class*="dark:bg-neutral-7\/20"],
-html.dark [class*="dark:bg-neutral-7\/10"],
-html.dark [class*="dark:bg-white\/5"] {
-  background-color: var(--theme-bg-input) !important;
-}
-
-html.dark [class*="dark:hover:bg-white\/5"]:hover,
-html.dark [class*="dark:hover:bg-neutral"]:hover {
-  background-color: var(--theme-bg-hover) !important;
-}
-
-/* ------------------------------------------------------------------ */
-/* Borders                                                               */
-/* ------------------------------------------------------------------ */
-
-html.dark [class*="dark:border-"] {
-  border-color: var(--theme-border) !important;
-}
-
-/* ------------------------------------------------------------------ */
-/* Text                                                                  */
-/* ------------------------------------------------------------------ */
-
-html.dark .dark\:text-white {
-  color: var(--theme-text-strong) !important;
-}
-
-html.dark .dark\:text-neutral-400 {
-  color: var(--theme-text-muted) !important;
-}
-
-html.dark .dark\:text-neutral-300 {
-  color: var(--theme-text) !important;
-}
-
-html.dark .dark\:text-neutral-200 {
-  color: var(--theme-text-strong) !important;
-}
-
-/* Links */
-html.dark .dark\:text-blue-400,
-html.dark a[class*="dark:text-blue"] {
-  color: var(--theme-text-link) !important;
-}
-
-/* Code elements */
-html.dark code,
-html.dark pre,
-html.dark .font-mono {
-  background-color: var(--theme-code-bg) !important;
-  color: var(--theme-code-text) !important;
-  border-color: var(--theme-code-border) !important;
-}
-
-/* ------------------------------------------------------------------ */
-/* Nav chrome — sidebar                                                  */
-/* ------------------------------------------------------------------ */
-
-html.dark #pc-sidebar,
-html.dark #pc-sidebar2 {
-  background-color: var(--theme-nav-bg) !important;
-  border-color: var(--theme-nav-border) !important;
-}
-
-html.dark .nav-link {
-  color: var(--theme-nav-text) !important;
-}
-
-html.dark .nav-link.active,
-html.dark .nav-link:hover {
-  color: var(--theme-nav-text-active) !important;
-}
-
-html.dark #active-background {
-  background-color: var(--theme-bg-active-nav) !important;
-  border-color: var(--theme-border-accent) !important;
-}
-
-/* Nav icons */
-html.dark .nav-link svg {
-  color: var(--theme-nav-icon) !important;
-}
-
-html.dark .nav-link.active svg,
-html.dark .nav-link:hover svg {
-  color: var(--theme-nav-icon-active) !important;
-}
-
-/* ------------------------------------------------------------------ */
-/* Nav chrome — mobile                                                   */
-/* ------------------------------------------------------------------ */
-
-html.dark .mobile-top-bar,
-html.dark .mobile-bottom-nav {
-  background-color: var(--theme-nav-bg) !important;
-  border-color: var(--theme-nav-border) !important;
-}
-
-html.dark .mobile-nav-link {
-  color: var(--theme-nav-text) !important;
-}
-
-html.dark .mobile-nav-link.active-mobile {
-  color: var(--theme-nav-text-active) !important;
-}
-
-html.dark .mobile-more-sheet {
-  background-color: var(--theme-bg-secondary) !important;
-  border-color: var(--theme-nav-border) !important;
-}
-
-/* ------------------------------------------------------------------ */
-/* Tables                                                                */
-/* ------------------------------------------------------------------ */
-
-html.dark thead,
-html.dark [class*="dark:bg-neutral-8\/50"] {
-  background-color: var(--theme-table-header-bg) !important;
-}
-
-html.dark tbody tr:hover {
-  background-color: var(--theme-table-row-hover) !important;
-}
-
-html.dark [class*="dark:divide-white\/10"],
-html.dark [class*="dark:divide-white\/5"] {
-  border-color: var(--theme-table-divide) !important;
-}
-
-/* ------------------------------------------------------------------ */
-/* Buttons                                                               */
-/* ------------------------------------------------------------------ */
-
-html.dark [class*="dark:bg-blue"],
-html.dark [class*="dark:bg-indigo"] {
-  background-color: var(--theme-accent) !important;
-}
-
-html.dark .dark\:bg-neutral-800 {
-  background-color: var(--theme-btn-secondary-bg) !important;
-}
-
-html.dark .dark\:hover\:bg-neutral-700:hover {
-  background-color: var(--theme-btn-secondary-hover) !important;
-}
-
-/* ------------------------------------------------------------------ */
-/* Badges / status pills                                                 */
-/* ------------------------------------------------------------------ */
-
-html.dark [class*="bg-neutral-400\/10"],
-html.dark [class*="dark:text-neutral-300\/70"] {
-  background-color: var(--theme-badge-neutral-bg) !important;
-  color: var(--theme-badge-neutral-text) !important;
-}
-
-/* Success badges */
-html.dark [class*="bg-emerald-600\/10"] {
-  background-color: var(--theme-success-bg) !important;
-}
-
-html.dark [class*="dark:text-emerald-400"] {
-  color: var(--theme-success) !important;
-}
-
-/* Warning badges */
-html.dark [class*="bg-yellow-600\/10"] {
-  background-color: var(--theme-warning-bg) !important;
-}
-
-html.dark [class*="dark:text-yellow-400"] {
-  color: var(--theme-warning) !important;
-}
-
-/* Danger */
-html.dark [class*="text-red-"],
-html.dark [class*="dark:text-red-"] {
-  color: var(--theme-danger) !important;
-}
-
-/* ------------------------------------------------------------------ */
-/* Search                                                                */
-/* ------------------------------------------------------------------ */
-
-html.dark #searchResults {
-  background-color: var(--theme-search-results) !important;
-  border-color: var(--theme-border) !important;
-}
-
-/* ------------------------------------------------------------------ */
-/* Toggle / theme switch                                                  */
-/* ------------------------------------------------------------------ */
-
-html.dark #theme-toggle {
-  background-color: var(--theme-toggle-track) !important;
-}
-
-/* ------------------------------------------------------------------ */
-/* Logo                                                                  */
-/* ------------------------------------------------------------------ */
-
-html.dark .logo-bg {
-  background-color: var(--theme-logo-bg) !important;
-}
-
-/* ------------------------------------------------------------------ */
-/* Modals / sheets                                                       */
-/* ------------------------------------------------------------------ */
-
-html.dark [class*="dark:bg-neutral-8"][class*="rounded"] {
-  background-color: var(--theme-bg-card) !important;
-  border-color: var(--theme-border) !important;
-}
-
-/* ------------------------------------------------------------------ */
-/* Addon cards (a-card class from addons page)                           */
-/* ------------------------------------------------------------------ */
-
-html.dark .a-card {
-  background: rgba(7, 54, 66, 0.6) !important;
-  border-color: var(--theme-border) !important;
-}
-
-html.dark .a-card:hover {
-  border-color: var(--theme-border-accent) !important;
-}
-
-html.dark .a-icon {
-  background: rgba(38, 139, 210, 0.08) !important;
-  border-color: rgba(38, 139, 210, 0.15) !important;
-}
-
-html.dark .a-icon svg {
-  color: #3d7a9e !important;
+  /* --- Transitions --- */
+  --theme-transition:       150ms;
+  --theme-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
 }

@@ -66,8 +66,8 @@ export async function checkForServerInstallation(
     });
 
     return { installed: isInstalled, state, failed: state === 'failed' };
-  } catch (error: any) {
-    if (error.response?.status === 404) {
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
       return { installed: false, state: 'not_found' };
     }
     return { installed: false, error: 'Could not reach daemon.' };

@@ -19,8 +19,9 @@ function createConfigStore(addonSlug: string): AddonConfigStore {
           where: { addonSlug_key: { addonSlug, key } },
         });
         return row?.value ?? null;
-      } catch (err: any) {
-        logger.error(`Addon config get failed for "${addonSlug}":`, err.message);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        logger.error(`Addon config get failed for "${addonSlug}":`, msg);
         return null;
       }
     },
@@ -32,8 +33,9 @@ function createConfigStore(addonSlug: string): AddonConfigStore {
           create: { addonSlug, key, value },
           update: { value },
         });
-      } catch (err: any) {
-        logger.error(`Addon config set failed for "${addonSlug}":`, err.message);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        logger.error(`Addon config set failed for "${addonSlug}":`, msg);
       }
     },
 
@@ -56,8 +58,9 @@ function createConfigStore(addonSlug: string): AddonConfigStore {
         await prisma.addonSetting.deleteMany({
           where: { addonSlug, key },
         });
-      } catch (err: any) {
-        logger.error(`Addon config delete failed for "${addonSlug}":`, err.message);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        logger.error(`Addon config delete failed for "${addonSlug}":`, msg);
       }
     },
 
@@ -66,8 +69,9 @@ function createConfigStore(addonSlug: string): AddonConfigStore {
         await prisma.addonSetting.deleteMany({
           where: { addonSlug },
         });
-      } catch (err: any) {
-        logger.error(`Addon config deleteAll failed for "${addonSlug}":`, err.message);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        logger.error(`Addon config deleteAll failed for "${addonSlug}":`, msg);
       }
     },
 
@@ -81,8 +85,9 @@ function createConfigStore(addonSlug: string): AddonConfigStore {
           result[row.key] = row.value;
         }
         return result;
-      } catch (err: any) {
-        logger.error(`Addon config getAll failed for "${addonSlug}":`, err.message);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        logger.error(`Addon config getAll failed for "${addonSlug}":`, msg);
         return {};
       }
     },

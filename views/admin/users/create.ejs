@@ -10,16 +10,16 @@
       <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminCreateUserText || 'Every great panel needs people. Let\'s add one.' %></p>
     </div>
 
-    <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4 space-y-4">
+    <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4 space-y-4">
 
       <div>
         <label for="userEmail" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.email %>:</label>
-        <input id="userEmail" type="email" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition" placeholder="example@domain.com">
+        <input id="userEmail" type="email" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition" placeholder="example@domain.com">
       </div>
 
       <div>
         <label for="userUsername" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.username %>:</label>
-        <input id="userUsername" type="text" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition" placeholder="username">
+        <input id="userUsername" type="text" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition" placeholder="username">
         <div class="mt-2 space-y-1">
           <p id="crit-username-length" class="text-xs text-neutral-400"><span class="crit-icon">—</span> 3–20 characters</p>
           <p id="crit-username-chars" class="text-xs text-neutral-400"><span class="crit-icon">—</span> Letters and numbers only</p>
@@ -28,7 +28,7 @@
 
       <div>
         <label for="userPassword" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5"><%= req.translations.password %>:</label>
-        <input id="userPassword" type="password" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-700/20 border border-neutral-200 dark:border-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition" placeholder="********">
+        <input id="userPassword" type="password" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition" placeholder="********">
         <div class="mt-2 space-y-1">
           <p id="crit-length" class="text-xs text-neutral-400"><span class="crit-icon">—</span> At least 8 characters</p>
           <p id="crit-letter" class="text-xs text-neutral-400"><span class="crit-icon">—</span> At least one letter</p>
@@ -173,7 +173,7 @@
       </div>
 
       <div id="userForm" class="mt-6 px-8 w-full">
-        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
             <div>

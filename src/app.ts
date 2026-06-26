@@ -24,7 +24,7 @@ import PrismaSessionStore from './services/session';
 import { settingsLoader } from './config/settings';
 import { loadAddons, setAppInstance } from './addons/handler';
 import {
-  initializeDefaultUIComponents,
+  setupUIComponents,
   uiComponentStore,
 } from './core/uiComponents';
 import { installDaemonRequestInterceptor } from './services/daemonRequest';
@@ -108,9 +108,11 @@ app.set('view engine', 'ejs');
 
 import ejs from 'ejs';
 
-const originalRenderFile = (ejs as any).renderFile
-  ? (ejs as any).renderFile.bind(ejs)
-  : (ejs as any).__express?.bind(ejs);
+const ejsModule = ejs as unknown as {
+  renderFile?: typeof ejs.renderFile;
+  __express?: typeof ejs.renderFile;
+};
+const originalRenderFile = (ejsModule.renderFile || ejsModule.__express)?.bind(ejs);
 
 const addonViewsDir = path.join(__dirname, '../../storage/addons');
 
@@ -122,12 +124,14 @@ function getAddonDirs(): string[] {
     .map((d) => d.name);
 }
 
-(ejs as any).renderFile = function (
+(ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile = function (
   file: string,
-  data: any,
-  options: any,
-  callback: any,
+  data: Record<string, unknown>,
+  optionsOrCallback: Record<string, unknown> | ((err: Error | null, html?: string) => void),
+  maybeCallback?: (err: Error | null, html?: string) => void,
 ) {
+  const callback = typeof optionsOrCallback === 'function' ? optionsOrCallback : maybeCallback;
+  const options = typeof optionsOrCallback === 'function' ? {} : optionsOrCallback;
   try {
     if (fs.existsSync(file)) {
       return originalRenderFile(file, data, options, callback);
@@ -136,7 +140,7 @@ function getAddonDirs(): string[] {
     const viewName = path.basename(file);
 
     if (data?.addonSlug) {
-      const addonViewPath = path.join(addonViewsDir, data.addonSlug, 'views', viewName);
+      const addonViewPath = path.join(addonViewsDir, String(data.addonSlug), 'views', viewName);
       if (fs.existsSync(addonViewPath)) {
         return originalRenderFile(addonViewPath, data, options, callback);
       }
@@ -413,24 +417,27 @@ app.use((req, res, next) => {
   addCsrfTokenToLocals(req, res, next);
 });
 
-// Handle CSRF errors
 app.use(handleCsrfError);
 
 // Flash toast support — req.flashToast('msg', 'type') before res.redirect()
 app.use(flashToastMiddleware);
 
-interface SidebarItem {
-  id: string;
-  label: string;
-  link: string;
-}
-
 interface GlobalWithCustomProperties extends NodeJS.Global {
-  uiComponentStore: typeof import('./core/uiComponents').uiComponentStore;
+  uiComponentStore: {
+    getSidebarItems: (section?: string, isAdmin?: boolean) => Array<{
+      id: string;
+      label: string;
+      icon: string;
+      url: string;
+      priority: number;
+      isAddon?: boolean;
+      matchPrefix?: string;
+    }>;
+  };
   appName: string;
   airlinkVersion: string;
-  adminMenuItems: SidebarItem[];
-  regularMenuItems: SidebarItem[];
+  adminMenuItems: Array<{ id: string; label: string; icon: string; url: string }>;
+  regularMenuItems: Array<{ id: string; label: string; icon: string; url: string }>;
 }
 
 declare const global: GlobalWithCustomProperties;
@@ -449,7 +456,7 @@ app.use((_req, res, next) => {
     false,
   );
 
-  const viewportCookie = (_req as any).cookies?.viewport_mode;
+  const viewportCookie = (_req.cookies as Record<string, string> | undefined)?.viewport_mode;
   const isMobileViewport = viewportCookie === 'mobile';
   res.locals.isMobileViewport = isMobileViewport;
 
@@ -466,7 +473,7 @@ app.use((_req, res, next) => {
 
     if (isAbsolutePath || isAddonView) {
       const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-      (ejs as any).renderFile(view, data, {}, (err: Error | null, html: string) => {
+      (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(view, data, {}, (err: Error | null, html: string) => {
         if (err) {
           if (typeof callback === 'function') return callback(err);
           return res.status(500).send('View render error: ' + err.message);
@@ -494,12 +501,13 @@ app.use((_req, res, next) => {
 
     // Addon view fallback (unchanged)
     if (!fs.existsSync(path.join(viewsPath, resolvedView + '.ejs'))) {
-      if ((opts as any).addonSlug) {
-        const addonSlug = (opts as any).addonSlug as string;
+      const optsRecord = opts as Record<string, unknown>;
+      if (optsRecord.addonSlug) {
+        const addonSlug = optsRecord.addonSlug as string;
         const addonFallbackPath = path.join(addonViewsDir, addonSlug, 'views', view + '.ejs');
         if (fs.existsSync(addonFallbackPath)) {
           const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-          (ejs as any).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
+          (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
             if (err) {
               if (typeof callback === 'function') return callback(err);
               return res.status(500).send('View render error: ' + err.message);
@@ -512,11 +520,11 @@ app.use((_req, res, next) => {
       }
 
       for (const addonDir of getAddonDirs()) {
-        if ((opts as any).addonSlug && addonDir === (opts as any).addonSlug) continue;
+        if (optsRecord.addonSlug && addonDir === optsRecord.addonSlug) continue;
         const addonFallbackPath = path.join(addonViewsDir, addonDir, 'views', view + '.ejs');
         if (fs.existsSync(addonFallbackPath)) {
           const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-          (ejs as any).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
+          (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
             if (err) {
               if (typeof callback === 'function') return callback(err);
               return res.status(500).send('View render error: ' + err.message);
@@ -545,8 +553,7 @@ app.use(errorPageHandler);
     await settingsLoader();
     // Install HMAC signing interceptor for all panel→daemon requests
     installDaemonRequestInterceptor();
-    // Initialize default UI components
-    initializeDefaultUIComponents();
+    setupUIComponents();
     await loadModules(app, airlinkVersion, Number(port), expressWsInstance);
     setAppInstance(app);
     await loadAddons(app);

@@ -11,7 +11,7 @@
       <p class="mt-1 text-sm text-neutral-500"><%= req.translations.adminEditNodeText %></p>
     </div>
 
-    <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+    <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
       <form>
 
         <div class="space-y-4">
@@ -59,7 +59,7 @@
           <div class="flex flex-col gap-1">
             <label for="nodeKey" class="text-sm font-medium text-neutral-700 dark:text-neutral-400"><%= req.translations.daemonKey %>:</label>
             <input id="nodeKey" value="<%= node.key %>" type="text" disabled
-              class="w-full rounded-xl border border-neutral-800/10 dark:border-white/5 bg-neutral-300/10 dark:bg-neutral-700/20 px-4 py-2.5 text-sm text-neutral-500 dark:text-neutral-500 opacity-60 cursor-not-allowed">
+              class="w-full rounded-xl border border-neutral-800/10 dark:border-white/5 bg-neutral-300/10 dark:bg-neutral-700 px-4 py-2.5 text-sm text-neutral-500 dark:text-neutral-500 opacity-60 cursor-not-allowed">
           </div>
 
           <div class="flex flex-col gap-2">
@@ -114,7 +114,7 @@
     const tag = document.createElement('div');
     tag.dataset.port = port;
     tag.className = `flex items-center justify-between rounded-lg px-3 py-2 text-sm ${
-      isUsed ? 'bg-amber-600/10' : 'bg-neutral-800/10 dark:bg-neutral-700/20'
+      isUsed ? 'bg-amber-600/10' : 'bg-neutral-800/10 dark:bg-neutral-700'
     }`;
     tag.style.opacity = '0';
     tag.style.transform = 'translateY(4px)';
@@ -277,7 +277,7 @@
       </div>
 
       <div id="nodeForm" class="mt-6 px-8 w-full">
-        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <form>
             <div class="grid grid-cols-2 gap-4">
               <div>

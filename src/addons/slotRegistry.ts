@@ -93,8 +93,9 @@ class SlotRegistry {
       try {
         const html = await contrib.render(locals);
         if (html) parts.push(html);
-      } catch (err: any) {
-        logger.error(`Error rendering slot "${slotId}" for addon "${contrib.addonSlug}":`, err.message);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        logger.error(`Error rendering slot "${slotId}" for addon "${contrib.addonSlug}":`, msg);
       }
     }
     return parts.join('\n');
@@ -111,8 +112,9 @@ class SlotRegistry {
         if (typeof result === 'string') {
           parts.push(result);
         }
-      } catch (err: any) {
-        logger.error(`Error rendering slot "${slotId}" for addon "${contrib.addonSlug}":`, err.message);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        logger.error(`Error rendering slot "${slotId}" for addon "${contrib.addonSlug}":`, msg);
       }
     }
     return parts.join('\n');

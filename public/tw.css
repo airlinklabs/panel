@@ -133,3 +133,32 @@ button:active:not(:disabled), .al-btn:active:not(:disabled) {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.4; }
 }
+
+/* ── Opaque dropdown backgrounds ────────────────────────────────────────── */
+/* Ensures all dropdowns, popovers, context menus, and select menus always   */
+/* have solid opaque backgrounds regardless of theme overrides.              */
+[data-popover],
+.filter-menu,
+.al-file-menu,
+.server-ctx-menu,
+.al-dropdown,
+.cs-dropdown,
+#searchResults,
+#mobileSearchResults,
+[role="menu"],
+[role="listbox"] {
+  background-color: #fff !important;
+}
+html.dark [data-popover],
+html.dark .filter-menu,
+html.dark .al-file-menu,
+html.dark .server-ctx-menu,
+html.dark .al-dropdown,
+html.dark .cs-dropdown,
+html.dark #searchResults,
+html.dark #mobileSearchResults,
+html.dark [role="menu"],
+html.dark [role="listbox"] {
+  background-color: var(--theme-bg-card, #1a1a1a) !important;
+  border-color: var(--theme-border, rgba(255,255,255,0.08)) !important;
+}

@@ -145,10 +145,11 @@ export function parseAddonManifest(filePath: string, addonSlug?: string): ParseM
     }
 
     return { success: true, manifest, filePath };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Unknown error';
     return {
       success: false,
-      error: `Failed to parse manifest: ${error.message}`,
+      error: `Failed to parse manifest: ${msg}`,
       filePath,
     };
   }

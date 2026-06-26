@@ -181,12 +181,13 @@ const radarModule: Module = {
               : null,
             vtLink: `https://www.virustotal.com/gui/file/${hash}`,
           });
-        } catch (err: any) {
-          if (err?.response?.status === 404) {
+        } catch (err: unknown) {
+          if (axios.isAxiosError(err) && err.response?.status === 404) {
             res.json({ success: true, found: false });
           } else {
-            logger.error('VirusTotal API error:', err?.message);
-            res.status(502).json({ success: false, error: 'VirusTotal request failed', message: err?.message });
+            const msg = err instanceof Error ? err.message : 'Unknown error';
+            logger.error('VirusTotal API error:', msg);
+            res.status(502).json({ success: false, error: 'VirusTotal request failed', message: msg });
           }
         }
       }
@@ -257,7 +258,7 @@ const radarModule: Module = {
               if (p.severity) patternMap[key] = p.severity;
             }
 
-            scanData.results = scanData.results.map((result: any) => {
+            scanData.results = scanData.results.map((result: { pattern?: { description?: string }; matches?: unknown[]; severity?: string }) => {
               const key = (result.pattern?.description || '').toLowerCase();
               return {
                 ...result,
@@ -386,7 +387,7 @@ const radarModule: Module = {
 
           // Poll VT up to 8 times, 20s apart (max ~2.7 min wait).
           // VT typically finishes in 30–90s for small zips on free tier.
-          let analysisData: any = null;
+          let analysisData: Record<string, unknown> | null = null;
           for (let attempt = 0; attempt < 8; attempt++) {
             await new Promise(r => setTimeout(r, 20000));
 
@@ -412,16 +413,20 @@ const radarModule: Module = {
 
           // The correct GUI URL needs the file's SHA256, not the analysis ID.
           // VT returns it in the analysis response under meta.file_info.sha256.
-          const sha256 = analysisData.meta?.file_info?.sha256 as string | undefined;
+          const meta = analysisData.meta as Record<string, unknown> | undefined;
+          const fileInfo = meta?.file_info as Record<string, unknown> | undefined;
+          const sha256 = fileInfo?.sha256 as string | undefined;
           const vtLink = sha256
             ? `https://www.virustotal.com/gui/file/${sha256}`
             : 'https://www.virustotal.com/gui/home/upload';
 
-          const results = analysisData.data?.attributes?.results || {};
-          const stats = analysisData.data?.attributes?.stats || {};
+          const analysisPayload = analysisData.data as Record<string, Record<string, unknown>> | undefined;
+          const attributes = analysisPayload?.attributes as Record<string, unknown> | undefined;
+          const results = (attributes?.results ?? {}) as Record<string, { category?: string; result?: string }>;
+          const stats = (attributes?.stats ?? {}) as Record<string, number>;
           const maliciousEngines = Object.entries(results)
-            .filter(([, v]: [string, any]) => v.category === 'malicious' || v.category === 'suspicious')
-            .map(([engine, v]: [string, any]) => ({ engine, result: v.result }));
+            .filter(([, v]) => v.category === 'malicious' || v.category === 'suspicious')
+            .map(([engine, v]) => ({ engine, result: v.result }));
 
           res.json({
             success: true,
@@ -432,9 +437,10 @@ const radarModule: Module = {
             totalEngines: Object.keys(results).length,
             vtLink,
           });
-        } catch (err: any) {
-          logger.error('VT file scan error:', err?.message);
-          res.status(502).json({ success: false, error: err?.message || 'VT file scan failed' });
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : 'Unknown error';
+          logger.error('VT file scan error:', msg);
+          res.status(502).json({ success: false, error: msg || 'VT file scan failed' });
         } finally {
           fs.unlink(tmpPath).catch(() => {});
         }

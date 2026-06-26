@@ -27,7 +27,6 @@ class Queueer {
     } catch (error) {
       logger.error('Error processing queue task:', error);
     } finally {
-      // Process next task
       this.processQueue();
     }
   }

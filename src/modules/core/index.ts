@@ -4,11 +4,11 @@ import logger from '../../services/logger';
 import os from 'os';
 import prisma from '../../db';
 import { checkNodeStatus } from '../../services/nodeStatus';
+import type { Prisma } from '../../generated/prisma/client';
 
 const coreModule: Module = {
   info: {
     name: 'Core Module',
-    description: 'This file is for all core functionality.',
     version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
@@ -123,7 +123,7 @@ const coreModule: Module = {
           : { ownerId: userId, OR: [{ name: { contains: q } }, { UUID: { contains: q } }] };
 
         const servers = await prisma.server.findMany({
-          where: serverWhere as any,
+          where: serverWhere as Prisma.ServerWhereInput,
           select: { UUID: true, name: true, description: true },
           take: 8,
         });

@@ -1,0 +1,397 @@
+/*
+ * AirLink Panel — Theme Base Selectors
+ *
+ * This file maps CSS custom properties (--theme-*) to actual elements.
+ * It is loaded automatically for ALL themes (built-in and user-uploaded).
+ *
+ * Theme authors only need to define variables in :root. Do NOT copy
+ * these selectors into your theme files — they are applied for you.
+ *
+ * See THEME.md for the full variable reference.
+ */
+
+/* ================================================================== */
+/* Base                                                                */
+/* ================================================================== */
+
+body {
+  background-color: var(--theme-bg) !important;
+  color: var(--theme-text) !important;
+  font-family: var(--theme-font-family, 'General Sans', ui-sans-serif, system-ui, sans-serif) !important;
+  border-radius: var(--theme-radius-root, 0) !important;
+}
+
+/* ================================================================== */
+/* Backgrounds                                                         */
+/* ================================================================== */
+
+/* Light mode selectors */
+.bg-white,
+[class*="bg-neutral-50"],
+[class*="bg-neutral-100"] {
+  background-color: var(--theme-bg-secondary) !important;
+}
+
+[class*="bg-neutral-200"] {
+  background-color: var(--theme-bg-card) !important;
+}
+
+[class*="bg-neutral-400\/10"] {
+  background-color: var(--theme-bg-input) !important;
+}
+
+[class*="hover:bg-neutral"]:hover {
+  background-color: var(--theme-bg-hover) !important;
+}
+
+/* Dark mode selectors */
+html.dark .dark\:bg-\[#141414\],
+html.dark [class*="dark:bg-neutral-9"],
+html.dark [class*="dark:bg-neutral-8"] {
+  background-color: var(--theme-bg-secondary) !important;
+}
+
+html.dark [class*="dark:bg-neutral-7"] {
+  background-color: var(--theme-bg-card) !important;
+}
+
+html.dark [class*="dark:bg-neutral-7\/20"],
+html.dark [class*="dark:bg-neutral-7\/10"],
+html.dark [class*="dark:bg-white\/5"] {
+  background-color: var(--theme-bg-input) !important;
+}
+
+html.dark [class*="dark:hover:bg-white\/5"]:hover,
+html.dark [class*="dark:hover:bg-neutral"]:hover {
+  background-color: var(--theme-bg-hover) !important;
+}
+
+/* ================================================================== */
+/* Borders                                                             */
+/* ================================================================== */
+
+/* Light mode */
+[class*="border-neutral"],
+.border {
+  border-color: var(--theme-border) !important;
+}
+
+/* Dark mode */
+html.dark [class*="dark:border-"] {
+  border-color: var(--theme-border) !important;
+}
+
+/* Input borders */
+input, textarea, select {
+  border-color: var(--theme-border-input) !important;
+}
+
+/* ================================================================== */
+/* Text                                                                */
+/* ================================================================== */
+
+/* Light mode */
+.text-neutral-800,
+.text-neutral-900 {
+  color: var(--theme-text-strong) !important;
+}
+
+.text-neutral-700,
+.text-neutral-600 {
+  color: var(--theme-text) !important;
+}
+
+.text-neutral-500 {
+  color: var(--theme-text-muted) !important;
+}
+
+a[class*="text-blue"] {
+  color: var(--theme-text-link) !important;
+}
+
+/* Dark mode */
+html.dark .dark\:text-white {
+  color: var(--theme-text-strong) !important;
+}
+
+html.dark .dark\:text-neutral-400,
+html.dark .dark\:text-neutral-300,
+html.dark .dark\:text-neutral-200 {
+  color: var(--theme-text-muted) !important;
+}
+
+html.dark .dark\:text-blue-400,
+html.dark a[class*="dark:text-blue"] {
+  color: var(--theme-text-link) !important;
+}
+
+/* Code elements */
+code, pre, .font-mono {
+  background-color: var(--theme-code-bg) !important;
+  color: var(--theme-code-text) !important;
+  border-color: var(--theme-code-border) !important;
+}
+
+/* ================================================================== */
+/* Nav chrome — sidebar                                                */
+/* ================================================================== */
+
+#pc-sidebar,
+#pc-sidebar2 {
+  background-color: var(--theme-nav-bg) !important;
+  border-color: var(--theme-nav-border) !important;
+}
+
+.nav-link {
+  color: var(--theme-nav-text) !important;
+}
+
+.nav-link.active,
+.nav-link:hover {
+  color: var(--theme-nav-text-active) !important;
+}
+
+#active-background {
+  background-color: var(--theme-bg-active-nav) !important;
+  border-color: var(--theme-border-accent) !important;
+}
+
+.nav-link svg {
+  color: var(--theme-nav-icon) !important;
+}
+
+.nav-link.active svg,
+.nav-link:hover svg {
+  color: var(--theme-nav-icon-active) !important;
+}
+
+/* ================================================================== */
+/* Nav chrome — mobile                                                 */
+/* ================================================================== */
+
+.mobile-top-bar,
+.mobile-bottom-nav {
+  background-color: var(--theme-nav-bg) !important;
+  border-color: var(--theme-nav-border) !important;
+}
+
+.mobile-nav-link {
+  color: var(--theme-nav-text) !important;
+}
+
+.mobile-nav-link.active-mobile {
+  color: var(--theme-nav-text-active) !important;
+}
+
+.mobile-more-sheet {
+  background-color: var(--theme-bg-secondary) !important;
+  border-color: var(--theme-nav-border) !important;
+}
+
+/* ================================================================== */
+/* Tables                                                              */
+/* ================================================================== */
+
+thead,
+[class*="bg-neutral-50"] thead,
+html.dark [class*="dark:bg-neutral-8\/50"] {
+  background-color: var(--theme-table-header-bg) !important;
+}
+
+tbody tr:hover {
+  background-color: var(--theme-table-row-hover) !important;
+}
+
+[class*="divide-neutral-200"],
+[class*="divide-neutral-100"],
+html.dark [class*="dark:divide-white\/10"],
+html.dark [class*="dark:divide-white\/5"] {
+  border-color: var(--theme-table-divide) !important;
+}
+
+/* ================================================================== */
+/* Badges / status pills                                               */
+/* ================================================================== */
+
+/* Neutral badges */
+[class*="bg-neutral-400\/10"] {
+  background-color: var(--theme-badge-neutral-bg) !important;
+  color: var(--theme-badge-neutral-text) !important;
+}
+
+/* Blue badges */
+[class*="bg-blue-600\/10"],
+[class*="bg-indigo-"] {
+  background-color: var(--theme-badge-blue-bg) !important;
+  color: var(--theme-badge-blue-text) !important;
+}
+
+/* Success badges */
+[class*="bg-emerald-600\/10"] {
+  background-color: var(--theme-success-bg) !important;
+}
+
+.text-emerald-600,
+[class*="dark:text-emerald-400"] {
+  color: var(--theme-success) !important;
+}
+
+/* Warning badges */
+[class*="bg-yellow-600\/10"] {
+  background-color: var(--theme-warning-bg) !important;
+}
+
+.text-yellow-600,
+[class*="dark:text-yellow-400"] {
+  color: var(--theme-warning) !important;
+}
+
+/* Danger badges */
+.text-red-500,
+.text-red-600,
+[class*="text-red-"],
+[class*="dark:text-red-"] {
+  color: var(--theme-danger) !important;
+}
+
+/* Info badges */
+[class*="bg-blue-600\/10"] {
+  background-color: var(--theme-info-bg) !important;
+}
+
+/* ================================================================== */
+/* Buttons                                                             */
+/* ================================================================== */
+
+/* Accent / primary buttons */
+[class*="bg-blue"],
+[class*="bg-indigo"] {
+  background-color: var(--theme-accent) !important;
+  color: var(--theme-accent-text) !important;
+}
+
+[class*="hover:bg-blue"]:hover,
+[class*="hover:bg-indigo"]:hover {
+  background-color: var(--theme-accent-hover) !important;
+}
+
+/* Secondary buttons */
+.bg-white[class*="border"],
+button.bg-white {
+  background-color: var(--theme-btn-secondary-bg) !important;
+  border-color: var(--theme-btn-secondary-border) !important;
+  color: var(--theme-btn-secondary-text) !important;
+}
+
+button.bg-white:hover,
+.hover\:bg-neutral-200:hover,
+.hover\:bg-neutral-300:hover {
+  background-color: var(--theme-btn-secondary-hover) !important;
+}
+
+/* ================================================================== */
+/* Toggle / switch                                                     */
+/* ================================================================== */
+
+#theme-toggle {
+  background-color: var(--theme-toggle-track) !important;
+}
+
+/* ================================================================== */
+/* Search                                                              */
+/* ================================================================== */
+
+#searchResults {
+  background-color: var(--theme-search-results) !important;
+  border-color: var(--theme-border) !important;
+}
+
+/* ================================================================== */
+/* Logo                                                                */
+/* ================================================================== */
+
+.logo-bg {
+  background-color: var(--theme-logo-bg) !important;
+}
+
+/* ================================================================== */
+/* Addon cards                                                         */
+/* ================================================================== */
+
+.a-card {
+  border-color: var(--theme-border) !important;
+}
+
+.a-card:hover {
+  border-color: var(--theme-border-accent) !important;
+}
+
+/* ================================================================== */
+/* Modals / sheets                                                     */
+/* ================================================================== */
+
+[class*="rounded"][class*="bg-neutral"],
+[class*="rounded"][class*="dark:bg-neutral"] {
+  background-color: var(--theme-bg-card) !important;
+  border-color: var(--theme-border) !important;
+}
+
+/* ================================================================== */
+/* Radius overrides                                                    */
+/* ================================================================== */
+
+[class*="rounded-xl"] {
+  border-radius: var(--theme-radius, 0.75rem) !important;
+}
+
+[class*="rounded-2xl"] {
+  border-radius: var(--theme-radius-lg, 1rem) !important;
+}
+
+/* ================================================================== */
+/* Shadows                                                             */
+/* ================================================================== */
+
+.shadow-md {
+  box-shadow: var(--theme-shadow, 0 6px 12px -10px rgb(0 0 0 / 0.32)) !important;
+}
+
+.shadow-lg {
+  box-shadow: var(--theme-shadow-lg, 0 8px 18px -14px rgb(0 0 0 / 0.34)) !important;
+}
+
+.shadow-2xl {
+  box-shadow: var(--theme-shadow-xl, 0 18px 44px -28px rgb(0 0 0 / 0.45)) !important;
+}
+
+/* ================================================================== */
+/* Transitions                                                         */
+/* ================================================================== */
+
+* {
+  transition-duration: var(--theme-transition, 150ms) !important;
+  transition-timing-function: var(--theme-transition-easing, cubic-bezier(0.4, 0, 0.2, 1)) !important;
+}
+
+/* ================================================================== */
+/* Reduced motion                                                      */
+/* ================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ================================================================== */
+/* Scrollbar                                                           */
+/* ================================================================== */
+
+::-webkit-scrollbar-track {
+  background: var(--theme-scrollbar-track) !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--theme-scrollbar-thumb) !important;
+}

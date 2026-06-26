@@ -6,7 +6,7 @@
     <section class="px-4 py-5">
         <%- include('../../components/serverHeader', { server: server, req: req }) %>
         <div class="mt-4">
-            <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-3 mb-3">
+            <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-3 mb-3">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2 min-w-0">
                         <a href="/server/<%= server.shortID %>/files" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition shrink-0">
@@ -20,7 +20,7 @@
                     </div>
                 </div>
             </div>
-            <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-3">
+            <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-3">
                 <div id="editor" style="min-height: 300px;"><%= file.content %></div>
             </div>
         </div>
@@ -36,7 +36,7 @@
                 <%- include('../../components/serverHeader', { server: server, req: req }) %>
             </div>
             <div class="p-6">
-                <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4 mb-4">
+                <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4 mb-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3 min-w-0">
                             <a href="/server/<%= server.shortID %>/files" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition shrink-0">
@@ -50,7 +50,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+                <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
                     <div id="editor" style="min-height: 400px;"><%= file.content %></div>
                 </div>
             </div>
@@ -62,7 +62,7 @@
 <%- include('../../components/toast') %>
 <%- include('../../components/footer') %>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/ace.js"></script>
+<script nonce="<%- nonce %>" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.6/ace.js"></script>
 <script nonce="<%- nonce %>">
     const editor = ace.edit("editor");
     editor.setTheme("ace/theme/monokai");

@@ -21,14 +21,14 @@ function pickAvailablePorts(allocatedPorts: number[], usedPorts: number[], count
   return picked;
 }
 
-async function resolveUserServerLimit(userId: number, settings: any): Promise<number> {
+async function resolveUserServerLimit(userId: number, settings: { defaultServerLimit?: number | null } | null): Promise<number> {
   const user = await prisma.users.findUnique({ where: { id: userId } });
   if (!user) return 0;
   if (user.serverLimit !== null && user.serverLimit !== undefined) return user.serverLimit;
   return settings?.defaultServerLimit ?? 0;
 }
 
-async function resolveUserResourceLimits(userId: number, settings: any) {
+async function resolveUserResourceLimits(userId: number, settings: { defaultMaxMemory?: number | null; defaultMaxCpu?: number | null; defaultMaxStorage?: number | null } | null) {
   const user = await prisma.users.findUnique({ where: { id: userId } });
   return {
     maxMemory: user?.maxMemory ?? settings?.defaultMaxMemory ?? 512,
@@ -158,20 +158,20 @@ const userCreateServerModule: Module = {
           return res.status(503).json({ error: `No available ports on the selected node. ${requiredPortCount} port(s) required.` });
         }
 
-        let dockerImages: any[] = [];
+        let dockerImages: Record<string, string>[] = [];
         try {
           dockerImages = JSON.parse(image.dockerImages || '[]');
         } catch {
           return res.status(500).json({ error: 'Image docker configuration is invalid.' });
         }
 
-        const imageDocker = dockerImages.find((img: any) => Object.keys(img).includes(dockerImage));
+        const imageDocker = dockerImages.find((img) => Object.keys(img).includes(dockerImage));
         if (!imageDocker) return res.status(400).json({ error: 'Docker image variant not found.' });
 
         const startCommand = image.startup;
         if (!startCommand) return res.status(500).json({ error: 'Image has no startup command.' });
 
-        let imageVariables: any[] = [];
+        let imageVariables: Record<string, unknown>[] = [];
         try {
           imageVariables = JSON.parse(image.variables || '[]');
         } catch {
@@ -217,17 +217,17 @@ const userCreateServerModule: Module = {
               continue;
             }
 
-            let serverEnv: any[];
+            let serverEnv: Array<{ env: string; value: string | number }>;
             try {
               const rawVars = JSON.parse(server.Variables);
-              serverEnv = rawVars.map((v: any) => ({
+              serverEnv = rawVars.map((v: Record<string, unknown>) => ({
                 env: String(v.env_variable ?? v.env ?? ''),
-                value: v.value ?? v.default_value ?? '',
+                value: String(v.value ?? v.default_value ?? ''),
               }));
               let serverPort = assignedPorts[0];
               try {
                 const parsedPorts = JSON.parse(server.Ports);
-                const primary = parsedPorts.find((p: any) => p.primary);
+                const primary = parsedPorts.find((p: { primary?: boolean; Port?: string }) => p.primary);
                 if (primary?.Port) {
                   serverPort = parseInt(String(primary.Port).split(':')[0]);
                 }
@@ -241,7 +241,7 @@ const userCreateServerModule: Module = {
               continue;
             }
 
-            const env = serverEnv.reduce((acc: any, curr: any) => {
+            const env = serverEnv.reduce((acc: Record<string, string | number>, curr: { env: string; value: string | number }) => {
               acc[curr.env] = curr.value;
               return acc;
             }, {});
@@ -289,7 +289,7 @@ const userCreateServerModule: Module = {
                     id: server.UUID,
                     image: dockerImageValue,
                     env,
-                    scripts: (scripts.install as any[]).map((s: any) => ({
+                    scripts: (scripts.install as Record<string, unknown>[]).map((s) => ({
                       url: s.url,
                       onStartup: s.onStart,
                       ALVKT: s.ALVKT,
@@ -345,10 +345,10 @@ const userCreateServerModule: Module = {
               headers: { 'Content-Type': 'application/json' },
               data: { id: server.UUID },
             });
-          } catch (err: any) {
+          } catch (err: unknown) {
             const isGone =
-              err.response?.status === 404 ||
-              err.response?.data?.error?.includes('not exist');
+              axios.isAxiosError(err) && (err.response?.status === 404 ||
+              err.response?.data?.error?.includes('not exist'));
 
             if (!isGone) {
               logger.error('Error deleting container from daemon:', err);

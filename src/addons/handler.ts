@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
-import express, { Express, Router, Request, Response, NextFunction } from 'express';
+import express, { Express, Application, Router, Request, Response, NextFunction } from 'express';
 import { uiComponentStore, SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from '../core/uiComponents';
 import { slotRegistry, SlotId } from './slotRegistry';
 import { commandRegistry, scheduler, RegisteredCommand, ScheduledTask } from './commands';
@@ -68,7 +68,7 @@ function escapeHtml(str: string): string {
 function escapeJsString(str: string): string {
   return str
     .replace(/\\/g, '\\\\')
-    .replace(/'/g, "\\'")
+    .replace(/'/g, '\\\'')
     .replace(/"/g, '\\"')
     .replace(/\n/g, '\\n')
     .replace(/\r/g, '\\r')
@@ -387,9 +387,11 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
 
       let panelSettings: Record<string, unknown> = {};
       try {
-        const row = await (prisma as any).settings.findUnique({ where: { id: 1 } });
-        if (row) panelSettings = row;
-      } catch (_) {}
+        const row = await prisma.settings.findUnique({ where: { id: 1 } });
+        if (row) panelSettings = row as Record<string, unknown>;
+      } catch (_) {
+        // settings table may not exist yet during initial setup
+      }
 
       // Inject all template vars into data so addon views (and their includes) have access
       data.nonce = data.nonce || '';
@@ -398,7 +400,7 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
       data.req = data.req || { translations: {}, path: '', query: {} };
 
       const content = await new Promise<string>((resolve, reject) => {
-        ejs.renderFile(viewPath, data, {}, (err: any, str: string) => {
+        ejs.renderFile(viewPath, data, {}, (err: Error | null, str: string) => {
           if (err) {
             logger.error(`Error rendering view ${viewName}:`, err);
             reject(err);
@@ -431,7 +433,7 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
         addonUrls: uiComponentStore.getSidebarItems(undefined, false)
           .filter(item => uiComponentStore.getAddonSidebarIds().has(item.id))
           .map(item => item.url),
-        icon: (name: string, opts: any = {}) => {
+        icon: (name: string, opts: Record<string, unknown> = {}) => {
           const icons: Record<string, string> = {
             'search': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>',
             'layout-dashboard': '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
@@ -461,7 +463,7 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
       let header = '';
       if (hasHeader) {
         header = await new Promise<string>((resolve) => {
-          ejs.renderFile(headerPath, templateData, {}, (err: any, str: string) => {
+          ejs.renderFile(headerPath, templateData, {}, (err: Error | null, str: string) => {
             if (err) { resolve(''); } else { resolve(str); }
           });
         });
@@ -470,7 +472,7 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
       let template = '';
       if (hasTemplate) {
         template = await new Promise<string>((resolve) => {
-          ejs.renderFile(templatePath, templateData, {}, (err: any, str: string) => {
+          ejs.renderFile(templatePath, templateData, {}, (err: Error | null, str: string) => {
             if (err) { resolve(''); } else { resolve(str); }
           });
         });
@@ -479,7 +481,7 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
       let footer = '';
       if (hasFooter) {
         footer = await new Promise<string>((resolve) => {
-          ejs.renderFile(footerPath, templateData, {}, (err: any, str: string) => {
+          ejs.renderFile(footerPath, templateData, {}, (err: Error | null, str: string) => {
             if (err) { resolve(''); } else { resolve(str); }
           });
         });
@@ -547,7 +549,7 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
   };
 }
 
-function setupStaticAssetServing(appExpress: Express, slug: string, addonPath: string): string | undefined {
+function setupStaticAssetServing(appExpress: Application, slug: string, addonPath: string): string | undefined {
   const publicPath = path.join(addonPath, 'public');
   if (!fs.existsSync(publicPath)) return undefined;
 
@@ -564,19 +566,21 @@ function setupStaticAssetServing(appExpress: Express, slug: string, addonPath: s
   return mountPath;
 }
 
-function removeStaticAssetServing(appExpress: Express, mountPath: string): void {
-  const routerStack = (appExpress as any)._router?.stack;
+function removeStaticAssetServing(appExpress: Application, mountPath: string): void {
+  const routerStack = (appExpress as unknown as { _router?: { stack: Array<Record<string, unknown>> } })._router?.stack;
   if (!routerStack) return;
 
   for (let i = routerStack.length - 1; i >= 0; i--) {
     const layer = routerStack[i];
-    if (layer?.route?.path === mountPath || layer?.regexp?.test?.(mountPath)) {
+    const route = layer?.route as { path?: string } | undefined;
+    const regexp = layer?.regexp as { test?: (path: string) => boolean } | undefined;
+    if (route?.path === mountPath || regexp?.test?.(mountPath)) {
       routerStack.splice(i, 1);
     }
   }
 }
 
-export async function loadAddons(appExpress: Express | any) {
+export async function loadAddons(appExpress: Application) {
   for (const [slug] of loadedAddons.entries()) {
     await unloadAddon(appExpress, slug);
   }
@@ -742,7 +746,7 @@ export async function loadAddons(appExpress: Express | any) {
     const addonAPI = buildAddonAPI(folder, addonPath, manifest);
     const animationsDisabled = manifest.dontfuckinganimateme === true;
 
-    addonRouter.use((_req: any, res: any, next: any) => {
+    addonRouter.use((_req: Request, res: Response, next: NextFunction) => {
       res.locals.addonAnimationsDisabled = animationsDisabled;
       res.locals.addonSlug = folder;
       next();
@@ -751,7 +755,7 @@ export async function loadAddons(appExpress: Express | any) {
     const cacheTracker = trackRequireCache(addonPath);
 
     try {
-      let addonModule: any;
+      let addonModule: Record<string, unknown>;
       try {
         addonModule = require(mainFilePath);
       } finally {
@@ -763,12 +767,12 @@ export async function loadAddons(appExpress: Express | any) {
       let hooks: AddonLifecycleHooks | undefined;
 
       if (typeof addonModule === 'function') {
-        const result = addonModule(addonRouter, addonAPI);
+        const result = (addonModule as (router: Router, api: AddonAPI) => unknown)(addonRouter, addonAPI);
         if (result && typeof result === 'object') {
           hooks = result as AddonLifecycleHooks;
         }
       } else if (addonModule.default && typeof addonModule.default === 'function') {
-        const result = addonModule.default(addonRouter, addonAPI);
+        const result = (addonModule.default as (router: Router, api: AddonAPI) => unknown)(addonRouter, addonAPI);
         if (result && typeof result === 'object') {
           hooks = result as AddonLifecycleHooks;
         }
@@ -807,8 +811,9 @@ export async function loadAddons(appExpress: Express | any) {
       }
 
       logger.info(`Loaded addon: ${manifest.name} (${folder})`);
-    } catch (error: any) {
-      logger.error(`Failed to initialize addon ${manifest.name}:`, error.message);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      logger.error(`Failed to initialize addon ${manifest.name}:`, msg);
     }
   }
 
@@ -818,8 +823,9 @@ export async function loadAddons(appExpress: Express | any) {
 async function safeHookCall(slug: string, hookName: string, fn: () => Promise<void> | void): Promise<void> {
   try {
     await fn();
-  } catch (err: any) {
-    logger.error(`Addon "${slug}" hook "${hookName}" failed:`, err.message);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    logger.error(`Addon "${slug}" hook "${hookName}" failed:`, msg);
   }
 }
 
@@ -873,9 +879,10 @@ export async function toggleAddonStatus(slug: string, enabled: boolean) {
         success: true,
         message: `Addon ${addon.name} ${enabled ? 'enabled' : 'disabled'} successfully`,
       };
-    } catch (error: any) {
-      logger.error('Failed to toggle addon status:', error.message);
-      return { success: false, message: `Failed to toggle addon status: ${error.message}` };
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Failed to toggle addon status:', msg);
+      return { success: false, message: `Failed to toggle addon status: ${msg}` };
     }
   });
 }
@@ -889,21 +896,23 @@ export async function getAllAddons() {
       return [];
     }
     return await prisma.addon.findMany({ orderBy: { name: 'asc' } });
-  } catch (error: any) {
-    logger.error('Failed to get addons:', error.message);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Failed to get addons:', msg);
     return [];
   }
 }
 
-function unloadAddon(app: Express | any, slug: string): void {
+function unloadAddon(app: Application, slug: string): void {
   const addon = loadedAddons.get(slug);
   if (!addon) return;
 
-  const routerStack = (app as any)._router?.stack;
+  const routerStack = (app as unknown as { _router?: { stack: Array<Record<string, unknown>> } })._router?.stack;
   if (routerStack) {
     for (let i = routerStack.length - 1; i >= 0; i--) {
       const layer = routerStack[i];
-      if (layer?.handle?.name === `router_${slug}`) {
+      const handle = layer?.handle as { name?: string } | undefined;
+      if (handle?.name === `router_${slug}`) {
         routerStack.splice(i, 1);
         break;
       }
@@ -924,7 +933,7 @@ function unloadAddon(app: Express | any, slug: string): void {
   logger.info(`Unloaded addon: ${slug}`);
 }
 
-export async function reloadAddons(app: Express | any) {
+export async function reloadAddons(app: Application) {
   logger.info('Reloading addons...');
 
   for (const [slug] of loadedAddons.entries()) {
@@ -980,9 +989,10 @@ async function applyAddonMigrations(slug: string, manifest: AddonManifestV2) {
           `;
         });
         logger.info(`Applied migration ${migration.name} for addon ${manifest.name}`);
-      } catch (error: any) {
-        logger.error(`Failed to apply migration ${migration.name}:`, error.message);
-        return { success: false, message: `Failed to apply migration ${migration.name}: ${error.message}` };
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : 'Unknown error';
+        logger.error(`Failed to apply migration ${migration.name}:`, msg);
+        return { success: false, message: `Failed to apply migration ${migration.name}: ${msg}` };
       }
     }
 
@@ -991,9 +1001,10 @@ async function applyAddonMigrations(slug: string, manifest: AddonManifestV2) {
       message: `Applied ${pending.length} migrations for addon ${manifest.name}`,
       migrationsApplied: pending.length,
     };
-  } catch (error: any) {
-    logger.error(`Failed to apply migrations for addon ${manifest.name}:`, error.message);
-    return { success: false, message: `Failed to apply migrations: ${error.message}` };
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    logger.error(`Failed to apply migrations for addon ${manifest.name}:`, msg);
+    return { success: false, message: `Failed to apply migrations: ${msg}` };
   }
 }
 
@@ -1031,7 +1042,7 @@ function topologicalSort(graph: Map<string, { manifest: AddonManifestV2; folder:
   return order;
 }
 
-export async function uninstallAddon(slug: string, app: Express | any) {
+export async function uninstallAddon(slug: string, app: Application) {
   return withAddonLock(slug, async () => {
     const loaded = loadedAddons.get(slug);
 
@@ -1061,8 +1072,9 @@ export async function uninstallAddon(slug: string, app: Express | any) {
           try {
             await prisma.$executeRawUnsafe(migration.down!);
             logger.info(`Rolled back migration ${migration.name} for addon ${slug}`);
-          } catch (err: any) {
-            logger.error(`Failed to roll back migration ${migration.name}:`, err.message);
+          } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : 'Unknown error';
+            logger.error(`Failed to roll back migration ${migration.name}:`, msg);
           }
         }
       }

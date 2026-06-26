@@ -12,7 +12,6 @@ import { daemonSchemeSync } from '../../../services/daemonRequest';
 const coreModule: Module = {
   info: {
     name: 'Core Module',
-    description: 'This file is for all core functionality.',
     version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
@@ -25,7 +24,7 @@ const coreModule: Module = {
     async function loadApiKeys() {
       try {
         const keys = await prisma.apiKey.findMany();
-        validKeys = keys.map((key: any) => key.key);
+        validKeys = keys.map((key) => key.key);
       } catch (error) {
         logger.error('Error loading API keys:', error);
       }
@@ -72,14 +71,14 @@ const coreModule: Module = {
           let serverData = null;
           if (include && include === 'servers') {
             serverData = await prisma.server.findMany({
-              where: { ownerId: { in: users.map((user: any) => user.id) } },
+              where: { ownerId: { in: users.map((user) => user.id) } },
               include: { node: true, owner: true },
             });
           }
 
-          const response = users.map((user: any) => {
-            const userData: any = {
-              object: 'user',
+          const response = users.map((user) => {
+            const userData = {
+              object: 'user' as const,
               attributes: {
                 id: user.id,
                 username: user.username,
@@ -93,8 +92,8 @@ const coreModule: Module = {
 
             if (include && include === 'servers' && serverData) {
               userData.relationships.servers = serverData
-                .filter((server: any) => server.ownerId === user.id)
-                .map((server: any) => ({
+                .filter((server) => server.ownerId === user.id)
+                .map((server) => ({
                   object: 'server',
                   attributes: {
                     id: server.id,
@@ -180,7 +179,7 @@ const coreModule: Module = {
               include: { node: true, owner: true },
             });
 
-            const formattedServers = servers.map((server: any) => ({
+            const formattedServers = servers.map((server) => ({
               attributes: {
                 id: server.id,
                 UUID: server.UUID,
@@ -319,7 +318,7 @@ const coreModule: Module = {
             return;
           }
 
-          const updatedData: any = {};
+          const updatedData: Record<string, string | number | boolean> = {};
 
           if (username) updatedData.username = username;
           if (email) updatedData.email = email;
@@ -480,7 +479,7 @@ const coreModule: Module = {
           { length: 100 },
           (_, i) => 25565 + i,
         );
-        const usedPorts = servers.flatMap((server: any) =>
+        const usedPorts = servers.flatMap((server) =>
           JSON.parse(server.Ports).map((portInfo: { Port: string }) =>
             parseInt(portInfo.Port.split(':')[0]),
           ),
@@ -523,7 +522,7 @@ const coreModule: Module = {
                 id: imageId,
               },
             })
-            .then((image: any) => {
+            .then((image) => {
               if (!image) {
                 return null;
               }
@@ -631,10 +630,10 @@ const coreModule: Module = {
 
               const env = ServerEnv.reduce(
                 (
-                  acc: { [key: string]: any },
-                  curr: { env: string; value: any },
+                  acc: Record<string, string>,
+                  curr: { env: string; value: string | number | boolean },
                 ) => {
-                  acc[curr.env] = curr.value;
+                  acc[curr.env] = String(curr.value);
                   return acc;
                 },
                 {},

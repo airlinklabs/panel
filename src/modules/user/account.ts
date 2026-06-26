@@ -12,7 +12,7 @@ import validator from 'validator';
 
 const avatarStorage = multer.diskStorage({
   destination: (req, _file, cb) => {
-    const username = (req as any).session?.user?.username;
+    const username = req.session?.user?.username;
     if (!username) return cb(new Error('Not authenticated'), '');
 
     const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', username);
@@ -55,7 +55,6 @@ interface ErrorMessage {
 const accountModule: Module = {
   info: {
     name: 'Account Module',
-    description: 'This file is for account functionality.',
     version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
@@ -372,7 +371,6 @@ const accountModule: Module = {
           return;
         }
 
-        // Validate language is supported
         const supportedLanguages = ['en', 'fr', 'de', 'es', 'pt', 'it', 'ru', 'zh', 'ja', 'ta'];
         if (!supportedLanguages.includes(language)) {
           res.status(400).send('Unsupported language.');
@@ -380,7 +378,6 @@ const accountModule: Module = {
         }
 
         try {
-          // Set the language cookie
           res.cookie('lang', language, {
             maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year
             httpOnly: true,
@@ -407,7 +404,7 @@ const accountModule: Module = {
 
         try {
           const userId = req.session?.user?.id;
-          const username = (req as any).session?.user?.username;
+          const username = req.session?.user?.username;
           const avatarPath = `/uploads/avatars/${username}/${req.file.filename}`;
 
           await prisma.users.update({
@@ -429,7 +426,7 @@ const accountModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const username = (req as any).session?.user?.username;
+          const username = req.session?.user?.username;
 
           const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', username);
           if (fs.existsSync(userDir)) {

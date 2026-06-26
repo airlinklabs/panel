@@ -43,7 +43,7 @@
     </div>
 
     <div class="space-y-4">
-      <div id="mobileTabGeneral" class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+      <div id="mobileTabGeneral" class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
         <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-4">Basic Information</h2>
         <div class="space-y-3">
           <div class="flex flex-col gap-1">
@@ -76,7 +76,7 @@
         </div>
       </div>
 
-      <div id="mobileTabSettings" class="hidden rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
+      <div id="mobileTabSettings" class="hidden rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 overflow-hidden">
         <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/5">
           <div>
             <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Required Ports</h2>
@@ -96,7 +96,7 @@
         </div>
       </div>
 
-      <div id="mobileTabRaw" class="hidden rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+      <div id="mobileTabRaw" class="hidden rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
         <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">JSON Configuration</h2>
         <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-3">Edit the JSON directly. Keep the format valid.</p>
         <div id="jsonEditor" class="w-full h-64 border border-neutral-200 dark:border-white/5 rounded-xl overflow-hidden"></div>
@@ -302,7 +302,7 @@
         <!-- General tab -->
         <div data-tab-form="general" class="tab-form space-y-5">
           <div data-animate-card class="flex flex-col bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Basics</h2>
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Basics</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Name</label>
@@ -322,7 +322,7 @@
             </div>
           </div>
           <div data-animate-card class="flex flex-col bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Process</h2>
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Process</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
               <div class="sm:col-span-2">
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Startup Command</label>
@@ -355,7 +355,7 @@
         <!-- Docker Images tab -->
         <div data-tab-form="docker" class="tab-form space-y-5 hidden">
           <div data-animate-card class="flex flex-col bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5">
-            <div class="flex items-center justify-between px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">
+            <div class="flex items-center justify-between px-5 py-3.5 bg-neutral-100 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">
               <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white">Docker Images</h2>
               <button type="button" id="add-docker-image"
                 class="px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition">
@@ -378,7 +378,7 @@
         <!-- Variables tab -->
         <div data-tab-form="variables" class="tab-form space-y-5 hidden">
           <div data-animate-card class="flex flex-col bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5">
-            <div class="flex items-center justify-between px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">
+            <div class="flex items-center justify-between px-5 py-3.5 bg-neutral-100 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">
               <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white">Egg Variables</h2>
               <button type="button" id="add-variable"
                 class="px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition">
@@ -401,7 +401,7 @@
         <!-- Install Script tab -->
         <div data-tab-form="install" class="tab-form space-y-5 hidden">
           <div data-animate-card class="flex flex-col bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Installation Script</h2>
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Installation Script</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Container Image</label>
@@ -434,7 +434,7 @@
         <!-- Settings tab -->
         <div data-tab-form="settings" class="tab-form space-y-5 hidden">
           <div data-animate-card class="flex flex-col bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5">
-            <div class="flex items-center justify-between px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">
+            <div class="flex items-center justify-between px-5 py-3.5 bg-neutral-100 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">
               <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white">Required Ports</h2>
               <button type="button" id="add-port-requirement"
                 class="px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition">
@@ -457,7 +457,7 @@
         <!-- Raw JSON tab -->
         <div data-tab-form="raw" class="tab-form space-y-5 hidden">
           <div data-animate-card class="flex flex-col bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Raw JSON</h2>
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-100 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Raw JSON</h2>
             <div class="px-5 py-5">
               <p class="text-xs text-neutral-500 mb-4">Edit the complete egg JSON directly. Must be valid JSON — the editor will warn on errors. Saving here overwrites all tab values.</p>
               <div id="json-editor" class="w-full h-[480px] rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden"></div>

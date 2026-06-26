@@ -30,8 +30,8 @@ type NodeWithInstances = {
   port: number;
   key: string;
   createdAt: Date;
-  instances: any[];
-  servers?: any[]; // For port allocation UI
+  instances: { id: number; UUID: string; name: string }[];
+  servers?: { id: number; UUID: string; name: string }[];
 }
 
 async function listNodes(res: Response, includeServers = false) {
@@ -63,7 +63,6 @@ async function listNodes(res: Response, includeServers = false) {
 const adminModule: Module = {
   info: {
     name: 'Admin Nodes Module',
-    description: 'This file is for admin functionality of the Nodes.',
     version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
@@ -341,7 +340,6 @@ const adminModule: Module = {
 
           const nodeId = getParamAsNumber(req.params.id);
 
-          // Get node with its servers for port allocation UI
           const node = await prisma.node.findUnique({
             where: { id: nodeId },
             include: {
@@ -402,7 +400,6 @@ const adminModule: Module = {
             return;
           }
 
-          // Validate allocated ports
           try {
             const parsedPorts = JSON.parse(allocatedPorts);
             if (!Array.isArray(parsedPorts)) {
@@ -415,9 +412,10 @@ const adminModule: Module = {
                 throw new Error('Each port must be a number between 1024 and 65535');
               }
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : 'Unknown error';
             res.status(400).json({
-              message: 'Invalid allocated ports format: ' + (error.message || 'Unknown error'),
+              message: 'Invalid allocated ports format: ' + msg,
             });
             return;
           }

@@ -175,7 +175,7 @@
 
     <!-- IP Address -->
     <div class="mt-3 mb-3">
-      <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-2.5 flex items-center gap-2">
+      <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-3 py-2.5 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="h-4 w-4 shrink-0 text-neutral-400"><rect width="256" height="256" fill="none"/><path d="M240,120a8,8,0,0,1-8,8H200v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H176a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H72v32h8a16,16,0,0,1,16,16v32a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V176a16,16,0,0,1,16-16h8V128H24a8,8,0,0,1,0-16h96V88h-8A16,16,0,0,1,96,72V40a16,16,0,0,1,16-16h32a16,16,0,0,1,16,16V72a16,16,0,0,1-16,16h-8v24h96A8,8,0,0,1,240,120Z"/></svg>
         <span class="text-[10px] font-medium text-neutral-500 shrink-0"><%= req.translations.addressIP %>:</span>
         <span class="text-xs font-medium text-neutral-800 dark:text-white font-mono truncate flex-1" id="server-ip-text"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></span>
@@ -216,7 +216,7 @@
       <div class="grid grid-cols-2 gap-3 mt-3">
 
         <!-- Status -->
-        <div class="data-animate-card stats-card relative overflow-hidden rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-auto min-h-[5rem]" style="--i:0">
+        <div class="data-animate-card stats-card relative overflow-hidden rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-3 py-3 h-auto min-h-[5rem]" style="--i:0">
           <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 dark:via-white/10 to-transparent" aria-hidden="true"></div>
           <canvas id="statusChart"></canvas>
           <div class="relative z-10">
@@ -227,7 +227,7 @@
         </div>
 
         <!-- RAM -->
-        <div class="data-animate-card stats-card relative overflow-hidden rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-auto min-h-[5rem]" style="--i:1">
+        <div class="data-animate-card stats-card relative overflow-hidden rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-3 py-3 h-auto min-h-[5rem]" style="--i:1">
           <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 dark:via-white/10 to-transparent" aria-hidden="true"></div>
           <canvas id="ramChart"></canvas>
           <div class="relative z-10">
@@ -237,7 +237,7 @@
         </div>
 
         <!-- CPU -->
-        <div class="data-animate-card stats-card relative overflow-hidden rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-auto min-h-[5rem]" style="--i:2">
+        <div class="data-animate-card stats-card relative overflow-hidden rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-3 py-3 h-auto min-h-[5rem]" style="--i:2">
           <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 dark:via-white/10 to-transparent" aria-hidden="true"></div>
           <canvas id="cpuChart"></canvas>
           <div class="relative z-10">
@@ -247,7 +247,7 @@
         </div>
 
         <!-- Disk -->
-        <div class="data-animate-card stats-card relative overflow-hidden rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-3 py-3 h-auto min-h-[5rem]" style="--i:3">
+        <div class="data-animate-card stats-card relative overflow-hidden rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-3 py-3 h-auto min-h-[5rem]" style="--i:3">
           <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 dark:via-white/10 to-transparent" aria-hidden="true"></div>
           <canvas id="diskChart" class="hidden"></canvas>
           <div class="relative z-10">

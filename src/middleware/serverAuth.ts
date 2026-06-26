@@ -6,7 +6,7 @@ import prisma from '../db';
 import { getParamAsString } from '../utils/typeHelpers';
 
 export const isAuthenticatedForServer =
-  (serverIdParam: string = 'id') =>
+  (serverIdParam = 'id') =>
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       const userId = req.session?.user?.id;
 
@@ -47,8 +47,8 @@ export const isAuthenticatedForServer =
     };
 
 export const isAuthenticatedForServerWS =
-  (serverIdParam: string = 'id') =>
-    async (ws: WebSocket, req: any, next: NextFunction): Promise<void> => {
+  (serverIdParam = 'id') =>
+    async (ws: WebSocket, req: Request, next: NextFunction): Promise<void> => {
       const userId = req.session?.user?.id;
 
       if (!userId) {

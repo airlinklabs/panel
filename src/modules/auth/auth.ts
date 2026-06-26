@@ -7,7 +7,6 @@ import prisma from '../../db';
 const authModule: Module = {
   info: {
     name: 'Auth Module',
-    description: 'This file is for authentication and authorization of users.',
     version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
@@ -47,7 +46,7 @@ const authModule: Module = {
 
     router.post('/logout', (req: Request, res: Response) => {
       if (req.session) {
-        const cookieName = (req.session.cookie as any).name || 'al.sid';
+        const cookieName = 'al.sid';
         req.session.destroy((err) => {
           if (err) {
             logger.error('Session destruction error', err);

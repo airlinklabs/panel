@@ -11,7 +11,7 @@ export class AirlinkCloudClient {
     this.apiKey = apiKey;
   }
 
-  async uploadFile(fileStream: any, fileName: string) {
+  async uploadFile(fileStream: NodeJS.ReadableStream, fileName: string) {
     const form = new FormData();
     form.append('file', fileStream, fileName);
 

@@ -3,7 +3,7 @@ import { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import logger from '../../services/logger';
-import { checkForUpdates, performUpdate } from '../../services/updater';
+import { checkForUpdates, runUpdate } from '../../services/updater';
 import { registerPermission } from '../../core/permissions';
 
 
@@ -18,7 +18,6 @@ interface ErrorMessage {
 const adminModule: Module = {
   info: {
     name: 'Admin Module',
-    description: 'This file is for admin functionality.',
     version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
@@ -88,7 +87,7 @@ const adminModule: Module = {
       isAuthenticated(true, 'airlink.admin.overview.performUpdate'),
       async (_req: Request, res: Response) => {
         try {
-          const success = await performUpdate();
+          const success = await runUpdate();
           if (success) {
             res.json({ message: 'Update completed successfully' });
           } else {

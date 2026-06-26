@@ -17,12 +17,12 @@
     </div>
 
     <div class="grid grid-cols-2 gap-3 mb-5">
-      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Total Servers</p>
         <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= servers.length %></p>
         <p class="text-xs text-neutral-500 mt-1"><%= servers.filter(s => s.status === 'running').length %> running</p>
       </div>
-      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Users</p>
         <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= [...new Set(servers.map(s => s.ownerId).filter(Boolean))].length %></p>
         <p class="text-xs text-neutral-500 mt-1">with servers</p>
@@ -82,7 +82,7 @@
     <!-- Server cards -->
     <div class="space-y-2">
       <% let srvIdx = 0; servers.forEach(function(server) { %>
-      <div class="grid-item-animate server-card relative overflow-hidden rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 cursor-pointer"
+      <div class="grid-item-animate server-card relative overflow-hidden rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3 cursor-pointer"
         style="--i:<%= srvIdx++ %>"
         data-id="<%= server.id %>" data-uuid="<%= server.UUID %>">
         <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 dark:via-white/10 to-transparent" aria-hidden="true"></div>
@@ -733,12 +733,12 @@
       </div>
 
       <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mx-8 mt-6">
-        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Total Servers</h2>
           <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= servers.length %></p>
           <p class="text-sm text-neutral-400 mt-2"><%= servers.filter(s => s.status === 'running').length %> currently running</p>
         </div>
-        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Users</h2>
           <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= [...new Set(servers.map(s => s.ownerId).filter(Boolean))].length %></p>
           <p class="text-sm text-neutral-400 mt-2">with servers assigned</p>
@@ -812,7 +812,7 @@
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white"></th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
+          <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800">
             <% let srvIdx = 0; servers.forEach(function(server) { %>
             <tr style="--i:<%= srvIdx++ %>" class="server-row hover:bg-neutral-50 dark:hover:bg-white/[0.03] transition-colors cursor-pointer"
               data-id="<%= server.id %>" data-uuid="<%= server.UUID %>"

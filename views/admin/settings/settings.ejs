@@ -22,18 +22,18 @@
         <form id="form-appearance" data-tab-panel="appearance" class="tab-panel space-y-5 hidden" enctype="multipart/form-data">
 
           <!-- Branding -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Branding</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Branding</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 px-5 py-5">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Site title</label>
                 <input type="text" name="title" value="<%= settings.title %>"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
               </div>
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Logo</label>
                 <input type="file" name="logo" accept="image/*"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <% if (settings.logo) { %>
                 <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 mt-2 object-contain">
                 <% } %>
@@ -41,15 +41,15 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Favicon</label>
                 <input type="file" name="favicon" accept=".ico,.png,.jpg,.jpeg"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <p class="text-xs text-neutral-400 mt-1">PNG or JPG auto-converted to .ico</p>
               </div>
             </div>
           </div>
 
           <!-- Registration -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Registration</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Registration</h2>
             <div class="px-5 py-5 flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow public registration</p>
@@ -60,8 +60,8 @@
           </div>
 
           <!-- Themes -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Themes</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Themes</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-5 py-5">
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white mb-1">Light mode</p>
@@ -88,6 +88,11 @@
                       <% if (theme.author) { %><span class="text-xs text-neutral-400">by <%= theme.author %></span><% } %>
                     </div>
                     <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
+                    <% if (!theme.builtin && theme.path) { %>
+                    <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                    <% } %>
                   </label>
                   <% }); %>
                 </div>
@@ -117,6 +122,11 @@
                       <% if (theme.author) { %><span class="text-xs text-neutral-400">by <%= theme.author %></span><% } %>
                     </div>
                     <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
+                    <% if (!theme.builtin && theme.path) { %>
+                    <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                    <% } %>
                   </label>
                   <% }); %>
                 </div>
@@ -129,13 +139,13 @@
               </div>
               <p class="text-xs text-neutral-500 mb-3">A .zip containing info.json, light.css, dark.css.</p>
               <input type="file" name="themeFile" accept=".zip"
-                class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
             </div>
           </div>
 
           <!-- Auth page wallpapers -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Auth page wallpapers</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Auth page wallpapers</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3 pb-1">Background image on the login and register pages. Upload a file or paste a URL. Leave both blank to use the default.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-5 py-5">
               <div>
@@ -145,11 +155,11 @@
                 <% } %>
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
                 <input type="file" name="loginWallpaperFile" accept="image/*"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" name="loginWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.loginWallpaper && settings.loginWallpaper.startsWith('http')) ? settings.loginWallpaper : '' %>"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
               </div>
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white mb-3">Register page</p>
@@ -158,11 +168,11 @@
                 <% } %>
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
                 <input type="file" name="registerWallpaperFile" accept="image/*"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" name="registerWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.registerWallpaper && settings.registerWallpaper.startsWith('http')) ? settings.registerWallpaper : '' %>"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
               </div>
             </div>
           </div>
@@ -176,8 +186,8 @@
         <!-- ── SERVERS ─────────────────────────────────────────────────────── -->
         <div id="panel-servers" data-tab-panel="servers" class="tab-panel hidden space-y-5">
 
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">User permissions</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">User permissions</h2>
             <div class="px-5 py-5 space-y-5">
               <div class="flex items-center justify-between">
                 <div>
@@ -196,27 +206,27 @@
             </div>
           </div>
 
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">File uploads</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">File uploads</h2>
             <div class="px-5 py-5">
               <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Upload limit <span class="text-neutral-400 font-normal">(MB)</span></label>
               <div class="relative max-w-xs">
                 <input type="number" id="uploadLimitInput" value="<%= settings.uploadLimit %>" min="1" max="10000"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 pr-12 text-neutral-800 dark:text-white transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 pr-12 text-neutral-800 dark:text-white transition-colors">
                 <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-neutral-400 pointer-events-none">MB</span>
               </div>
               <p class="mt-1.5 text-xs text-neutral-500">Maximum file size users can upload via the file manager.</p>
             </div>
           </div>
 
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Default limits</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Default limits</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3">Applied to new users unless overridden per-user.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 px-5 py-5">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Server limit</label>
                 <input type="number" id="defaultServerLimit" value="<%= settings.defaultServerLimit %>" min="0" max="100"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
                 <p class="mt-1 text-xs text-neutral-500">0 = cannot create.</p>
               </div>
               <div>
@@ -225,7 +235,7 @@
                 <div class="flex items-stretch gap-0">
                   <input type="number" id="defaultMaxMemoryDisplay" min="1"
                     value="<%= settings.defaultMaxMemory >= 1024 ? Math.round(settings.defaultMaxMemory / 1024) : settings.defaultMaxMemory %>"
-                    class="rounded-l-xl flex-1 border border-r-0 border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                    class="rounded-l-xl flex-1 border border-r-0 border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
                   <select id="defaultMaxMemoryUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-600 text-neutral-800 dark:text-white border border-neutral-200 dark:border-neutral-600/30 cursor-pointer">
                     <option value="1"    <%= settings.defaultMaxMemory < 1024  ? 'selected' : '' %>>MB</option>
                     <option value="1024" <%= settings.defaultMaxMemory >= 1024 ? 'selected' : '' %>>GB</option>
@@ -235,7 +245,7 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max CPU <span class="text-neutral-400 font-normal">(%)</span></label>
                 <input type="number" id="defaultMaxCpu" value="<%= settings.defaultMaxCpu %>" min="50" max="10000"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
               </div>
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max storage</label>
@@ -243,7 +253,7 @@
                 <div class="flex items-stretch gap-0">
                   <input type="number" id="defaultMaxStorageDisplay" min="1"
                     value="<%= settings.defaultMaxStorage >= 1024 ? Math.round(settings.defaultMaxStorage / 1024) : settings.defaultMaxStorage %>"
-                    class="rounded-l-xl flex-1 border border-r-0 border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                    class="rounded-l-xl flex-1 border border-r-0 border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
                   <select id="defaultMaxStorageUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-600 text-neutral-800 dark:text-white border border-neutral-200 dark:border-neutral-600/30 cursor-pointer">
                     <option value="1"    <%= settings.defaultMaxStorage < 1024  ? 'selected' : '' %>>MB</option>
                     <option value="1024" <%= settings.defaultMaxStorage >= 1024 ? 'selected' : '' %>>GB</option>
@@ -261,13 +271,13 @@
         <div id="panel-security" data-tab-panel="security" class="tab-panel hidden space-y-5">
 
           <!-- VirusTotal -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">VirusTotal</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">VirusTotal</h2>
             <div class="px-5 py-5">
               <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">API key</label>
               <div class="relative max-w-sm">
                 <input type="password" id="vtKeyInput" value="<%= settings.virusTotalApiKey || '' %>" placeholder="Paste your key" autocomplete="off"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 pr-16 text-neutral-800 dark:text-white placeholder-neutral-400 font-mono transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 pr-16 text-neutral-800 dark:text-white placeholder-neutral-400 font-mono transition-colors">
                 <button type="button" onclick="const i=this.previousElementSibling;i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'Show':'Hide';"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Show</button>
               </div>
@@ -280,8 +290,8 @@
           </div>
 
           <!-- Rate limiting -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Rate limiting</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Rate limiting</h2>
             <div class="px-5 py-5 space-y-4">
               <div class="flex items-center justify-between">
                 <div>
@@ -293,32 +303,32 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Requests per minute</label>
                 <input type="number" id="rateLimitRpm" value="<%= settings.rateLimitRpm %>" min="1" max="10000"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-48 bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-48 bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
               </div>
             </div>
           </div>
 
           <!-- Login protection -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Login protection</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Login protection</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3">After N failed attempts from a single account, that account is locked for the configured duration. Errors always say "invalid credentials" — the username is never revealed.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 px-5 py-5">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max failed attempts before lockout</label>
                 <input type="number" id="loginMaxAttempts" value="<%= settings.loginMaxAttempts ?? 5 %>" min="1" max="100"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
               </div>
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Lockout duration <span class="text-neutral-400 font-normal">(minutes)</span></label>
                 <input type="number" id="loginLockoutMinutes" value="<%= settings.loginLockoutMinutes ?? 15 %>" min="1" max="1440"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
               </div>
             </div>
           </div>
 
           <!-- Network -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Network</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Network</h2>
             <div class="px-5 py-5 space-y-5">
               <div class="flex items-center justify-between">
                 <div>
@@ -348,12 +358,12 @@
           </div>
 
           <!-- IP banning -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">IP banning</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">IP banning</h2>
             <div class="px-5 py-5">
               <div class="flex gap-3 mb-4">
                 <input type="text" id="banIpInput" placeholder="192.168.1.1"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors flex-1 max-w-xs">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors flex-1 max-w-xs">
                 <button type="button" id="banIpBtn" class="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700">Ban IP</button>
               </div>
               <div id="bannedIpList" class="space-y-2">
@@ -426,6 +436,18 @@
       .catch(err => showToast(err.message || 'Failed', 'error'))
       .finally(() => { if (btn) { btn.disabled = false; btn.textContent = orig; } });
   }
+
+  window.deleteCustomTheme = function(themeId, themeName) {
+    if (!confirm('Delete theme "' + themeName + '"? This cannot be undone.')) return;
+    fetch('/admin/settings/theme/' + themeId, { method: 'DELETE' })
+      .then(r => r.json())
+      .then(d => {
+        if (!d.success) throw new Error(d.error || 'Failed');
+        showToast('Theme deleted.', 'success');
+        setTimeout(() => location.reload(), 500);
+      })
+      .catch(err => showToast(err.message || 'Failed to delete theme', 'error'));
+  };
 
   function getToggleValue(name) {
     const toggle = document.querySelector(`input[type="hidden"][name="${name}"]`);
@@ -571,18 +593,18 @@
         <form id="form-appearance" data-tab-panel="appearance" class="tab-panel space-y-5 hidden" enctype="multipart/form-data">
 
           <!-- Branding -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Branding</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Branding</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 px-5 py-5">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Site title</label>
                 <input type="text" name="title" value="<%= settings.title %>"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
               </div>
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Logo</label>
                 <input type="file" name="logo" accept="image/*"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <% if (settings.logo) { %>
                 <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 mt-2 object-contain">
                 <% } %>
@@ -590,15 +612,15 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Favicon</label>
                 <input type="file" name="favicon" accept=".ico,.png,.jpg,.jpeg"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <p class="text-xs text-neutral-400 mt-1">PNG or JPG auto-converted to .ico</p>
               </div>
             </div>
           </div>
 
           <!-- Registration -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Registration</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Registration</h2>
             <div class="px-5 py-5 flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow public registration</p>
@@ -609,8 +631,8 @@
           </div>
 
           <!-- Themes -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Themes</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Themes</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-5 py-5">
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white mb-1">Light mode</p>
@@ -637,6 +659,11 @@
                       <% if (theme.author) { %><span class="text-xs text-neutral-400">by <%= theme.author %></span><% } %>
                     </div>
                     <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
+                    <% if (!theme.builtin && theme.path) { %>
+                    <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                    <% } %>
                   </label>
                   <% }); %>
                 </div>
@@ -666,6 +693,11 @@
                       <% if (theme.author) { %><span class="text-xs text-neutral-400">by <%= theme.author %></span><% } %>
                     </div>
                     <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
+                    <% if (!theme.builtin && theme.path) { %>
+                    <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                    <% } %>
                   </label>
                   <% }); %>
                 </div>
@@ -678,13 +710,13 @@
               </div>
               <p class="text-xs text-neutral-500 mb-3">A .zip containing info.json, light.css, dark.css.</p>
               <input type="file" name="themeFile" accept=".zip"
-                class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
             </div>
           </div>
 
           <!-- Auth page wallpapers -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Auth page wallpapers</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Auth page wallpapers</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3 pb-1">Background image on the login and register pages. Upload a file or paste a URL. Leave both blank to use the default.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-5 py-5">
               <div>
@@ -694,11 +726,11 @@
                 <% } %>
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
                 <input type="file" name="loginWallpaperFile" accept="image/*"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" name="loginWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.loginWallpaper && settings.loginWallpaper.startsWith('http')) ? settings.loginWallpaper : '' %>"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
               </div>
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white mb-3">Register page</p>
@@ -707,11 +739,11 @@
                 <% } %>
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
                 <input type="file" name="registerWallpaperFile" accept="image/*"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" name="registerWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.registerWallpaper && settings.registerWallpaper.startsWith('http')) ? settings.registerWallpaper : '' %>"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
               </div>
             </div>
           </div>
@@ -725,8 +757,8 @@
         <!-- ── SERVERS ─────────────────────────────────────────────────────── -->
         <div id="panel-servers" data-tab-panel="servers" class="tab-panel hidden space-y-5">
 
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">User permissions</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">User permissions</h2>
             <div class="px-5 py-5 space-y-5">
               <div class="flex items-center justify-between">
                 <div>
@@ -745,27 +777,27 @@
             </div>
           </div>
 
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">File uploads</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">File uploads</h2>
             <div class="px-5 py-5">
               <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Upload limit <span class="text-neutral-400 font-normal">(MB)</span></label>
               <div class="relative max-w-xs">
                 <input type="number" id="uploadLimitInput" value="<%= settings.uploadLimit %>" min="1" max="10000"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 pr-12 text-neutral-800 dark:text-white transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 pr-12 text-neutral-800 dark:text-white transition-colors">
                 <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-neutral-400 pointer-events-none">MB</span>
               </div>
               <p class="mt-1.5 text-xs text-neutral-500">Maximum file size users can upload via the file manager.</p>
             </div>
           </div>
 
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Default limits</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Default limits</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3">Applied to new users unless overridden per-user.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 px-5 py-5">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Server limit</label>
                 <input type="number" id="defaultServerLimit" value="<%= settings.defaultServerLimit %>" min="0" max="100"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
                 <p class="mt-1 text-xs text-neutral-500">0 = cannot create.</p>
               </div>
               <div>
@@ -774,7 +806,7 @@
                 <div class="flex items-stretch gap-0">
                   <input type="number" id="defaultMaxMemoryDisplay" min="1"
                     value="<%= settings.defaultMaxMemory >= 1024 ? Math.round(settings.defaultMaxMemory / 1024) : settings.defaultMaxMemory %>"
-                    class="rounded-l-xl flex-1 border border-r-0 border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                    class="rounded-l-xl flex-1 border border-r-0 border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
                   <select id="defaultMaxMemoryUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-600 text-neutral-800 dark:text-white border border-neutral-200 dark:border-neutral-600/30 cursor-pointer">
                     <option value="1"    <%= settings.defaultMaxMemory < 1024  ? 'selected' : '' %>>MB</option>
                     <option value="1024" <%= settings.defaultMaxMemory >= 1024 ? 'selected' : '' %>>GB</option>
@@ -784,7 +816,7 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max CPU <span class="text-neutral-400 font-normal">(%)</span></label>
                 <input type="number" id="defaultMaxCpu" value="<%= settings.defaultMaxCpu %>" min="50" max="10000"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
               </div>
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max storage</label>
@@ -792,7 +824,7 @@
                 <div class="flex items-stretch gap-0">
                   <input type="number" id="defaultMaxStorageDisplay" min="1"
                     value="<%= settings.defaultMaxStorage >= 1024 ? Math.round(settings.defaultMaxStorage / 1024) : settings.defaultMaxStorage %>"
-                    class="rounded-l-xl flex-1 border border-r-0 border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                    class="rounded-l-xl flex-1 border border-r-0 border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
                   <select id="defaultMaxStorageUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-600 text-neutral-800 dark:text-white border border-neutral-200 dark:border-neutral-600/30 cursor-pointer">
                     <option value="1"    <%= settings.defaultMaxStorage < 1024  ? 'selected' : '' %>>MB</option>
                     <option value="1024" <%= settings.defaultMaxStorage >= 1024 ? 'selected' : '' %>>GB</option>
@@ -810,13 +842,13 @@
         <div id="panel-security" data-tab-panel="security" class="tab-panel hidden space-y-5">
 
           <!-- VirusTotal -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">VirusTotal</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">VirusTotal</h2>
             <div class="px-5 py-5">
               <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">API key</label>
               <div class="relative max-w-sm">
                 <input type="password" id="vtKeyInput" value="<%= settings.virusTotalApiKey || '' %>" placeholder="Paste your key" autocomplete="off"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 pr-16 text-neutral-800 dark:text-white placeholder-neutral-400 font-mono transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 pr-16 text-neutral-800 dark:text-white placeholder-neutral-400 font-mono transition-colors">
                 <button type="button" onclick="const i=this.previousElementSibling;i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'Show':'Hide';"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Show</button>
               </div>
@@ -829,8 +861,8 @@
           </div>
 
           <!-- Rate limiting -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Rate limiting</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Rate limiting</h2>
             <div class="px-5 py-5 space-y-4">
               <div class="flex items-center justify-between">
                 <div>
@@ -842,32 +874,32 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Requests per minute</label>
                 <input type="number" id="rateLimitRpm" value="<%= settings.rateLimitRpm %>" min="1" max="10000"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-48 bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-48 bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
               </div>
             </div>
           </div>
 
           <!-- Login protection -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Login protection</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Login protection</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3">After N failed attempts from a single account, that account is locked for the configured duration. Errors always say "invalid credentials" — the username is never revealed.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 px-5 py-5">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max failed attempts before lockout</label>
                 <input type="number" id="loginMaxAttempts" value="<%= settings.loginMaxAttempts ?? 5 %>" min="1" max="100"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
               </div>
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Lockout duration <span class="text-neutral-400 font-normal">(minutes)</span></label>
                 <input type="number" id="loginLockoutMinutes" value="<%= settings.loginLockoutMinutes ?? 15 %>" min="1" max="1440"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
               </div>
             </div>
           </div>
 
           <!-- Network -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Network</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Network</h2>
             <div class="px-5 py-5 space-y-5">
               <div class="flex items-center justify-between">
                 <div>
@@ -897,12 +929,12 @@
           </div>
 
           <!-- IP banning -->
-          <div data-animate-card class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">IP banning</h2>
+          <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
+            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">IP banning</h2>
             <div class="px-5 py-5">
               <div class="flex gap-3 mb-4">
                 <input type="text" id="banIpInput" placeholder="192.168.1.1"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors flex-1 max-w-xs">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors flex-1 max-w-xs">
                 <button type="button" id="banIpBtn" class="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700">Ban IP</button>
               </div>
               <div id="bannedIpList" class="space-y-2">

@@ -5,14 +5,14 @@
     <section class="px-4 py-5">
         <%- include('../../components/serverHeader', { server: server, req: req }) %>
         <div class="mt-4">
-            <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+            <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
                 <h2 class="text-sm font-medium text-neutral-800 dark:text-white mb-3">Worlds</h2>
                 <div id="worlds-list" class="space-y-2">
                     <% if (worlds.length === 0) { %>
                         <p class="text-xs text-neutral-500 text-center py-4">No worlds found.</p>
                     <% } else { %>
                         <% worlds.forEach(world => { %>
-                            <div class="data-animate-card rounded-xl bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 p-3 flex items-center justify-between">
+                            <div class="data-animate-card rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-white/5 p-3 flex items-center justify-between">
                                 <div class="min-w-0">
                                     <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= world.name %></p>
                                     <p class="text-[10px] text-neutral-500">Size: <%= world.size %></p>
@@ -43,14 +43,14 @@
                 <%- include('../../components/serverHeader', { server: server, req: req }) %>
             </div>
             <div class="p-6">
-                <div class="data-animate-card bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+                <div class="data-animate-card bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
                     <h2 class="text-lg font-semibold text-neutral-800 dark:text-white mb-4">Worlds</h2>
                     <div id="worlds-list" class="space-y-3">
                         <% if (worlds.length === 0) { %>
                             <p class="text-sm text-neutral-500 text-center py-8">No worlds found.</p>
                         <% } else { %>
                             <% worlds.forEach(world => { %>
-                                <div class="data-animate-card rounded-xl bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 p-4 flex items-center justify-between">
+                                <div class="data-animate-card rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-white/5 p-4 flex items-center justify-between">
                                     <div class="min-w-0">
                                         <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= world.name %></p>
                                         <p class="text-xs text-neutral-500">Size: <%= world.size %></p>

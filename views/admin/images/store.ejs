@@ -64,7 +64,7 @@
 
     <div id="skeletons" class="space-y-2">
       <% for (let i = 0; i < 6; i++) { %>
-      <div data-animate-card class="rounded-xl border border-neutral-200 dark:border-neutral-700/30 p-4 flex flex-col gap-2.5 bg-white dark:bg-neutral-800/20">
+      <div data-animate-card class="rounded-xl border border-neutral-200 dark:border-neutral-700/30 p-4 flex flex-col gap-2.5 bg-white dark:bg-neutral-800">
         <div class="sk h-4 w-2/3"></div>
         <div class="sk h-3 w-full"></div>
         <div class="sk h-3 w-3/4"></div>
@@ -183,7 +183,7 @@ function buildCard(img) {
   const desc = (img.readme&&img.readme.length>20?img.readme:img.description)||'';
   const short = desc.length>90 ? desc.slice(0,88)+'…' : desc;
   const el = document.createElement('div');
-  el.className = 'rounded-xl border border-neutral-200 dark:border-neutral-800/40 bg-white dark:bg-neutral-800/20 p-4 flex flex-col gap-2 transition hover:bg-neutral-50 dark:hover:bg-neutral-700/20';
+  el.className = 'rounded-xl border border-neutral-200 dark:border-neutral-800/40 bg-white dark:bg-neutral-800 p-4 flex flex-col gap-2 transition hover:bg-neutral-50 dark:hover:bg-neutral-700/20';
   el.innerHTML = `
     <div class="flex items-start justify-between gap-2">
       <p class="text-sm font-medium text-neutral-800 dark:text-white leading-snug">${esc(img.name)}</p>
@@ -191,7 +191,7 @@ function buildCard(img) {
     </div>
     ${img.subGroup&&img.subGroup!==img.group?`<p class="text-[10px] text-neutral-400 font-mono">${esc(img.subGroup)}</p>`:''}
     ${short?`<p class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">${esc(short)}</p>`:''}
-    <button class="install-btn mt-1 w-full py-2 rounded-xl border border-neutral-200 dark:border-neutral-800/40 bg-white dark:bg-neutral-800/20 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 text-neutral-700 dark:text-neutral-300 text-xs font-medium transition">Install</button>`;
+    <button class="install-btn mt-1 w-full py-2 rounded-xl border border-neutral-200 dark:border-neutral-800/40 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 text-neutral-700 dark:text-neutral-300 text-xs font-medium transition">Install</button>`;
   el.querySelector('.install-btn').addEventListener('click',()=>openModal(img));
   return el;
 }
@@ -397,7 +397,7 @@ loadCatalogue();
               <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white">Actions</th>
             </tr>
           </thead>
-          <tbody id="allBody" class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20"></tbody>
+          <tbody id="allBody" class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800"></tbody>
         </table>
       </div>
 

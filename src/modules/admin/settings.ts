@@ -32,7 +32,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   if (file.fieldname === 'themeFile') {
     const ext = path.extname(file.originalname).toLowerCase();
     return cb(null, ext === '.zip' || file.mimetype.includes('zip'));
@@ -64,9 +64,10 @@ function installThemeZip(zipPath: string): { success: boolean; error?: string } 
     fs.copyFileSync(lightPath, path.join(themeDir, 'light.css'));
     fs.copyFileSync(darkPath, path.join(themeDir, 'dark.css'));
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof SyntaxError) return { success: false, error: 'info.json contains invalid JSON.' };
-    if (err.message?.startsWith('Theme zip')) return { success: false, error: err.message };
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    if (msg.startsWith('Theme zip')) return { success: false, error: msg };
     return { success: false, error: 'Failed to extract theme zip.' };
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
@@ -77,7 +78,7 @@ function installThemeZip(zipPath: string): { success: boolean; error?: string } 
 function loadUserThemes() {
   const dir = path.join(process.cwd(), 'public', 'themes', 'user');
   if (!fs.existsSync(dir)) return [];
-  const themes: any[] = [];
+  const themes: Array<{ name: string; lightPath: string; darkPath: string; path: string; builtin: boolean; author?: string }> = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
     const infoPath  = path.join(dir, entry.name, 'info.json');
@@ -102,7 +103,7 @@ function loadUserThemes() {
 // Upsert the settings row — creates it with defaults if it doesn't exist,
 // then applies the partial update. This means every save is safe even on a
 // fresh DB, and never overwrites fields it didn't intend to touch.
-async function saveSettings(data: Record<string, any>) {
+async function saveSettings(data: Record<string, unknown>) {
   return prisma.settings.upsert({
     where:  { id: 1 },
     update: data,
@@ -188,15 +189,277 @@ const adminModule: Module = {
           fs.mkdirSync(zipDir, { recursive: true });
           const archivePath = path.join(zipDir, 'example-theme-' + Date.now() + '.zip');
           const info = { name: 'Example Theme', author: 'Your Name', updatedAt: new Date().toISOString().split('T')[0] };
+          const lightCss = `/*
+ * Example Theme — Light Mode
+ *
+ * Only define CSS variables here. The panel loads theme-base.css
+ * automatically which handles all element selectors for you.
+ *
+ * See THEME.md for the full variable reference.
+ */
+
+:root {
+  /* --- Page backgrounds --- */
+  --theme-bg:               #ffffff;
+  --theme-bg-secondary:     #f5f5f5;
+  --theme-bg-tertiary:      #ececec;
+  --theme-bg-card:          #f9f9f9;
+  --theme-bg-hover:         #eeeeee;
+  --theme-bg-input:         #f0f0f0;
+  --theme-bg-active-nav:    rgba(0, 0, 0, 0.05);
+
+  /* --- Borders --- */
+  --theme-border:           #e0e0e0;
+  --theme-border-subtle:    rgba(0, 0, 0, 0.06);
+  --theme-border-input:     #d4d4d4;
+  --theme-border-accent:    rgba(99, 102, 241, 0.25);
+
+  /* --- Text --- */
+  --theme-text:             #525252;
+  --theme-text-strong:      #171717;
+  --theme-text-muted:       #a3a3a3;
+  --theme-text-nav:         #737373;
+  --theme-text-nav-active:  #171717;
+  --theme-text-placeholder: #bbbbbb;
+  --theme-text-code:        #7c3aed;
+  --theme-text-link:        #4f46e5;
+
+  /* --- Accent / brand --- */
+  --theme-accent:           #6366f1;
+  --theme-accent-hover:     #4f46e5;
+  --theme-accent-text:      #ffffff;
+  --theme-accent-subtle:    rgba(99, 102, 241, 0.08);
+
+  /* --- Status colours --- */
+  --theme-success:          #16a34a;
+  --theme-success-bg:       rgba(22, 163, 74, 0.08);
+  --theme-warning:          #d97706;
+  --theme-warning-bg:       rgba(217, 119, 6, 0.08);
+  --theme-danger:           #dc2626;
+  --theme-danger-bg:        rgba(220, 38, 38, 0.06);
+  --theme-info:             #2563eb;
+  --theme-info-bg:          rgba(37, 99, 235, 0.08);
+
+  /* --- Nav chrome --- */
+  --theme-nav-bg:           #f5f5f5;
+  --theme-nav-border:       #e0e0e0;
+  --theme-nav-text:         #737373;
+  --theme-nav-text-active:  #171717;
+  --theme-nav-icon:         #a3a3a3;
+  --theme-nav-icon-active:  #4f46e5;
+
+  /* --- Table --- */
+  --theme-table-header-bg:  #f9f9f9;
+  --theme-table-row-hover:  rgba(0, 0, 0, 0.02);
+  --theme-table-divide:     #eeeeee;
+
+  /* --- Badges / pills --- */
+  --theme-badge-neutral-bg:   rgba(0, 0, 0, 0.06);
+  --theme-badge-neutral-text: #525252;
+  --theme-badge-blue-bg:      rgba(99, 102, 241, 0.08);
+  --theme-badge-blue-text:    #4f46e5;
+
+  /* --- Buttons --- */
+  --theme-btn-secondary-bg:     #f5f5f5;
+  --theme-btn-secondary-border: #e0e0e0;
+  --theme-btn-secondary-text:   #525252;
+  --theme-btn-secondary-hover:  #eeeeee;
+
+  /* --- Toggle / switch --- */
+  --theme-toggle-track:     #d4d4d4;
+  --theme-toggle-dot:       #ffffff;
+
+  /* --- Search --- */
+  --theme-search-bg:        #f0f0f0;
+  --theme-search-border:    #e0e0e0;
+  --theme-search-text:      #525252;
+  --theme-search-results:   #ffffff;
+
+  /* --- Scrollbar --- */
+  --theme-scrollbar-track:  #ffffff;
+  --theme-scrollbar-thumb:  #e0e0e0;
+
+  /* --- Logo background --- */
+  --theme-logo-bg:          rgba(0, 0, 0, 0.08);
+
+  /* --- Code / terminal --- */
+  --theme-code-bg:          #f5f5f5;
+  --theme-code-text:        #7c3aed;
+  --theme-code-border:      #e0e0e0;
+
+  /* --- Typography --- */
+  --theme-font-family:      'General Sans', ui-sans-serif, system-ui, sans-serif;
+
+  /* --- Border radius --- */
+  --theme-radius:           0.75rem;
+  --theme-radius-lg:        1rem;
+  --theme-radius-root:      0;
+
+  /* --- Shadows --- */
+  --theme-shadow:           0 6px 12px -10px rgb(0 0 0 / 0.32);
+  --theme-shadow-lg:        0 8px 18px -14px rgb(0 0 0 / 0.34);
+  --theme-shadow-xl:        0 18px 44px -28px rgb(0 0 0 / 0.45);
+
+  /* --- Transitions --- */
+  --theme-transition:       150ms;
+  --theme-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+`;
+          const darkCss = `/*
+ * Example Theme — Dark Mode
+ *
+ * Only define CSS variables here. The panel loads theme-base.css
+ * automatically which handles all element selectors for you.
+ *
+ * See THEME.md for the full variable reference.
+ */
+
+:root {
+  /* --- Page backgrounds --- */
+  --theme-bg:               #0f0f0f;
+  --theme-bg-secondary:     #1a1a1a;
+  --theme-bg-tertiary:      #222222;
+  --theme-bg-card:          #1a1a1a;
+  --theme-bg-hover:         #252525;
+  --theme-bg-input:         #141414;
+  --theme-bg-active-nav:    rgba(255, 255, 255, 0.06);
+
+  /* --- Borders --- */
+  --theme-border:           #2a2a2a;
+  --theme-border-subtle:    rgba(255, 255, 255, 0.05);
+  --theme-border-input:     #333333;
+  --theme-border-accent:    rgba(99, 102, 241, 0.30);
+
+  /* --- Text --- */
+  --theme-text:             #a3a3a3;
+  --theme-text-strong:      #f0f0f0;
+  --theme-text-muted:       #666666;
+  --theme-text-nav:         #707070;
+  --theme-text-nav-active:  #f0f0f0;
+  --theme-text-placeholder: #555555;
+  --theme-text-code:        #a78bfa;
+  --theme-text-link:        #818cf8;
+
+  /* --- Accent / brand --- */
+  --theme-accent:           #6366f1;
+  --theme-accent-hover:     #818cf8;
+  --theme-accent-text:      #ffffff;
+  --theme-accent-subtle:    rgba(99, 102, 241, 0.12);
+
+  /* --- Status colours --- */
+  --theme-success:          #22c55e;
+  --theme-success-bg:       rgba(34, 197, 94, 0.12);
+  --theme-warning:          #f59e0b;
+  --theme-warning-bg:       rgba(245, 158, 11, 0.12);
+  --theme-danger:           #ef4444;
+  --theme-danger-bg:        rgba(239, 68, 68, 0.12);
+  --theme-info:             #3b82f6;
+  --theme-info-bg:          rgba(59, 130, 246, 0.12);
+
+  /* --- Nav chrome --- */
+  --theme-nav-bg:           #111111;
+  --theme-nav-border:       #2a2a2a;
+  --theme-nav-text:         #606060;
+  --theme-nav-text-active:  #f0f0f0;
+  --theme-nav-icon:         #555555;
+  --theme-nav-icon-active:  #818cf8;
+
+  /* --- Table --- */
+  --theme-table-header-bg:  #161616;
+  --theme-table-row-hover:  rgba(99, 102, 241, 0.05);
+  --theme-table-divide:     #222222;
+
+  /* --- Badges / pills --- */
+  --theme-badge-neutral-bg:   rgba(163, 163, 163, 0.10);
+  --theme-badge-neutral-text: #a3a3a3;
+  --theme-badge-blue-bg:      rgba(99, 102, 241, 0.14);
+  --theme-badge-blue-text:    #a5b4fc;
+
+  /* --- Buttons --- */
+  --theme-btn-secondary-bg:     #1e1e1e;
+  --theme-btn-secondary-border: #2a2a2a;
+  --theme-btn-secondary-text:   #a3a3a3;
+  --theme-btn-secondary-hover:  #282828;
+
+  /* --- Toggle / switch --- */
+  --theme-toggle-track:     #333333;
+  --theme-toggle-dot:       #a3a3a3;
+
+  /* --- Search --- */
+  --theme-search-bg:        #141414;
+  --theme-search-border:    #2a2a2a;
+  --theme-search-text:      #a3a3a3;
+  --theme-search-results:   #1a1a1a;
+
+  /* --- Scrollbar --- */
+  --theme-scrollbar-track:  #0f0f0f;
+  --theme-scrollbar-thumb:  #2a2a2a;
+
+  /* --- Logo background --- */
+  --theme-logo-bg:          transparent;
+
+  /* --- Code / terminal --- */
+  --theme-code-bg:          #0a0a0a;
+  --theme-code-text:        #a78bfa;
+  --theme-code-border:      #222222;
+
+  /* --- Typography --- */
+  --theme-font-family:      'General Sans', ui-sans-serif, system-ui, sans-serif;
+
+  /* --- Border radius --- */
+  --theme-radius:           0.75rem;
+  --theme-radius-lg:        1rem;
+  --theme-radius-root:      0;
+
+  /* --- Shadows --- */
+  --theme-shadow:           0 6px 12px -10px rgb(0 0 0 / 0.32);
+  --theme-shadow-lg:        0 8px 18px -14px rgb(0 0 0 / 0.34);
+  --theme-shadow-xl:        0 18px 44px -28px rgb(0 0 0 / 0.45);
+
+  /* --- Transitions --- */
+  --theme-transition:       150ms;
+  --theme-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+`;
           const zip = new AdmZip();
           zip.addFile('info.json', Buffer.from(JSON.stringify(info, null, 2)));
-          zip.addFile('light.css', Buffer.from('/* light mode theme */\n:root {}\n'));
-          zip.addFile('dark.css',  Buffer.from('/* dark mode theme */\n:root {}\n'));
+          zip.addFile('light.css', Buffer.from(lightCss));
+          zip.addFile('dark.css', Buffer.from(darkCss));
           zip.writeZip(archivePath);
           res.download(archivePath, 'example-theme.zip', () => fs.rmSync(archivePath, { force: true }));
         } catch (error) {
           logger.error('Error generating example theme:', error);
           res.status(500).json({ error: 'Failed to generate example theme.' });
+        }
+      },
+    );
+
+    // ── DELETE /admin/settings/theme/:id ────────────────────────────────────
+    router.delete(
+      '/admin/settings/theme/:id',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        try {
+          const themeId = String(req.params.id);
+          if (!themeId || themeId === 'default') {
+            return res.status(400).json({ success: false, error: 'Cannot delete the default theme.' });
+          }
+          const themeDir = path.join(process.cwd(), 'public', 'themes', 'user', themeId);
+          if (!fs.existsSync(themeDir)) {
+            return res.status(404).json({ success: false, error: 'Theme not found.' });
+          }
+          fs.rmSync(themeDir, { recursive: true, force: true });
+
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          const update: Record<string, unknown> = {};
+          if (settings?.lightTheme?.includes(`/user/${themeId}/`)) update.lightTheme = 'default';
+          if (settings?.darkTheme?.includes(`/user/${themeId}/`)) update.darkTheme = 'default';
+          if (Object.keys(update).length > 0) await saveSettings(update);
+
+          res.json({ success: true });
+        } catch (error) {
+          logger.error('Error deleting theme:', error);
+          res.status(500).json({ success: false, error: 'Failed to delete theme.' });
         }
       },
     );
@@ -222,7 +485,7 @@ const adminModule: Module = {
             if (!result.success) return res.status(400).json({ success: false, error: result.error });
           }
 
-          const data: Record<string, any> = {};
+          const data: Record<string, unknown> = {};
 
           if (typeof raw.title === 'string') data.title = raw.title;
           if (typeof raw.allowRegistration !== 'undefined') {
@@ -273,7 +536,7 @@ const adminModule: Module = {
       isAuthenticated(true),
       async (req: Request, res: Response) => {
         try {
-          const data: Record<string, any> = {
+          const data: Record<string, unknown> = {
             allowRegistration: req.body.allowRegistration === true,
           };
           if (req.body.uploadLimit) {
@@ -315,7 +578,7 @@ const adminModule: Module = {
             return res.status(400).json({ success: false, error: 'Lockout must be between 1 and 1440 minutes.' });
           }
 
-          const securityData: Record<string, any> = {
+          const securityData: Record<string, unknown> = {
             rateLimitEnabled,
             rateLimitRpm,
             loginMaxAttempts,
@@ -359,7 +622,7 @@ const adminModule: Module = {
           if (isNaN(defaultMaxStorage) || defaultMaxStorage < 128)
             return res.status(400).json({ success: false, error: 'Max storage must be at least 128 MB.' });
 
-          const serverPolicyData: Record<string, any> = {
+          const serverPolicyData: Record<string, unknown> = {
             allowUserCreateServer,
             allowUserDeleteServer,
             defaultServerLimit,

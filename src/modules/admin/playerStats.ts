@@ -82,7 +82,7 @@ const adminModule: Module = {
             servers.map(async (server) => {
               try {
                 const ports = JSON.parse(server.Ports || '[]');
-                const primaryPort = ports.find((p: any) => p.primary)?.Port;
+                const primaryPort = ports.find((p: { primary?: boolean; Port?: string }) => p.primary)?.Port;
 
                 if (!primaryPort) {
                   return {

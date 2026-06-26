@@ -13,7 +13,7 @@
       </div>
 
       <div id="nodeForm" class="mt-4 w-full">
-        <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">
+        <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-5">
           <form id="createServerForm" method="POST" action="/admin/servers/create">
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">General</h2>
             <div class="grid grid-cols-1 gap-4 mb-6">
@@ -153,13 +153,13 @@
                   <%- icon('cloud-download', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Ports %>:</label>
                 <input type="hidden" id="serverPorts" name="Ports">
-          <button type="button" id="assignPortsBtn" class="mt-2 mb-4 w-full inline-flex items-center gap-2 rounded-xl bg-neutral-100 dark:bg-neutral-700/30 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white px-4 py-2.5 text-sm font-medium border border-neutral-200 dark:border-white/5 transition">
+          <button type="button" id="assignPortsBtn" class="mt-2 mb-4 w-full inline-flex items-center gap-2 rounded-xl bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white px-4 py-2.5 text-sm font-medium border border-neutral-200 dark:border-white/5 transition">
             <%- icon('cloud-download', { size: 14, class: 'shrink-0' }) %>
             Assign ports
           </button>
               </div>
 
-              <div data-animate-card class="bg-neutral-100 dark:bg-neutral-800/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
+              <div data-animate-card class="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between">
                   <div class="flex items-center mb-2 md:mb-0">
                     <div class="flex-shrink-0 mr-3">
@@ -518,7 +518,7 @@ const listB = ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither
       </div>
 
       <div id="nodeForm" class="mt-6 px-8 w-full">
-        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <form id="createServerForm" method="POST" action="/admin/servers/create">
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">General</h2>
             <div class="grid grid-cols-2 gap-4 mb-6">
@@ -640,12 +640,12 @@ const listB = ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither
                   <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Ports %>:</label>
                 <input type="hidden" id="serverPorts" name="Ports">
-          <button type="button" id="assignPortsBtn" class="mt-2 mb-4 w-full inline-flex items-center gap-2 rounded-xl bg-neutral-100 dark:bg-neutral-700/30 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white px-4 py-2.5 text-sm font-medium border border-neutral-200 dark:border-white/5 transition">
+          <button type="button" id="assignPortsBtn" class="mt-2 mb-4 w-full inline-flex items-center gap-2 rounded-xl bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white px-4 py-2.5 text-sm font-medium border border-neutral-200 dark:border-white/5 transition">
             <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
             Assign ports
           </button>
               </div>
-              <div data-animate-card class="bg-neutral-100 dark:bg-neutral-700/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
+              <div data-animate-card class="bg-neutral-100 dark:bg-neutral-700 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between">
                   <div class="flex items-center mb-2 md:mb-0">
                     <div class="flex-shrink-0 mr-3"><%- icon('pencil', { size: 24, class: 'text-blue-500' }) %></div>
@@ -862,7 +862,7 @@ const listB = ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither
 @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 .custom-select { position: relative; user-select: none; }
 .cs-trigger { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 8px 16px; border-radius: 12px; cursor: pointer; font-size: 14px; border: 1px solid var(--theme-border-subtle, rgba(0,0,0,0.07)); background: var(--theme-bg-secondary, rgba(180,180,180,0.1)); color: var(--theme-text-strong, #1a1a1a); transition: background 0.15s, border-color 0.15s; }
-.dark .cs-trigger { background: var(--theme-bg-secondary, rgba(80,80,80,0.9)); color: var(--theme-text, #fff); border-color: var(--theme-border-subtle, rgba(255,255,255,0.05)); }
+.dark .cs-trigger { background: var(--theme-bg-secondary, #2a2a2a); color: var(--theme-text, #fff); border-color: var(--theme-border-subtle, rgba(255,255,255,0.05)); }
 .cs-trigger:hover { background: var(--theme-bg-hover, rgba(180,180,180,0.25)); }
 .dark .cs-trigger:hover { background: var(--theme-bg-hover, rgba(255,255,255,0.08)); }
 .cs-trigger.open { border-color: var(--theme-border, rgba(0,0,0,0.15)); }

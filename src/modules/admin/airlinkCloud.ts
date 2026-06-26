@@ -4,7 +4,7 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import logger from '../../services/logger';
 
-async function saveSettings(data: Record<string, any>) {
+async function saveSettings(data: Record<string, unknown>) {
   return prisma.settings.upsert({
     where: { id: 1 },
     update: data,
@@ -54,7 +54,7 @@ const airlinkCloudModule: Module = {
         try {
           const { airlinkCloudApiKey, airlinkCloudBackupEnabled } = req.body;
 
-          const data: Record<string, any> = {
+          const data: Record<string, unknown> = {
             airlinkCloudApiKey: airlinkCloudApiKey || null,
             airlinkCloudBackupEnabled: airlinkCloudBackupEnabled === true || airlinkCloudBackupEnabled === 'true',
           };

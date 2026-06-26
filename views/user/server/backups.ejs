@@ -6,7 +6,7 @@
         <%- include('../../components/serverHeader', { server: server, req: req }) %>
         <%- include('../../components/serverTemplate') %>
         <div class="mt-4">
-            <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4">
+            <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
                 <div class="flex items-center justify-between mb-3">
                     <h2 class="text-sm font-medium text-neutral-800 dark:text-white">Backups</h2>
                     <button type="button" onclick="openCreateBackupModal()" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">New Backup</button>
@@ -16,7 +16,7 @@
                         <p class="text-xs text-neutral-500 text-center py-4">No backups found.</p>
                     <% } else { %>
                         <% backups.forEach(backup => { %>
-                            <div class="data-animate-card rounded-xl bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 p-3" data-backup-id="<%= backup.id %>">
+                            <div class="data-animate-card rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-white/5 p-3" data-backup-id="<%= backup.id %>">
                                 <div class="flex items-center justify-between">
                                     <div class="min-w-0">
                                         <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= backup.name %></p>
@@ -56,7 +56,7 @@
             </div>
             <%- include('../../components/serverTemplate') %>
             <div class="p-6">
-                <div class="data-animate-card bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+                <div class="data-animate-card bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Backups</h2>
                         <button type="button" onclick="openCreateBackupModal()" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">New Backup</button>
@@ -66,7 +66,7 @@
                             <p class="text-sm text-neutral-500 text-center py-8">No backups found.</p>
                         <% } else { %>
                             <% backups.forEach(backup => { %>
-                                <div class="data-animate-card rounded-xl bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 p-4" data-backup-id="<%= backup.id %>">
+                                <div class="data-animate-card rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-white/5 p-4" data-backup-id="<%= backup.id %>">
                                     <div class="flex items-center justify-between">
                                         <div class="min-w-0">
                                             <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= backup.name %></p>
@@ -237,7 +237,7 @@ function addBackupRow(backup) {
     var emptyMsg = list.querySelector('p.text-neutral-500');
     if (emptyMsg) emptyMsg.remove();
     var div = document.createElement('div');
-    div.className = 'data-animate-card rounded-xl bg-neutral-100 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 p-3';
+    div.className = 'data-animate-card rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-white/5 p-3';
     div.setAttribute('data-backup-id', backup.id);
     var sizeText = backup.size ? (Number(backup.size) / (1024 * 1024)).toFixed(2) + ' MB' : 'Unknown size';
     div.innerHTML =

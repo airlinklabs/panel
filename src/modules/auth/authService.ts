@@ -185,7 +185,7 @@ const authServiceModule: Module = {
 
     // ── GET /logout ──────────────────────────────────────────────────────────
     router.get('/logout', (req: Request, res: Response) => {
-      const cookieName = (req.session?.cookie as any)?.name || 'al.sid';
+      const cookieName = 'al.sid';
       res.clearCookie(cookieName);
       if (req.session) {
         req.session.destroy(() => res.redirect('/login'));

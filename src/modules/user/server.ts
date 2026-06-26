@@ -163,7 +163,7 @@ function getServerStatusInput(server: Pick<ServerPageServer, 'UUID' | 'node'>) {
   };
 }
 
-function getImageFeatures(image: any): string[] {
+function getImageFeatures(image: { info?: string | Record<string, unknown> | null } | null): string[] {
   if (!image) return [];
   try {
     const info = typeof image.info === 'string' ? JSON.parse(image.info) : image.info;
@@ -176,11 +176,11 @@ function getImageFeatures(image: any): string[] {
 function buildEnvVariables(variables: string | null | ServerVariable[]): Record<string, string> {
   if (!variables) return {};
   try {
-    const vars = Array.isArray(variables) ? variables : JSON.parse(variables) as any[];
+    const vars = Array.isArray(variables) ? variables.map(v => v as unknown as Record<string, unknown>) : JSON.parse(variables) as Record<string, unknown>[];
     const env: Record<string, string> = {};
     for (const v of vars) {
       // Support both Pterodactyl egg format (env_variable) and legacy format (env)
-      const key = v.env_variable || v.env;
+      const key = String(v.env_variable || v.env || '');
       if (!key) continue;
       const raw = v.value !== undefined ? v.value : (v.default_value ?? '');
       env[key] = String(raw);
@@ -293,7 +293,6 @@ async function restartServerContainer(
 const dashboardModule: Module = {
   info: {
     name: 'Server Module',
-    description: 'This file is for dashboard functionality.',
     version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
@@ -303,7 +302,6 @@ const dashboardModule: Module = {
   router: () => {
     const router = Router();
 
-    // Get server info
     router.get(
       '/server/:id',
       isAuthenticatedForServer('id'),
@@ -638,12 +636,12 @@ const dashboardModule: Module = {
             },
           };
 
-          let files = (await axios(filesRequest)).data as any[];
+          let files = (await axios(filesRequest)).data as Array<{ name: string; type: string; size?: number }>;
           files = typeof files === 'string' ? JSON.parse(files) : files;
 
-          files = files.filter((file: any) => file.name !== 'airlink');
+          files = files.filter((file) => file.name !== 'airlink');
 
-          files = files.sort((a: any, b: any) => {
+          files = files.sort((a, b) => {
             if (a.type === 'directory' && b.type === 'file') {
               return -1;
             } else if (a.type === 'file' && b.type === 'directory') {
@@ -1009,7 +1007,7 @@ const dashboardModule: Module = {
             relativePath = JSON.stringify(relativePath);
           }
 
-          const response: any = await axios({
+          const response = await axios({
             method: 'POST',
             url: getServerDaemonAddress(server, '/fs/zip'),
             auth: getServerDaemonAuth(server),
@@ -1169,8 +1167,8 @@ const dashboardModule: Module = {
 
           const primaryPort = server.Ports
             ? JSON.parse(server.Ports)
-              .filter((Port: any) => Port.primary)
-              .map((Port: any) => Port.Port.split(':')[1])
+              .filter((Port: { primary?: boolean; Port?: string }) => Port.primary)
+              .map((Port: { primary?: boolean; Port?: string }) => Port.Port.split(':')[1])
               .pop()
             : '';
 
@@ -2428,7 +2426,7 @@ const dashboardModule: Module = {
                   logger.info(`Parsed ServerEnv: ${JSON.stringify(ServerEnv)}`);
 
                   const ports = JSON.parse(serverToReinstall.Ports);
-                  const primaryPort = ports.find((p: any) => p.primary);
+                  const primaryPort = ports.find((p: { primary?: boolean; Port?: string }) => p.primary);
                   if (primaryPort) {
                     ServerEnv.push({
                       env: 'SERVER_PORT',
@@ -2447,7 +2445,7 @@ const dashboardModule: Module = {
               }
 
               const env = ServerEnv.reduce(
-                (acc: { [key: string]: any }, curr: ServerVariable) => {
+                (acc: Record<string, string | number | boolean>, curr: ServerVariable) => {
                   logger.info(
                     `Processing variable: ${curr.env} = ${curr.value} (type: ${curr.type})`,
                   );
@@ -2543,14 +2541,15 @@ const dashboardModule: Module = {
                     where: { UUID: getParamAsString(serverId) },
                     data: { Queued: false },
                   });
-                } catch (error: any) {
+                } catch (error: unknown) {
+                  const msg = error instanceof Error ? error.message : 'Unknown error';
                   logger.error(
                     `Error during reinstallation of server ${serverId}:`,
                     error,
                   );
-                  if (error.response) {
-                    logger.error(`Response status: ${error.response.status}`);
-                    logger.error('Response data:', error.response.data);
+                  if (axios.isAxiosError(error)) {
+                    logger.error(`Response status: ${error.response?.status}`);
+                    logger.error('Response data:', error.response?.data);
                   }
                   await prisma.server.update({
                     where: { UUID: getParamAsString(serverId) },

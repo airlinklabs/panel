@@ -27,22 +27,22 @@
 
     <!-- Stats grid -->
     <div class="grid grid-cols-2 gap-3 mb-5">
-      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Total Players</p>
         <p id="totalPlayers" class="text-2xl font-semibold text-neutral-800 dark:text-white">0</p>
         <p class="text-xs text-neutral-500 mt-1">Across all servers</p>
       </div>
-      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Capacity</p>
         <p id="maxCapacity" class="text-2xl font-semibold text-neutral-800 dark:text-white">0</p>
         <p class="text-xs text-neutral-500 mt-1">Max slots</p>
       </div>
-      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Online Servers</p>
         <p id="onlineServers" class="text-2xl font-semibold text-neutral-800 dark:text-white">0</p>
         <p class="text-xs text-neutral-500 mt-1">Currently up</p>
       </div>
-      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Utilization</p>
         <p id="utilization" class="text-2xl font-semibold text-neutral-800 dark:text-white">0%</p>
         <p class="text-xs text-neutral-500 mt-1">Capacity used</p>
@@ -50,7 +50,7 @@
     </div>
 
     <!-- Chart -->
-    <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4 mb-5">
+    <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4 mb-5">
       <div class="flex items-center justify-between mb-3">
         <p class="text-sm font-medium text-neutral-800 dark:text-white">Player Count History</p>
         <p class="text-[10px] text-neutral-500">Last 48 hours</p>
@@ -63,7 +63,7 @@
     <!-- Server list -->
     <p class="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-2">Servers</p>
     <div id="serverList" class="space-y-2">
-      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 text-center">
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3 text-center">
         <p class="text-xs text-neutral-500">Loading...</p>
       </div>
     </div>
@@ -120,11 +120,11 @@
       const list = document.getElementById('serverList');
       list.innerHTML = '';
       if (!data.servers || data.servers.length === 0) {
-        list.innerHTML = '<div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 text-center"><p class="text-xs text-neutral-500">No servers found</p></div>';
+        list.innerHTML = '<div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3 text-center"><p class="text-xs text-neutral-500">No servers found</p></div>';
       } else {
         data.servers.forEach(server => {
           const div = document.createElement('div');
-          div.className = 'rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3 flex items-center gap-3';
+          div.className = 'rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3 flex items-center gap-3';
           div.innerHTML = `
             <div class="w-2 h-2 rounded-full shrink-0 ${server.online ? 'bg-emerald-500' : 'bg-neutral-400'}"></div>
             <div class="flex-1 min-w-0">
@@ -203,10 +203,10 @@
         <!-- Stats Cards -->
         <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <!-- Total Players Card -->
-            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
+            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-4">
                <div class="flex items-center justify-between">
                  <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Total Players</dt>
-                  <div data-animate-card class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                  <div data-animate-card class="rounded-lg bg-neutral-100 dark:bg-neutral-700 p-2">
                     <%- icon('users', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
                   </div>
                </div>
@@ -217,10 +217,10 @@
             </div>
 
             <!-- Max Capacity Card -->
-            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
+            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-4">
                <div class="flex items-center justify-between">
                  <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Max Capacity</dt>
-                  <div data-animate-card class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                  <div data-animate-card class="rounded-lg bg-neutral-100 dark:bg-neutral-700 p-2">
                     <%- icon('database', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
                   </div>
                </div>
@@ -231,10 +231,10 @@
             </div>
 
             <!-- Online Servers Card -->
-            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
+            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-4">
                <div class="flex items-center justify-between">
                  <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Online Servers</dt>
-                  <div data-animate-card class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                  <div data-animate-card class="rounded-lg bg-neutral-100 dark:bg-neutral-700 p-2">
                     <%- icon('server', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
                   </div>
                </div>
@@ -245,10 +245,10 @@
             </div>
 
             <!-- Utilization Card -->
-            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
+            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-4">
                <div class="flex items-center justify-between">
                  <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Utilization</dt>
-                  <div data-animate-card class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                  <div data-animate-card class="rounded-lg bg-neutral-100 dark:bg-neutral-700 p-2">
                     <%- icon('activity', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
                   </div>
                </div>
@@ -274,7 +274,7 @@
          </div>
 
          <!-- Server Table -->
-         <div data-animate-card class="bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-neutral-700/20 rounded-xl mt-8 shadow-sm p-6">
+         <div data-animate-card class="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/20 rounded-xl mt-8 shadow-sm p-6">
             <h2 class="text-lg font-semibold text-neutral-800 dark:text-white mb-4">Server Player Counts</h2>
             <div class="overflow-x-auto">
               <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700/20">

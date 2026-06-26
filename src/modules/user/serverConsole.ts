@@ -209,7 +209,6 @@ async function proxyConsole(
 const wsServerConsoleModule: Module = {
   info: {
     name: 'Server Console Module',
-    description: 'This file is for the server console functionality.',
     version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',

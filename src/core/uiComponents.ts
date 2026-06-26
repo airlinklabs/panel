@@ -195,7 +195,7 @@ class UIComponentStore {
 
 export const uiComponentStore = new UIComponentStore();
 
-export function initializeDefaultUIComponents(): void {
+export function setupUIComponents(): void {
   uiComponentStore.addSidebarItem({
     id: 'servers',
     label: 'Servers',
@@ -291,5 +291,5 @@ export function initializeDefaultUIComponents(): void {
 
 export default {
   uiComponentStore,
-  initializeDefaultUIComponents
+  setupUIComponents
 };

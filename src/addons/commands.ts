@@ -34,9 +34,10 @@ class AddonCommandRegistry {
     try {
       const result = await cmd.handler(args);
       return result;
-    } catch (err: any) {
-      logger.error(`Command "${commandKey}" failed:`, err.message);
-      return `Command failed: ${err.message}`;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      logger.error(`Command "${commandKey}" failed:`, msg);
+      return `Command failed: ${msg}`;
     }
   }
 
@@ -77,8 +78,9 @@ class AddonScheduler {
     const timer = setInterval(async () => {
       try {
         await task.handler();
-      } catch (err: any) {
-        logger.error(`Scheduled task "${key}" failed:`, err.message);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        logger.error(`Scheduled task "${key}" failed:`, msg);
       }
     }, task.intervalMs);
 

@@ -66,7 +66,7 @@ export async function checkForUpdates(): Promise<{
   }
 }
 
-export async function performUpdate(): Promise<boolean> {
+export async function runUpdate(): Promise<boolean> {
   try {
     const backupDir = path.join(process.cwd(), 'backup');
     if (!fs.existsSync(backupDir)) {

@@ -26,7 +26,6 @@ async function listUsers(res: Response) {
 const adminModule: Module = {
   info: {
     name: 'Admin Users Module',
-    description: 'This file is for admin functionality of the Users.',
     version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
@@ -180,7 +179,7 @@ const adminModule: Module = {
             where: { id: 1 },
           });
 
-          res.render('admin/users/user', { user, req, settings, dataUser });
+          res.render('admin/users/user', { user, req, settings, dataUser, onlineUsers });
         } catch (error) {
           logger.error('Error fetching user:', error);
           return res.redirect('/login');
@@ -305,13 +304,12 @@ const adminModule: Module = {
           }
 
           // Prepare update data
-          const updateData: any = {};
+          const updateData: Record<string, string | number | boolean | null | undefined> = {};
 
           if (email) updateData.email = email;
           if (username) updateData.username = username;
           if (description) updateData.description = description;
 
-          // Handle isAdmin field (convert to boolean)
           if (isAdmin !== undefined) {
             updateData.isAdmin = isAdmin === true || isAdmin === 'true';
           }
@@ -330,12 +328,10 @@ const adminModule: Module = {
             updateData.maxStorage = maxStorage === '' || maxStorage === null ? null : parseInt(maxStorage, 10);
           }
 
-          // Handle password update if provided
           if (password && password.trim() !== '') {
             updateData.password = await bcrypt.hash(password, 12);
           }
 
-          // Update user
           await prisma.users.update({
             where: { id: targetUserId },
             data: updateData,

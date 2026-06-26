@@ -147,7 +147,7 @@ const logger = {
     writeToLogFile('LOG', text);
   },
 
-  box(options: string | { title?: string; message: string | string[]; style?: any }): void {
+  box(options: string | { title?: string; message: string | string[]; style?: Record<string, unknown> }): void {
     if (typeof options === 'string') {
       this.info(options);
       writeToLogFile('BOX', options);

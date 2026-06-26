@@ -97,12 +97,12 @@
     </div>
 
     <div class="grid grid-cols-2 gap-3 mb-5 mt-4">
-      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Addons</p>
         <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= addons ? addons.length : 0 %></p>
         <p class="text-xs text-neutral-500 mt-1">installed</p>
       </div>
-      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-3">
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Services</p>
         <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= addons ? addons.filter(a => a.status === 'running').length : 0 %></p>
         <p class="text-xs text-neutral-500 mt-1">running</p>
@@ -320,12 +320,12 @@
       </div>
 
       <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mx-8 mt-6">
-        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Addons</h2>
           <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= addons ? addons.length : 0 %></p>
           <p class="text-sm text-neutral-400 mt-2">installed on this panel</p>
         </div>
-        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2">Services</h2>
           <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= addons ? addons.filter(a => a.status === 'running').length : 0 %></p>
           <p class="text-sm text-neutral-400 mt-2">currently running</p>
@@ -361,7 +361,7 @@
               <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
+          <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800">
             <% let addonIdx = 0; addons.forEach(function(addon) { %>
             <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors addon-row"
                 style="--i:<%= addonIdx++ %>"
@@ -397,7 +397,7 @@
             <% }); %>
           </tbody>
         </table>
-        <div id="addonNoResults" class="hidden py-10 text-center text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-800/20">No addons match your search.</div>
+        <div id="addonNoResults" class="hidden py-10 text-center text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-800">No addons match your search.</div>
       </div>
       <% } else { %>
       <div class="flex flex-col items-center justify-center py-24 text-center">

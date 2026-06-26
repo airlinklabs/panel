@@ -20,7 +20,6 @@ import {
 const adminModule: Module = {
   info: {
     name: 'Admin Module',
-    description: 'This file is for admin functionality.',
     version: '2.0.0',
     moduleVersion: '1.0.0',
     author: 'AirLinkLab',
@@ -158,7 +157,6 @@ const adminModule: Module = {
             ports,
           } = req.body;
 
-          // Validate required fields
           if (!name || !nodeId || !imageId || !Memory || !Cpu || !Storage || !ownerId) {
             res.status(400).json({ error: 'Missing required fields' });
             return;
@@ -372,7 +370,7 @@ const adminModule: Module = {
                 id: parseInt(imageId),
               },
             })
-            .then((image: any) => {
+            .then((image) => {
               if (!image) {
                 return null;
               }
@@ -482,7 +480,7 @@ const adminModule: Module = {
                 let serverPort = String(parseServerPorts(Port)[0]?.externalPort ?? '');
                 try {
                   const parsedPorts = JSON.parse(server.Ports);
-                  const primary = parsedPorts.find((p: any) => p.primary);
+                  const primary = parsedPorts.find((p: { primary?: boolean; Port?: string }) => p.primary);
                   if (primary?.Port) {
                     serverPort = String(primary.Port).split(':')[0];
                   }
@@ -519,10 +517,10 @@ const adminModule: Module = {
 
               const env = ServerEnv.reduce(
                 (
-                  acc: { [key: string]: any },
-                  curr: { env: string; value: any },
+                  acc: Record<string, string>,
+                  curr: { env: string; value: string | number | boolean },
                 ) => {
-                  acc[curr.env] = curr.value;
+                  acc[curr.env] = String(curr.value);
                   return acc;
                 },
                 {},
@@ -581,7 +579,7 @@ const adminModule: Module = {
                         id: server.UUID,
                         image: dockerImageValue,
                         env,
-                        scripts: (scripts.install as any[]).map((s: any) => ({
+                        scripts: (scripts.install as Record<string, unknown>[]).map((s) => ({
                           url: s.url,
                           onStartup: s.onStart,
                           ALVKT: s.ALVKT,
@@ -691,7 +689,7 @@ const adminModule: Module = {
               } catch (error: unknown) {
                 logger.error('Error deleting container on daemon:', error);
 
-                const daemonError = error as any;
+                const daemonError = error as { response?: { status?: number; data?: { error?: string } }; message?: string };
                 const isNotFoundError =
                   daemonError.response &&
                   (daemonError.response.status === 404 ||

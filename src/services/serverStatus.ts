@@ -46,7 +46,7 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
     }
 
     return status;
-  } catch (error: any) {
+  } catch (error: unknown) {
     const errorStatus: ServerStatus = {
       online: false,
       starting: false,

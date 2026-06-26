@@ -106,8 +106,10 @@ async function* runInstall(
       const { stdout, stderr } = await execFileAsync(bin, args, { cwd: workDir });
       const output = (stdout + stderr).trim();
       if (output) yield { type: 'output', step: `Step ${key}`, cmd, output };
-    } catch (err: any) {
-      const output = ((err.stdout || '') + (err.stderr || '')).trim() || err.message;
+    } catch (err: unknown) {
+      const e = err instanceof Error ? err : new Error('Unknown error');
+      const execErr = err as { stdout?: string; stderr?: string };
+      const output = ((execErr.stdout || '') + (execErr.stderr || '')).trim() || e.message;
       yield { type: 'error', message: `"${cmd}" failed: ${output}` };
       return;
     }
@@ -173,8 +175,9 @@ const addonsModule: Module = {
         try {
           const addons = await getAllAddons();
           res.json({ success: true, addons });
-        } catch (error: any) {
-          res.status(500).json({ success: false, message: error.message });
+        } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : 'Unknown error';
+          res.status(500).json({ success: false, message: msg });
         }
       }
     );
@@ -212,56 +215,58 @@ const addonsModule: Module = {
             return res.status(502).json({ success: false, message: 'Failed to fetch addon list from GitHub' });
           }
 
-          const contents = await contentsRes.json() as any[];
-          const folders = contents.filter((i: any) => i.type === 'dir' && !i.name.startsWith('.'));
+      interface GitHubContent { type: string; name: string; path: string; sha: string }
+      const contents = await contentsRes.json() as GitHubContent[];
+      const folders = contents.filter((i) => i.type === 'dir' && !i.name.startsWith('.'));
 
-          const addonData = await Promise.all(
-            folders.map(async (folder: any) => {
-              try {
-                const infoRes = await fetch(`${ADDONS_RAW_BASE}/${folder.name}/info.json`, {
-                  headers: { 'User-Agent': 'airlink-panel' },
-                });
-                if (!infoRes.ok) return null;
-                const info = await infoRes.json() as any;
+      const addonData = await Promise.all(
+        folders.map(async (folder) => {
+          try {
+            const infoRes = await fetch(`${ADDONS_RAW_BASE}/${folder.name}/info.json`, {
+              headers: { 'User-Agent': 'airlink-panel' },
+            });
+            if (!infoRes.ok) return null;
+            const info = await infoRes.json() as Record<string, unknown>;
 
-                let installManifest: InstallManifest = {};
-                try {
-                  const instRes = await fetch(`${ADDONS_RAW_BASE}/${folder.name}/install.json`, {
-                    headers: { 'User-Agent': 'airlink-panel' },
-                  });
-                  if (instRes.ok) installManifest = await instRes.json() as InstallManifest;
-                } catch { /* best-effort */ }
+            let installManifest: InstallManifest = {};
+            try {
+              const instRes = await fetch(`${ADDONS_RAW_BASE}/${folder.name}/install.json`, {
+                headers: { 'User-Agent': 'airlink-panel' },
+              });
+              if (instRes.ok) installManifest = await instRes.json() as InstallManifest;
+            } catch { /* best-effort */ }
 
-                return {
-                  id: folder.name,
-                  name: info.name || folder.name,
-                  version: info.version || '',
-                  description: info.description || '',
-                  longDescription: info.longDescription || info.description || '',
-                  author: info.author || '',
-                  status: info.status || 'working',
-                  tags: info.tags || [],
-                  icon: info.icon || '',
-                  features: info.features || [],
-                  github: info.github || `https://github.com/${ADDONS_REPO_OWNER}/${ADDONS_REPO_NAME}/tree/main/${folder.name}`,
-                  screenshots: info.screenshots || [],
-                  installRepo: installManifest.repo || '',
-                  installBranch: installManifest.branch || 'main',
-                  installNote: installManifest.note || '',
-                  installCommands: installManifest.commands || {},
-                };
-              } catch {
-                return null;
-              }
-            })
-          );
-
-          res.json({ success: true, addons: addonData.filter(Boolean) });
-        } catch (error: any) {
-          logger.error('Error fetching addon store list:', error);
-          res.status(500).json({ success: false, message: error.message });
+            return {
+              id: folder.name,
+              name: info.name || folder.name,
+              version: info.version || '',
+              description: info.description || '',
+              longDescription: info.longDescription || info.description || '',
+              author: info.author || '',
+              status: info.status || 'working',
+              tags: info.tags || [],
+              icon: info.icon || '',
+              features: info.features || [],
+              github: info.github || `https://github.com/${ADDONS_REPO_OWNER}/${ADDONS_REPO_NAME}/tree/main/${folder.name}`,
+              screenshots: info.screenshots || [],
+              installRepo: installManifest.repo || '',
+              installBranch: installManifest.branch || 'main',
+              installNote: installManifest.note || '',
+            installCommands: installManifest.commands || {},
+          };
+        } catch {
+          return null;
         }
-      }
+        })
+      );
+
+      res.json({ success: true, addons: addonData.filter(Boolean) });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Error fetching addon store list:', error);
+      res.status(500).json({ success: false, message: msg });
+    }
+  }
     );
 
     router.get(
@@ -292,8 +297,11 @@ const addonsModule: Module = {
 
           if (!ghRes.ok) return res.json({ success: true, counts: {} });
 
-          const data: any = await ghRes.json();
-          const nodes = data?.data?.repository?.discussions?.nodes || [];
+          const data = await ghRes.json() as Record<string, unknown>;
+          const graphData = (data as Record<string, Record<string, unknown>>).data;
+          const repository = graphData?.repository as Record<string, unknown> | undefined;
+          const discussions = repository?.discussions as Record<string, unknown> | undefined;
+          const nodes = (discussions?.nodes ?? []) as Array<{ title: string; comments: { totalCount: number } }>;
           const counts: Record<string, number> = {};
           for (const d of nodes) {
             if (d.title) counts[d.title.toLowerCase()] = d.comments.totalCount;
@@ -370,12 +378,13 @@ const addonsModule: Module = {
                 env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
               }
             );
-          } catch (cloneErr: any) {
-            const msg: string = ((cloneErr.stdout || '') + (cloneErr.stderr || '')).trim() || cloneErr.message;
-            if (msg.toLowerCase().includes('username') || msg.toLowerCase().includes('authentication')) {
+          } catch (cloneErr: unknown) {
+            const execErr = cloneErr as { stdout?: string; stderr?: string };
+            const cloneMsg: string = ((execErr.stdout || '') + (execErr.stderr || '')).trim() || (cloneErr instanceof Error ? cloneErr.message : 'Unknown error');
+            if (cloneMsg.toLowerCase().includes('username') || cloneMsg.toLowerCase().includes('authentication')) {
               send({ type: 'error', message: 'Clone failed: repository requires authentication' });
             } else {
-              send({ type: 'error', message: `Clone failed: ${msg}` });
+              send({ type: 'error', message: `Clone failed: ${cloneMsg}` });
             }
             if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
             res.end();
@@ -403,10 +412,11 @@ const addonsModule: Module = {
           await loadAddons(req.app);
 
           send({ type: 'done', message: `"${manifest.name || slug}" installed successfully` });
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : 'Unknown error';
           logger.error('Error installing addon:', error);
           if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
-          send({ type: 'error', message: error.message });
+          send({ type: 'error', message: msg });
         }
 
         res.end();
@@ -439,8 +449,9 @@ const addonsModule: Module = {
             commands,
             settings: settingsMap,
           });
-        } catch (error: any) {
-          res.status(500).json({ success: false, message: error.message });
+        } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : 'Unknown error';
+          res.status(500).json({ success: false, message: msg });
         }
       }
     );
@@ -460,9 +471,10 @@ const addonsModule: Module = {
           } else {
             res.status(500).json({ success: false, message: result.message || 'Failed to update addon status' });
           }
-        } catch (error: any) {
+          } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : 'Unknown error';
           logger.error('Error toggling addon status:', error);
-          res.status(500).json({ success: false, message: error.message });
+          res.status(500).json({ success: false, message: msg });
         }
       }
     );
@@ -474,9 +486,10 @@ const addonsModule: Module = {
         try {
           const result = await reloadAddons(req.app);
           res.json({ success: result.success, message: result.message });
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : 'Unknown error';
           logger.error('Error reloading addons:', error);
-          res.status(500).json({ success: false, message: error.message });
+          res.status(500).json({ success: false, message: msg });
         }
       }
     );
@@ -525,8 +538,9 @@ const addonsModule: Module = {
           }
 
           res.json({ success: true, message: 'Settings saved' });
-        } catch (error: any) {
-          res.status(500).json({ success: false, message: error.message });
+        } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : 'Unknown error';
+          res.status(500).json({ success: false, message: msg });
         }
       }
     );
@@ -542,8 +556,9 @@ const addonsModule: Module = {
           const key = `${slug}:${command}`;
           const result = await commandRegistry.execute(key, args);
           res.json({ success: true, output: result });
-        } catch (error: any) {
-          res.status(500).json({ success: false, message: error.message });
+        } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : 'Unknown error';
+          res.status(500).json({ success: false, message: msg });
         }
       }
     );
@@ -568,8 +583,9 @@ const addonsModule: Module = {
           });
 
           res.json({ success: true, message: `Capability "${capability}" ${enabled ? 'enabled' : 'disabled'}` });
-        } catch (error: any) {
-          res.status(500).json({ success: false, message: error.message });
+        } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : 'Unknown error';
+          res.status(500).json({ success: false, message: msg });
         }
       }
     );
@@ -596,9 +612,10 @@ const addonsModule: Module = {
           await reloadAddons(req.app);
 
           res.json({ success: true, message: `Addon "${slug}" uninstalled` });
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : 'Unknown error';
           logger.error('Error uninstalling addon:', error);
-          res.status(500).json({ success: false, message: error.message });
+          res.status(500).json({ success: false, message: msg });
         }
       }
     );

@@ -41,8 +41,8 @@ export async function checkEulaStatus(serverId: string): Promise<CheckEulaResult
     });
 
     return { accepted: (eulaResponse.data as string).includes('eula=true') };
-  } catch (error: any) {
-    if (error.response?.status === 404) {
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
       return { accepted: false };
     }
     return { accepted: false, error: 'An error occurred while checking the EULA status.' };

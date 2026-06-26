@@ -7,7 +7,7 @@ import prisma from '../db';
  * @param data The seed data to validate
  * @returns True if the data is valid, false otherwise
  */
-export function* validateSeedData(data: any[]): Generator<boolean> {
+export function* validateSeedData(data: Record<string, unknown>[]): Generator<boolean> {
   yield true;
   yield data.length > 0;
   return data.length > 0;
@@ -25,12 +25,13 @@ const rl = createInterface({
 });
 
 interface ImageData {
-  meta: Record<string, any>;
-  dockerImages: Record<string, any>;
-  info: Record<string, any>;
-  scripts: Record<string, any>;
-  variables: Record<string, any>;
-  [key: string]: any;
+  meta: Record<string, unknown>;
+  dockerImages: Record<string, unknown>;
+  info: Record<string, unknown>;
+  scripts: Record<string, unknown>;
+  variables: Record<string, unknown>;
+  name?: string;
+  [key: string]: unknown;
 }
 
 class Seeder {
@@ -42,7 +43,7 @@ class Seeder {
     });
   }
 
-  private mapFields(data: Record<string, any>): Record<string, any> {
+  private mapFields(data: Record<string, unknown>): Record<string, unknown> {
     return Object.entries(data).reduce(
       (acc, [key, value]) => ({
         ...acc,
@@ -52,7 +53,7 @@ class Seeder {
     );
   }
 
-  private stringifyJsonFields(image: Record<string, any>): Record<string, any> {
+  private stringifyJsonFields(image: Record<string, unknown>): Record<string, unknown> {
     const jsonFields = ['meta', 'dockerImages', 'info', 'scripts', 'variables'];
 
     if (!image.dockerImages && image.docker_images) {
@@ -80,7 +81,7 @@ class Seeder {
     }
   }
 
-  private async fetchAndProcessImages(): Promise<Record<string, any>[]> {
+  private async fetchAndProcessImages(): Promise<Record<string, unknown>[]> {
     console.info(`Fetching image index from ${IMAGES_URL}...`);
     const { data: imageUrls } = await axios.get<string[]>(IMAGES_URL);
     console.info(`Found ${imageUrls.length} images in the index.`);
@@ -110,7 +111,7 @@ class Seeder {
     console.info('=====================\n');
   }
 
-  private async performSeeding(): Promise<void> {
+  private async seedDatabase(): Promise<void> {
     try {
       const processedImages = await this.fetchAndProcessImages();
 
@@ -128,9 +129,9 @@ class Seeder {
       console.info('Starting seeding process...');
 
       for (const image of processedImages) {
-        if (existingImageMap.has(image.name)) {
+        if (existingImageMap.has(String(image.name))) {
           await prisma.images.update({
-            where: { id: existingImageMap.get(image.name)!.id },
+            where: { id: existingImageMap.get(String(image.name))!.id },
             data: image
           });
           updatedCount++;
@@ -163,7 +164,7 @@ class Seeder {
         }
       }
 
-      await this.performSeeding();
+      await this.seedDatabase();
     } catch (error) {
       console.error('Failed during seeding process:', error);
       throw error;
@@ -174,13 +175,11 @@ class Seeder {
   }
 }
 
-// Error handling
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
   process.exit(1);
 });
 
-// Main execution
 const seeder = new Seeder();
 seeder
   .seed()

@@ -57,8 +57,8 @@
       <% } else { %>
       <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400 pt-4 pb-1"><%= req.translations.navAdminPanel || 'Admin Panel' %></p>
       <% adminItems.forEach(function(item) { %>
-      <div data-animate-card class="flex items-center gap-3 px-4 py-3 rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-100 dark:border-neutral-700/10 opacity-40 pointer-events-none">
-        <div data-animate-card class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-700/30 flex items-center justify-center shrink-0">
+      <div data-animate-card class="flex items-center gap-3 px-4 py-3 rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700/10 opacity-40 pointer-events-none">
+        <div data-animate-card class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center shrink-0">
           <%- icon(item.iconId, { size: 18, class: 'text-neutral-400 shrink-0' }) %>
         </div>
         <div class="flex-1 min-w-0">

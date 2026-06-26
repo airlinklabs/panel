@@ -20,7 +20,7 @@
 
         <%- include('../../components/serverTemplate', { features: ['players', 'worlds'] }) %>
 
-        <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4 mb-4">
+        <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4 mb-4">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-neutral-800 dark:text-white">Players</p>
@@ -46,7 +46,7 @@
         <% if (players && players.length > 0) { %>
         <div id="PlayersGrid" class="grid grid-cols-2 gap-3">
           <% players.forEach(function(player) { %>
-          <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-3 flex items-center gap-3">
+          <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-3 flex items-center gap-3">
             <img
               src="https://crafatar.com/avatars/<%= player.uuid %>?size=64&overlay"
               alt="<%= player.name %>"
@@ -63,7 +63,7 @@
           <% }); %>
         </div>
         <% } else { %>
-        <div id="no-players-message" class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-8 text-center">
+        <div id="no-players-message" class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-8 text-center">
           <% if (!serverIsOnline && errorMessage && errorMessage.message) { %>
             <div class="w-12 h-12 rounded-full bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center mx-auto mb-3">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-400">
@@ -122,7 +122,7 @@
             <%- include('../../components/serverTemplate', { features: ['players', 'worlds'] }) %>
 
             <div class="p-6">
-                <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5 mb-5">
+                <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-5 mb-5">
                   <div class="flex items-center justify-between">
                     <div>
                       <p class="text-sm font-medium text-neutral-800 dark:text-white">Players</p>
@@ -148,7 +148,7 @@
                 <% if (players && players.length > 0) { %>
                 <div id="PlayersGrid" class="grid grid-cols-2 lg:grid-cols-3 gap-3">
                   <% players.forEach(function(player) { %>
-                  <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4 flex items-center justify-between">
+                  <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4 flex items-center justify-between">
                     <div class="flex items-center gap-3 min-w-0">
                       <img
                         src="https://crafatar.com/avatars/<%= player.uuid %>?size=64&overlay"
@@ -168,7 +168,7 @@
                   <% }); %>
                 </div>
                 <% } else { %>
-                <div id="no-players-message" class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-8 text-center">
+                <div id="no-players-message" class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-8 text-center">
                   <% if (!serverIsOnline && errorMessage && errorMessage.message) { %>
                     <div class="w-12 h-12 rounded-full bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center mx-auto mb-3">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-400">
