@@ -1,51 +1,41 @@
 <% if (isMobileViewport) { %>
-<%- include('../components/header', { title: 'Settings' }) %>
+<%- include('../components/header', { title: 'Error' }) %>
 
-  <main id="page-content" class="">
+  <main id="page-content">
     <%- include('../components/template') %>
       <div class="px-4 pt-5 pb-24">
+        <section class="flex min-h-[calc(100dvh-10rem)] flex-col items-center justify-center text-center">
+          <div class="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-neutral-200 bg-white text-neutral-800 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-white">
+            <%- icon('triangle-alert', { class: 'h-6 w-6', strokeWidth: 1.6 }) %>
+          </div>
 
-        <main id="page-content" class="min-h-[calc(100dvh-7.5rem)] px-4 py-10">
-          <section class="flex min-h-[calc(100dvh-10rem)] flex-col items-center justify-center text-center">
-            <div
-              class="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-neutral-200 bg-white text-neutral-800 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6"
-                stroke="currentColor" class="h-6 w-6">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M12 9v3.75m0 3.75h.008v.008H12v-.008Zm9-4.5a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-              </svg>
-            </div>
+          <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400">Error <%= statusCode %></p>
+          <h1 class="mt-2 text-2xl font-semibold tracking-tight text-neutral-900 dark:text-white">
+            <%= errorTitle %>
+          </h1>
+          <p class="mt-3 max-w-sm text-sm leading-6 text-neutral-600 dark:text-neutral-400">
+            <%= errorMessage %>
+          </p>
+          <p class="mt-4 w-full max-w-sm truncate rounded-lg border border-neutral-200 bg-white px-3 py-2 font-mono text-[11px] text-neutral-500 dark:border-white/10 dark:bg-white/5 dark:text-neutral-400">
+            <%= path %>
+          </p>
 
-            <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400">Error <%= statusCode %>
-            </p>
-            <h1 class="mt-2 text-2xl font-semibold tracking-tight text-neutral-900 dark:text-white">
-              <%= errorTitle %>
-            </h1>
-            <p class="mt-3 max-w-sm text-sm leading-6 text-neutral-600 dark:text-neutral-400">
-              <%= errorMessage %>
-            </p>
-            <p
-              class="mt-4 w-full max-w-sm truncate rounded-lg border border-neutral-200 bg-white px-3 py-2 font-mono text-[11px] text-neutral-500 dark:border-white/10 dark:bg-white/5 dark:text-neutral-400">
-              <%= path %>
-            </p>
-
-            <div class="mt-7 grid w-full max-w-sm grid-cols-2 gap-2">
-              <button type="button" onclick="history.length > 1 ? history.back() : location.assign('/')"
-                class="rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-800 shadow-sm transition dark:border-white/10 dark:bg-white/5 dark:text-white">
-                Back
-              </button>
-              <a href="/"
-                class="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition dark:bg-white dark:text-neutral-900">
-                Dashboard
-              </a>
-            </div>
-          </section>
-        </main>
+          <div class="mt-7 grid w-full max-w-sm grid-cols-2 gap-2">
+            <button type="button" onclick="history.length > 1 ? history.back() : location.assign('/')"
+              class="rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-800 shadow-sm transition dark:border-white/10 dark:bg-white/5 dark:text-white">
+              Back
+            </button>
+            <a href="/"
+              class="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition dark:bg-white dark:text-neutral-900">
+              Dashboard
+            </a>
+          </div>
+        </section>
       </div>
   </main>
   <%- include('../components/footer') %>
 <% } else { %>
-<%- include('../components/header', { title:'ERROR' }) %>
+<%- include('../components/header', { title: 'Error' }) %>
   <%- include('../components/toast') %>
     <main class="min-h-screen">
       <div class="flex min-h-screen">
@@ -55,43 +45,39 @@
 
         <div id="page-content" class="flex-1 overflow-y-auto pt-16">
           <div class="px-12 pt-6 pb-8">
-            <section
-              class="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-3xl flex-col items-center justify-center text-center">
-            <div
-              class="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-neutral-200 bg-white text-neutral-800 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-white">
-              <%- icon('triangle-alert', { class: 'h-7 w-7', strokeWidth: 1.6 }) %>
-            </div>
+            <section class="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-3xl flex-col items-center justify-center text-center">
+              <div class="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-neutral-200 bg-white text-neutral-800 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-white">
+                <%- icon('triangle-alert', { class: 'h-7 w-7', strokeWidth: 1.6 }) %>
+              </div>
 
-            <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Error <%= statusCode %>
-            </p>
-            <h1 class="mt-3 text-3xl font-semibold tracking-tight text-neutral-900 dark:text-white">
-              <%= errorTitle %>
-            </h1>
-            <p class="mt-3 max-w-xl text-sm leading-6 text-neutral-600 dark:text-neutral-400">
-              <%= errorMessage %>
-            </p>
-            <p
-              class="mt-4 max-w-xl truncate rounded-lg border border-neutral-200 bg-white px-3 py-2 font-mono text-xs text-neutral-500 dark:border-white/10 dark:bg-white/5 dark:text-neutral-400">
-              <%= path %>
-            </p>
+              <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Error <%= statusCode %></p>
+              <h1 class="mt-3 text-3xl font-semibold tracking-tight text-neutral-900 dark:text-white">
+                <%= errorTitle %>
+              </h1>
+              <p class="mt-3 max-w-xl text-sm leading-6 text-neutral-600 dark:text-neutral-400">
+                <%= errorMessage %>
+              </p>
+              <p class="mt-4 max-w-xl truncate rounded-lg border border-neutral-200 bg-white px-3 py-2 font-mono text-xs text-neutral-500 dark:border-white/10 dark:bg-white/5 dark:text-neutral-400">
+                <%= path %>
+              </p>
 
-            <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <button type="button" onclick="history.length > 1 ? history.back() : location.assign('/')"
-                class="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-800 shadow-sm transition hover:bg-neutral-100 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10">
-                Back
-              </button>
-              <a href="/"
-                class="inline-flex items-center gap-2 rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200">
-                Dashboard
-              </a>
-              <% if (user && user.isAdmin) { %>
-                <a href="/admin/overview"
+              <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+                <button type="button" onclick="history.length > 1 ? history.back() : location.assign('/')"
                   class="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-800 shadow-sm transition hover:bg-neutral-100 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10">
-                  Admin
+                  Back
+                </button>
+                <a href="/"
+                  class="inline-flex items-center gap-2 rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200">
+                  Dashboard
                 </a>
+                <% if (user && user.isAdmin) { %>
+                  <a href="/admin/overview"
+                    class="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-800 shadow-sm transition hover:bg-neutral-100 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10">
+                    Admin
+                  </a>
                 <% } %>
-            </div>
-          </section>
+              </div>
+            </section>
           </div>
         </div>
       </div>

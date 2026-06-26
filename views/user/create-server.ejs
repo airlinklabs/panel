@@ -1,185 +1,245 @@
-<head>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-    <style>
-        body {
-            background-color: #0e1726;
-            font-family: 'Inter', sans-serif;
-            color: #e2e8f0;
-        }
-
-        .bg-theme-card {
-            background-color: #111c2d;
-        }
-
-        .bg-theme-body {
-            background-color: #0e1726;
-        }
-
-        .text-theme-l {
-            color: #94a3b8;
-        }
-
-        .text-theme-d {
-            color: #475569;
-        }
-
-        .bg-theme-btn {
-            background-color: #3b82f6;
-        }
-
-        .bg-theme-btn:hover {
-            background-color: #2563eb;
-        }
-
-        .bg-theme-nav {
-            background-color: #111c2d;
-        }
-
-        .bg-theme-input {
-            background-color: #1e293b;
-        }
-
-        .card-shadow {
-            box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.43);
-        }
-
-        .btn-shadow {
-            box-shadow: 0px 0px 3px 1px rgba(0,0,0,0.23);
-        }
-
-        .step-active {
-            background-color: #3b82f6;
-            color: white;
-        }
-
-        .step-inactive {
-            background-color: #1e293b;
-            color: #94a3b8;
-        }
-    </style>
-</head>
+<%- include('../components/header', { title: 'Create Server' }) %>
 
 <% if (isMobileViewport) { %>
-    <%- include('../components/template', { body: 'user/create-server' }) %>
+<main id="page-content" class="">
+  <%- include('../components/template') %>
 
-    <main id="page-content" class="">
-        <%- include('../components/header', { name: user.name, avatar: user.avatar }) %>
-        <section class="px-4 py-5">
-            <div class="row g-3">
-                <div class="col-12">
-                    <div class="data-animate-card bg-theme-card card-shadow rounded p-4">
-                        <h3 class="text-white fw-bold mb-4">Create Server</h3>
+  <div class="px-4 py-5">
+    <div class="mb-5">
+      <h1 class="text-base font-medium text-neutral-800 dark:text-white">Create Server</h1>
+      <p class="text-xs text-neutral-500 mt-0.5">Spin up a new server in a few steps.</p>
+    </div>
 
-                        <div class="d-flex align-items-center justify-content-center mb-4">
-                            <div class="step-active rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">1</div>
-                            <div class="flex-fill border-top mx-2" style="border-top: 2px solid #334155;"></div>
-                            <div class="step-inactive rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">2</div>
-                            <div class="flex-fill border-top mx-2" style="border-top: 2px solid #334155;"></div>
-                            <div class="step-inactive rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">3</div>
-                        </div>
+    <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+    <div class="mb-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3">
+      <p class="text-sm font-medium text-red-700 dark:text-red-400"><%= errorMessage.message || errorMessage %></p>
+    </div>
+    <% } %>
 
-                        <form action="/api/servers/create" method="POST">
-                            <div class="mb-3">
-                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Server Name</label><input type="text" name="name" required class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
-                            </div>
-                            <div class="mb-3">
-                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Server Type</label><select name="serverType" required class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full"><option value="paper">Paper</option><option value="purpur">Purpur</option><option value="spigot">Spigot</option><option value="vanilla">Vanilla</option><option value="forge">Forge</option><option value="fabric">Fabric</option></select></div>
-                            </div>
-                            <div class="mb-3">
-                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Version</label><select name="serverVersion" required class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full"><option value="1.21">1.21</option><option value="1.20.6">1.20.6</option><option value="1.20.4">1.20.4</option></select></div>
-                            </div>
-                            <div class="mb-3">
-                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">RAM (MB)</label><input type="number" name="ram" value="1024" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
-                            </div>
-                            <div class="mb-3">
-                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">CPU (cores)</label><input type="number" name="cpu" value="1" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
-                            </div>
-                            <div class="mb-3">
-                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Disk (MB)</label><input type="number" name="disk" value="10240" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
-                            </div>
-                            <button type="submit" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90 w-100 btn-shadow">Create Server</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+    <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
+      <form id="createServerForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Server Name</label>
+          <input type="text" name="name" required placeholder="my-server"
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Description</label>
+          <input type="text" name="description" placeholder="Optional description"
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Node</label>
+          <select name="nodeId" required
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+            <% if (nodes && nodes.length > 0) { %>
+              <% nodes.forEach(function(node) { %>
+              <option value="<%= node.id %>"><%= node.name %></option>
+              <% }); %>
+            <% } else { %>
+              <option value="" disabled selected>No nodes available</option>
+            <% } %>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Server Image</label>
+          <select name="imageId" required id="imageSelect"
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+            <% if (images && images.length > 0) { %>
+              <% images.forEach(function(img) { %>
+              <option value="<%= img.id %>" data-docker="<%= img.dockerImage %>" data-name="<%= img.name %>"><%= img.name %></option>
+              <% }); %>
+            <% } else { %>
+              <option value="" disabled selected>No images available</option>
+            <% } %>
+          </select>
+          <input type="hidden" name="dockerImage" id="dockerImageInput" value="<%= images && images.length > 0 ? images[0].dockerImage : '' %>">
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Memory (MB)</label>
+            <input type="number" name="Memory" value="1024" min="128" max="<%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxMemory : 8192 %>"
+              class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">CPU (%)</label>
+            <input type="number" name="Cpu" value="100" min="50" max="<%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxCpu : 400 %>" step="50"
+              class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Disk (MB)</label>
+            <input type="number" name="Storage" value="10240" min="128" max="<%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxStorage : 51200 %>"
+              class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+          </div>
+        </div>
+
+        <% if (typeof serverLimit !== 'undefined' && typeof currentCount !== 'undefined') { %>
+        <p class="text-xs text-neutral-400">Servers: <%= currentCount %> / <%= serverLimit %></p>
+        <% } %>
+
+        <button type="submit" id="submitBtn"
+          class="w-full rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2.5 text-sm font-medium transition hover:bg-neutral-700 dark:hover:bg-neutral-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-white focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950">
+          Create Server
+        </button>
+      </form>
+    </div>
+  </div>
+</main>
 
 <% } else { %>
-    <%- include('../components/template', { body: 'user/create-server' }) %>
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <%- include('../components/template') %>
 
-    <main class="h-screen m-auto">
-        <div class="flex h-screen">
-            <%- include('../components/template') %>
-            <section id="page-content" class="flex-1 overflow-y-auto">
-                <%- include('../components/header', { name: user.name, avatar: user.avatar }) %>
-                <div class="p-6">
-                    <div class="max-w-2xl mx-auto">
-                        <div class="data-animate-card bg-theme-card card-shadow rounded-lg p-6">
-                            <h3 class="text-white font-bold text-lg mb-6">Create Server</h3>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16">
+      <div class="px-12 pt-6 pb-8">
+        <div class="max-w-2xl mx-auto">
+          <div class="mb-6">
+            <h1 class="text-base font-medium text-neutral-800 dark:text-white">Create Server</h1>
+            <p class="text-sm text-neutral-500 mt-0.5">Spin up a new server in a few steps.</p>
+          </div>
 
-                            <div class="flex items-center justify-center mb-6">
-                                <div class="step-active rounded-full flex items-center justify-center mr-2" style="width: 32px; height: 32px;">1</div>
-                                <div class="flex-1 border-t" style="border-top: 2px solid #334155;"></div>
-                                <div class="step-inactive rounded-full flex items-center justify-center mx-2" style="width: 32px; height: 32px;">2</div>
-                                <div class="flex-1 border-t" style="border-top: 2px solid #334155;"></div>
-                                <div class="step-inactive rounded-full flex items-center justify-center" style="width: 32px; height: 32px;">3</div>
-                            </div>
+          <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+          <div class="mb-5 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3">
+            <p class="text-sm font-medium text-red-700 dark:text-red-400"><%= errorMessage.message || errorMessage %></p>
+          </div>
+          <% } %>
 
-                            <form action="/api/servers/create" method="POST">
-                                <div class="grid grid-cols-2 gap-4 mb-6">
-                                    <div>
-                                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Server Name</label><input type="text" name="name" required class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
-                                    </div>
-                                    <div>
-                                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Server Type</label><select name="serverType" required class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full"><option value="paper">Paper</option><option value="purpur">Purpur</option><option value="spigot">Spigot</option><option value="vanilla">Vanilla</option><option value="forge">Forge</option><option value="fabric">Fabric</option></select></div>
-                                    </div>
-                                    <div>
-                                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Version</label><select name="serverVersion" required class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full"><option value="1.21">1.21</option><option value="1.20.6">1.20.6</option><option value="1.20.4">1.20.4</option></select></div>
-                                    </div>
-                                    <div>
-                                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">RAM (MB)</label><input type="number" name="ram" value="1024" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
-                                    </div>
-                                    <div>
-                                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">CPU (cores)</label><input type="number" name="cpu" value="1" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
-                                    </div>
-                                    <div>
-                                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Disk (MB)</label><input type="number" name="disk" value="10240" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
-                                    </div>
-                                </div>
-                                <button type="submit" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90 btn-shadow">Create Server</button>
-                            </form>
-                        </div>
-                    </div>
+          <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-6">
+            <form id="createServerForm" class="space-y-5">
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Server Name</label>
+                <input type="text" name="name" required placeholder="my-server"
+                  class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Description</label>
+                <input type="text" name="description" placeholder="Optional description"
+                  class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Node</label>
+                  <select name="nodeId" required
+                    class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-4 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                    <% if (nodes && nodes.length > 0) { %>
+                      <% nodes.forEach(function(node) { %>
+                      <option value="<%= node.id %>"><%= node.name %></option>
+                      <% }); %>
+                    <% } else { %>
+                      <option value="" disabled selected>No nodes available</option>
+                    <% } %>
+                  </select>
                 </div>
-            </section>
+                <div>
+                  <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Server Image</label>
+                  <select name="imageId" required id="imageSelect"
+                    class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-4 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                    <% if (images && images.length > 0) { %>
+                      <% images.forEach(function(img) { %>
+                      <option value="<%= img.id %>" data-docker="<%= img.dockerImage %>" data-name="<%= img.name %>"><%= img.name %></option>
+                      <% }); %>
+                    <% } else { %>
+                      <option value="" disabled selected>No images available</option>
+                    <% } %>
+                  </select>
+                  <input type="hidden" name="dockerImage" id="dockerImageInput" value="<%= images && images.length > 0 ? images[0].dockerImage : '' %>">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Resources</label>
+                <div class="grid grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Memory (MB)</label>
+                    <input type="number" name="Memory" value="1024" min="128" max="<%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxMemory : 8192 %>"
+                      class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">CPU (%)</label>
+                    <input type="number" name="Cpu" value="100" min="50" max="<%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxCpu : 400 %>" step="50"
+                      class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Disk (MB)</label>
+                    <input type="number" name="Storage" value="10240" min="128" max="<%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxStorage : 51200 %>"
+                      class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                  </div>
+                </div>
+              </div>
+
+              <% if (typeof serverLimit !== 'undefined' && typeof currentCount !== 'undefined') { %>
+              <p class="text-xs text-neutral-400">Servers: <%= currentCount %> / <%= serverLimit %></p>
+              <% } %>
+
+              <div class="flex items-center gap-3 pt-2">
+                <a href="/" class="min-h-10 px-4 py-2 rounded-xl text-sm font-medium bg-transparent text-neutral-500 border border-neutral-200 dark:border-white/10 hover:bg-neutral-100 dark:hover:bg-white/[0.05] transition">Cancel</a>
+                <button type="submit" id="submitBtn"
+                  class="min-h-10 px-6 py-2 rounded-xl text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-white focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950 active:scale-[0.98]">
+                  Create Server
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-    </main>
+      </div>
+    </div>
+  </div>
+</main>
 <% } %>
 
 <script nonce="<%- nonce %>">
-    function updateOptions() {
-        const type = document.getElementById('serverType').value;
-        const versionSelect = document.getElementById('serverVersion');
-        versionSelect.innerHTML = '';
+(function() {
+  var imageSelect = document.getElementById('imageSelect');
+  var dockerInput = document.getElementById('dockerImageInput');
+  var form = document.getElementById('createServerForm');
+  var submitBtn = document.getElementById('submitBtn');
 
-        const versions = {
-            paper: ['1.21', '1.20.6', '1.20.4', '1.20.2', '1.20.1'],
-            purpur: ['1.21', '1.20.6', '1.20.4'],
-            spigot: ['1.21', '1.20.6', '1.20.4'],
-            vanilla: ['1.21', '1.20.6', '1.20.4'],
-            forge: ['1.21', '1.20.6', '1.20.4'],
-            fabric: ['1.21', '1.20.6', '1.20.4']
-        };
+  if (imageSelect && dockerInput) {
+    imageSelect.addEventListener('change', function() {
+      var opt = imageSelect.options[imageSelect.selectedIndex];
+      if (opt && opt.dataset.docker) {
+        dockerInput.value = opt.dataset.docker;
+      }
+    });
+  }
 
-        (versions[type] || []).forEach(v => {
-            const opt = document.createElement('option');
-            opt.value = v;
-            opt.textContent = v;
-            versionSelect.appendChild(opt);
+  if (form) {
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating...';
+
+      var data = {};
+      var fd = new FormData(form);
+      fd.forEach(function(val, key) { data[key] = val; });
+
+      try {
+        var r = await fetch('/create-server', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
         });
-    }
-
-    document.getElementById('serverType').addEventListener('change', updateOptions);
+        var result = await r.json();
+        if (r.ok && result.success) {
+          window.location.href = result.redirect || '/dashboard';
+        } else {
+          showToast(result.error || 'Failed to create server.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Create Server';
+        }
+      } catch (err) {
+        showToast('Something went wrong. Please try again.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create Server';
+      }
+    });
+  }
+})();
 </script>

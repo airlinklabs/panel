@@ -17,7 +17,7 @@
 body {
   background-color: var(--theme-bg) !important;
   color: var(--theme-text) !important;
-  font-family: var(--theme-font-family, 'General Sans', ui-sans-serif, system-ui, sans-serif) !important;
+  font-family: var(--theme-font-family, 'Satoshi', ui-sans-serif, system-ui, sans-serif) !important;
   border-radius: var(--theme-radius-root, 0) !important;
 }
 

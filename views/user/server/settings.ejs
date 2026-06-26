@@ -26,11 +26,11 @@
                     <dl class="grid grid-cols-2 gap-x-4 gap-y-3">
                         <div>
                             <dt class="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Node</dt>
-                            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5 truncate"><%= server.node.name %></dd>
+                            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5 truncate"><%= server.node ? server.node.name : 'Unknown' %></dd>
                         </div>
                         <div>
                             <dt class="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Image</dt>
-                            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5 truncate"><%= server.image.name || 'Unknown' %></dd>
+                            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5 truncate"><%= server.image ? server.image.name : 'Unknown' %></dd>
                         </div>
                         <div>
                             <dt class="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Memory</dt>
@@ -135,11 +135,11 @@
                         <dl class="grid grid-cols-2 gap-x-6 gap-y-4">
                             <div>
                                 <dt class="text-xs font-medium text-neutral-500 uppercase tracking-wide">Node</dt>
-                                <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-1 truncate"><%= server.node.name %></dd>
+                                <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-1 truncate"><%= server.node ? server.node.name : 'Unknown' %></dd>
                             </div>
                             <div>
                                 <dt class="text-xs font-medium text-neutral-500 uppercase tracking-wide">Image</dt>
-                                <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-1 truncate"><%= server.image.name || 'Unknown' %></dd>
+                                <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-1 truncate"><%= server.image ? server.image.name : 'Unknown' %></dd>
                             </div>
                             <div>
                                 <dt class="text-xs font-medium text-neutral-500 uppercase tracking-wide">Memory</dt>

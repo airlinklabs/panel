@@ -7,6 +7,10 @@
     <meta name="csrf-token" content="<%= csrfToken %>">
     <% } %>
     <title><%= settings.title %> - <%= title %></title>
+    <meta name="description" content="<%= settings.title %> server control panel for managing servers, users, files, nodes, and activity.">
+    <meta property="og:title" content="<%= settings.title %> - <%= title %>">
+    <meta property="og:description" content="Manage game servers, access, files, and node health from <%= settings.title %>.">
+    <meta property="og:image" content="<%= settings.logo && settings.logo.startsWith('/') ? settings.logo : '/assets/logo.png' %>">
     <link rel="stylesheet" href="/styles.css">
     <link rel="stylesheet" href="/layout-animations.css">
     <link rel="stylesheet" href="/styles/motion.css">
@@ -23,7 +27,10 @@
     <link rel="stylesheet" href="<%= settings.darkTheme %>" id="dark-theme-css" data-theme-mode="dark">
     <% } %>
     <link rel="preconnect" href="https://cdn.fontshare.com">
-    <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,300,600,400,700&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script nonce="<%- nonce %>" src="/js/csrf.js"></script>
     <script nonce="<%- nonce %>" src="/js/core/viewport.js"></script>
     <script nonce="<%- nonce %>" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@8/dist/turbo.min.js" data-turbo-eval="false"></script>
@@ -34,27 +41,20 @@
       html, body, * { scrollbar-width: none; -ms-overflow-style: none; }
       ::-webkit-scrollbar { display: none; }
       html, body { transition: background-color 0.25s ease-in, color 0.25s ease-in; }
-      #page-content > * { opacity: 0; }
-      #page-content > .mobile-top-bar,
-      #page-content > .mobile-bottom-nav,
-      #page-content > .mobile-more-sheet,
-      #page-content > #mobileSearchResults { opacity: 1 !important; }
+      body { overscroll-behavior: none; }
     </style>
 </head>
-<body style="font-family: 'General Sans'" class="bg-neutral-50 dark:bg-[#141414] h-full text-neutral-800 dark:text-white<% if (isMobileViewport) { %> overflow-x-hidden<% } %>">
+<body class="bg-neutral-50 dark:bg-[#141414] h-full text-neutral-800 dark:text-white overflow-x-hidden">
 
-<div id="toast-container" data-turbo-permanent class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none max-w-xs w-full" aria-live="polite" aria-atomic="false" role="status"></div>
+<div id="toast-container" data-turbo-permanent class="fixed top-4 right-4 z-[90] flex flex-col gap-2 pointer-events-none max-w-xs w-full" aria-live="polite" aria-atomic="false" role="status"></div>
 
-<% if (!isMobileViewport) { %>
-<a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[99999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-neutral-900 focus:text-white focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
-<% } %>
+<a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-neutral-900 focus:text-white focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
 
 <% if (isMobileViewport) { %>
 <style>
   body {
-    /* Prevent page content from showing through the fixed bottom nav */
-    padding-top: 3.5rem;   /* 56px = h-14 */
-    padding-bottom: 5rem;  /* 80px — ensure content stops above bottom bar */
+    padding-top: 3.5rem;
+    padding-bottom: 5rem;
     min-height: 100dvh;
     box-sizing: border-box;
   }
@@ -62,9 +62,10 @@
     padding-bottom: 5rem;
   }
 </style>
-
+<% } %>
 
 <script nonce="<%- nonce %>">
+  // Shared theme utilities
   function applyThemeSheets() {
     const isDark = document.documentElement.classList.contains('dark');
     const lightSheet = document.getElementById('light-theme-css');
@@ -73,29 +74,7 @@
     if (darkSheet) darkSheet.disabled = !isDark;
   }
 
-  function updateToggleDot() {
-    const isDark = document.documentElement.classList.contains('dark');
-    const dot = document.querySelector('#theme-toggle .dot');
-    const btn = document.getElementById('theme-toggle');
-    if (!dot) return;
-    dot.style.transform = isDark ? 'translateX(20px)' : 'translateX(0)';
-    if (btn) {
-      btn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
-      btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
-    }
-  }
-
-  function toggleTheme() {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    applyThemeSheets();
-    updateToggleDot();
-    if (typeof setTerminalTheme === 'function') {
-      setTerminalTheme();
-    }
-  }
-
-  (function initializeTheme() {
+  function initializeTheme() {
     const userPreference = localStorage.getItem('theme');
     const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (userPreference === 'dark' || (!userPreference && systemPreference)) {
@@ -104,71 +83,67 @@
       document.documentElement.classList.remove('dark');
     }
     applyThemeSheets();
-  })();
+  }
 
-  document.addEventListener('DOMContentLoaded', function() {
-    updateToggleDot();
-    const btn = document.getElementById('theme-toggle');
-    if (btn) btn.addEventListener('click', toggleTheme);
-  });
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    applyThemeSheets();
+    if (typeof setTerminalTheme === 'function') setTerminalTheme();
+    // Re-apply active nav link color
+    const activeLink = document.querySelector('.nav-link.active');
+    if (activeLink) {
+      activeLink.style.color = isDark
+        ? 'var(--theme-nav-text-active, #ffffff)'
+        : 'var(--theme-nav-text-active, #0a0a0a)';
+    }
+  }
+
+  initializeTheme();
 </script>
 
-<% } else { %>
+<% if (!isMobileViewport) { %>
 <button id="theme-toggle" class="fixed right-4 top-4 w-14 h-8 flex items-center bg-neutral-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500 z-50" aria-label="Switch to dark mode" aria-pressed="false">
     <span class="dot bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
 </button>
 <script nonce="<%- nonce %>">
-function initializeTheme() {
-    const userPreference = localStorage.getItem('theme');
-    const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    if (userPreference === 'dark' || (!userPreference && systemPreference)) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    applyThemeSheets();
-    updateSwitchPosition();
-  }
-
-  function applyThemeSheets() {
-    const isDark = document.documentElement.classList.contains('dark');
-    const lightSheet = document.getElementById('light-theme-css');
-    const darkSheet = document.getElementById('dark-theme-css');
-    if (lightSheet) lightSheet.disabled = isDark;
-    if (darkSheet) darkSheet.disabled = !isDark;
-  }
-
-  function toggleTheme() {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    applyThemeSheets();
-    updateSwitchPosition();
-    if (typeof setTerminalTheme === 'function') {
-      setTerminalTheme();
-    }
-    // Re-apply active link color since it's set via inline style
-    const activeLink = document.querySelector('.nav-link.active');
-    if (activeLink) {
-      activeLink.style.color = isDark ? 'var(--theme-nav-text-active, #ffffff)' : 'var(--theme-nav-text-active, #0a0a0a)';
-    }
-  }
-
-  function updateSwitchPosition() {
-    const isDark = document.documentElement.classList.contains('dark');
+  (function() {
     const btn = document.getElementById('theme-toggle');
     const dot = document.querySelector('#theme-toggle .dot');
-    if (isDark) {
-      dot.classList.add('translate-x-6');
-      if (btn) { btn.setAttribute('aria-pressed', 'true'); btn.setAttribute('aria-label', 'Switch to light mode'); }
-    } else {
-      dot.classList.remove('translate-x-6');
-      if (btn) { btn.setAttribute('aria-pressed', 'false'); btn.setAttribute('aria-label', 'Switch to dark mode'); }
-    }
-  }
 
-  document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
-  initializeTheme();
-  </script>
+    function updateSwitchPosition() {
+      const isDark = document.documentElement.classList.contains('dark');
+      if (isDark) {
+        dot.classList.add('translate-x-6');
+        if (btn) { btn.setAttribute('aria-pressed', 'true'); btn.setAttribute('aria-label', 'Switch to light mode'); }
+      } else {
+        dot.classList.remove('translate-x-6');
+        if (btn) { btn.setAttribute('aria-pressed', 'false'); btn.setAttribute('aria-label', 'Switch to dark mode'); }
+      }
+    }
+
+    btn.addEventListener('click', toggleTheme);
+    updateSwitchPosition();
+  })();
+</script>
+<% } else { %>
+<script nonce="<%- nonce %>">
+  (function() {
+    const dot = document.querySelector('#theme-toggle .dot');
+    const btn = document.getElementById('theme-toggle');
+
+    function updateToggleDot() {
+      const isDark = document.documentElement.classList.contains('dark');
+      if (dot) dot.style.transform = isDark ? 'translateX(20px)' : 'translateX(0)';
+      if (btn) {
+        btn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+        btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+      }
+    }
+
+    if (btn) btn.addEventListener('click', toggleTheme);
+    updateToggleDot();
+  })();
+</script>
 <% } %>
 <%- include("./modal") %>

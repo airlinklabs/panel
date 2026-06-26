@@ -61,9 +61,13 @@ Full `--theme-*` CSS custom property set (56+ variables) overrides Tailwind defa
 
 ### Font
 
-**Primary:** General Sans (Fontshare CDN)
+**Display / Headings:** Cabinet Grotesk (Fontshare CDN)
+- Weights loaded: 400, 500, 700, 800, 900
+- Applied on `h1-h6` via CSS
+
+**Body:** Inter Tight (Google Fonts)
 - Weights loaded: 300, 400, 500, 600, 700
-- Applied on `<body>` via inline style
+- Applied on `body` via CSS
 
 **Monospace:** `ui-monospace, 'Cascadia Code', 'SF Mono', monospace`
 
@@ -107,6 +111,8 @@ Scale ratio: 1.125-1.2 between steps.
 | `shadow-md` | `0 6px 12px -10px rgb(0 0 0 / 0.32)` |
 | `shadow-lg` | `0 8px 18px -14px rgb(0 0 0 / 0.34)` |
 | `shadow-2xl` | `0 18px 44px -28px rgb(0 0 0 / 0.45)` |
+
+Note: UI components use flat design with subtle borders instead of shadows for depth.
 
 ### Spacing
 
@@ -163,17 +169,17 @@ Every interactive component has: default, hover, focus, active, disabled, loadin
 |---|---|---|
 | Decelerate | `cubic-bezier(0.16, 1, 0.3, 1)` | **Primary** -- modals, reveals, layout |
 | Standard | `cubic-bezier(0.4, 0, 0.2, 1)` | Transitions, hover states, FLIP |
-| Spring | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Checkbox overshot |
+| Smooth | `cubic-bezier(0.22, 1, 0.36, 1)` | Sidebar/bottom bar indicator movement |
 
 ### Durations
 
 | Type | Duration |
 |---|---|
 | Default transition | 150ms |
-| Modal open/close | 200ms |
+| Modal open/close | 250ms |
 | Card/row stagger | 350ms, +50ms per item |
-| Page transition | 350ms |
-| SPA progress bar | 72% asymptote, exponential ease |
+| Page transition | 300ms |
+| Indicator movement | 320ms |
 
 ### Motion system
 

@@ -33,15 +33,13 @@
           <%- icon('refresh-cw', { size: 16, class: 'shrink-0' }) %>
         </button>
         <a href="/admin/images" class="text-xs text-neutral-500 flex items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>Back
+          <%- icon('chevron-left', { class: 'w-3.5 h-3.5' }) %>Back
         </a>
       </div>
     </div>
 
     <div class="relative mb-3">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none">
-        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
-      </svg>
+      <%- icon('search', { class: 'absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none' }) %>
       <input id="searchInput" type="text" placeholder="Search images…"
         class="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-neutral-200 dark:border-neutral-700/50
                bg-white dark:bg-neutral-800/50 text-neutral-800 dark:text-white
@@ -75,9 +73,7 @@
     <div id="sections" class="hidden space-y-6"></div>
 
     <div id="emptyState" class="hidden py-16 flex flex-col items-center text-center">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-9 h-9 text-neutral-300 dark:text-neutral-600 mb-2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
-      </svg>
+      <%- icon('search', { class: 'w-9 h-9 text-neutral-300 dark:text-neutral-600 mb-2' }) %>
       <p class="text-sm font-medium text-neutral-500">No images match</p>
     </div>
   </div>

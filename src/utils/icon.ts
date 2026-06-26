@@ -8,7 +8,6 @@
  */
 
 // lucide exports icons as arrays of [tag, attrs, children?] tuples
- 
 const lucideIcons = require('lucide') as Record<string, unknown>;
 
 interface IconOptions {
@@ -58,9 +57,8 @@ export function icon(name: string, opts: IconOptions = {}): string {
   const iconData = lucideIcons[key] as IconNode[] | undefined;
 
   if (!iconData || !Array.isArray(iconData)) {
-    // Graceful degradation — render an empty placeholder span
-    console.warn(`[icon] Unknown Lucide icon: "${name}" (looked up as "${key}")`);
-    return `<span aria-hidden="true" style="display:inline-block;width:${opts.size ?? 16}px;height:${opts.size ?? 16}px;"></span>`;
+    console.warn(`[icon] Unknown icon: "${name}" (looked up as "${key}")`);
+    return `<span aria-hidden="true" class="inline-block" style="width:${opts.size ?? 16}px;height:${opts.size ?? 16}px;"></span>`;
   }
 
   const w = opts.width  ?? opts.size ?? 16;

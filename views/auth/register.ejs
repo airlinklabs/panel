@@ -104,6 +104,36 @@
 
   .auth-panel { opacity: 0; transform: translateX(-12px); transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1); }
   .auth-panel.visible { opacity: 1; transform: translateX(0); }
+
+  body, html { min-height: 100dvh; }
+  .auth-split { min-height: 100dvh; }
+  .auth-panel {
+    padding: 56px 44px;
+    background: color-mix(in srgb, var(--theme-bg-card, white) 92%, transparent);
+    box-shadow: 24px 0 70px rgba(43, 55, 49, 0.12);
+    backdrop-filter: blur(18px);
+  }
+  html.dark .auth-panel { background: color-mix(in srgb, var(--theme-bg-card, #141414) 90%, transparent); }
+  .auth-input {
+    background: color-mix(in srgb, var(--theme-bg-input, #f9fafb) 84%, white);
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+  }
+  .auth-submit {
+    background: #26342f;
+    font-weight: 600;
+    box-shadow: 0 14px 32px rgba(38, 52, 47, 0.22);
+    transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+  .auth-submit:hover:not(:disabled) { background: #1d2925; transform: translateY(-1px); }
+  .auth-submit:active:not(:disabled) { transform: translateY(0) scale(0.98); }
+  @media (max-width: 768px) {
+    .auth-panel {
+      min-height: 100dvh;
+      padding: 44px 24px;
+      background: color-mix(in srgb, var(--theme-bg-card, white) 88%, transparent);
+    }
+    html.dark .auth-panel { background: color-mix(in srgb, var(--theme-bg-card, #141414) 88%, transparent); }
+  }
 </style>
 
 <div class="auth-split">
@@ -151,10 +181,7 @@
             <input id="password" name="password" type="password" autocomplete="new-password"
               required class="auth-input" placeholder="••••••••" style="padding-right:40px">
             <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">
-              <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-                <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>
-                <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" clip-rule="evenodd"/>
-              </svg>
+              <span id="eyeIcon"><%- icon('eye', { width: 16, height: 16 }) %></span>
             </button>
           </div>
           <div class="pw-strength"><div class="pw-bar" id="pwBar"></div></div>
@@ -314,6 +341,36 @@
 
   .auth-panel { opacity: 0; transform: translateX(-12px); transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1); }
   .auth-panel.visible { opacity: 1; transform: translateX(0); }
+
+  body, html { min-height: 100dvh; }
+  .auth-split { min-height: 100dvh; }
+  .auth-panel {
+    padding: 56px 44px;
+    background: color-mix(in srgb, var(--theme-bg-card, white) 92%, transparent);
+    box-shadow: 24px 0 70px rgba(43, 55, 49, 0.12);
+    backdrop-filter: blur(18px);
+  }
+  html.dark .auth-panel { background: color-mix(in srgb, var(--theme-bg-card, #141414) 90%, transparent); }
+  .auth-input {
+    background: color-mix(in srgb, var(--theme-bg-input, #f9fafb) 84%, white);
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+  }
+  .auth-submit {
+    background: #26342f;
+    font-weight: 600;
+    box-shadow: 0 14px 32px rgba(38, 52, 47, 0.22);
+    transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+  .auth-submit:hover:not(:disabled) { background: #1d2925; transform: translateY(-1px); }
+  .auth-submit:active:not(:disabled) { transform: translateY(0) scale(0.98); }
+  @media (max-width: 768px) {
+    .auth-panel {
+      min-height: 100dvh;
+      padding: 44px 24px;
+      background: color-mix(in srgb, var(--theme-bg-card, white) 88%, transparent);
+    }
+    html.dark .auth-panel { background: color-mix(in srgb, var(--theme-bg-card, #141414) 88%, transparent); }
+  }
 </style>
 
 <div class="auth-split">

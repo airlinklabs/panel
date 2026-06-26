@@ -8,9 +8,7 @@
 
         <% if (errorMessage && errorMessage.message) { %>
         <div data-animate-card class="rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-4 flex items-start gap-3">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
+          <%- icon('triangle-alert', { class: 'w-4 h-4 text-red-500 mt-0.5 shrink-0', strokeWidth: 2 }) %>
           <div>
             <p class="text-xs font-medium text-red-700 dark:text-red-400"><%= req.translations.connectionError || 'Error' %></p>
             <p class="text-xs text-red-600 dark:text-red-400/70 mt-0.5"><%= errorMessage.message %></p>
@@ -34,9 +32,7 @@
               </p>
             </div>
             <div class="text-xs text-neutral-500 flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
+              <%- icon('refresh-cw', { class: 'h-3 w-3', strokeWidth: 2 }) %>
               <span><span id="refresh-countdown">30</span>s</span>
                       <button type="button" onclick="window.location.reload()" class="rounded-lg bg-transparent px-2 py-1 text-sm font-medium transition text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800">now</button>
             </div>
@@ -66,9 +62,7 @@
         <div id="no-players-message" class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-8 text-center">
           <% if (!serverIsOnline && errorMessage && errorMessage.message) { %>
             <div class="w-12 h-12 rounded-full bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center mx-auto mb-3">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-400">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m3 3 8.735 8.735m0 0a.374.374 0 1 1 .53.53m-.53-.53.53.53m0 0L21 21M14.652 9.348a3.75 3.75 0 0 1 0 5.304m2.121-7.425a6.75 6.75 0 0 1 0 9.546m2.121-11.667c3.808 3.807 3.808 9.98 0 13.788m-9.546-4.242a3.733 3.733 0 0 1-1.06-2.122m-1.061 4.243a6.75 6.75 0 0 1-1.625-6.929m-.496 9.05c-3.068-3.067-3.664-7.67-1.79-11.334M12 12h.008v.008H12V12Z" />
-              </svg>
+              <%- icon('wifi-off', { class: 'w-5 h-5 text-neutral-400', strokeWidth: 1.5 }) %>
             </div>
             <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Server offline</p>
             <p class="text-xs text-neutral-500 mt-1">Start your server to see online players.</p>
@@ -109,9 +103,7 @@
 
             <% if (errorMessage && errorMessage.message) { %>
             <div class="mx-8 mt-4 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-start gap-3">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
+              <%- icon('triangle-alert', { class: 'w-4 h-4 text-red-500 mt-0.5 shrink-0', strokeWidth: 2 }) %>
               <div>
                 <p class="text-sm font-medium text-red-700 dark:text-red-400"><%= req.translations.connectionError || 'Error' %></p>
                 <p class="text-xs text-red-600 dark:text-red-400/70 mt-0.5"><%= errorMessage.message %></p>
@@ -136,9 +128,7 @@
                       </p>
                     </div>
                     <div class="text-xs text-neutral-500 flex items-center gap-1.5">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
+                      <%- icon('refresh-cw', { class: 'h-3 w-3', strokeWidth: 2 }) %>
                       <span><span id="refresh-countdown">30</span>s</span>
                        <button type="button" onclick="window.location.reload()" class="rounded-lg bg-transparent px-2 py-1 text-sm font-medium transition text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800">now</button>
                     </div>
@@ -171,9 +161,7 @@
                 <div id="no-players-message" class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-8 text-center">
                   <% if (!serverIsOnline && errorMessage && errorMessage.message) { %>
                     <div class="w-12 h-12 rounded-full bg-neutral-100 dark:bg-neutral-700/50 flex items-center justify-center mx-auto mb-3">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-neutral-400">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m3 3 8.735 8.735m0 0a.374.374 0 1 1 .53.53m-.53-.53.53.53m0 0L21 21M14.652 9.348a3.75 3.75 0 0 1 0 5.304m2.121-7.425a6.75 6.75 0 0 1 0 9.546m2.121-11.667c3.808 3.807 3.808 9.98 0 13.788m-9.546-4.242a3.733 3.733 0 0 1-1.06-2.122m-1.061 4.243a6.75 6.75 0 0 1-1.625-6.929m-.496 9.05c-3.068-3.067-3.664-7.67-1.79-11.334M12 12h.008v.008H12V12Z" />
-                      </svg>
+                      <%- icon('wifi-off', { class: 'w-5 h-5 text-neutral-400', strokeWidth: 1.5 }) %>
                     </div>
                     <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Server offline</p>
                     <p class="text-xs text-neutral-500 mt-1">Start your server to see online players.</p>

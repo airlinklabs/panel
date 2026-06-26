@@ -103,31 +103,13 @@
 
 /* ── State change animations ──────────────────────────────────────── */
 
-/* Card hover lift */
-.stats-card,
-[class*="rounded-xl"][class*="bg-neutral-50"],
-[class*="rounded-xl"][class*="bg-white"] {
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.2s ease;
+/* Card hover — scoped to al-card-lift class only */
+.al-card-lift {
+  transition: border-color 0.2s ease,
+              background-color 0.2s ease;
 }
-.stats-card:hover,
-[class*="rounded-xl"][class*="bg-neutral-50"]:hover,
-[class*="rounded-xl"][class*="bg-white"]:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-}
-
-/* Button press feedback */
-button {
-  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
-              background-color 0.15s ease,
-              border-color 0.15s ease,
-              color 0.15s ease,
-              box-shadow 0.15s ease;
-}
-button:active:not(:disabled) {
-  transform: scale(0.96);
+.al-card-lift:hover {
+  border-color: rgb(var(--al-accent) / 0.15);
 }
 
 /* Input focus glow */
@@ -135,28 +117,25 @@ input:focus,
 select:focus,
 textarea:focus {
   transition: border-color 0.2s ease,
-              box-shadow 0.2s ease,
-              transform 0.2s ease;
-  transform: scale(1.005);
+              box-shadow 0.2s ease;
 }
 
-/* Toggle switch spring */
+/* Toggle switch */
 .toggle-btn-enable,
 .toggle-btn-disable,
 [role="switch"] {
-  transition: background-color 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+  transition: background-color 0.25s ease,
               color 0.25s ease,
-              border-color 0.25s ease,
-              transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+              border-color 0.25s ease;
 }
 
-/* Badge pop on appear */
-[class*="rounded-md"][class*="px-2"][class*="font-medium"] {
+/* Badge pop on appear — scoped to status badges only */
+.status-badge {
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
               background-color 0.2s ease,
               color 0.2s ease;
 }
-[class*="rounded-md"][class*="px-2"][class*="font-medium"]:hover {
+.status-badge:hover {
   transform: scale(1.05);
 }
 
@@ -187,8 +166,9 @@ tbody tr {
   transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Avatar hover */
-img[class*="rounded"]:hover {
+/* Avatar hover — scoped to avatar elements only */
+img.avatar:hover,
+img[class*="w-10"][class*="h-10"]:hover {
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   transform: scale(1.08);
 }
@@ -204,9 +184,18 @@ button:hover svg[class*="refresh"] {
   to { transform: rotate(360deg); }
 }
 
-/* Dropdown scale in */
-.fixed[class*="z-50"]:not(.mobile-top-bar):not(.mobile-bottom-nav):not(.mobile-more-sheet) {
-  transform-origin: top right;
+/* Dropdown scale in — default to top, allow override via data attribute */
+.al-dropdown,
+.cs-dropdown,
+[data-popover],
+#searchResults,
+#mobileSearchResults,
+.filter-menu,
+.al-file-menu,
+.server-ctx-menu,
+[role="menu"],
+[role="listbox"] {
+  transform-origin: top;
   transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
               opacity 0.15s ease;
 }

@@ -1,0 +1,331 @@
+<%- include('../components/header', { title: req.translations.twoFactorAuth || 'Two-Factor Auth' }) %>
+
+<% if (isMobileViewport) { %>
+<main id="page-content" class="">
+  <%- include('../components/template') %>
+  <%- include('../components/toast') %>
+
+  <div class="px-4 py-5 space-y-4">
+
+    <div class="mb-2">
+      <nav class="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 mb-3">
+        <a href="/account" class="hover:text-neutral-800 dark:hover:text-white transition">Account</a>
+        <%- icon('chevron-right', { class: 'w-3 h-3 shrink-0' }) %>
+        <span class="text-neutral-800 dark:text-white font-medium">Two-Factor Auth</span>
+      </nav>
+      <div>
+        <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.twoFactorAuth || 'Two-Factor Authentication' %></h1>
+        <p class="text-xs text-neutral-500 mt-0.5">Add an extra layer of security to your account.</p>
+      </div>
+    </div>
+
+    <!-- Status card -->
+    <div data-animate-card class="rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center <%= user['2fa'] ? 'bg-emerald-100 dark:bg-emerald-500/10' : 'bg-neutral-100 dark:bg-neutral-700' %>">
+            <%- icon('shield', { class: 'w-5 h-5 ' + (user['2fa'] ? 'text-emerald-600 dark:text-emerald-400' : 'text-neutral-400') }) %>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-neutral-800 dark:text-white">Status</p>
+            <% if (user['2fa']) { %>
+              <p class="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <span class="relative flex h-1.5 w-1.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                </span>
+                Enabled
+              </p>
+            <% } else { %>
+              <p class="text-xs text-neutral-500 dark:text-neutral-400">Not enabled</p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <% if (!user['2fa']) { %>
+    <!-- Enable 2FA -->
+    <div data-animate-card class="rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
+      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3">Enable 2FA</p>
+      <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-4">Scan the QR code below with your authenticator app, then enter the verification code to confirm.</p>
+
+      <div id="2fa-setup" class="hidden">
+        <div class="flex justify-center mb-4">
+          <div class="bg-white dark:bg-neutral-700 rounded-xl p-3 border border-neutral-200 dark:border-neutral-600">
+            <img id="2fa-qr" src="" alt="QR Code" class="w-40 h-40">
+          </div>
+        </div>
+        <div class="mb-4">
+          <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-1.5">Or enter this secret manually:</p>
+          <div class="flex items-center gap-2 bg-neutral-100 dark:bg-neutral-700 rounded-lg px-3 py-2">
+            <code id="2fa-secret" class="text-xs font-mono text-neutral-700 dark:text-neutral-300 flex-1 break-all select-all"></code>
+            <button type="button" onclick="copySecret()" class="shrink-0 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition active:scale-90">
+              <%- icon('copy', { size: 14, class: 'shrink-0' }) %>
+            </button>
+          </div>
+        </div>
+        <form id="2fa-verify-form" action="/enable-2fa" method="POST" class="space-y-3">
+          <%- include('../components/csrf') %>
+          <input type="hidden" name="secret" id="2fa-secret-input">
+          <div>
+            <label class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5 block">Verification Code</label>
+            <input type="text" name="token" id="2fa-token" placeholder="000000" required maxlength="6" pattern="[0-9]{6}" inputmode="numeric"
+              class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600/30 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono text-center tracking-[0.3em] transition">
+          </div>
+          <button type="submit" class="w-full rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2.5 text-sm font-medium transition active:scale-95">
+            Enable 2FA
+          </button>
+        </form>
+      </div>
+
+      <button id="start-2fa-btn" type="button"
+        class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2.5 text-sm font-medium transition active:scale-95">
+        Enable 2FA
+      </button>
+    </div>
+
+    <% } else { %>
+    <!-- Disable 2FA -->
+    <div data-animate-card class="rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
+      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3">Disable 2FA</p>
+      <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-3">Enter your password to disable two-factor authentication.</p>
+      <form action="/disable-2fa" method="POST" class="space-y-3">
+        <%- include('../components/csrf') %>
+        <input type="password" name="password" placeholder="Your password" required
+          class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600/30 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 transition">
+        <button type="submit" class="w-full rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2.5 text-sm font-medium transition active:scale-95">
+          Disable 2FA
+        </button>
+      </form>
+    </div>
+
+    <!-- Backup codes -->
+    <div data-animate-card class="rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-sm font-medium text-neutral-800 dark:text-white">Backup Codes</p>
+        <button type="button" id="copy-codes-btn" class="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition flex items-center gap-1">
+          <%- icon('copy', { class: 'w-3 h-3' }) %>
+          Copy
+        </button>
+      </div>
+      <div class="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-3 py-2.5 mb-3">
+        <p class="text-xs text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+          <%- icon('triangle-alert', { class: 'w-3.5 h-3.5 shrink-0' }) %>
+          Save these codes. They won't be shown again.
+        </p>
+      </div>
+      <div id="backup-codes" class="grid grid-cols-2 gap-2">
+        <% if (typeof backupCodes !== 'undefined' && backupCodes && backupCodes.length > 0) { %>
+          <% backupCodes.forEach(code => { %>
+            <div class="bg-neutral-100 dark:bg-neutral-700 rounded-lg px-3 py-2 font-mono text-xs text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-600/30 text-center tracking-wider select-all">
+              <%= code %>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <% for (let i = 0; i < 10; i++) { %>
+            <div class="bg-neutral-100 dark:bg-neutral-700 rounded-lg px-3 py-2 font-mono text-xs text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-600/30 text-center tracking-wider select-all">
+              ••••-••••
+            </div>
+          <% } %>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
+
+  </div>
+</main>
+
+<% } else { %>
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <div class="w-60 h-full">
+      <%- include('../components/template') %>
+    </div>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+
+      <div class="px-8 pt-5 mb-5">
+        <nav class="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 mb-3">
+          <a href="/account" class="hover:text-neutral-800 dark:hover:text-white transition">Account</a>
+          <%- icon('chevron-right', { class: 'w-3 h-3 shrink-0' }) %>
+          <span class="text-neutral-800 dark:text-white font-medium">Two-Factor Auth</span>
+        </nav>
+        <div>
+          <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.twoFactorAuth || 'Two-Factor Authentication' %></h1>
+          <p class="text-sm text-neutral-500 mt-0.5">Add an extra layer of security to your account.</p>
+        </div>
+      </div>
+
+      <div class="px-8 space-y-4">
+
+        <!-- Status card -->
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-white/5 p-5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center <%= user['2fa'] ? 'bg-emerald-100 dark:bg-emerald-500/10' : 'bg-neutral-100 dark:bg-neutral-700' %>">
+                <%- icon('shield', { class: 'w-6 h-6 ' + (user['2fa'] ? 'text-emerald-600 dark:text-emerald-400' : 'text-neutral-400') }) %>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-neutral-800 dark:text-white">Two-Factor Authentication</p>
+                <% if (user['2fa']) { %>
+                  <p class="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 mt-0.5">
+                    <span class="relative flex h-1.5 w-1.5">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                    </span>
+                    Enabled — your account is protected
+                  </p>
+                <% } else { %>
+                  <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Not enabled — consider turning it on for better security.</p>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <% if (!user['2fa']) { %>
+        <!-- Enable 2FA -->
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-white/5 p-5">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white mb-2">Enable Two-Factor Authentication</p>
+          <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-5">Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.), then enter the 6-digit code to verify.</p>
+
+          <div id="2fa-setup" class="hidden">
+            <div class="flex gap-6 items-start">
+              <div class="bg-white dark:bg-neutral-700 rounded-xl p-3 border border-neutral-200 dark:border-neutral-600 shrink-0">
+                <img id="2fa-qr" src="" alt="QR Code" class="w-44 h-44">
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="mb-4">
+                  <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-1.5">Manual entry key:</p>
+                  <div class="flex items-center gap-2 bg-neutral-100 dark:bg-neutral-700 rounded-lg px-3 py-2">
+                    <code id="2fa-secret" class="text-xs font-mono text-neutral-700 dark:text-neutral-300 flex-1 break-all select-all"></code>
+                    <button type="button" onclick="copySecret()" class="shrink-0 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition active:scale-90" title="Copy secret">
+                      <%- icon('copy', { size: 14, class: 'shrink-0' }) %>
+                    </button>
+                  </div>
+                </div>
+                <form id="2fa-verify-form" action="/enable-2fa" method="POST" class="space-y-3">
+                  <%- include('../components/csrf') %>
+                  <input type="hidden" name="secret" id="2fa-secret-input">
+                  <div>
+                    <label class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5 block">Verification Code</label>
+                    <input type="text" name="token" id="2fa-token" placeholder="000000" required maxlength="6" pattern="[0-9]{6}" inputmode="numeric"
+                      class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600/30 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono text-center tracking-[0.3em] transition">
+                  </div>
+                  <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2.5 text-sm font-medium transition active:scale-95">
+                    Enable 2FA
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <button id="start-2fa-btn" type="button"
+            class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2.5 text-sm font-medium transition active:scale-95">
+            Enable 2FA
+          </button>
+        </div>
+
+        <% } else { %>
+        <!-- Disable 2FA -->
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-white/5 p-5">
+          <p class="text-sm font-medium text-neutral-800 dark:text-white mb-2">Disable Two-Factor Authentication</p>
+          <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-4">Enter your password to confirm disabling 2FA. This will make your account less secure.</p>
+          <form action="/disable-2fa" method="POST" class="flex items-end gap-3">
+            <%- include('../components/csrf') %>
+            <div class="flex-1">
+              <label class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5 block">Password</label>
+              <input type="password" name="password" placeholder="Your current password" required
+                class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600/30 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 transition">
+            </div>
+            <button type="submit" class="rounded-xl bg-red-600 hover:bg-red-500 text-white px-4 py-2.5 text-sm font-medium shrink-0 transition active:scale-95">
+              Disable 2FA
+            </button>
+          </form>
+        </div>
+
+        <!-- Backup codes -->
+        <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-white/5 p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <p class="text-sm font-medium text-neutral-800 dark:text-white">Backup Codes</p>
+              <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Use these codes to access your account if you lose your authenticator device.</p>
+            </div>
+            <button type="button" id="copy-codes-btn" class="rounded-xl border border-neutral-200 dark:border-neutral-700/40 bg-white dark:bg-neutral-800 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition flex items-center gap-1.5 active:scale-95">
+              <%- icon('copy', { class: 'w-3.5 h-3.5' }) %>
+              Copy all
+            </button>
+          </div>
+          <div class="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-4 py-3 mb-4">
+            <p class="text-xs text-amber-700 dark:text-amber-400 flex items-center gap-2">
+              <%- icon('triangle-alert', { class: 'w-4 h-4 shrink-0' }) %>
+              Save these codes somewhere safe. They won't be shown again after you leave this page.
+            </p>
+          </div>
+          <div id="backup-codes" class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <% if (typeof backupCodes !== 'undefined' && backupCodes && backupCodes.length > 0) { %>
+              <% backupCodes.forEach(code => { %>
+                <div class="bg-neutral-100 dark:bg-neutral-700 rounded-lg px-3 py-2.5 font-mono text-xs text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-600/30 text-center tracking-wider select-all">
+                  <%= code %>
+                </div>
+              <% }); %>
+            <% } else { %>
+              <% for (let i = 0; i < 10; i++) { %>
+                <div class="bg-neutral-100 dark:bg-neutral-700 rounded-lg px-3 py-2.5 font-mono text-xs text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-600/30 text-center tracking-wider select-all">
+                  ••••-••••
+                </div>
+              <% } %>
+            <% } %>
+          </div>
+        </div>
+        <% } %>
+
+      </div>
+    </div>
+  </div>
+</main>
+<% } %>
+
+<script nonce="<%- nonce %>">
+document.addEventListener('DOMContentLoaded', () => {
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+  document.getElementById('start-2fa-btn')?.addEventListener('click', async () => {
+    try {
+      const res = await fetch('/2fa/setup', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken } });
+      const data = await res.json();
+      if (res.ok && data.qr && data.secret) {
+        document.getElementById('2fa-qr').src = data.qr;
+        document.getElementById('2fa-secret').textContent = data.secret;
+        document.getElementById('2fa-secret-input').value = data.secret;
+        document.getElementById('2fa-setup').classList.remove('hidden');
+        document.getElementById('start-2fa-btn').classList.add('hidden');
+      } else {
+        showToast(data.error || 'Failed to start 2FA setup', 'error');
+      }
+    } catch {
+      showToast('Failed to start 2FA setup', 'error');
+    }
+  });
+
+  window.copySecret = function() {
+    const secret = document.getElementById('2fa-secret')?.textContent;
+    if (secret) {
+      navigator.clipboard.writeText(secret)
+        .then(() => showToast('Secret copied', 'success'))
+        .catch(() => showToast('Failed to copy', 'error'));
+    }
+  };
+
+  document.getElementById('copy-codes-btn')?.addEventListener('click', () => {
+    const codes = document.getElementById('backup-codes');
+    if (!codes) return;
+    const text = Array.from(codes.querySelectorAll('div')).map(el => el.textContent.trim()).join('\n');
+    navigator.clipboard.writeText(text)
+      .then(() => showToast('Backup codes copied', 'success'))
+      .catch(() => showToast('Failed to copy', 'error'));
+  });
+});
+</script>
+
+<%- include('../components/footer') %>

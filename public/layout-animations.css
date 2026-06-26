@@ -79,8 +79,9 @@
 /* analytics.ejs — player details modal */
 #serverDetailsModal,
 
-/* create server — variables section */
+/* create server — variables section, ports modal */
 #variablesSection,
+#portsModal,
 
 /* worlds.ejs — table / empty message */
 #serverTable,
@@ -101,8 +102,8 @@
 .tab-content,
 .m-pane {
   transition:
-    opacity   0.38s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity   0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
   transition-behavior: allow-discrete;
 }
 
@@ -146,6 +147,7 @@
   #chartContainer,
   #serverDetailsModal,
   #variablesSection,
+  #portsModal,
   #serverTable,
   #noWorldsMessage,
   [data-server-started-container],
@@ -156,9 +158,11 @@
   .tab-content,
   .m-pane {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
 }
+
+/* Modal panel enter — slide up + fade (only for data-[open] toggled modals) */
 
 /* ── Page-content children — layout shift transitions ─────────────────────
    When a warning banner or section appears/disappears, sibling elements
@@ -176,11 +180,12 @@
 /* ── Server & folder card load-in ─────────────────────────────────────────
    Cards animate in on page load with a stagger driven by CSS custom
    properties set inline. Each card gets --i: N where N is its index.
+   Capped at 300ms max delay to prevent long waits on large lists.
 */
 .server-card,
 .folder-card {
   animation: card-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: calc(var(--i, 0) * 50ms);
+  animation-delay: calc(min(var(--i, 0), 6) * 50ms);
 }
 
 @keyframes card-enter {
@@ -201,10 +206,9 @@
 .player-row,
 .login-row,
 .backup-row,
-.table-row-animate,
-tbody tr {
+.table-row-animate {
   animation: row-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: calc(var(--i, 0) * 30ms);
+  animation-delay: calc(min(var(--i, 0), 10) * 30ms);
 }
 
 @keyframes row-enter {
@@ -215,7 +219,7 @@ tbody tr {
 /* ── All grid items load-in ─────────────────────────────────────────────*/
 .grid-item-animate {
   animation: card-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: calc(var(--i, 0) * 40ms);
+  animation-delay: calc(min(var(--i, 0), 8) * 40ms);
 }
 
 /* ── Skeleton shimmer ───────────────────────────────────────────────────*/
@@ -266,27 +270,6 @@ canvas,
 #terminal *,
 [class*="xterm"],
 .animate-spin,
-.animate-ping,
-.mobile-top-bar,
-.mobile-top-bar *,
-.mobile-bottom-nav,
-.mobile-bottom-nav *,
-.mobile-more-sheet,
-.mobile-more-sheet *,
-#pl-overlay,
-#pl-overlay *,
-#active-background,
-svg,
-img {
+.animate-ping {
   transition: none !important;
-}
-
-/* Respect user's motion preference */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
 }

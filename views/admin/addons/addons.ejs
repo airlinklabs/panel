@@ -194,9 +194,7 @@
           <% if (addonTableExists) { %>
             <a href="/admin/addons/store" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-neutral-100 dark:bg-neutral-800/80 hover:bg-neutral-200 dark:hover:bg-neutral-700/80 border border-neutral-200 dark:border-neutral-700/50 text-neutral-600 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">
               Browse Store
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-              </svg>
+              <%- icon('external-link', { class: 'w-3.5 h-3.5' }) %>
             </a>
           <% } %>
         </div>

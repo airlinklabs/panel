@@ -246,7 +246,7 @@ const dashboardModule: Module = {
         });
       } catch (error) {
         logger.error('Error fetching user:', error);
-        errorMessage.message = 'Error fetching user data.';
+        errorMessage.message = 'We could not load your dashboard data.';
         res.render('user/dashboard', {
           errorMessage,
           user: getUser(req),

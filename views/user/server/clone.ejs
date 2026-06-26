@@ -1,0 +1,129 @@
+<% if (isMobileViewport) { %>
+<%- include('../../components/header', { title: 'Clone Server' }) %>
+<main id="page-content">
+    <%- include('../../components/template') %>
+    <section class="px-4 py-5">
+        <%- include('../../components/serverHeader', { server: server, req: req }) %>
+        <%- include('../../components/serverTemplate') %>
+        <div class="space-y-4 mt-4">
+
+            <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
+                <h2 class="text-sm font-medium text-neutral-800 dark:text-white mb-1">Clone Server</h2>
+                <p class="text-xs text-neutral-500 mb-4">Create a copy of this server with the same configuration.</p>
+
+                <form id="cloneServerForm" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">New Server Name</label>
+                        <input type="text" name="name" value="Copy of <%= server.name %>" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800/50 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</label>
+                        <input type="text" name="description" value="" placeholder="Optional description" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800/50 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30">
+                    </div>
+
+                    <div class="flex items-start gap-2 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-3 py-2.5">
+                        <%- icon('triangle-alert', { class: 'h-4 w-4 shrink-0 text-amber-500 mt-0.5' }) %>
+                        <div class="min-w-0">
+                            <p class="text-xs font-medium text-amber-700 dark:text-amber-400">This will create a new server with the same configuration.</p>
+                            <p class="text-[10px] text-amber-600 dark:text-amber-400/70 mt-0.5">The server will be queued for installation.</p>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Clone Server</button>
+                </form>
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/loadingPopup') %>
+<%- include('../../components/modal') %>
+<%- include('../../components/footer') %>
+
+<% } else { %>
+<%- include('../../components/header', { title: 'Clone Server' }) %>
+<main class="h-screen m-auto">
+    <div class="flex h-screen">
+        <%- include('../../components/template') %>
+        <section id="page-content" class="flex-1 overflow-y-auto pt-16">
+            <div class="px-8 pt-4">
+                <%- include('../../components/serverHeader', { server: server, req: req }) %>
+            </div>
+            <%- include('../../components/serverTemplate') %>
+            <div class="p-6">
+                <div class="data-animate-card bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+                    <div class="mb-6">
+                        <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Clone Server</h2>
+                        <p class="text-sm text-neutral-500 mt-1">Create a copy of this server with the same configuration.</p>
+                    </div>
+
+                    <form id="cloneServerForm" class="space-y-4 max-w-lg">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">New Server Name</label>
+                            <input type="text" name="name" value="Copy of <%= server.name %>" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800/50 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</label>
+                            <input type="text" name="description" value="" placeholder="Optional description" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800/50 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30">
+                        </div>
+
+                        <div class="flex items-start gap-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl px-4 py-3">
+                            <%- icon('triangle-alert', { class: 'h-5 w-5 shrink-0 text-amber-500 mt-0.5' }) %>
+                            <div>
+                                <p class="text-sm font-medium text-amber-700 dark:text-amber-400">This will create a new server with the same configuration.</p>
+                                <p class="text-xs text-amber-600 dark:text-amber-400/70 mt-0.5">The server will be queued for installation.</p>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Clone Server</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/loadingPopup') %>
+<%- include('../../components/modal') %>
+<%- include('../../components/footer') %>
+<% } %>
+
+<script nonce="<%- nonce %>">
+var serverShortID = '<%= server.shortID %>';
+
+document.getElementById('cloneServerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var form = e.target;
+    var name = form.name.value.trim();
+    if (!name) {
+        showToast('Please enter a server name.', 'error');
+        return;
+    }
+    var loader = showLoadingPopup('Cloning server', 'This may take a few minutes...');
+    try {
+        var res = await fetch('/api/servers/' + serverShortID + '/clone', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name, description: form.description.value.trim() })
+        });
+        var data = await res.json();
+        loader.close();
+        if (data.success || res.ok) {
+            showToast('Server clone queued successfully.', 'success');
+            if (data.server && data.server.UUID) {
+                window.location.href = '/server/' + data.server.UUID;
+            } else {
+                window.location.href = '/dashboard';
+            }
+        } else {
+            showToast(data.error || 'Failed to clone server.', 'error');
+        }
+    } catch(err) {
+        loader.close();
+        showToast('Failed to clone server.', 'error');
+    }
+});
+</script>

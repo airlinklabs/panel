@@ -1,0 +1,252 @@
+<% if (isMobileViewport) { %>
+<%- include('../../components/header', { title: 'Access Management' }) %>
+<main id="page-content">
+    <%- include('../../components/template') %>
+    <section class="px-4 py-5">
+        <%- include('../../components/serverHeader', { server: server, req: req }) %>
+        <%- include('../../components/serverTemplate') %>
+        <div class="space-y-4 mt-4">
+
+            <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-medium text-neutral-800 dark:text-white">Access Management</h2>
+                </div>
+                <div id="access-list" class="space-y-2">
+                    <% if (typeof accessList !== 'undefined' && accessList && accessList.length > 0) { %>
+                        <% accessList.forEach(function(entry) { %>
+                        <div class="data-animate-card rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-white/5 p-3" data-access-id="<%= entry.id %>">
+                            <div class="flex items-center justify-between">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= entry.username || entry.email %></p>
+                                    <p class="text-[10px] text-neutral-500 truncate"><%= entry.email %></p>
+                                    <div class="flex flex-wrap gap-1 mt-1.5">
+                                        <% if (entry.permissions) { %>
+                                            <% var perms = typeof entry.permissions === 'string' ? JSON.parse(entry.permissions) : entry.permissions; %>
+                                            <% Object.keys(perms).forEach(function(perm) { %>
+                                                <% if (perms[perm]) { %>
+                                                <span class="inline-flex items-center rounded-md bg-neutral-200 dark:bg-neutral-600 px-1.5 py-0.5 text-[10px] font-medium text-neutral-700 dark:text-neutral-300"><%= perm %></span>
+                                                <% } %>
+                                            <% }); %>
+                                        <% } %>
+                                    </div>
+                                    <p class="text-[10px] text-neutral-500 mt-1">Granted: <%= entry.grantedAt ? new Date(entry.grantedAt).toLocaleString() : 'Unknown' %></p>
+                                </div>
+                                <div class="flex items-center gap-1.5 shrink-0 ml-2">
+                                    <button type="button" onclick="editAccess('<%= entry.id %>')" class="rounded-lg bg-neutral-200 dark:bg-neutral-600 text-neutral-700 dark:text-neutral-300 px-2.5 py-1 text-[11px] font-medium transition hover:bg-neutral-300 dark:hover:bg-neutral-500">Edit</button>
+                                    <button type="button" onclick="revokeAccess('<%= entry.id %>', '<%= entry.username || entry.email %>')" class="rounded-lg bg-red-600 text-white px-2.5 py-1 text-[11px] font-medium transition hover:bg-red-700">Revoke</button>
+                                </div>
+                            </div>
+                        </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="text-xs text-neutral-500 text-center py-4" id="access-empty">No access granted. Invite other users to help manage this server.</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
+                <h3 class="text-sm font-medium text-neutral-800 dark:text-white mb-3">Grant Access</h3>
+                <form id="grantAccessForm" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Username or Email</label>
+                        <input type="text" name="user" placeholder="username or user@example.com" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800/50 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Permissions</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="flex items-center gap-2 text-xs text-neutral-700 dark:text-neutral-300">
+                                <input type="checkbox" name="console" value="true" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 focus:ring-neutral-400 dark:focus:ring-neutral-500"> Console
+                            </label>
+                            <label class="flex items-center gap-2 text-xs text-neutral-700 dark:text-neutral-300">
+                                <input type="checkbox" name="files" value="true" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 focus:ring-neutral-400 dark:focus:ring-neutral-500"> Files
+                            </label>
+                            <label class="flex items-center gap-2 text-xs text-neutral-700 dark:text-neutral-300">
+                                <input type="checkbox" name="backups" value="true" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 focus:ring-neutral-400 dark:focus:ring-neutral-500"> Backups
+                            </label>
+                            <label class="flex items-center gap-2 text-xs text-neutral-700 dark:text-neutral-300">
+                                <input type="checkbox" name="startup" value="true" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 focus:ring-neutral-400 dark:focus:ring-neutral-500"> Startup
+                            </label>
+                            <label class="flex items-center gap-2 text-xs text-neutral-700 dark:text-neutral-300">
+                                <input type="checkbox" name="settings" value="true" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 focus:ring-neutral-400 dark:focus:ring-neutral-500"> Settings
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Grant Access</button>
+                </form>
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/loadingPopup') %>
+<%- include('../../components/modal') %>
+<%- include('../../components/footer') %>
+
+<% } else { %>
+<%- include('../../components/header', { title: 'Access Management' }) %>
+<main class="h-screen m-auto">
+    <div class="flex h-screen">
+        <%- include('../../components/template') %>
+        <section id="page-content" class="flex-1 overflow-y-auto pt-16">
+            <div class="px-8 pt-4">
+                <%- include('../../components/serverHeader', { server: server, req: req }) %>
+            </div>
+            <%- include('../../components/serverTemplate') %>
+            <div class="p-6">
+                <div class="data-animate-card bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Access Management</h2>
+                    </div>
+                    <div id="access-list" class="space-y-3">
+                        <% if (typeof accessList !== 'undefined' && accessList && accessList.length > 0) { %>
+                            <% accessList.forEach(function(entry) { %>
+                            <div class="data-animate-card rounded-xl bg-neutral-100 dark:bg-neutral-700 border border-neutral-200 dark:border-white/5 p-4" data-access-id="<%= entry.id %>">
+                                <div class="flex items-center justify-between">
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= entry.username || entry.email %></p>
+                                        <p class="text-xs text-neutral-500"><%= entry.email %></p>
+                                        <div class="flex flex-wrap gap-1.5 mt-2">
+                                            <% if (entry.permissions) { %>
+                                                <% var perms = typeof entry.permissions === 'string' ? JSON.parse(entry.permissions) : entry.permissions; %>
+                                                <% Object.keys(perms).forEach(function(perm) { %>
+                                                    <% if (perms[perm]) { %>
+                                                    <span class="inline-flex items-center rounded-md bg-neutral-200 dark:bg-neutral-600 px-2 py-0.5 text-xs font-medium text-neutral-700 dark:text-neutral-300"><%= perm %></span>
+                                                    <% } %>
+                                                <% }); %>
+                                            <% } %>
+                                        </div>
+                                        <p class="text-xs text-neutral-500 mt-2">Granted: <%= entry.grantedAt ? new Date(entry.grantedAt).toLocaleString() : 'Unknown' %></p>
+                                    </div>
+                                    <div class="flex items-center gap-2 shrink-0 ml-4">
+                                        <button type="button" onclick="editAccess('<%= entry.id %>')" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Edit</button>
+                                        <button type="button" onclick="revokeAccess('<%= entry.id %>', '<%= entry.username || entry.email %>')" class="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700">Revoke</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                        <% } else { %>
+                            <p class="text-sm text-neutral-500 text-center py-8" id="access-empty">No access granted. Invite other users to help manage this server.</p>
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="data-animate-card bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5 mt-4">
+                    <h3 class="text-lg font-semibold text-neutral-800 dark:text-white mb-4">Grant Access</h3>
+                    <form id="grantAccessForm" class="space-y-4 max-w-lg">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Username or Email</label>
+                            <input type="text" name="user" placeholder="username or user@example.com" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800/50 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Permissions</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <label class="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300">
+                                    <input type="checkbox" name="console" value="true" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 focus:ring-neutral-400 dark:focus:ring-neutral-500"> Console
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300">
+                                    <input type="checkbox" name="files" value="true" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 focus:ring-neutral-400 dark:focus:ring-neutral-500"> Files
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300">
+                                    <input type="checkbox" name="backups" value="true" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 focus:ring-neutral-400 dark:focus:ring-neutral-500"> Backups
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300">
+                                    <input type="checkbox" name="startup" value="true" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 focus:ring-neutral-400 dark:focus:ring-neutral-500"> Startup
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300">
+                                    <input type="checkbox" name="settings" value="true" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 focus:ring-neutral-400 dark:focus:ring-neutral-500"> Settings
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Grant Access</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<%- include('../../components/toast') %>
+<%- include('../../components/loadingPopup') %>
+<%- include('../../components/modal') %>
+<%- include('../../components/footer') %>
+<% } %>
+
+<script nonce="<%- nonce %>">
+var serverShortID = '<%= server.shortID %>';
+
+document.getElementById('grantAccessForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var form = e.target;
+    var user = form.user.value.trim();
+    if (!user) {
+        showToast('Please enter a username or email.', 'error');
+        return;
+    }
+    var permissions = {
+        console: form.console.checked,
+        files: form.files.checked,
+        backups: form.backups.checked,
+        startup: form.startup.checked,
+        settings: form.settings.checked
+    };
+    var loader = showLoadingPopup('Granting access', 'Please wait...');
+    try {
+        var res = await fetch('/api/servers/' + serverShortID + '/access', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user: user, permissions: permissions })
+        });
+        var data = await res.json();
+        loader.close();
+        if (data.success || res.ok) {
+            showToast('Access granted.', 'success');
+            location.reload();
+        } else {
+            showToast(data.error || 'Failed to grant access.', 'error');
+        }
+    } catch(err) {
+        loader.close();
+        showToast('Failed to grant access.', 'error');
+    }
+});
+
+function editAccess(id) {
+    showToast('Edit permissions coming soon.', 'info');
+}
+
+function revokeAccess(id, name) {
+    window.modal.confirm({
+        title: 'Revoke Access',
+        body: 'Revoke access for "' + name + '"? They will no longer be able to manage this server.',
+        danger: true,
+        confirmLabel: 'Revoke',
+        onConfirm: async function() {
+            var loader = showLoadingPopup('Revoking access', 'Please wait...');
+            try {
+                var res = await fetch('/api/servers/' + serverShortID + '/access/' + id, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                var data = await res.json();
+                loader.close();
+                if (data.success) {
+                    showToast('Access revoked.', 'success');
+                    var row = document.querySelector('[data-access-id="' + id + '"]');
+                    if (row) row.remove();
+                    var list = document.getElementById('access-list');
+                    if (list && list.querySelectorAll('[data-access-id]').length === 0) {
+                        list.innerHTML = '<p class="text-xs text-neutral-500 text-center py-4" id="access-empty">No access granted. Invite other users to help manage this server.</p>';
+                    }
+                } else {
+                    showToast(data.error || 'Failed to revoke access.', 'error');
+                }
+            } catch(err) {
+                loader.close();
+                showToast('Failed to revoke access.', 'error');
+            }
+        }
+    });
+}
+</script>

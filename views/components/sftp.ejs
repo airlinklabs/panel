@@ -2,9 +2,7 @@
 <button onclick="openSftpModal()" type="button" aria-label="Open SFTP access"
   class="inline-flex items-center gap-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
   <% if (isMobileViewport) { %>
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
-    <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd" />
-  </svg>
+  <%- icon('key', { class: 'w-3.5 h-3.5' }) %>
   SFTP
   <% } else { %>
   <%- icon('lock', { class: 'w-4 h-4 shrink-0' }) %>

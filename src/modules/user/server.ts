@@ -2,6 +2,8 @@ import { Router, Request, Response } from 'express';
 import type { Prisma, Users, settings as PanelSettings } from '../../generated/prisma/client';
 import { Module } from '../../core/moduleInit';
 import { isAuthenticatedForServer } from '../../middleware/serverAuth';
+import { trackActivity } from '../../middleware/activityTracker';
+import { notifyUser } from '../../services/notifications';
 import logger from '../../services/logger';
 import axios from 'axios';
 import multer from 'multer';
@@ -413,6 +415,7 @@ const dashboardModule: Module = {
     router.post(
       '/server/:id/power/:poweraction',
       isAuthenticatedForServer('id'),
+      trackActivity('server.power'),
       async (req: Request, res: Response): Promise<void> => {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
@@ -559,6 +562,7 @@ const dashboardModule: Module = {
 
             logger.info('Container restarted successfully: ' + serverId);
             res.status(200).json({ success: true, message: 'Server restarted successfully' });
+            notifyUser(userId, 'Server Restarted', `Server ${server.name} has been restarted.`, '/server/' + serverId).catch(() => {});
             return;
           }
 
@@ -574,6 +578,7 @@ const dashboardModule: Module = {
           logger.info('Container started successfully: ' + serverId);
 
           res.status(200).json({ message: 'Container started successfully.' });
+          notifyUser(userId, 'Server Started', `Server ${server.name} has been started.`, '/server/' + serverId).catch(() => {});
           return;
         } catch (error) {
           logger.error('Failed to process power action', error, {
@@ -833,10 +838,11 @@ const dashboardModule: Module = {
 
     /*
      * File system : Save
-     */
+      */
     router.post(
       '/server/:id/files/{*path}',
       isAuthenticatedForServer('id'),
+      trackActivity('server.file.edit'),
       async (req: Request, res: Response) => {
         let filePath = Array.isArray(req.params?.path) ? req.params.path.join('/') : getParamAsString(req.params?.path);
         if (filePath.endsWith('/save')) {
@@ -879,6 +885,7 @@ const dashboardModule: Module = {
     router.delete(
       '/server/:id/files/rm/{*path}',
       isAuthenticatedForServer('id'),
+      trackActivity('server.file.delete'),
       async (req: Request, res: Response) => {
         const serverId = req.params?.id;
         const filePath = Array.isArray(req.params?.path) ? req.params.path.join('/') : getParamAsString(req.params?.path);
@@ -986,6 +993,7 @@ const dashboardModule: Module = {
     router.post(
       '/server/:id/zip',
       isAuthenticatedForServer('id'),
+      trackActivity('server.file.zip'),
       async (req: Request, res: Response) => {
         const serverId = req.params?.id;
         let relativePath = req.body?.relativePath || '/';
@@ -1039,6 +1047,7 @@ const dashboardModule: Module = {
     router.post(
       '/server/:id/unzip',
       isAuthenticatedForServer('id'),
+      trackActivity('server.file.unzip'),
       async (req: Request, res: Response) => {
         const serverId = req.params?.id;
         const relativePath = req.body?.relativePath || '/';
@@ -1418,6 +1427,7 @@ const dashboardModule: Module = {
     router.post(
       '/server/:id/rename',
       isAuthenticatedForServer('id'),
+      trackActivity('server.file.rename'),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -1487,6 +1497,7 @@ const dashboardModule: Module = {
     router.post(
       '/server/:id/upload',
       isAuthenticatedForServer('id'),
+      trackActivity('server.file.upload'),
       async (req: Request, res: Response, next) => {
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         const limitMb = settings?.uploadLimit ?? 100;
@@ -1754,6 +1765,7 @@ const dashboardModule: Module = {
     router.post(
       '/server/:id/startup/command',
       isAuthenticatedForServer('id'),
+      trackActivity('server.startup.command'),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -1890,6 +1902,7 @@ const dashboardModule: Module = {
     router.post(
       '/server/:id/startup/docker-image',
       isAuthenticatedForServer('id'),
+      trackActivity('server.startup.dockerImage'),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -2270,6 +2283,7 @@ const dashboardModule: Module = {
     router.post(
       '/server/:id/settings',
       isAuthenticatedForServer('id'),
+      trackActivity('server.settings.update'),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -2353,6 +2367,7 @@ const dashboardModule: Module = {
     router.post(
       '/server/:id/reinstall',
       isAuthenticatedForServer('id'),
+      trackActivity('server.reinstall'),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -2583,6 +2598,8 @@ const dashboardModule: Module = {
             success: true,
             message: 'Server reinstallation initiated',
           });
+
+          notifyUser(userId, 'Server Reinstalling', `Server ${server.name} is being reinstalled. This may take a few minutes.`, '/server/' + serverId).catch(() => {});
         } catch (error) {
           logger.error('Error reinstalling server:', error);
           res.status(500).json({ error: 'Failed to reinstall server' });
@@ -2643,6 +2660,7 @@ const dashboardModule: Module = {
     router.post(
       '/server/:id/backups/create',
       isAuthenticatedForServer('id'),
+      trackActivity('server.backup.create'),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -2754,6 +2772,8 @@ const dashboardModule: Module = {
                 createdAt: backup.createdAt,
               },
             });
+
+            notifyUser(userId, 'Backup Created', `Backup "${name.trim()}" for server ${server.name} has been created successfully.`, '/server/' + serverId + '/backups').catch(() => {});
           } else {
             res
               .status(500)
@@ -2775,6 +2795,7 @@ const dashboardModule: Module = {
     router.post(
       '/server/:id/backups/:backupId/restore',
       isAuthenticatedForServer('id'),
+      trackActivity('server.backup.restore'),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -2993,6 +3014,7 @@ const dashboardModule: Module = {
     router.delete(
       '/server/:id/backups/:backupId',
       isAuthenticatedForServer('id'),
+      trackActivity('server.backup.delete'),
       async (req: Request, res: Response) => {
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;

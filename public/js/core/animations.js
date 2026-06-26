@@ -105,69 +105,68 @@
   //   60 + (14 × 10) + 350 = 550ms ✓
 
   var EASING = 'cubic-bezier(0.16, 1, 0.3, 1)';
-  var EASING_BOUNCE = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
 
   var TYPE_BASE_DELAY = {
-    'card': 0, 'stat-card': 0, 'table': 15, 'table-row': 30,
-    'alert': 8, 'badge': 38, 'avatar': 30, 'icon-box': 23,
-    'button': 45, 'input': 53, 'form-group': 38, 'select': 53,
-    'nav-item': 15, 'heading': 60, 'code-block': 30,
-    'progress-bar': 23, 'empty-state': 38, 'generic': 45
+    'card': 0, 'stat-card': 0, 'table': 10, 'table-row': 20,
+    'alert': 5, 'badge': 25, 'avatar': 20, 'icon-box': 15,
+    'button': 30, 'input': 35, 'form-group': 25, 'select': 35,
+    'nav-item': 10, 'heading': 40, 'code-block': 20,
+    'progress-bar': 15, 'empty-state': 25, 'generic': 30
   };
 
   var ELEMENT_TYPES = [
     { name: 'heading', match: function (el) { return /^H[1-6]$/.test(el.tagName); },
-      anim: { from: { opacity: 0, transform: 'translateY(-6px)' }, to: { opacity: 1, transform: 'translateY(0)' }, dur: 180, ease: EASING } },
+      anim: { from: { opacity: 0, transform: 'translateY(-4px)' }, to: { opacity: 1, transform: 'translateY(0)' }, dur: 150, ease: EASING } },
     { name: 'stat-card', match: function (el) { return el.classList && (el.classList.contains('stats-card') || el.getAttribute('data-animate') === 'stat'); },
-      anim: { from: { opacity: 0, transform: 'scale(0.96) translateY(6px)' }, to: { opacity: 1, transform: 'scale(1) translateY(0)' }, dur: 250, ease: EASING } },
+      anim: { from: { opacity: 0, transform: 'translateY(4px)' }, to: { opacity: 1, transform: 'translateY(0)' }, dur: 200, ease: EASING } },
     { name: 'card', match: function (el) {
         if (!el.classList) return false; var c = el.className; if (typeof c !== 'string') return false;
         if (c.indexOf('data-animate-card') !== -1) return true;
         if (c.indexOf('rounded-xl') === -1 && c.indexOf('rounded-2xl') === -1 && c.indexOf('rounded-lg') === -1) return false;
         return c.indexOf('bg-') !== -1 || c.indexOf('border-') !== -1 || c.indexOf('shadow') !== -1;
-      }, anim: { from: { opacity: 0, transform: 'translateY(8px) scale(0.98)' }, to: { opacity: 1, transform: 'translateY(0) scale(1)' }, dur: 250, ease: EASING } },
+      }, anim: { from: { opacity: 0, transform: 'translateY(6px)' }, to: { opacity: 1, transform: 'translateY(0)' }, dur: 200, ease: EASING } },
     { name: 'table', match: function (el) { return el.tagName === 'TABLE'; },
-      anim: { from: { opacity: 0, transform: 'translateY(6px)' }, to: { opacity: 1, transform: 'translateY(0)' }, dur: 180, ease: EASING } },
+      anim: { from: { opacity: 0 }, to: { opacity: 1 }, dur: 150, ease: EASING } },
     { name: 'table-row', match: function (el) { return el.tagName === 'TR' && el.parentElement && el.parentElement.tagName === 'TBODY'; },
-      anim: { from: { opacity: 0, transform: 'translateY(4px)' }, to: { opacity: 1, transform: 'translateY(0)' }, dur: 150, ease: EASING } },
+      anim: { from: { opacity: 0, transform: 'translateX(-3px)' }, to: { opacity: 1, transform: 'translateX(0)' }, dur: 120, ease: EASING } },
     { name: 'badge', match: function (el) {
         if (!el.classList) return false; var c = el.className; if (typeof c !== 'string') return false;
         return c.indexOf('rounded-md') !== -1 && c.indexOf('px-2') !== -1 && c.indexOf('text-') !== -1 && c.indexOf('font-medium') !== -1;
-      }, anim: { from: { opacity: 0, transform: 'scale(0.7)' }, to: { opacity: 1, transform: 'scale(1)' }, dur: 200, ease: EASING_BOUNCE } },
+      }, anim: { from: { opacity: 0, transform: 'scale(0.9)' }, to: { opacity: 1, transform: 'scale(1)' }, dur: 150, ease: EASING } },
     { name: 'avatar', match: function (el) { return el.tagName === 'IMG' && el.classList && el.className.indexOf('rounded') !== -1; },
-      anim: { from: { opacity: 0, transform: 'scale(0.8)' }, to: { opacity: 1, transform: 'scale(1)' }, dur: 180, ease: EASING_BOUNCE } },
+      anim: { from: { opacity: 0, transform: 'scale(0.9)' }, to: { opacity: 1, transform: 'scale(1)' }, dur: 150, ease: EASING } },
     { name: 'icon-box', match: function (el) {
         if (!el.classList) return false; var c = el.className; if (typeof c !== 'string') return false;
         return c.indexOf('rounded-lg') !== -1 && c.indexOf('bg-neutral-100') !== -1 && el.querySelector && el.querySelector('svg');
-      }, anim: { from: { opacity: 0, transform: 'scale(0.5) rotate(-8deg)' }, to: { opacity: 1, transform: 'scale(1) rotate(0deg)' }, dur: 180, ease: EASING_BOUNCE } },
+      }, anim: { from: { opacity: 0, transform: 'scale(0.9)' }, to: { opacity: 1, transform: 'scale(1)' }, dur: 150, ease: EASING } },
     { name: 'button', match: function (el) { return el.tagName === 'BUTTON' || (el.tagName === 'A' && el.classList && el.className.indexOf('rounded-xl') !== -1 && el.className.indexOf('bg-') !== -1); },
-      anim: { from: { opacity: 0, transform: 'scale(0.92)' }, to: { opacity: 1, transform: 'scale(1)' }, dur: 150, ease: EASING_BOUNCE } },
+      anim: { from: { opacity: 0 }, to: { opacity: 1 }, dur: 120, ease: EASING } },
     { name: 'input', match: function (el) { return el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA'; },
-      anim: { from: { opacity: 0, transform: 'translateX(-6px)' }, to: { opacity: 1, transform: 'translateX(0)' }, dur: 200, ease: EASING } },
+      anim: { from: { opacity: 0, transform: 'translateX(-4px)' }, to: { opacity: 1, transform: 'translateX(0)' }, dur: 150, ease: EASING } },
     { name: 'form-group', match: function (el) {
         if (!el.classList) return false; var c = el.className; if (typeof c !== 'string') return false;
         return c.indexOf('space-y-') !== -1 || c.indexOf('grid-cols-') !== -1;
-      }, anim: { from: { opacity: 0, transform: 'translateY(6px)' }, to: { opacity: 1, transform: 'translateY(0)' }, dur: 180, ease: EASING } },
+      }, anim: { from: { opacity: 0, transform: 'translateY(4px)' }, to: { opacity: 1, transform: 'translateY(0)' }, dur: 150, ease: EASING } },
     { name: 'nav-item', match: function (el) {
         if (!el.classList) return false; var c = el.className; if (typeof c !== 'string') return false;
         return c.indexOf('nav-link') !== -1 || c.indexOf('nav-link2') !== -1 || c.indexOf('mobile-nav-link') !== -1;
-      }, anim: { from: { opacity: 0, transform: 'translateX(-8px)' }, to: { opacity: 1, transform: 'translateX(0)' }, dur: 200, ease: EASING } },
+      }, anim: { from: { opacity: 0, transform: 'translateX(-4px)' }, to: { opacity: 1, transform: 'translateX(0)' }, dur: 150, ease: EASING } },
     { name: 'alert', match: function (el) {
         if (!el.classList) return false; var c = el.className; if (typeof c !== 'string') return false;
         return c.indexOf('bg-red-50') !== -1 || c.indexOf('bg-amber-50') !== -1 || c.indexOf('bg-emerald-50') !== -1;
-      }, anim: { from: { opacity: 0, transform: 'translateY(-6px) scale(0.98)' }, to: { opacity: 1, transform: 'translateY(0) scale(1)' }, dur: 180, ease: EASING } },
+      }, anim: { from: { opacity: 0, transform: 'translateY(-4px)' }, to: { opacity: 1, transform: 'translateY(0)' }, dur: 150, ease: EASING } },
     { name: 'code-block', match: function (el) { return el.tagName === 'PRE' || el.tagName === 'CODE'; },
-      anim: { from: { opacity: 0 }, to: { opacity: 1 }, dur: 180, ease: EASING } },
+      anim: { from: { opacity: 0 }, to: { opacity: 1 }, dur: 150, ease: EASING } },
     { name: 'progress-bar', match: function (el) {
         if (!el.classList) return false; var c = el.className; if (typeof c !== 'string') return false;
         return c.indexOf('rounded-full') !== -1 && c.indexOf('h-1') !== -1;
-      }, anim: { from: { transform: 'scaleX(0)' }, to: { transform: 'scaleX(1)' }, dur: 350, ease: EASING } },
+      }, anim: { from: { transform: 'scaleX(0)' }, to: { transform: 'scaleX(1)' }, dur: 250, ease: EASING } },
     { name: 'empty-state', match: function (el) {
         if (!el.classList) return false; var c = el.className; if (typeof c !== 'string') return false;
         return c.indexOf('items-center') !== -1 && c.indexOf('justify-center') !== -1 && c.indexOf('text-center') !== -1 && c.indexOf('mt-') !== -1;
-      }, anim: { from: { opacity: 0, transform: 'scale(0.95) translateY(8px)' }, to: { opacity: 1, transform: 'scale(1) translateY(0)' }, dur: 300, ease: EASING } },
+      }, anim: { from: { opacity: 0, transform: 'translateY(4px)' }, to: { opacity: 1, transform: 'translateY(0)' }, dur: 200, ease: EASING } },
     { name: 'generic', match: function () { return true; },
-      anim: { from: { opacity: 0, transform: 'translateY(4px)' }, to: { opacity: 1, transform: 'translateY(0)' }, dur: 200, ease: EASING } }
+      anim: { from: { opacity: 0, transform: 'translateY(3px)' }, to: { opacity: 1, transform: 'translateY(0)' }, dur: 150, ease: EASING } }
   ];
 
   var SKIP_TAGS = { SCRIPT: 1, STYLE: 1, LINK: 1, META: 1, NOSCRIPT: 1, CANVAS: 1, SVG: 1, PATH: 1 };
@@ -280,14 +279,14 @@
   // Public API for addon views
   window.airlinkAnimate = function (el, options) {
     if (!el || el.nodeType !== 1) return;
-    var duration = (options && options.duration) || 250;
+    var duration = (options && options.duration) || 200;
     var delay    = (options && options.delay)    || 0;
     el.animate(
       [
-        { opacity: 0, transform: 'translateY(8px)' },
+        { opacity: 0, transform: 'translateY(4px)' },
         { opacity: 1, transform: 'translateY(0)' }
       ],
-      { duration: duration, delay: delay, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', fill: 'backwards' }
+      { duration: duration, delay: delay, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' }
     );
   };
 

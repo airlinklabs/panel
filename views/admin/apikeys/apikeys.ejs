@@ -134,9 +134,7 @@
                   <span class="text-xs font-medium text-neutral-700 dark:text-neutral-300 capitalize"><%= category %></span>
                   <span class="create-cat-count text-[10px] text-neutral-400 dark:text-neutral-500" data-category="<%= category %>"></span>
                 </div>
-                <svg class="category-chevron w-3.5 h-3.5 text-neutral-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                </svg>
+                <%- icon('chevron-down', { class: 'category-chevron w-3.5 h-3.5 text-neutral-400 transition-transform duration-200' }) %>
               </button>
               <div class="category-panel hidden px-3 py-3 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60">
                 <div class="grid grid-cols-2 gap-2">
@@ -205,9 +203,7 @@
                   <span class="text-xs font-medium text-neutral-700 dark:text-neutral-300 capitalize"><%= category %></span>
                   <span class="edit-cat-count text-[10px] text-neutral-400 dark:text-neutral-500" data-category="<%= category %>"></span>
                 </div>
-                <svg class="category-chevron w-3.5 h-3.5 text-neutral-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                </svg>
+                <%- icon('chevron-down', { class: 'category-chevron w-3.5 h-3.5 text-neutral-400 transition-transform duration-200' }) %>
               </button>
               <div class="category-panel hidden px-3 py-3 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60">
                 <div class="grid grid-cols-2 gap-2">
@@ -217,9 +213,7 @@
                         id="edit-permission-<%= permission.value %>"
                         class="edit-permission-checkbox h-3.5 w-3.5 rounded shrink-0" data-category="<%= category %>"
                         onchange="refreshLabels(this, 'edit', '<%= category %>')">
-                      <svg class="check-icon w-3.5 h-3.5 text-white opacity-0 shrink-0 transition-opacity duration-150" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                      </svg>
+                      <span class="check-icon"><%- icon('check', { class: 'w-3.5 h-3.5 text-white opacity-0 shrink-0 transition-opacity duration-150', strokeWidth: 2.5 }) %></span>
                       <span class="perm-text text-xs text-neutral-600 dark:text-neutral-300"><%= permission.name.split(' - ')[1] || permission.name %></span>
                     </label>
                   <% }); %>
@@ -581,9 +575,7 @@
           <p id="createApiKeyDescription" class="text-xs text-neutral-500 mt-0.5">Set a name and choose what this key is allowed to do.</p>
         </div>
         <button type="button" onclick="hideCreateModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800" aria-label="Close create API key dialog">
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <%- icon('x', { class: 'h-4 w-4' }) %>
         </button>
       </div>
       <form action="/admin/apikeys/create" method="POST" class="px-6 py-5 space-y-5">
@@ -677,9 +669,7 @@
         <p id="editApiKeyDescription" class="text-xs text-neutral-500 mt-0.5">Update name, description, and permissions.</p>
       </div>
       <button type="button" onclick="hideEditModal()" class="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition" aria-label="Close edit API key dialog">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
+        <%- icon('x', { class: 'w-4 h-4' }) %>
       </button>
     </div>
     <form id="editApiKeyForm" action="/admin/apikeys/edit/0" method="POST" class="flex flex-col min-h-0 flex-1">

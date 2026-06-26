@@ -252,21 +252,21 @@ const addonsModule: Module = {
               installRepo: installManifest.repo || '',
               installBranch: installManifest.branch || 'main',
               installNote: installManifest.note || '',
-            installCommands: installManifest.commands || {},
-          };
-        } catch {
-          return null;
-        }
+              installCommands: installManifest.commands || {},
+            };
+          } catch {
+            return null;
+          }
         })
       );
 
       res.json({ success: true, addons: addonData.filter(Boolean) });
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Error fetching addon store list:', error);
-      res.status(500).json({ success: false, message: msg });
-    }
-  }
+        } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : 'Unknown error';
+          logger.error('Error fetching addon store list:', error);
+          res.status(500).json({ success: false, message: msg });
+        }
+      }
     );
 
     router.get(
@@ -471,7 +471,7 @@ const addonsModule: Module = {
           } else {
             res.status(500).json({ success: false, message: result.message || 'Failed to update addon status' });
           }
-          } catch (error: unknown) {
+        } catch (error: unknown) {
           const msg = error instanceof Error ? error.message : 'Unknown error';
           logger.error('Error toggling addon status:', error);
           res.status(500).json({ success: false, message: msg });

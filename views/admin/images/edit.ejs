@@ -7,9 +7,7 @@
   <div class="px-4 pt-5 pb-8">
     <div class="mb-5">
       <a href="/admin/images" class="inline-flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 mb-3 hover:text-neutral-700 dark:hover:text-neutral-200 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-        </svg>
+        <%- icon('arrow-left', { class: 'w-3.5 h-3.5' }) %>
         Back to Images
       </a>
       <div class="flex items-start justify-between gap-3">
@@ -26,9 +24,7 @@
 
     <% if (req.query.success) { %>
       <div data-animate-card class="rounded-xl bg-green-500/10 border border-green-500/20 px-4 py-3 mb-5 flex items-center gap-3">
-        <svg class="h-4 w-4 text-green-400 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-        </svg>
+        <%- icon('circle-check', { class: 'h-4 w-4 text-green-400 shrink-0' }) %>
         <div>
           <p class="text-sm font-medium text-green-400">Image updated successfully</p>
           <p class="text-xs text-green-400/60 mt-0.5">Your changes have been saved.</p>

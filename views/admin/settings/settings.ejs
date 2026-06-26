@@ -1,7 +1,8 @@
 <%- include('../../components/header', { title: 'Settings' }) %>
+<noscript><style>#page-content { opacity: 1 !important; }</style></noscript>
 
 <% if (isMobileViewport) { %>
-<main id="page-content" style="opacity: 0">
+<main id="page-content" style="opacity: 0; transition: opacity 0.3s">
   <%- include('../../components/template') %>
   <div class="px-4 pt-5 pb-24">
     <div>
@@ -90,7 +91,7 @@
                     <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
                     <% if (!theme.builtin && theme.path) { %>
                     <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      <%- icon('trash-2', { class: 'w-4 h-4' }) %>
                     </button>
                     <% } %>
                   </label>
@@ -124,7 +125,7 @@
                     <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
                     <% if (!theme.builtin && theme.path) { %>
                     <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      <%- icon('trash-2', { class: 'w-4 h-4' }) %>
                     </button>
                     <% } %>
                   </label>
@@ -159,7 +160,7 @@
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" name="loginWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.loginWallpaper && settings.loginWallpaper.startsWith('http')) ? settings.loginWallpaper : '' %>"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
               </div>
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white mb-3">Register page</p>
@@ -172,7 +173,7 @@
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" name="registerWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.registerWallpaper && settings.registerWallpaper.startsWith('http')) ? settings.registerWallpaper : '' %>"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
               </div>
             </div>
           </div>
@@ -450,8 +451,8 @@
   };
 
   function getToggleValue(name) {
-    const toggle = document.querySelector(`input[type="hidden"][name="${name}"]`);
-    return toggle ? toggle.value === 'true' : false;
+    const toggle = document.querySelector(`input[type="checkbox"][name="${name}"]`);
+    return toggle ? toggle.checked : false;
   }
 
   document.getElementById('form-appearance').addEventListener('submit', function (e) {
@@ -574,7 +575,7 @@
   <div class="flex min-h-screen">
     <div class="w-60 shrink-0"><%- include('../../components/template') %></div>
 
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12" style="opacity: 0">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12" style="opacity: 0; transition: opacity 0.3s">
       <div class="px-8 pt-5">
         <h1 class="text-base font-medium text-neutral-800 dark:text-white">Settings</h1>
         <p class="mt-0.5 text-sm text-neutral-500">Manage your panel configuration.</p>
@@ -661,13 +662,14 @@
                     <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
                     <% if (!theme.builtin && theme.path) { %>
                     <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      <%- icon('trash-2', { class: 'w-4 h-4' }) %>
                     </button>
                     <% } %>
                   </label>
                   <% }); %>
                 </div>
               </div>
+            </div>
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white mb-1">Dark mode</p>
                 <p class="text-xs text-neutral-500 mb-3">Applied when the panel is in dark mode.</p>
@@ -695,7 +697,7 @@
                     <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
                     <% if (!theme.builtin && theme.path) { %>
                     <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      <%- icon('trash-2', { class: 'w-4 h-4' }) %>
                     </button>
                     <% } %>
                   </label>

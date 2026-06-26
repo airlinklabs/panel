@@ -67,7 +67,14 @@ export const ModelName = {
   Backup: 'Backup',
   SftpCredential: 'SftpCredential',
   EggCatalog: 'EggCatalog',
-  CategoryMD: 'CategoryMD'
+  CategoryMD: 'CategoryMD',
+  ActivityLog: 'ActivityLog',
+  Notification: 'Notification',
+  UserApiKey: 'UserApiKey',
+  TwoFactor: 'TwoFactor',
+  ScheduledTask: 'ScheduledTask',
+  ServerAlert: 'ServerAlert',
+  ServerAccess: 'ServerAccess'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -362,6 +369,108 @@ export const CategoryMDScalarFieldEnum = {
 } as const
 
 export type CategoryMDScalarFieldEnum = (typeof CategoryMDScalarFieldEnum)[keyof typeof CategoryMDScalarFieldEnum]
+
+
+export const ActivityLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  serverId: 'serverId',
+  action: 'action',
+  detail: 'detail',
+  ip: 'ip',
+  createdAt: 'createdAt'
+} as const
+
+export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  title: 'title',
+  message: 'message',
+  read: 'read',
+  serverId: 'serverId',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const UserApiKeyScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  key: 'key',
+  prefix: 'prefix',
+  permissions: 'permissions',
+  active: 'active',
+  lastUsedAt: 'lastUsedAt',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserApiKeyScalarFieldEnum = (typeof UserApiKeyScalarFieldEnum)[keyof typeof UserApiKeyScalarFieldEnum]
+
+
+export const TwoFactorScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  secret: 'secret',
+  enabled: 'enabled',
+  backupCodes: 'backupCodes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TwoFactorScalarFieldEnum = (typeof TwoFactorScalarFieldEnum)[keyof typeof TwoFactorScalarFieldEnum]
+
+
+export const ScheduledTaskScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  serverId: 'serverId',
+  type: 'type',
+  cronExpr: 'cronExpr',
+  enabled: 'enabled',
+  lastRunAt: 'lastRunAt',
+  nextRunAt: 'nextRunAt',
+  config: 'config',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ScheduledTaskScalarFieldEnum = (typeof ScheduledTaskScalarFieldEnum)[keyof typeof ScheduledTaskScalarFieldEnum]
+
+
+export const ServerAlertScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  serverId: 'serverId',
+  type: 'type',
+  threshold: 'threshold',
+  current: 'current',
+  triggered: 'triggered',
+  enabled: 'enabled',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ServerAlertScalarFieldEnum = (typeof ServerAlertScalarFieldEnum)[keyof typeof ServerAlertScalarFieldEnum]
+
+
+export const ServerAccessScalarFieldEnum = {
+  id: 'id',
+  serverId: 'serverId',
+  grantorId: 'grantorId',
+  granteeId: 'granteeId',
+  permissions: 'permissions',
+  createdAt: 'createdAt'
+} as const
+
+export type ServerAccessScalarFieldEnum = (typeof ServerAccessScalarFieldEnum)[keyof typeof ServerAccessScalarFieldEnum]
 
 
 export const SortOrder = {

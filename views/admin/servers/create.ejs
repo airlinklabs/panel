@@ -24,9 +24,7 @@
                 <div class="flex items-center space-x-2">
                     <input id="serverName" name="name" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server">
                     <div class="flex-shrink-0 p-2 mb-1 -ml-5" onclick="generateRandomName()">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-neutral-300">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
-                        </svg>
+                        <%- icon('refresh-cw', { size: 24, class: 'text-neutral-300' }) %>
                     </div>
                 </div>
             </div>
@@ -140,7 +138,7 @@
 
               <div>
                 <label for="dockerImage" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+                  <%- icon('box', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.DockerImage %>:</label>
                 <select id="dockerImage" name="dockerImage"
                         class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
@@ -163,9 +161,7 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between">
                   <div class="flex items-center mb-2 md:mb-0">
                     <div class="flex-shrink-0 mr-3">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
+                      <%- icon('pencil', { size: 24, class: 'text-blue-500' }) %>
                     </div>
                     <div>
                       <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
@@ -202,7 +198,7 @@
 </main>
 
 <div id="portsModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/60 px-3 pb-3 pt-16">
-  <div data-animate-card class="w-full max-h-[88vh] overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-700/60 bg-white dark:bg-neutral-900 shadow-xl">
+  <div id="portsModalPanel" class="w-full max-h-[88vh] overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-700/60 bg-white dark:bg-neutral-900">
     <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700/60 px-4 py-3">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
       <button type="button" id="closePortsModal" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">

@@ -1,19 +1,62 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
+@source "../views/**/*.ejs";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  :root {
+    --al-accent: 82 111 102;
+    --al-accent-strong: 52 79 72;
+    --al-ink: 28 31 32;
+    --al-paper: 247 247 243;
+    --al-paper-soft: 239 240 235;
+    --al-focus: rgb(var(--al-accent) / 0.72);
+  }
+
   html {
+    scroll-behavior: smooth;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
+  body {
+    font-family: 'Inter Tight', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: rgb(var(--al-ink));
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cabinet Grotesk', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+
+  html.dark body {
+    background-color: #141414;
+  }
+
   h1,
   h2,
-  h3 {
+  h3,
+  h4,
+  h5,
+  h6 {
+    letter-spacing: -0.02em;
+    line-height: 1.1;
     text-wrap: balance;
+  }
+
+  h1 {
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  h2 {
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+
+  h3 {
+    font-weight: 600;
   }
 
   p,
@@ -23,7 +66,7 @@
   }
 
   :where(button, [role="button"], a, input, select, textarea):focus-visible {
-    outline: 2px solid rgb(59 130 246 / 0.75);
+    outline: 2px solid var(--al-focus);
     outline-offset: 2px;
   }
 
@@ -52,16 +95,23 @@
     --tw-shadow-colored: 0 18px 44px -28px var(--tw-shadow-color);
   }
 
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
   .al-ui-surface {
-    @apply border border-neutral-200 bg-white dark:border-neutral-700/50 dark:bg-neutral-900/60;
+    @apply border border-neutral-200/80 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-white/[0.045];
   }
 
   .al-ui-button {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-800 transition-colors hover:bg-neutral-100 active:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-55 dark:border-white/10 dark:bg-white/5 dark:text-neutral-100 dark:hover:bg-white/10 dark:active:bg-white/15;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-neutral-200/80 bg-white/90 px-3 py-2 text-sm font-medium text-neutral-800 transition-all duration-200 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-55 dark:border-white/10 dark:bg-white/[0.055] dark:text-neutral-100 dark:hover:bg-white/10;
   }
 
   .al-ui-button-primary {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-xl bg-neutral-950 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800 active:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-55 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200 dark:active:bg-neutral-300;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-neutral-950 px-3 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-55 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200;
   }
 
   .al-ui-muted {
@@ -82,29 +132,108 @@
   #al-progress       { transition: none !important; }
 }
 
-/* ── Sidebar active indicator spring ────────────────────────────────────── */
+/* ── Sidebar active indicator ────────────────────────────────────── */
 #active-background {
-  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1),
-              opacity   150ms ease,
-              width     200ms ease !important;
+  background: rgb(var(--al-accent) / 0.1);
+  border: 1px solid rgb(var(--al-accent) / 0.12);
+  border-radius: 0.625rem;
+  transform: translate3d(0, 0, 0);
+  transition:
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 160ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease !important;
+  will-change: transform, opacity;
 }
 
-/* ── Card lift ───────────────────────────────────────────────────────────── */
-.al-card-lift {
-  transition: transform 200ms cubic-bezier(0.16,1,0.3,1),
-              box-shadow 200ms ease,
-              border-color 200ms ease;
+html.dark #active-background {
+  background: rgb(255 255 255 / 0.06);
+  border-color: rgb(255 255 255 / 0.06);
 }
-.al-card-lift:hover { transform: translateY(-2px); }
-.al-card-lift:active { transform: translateY(0); }
+
+.nav-link,
+.mobile-nav-link {
+  will-change: color;
+}
+
+.nav-link.active,
+.mobile-nav-link.active-mobile {
+  will-change: color;
+}
+
+.mobile-nav-link svg,
+.nav-link svg {
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 180ms ease,
+    opacity 180ms ease;
+}
+
+.mobile-nav-link.active-mobile svg,
+.nav-link.active svg {
+  transform: none;
+}
+
+.al-topbar {
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    backdrop-filter 260ms ease;
+  will-change: background-color, border-color;
+}
+
+.al-topbar-ready {
+  animation: al-topbar-settle 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes al-topbar-settle {
+  from { opacity: 0.94; }
+  to { opacity: 1; }
+}
+
+.al-search-shell,
+.al-mobile-search-shell {
+  transition:
+    border-color 220ms ease,
+    background-color 220ms ease;
+}
+
+.al-search-shell:hover,
+.al-search-shell.is-active,
+.al-mobile-search-shell:focus-within {
+  border-color: rgb(var(--al-accent) / 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .al-topbar-ready {
+    animation: none !important;
+  }
+  .nav-link:hover,
+  .mobile-nav-link:hover,
+  .nav-link.active,
+  .mobile-nav-link.active-mobile,
+  .mobile-nav-link.active-mobile svg,
+  .nav-link.active svg,
+  .al-search-shell:hover,
+  .al-search-shell.is-active,
+  .al-mobile-search-shell:focus-within {
+    transform: none !important;
+  }
+}
+
+/* ── Card hover ──────────────────────────────────────────────────────────── */
+.al-card-lift {
+  transition: border-color 200ms ease,
+              background-color 200ms ease;
+}
+.al-card-lift:hover { border-color: rgb(var(--al-accent) / 0.2); }
 
 /* ── Button press ────────────────────────────────────────────────────────── */
 .al-btn, button[type="submit"], button[type="button"] {
-  transition: transform 80ms ease, filter 80ms ease, opacity 80ms ease;
+  transition: opacity 80ms ease, background-color 150ms ease;
 }
 button:active:not(:disabled), .al-btn:active:not(:disabled) {
-  transform: scale(0.97);
-  filter: brightness(0.9);
+  opacity: 0.85;
 }
 
 /* ── Progress bar (injected by transitions.js) ───────────────────────────── */
@@ -117,7 +246,7 @@ button:active:not(:disabled), .al-btn:active:not(:disabled) {
 .al-table-wrapper table { border-collapse: separate; border-spacing: 0; }
 
 /* ── Selection ───────────────────────────────────────────────────────────── */
-::selection { background: rgb(99 102 241 / 0.18); }
+::selection { background: rgb(var(--al-accent) / 0.24); }
 
 /* ── Smooth scroll inside swapped panels ────────────────────────────────── */
 #page-content { scroll-behavior: smooth; }
@@ -134,9 +263,9 @@ button:active:not(:disabled), .al-btn:active:not(:disabled) {
   50%       { opacity: 0.4; }
 }
 
-/* ── Opaque dropdown backgrounds ────────────────────────────────────────── */
-/* Ensures all dropdowns, popovers, context menus, and select menus always   */
-/* have solid opaque backgrounds regardless of theme overrides.              */
+/* ── Dropdown backgrounds ──────────────────────────────────────────────── */
+/* Ensures all dropdowns, popovers, context menus, and select menus have    */
+/* solid backgrounds. Theme authors can override via --theme-bg-card.       */
 [data-popover],
 .filter-menu,
 .al-file-menu,
@@ -147,7 +276,7 @@ button:active:not(:disabled), .al-btn:active:not(:disabled) {
 #mobileSearchResults,
 [role="menu"],
 [role="listbox"] {
-  background-color: #fff !important;
+  background-color: var(--theme-bg-card, #fff);
 }
 html.dark [data-popover],
 html.dark .filter-menu,
@@ -159,6 +288,6 @@ html.dark #searchResults,
 html.dark #mobileSearchResults,
 html.dark [role="menu"],
 html.dark [role="listbox"] {
-  background-color: var(--theme-bg-card, #1a1a1a) !important;
-  border-color: var(--theme-border, rgba(255,255,255,0.08)) !important;
+  background-color: var(--theme-bg-card, #1a1a1a);
+  border-color: var(--theme-border, rgba(255,255,255,0.08));
 }

@@ -85,3 +85,80 @@ export const isAuthenticatedForServerWS =
         ws.close();
       }
     };
+
+export interface ServerAccessResult {
+  hasAccess: boolean;
+  isOwner: boolean;
+  isAdmin: boolean;
+  permissions: string[];
+}
+
+export async function hasServerAccess(
+  userId: number,
+  serverUUID: string,
+): Promise<ServerAccessResult> {
+  const defaultResult: ServerAccessResult = {
+    hasAccess: false,
+    isOwner: false,
+    isAdmin: false,
+    permissions: [],
+  };
+
+  try {
+    const user = await prisma.users.findUnique({ where: { id: userId } });
+    if (!user) return defaultResult;
+
+    if (user.isAdmin) {
+      return {
+        hasAccess: true,
+        isOwner: false,
+        isAdmin: true,
+        permissions: ['console', 'files', 'backups', 'startup', 'settings'],
+      };
+    }
+
+    const server = await prisma.server.findUnique({
+      where: { UUID: serverUUID },
+      select: { ownerId: true },
+    });
+
+    if (!server) return defaultResult;
+
+    if (server.ownerId === userId) {
+      return {
+        hasAccess: true,
+        isOwner: true,
+        isAdmin: false,
+        permissions: ['console', 'files', 'backups', 'startup', 'settings'],
+      };
+    }
+
+    const accessGrant = await prisma.serverAccess.findUnique({
+      where: {
+        serverId_granteeId: {
+          serverId: serverUUID,
+          granteeId: userId,
+        },
+      },
+    });
+
+    if (!accessGrant) return defaultResult;
+
+    let permissions: string[];
+    try {
+      permissions = JSON.parse(accessGrant.permissions);
+    } catch {
+      permissions = [];
+    }
+
+    return {
+      hasAccess: true,
+      isOwner: false,
+      isAdmin: false,
+      permissions,
+    };
+  } catch (error) {
+    logger.error('Error checking server access:', error);
+    return defaultResult;
+  }
+}

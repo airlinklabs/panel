@@ -102,3 +102,38 @@ export type EggCatalog = Prisma.EggCatalogModel
  * 
  */
 export type CategoryMD = Prisma.CategoryMDModel
+/**
+ * Model ActivityLog
+ * 
+ */
+export type ActivityLog = Prisma.ActivityLogModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
+ * Model UserApiKey
+ * 
+ */
+export type UserApiKey = Prisma.UserApiKeyModel
+/**
+ * Model TwoFactor
+ * 
+ */
+export type TwoFactor = Prisma.TwoFactorModel
+/**
+ * Model ScheduledTask
+ * 
+ */
+export type ScheduledTask = Prisma.ScheduledTaskModel
+/**
+ * Model ServerAlert
+ * 
+ */
+export type ServerAlert = Prisma.ServerAlertModel
+/**
+ * Model ServerAccess
+ * 
+ */
+export type ServerAccess = Prisma.ServerAccessModel

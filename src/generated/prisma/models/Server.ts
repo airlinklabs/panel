@@ -358,6 +358,10 @@ export type ServerWhereInput = {
   image?: Prisma.XOR<Prisma.ImagesScalarRelationFilter, Prisma.ImagesWhereInput>
   backups?: Prisma.BackupListRelationFilter
   folder?: Prisma.XOR<Prisma.ServerFolderMemberNullableScalarRelationFilter, Prisma.ServerFolderMemberWhereInput> | null
+  activityLogs?: Prisma.ActivityLogListRelationFilter
+  scheduledTasks?: Prisma.ScheduledTaskListRelationFilter
+  alerts?: Prisma.ServerAlertListRelationFilter
+  accessGrants?: Prisma.ServerAccessListRelationFilter
 }
 
 export type ServerOrderByWithRelationInput = {
@@ -386,6 +390,10 @@ export type ServerOrderByWithRelationInput = {
   image?: Prisma.ImagesOrderByWithRelationInput
   backups?: Prisma.BackupOrderByRelationAggregateInput
   folder?: Prisma.ServerFolderMemberOrderByWithRelationInput
+  activityLogs?: Prisma.ActivityLogOrderByRelationAggregateInput
+  scheduledTasks?: Prisma.ScheduledTaskOrderByRelationAggregateInput
+  alerts?: Prisma.ServerAlertOrderByRelationAggregateInput
+  accessGrants?: Prisma.ServerAccessOrderByRelationAggregateInput
 }
 
 export type ServerWhereUniqueInput = Prisma.AtLeast<{
@@ -417,6 +425,10 @@ export type ServerWhereUniqueInput = Prisma.AtLeast<{
   image?: Prisma.XOR<Prisma.ImagesScalarRelationFilter, Prisma.ImagesWhereInput>
   backups?: Prisma.BackupListRelationFilter
   folder?: Prisma.XOR<Prisma.ServerFolderMemberNullableScalarRelationFilter, Prisma.ServerFolderMemberWhereInput> | null
+  activityLogs?: Prisma.ActivityLogListRelationFilter
+  scheduledTasks?: Prisma.ScheduledTaskListRelationFilter
+  alerts?: Prisma.ServerAlertListRelationFilter
+  accessGrants?: Prisma.ServerAccessListRelationFilter
 }, "id" | "UUID">
 
 export type ServerOrderByWithAggregationInput = {
@@ -493,6 +505,10 @@ export type ServerCreateInput = {
   image: Prisma.ImagesCreateNestedOneWithoutServersInput
   backups?: Prisma.BackupCreateNestedManyWithoutServerInput
   folder?: Prisma.ServerFolderMemberCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateInput = {
@@ -518,6 +534,10 @@ export type ServerUncheckedCreateInput = {
   sftpCredential?: Prisma.SftpCredentialUncheckedCreateNestedOneWithoutServerInput
   backups?: Prisma.BackupUncheckedCreateNestedManyWithoutServerInput
   folder?: Prisma.ServerFolderMemberUncheckedCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerUpdateInput = {
@@ -542,6 +562,10 @@ export type ServerUpdateInput = {
   image?: Prisma.ImagesUpdateOneRequiredWithoutServersNestedInput
   backups?: Prisma.BackupUpdateManyWithoutServerNestedInput
   folder?: Prisma.ServerFolderMemberUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateInput = {
@@ -567,6 +591,10 @@ export type ServerUncheckedUpdateInput = {
   sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
   backups?: Prisma.BackupUncheckedUpdateManyWithoutServerNestedInput
   folder?: Prisma.ServerFolderMemberUncheckedUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateManyInput = {
@@ -730,6 +758,11 @@ export type ServerSumOrderByAggregateInput = {
 export type ServerScalarRelationFilter = {
   is?: Prisma.ServerWhereInput
   isNot?: Prisma.ServerWhereInput
+}
+
+export type ServerNullableScalarRelationFilter = {
+  is?: Prisma.ServerWhereInput | null
+  isNot?: Prisma.ServerWhereInput | null
 }
 
 export type ServerCreateNestedManyWithoutOwnerInput = {
@@ -900,6 +933,64 @@ export type ServerUpdateOneRequiredWithoutSftpCredentialNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ServerUpdateToOneWithWhereWithoutSftpCredentialInput, Prisma.ServerUpdateWithoutSftpCredentialInput>, Prisma.ServerUncheckedUpdateWithoutSftpCredentialInput>
 }
 
+export type ServerCreateNestedOneWithoutActivityLogsInput = {
+  create?: Prisma.XOR<Prisma.ServerCreateWithoutActivityLogsInput, Prisma.ServerUncheckedCreateWithoutActivityLogsInput>
+  connectOrCreate?: Prisma.ServerCreateOrConnectWithoutActivityLogsInput
+  connect?: Prisma.ServerWhereUniqueInput
+}
+
+export type ServerUpdateOneWithoutActivityLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.ServerCreateWithoutActivityLogsInput, Prisma.ServerUncheckedCreateWithoutActivityLogsInput>
+  connectOrCreate?: Prisma.ServerCreateOrConnectWithoutActivityLogsInput
+  upsert?: Prisma.ServerUpsertWithoutActivityLogsInput
+  disconnect?: Prisma.ServerWhereInput | boolean
+  delete?: Prisma.ServerWhereInput | boolean
+  connect?: Prisma.ServerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ServerUpdateToOneWithWhereWithoutActivityLogsInput, Prisma.ServerUpdateWithoutActivityLogsInput>, Prisma.ServerUncheckedUpdateWithoutActivityLogsInput>
+}
+
+export type ServerCreateNestedOneWithoutScheduledTasksInput = {
+  create?: Prisma.XOR<Prisma.ServerCreateWithoutScheduledTasksInput, Prisma.ServerUncheckedCreateWithoutScheduledTasksInput>
+  connectOrCreate?: Prisma.ServerCreateOrConnectWithoutScheduledTasksInput
+  connect?: Prisma.ServerWhereUniqueInput
+}
+
+export type ServerUpdateOneRequiredWithoutScheduledTasksNestedInput = {
+  create?: Prisma.XOR<Prisma.ServerCreateWithoutScheduledTasksInput, Prisma.ServerUncheckedCreateWithoutScheduledTasksInput>
+  connectOrCreate?: Prisma.ServerCreateOrConnectWithoutScheduledTasksInput
+  upsert?: Prisma.ServerUpsertWithoutScheduledTasksInput
+  connect?: Prisma.ServerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ServerUpdateToOneWithWhereWithoutScheduledTasksInput, Prisma.ServerUpdateWithoutScheduledTasksInput>, Prisma.ServerUncheckedUpdateWithoutScheduledTasksInput>
+}
+
+export type ServerCreateNestedOneWithoutAlertsInput = {
+  create?: Prisma.XOR<Prisma.ServerCreateWithoutAlertsInput, Prisma.ServerUncheckedCreateWithoutAlertsInput>
+  connectOrCreate?: Prisma.ServerCreateOrConnectWithoutAlertsInput
+  connect?: Prisma.ServerWhereUniqueInput
+}
+
+export type ServerUpdateOneRequiredWithoutAlertsNestedInput = {
+  create?: Prisma.XOR<Prisma.ServerCreateWithoutAlertsInput, Prisma.ServerUncheckedCreateWithoutAlertsInput>
+  connectOrCreate?: Prisma.ServerCreateOrConnectWithoutAlertsInput
+  upsert?: Prisma.ServerUpsertWithoutAlertsInput
+  connect?: Prisma.ServerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ServerUpdateToOneWithWhereWithoutAlertsInput, Prisma.ServerUpdateWithoutAlertsInput>, Prisma.ServerUncheckedUpdateWithoutAlertsInput>
+}
+
+export type ServerCreateNestedOneWithoutAccessGrantsInput = {
+  create?: Prisma.XOR<Prisma.ServerCreateWithoutAccessGrantsInput, Prisma.ServerUncheckedCreateWithoutAccessGrantsInput>
+  connectOrCreate?: Prisma.ServerCreateOrConnectWithoutAccessGrantsInput
+  connect?: Prisma.ServerWhereUniqueInput
+}
+
+export type ServerUpdateOneRequiredWithoutAccessGrantsNestedInput = {
+  create?: Prisma.XOR<Prisma.ServerCreateWithoutAccessGrantsInput, Prisma.ServerUncheckedCreateWithoutAccessGrantsInput>
+  connectOrCreate?: Prisma.ServerCreateOrConnectWithoutAccessGrantsInput
+  upsert?: Prisma.ServerUpsertWithoutAccessGrantsInput
+  connect?: Prisma.ServerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ServerUpdateToOneWithWhereWithoutAccessGrantsInput, Prisma.ServerUpdateWithoutAccessGrantsInput>, Prisma.ServerUncheckedUpdateWithoutAccessGrantsInput>
+}
+
 export type ServerCreateWithoutOwnerInput = {
   UUID?: string
   name: string
@@ -921,6 +1012,10 @@ export type ServerCreateWithoutOwnerInput = {
   image: Prisma.ImagesCreateNestedOneWithoutServersInput
   backups?: Prisma.BackupCreateNestedManyWithoutServerInput
   folder?: Prisma.ServerFolderMemberCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutOwnerInput = {
@@ -945,6 +1040,10 @@ export type ServerUncheckedCreateWithoutOwnerInput = {
   sftpCredential?: Prisma.SftpCredentialUncheckedCreateNestedOneWithoutServerInput
   backups?: Prisma.BackupUncheckedCreateNestedManyWithoutServerInput
   folder?: Prisma.ServerFolderMemberUncheckedCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutOwnerInput = {
@@ -1018,6 +1117,10 @@ export type ServerCreateWithoutImageInput = {
   owner: Prisma.UsersCreateNestedOneWithoutServersInput
   backups?: Prisma.BackupCreateNestedManyWithoutServerInput
   folder?: Prisma.ServerFolderMemberCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutImageInput = {
@@ -1042,6 +1145,10 @@ export type ServerUncheckedCreateWithoutImageInput = {
   sftpCredential?: Prisma.SftpCredentialUncheckedCreateNestedOneWithoutServerInput
   backups?: Prisma.BackupUncheckedCreateNestedManyWithoutServerInput
   folder?: Prisma.ServerFolderMemberUncheckedCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutImageInput = {
@@ -1090,6 +1197,10 @@ export type ServerCreateWithoutNodeInput = {
   image: Prisma.ImagesCreateNestedOneWithoutServersInput
   backups?: Prisma.BackupCreateNestedManyWithoutServerInput
   folder?: Prisma.ServerFolderMemberCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutNodeInput = {
@@ -1114,6 +1225,10 @@ export type ServerUncheckedCreateWithoutNodeInput = {
   sftpCredential?: Prisma.SftpCredentialUncheckedCreateNestedOneWithoutServerInput
   backups?: Prisma.BackupUncheckedCreateNestedManyWithoutServerInput
   folder?: Prisma.ServerFolderMemberUncheckedCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutNodeInput = {
@@ -1162,6 +1277,10 @@ export type ServerCreateWithoutFolderInput = {
   owner: Prisma.UsersCreateNestedOneWithoutServersInput
   image: Prisma.ImagesCreateNestedOneWithoutServersInput
   backups?: Prisma.BackupCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutFolderInput = {
@@ -1186,6 +1305,10 @@ export type ServerUncheckedCreateWithoutFolderInput = {
   imageId: number
   sftpCredential?: Prisma.SftpCredentialUncheckedCreateNestedOneWithoutServerInput
   backups?: Prisma.BackupUncheckedCreateNestedManyWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutFolderInput = {
@@ -1225,6 +1348,10 @@ export type ServerUpdateWithoutFolderInput = {
   owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
   image?: Prisma.ImagesUpdateOneRequiredWithoutServersNestedInput
   backups?: Prisma.BackupUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutFolderInput = {
@@ -1249,6 +1376,10 @@ export type ServerUncheckedUpdateWithoutFolderInput = {
   imageId?: Prisma.IntFieldUpdateOperationsInput | number
   sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
   backups?: Prisma.BackupUncheckedUpdateManyWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateWithoutBackupsInput = {
@@ -1272,6 +1403,10 @@ export type ServerCreateWithoutBackupsInput = {
   owner: Prisma.UsersCreateNestedOneWithoutServersInput
   image: Prisma.ImagesCreateNestedOneWithoutServersInput
   folder?: Prisma.ServerFolderMemberCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutBackupsInput = {
@@ -1296,6 +1431,10 @@ export type ServerUncheckedCreateWithoutBackupsInput = {
   imageId: number
   sftpCredential?: Prisma.SftpCredentialUncheckedCreateNestedOneWithoutServerInput
   folder?: Prisma.ServerFolderMemberUncheckedCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutBackupsInput = {
@@ -1335,6 +1474,10 @@ export type ServerUpdateWithoutBackupsInput = {
   owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
   image?: Prisma.ImagesUpdateOneRequiredWithoutServersNestedInput
   folder?: Prisma.ServerFolderMemberUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutBackupsInput = {
@@ -1359,6 +1502,10 @@ export type ServerUncheckedUpdateWithoutBackupsInput = {
   imageId?: Prisma.IntFieldUpdateOperationsInput | number
   sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
   folder?: Prisma.ServerFolderMemberUncheckedUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateWithoutSftpCredentialInput = {
@@ -1382,6 +1529,10 @@ export type ServerCreateWithoutSftpCredentialInput = {
   image: Prisma.ImagesCreateNestedOneWithoutServersInput
   backups?: Prisma.BackupCreateNestedManyWithoutServerInput
   folder?: Prisma.ServerFolderMemberCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessCreateNestedManyWithoutServerInput
 }
 
 export type ServerUncheckedCreateWithoutSftpCredentialInput = {
@@ -1406,6 +1557,10 @@ export type ServerUncheckedCreateWithoutSftpCredentialInput = {
   imageId: number
   backups?: Prisma.BackupUncheckedCreateNestedManyWithoutServerInput
   folder?: Prisma.ServerFolderMemberUncheckedCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutServerInput
 }
 
 export type ServerCreateOrConnectWithoutSftpCredentialInput = {
@@ -1445,6 +1600,10 @@ export type ServerUpdateWithoutSftpCredentialInput = {
   image?: Prisma.ImagesUpdateOneRequiredWithoutServersNestedInput
   backups?: Prisma.BackupUpdateManyWithoutServerNestedInput
   folder?: Prisma.ServerFolderMemberUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutSftpCredentialInput = {
@@ -1469,6 +1628,514 @@ export type ServerUncheckedUpdateWithoutSftpCredentialInput = {
   imageId?: Prisma.IntFieldUpdateOperationsInput | number
   backups?: Prisma.BackupUncheckedUpdateManyWithoutServerNestedInput
   folder?: Prisma.ServerFolderMemberUncheckedUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUncheckedUpdateManyWithoutServerNestedInput
+}
+
+export type ServerCreateWithoutActivityLogsInput = {
+  UUID?: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  Ports: string
+  Memory: number
+  Cpu: number
+  Storage: number
+  Variables?: string | null
+  StartCommand?: string | null
+  dockerImage?: string | null
+  allowStartupEdit?: boolean
+  Installing?: boolean
+  Queued?: boolean
+  Suspended?: boolean
+  sftpCredential?: Prisma.SftpCredentialCreateNestedOneWithoutServerInput
+  node: Prisma.NodeCreateNestedOneWithoutServersInput
+  owner: Prisma.UsersCreateNestedOneWithoutServersInput
+  image: Prisma.ImagesCreateNestedOneWithoutServersInput
+  backups?: Prisma.BackupCreateNestedManyWithoutServerInput
+  folder?: Prisma.ServerFolderMemberCreateNestedOneWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessCreateNestedManyWithoutServerInput
+}
+
+export type ServerUncheckedCreateWithoutActivityLogsInput = {
+  id?: number
+  UUID?: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  Ports: string
+  Memory: number
+  Cpu: number
+  Storage: number
+  Variables?: string | null
+  StartCommand?: string | null
+  dockerImage?: string | null
+  allowStartupEdit?: boolean
+  Installing?: boolean
+  Queued?: boolean
+  Suspended?: boolean
+  ownerId: number
+  nodeId: number
+  imageId: number
+  sftpCredential?: Prisma.SftpCredentialUncheckedCreateNestedOneWithoutServerInput
+  backups?: Prisma.BackupUncheckedCreateNestedManyWithoutServerInput
+  folder?: Prisma.ServerFolderMemberUncheckedCreateNestedOneWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutServerInput
+}
+
+export type ServerCreateOrConnectWithoutActivityLogsInput = {
+  where: Prisma.ServerWhereUniqueInput
+  create: Prisma.XOR<Prisma.ServerCreateWithoutActivityLogsInput, Prisma.ServerUncheckedCreateWithoutActivityLogsInput>
+}
+
+export type ServerUpsertWithoutActivityLogsInput = {
+  update: Prisma.XOR<Prisma.ServerUpdateWithoutActivityLogsInput, Prisma.ServerUncheckedUpdateWithoutActivityLogsInput>
+  create: Prisma.XOR<Prisma.ServerCreateWithoutActivityLogsInput, Prisma.ServerUncheckedCreateWithoutActivityLogsInput>
+  where?: Prisma.ServerWhereInput
+}
+
+export type ServerUpdateToOneWithWhereWithoutActivityLogsInput = {
+  where?: Prisma.ServerWhereInput
+  data: Prisma.XOR<Prisma.ServerUpdateWithoutActivityLogsInput, Prisma.ServerUncheckedUpdateWithoutActivityLogsInput>
+}
+
+export type ServerUpdateWithoutActivityLogsInput = {
+  UUID?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  Ports?: Prisma.StringFieldUpdateOperationsInput | string
+  Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Cpu?: Prisma.IntFieldUpdateOperationsInput | number
+  Storage?: Prisma.IntFieldUpdateOperationsInput | number
+  Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  StartCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dockerImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowStartupEdit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sftpCredential?: Prisma.SftpCredentialUpdateOneWithoutServerNestedInput
+  node?: Prisma.NodeUpdateOneRequiredWithoutServersNestedInput
+  owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
+  image?: Prisma.ImagesUpdateOneRequiredWithoutServersNestedInput
+  backups?: Prisma.BackupUpdateManyWithoutServerNestedInput
+  folder?: Prisma.ServerFolderMemberUpdateOneWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUpdateManyWithoutServerNestedInput
+}
+
+export type ServerUncheckedUpdateWithoutActivityLogsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  UUID?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  Ports?: Prisma.StringFieldUpdateOperationsInput | string
+  Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Cpu?: Prisma.IntFieldUpdateOperationsInput | number
+  Storage?: Prisma.IntFieldUpdateOperationsInput | number
+  Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  StartCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dockerImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowStartupEdit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ownerId?: Prisma.IntFieldUpdateOperationsInput | number
+  nodeId?: Prisma.IntFieldUpdateOperationsInput | number
+  imageId?: Prisma.IntFieldUpdateOperationsInput | number
+  sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
+  backups?: Prisma.BackupUncheckedUpdateManyWithoutServerNestedInput
+  folder?: Prisma.ServerFolderMemberUncheckedUpdateOneWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUncheckedUpdateManyWithoutServerNestedInput
+}
+
+export type ServerCreateWithoutScheduledTasksInput = {
+  UUID?: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  Ports: string
+  Memory: number
+  Cpu: number
+  Storage: number
+  Variables?: string | null
+  StartCommand?: string | null
+  dockerImage?: string | null
+  allowStartupEdit?: boolean
+  Installing?: boolean
+  Queued?: boolean
+  Suspended?: boolean
+  sftpCredential?: Prisma.SftpCredentialCreateNestedOneWithoutServerInput
+  node: Prisma.NodeCreateNestedOneWithoutServersInput
+  owner: Prisma.UsersCreateNestedOneWithoutServersInput
+  image: Prisma.ImagesCreateNestedOneWithoutServersInput
+  backups?: Prisma.BackupCreateNestedManyWithoutServerInput
+  folder?: Prisma.ServerFolderMemberCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessCreateNestedManyWithoutServerInput
+}
+
+export type ServerUncheckedCreateWithoutScheduledTasksInput = {
+  id?: number
+  UUID?: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  Ports: string
+  Memory: number
+  Cpu: number
+  Storage: number
+  Variables?: string | null
+  StartCommand?: string | null
+  dockerImage?: string | null
+  allowStartupEdit?: boolean
+  Installing?: boolean
+  Queued?: boolean
+  Suspended?: boolean
+  ownerId: number
+  nodeId: number
+  imageId: number
+  sftpCredential?: Prisma.SftpCredentialUncheckedCreateNestedOneWithoutServerInput
+  backups?: Prisma.BackupUncheckedCreateNestedManyWithoutServerInput
+  folder?: Prisma.ServerFolderMemberUncheckedCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutServerInput
+}
+
+export type ServerCreateOrConnectWithoutScheduledTasksInput = {
+  where: Prisma.ServerWhereUniqueInput
+  create: Prisma.XOR<Prisma.ServerCreateWithoutScheduledTasksInput, Prisma.ServerUncheckedCreateWithoutScheduledTasksInput>
+}
+
+export type ServerUpsertWithoutScheduledTasksInput = {
+  update: Prisma.XOR<Prisma.ServerUpdateWithoutScheduledTasksInput, Prisma.ServerUncheckedUpdateWithoutScheduledTasksInput>
+  create: Prisma.XOR<Prisma.ServerCreateWithoutScheduledTasksInput, Prisma.ServerUncheckedCreateWithoutScheduledTasksInput>
+  where?: Prisma.ServerWhereInput
+}
+
+export type ServerUpdateToOneWithWhereWithoutScheduledTasksInput = {
+  where?: Prisma.ServerWhereInput
+  data: Prisma.XOR<Prisma.ServerUpdateWithoutScheduledTasksInput, Prisma.ServerUncheckedUpdateWithoutScheduledTasksInput>
+}
+
+export type ServerUpdateWithoutScheduledTasksInput = {
+  UUID?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  Ports?: Prisma.StringFieldUpdateOperationsInput | string
+  Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Cpu?: Prisma.IntFieldUpdateOperationsInput | number
+  Storage?: Prisma.IntFieldUpdateOperationsInput | number
+  Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  StartCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dockerImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowStartupEdit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sftpCredential?: Prisma.SftpCredentialUpdateOneWithoutServerNestedInput
+  node?: Prisma.NodeUpdateOneRequiredWithoutServersNestedInput
+  owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
+  image?: Prisma.ImagesUpdateOneRequiredWithoutServersNestedInput
+  backups?: Prisma.BackupUpdateManyWithoutServerNestedInput
+  folder?: Prisma.ServerFolderMemberUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUpdateManyWithoutServerNestedInput
+}
+
+export type ServerUncheckedUpdateWithoutScheduledTasksInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  UUID?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  Ports?: Prisma.StringFieldUpdateOperationsInput | string
+  Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Cpu?: Prisma.IntFieldUpdateOperationsInput | number
+  Storage?: Prisma.IntFieldUpdateOperationsInput | number
+  Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  StartCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dockerImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowStartupEdit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ownerId?: Prisma.IntFieldUpdateOperationsInput | number
+  nodeId?: Prisma.IntFieldUpdateOperationsInput | number
+  imageId?: Prisma.IntFieldUpdateOperationsInput | number
+  sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
+  backups?: Prisma.BackupUncheckedUpdateManyWithoutServerNestedInput
+  folder?: Prisma.ServerFolderMemberUncheckedUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUncheckedUpdateManyWithoutServerNestedInput
+}
+
+export type ServerCreateWithoutAlertsInput = {
+  UUID?: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  Ports: string
+  Memory: number
+  Cpu: number
+  Storage: number
+  Variables?: string | null
+  StartCommand?: string | null
+  dockerImage?: string | null
+  allowStartupEdit?: boolean
+  Installing?: boolean
+  Queued?: boolean
+  Suspended?: boolean
+  sftpCredential?: Prisma.SftpCredentialCreateNestedOneWithoutServerInput
+  node: Prisma.NodeCreateNestedOneWithoutServersInput
+  owner: Prisma.UsersCreateNestedOneWithoutServersInput
+  image: Prisma.ImagesCreateNestedOneWithoutServersInput
+  backups?: Prisma.BackupCreateNestedManyWithoutServerInput
+  folder?: Prisma.ServerFolderMemberCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessCreateNestedManyWithoutServerInput
+}
+
+export type ServerUncheckedCreateWithoutAlertsInput = {
+  id?: number
+  UUID?: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  Ports: string
+  Memory: number
+  Cpu: number
+  Storage: number
+  Variables?: string | null
+  StartCommand?: string | null
+  dockerImage?: string | null
+  allowStartupEdit?: boolean
+  Installing?: boolean
+  Queued?: boolean
+  Suspended?: boolean
+  ownerId: number
+  nodeId: number
+  imageId: number
+  sftpCredential?: Prisma.SftpCredentialUncheckedCreateNestedOneWithoutServerInput
+  backups?: Prisma.BackupUncheckedCreateNestedManyWithoutServerInput
+  folder?: Prisma.ServerFolderMemberUncheckedCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutServerInput
+  accessGrants?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutServerInput
+}
+
+export type ServerCreateOrConnectWithoutAlertsInput = {
+  where: Prisma.ServerWhereUniqueInput
+  create: Prisma.XOR<Prisma.ServerCreateWithoutAlertsInput, Prisma.ServerUncheckedCreateWithoutAlertsInput>
+}
+
+export type ServerUpsertWithoutAlertsInput = {
+  update: Prisma.XOR<Prisma.ServerUpdateWithoutAlertsInput, Prisma.ServerUncheckedUpdateWithoutAlertsInput>
+  create: Prisma.XOR<Prisma.ServerCreateWithoutAlertsInput, Prisma.ServerUncheckedCreateWithoutAlertsInput>
+  where?: Prisma.ServerWhereInput
+}
+
+export type ServerUpdateToOneWithWhereWithoutAlertsInput = {
+  where?: Prisma.ServerWhereInput
+  data: Prisma.XOR<Prisma.ServerUpdateWithoutAlertsInput, Prisma.ServerUncheckedUpdateWithoutAlertsInput>
+}
+
+export type ServerUpdateWithoutAlertsInput = {
+  UUID?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  Ports?: Prisma.StringFieldUpdateOperationsInput | string
+  Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Cpu?: Prisma.IntFieldUpdateOperationsInput | number
+  Storage?: Prisma.IntFieldUpdateOperationsInput | number
+  Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  StartCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dockerImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowStartupEdit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sftpCredential?: Prisma.SftpCredentialUpdateOneWithoutServerNestedInput
+  node?: Prisma.NodeUpdateOneRequiredWithoutServersNestedInput
+  owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
+  image?: Prisma.ImagesUpdateOneRequiredWithoutServersNestedInput
+  backups?: Prisma.BackupUpdateManyWithoutServerNestedInput
+  folder?: Prisma.ServerFolderMemberUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUpdateManyWithoutServerNestedInput
+}
+
+export type ServerUncheckedUpdateWithoutAlertsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  UUID?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  Ports?: Prisma.StringFieldUpdateOperationsInput | string
+  Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Cpu?: Prisma.IntFieldUpdateOperationsInput | number
+  Storage?: Prisma.IntFieldUpdateOperationsInput | number
+  Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  StartCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dockerImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowStartupEdit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ownerId?: Prisma.IntFieldUpdateOperationsInput | number
+  nodeId?: Prisma.IntFieldUpdateOperationsInput | number
+  imageId?: Prisma.IntFieldUpdateOperationsInput | number
+  sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
+  backups?: Prisma.BackupUncheckedUpdateManyWithoutServerNestedInput
+  folder?: Prisma.ServerFolderMemberUncheckedUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUncheckedUpdateManyWithoutServerNestedInput
+}
+
+export type ServerCreateWithoutAccessGrantsInput = {
+  UUID?: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  Ports: string
+  Memory: number
+  Cpu: number
+  Storage: number
+  Variables?: string | null
+  StartCommand?: string | null
+  dockerImage?: string | null
+  allowStartupEdit?: boolean
+  Installing?: boolean
+  Queued?: boolean
+  Suspended?: boolean
+  sftpCredential?: Prisma.SftpCredentialCreateNestedOneWithoutServerInput
+  node: Prisma.NodeCreateNestedOneWithoutServersInput
+  owner: Prisma.UsersCreateNestedOneWithoutServersInput
+  image: Prisma.ImagesCreateNestedOneWithoutServersInput
+  backups?: Prisma.BackupCreateNestedManyWithoutServerInput
+  folder?: Prisma.ServerFolderMemberCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutServerInput
+}
+
+export type ServerUncheckedCreateWithoutAccessGrantsInput = {
+  id?: number
+  UUID?: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  Ports: string
+  Memory: number
+  Cpu: number
+  Storage: number
+  Variables?: string | null
+  StartCommand?: string | null
+  dockerImage?: string | null
+  allowStartupEdit?: boolean
+  Installing?: boolean
+  Queued?: boolean
+  Suspended?: boolean
+  ownerId: number
+  nodeId: number
+  imageId: number
+  sftpCredential?: Prisma.SftpCredentialUncheckedCreateNestedOneWithoutServerInput
+  backups?: Prisma.BackupUncheckedCreateNestedManyWithoutServerInput
+  folder?: Prisma.ServerFolderMemberUncheckedCreateNestedOneWithoutServerInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutServerInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutServerInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutServerInput
+}
+
+export type ServerCreateOrConnectWithoutAccessGrantsInput = {
+  where: Prisma.ServerWhereUniqueInput
+  create: Prisma.XOR<Prisma.ServerCreateWithoutAccessGrantsInput, Prisma.ServerUncheckedCreateWithoutAccessGrantsInput>
+}
+
+export type ServerUpsertWithoutAccessGrantsInput = {
+  update: Prisma.XOR<Prisma.ServerUpdateWithoutAccessGrantsInput, Prisma.ServerUncheckedUpdateWithoutAccessGrantsInput>
+  create: Prisma.XOR<Prisma.ServerCreateWithoutAccessGrantsInput, Prisma.ServerUncheckedCreateWithoutAccessGrantsInput>
+  where?: Prisma.ServerWhereInput
+}
+
+export type ServerUpdateToOneWithWhereWithoutAccessGrantsInput = {
+  where?: Prisma.ServerWhereInput
+  data: Prisma.XOR<Prisma.ServerUpdateWithoutAccessGrantsInput, Prisma.ServerUncheckedUpdateWithoutAccessGrantsInput>
+}
+
+export type ServerUpdateWithoutAccessGrantsInput = {
+  UUID?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  Ports?: Prisma.StringFieldUpdateOperationsInput | string
+  Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Cpu?: Prisma.IntFieldUpdateOperationsInput | number
+  Storage?: Prisma.IntFieldUpdateOperationsInput | number
+  Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  StartCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dockerImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowStartupEdit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sftpCredential?: Prisma.SftpCredentialUpdateOneWithoutServerNestedInput
+  node?: Prisma.NodeUpdateOneRequiredWithoutServersNestedInput
+  owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
+  image?: Prisma.ImagesUpdateOneRequiredWithoutServersNestedInput
+  backups?: Prisma.BackupUpdateManyWithoutServerNestedInput
+  folder?: Prisma.ServerFolderMemberUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutServerNestedInput
+}
+
+export type ServerUncheckedUpdateWithoutAccessGrantsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  UUID?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  Ports?: Prisma.StringFieldUpdateOperationsInput | string
+  Memory?: Prisma.IntFieldUpdateOperationsInput | number
+  Cpu?: Prisma.IntFieldUpdateOperationsInput | number
+  Storage?: Prisma.IntFieldUpdateOperationsInput | number
+  Variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  StartCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dockerImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowStartupEdit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Installing?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Queued?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  Suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ownerId?: Prisma.IntFieldUpdateOperationsInput | number
+  nodeId?: Prisma.IntFieldUpdateOperationsInput | number
+  imageId?: Prisma.IntFieldUpdateOperationsInput | number
+  sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
+  backups?: Prisma.BackupUncheckedUpdateManyWithoutServerNestedInput
+  folder?: Prisma.ServerFolderMemberUncheckedUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerCreateManyOwnerInput = {
@@ -1513,6 +2180,10 @@ export type ServerUpdateWithoutOwnerInput = {
   image?: Prisma.ImagesUpdateOneRequiredWithoutServersNestedInput
   backups?: Prisma.BackupUpdateManyWithoutServerNestedInput
   folder?: Prisma.ServerFolderMemberUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutOwnerInput = {
@@ -1537,6 +2208,10 @@ export type ServerUncheckedUpdateWithoutOwnerInput = {
   sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
   backups?: Prisma.BackupUncheckedUpdateManyWithoutServerNestedInput
   folder?: Prisma.ServerFolderMemberUncheckedUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateManyWithoutOwnerInput = {
@@ -1602,6 +2277,10 @@ export type ServerUpdateWithoutImageInput = {
   owner?: Prisma.UsersUpdateOneRequiredWithoutServersNestedInput
   backups?: Prisma.BackupUpdateManyWithoutServerNestedInput
   folder?: Prisma.ServerFolderMemberUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutImageInput = {
@@ -1626,6 +2305,10 @@ export type ServerUncheckedUpdateWithoutImageInput = {
   sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
   backups?: Prisma.BackupUncheckedUpdateManyWithoutServerNestedInput
   folder?: Prisma.ServerFolderMemberUncheckedUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateManyWithoutImageInput = {
@@ -1691,6 +2374,10 @@ export type ServerUpdateWithoutNodeInput = {
   image?: Prisma.ImagesUpdateOneRequiredWithoutServersNestedInput
   backups?: Prisma.BackupUpdateManyWithoutServerNestedInput
   folder?: Prisma.ServerFolderMemberUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateWithoutNodeInput = {
@@ -1715,6 +2402,10 @@ export type ServerUncheckedUpdateWithoutNodeInput = {
   sftpCredential?: Prisma.SftpCredentialUncheckedUpdateOneWithoutServerNestedInput
   backups?: Prisma.BackupUncheckedUpdateManyWithoutServerNestedInput
   folder?: Prisma.ServerFolderMemberUncheckedUpdateOneWithoutServerNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutServerNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutServerNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutServerNestedInput
+  accessGrants?: Prisma.ServerAccessUncheckedUpdateManyWithoutServerNestedInput
 }
 
 export type ServerUncheckedUpdateManyWithoutNodeInput = {
@@ -1745,10 +2436,18 @@ export type ServerUncheckedUpdateManyWithoutNodeInput = {
 
 export type ServerCountOutputType = {
   backups: number
+  activityLogs: number
+  scheduledTasks: number
+  alerts: number
+  accessGrants: number
 }
 
 export type ServerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   backups?: boolean | ServerCountOutputTypeCountBackupsArgs
+  activityLogs?: boolean | ServerCountOutputTypeCountActivityLogsArgs
+  scheduledTasks?: boolean | ServerCountOutputTypeCountScheduledTasksArgs
+  alerts?: boolean | ServerCountOutputTypeCountAlertsArgs
+  accessGrants?: boolean | ServerCountOutputTypeCountAccessGrantsArgs
 }
 
 /**
@@ -1766,6 +2465,34 @@ export type ServerCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Exten
  */
 export type ServerCountOutputTypeCountBackupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.BackupWhereInput
+}
+
+/**
+ * ServerCountOutputType without action
+ */
+export type ServerCountOutputTypeCountActivityLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ActivityLogWhereInput
+}
+
+/**
+ * ServerCountOutputType without action
+ */
+export type ServerCountOutputTypeCountScheduledTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ScheduledTaskWhereInput
+}
+
+/**
+ * ServerCountOutputType without action
+ */
+export type ServerCountOutputTypeCountAlertsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ServerAlertWhereInput
+}
+
+/**
+ * ServerCountOutputType without action
+ */
+export type ServerCountOutputTypeCountAccessGrantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ServerAccessWhereInput
 }
 
 
@@ -1795,6 +2522,10 @@ export type ServerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   image?: boolean | Prisma.ImagesDefaultArgs<ExtArgs>
   backups?: boolean | Prisma.Server$backupsArgs<ExtArgs>
   folder?: boolean | Prisma.Server$folderArgs<ExtArgs>
+  activityLogs?: boolean | Prisma.Server$activityLogsArgs<ExtArgs>
+  scheduledTasks?: boolean | Prisma.Server$scheduledTasksArgs<ExtArgs>
+  alerts?: boolean | Prisma.Server$alertsArgs<ExtArgs>
+  accessGrants?: boolean | Prisma.Server$accessGrantsArgs<ExtArgs>
   _count?: boolean | Prisma.ServerCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["server"]>
 
@@ -1878,6 +2609,10 @@ export type ServerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   image?: boolean | Prisma.ImagesDefaultArgs<ExtArgs>
   backups?: boolean | Prisma.Server$backupsArgs<ExtArgs>
   folder?: boolean | Prisma.Server$folderArgs<ExtArgs>
+  activityLogs?: boolean | Prisma.Server$activityLogsArgs<ExtArgs>
+  scheduledTasks?: boolean | Prisma.Server$scheduledTasksArgs<ExtArgs>
+  alerts?: boolean | Prisma.Server$alertsArgs<ExtArgs>
+  accessGrants?: boolean | Prisma.Server$accessGrantsArgs<ExtArgs>
   _count?: boolean | Prisma.ServerCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ServerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1900,6 +2635,10 @@ export type $ServerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     image: Prisma.$ImagesPayload<ExtArgs>
     backups: Prisma.$BackupPayload<ExtArgs>[]
     folder: Prisma.$ServerFolderMemberPayload<ExtArgs> | null
+    activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
+    scheduledTasks: Prisma.$ScheduledTaskPayload<ExtArgs>[]
+    alerts: Prisma.$ServerAlertPayload<ExtArgs>[]
+    accessGrants: Prisma.$ServerAccessPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -2321,6 +3060,10 @@ export interface Prisma__ServerClient<T, Null = never, ExtArgs extends runtime.T
   image<T extends Prisma.ImagesDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ImagesDefaultArgs<ExtArgs>>): Prisma.Prisma__ImagesClient<runtime.Types.Result.GetResult<Prisma.$ImagesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   backups<T extends Prisma.Server$backupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$backupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BackupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   folder<T extends Prisma.Server$folderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$folderArgs<ExtArgs>>): Prisma.Prisma__ServerFolderMemberClient<runtime.Types.Result.GetResult<Prisma.$ServerFolderMemberPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  activityLogs<T extends Prisma.Server$activityLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  scheduledTasks<T extends Prisma.Server$scheduledTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$scheduledTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScheduledTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  alerts<T extends Prisma.Server$alertsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$alertsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerAlertPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  accessGrants<T extends Prisma.Server$accessGrantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Server$accessGrantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2827,6 +3570,102 @@ export type Server$folderArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    */
   include?: Prisma.ServerFolderMemberInclude<ExtArgs> | null
   where?: Prisma.ServerFolderMemberWhereInput
+}
+
+/**
+ * Server.activityLogs
+ */
+export type Server$activityLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ActivityLog
+   */
+  select?: Prisma.ActivityLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ActivityLog
+   */
+  omit?: Prisma.ActivityLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogInclude<ExtArgs> | null
+  where?: Prisma.ActivityLogWhereInput
+  orderBy?: Prisma.ActivityLogOrderByWithRelationInput | Prisma.ActivityLogOrderByWithRelationInput[]
+  cursor?: Prisma.ActivityLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ActivityLogScalarFieldEnum | Prisma.ActivityLogScalarFieldEnum[]
+}
+
+/**
+ * Server.scheduledTasks
+ */
+export type Server$scheduledTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ScheduledTask
+   */
+  select?: Prisma.ScheduledTaskSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ScheduledTask
+   */
+  omit?: Prisma.ScheduledTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScheduledTaskInclude<ExtArgs> | null
+  where?: Prisma.ScheduledTaskWhereInput
+  orderBy?: Prisma.ScheduledTaskOrderByWithRelationInput | Prisma.ScheduledTaskOrderByWithRelationInput[]
+  cursor?: Prisma.ScheduledTaskWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ScheduledTaskScalarFieldEnum | Prisma.ScheduledTaskScalarFieldEnum[]
+}
+
+/**
+ * Server.alerts
+ */
+export type Server$alertsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ServerAlert
+   */
+  select?: Prisma.ServerAlertSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ServerAlert
+   */
+  omit?: Prisma.ServerAlertOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ServerAlertInclude<ExtArgs> | null
+  where?: Prisma.ServerAlertWhereInput
+  orderBy?: Prisma.ServerAlertOrderByWithRelationInput | Prisma.ServerAlertOrderByWithRelationInput[]
+  cursor?: Prisma.ServerAlertWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ServerAlertScalarFieldEnum | Prisma.ServerAlertScalarFieldEnum[]
+}
+
+/**
+ * Server.accessGrants
+ */
+export type Server$accessGrantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ServerAccess
+   */
+  select?: Prisma.ServerAccessSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ServerAccess
+   */
+  omit?: Prisma.ServerAccessOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ServerAccessInclude<ExtArgs> | null
+  where?: Prisma.ServerAccessWhereInput
+  orderBy?: Prisma.ServerAccessOrderByWithRelationInput | Prisma.ServerAccessOrderByWithRelationInput[]
+  cursor?: Prisma.ServerAccessWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ServerAccessScalarFieldEnum | Prisma.ServerAccessScalarFieldEnum[]
 }
 
 /**

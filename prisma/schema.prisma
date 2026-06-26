@@ -8,27 +8,35 @@ datasource db {
 }
 
 model Users {
-  id            Int              @id @default(autoincrement())
-  email         String           @unique
-  username      String?          @unique
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  username      String?   @unique
   password      String
-  isAdmin       Boolean          @default(false)
-  description   String?          @default("No About Me")
+  isAdmin       Boolean   @default(false)
+  description   String?   @default("No About Me")
   avatar        String?
-  permissions   String?          @default("[]")
-  serverLimit   Int?             @default(0)
-  maxMemory     Int?             @default(0)
-  maxCpu        Int?             @default(0)
-  maxStorage    Int?             @default(0)
-  loginAttempts Int              @default(0)
+  permissions   String?   @default("[]")
+  serverLimit   Int?      @default(0)
+  maxMemory     Int?      @default(0)
+  maxCpu        Int?      @default(0)
+  maxStorage    Int?      @default(0)
+  loginAttempts Int       @default(0)
   lockedUntil   DateTime?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  servers       Server[]
-  folders       ServerFolder[]
-  apiKeys       ApiKey[]
-  loginHistory  LoginHistory[]
+  servers        Server[]
+  folders        ServerFolder[]
+  apiKeys        ApiKey[]
+  loginHistory   LoginHistory[]
+  activityLogs   ActivityLog[]
+  notifications  Notification[]
+  userApiKeys    UserApiKey[]
+  twoFactor      TwoFactor?
+  scheduledTasks ScheduledTask[]
+  grantedAccess  ServerAccess[]  @relation("grantor")
+  serverAccess   ServerAccess[]  @relation("grantee")
+  alerts         ServerAlert[]
 }
 
 model Session {
@@ -41,11 +49,11 @@ model Session {
 }
 
 model Server {
-  id               Int                @id @default(autoincrement())
-  UUID             String             @unique @default(uuid())
+  id               Int                 @id @default(autoincrement())
+  UUID             String              @unique @default(uuid())
   name             String
   description      String?
-  createdAt        DateTime           @default(now())
+  createdAt        DateTime            @default(now())
   Ports            String
   Memory           Int
   Cpu              Int
@@ -54,40 +62,44 @@ model Server {
   StartCommand     String?
   dockerImage      String?
   sftpCredential   SftpCredential?
-  allowStartupEdit Boolean            @default(false)
-  Installing       Boolean            @default(true)
-  Queued           Boolean            @default(true)
-  Suspended        Boolean            @default(false)
+  allowStartupEdit Boolean             @default(false)
+  Installing       Boolean             @default(true)
+  Queued           Boolean             @default(true)
+  Suspended        Boolean             @default(false)
   ownerId          Int
   nodeId           Int
   imageId          Int
-  node             Node               @relation(fields: [nodeId], references: [id])
-  owner            Users              @relation(fields: [ownerId], references: [id])
-  image            Images             @relation(fields: [imageId], references: [id])
+  node             Node                @relation(fields: [nodeId], references: [id])
+  owner            Users               @relation(fields: [ownerId], references: [id])
+  image            Images              @relation(fields: [imageId], references: [id])
   backups          Backup[]
   folder           ServerFolderMember?
+  activityLogs     ActivityLog[]
+  scheduledTasks   ScheduledTask[]
+  alerts           ServerAlert[]
+  accessGrants     ServerAccess[]
 }
 
 model Images {
-  id              Int      @id @default(autoincrement())
-  UUID            String   @unique @default(uuid())
-  name            String?
-  description     String?
-  author          String?
-  authorName      String?
-  createdAt       DateTime @default(now())
-  meta            String?
-  dockerImages    String?
-  startup         String?
-  stop            String?
-  startup_done    String?
-  config_files    String?
-  info            String?
-  scripts         String?
-  variables       String?
-  portRequirements String  @default("[]")
+  id               Int      @id @default(autoincrement())
+  UUID             String   @unique @default(uuid())
+  name             String?
+  description      String?
+  author           String?
+  authorName       String?
+  createdAt        DateTime @default(now())
+  meta             String?
+  dockerImages     String?
+  startup          String?
+  stop             String?
+  startup_done     String?
+  config_files     String?
+  info             String?
+  scripts          String?
+  variables        String?
+  portRequirements String   @default("[]")
 
-  servers         Server[]
+  servers Server[]
 }
 
 model Node {
@@ -183,12 +195,12 @@ model LoginHistory {
 }
 
 model PlayerStats {
-  id           Int      @id @default(autoincrement())
-  timestamp    DateTime @default(now())
-  totalPlayers Int      @default(0)
-  maxPlayers   Int      @default(0)
-  onlineServers Int     @default(0)
-  totalServers  Int     @default(0)
+  id            Int      @id @default(autoincrement())
+  timestamp     DateTime @default(now())
+  totalPlayers  Int      @default(0)
+  maxPlayers    Int      @default(0)
+  onlineServers Int      @default(0)
+  totalServers  Int      @default(0)
 
   @@index([timestamp])
 }
@@ -217,14 +229,14 @@ model AddonSetting {
 }
 
 model Backup {
-  id            Int      @id @default(autoincrement())
-  UUID          String   @unique @default(uuid())
-  name          String
-  serverId      String
-  filePath      String
-  size          BigInt?
-  createdAt     DateTime @default(now())
-  server        Server   @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
+  id             Int      @id @default(autoincrement())
+  UUID           String   @unique @default(uuid())
+  name           String
+  serverId       String
+  filePath       String
+  size           BigInt?
+  createdAt      DateTime @default(now())
+  server         Server   @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
   airlinkCloudId String?
 
   @@index([serverId])
@@ -232,15 +244,15 @@ model Backup {
 }
 
 model SftpCredential {
-  id        Int      @id @default(autoincrement())
-  serverId  String   @unique
+  id        Int       @id @default(autoincrement())
+  serverId  String    @unique
   username  String
   password  String
   host      String
   port      Int
   expiresAt DateTime?
-  createdAt DateTime @default(now())
-  server    Server   @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  server    Server    @relation(fields: [serverId], references: [UUID], onDelete: Cascade)
 }
 
 model EggCatalog {
@@ -269,4 +281,118 @@ model CategoryMD {
   markdown  String
   html      String
   updatedAt DateTime @default(now())
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  serverId  String?
+  action    String
+  detail    String?
+  ip        String?
+  createdAt DateTime @default(now())
+  user      Users    @relation(fields: [userId], references: [id])
+  server    Server?  @relation(fields: [serverId], references: [UUID])
+
+  @@index([userId])
+  @@index([serverId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  serverId  String?
+  createdAt DateTime @default(now())
+  user      Users    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([userId, read])
+}
+
+model UserApiKey {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  name        String
+  key         String    @unique
+  prefix      String
+  permissions String    @default("[]")
+  active      Boolean   @default(true)
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        Users     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([key])
+}
+
+model TwoFactor {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
+  secret      String
+  enabled     Boolean  @default(false)
+  backupCodes String?  @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        Users    @relation(fields: [userId], references: [id])
+}
+
+model ScheduledTask {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  serverId  String
+  type      String
+  cronExpr  String
+  enabled   Boolean   @default(true)
+  lastRunAt DateTime?
+  nextRunAt DateTime?
+  config    String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  user      Users     @relation(fields: [userId], references: [id])
+  server    Server    @relation(fields: [serverId], references: [UUID])
+
+  @@index([userId])
+  @@index([serverId])
+  @@index([nextRunAt])
+}
+
+model ServerAlert {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  serverId  String
+  type      String
+  threshold Float
+  current   Float?
+  triggered Boolean  @default(false)
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      Users    @relation(fields: [userId], references: [id])
+  server    Server   @relation(fields: [serverId], references: [UUID])
+
+  @@index([userId])
+  @@index([serverId])
+}
+
+model ServerAccess {
+  id          Int      @id @default(autoincrement())
+  serverId    String
+  grantorId   Int
+  granteeId   Int
+  permissions String   @default("[\"console\",\"files\",\"backups\"]")
+  createdAt   DateTime @default(now())
+  server      Server   @relation(fields: [serverId], references: [UUID])
+  grantor     Users    @relation("grantor", fields: [grantorId], references: [id])
+  grantee     Users    @relation("grantee", fields: [granteeId], references: [id])
+
+  @@unique([serverId, granteeId])
+  @@index([serverId])
+  @@index([granteeId])
 }

@@ -14,18 +14,16 @@
         <% if (servers && servers.length > 0) { %>
         <div id="viewToggle" class="flex items-center gap-0.5 bg-neutral-100 dark:bg-neutral-800/60 p-0.5 rounded-lg border border-neutral-200 dark:border-white/5">
           <button id="gridViewBtn" class="p-1.5 rounded-md text-neutral-500 dark:text-neutral-400 transition" aria-label="Grid view">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+            <%- icon('grid-2x2', { size: 14 }) %>
           </button>
           <button id="listViewBtn" class="p-1.5 rounded-md text-neutral-500 dark:text-neutral-400 transition" aria-label="List view">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+            <%- icon('list', { size: 14 }) %>
           </button>
         </div>
         <% } %>
         <% if (canCreateServer) { %>
         <a href="/create-server" class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition active:scale-95">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5">
-            <path fill-rule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd" />
-          </svg>
+          <%- icon('plus', { class: 'h-3.5 w-3.5' }) %>
           New
         </a>
         <% } %>
@@ -50,7 +48,7 @@
       <div class="data-animate-card rounded-xl bg-red-50 dark:bg-red-800/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-4">
         <p class="text-sm font-medium text-red-700 dark:text-red-400"><%= req.translations.connectionError || 'Connection Error' %></p>
         <p class="text-xs text-red-600 dark:text-red-400/60 mt-0.5"><%= req.translations.connectionErrorDesc || 'One or more nodes are offline.' %></p>
-        <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded-lg"><%= req.translations.retry || 'Retry' %></button>
+        <button onclick="window.location.reload()" class="mt-3 px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg transition hover:bg-red-700 active:scale-95"><%= req.translations.retry || 'Retry' %></button>
       </div>
     <% } %>
 
@@ -68,9 +66,7 @@
           data-folder-id="<%= folder.id %>"
           data-folder-name="<%= folder.name %>"
           data-folder-members='<%= JSON.stringify(folder.members.map(m => m.serverUUID)) %>'>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-amber-500 shrink-0">
-            <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 12h-15a4.483 4.483 0 0 0-3 1.146Z" />
-          </svg>
+          <%- icon('folder', { class: 'h-4 w-4 text-amber-500 shrink-0', fill: 'currentColor' }) %>
           <div class="min-w-0">
             <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= folder.name %></p>
             <p class="text-[10px] text-neutral-500"><%= folder.members.length %> server<%= folder.members.length !== 1 ? 's' : '' %></p>
@@ -87,21 +83,31 @@
     <% } %>
 
     <% if (servers.length === 0 && (!folders || folders.length === 0)) { %>
-      <div class="flex flex-col items-center justify-center mt-32 text-center px-4">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-20 w-20 text-neutral-300 dark:text-neutral-600 mb-4">
-          <path fill-rule="evenodd" d="M11.622 1.602a.75.75 0 0 1 .756 0l2.25 1.313a.75.75 0 0 1-.756 1.295L12 3.118 10.128 4.21a.75.75 0 1 1-.756-1.295l2.25-1.313ZM5.898 5.81a.75.75 0 0 1-.27 1.025l-1.14.665 1.14.665a.75.75 0 1 1-.756 1.295L3.75 8.806v.944a.75.75 0 0 1-1.5 0V7.5a.75.75 0 0 1 .372-.648l2.25-1.312a.75.75 0 0 1 1.026.27Zm12.204 0a.75.75 0 0 1 1.026-.27l2.25 1.312a.75.75 0 0 1 .372.648v2.25a.75.75 0 0 1-1.5 0v-.944l-1.122.654a.75.75 0 1 1-.756-1.295l1.14-.665-1.14-.665a.75.75 0 0 1-.27-1.025Zm-9 5.25a.75.75 0 0 1 1.026-.27L12 11.882l1.872-1.092a.75.75 0 1 1 .756 1.295l-1.878 1.096V15a.75.75 0 0 1-1.5 0v-1.82l-1.878-1.095a.75.75 0 0 1-.27-1.025Z" clip-rule="evenodd" />
-        </svg>
-        <h2 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.noServersYet || "It's quiet here — suspiciously quiet." %></h2>
-        <p class="text-sm text-neutral-500 mt-1">
+      <section class="mt-24 overflow-hidden rounded-2xl border border-neutral-200/80 bg-white/80 p-5 text-left shadow-sm shadow-stone-300/40 backdrop-blur dark:border-white/10 dark:bg-white/[0.045] dark:shadow-black/20">
+        <div class="mb-5 flex items-center gap-3">
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eef2ee] text-[#344f48] dark:bg-white/10 dark:text-neutral-100">
+            <%- icon('server', { class: 'h-6 w-6' }) %>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400">No servers assigned</p>
+            <h2 class="mt-1 text-lg font-semibold text-neutral-900 dark:text-white"><%= req.translations.noServersYet || "Your server list is empty" %></h2>
+          </div>
+        </div>
+        <p class="max-w-sm text-sm leading-6 text-neutral-600 dark:text-neutral-400">
           <% if (user.isAdmin) { %>
-            <a href="/admin/servers/create" class="text-blue-500"><%= req.translations.createOneNow || 'Create one now' %></a>
+            Create a server from the admin panel to start tracking status and usage here.
           <% } else if (canCreateServer) { %>
-            <a href="/create-server" class="text-blue-500">Create your first server</a>
+            Create your first server and it will appear here with live RAM, CPU, and node details.
           <% } else { %>
             An admin will assign one to you.
           <% } %>
         </p>
-      </div>
+        <% if (user.isAdmin) { %>
+          <a href="/admin/servers/create" class="mt-5 inline-flex items-center justify-center rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200">Create server</a>
+        <% } else if (canCreateServer) { %>
+          <a href="/create-server" class="mt-5 inline-flex items-center justify-center rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200">Create server</a>
+        <% } %>
+      </section>
     <% } else { %>
       <!-- Grid view -->
       <div id="gridView" class="space-y-3">
@@ -152,7 +158,7 @@
                 </div>
               </div>
               <div class="flex items-center gap-1.5">
-                <img class="h-4 w-4 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="">
+                <img class="h-4 w-4 rounded-md shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="<%= server.owner ? server.owner.username + ' avatar' : 'Unknown owner avatar' %>">
                 <span class="text-xs text-neutral-500 dark:text-neutral-400 truncate flex-1"><%= server.owner ? server.owner.username : 'Unknown' %></span>
                 <% if (server.node) { %>
                 <span class="text-xs text-neutral-400 dark:text-neutral-500 shrink-0 truncate max-w-[6rem]"><%= server.node.name || server.node.address %></span>
@@ -197,11 +203,11 @@
       <% if (totalPages > 1) { %>
         <div class="flex items-center justify-center gap-3 mt-6">
           <% if (currentPage > 1) { %>
-            <a href="/?page=<%= currentPage - 1 %>" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg"><%= req.translations.prev || 'Prev' %></a>
+            <a href="/?page=<%= currentPage - 1 %>" class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition"><%= req.translations.prev || 'Prev' %></a>
           <% } %>
           <span class="text-sm text-neutral-500"><%= currentPage %> / <%= totalPages %></span>
           <% if (currentPage < totalPages) { %>
-            <a href="/?page=<%= currentPage + 1 %>" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg"><%= req.translations.next || 'Next' %></a>
+            <a href="/?page=<%= currentPage + 1 %>" class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition"><%= req.translations.next || 'Next' %></a>
           <% } %>
         </div>
       <% } %>
@@ -216,24 +222,16 @@
       <h2 class="text-base font-medium text-neutral-800 dark:text-white" id="folderOverlayTitle">Folder</h2>
       <div class="flex items-center gap-1">
         <button id="addServersToFolderBtnMobile" class="p-2 rounded-xl text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700/40 transition active:scale-95">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-            <path d="M12 5v14M5 12h14"/>
-          </svg>
+          <%- icon('plus', { class: 'h-4 w-4' }) %>
         </button>
         <button id="renameFolderBtnMobile" class="p-2 rounded-xl text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-700/40 transition active:scale-95">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>
-          </svg>
+          <%- icon('pencil', { class: 'h-4 w-4' }) %>
         </button>
         <button id="deleteFolderBtn" class="p-2 rounded-xl text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition active:scale-95">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-4 w-4">
-            <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd"/>
-          </svg>
+          <%- icon('trash-2', { class: 'h-4 w-4' }) %>
         </button>
         <button id="closeFolderOverlay" class="text-neutral-400 p-1">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
-            <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-          </svg>
+          <%- icon('x', { class: 'h-5 w-5' }) %>
         </button>
       </div>
     </div>
@@ -293,15 +291,11 @@
     <p class="text-xs text-neutral-500 mb-4">Choose an action</p>
     <div class="space-y-2">
       <button id="lpMoveToFolder" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-white/5 text-sm text-neutral-800 dark:text-white text-left transition active:scale-[0.98]">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-amber-500 shrink-0">
-          <path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 12h-15a4.483 4.483 0 0 0-3 1.146Z"/>
-        </svg>
+        <%- icon('folder', { class: 'h-4 w-4 text-amber-500 shrink-0', fill: 'currentColor' }) %>
         Move to folder
       </button>
       <button id="lpRemoveFromFolder" class="hidden w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-white/5 text-sm text-neutral-800 dark:text-white text-left transition active:scale-[0.98]">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-neutral-400 shrink-0">
-          <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-        </svg>
+        <%- icon('x', { class: 'h-4 w-4 text-neutral-400 shrink-0' }) %>
         Remove from folder
       </button>
       <button id="lpCancel" class="w-full py-2.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-700 rounded-xl transition">Cancel</button>
@@ -408,7 +402,7 @@
         <div class="data-animate-card rounded-xl bg-red-50 dark:bg-red-800/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-5">
           <p class="text-sm font-medium text-red-700 dark:text-red-400"><%= req.translations.connectionError || 'Connection Error' %></p>
           <p class="text-xs text-red-600 dark:text-red-400/60 mt-0.5"><%= req.translations.connectionErrorDesc || 'One or more nodes are offline.' %></p>
-          <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded-lg transition-colors"><%= req.translations.retry || 'Retry' %></button>
+          <button onclick="window.location.reload()" class="mt-3 px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg transition hover:bg-red-700 active:scale-95"><%= req.translations.retry || 'Retry' %></button>
         </div>
         <% } %>
 
@@ -420,7 +414,7 @@
               <span class="filter-label">Status</span>
               <%- icon('chevron-down', { class: 'h-3 w-3 text-neutral-400' }) %>
             </button>
-            <div data-popover class="hidden absolute left-0 mt-1.5 z-50 w-44 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-xl shadow-lg p-1.5">
+            <div data-popover class="hidden absolute left-0 mt-1.5 z-50 w-44 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-neutral-200/80 dark:border-white/10 rounded-xl shadow-xl shadow-black/5 dark:shadow-black/30 p-1.5">
               <button data-filter-val="" class="al-filter-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 transition">All</button>
               <button data-filter-val="running" class="al-filter-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-emerald-600 dark:text-emerald-400 transition">Running</button>
               <button data-filter-val="stopped" class="al-filter-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-rose-600 dark:text-rose-400 transition">Stopped</button>
@@ -432,7 +426,7 @@
               <span class="sort-label">Sort</span>
               <%- icon('chevron-down', { class: 'h-3 w-3 text-neutral-400' }) %>
             </button>
-            <div data-popover class="hidden absolute left-0 mt-1.5 z-50 w-48 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-xl shadow-lg p-1.5">
+            <div data-popover class="hidden absolute left-0 mt-1.5 z-50 w-48 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-neutral-200/80 dark:border-white/10 rounded-xl shadow-xl shadow-black/5 dark:shadow-black/30 p-1.5">
               <button data-sort-val="name" data-sort-dir="asc" class="al-sort-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 transition">Name (A-Z)</button>
               <button data-sort-val="name" data-sort-dir="desc" class="al-sort-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 transition">Name (Z-A)</button>
               <button data-sort-val="status" data-sort-dir="asc" class="al-sort-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 transition">Status (Running first)</button>
@@ -451,15 +445,27 @@
         </div>
 
         <% if (servers.length === 0 && (!folders || folders.length === 0)) { %>
-        <div class="flex flex-col items-center justify-center mt-32 text-center">
-          <%- icon('server', { class: 'h-16 w-16 text-neutral-200 dark:text-neutral-700 mb-4' }) %>
-          <h2 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.noServersYet || "It's quiet here — suspiciously quiet." %></h2>
-          <p class="text-sm text-neutral-500 mt-1">
-            <% if (user.isAdmin) { %><a href="/admin/servers/create" class="text-blue-500"><%= req.translations.createOneNow || 'Create one now' %></a>
-            <% } else if (canCreateServer) { %><a href="/create-server" class="text-blue-500">Create your first server</a>
+        <section class="mx-auto mt-28 max-w-2xl overflow-hidden rounded-2xl border border-neutral-200/80 bg-white/80 p-7 text-left shadow-sm shadow-stone-300/40 backdrop-blur dark:border-white/10 dark:bg-white/[0.045] dark:shadow-black/20">
+          <div class="mb-5 flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-[#eef2ee] text-[#344f48] dark:bg-white/10 dark:text-neutral-100">
+              <%- icon('server', { class: 'h-7 w-7' }) %>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400">No servers assigned</p>
+              <h2 class="mt-1 text-2xl font-semibold text-neutral-900 dark:text-white"><%= req.translations.noServersYet || "Your server list is empty" %></h2>
+            </div>
+          </div>
+          <p class="max-w-xl text-sm leading-6 text-neutral-600 dark:text-neutral-400">
+            <% if (user.isAdmin) { %>Create a server from the admin panel to start tracking status and usage here.
+            <% } else if (canCreateServer) { %>Create your first server and it will appear here with live RAM, CPU, and node details.
             <% } else { %>An admin will assign one to you.<% } %>
           </p>
-        </div>
+          <% if (user.isAdmin) { %>
+          <a href="/admin/servers/create" class="mt-6 inline-flex items-center justify-center rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-neutral-800 active:translate-y-0 dark:bg-white dark:text-neutral-900"><%= req.translations.createOneNow || 'Create server' %></a>
+          <% } else if (canCreateServer) { %>
+          <a href="/create-server" class="mt-6 inline-flex items-center justify-center rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-neutral-800 active:translate-y-0 dark:bg-white dark:text-neutral-900">Create server</a>
+          <% } %>
+        </section>
         <% } else { %>
 
         <!-- ── Folders ──────────────────────────────────────── -->
@@ -545,7 +551,7 @@
               </div>
               <div class="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-white/5">
                 <div class="flex items-center gap-1.5 min-w-0">
-                  <img class="h-4 w-4 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="">
+                  <img class="h-4 w-4 rounded-md shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="<%= server.owner ? server.owner.username + ' avatar' : 'Unknown owner avatar' %>">
                   <span class="text-xs text-neutral-500 dark:text-neutral-400 truncate"><%= server.owner ? server.owner.username : 'Unknown' %></span>
                 </div>
                 <% if (server.node) { %>

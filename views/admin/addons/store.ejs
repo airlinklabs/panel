@@ -393,9 +393,7 @@
       </div>
 
       <div id="storeError" style="display:none;" class="py-16 text-center">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-9 h-9 text-neutral-800 mx-auto mb-3">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-        </svg>
+        <%- icon('triangle-alert', { class: 'w-9 h-9 text-neutral-800 mx-auto mb-3', strokeWidth: 1 }) %>
         <p id="storeErrorMsg" class="text-sm text-neutral-600"></p>
         <button onclick="loadStore()" class="mt-3 text-xs text-neutral-700 hover:text-neutral-400 transition underline">Retry</button>
       </div>
@@ -432,9 +430,7 @@
           <span id="mActionLabel"><%= req.translations.install || 'Install' %></span>
         </button>
         <a id="mGhBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-gh">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/>
-          </svg>
+          <%- icon('github', { class: 'w-3.5 h-3.5' }) %>
           GitHub
         </a>
       </div>
@@ -490,6 +486,11 @@
   const INSTALLED  = new Set(<%- JSON.stringify((addons || []).map(a => a.slug)) %>);
   let currentAddon = null;
   let activeTag    = null;
+
+  const pd = document.getElementById('page-data').dataset;
+  const defaultAddonIconHtml = pd.defaultAddonIcon || '';
+  const githubIconHtml = pd.githubIcon || '';
+  const infoIconHtml = pd.infoIcon || '';
 
   async function loadStore() {
     hide('storeError');
@@ -591,9 +592,7 @@
       card.innerHTML = `
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
           <div class="s-icon" data-icon-id="${esc(addon.id)}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px;color:#404040;">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/>
-            </svg>
+            ${defaultAddonIconHtml}
           </div>
           <span class="${badge}">${esc(badgeTxt)}</span>
         </div>
@@ -642,7 +641,7 @@
     const inst   = INSTALLED.has(addon.id);
 
     const iconEl = document.getElementById('mIcon');
-    iconEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:18px;height:18px;color:#404040;"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.39 48.39 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 4.126-.33c-.206-1.578-.322-3.174-.346-4.777a.637.637 0 0 1 .7-.631v0c.355 0 .676.186.959.401.29.221.634.349 1.003.349 1.035 0 1.875-1.007 1.875-2.25s-.84-2.25-1.875-2.25c-.37 0-.713.128-1.003.349-.283.215-.604.401-.96.401v0a.656.656 0 0 1-.658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58v0Z"/></svg>';
+    iconEl.innerHTML = defaultAddonIconHtml;
     if (addon.icon) {
       const img = new Image();
       img.style.cssText = 'width:20px;height:20px;object-fit:contain;display:block;';
@@ -679,7 +678,7 @@
     if (addon.installRepo) {
       const repoLine = document.createElement('div');
       repoLine.style.cssText = 'font-size:11px;color:#525252;margin-bottom:12px;display:flex;align-items:center;gap:6px;';
-      repoLine.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:11px;height:11px;flex-shrink:0;"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>'
+      repoLine.innerHTML = githubIconHtml
         + '<span style="font-family:ui-monospace,monospace;">' + esc(addon.installRepo) + '</span>'
         + '<span style="color:#404040;"> @ ' + esc(addon.installBranch || 'main') + '</span>';
       guideEl.appendChild(repoLine);
@@ -705,7 +704,7 @@
     if (addon.installNote) {
       const note     = document.createElement('div');
       note.className = 'm-note';
-      note.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:13px;height:13px;color:#525252;"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg><span>' + esc(addon.installNote) + '</span>';
+      note.innerHTML = infoIconHtml + '<span>' + esc(addon.installNote) + '</span>';
       guideEl.appendChild(note);
     }
 
@@ -1000,7 +999,12 @@
   </div>
 </div>
 
-<div id="page-data" style="display:none" data-installed-slugs="<%- JSON.stringify((addons||[]).map(a=>a.slug)) %>"></div>
+<div id="page-data" style="display:none"
+  data-installed-slugs="<%- JSON.stringify((addons||[]).map(a=>a.slug)) %>"
+  data-default-addon-icon="<%- icon('puzzle', { class: 's-icon-svg', style: 'width:16px;height:16px;color:#404040;', strokeWidth: 1.5 }) %>"
+  data-github-icon="<%- icon('github', { style: 'width:11px;height:11px;flex-shrink:0;' }) %>"
+  data-info-icon="<%- icon('circle-info', { style: 'width:13px;height:13px;color:#525252;', strokeWidth: 1.5 }) %>"
+></div>
 
 <script nonce="<%- nonce %>" src="/js/admin/addons-store.js"></script>
 <% } %>

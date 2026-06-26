@@ -47,24 +47,12 @@
 
     <% if (typeof serverStatus !== 'undefined' && serverStatus.online && typeof serverStatus.startedAt !== 'undefined' && serverStatus.startedAt) { %>
       <div class="ml-3 text-xs text-neutral-500 dark:text-neutral-500 flex items-center" data-server-started-container>
-        <% if (isMobileViewport) { %>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <% } else { %>
         <%- icon('clock', { class: 'h-3 w-3 mr-1' }) %>
-        <% } %>
         <span data-server-started-time>Started: <%= new Date(serverStatus.startedAt).toLocaleString() %></span>
       </div>
     <% } else { %>
       <div class="ml-3 text-xs text-neutral-500 dark:text-neutral-500 hidden items-center" data-server-started-container>
-        <% if (isMobileViewport) { %>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <% } else { %>
         <%- icon('clock', { class: 'h-3 w-3 mr-1' }) %>
-        <% } %>
         <span data-server-started-time><%= req.translations.startedUnknown || 'Started: Unknown' %></span>
       </div>
     <% } %>

@@ -328,6 +328,14 @@ export type UsersWhereInput = {
   folders?: Prisma.ServerFolderListRelationFilter
   apiKeys?: Prisma.ApiKeyListRelationFilter
   loginHistory?: Prisma.LoginHistoryListRelationFilter
+  activityLogs?: Prisma.ActivityLogListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  userApiKeys?: Prisma.UserApiKeyListRelationFilter
+  twoFactor?: Prisma.XOR<Prisma.TwoFactorNullableScalarRelationFilter, Prisma.TwoFactorWhereInput> | null
+  scheduledTasks?: Prisma.ScheduledTaskListRelationFilter
+  grantedAccess?: Prisma.ServerAccessListRelationFilter
+  serverAccess?: Prisma.ServerAccessListRelationFilter
+  alerts?: Prisma.ServerAlertListRelationFilter
 }
 
 export type UsersOrderByWithRelationInput = {
@@ -351,6 +359,14 @@ export type UsersOrderByWithRelationInput = {
   folders?: Prisma.ServerFolderOrderByRelationAggregateInput
   apiKeys?: Prisma.ApiKeyOrderByRelationAggregateInput
   loginHistory?: Prisma.LoginHistoryOrderByRelationAggregateInput
+  activityLogs?: Prisma.ActivityLogOrderByRelationAggregateInput
+  notifications?: Prisma.NotificationOrderByRelationAggregateInput
+  userApiKeys?: Prisma.UserApiKeyOrderByRelationAggregateInput
+  twoFactor?: Prisma.TwoFactorOrderByWithRelationInput
+  scheduledTasks?: Prisma.ScheduledTaskOrderByRelationAggregateInput
+  grantedAccess?: Prisma.ServerAccessOrderByRelationAggregateInput
+  serverAccess?: Prisma.ServerAccessOrderByRelationAggregateInput
+  alerts?: Prisma.ServerAlertOrderByRelationAggregateInput
 }
 
 export type UsersWhereUniqueInput = Prisma.AtLeast<{
@@ -377,6 +393,14 @@ export type UsersWhereUniqueInput = Prisma.AtLeast<{
   folders?: Prisma.ServerFolderListRelationFilter
   apiKeys?: Prisma.ApiKeyListRelationFilter
   loginHistory?: Prisma.LoginHistoryListRelationFilter
+  activityLogs?: Prisma.ActivityLogListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  userApiKeys?: Prisma.UserApiKeyListRelationFilter
+  twoFactor?: Prisma.XOR<Prisma.TwoFactorNullableScalarRelationFilter, Prisma.TwoFactorWhereInput> | null
+  scheduledTasks?: Prisma.ScheduledTaskListRelationFilter
+  grantedAccess?: Prisma.ServerAccessListRelationFilter
+  serverAccess?: Prisma.ServerAccessListRelationFilter
+  alerts?: Prisma.ServerAlertListRelationFilter
 }, "id" | "email" | "username">
 
 export type UsersOrderByWithAggregationInput = {
@@ -445,6 +469,14 @@ export type UsersCreateInput = {
   folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
   apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutUserInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutUserInput
 }
 
 export type UsersUncheckedCreateInput = {
@@ -468,6 +500,14 @@ export type UsersUncheckedCreateInput = {
   folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
   apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutUserInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorUncheckedCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UsersUpdateInput = {
@@ -490,6 +530,14 @@ export type UsersUpdateInput = {
   folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
   apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutUserNestedInput
 }
 
 export type UsersUncheckedUpdateInput = {
@@ -513,6 +561,14 @@ export type UsersUncheckedUpdateInput = {
   folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
   apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUncheckedUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UsersCreateManyInput = {
@@ -750,6 +806,118 @@ export type UsersUpdateOneRequiredWithoutLoginHistoryNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UsersUpdateToOneWithWhereWithoutLoginHistoryInput, Prisma.UsersUpdateWithoutLoginHistoryInput>, Prisma.UsersUncheckedUpdateWithoutLoginHistoryInput>
 }
 
+export type UsersCreateNestedOneWithoutActivityLogsInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutActivityLogsInput, Prisma.UsersUncheckedCreateWithoutActivityLogsInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutActivityLogsInput
+  connect?: Prisma.UsersWhereUniqueInput
+}
+
+export type UsersUpdateOneRequiredWithoutActivityLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutActivityLogsInput, Prisma.UsersUncheckedCreateWithoutActivityLogsInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutActivityLogsInput
+  upsert?: Prisma.UsersUpsertWithoutActivityLogsInput
+  connect?: Prisma.UsersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UsersUpdateToOneWithWhereWithoutActivityLogsInput, Prisma.UsersUpdateWithoutActivityLogsInput>, Prisma.UsersUncheckedUpdateWithoutActivityLogsInput>
+}
+
+export type UsersCreateNestedOneWithoutNotificationsInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutNotificationsInput, Prisma.UsersUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutNotificationsInput
+  connect?: Prisma.UsersWhereUniqueInput
+}
+
+export type UsersUpdateOneRequiredWithoutNotificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutNotificationsInput, Prisma.UsersUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutNotificationsInput
+  upsert?: Prisma.UsersUpsertWithoutNotificationsInput
+  connect?: Prisma.UsersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UsersUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UsersUpdateWithoutNotificationsInput>, Prisma.UsersUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type UsersCreateNestedOneWithoutUserApiKeysInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutUserApiKeysInput, Prisma.UsersUncheckedCreateWithoutUserApiKeysInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutUserApiKeysInput
+  connect?: Prisma.UsersWhereUniqueInput
+}
+
+export type UsersUpdateOneRequiredWithoutUserApiKeysNestedInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutUserApiKeysInput, Prisma.UsersUncheckedCreateWithoutUserApiKeysInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutUserApiKeysInput
+  upsert?: Prisma.UsersUpsertWithoutUserApiKeysInput
+  connect?: Prisma.UsersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UsersUpdateToOneWithWhereWithoutUserApiKeysInput, Prisma.UsersUpdateWithoutUserApiKeysInput>, Prisma.UsersUncheckedUpdateWithoutUserApiKeysInput>
+}
+
+export type UsersCreateNestedOneWithoutTwoFactorInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutTwoFactorInput, Prisma.UsersUncheckedCreateWithoutTwoFactorInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutTwoFactorInput
+  connect?: Prisma.UsersWhereUniqueInput
+}
+
+export type UsersUpdateOneRequiredWithoutTwoFactorNestedInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutTwoFactorInput, Prisma.UsersUncheckedCreateWithoutTwoFactorInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutTwoFactorInput
+  upsert?: Prisma.UsersUpsertWithoutTwoFactorInput
+  connect?: Prisma.UsersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UsersUpdateToOneWithWhereWithoutTwoFactorInput, Prisma.UsersUpdateWithoutTwoFactorInput>, Prisma.UsersUncheckedUpdateWithoutTwoFactorInput>
+}
+
+export type UsersCreateNestedOneWithoutScheduledTasksInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutScheduledTasksInput, Prisma.UsersUncheckedCreateWithoutScheduledTasksInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutScheduledTasksInput
+  connect?: Prisma.UsersWhereUniqueInput
+}
+
+export type UsersUpdateOneRequiredWithoutScheduledTasksNestedInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutScheduledTasksInput, Prisma.UsersUncheckedCreateWithoutScheduledTasksInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutScheduledTasksInput
+  upsert?: Prisma.UsersUpsertWithoutScheduledTasksInput
+  connect?: Prisma.UsersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UsersUpdateToOneWithWhereWithoutScheduledTasksInput, Prisma.UsersUpdateWithoutScheduledTasksInput>, Prisma.UsersUncheckedUpdateWithoutScheduledTasksInput>
+}
+
+export type UsersCreateNestedOneWithoutAlertsInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutAlertsInput, Prisma.UsersUncheckedCreateWithoutAlertsInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutAlertsInput
+  connect?: Prisma.UsersWhereUniqueInput
+}
+
+export type UsersUpdateOneRequiredWithoutAlertsNestedInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutAlertsInput, Prisma.UsersUncheckedCreateWithoutAlertsInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutAlertsInput
+  upsert?: Prisma.UsersUpsertWithoutAlertsInput
+  connect?: Prisma.UsersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UsersUpdateToOneWithWhereWithoutAlertsInput, Prisma.UsersUpdateWithoutAlertsInput>, Prisma.UsersUncheckedUpdateWithoutAlertsInput>
+}
+
+export type UsersCreateNestedOneWithoutGrantedAccessInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutGrantedAccessInput, Prisma.UsersUncheckedCreateWithoutGrantedAccessInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutGrantedAccessInput
+  connect?: Prisma.UsersWhereUniqueInput
+}
+
+export type UsersCreateNestedOneWithoutServerAccessInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutServerAccessInput, Prisma.UsersUncheckedCreateWithoutServerAccessInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutServerAccessInput
+  connect?: Prisma.UsersWhereUniqueInput
+}
+
+export type UsersUpdateOneRequiredWithoutGrantedAccessNestedInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutGrantedAccessInput, Prisma.UsersUncheckedCreateWithoutGrantedAccessInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutGrantedAccessInput
+  upsert?: Prisma.UsersUpsertWithoutGrantedAccessInput
+  connect?: Prisma.UsersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UsersUpdateToOneWithWhereWithoutGrantedAccessInput, Prisma.UsersUpdateWithoutGrantedAccessInput>, Prisma.UsersUncheckedUpdateWithoutGrantedAccessInput>
+}
+
+export type UsersUpdateOneRequiredWithoutServerAccessNestedInput = {
+  create?: Prisma.XOR<Prisma.UsersCreateWithoutServerAccessInput, Prisma.UsersUncheckedCreateWithoutServerAccessInput>
+  connectOrCreate?: Prisma.UsersCreateOrConnectWithoutServerAccessInput
+  upsert?: Prisma.UsersUpsertWithoutServerAccessInput
+  connect?: Prisma.UsersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UsersUpdateToOneWithWhereWithoutServerAccessInput, Prisma.UsersUpdateWithoutServerAccessInput>, Prisma.UsersUncheckedUpdateWithoutServerAccessInput>
+}
+
 export type UsersCreateWithoutServersInput = {
   email: string
   username?: string | null
@@ -769,6 +937,14 @@ export type UsersCreateWithoutServersInput = {
   folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
   apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutUserInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutUserInput
 }
 
 export type UsersUncheckedCreateWithoutServersInput = {
@@ -791,6 +967,14 @@ export type UsersUncheckedCreateWithoutServersInput = {
   folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
   apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutUserInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorUncheckedCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UsersCreateOrConnectWithoutServersInput = {
@@ -828,6 +1012,14 @@ export type UsersUpdateWithoutServersInput = {
   folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
   apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutUserNestedInput
 }
 
 export type UsersUncheckedUpdateWithoutServersInput = {
@@ -850,6 +1042,14 @@ export type UsersUncheckedUpdateWithoutServersInput = {
   folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
   apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUncheckedUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UsersCreateWithoutFoldersInput = {
@@ -871,6 +1071,14 @@ export type UsersCreateWithoutFoldersInput = {
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
   apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutUserInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutUserInput
 }
 
 export type UsersUncheckedCreateWithoutFoldersInput = {
@@ -893,6 +1101,14 @@ export type UsersUncheckedCreateWithoutFoldersInput = {
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
   apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutUserInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorUncheckedCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UsersCreateOrConnectWithoutFoldersInput = {
@@ -930,6 +1146,14 @@ export type UsersUpdateWithoutFoldersInput = {
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
   apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutUserNestedInput
 }
 
 export type UsersUncheckedUpdateWithoutFoldersInput = {
@@ -952,6 +1176,14 @@ export type UsersUncheckedUpdateWithoutFoldersInput = {
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
   apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUncheckedUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UsersCreateWithoutApiKeysInput = {
@@ -973,6 +1205,14 @@ export type UsersCreateWithoutApiKeysInput = {
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
   folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutUserInput
 }
 
 export type UsersUncheckedCreateWithoutApiKeysInput = {
@@ -995,6 +1235,14 @@ export type UsersUncheckedCreateWithoutApiKeysInput = {
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
   folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorUncheckedCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UsersCreateOrConnectWithoutApiKeysInput = {
@@ -1032,6 +1280,14 @@ export type UsersUpdateWithoutApiKeysInput = {
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
   folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutUserNestedInput
 }
 
 export type UsersUncheckedUpdateWithoutApiKeysInput = {
@@ -1054,6 +1310,14 @@ export type UsersUncheckedUpdateWithoutApiKeysInput = {
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
   folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUncheckedUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UsersCreateWithoutLoginHistoryInput = {
@@ -1075,6 +1339,14 @@ export type UsersCreateWithoutLoginHistoryInput = {
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
   folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
   apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutUserInput
 }
 
 export type UsersUncheckedCreateWithoutLoginHistoryInput = {
@@ -1097,6 +1369,14 @@ export type UsersUncheckedCreateWithoutLoginHistoryInput = {
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
   folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
   apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorUncheckedCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UsersCreateOrConnectWithoutLoginHistoryInput = {
@@ -1134,6 +1414,14 @@ export type UsersUpdateWithoutLoginHistoryInput = {
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
   folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
   apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutUserNestedInput
 }
 
 export type UsersUncheckedUpdateWithoutLoginHistoryInput = {
@@ -1156,6 +1444,1086 @@ export type UsersUncheckedUpdateWithoutLoginHistoryInput = {
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
   folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
   apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUncheckedUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UsersCreateWithoutActivityLogsInput = {
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutUserInput
+}
+
+export type UsersUncheckedCreateWithoutActivityLogsInput = {
+  id?: number
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorUncheckedCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UsersCreateOrConnectWithoutActivityLogsInput = {
+  where: Prisma.UsersWhereUniqueInput
+  create: Prisma.XOR<Prisma.UsersCreateWithoutActivityLogsInput, Prisma.UsersUncheckedCreateWithoutActivityLogsInput>
+}
+
+export type UsersUpsertWithoutActivityLogsInput = {
+  update: Prisma.XOR<Prisma.UsersUpdateWithoutActivityLogsInput, Prisma.UsersUncheckedUpdateWithoutActivityLogsInput>
+  create: Prisma.XOR<Prisma.UsersCreateWithoutActivityLogsInput, Prisma.UsersUncheckedCreateWithoutActivityLogsInput>
+  where?: Prisma.UsersWhereInput
+}
+
+export type UsersUpdateToOneWithWhereWithoutActivityLogsInput = {
+  where?: Prisma.UsersWhereInput
+  data: Prisma.XOR<Prisma.UsersUpdateWithoutActivityLogsInput, Prisma.UsersUncheckedUpdateWithoutActivityLogsInput>
+}
+
+export type UsersUpdateWithoutActivityLogsInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutUserNestedInput
+}
+
+export type UsersUncheckedUpdateWithoutActivityLogsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUncheckedUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UsersCreateWithoutNotificationsInput = {
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutUserInput
+}
+
+export type UsersUncheckedCreateWithoutNotificationsInput = {
+  id?: number
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorUncheckedCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UsersCreateOrConnectWithoutNotificationsInput = {
+  where: Prisma.UsersWhereUniqueInput
+  create: Prisma.XOR<Prisma.UsersCreateWithoutNotificationsInput, Prisma.UsersUncheckedCreateWithoutNotificationsInput>
+}
+
+export type UsersUpsertWithoutNotificationsInput = {
+  update: Prisma.XOR<Prisma.UsersUpdateWithoutNotificationsInput, Prisma.UsersUncheckedUpdateWithoutNotificationsInput>
+  create: Prisma.XOR<Prisma.UsersCreateWithoutNotificationsInput, Prisma.UsersUncheckedCreateWithoutNotificationsInput>
+  where?: Prisma.UsersWhereInput
+}
+
+export type UsersUpdateToOneWithWhereWithoutNotificationsInput = {
+  where?: Prisma.UsersWhereInput
+  data: Prisma.XOR<Prisma.UsersUpdateWithoutNotificationsInput, Prisma.UsersUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type UsersUpdateWithoutNotificationsInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutUserNestedInput
+}
+
+export type UsersUncheckedUpdateWithoutNotificationsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUncheckedUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UsersCreateWithoutUserApiKeysInput = {
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutUserInput
+}
+
+export type UsersUncheckedCreateWithoutUserApiKeysInput = {
+  id?: number
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorUncheckedCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UsersCreateOrConnectWithoutUserApiKeysInput = {
+  where: Prisma.UsersWhereUniqueInput
+  create: Prisma.XOR<Prisma.UsersCreateWithoutUserApiKeysInput, Prisma.UsersUncheckedCreateWithoutUserApiKeysInput>
+}
+
+export type UsersUpsertWithoutUserApiKeysInput = {
+  update: Prisma.XOR<Prisma.UsersUpdateWithoutUserApiKeysInput, Prisma.UsersUncheckedUpdateWithoutUserApiKeysInput>
+  create: Prisma.XOR<Prisma.UsersCreateWithoutUserApiKeysInput, Prisma.UsersUncheckedCreateWithoutUserApiKeysInput>
+  where?: Prisma.UsersWhereInput
+}
+
+export type UsersUpdateToOneWithWhereWithoutUserApiKeysInput = {
+  where?: Prisma.UsersWhereInput
+  data: Prisma.XOR<Prisma.UsersUpdateWithoutUserApiKeysInput, Prisma.UsersUncheckedUpdateWithoutUserApiKeysInput>
+}
+
+export type UsersUpdateWithoutUserApiKeysInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutUserNestedInput
+}
+
+export type UsersUncheckedUpdateWithoutUserApiKeysInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUncheckedUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UsersCreateWithoutTwoFactorInput = {
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutUserInput
+}
+
+export type UsersUncheckedCreateWithoutTwoFactorInput = {
+  id?: number
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UsersCreateOrConnectWithoutTwoFactorInput = {
+  where: Prisma.UsersWhereUniqueInput
+  create: Prisma.XOR<Prisma.UsersCreateWithoutTwoFactorInput, Prisma.UsersUncheckedCreateWithoutTwoFactorInput>
+}
+
+export type UsersUpsertWithoutTwoFactorInput = {
+  update: Prisma.XOR<Prisma.UsersUpdateWithoutTwoFactorInput, Prisma.UsersUncheckedUpdateWithoutTwoFactorInput>
+  create: Prisma.XOR<Prisma.UsersCreateWithoutTwoFactorInput, Prisma.UsersUncheckedCreateWithoutTwoFactorInput>
+  where?: Prisma.UsersWhereInput
+}
+
+export type UsersUpdateToOneWithWhereWithoutTwoFactorInput = {
+  where?: Prisma.UsersWhereInput
+  data: Prisma.XOR<Prisma.UsersUpdateWithoutTwoFactorInput, Prisma.UsersUncheckedUpdateWithoutTwoFactorInput>
+}
+
+export type UsersUpdateWithoutTwoFactorInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutUserNestedInput
+}
+
+export type UsersUncheckedUpdateWithoutTwoFactorInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UsersCreateWithoutScheduledTasksInput = {
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorCreateNestedOneWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutUserInput
+}
+
+export type UsersUncheckedCreateWithoutScheduledTasksInput = {
+  id?: number
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorUncheckedCreateNestedOneWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UsersCreateOrConnectWithoutScheduledTasksInput = {
+  where: Prisma.UsersWhereUniqueInput
+  create: Prisma.XOR<Prisma.UsersCreateWithoutScheduledTasksInput, Prisma.UsersUncheckedCreateWithoutScheduledTasksInput>
+}
+
+export type UsersUpsertWithoutScheduledTasksInput = {
+  update: Prisma.XOR<Prisma.UsersUpdateWithoutScheduledTasksInput, Prisma.UsersUncheckedUpdateWithoutScheduledTasksInput>
+  create: Prisma.XOR<Prisma.UsersCreateWithoutScheduledTasksInput, Prisma.UsersUncheckedCreateWithoutScheduledTasksInput>
+  where?: Prisma.UsersWhereInput
+}
+
+export type UsersUpdateToOneWithWhereWithoutScheduledTasksInput = {
+  where?: Prisma.UsersWhereInput
+  data: Prisma.XOR<Prisma.UsersUpdateWithoutScheduledTasksInput, Prisma.UsersUncheckedUpdateWithoutScheduledTasksInput>
+}
+
+export type UsersUpdateWithoutScheduledTasksInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUpdateOneWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutUserNestedInput
+}
+
+export type UsersUncheckedUpdateWithoutScheduledTasksInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUncheckedUpdateOneWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UsersCreateWithoutAlertsInput = {
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessCreateNestedManyWithoutGranteeInput
+}
+
+export type UsersUncheckedCreateWithoutAlertsInput = {
+  id?: number
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorUncheckedCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGrantorInput
+  serverAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGranteeInput
+}
+
+export type UsersCreateOrConnectWithoutAlertsInput = {
+  where: Prisma.UsersWhereUniqueInput
+  create: Prisma.XOR<Prisma.UsersCreateWithoutAlertsInput, Prisma.UsersUncheckedCreateWithoutAlertsInput>
+}
+
+export type UsersUpsertWithoutAlertsInput = {
+  update: Prisma.XOR<Prisma.UsersUpdateWithoutAlertsInput, Prisma.UsersUncheckedUpdateWithoutAlertsInput>
+  create: Prisma.XOR<Prisma.UsersCreateWithoutAlertsInput, Prisma.UsersUncheckedCreateWithoutAlertsInput>
+  where?: Prisma.UsersWhereInput
+}
+
+export type UsersUpdateToOneWithWhereWithoutAlertsInput = {
+  where?: Prisma.UsersWhereInput
+  data: Prisma.XOR<Prisma.UsersUpdateWithoutAlertsInput, Prisma.UsersUncheckedUpdateWithoutAlertsInput>
+}
+
+export type UsersUpdateWithoutAlertsInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUpdateManyWithoutGranteeNestedInput
+}
+
+export type UsersUncheckedUpdateWithoutAlertsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUncheckedUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGrantorNestedInput
+  serverAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGranteeNestedInput
+}
+
+export type UsersCreateWithoutGrantedAccessInput = {
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutUserInput
+  serverAccess?: Prisma.ServerAccessCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutUserInput
+}
+
+export type UsersUncheckedCreateWithoutGrantedAccessInput = {
+  id?: number
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorUncheckedCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutUserInput
+  serverAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGranteeInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UsersCreateOrConnectWithoutGrantedAccessInput = {
+  where: Prisma.UsersWhereUniqueInput
+  create: Prisma.XOR<Prisma.UsersCreateWithoutGrantedAccessInput, Prisma.UsersUncheckedCreateWithoutGrantedAccessInput>
+}
+
+export type UsersCreateWithoutServerAccessInput = {
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessCreateNestedManyWithoutGrantorInput
+  alerts?: Prisma.ServerAlertCreateNestedManyWithoutUserInput
+}
+
+export type UsersUncheckedCreateWithoutServerAccessInput = {
+  id?: number
+  email: string
+  username?: string | null
+  password: string
+  isAdmin?: boolean
+  description?: string | null
+  avatar?: string | null
+  permissions?: string | null
+  serverLimit?: number | null
+  maxMemory?: number | null
+  maxCpu?: number | null
+  maxStorage?: number | null
+  loginAttempts?: number
+  lockedUntil?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
+  folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
+  apiKeys?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutUserInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+  activityLogs?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
+  twoFactor?: Prisma.TwoFactorUncheckedCreateNestedOneWithoutUserInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedCreateNestedManyWithoutUserInput
+  grantedAccess?: Prisma.ServerAccessUncheckedCreateNestedManyWithoutGrantorInput
+  alerts?: Prisma.ServerAlertUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UsersCreateOrConnectWithoutServerAccessInput = {
+  where: Prisma.UsersWhereUniqueInput
+  create: Prisma.XOR<Prisma.UsersCreateWithoutServerAccessInput, Prisma.UsersUncheckedCreateWithoutServerAccessInput>
+}
+
+export type UsersUpsertWithoutGrantedAccessInput = {
+  update: Prisma.XOR<Prisma.UsersUpdateWithoutGrantedAccessInput, Prisma.UsersUncheckedUpdateWithoutGrantedAccessInput>
+  create: Prisma.XOR<Prisma.UsersCreateWithoutGrantedAccessInput, Prisma.UsersUncheckedCreateWithoutGrantedAccessInput>
+  where?: Prisma.UsersWhereInput
+}
+
+export type UsersUpdateToOneWithWhereWithoutGrantedAccessInput = {
+  where?: Prisma.UsersWhereInput
+  data: Prisma.XOR<Prisma.UsersUpdateWithoutGrantedAccessInput, Prisma.UsersUncheckedUpdateWithoutGrantedAccessInput>
+}
+
+export type UsersUpdateWithoutGrantedAccessInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutUserNestedInput
+  serverAccess?: Prisma.ServerAccessUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutUserNestedInput
+}
+
+export type UsersUncheckedUpdateWithoutGrantedAccessInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUncheckedUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutUserNestedInput
+  serverAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGranteeNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UsersUpsertWithoutServerAccessInput = {
+  update: Prisma.XOR<Prisma.UsersUpdateWithoutServerAccessInput, Prisma.UsersUncheckedUpdateWithoutServerAccessInput>
+  create: Prisma.XOR<Prisma.UsersCreateWithoutServerAccessInput, Prisma.UsersUncheckedCreateWithoutServerAccessInput>
+  where?: Prisma.UsersWhereInput
+}
+
+export type UsersUpdateToOneWithWhereWithoutServerAccessInput = {
+  where?: Prisma.UsersWhereInput
+  data: Prisma.XOR<Prisma.UsersUpdateWithoutServerAccessInput, Prisma.UsersUncheckedUpdateWithoutServerAccessInput>
+}
+
+export type UsersUpdateWithoutServerAccessInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUpdateManyWithoutGrantorNestedInput
+  alerts?: Prisma.ServerAlertUpdateManyWithoutUserNestedInput
+}
+
+export type UsersUncheckedUpdateWithoutServerAccessInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serverLimit?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxMemory?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxCpu?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
+  folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
+  apiKeys?: Prisma.ApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+  activityLogs?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
+  twoFactor?: Prisma.TwoFactorUncheckedUpdateOneWithoutUserNestedInput
+  scheduledTasks?: Prisma.ScheduledTaskUncheckedUpdateManyWithoutUserNestedInput
+  grantedAccess?: Prisma.ServerAccessUncheckedUpdateManyWithoutGrantorNestedInput
+  alerts?: Prisma.ServerAlertUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1168,6 +2536,13 @@ export type UsersCountOutputType = {
   folders: number
   apiKeys: number
   loginHistory: number
+  activityLogs: number
+  notifications: number
+  userApiKeys: number
+  scheduledTasks: number
+  grantedAccess: number
+  serverAccess: number
+  alerts: number
 }
 
 export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1175,6 +2550,13 @@ export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   folders?: boolean | UsersCountOutputTypeCountFoldersArgs
   apiKeys?: boolean | UsersCountOutputTypeCountApiKeysArgs
   loginHistory?: boolean | UsersCountOutputTypeCountLoginHistoryArgs
+  activityLogs?: boolean | UsersCountOutputTypeCountActivityLogsArgs
+  notifications?: boolean | UsersCountOutputTypeCountNotificationsArgs
+  userApiKeys?: boolean | UsersCountOutputTypeCountUserApiKeysArgs
+  scheduledTasks?: boolean | UsersCountOutputTypeCountScheduledTasksArgs
+  grantedAccess?: boolean | UsersCountOutputTypeCountGrantedAccessArgs
+  serverAccess?: boolean | UsersCountOutputTypeCountServerAccessArgs
+  alerts?: boolean | UsersCountOutputTypeCountAlertsArgs
 }
 
 /**
@@ -1215,6 +2597,55 @@ export type UsersCountOutputTypeCountLoginHistoryArgs<ExtArgs extends runtime.Ty
   where?: Prisma.LoginHistoryWhereInput
 }
 
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountActivityLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ActivityLogWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotificationWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountUserApiKeysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserApiKeyWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountScheduledTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ScheduledTaskWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountGrantedAccessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ServerAccessWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountServerAccessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ServerAccessWhereInput
+}
+
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountAlertsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ServerAlertWhereInput
+}
+
 
 export type UsersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1237,6 +2668,14 @@ export type UsersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   folders?: boolean | Prisma.Users$foldersArgs<ExtArgs>
   apiKeys?: boolean | Prisma.Users$apiKeysArgs<ExtArgs>
   loginHistory?: boolean | Prisma.Users$loginHistoryArgs<ExtArgs>
+  activityLogs?: boolean | Prisma.Users$activityLogsArgs<ExtArgs>
+  notifications?: boolean | Prisma.Users$notificationsArgs<ExtArgs>
+  userApiKeys?: boolean | Prisma.Users$userApiKeysArgs<ExtArgs>
+  twoFactor?: boolean | Prisma.Users$twoFactorArgs<ExtArgs>
+  scheduledTasks?: boolean | Prisma.Users$scheduledTasksArgs<ExtArgs>
+  grantedAccess?: boolean | Prisma.Users$grantedAccessArgs<ExtArgs>
+  serverAccess?: boolean | Prisma.Users$serverAccessArgs<ExtArgs>
+  alerts?: boolean | Prisma.Users$alertsArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["users"]>
 
@@ -1303,6 +2742,14 @@ export type UsersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   folders?: boolean | Prisma.Users$foldersArgs<ExtArgs>
   apiKeys?: boolean | Prisma.Users$apiKeysArgs<ExtArgs>
   loginHistory?: boolean | Prisma.Users$loginHistoryArgs<ExtArgs>
+  activityLogs?: boolean | Prisma.Users$activityLogsArgs<ExtArgs>
+  notifications?: boolean | Prisma.Users$notificationsArgs<ExtArgs>
+  userApiKeys?: boolean | Prisma.Users$userApiKeysArgs<ExtArgs>
+  twoFactor?: boolean | Prisma.Users$twoFactorArgs<ExtArgs>
+  scheduledTasks?: boolean | Prisma.Users$scheduledTasksArgs<ExtArgs>
+  grantedAccess?: boolean | Prisma.Users$grantedAccessArgs<ExtArgs>
+  serverAccess?: boolean | Prisma.Users$serverAccessArgs<ExtArgs>
+  alerts?: boolean | Prisma.Users$alertsArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UsersIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1315,6 +2762,14 @@ export type $UsersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     folders: Prisma.$ServerFolderPayload<ExtArgs>[]
     apiKeys: Prisma.$ApiKeyPayload<ExtArgs>[]
     loginHistory: Prisma.$LoginHistoryPayload<ExtArgs>[]
+    activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
+    notifications: Prisma.$NotificationPayload<ExtArgs>[]
+    userApiKeys: Prisma.$UserApiKeyPayload<ExtArgs>[]
+    twoFactor: Prisma.$TwoFactorPayload<ExtArgs> | null
+    scheduledTasks: Prisma.$ScheduledTaskPayload<ExtArgs>[]
+    grantedAccess: Prisma.$ServerAccessPayload<ExtArgs>[]
+    serverAccess: Prisma.$ServerAccessPayload<ExtArgs>[]
+    alerts: Prisma.$ServerAlertPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1731,6 +3186,14 @@ export interface Prisma__UsersClient<T, Null = never, ExtArgs extends runtime.Ty
   folders<T extends Prisma.Users$foldersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$foldersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerFolderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   apiKeys<T extends Prisma.Users$apiKeysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$apiKeysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ApiKeyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   loginHistory<T extends Prisma.Users$loginHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$loginHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoginHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  activityLogs<T extends Prisma.Users$activityLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notifications<T extends Prisma.Users$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  userApiKeys<T extends Prisma.Users$userApiKeysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$userApiKeysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserApiKeyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  twoFactor<T extends Prisma.Users$twoFactorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$twoFactorArgs<ExtArgs>>): Prisma.Prisma__TwoFactorClient<runtime.Types.Result.GetResult<Prisma.$TwoFactorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  scheduledTasks<T extends Prisma.Users$scheduledTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$scheduledTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScheduledTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  grantedAccess<T extends Prisma.Users$grantedAccessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$grantedAccessArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  serverAccess<T extends Prisma.Users$serverAccessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$serverAccessArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  alerts<T extends Prisma.Users$alertsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Users$alertsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServerAlertPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2260,6 +3723,193 @@ export type Users$loginHistoryArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.LoginHistoryScalarFieldEnum | Prisma.LoginHistoryScalarFieldEnum[]
+}
+
+/**
+ * Users.activityLogs
+ */
+export type Users$activityLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ActivityLog
+   */
+  select?: Prisma.ActivityLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ActivityLog
+   */
+  omit?: Prisma.ActivityLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogInclude<ExtArgs> | null
+  where?: Prisma.ActivityLogWhereInput
+  orderBy?: Prisma.ActivityLogOrderByWithRelationInput | Prisma.ActivityLogOrderByWithRelationInput[]
+  cursor?: Prisma.ActivityLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ActivityLogScalarFieldEnum | Prisma.ActivityLogScalarFieldEnum[]
+}
+
+/**
+ * Users.notifications
+ */
+export type Users$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Notification
+   */
+  select?: Prisma.NotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Notification
+   */
+  omit?: Prisma.NotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationInclude<ExtArgs> | null
+  where?: Prisma.NotificationWhereInput
+  orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[]
+  cursor?: Prisma.NotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
+}
+
+/**
+ * Users.userApiKeys
+ */
+export type Users$userApiKeysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserApiKey
+   */
+  select?: Prisma.UserApiKeySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserApiKey
+   */
+  omit?: Prisma.UserApiKeyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserApiKeyInclude<ExtArgs> | null
+  where?: Prisma.UserApiKeyWhereInput
+  orderBy?: Prisma.UserApiKeyOrderByWithRelationInput | Prisma.UserApiKeyOrderByWithRelationInput[]
+  cursor?: Prisma.UserApiKeyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserApiKeyScalarFieldEnum | Prisma.UserApiKeyScalarFieldEnum[]
+}
+
+/**
+ * Users.twoFactor
+ */
+export type Users$twoFactorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TwoFactor
+   */
+  select?: Prisma.TwoFactorSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TwoFactor
+   */
+  omit?: Prisma.TwoFactorOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TwoFactorInclude<ExtArgs> | null
+  where?: Prisma.TwoFactorWhereInput
+}
+
+/**
+ * Users.scheduledTasks
+ */
+export type Users$scheduledTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ScheduledTask
+   */
+  select?: Prisma.ScheduledTaskSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ScheduledTask
+   */
+  omit?: Prisma.ScheduledTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScheduledTaskInclude<ExtArgs> | null
+  where?: Prisma.ScheduledTaskWhereInput
+  orderBy?: Prisma.ScheduledTaskOrderByWithRelationInput | Prisma.ScheduledTaskOrderByWithRelationInput[]
+  cursor?: Prisma.ScheduledTaskWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ScheduledTaskScalarFieldEnum | Prisma.ScheduledTaskScalarFieldEnum[]
+}
+
+/**
+ * Users.grantedAccess
+ */
+export type Users$grantedAccessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ServerAccess
+   */
+  select?: Prisma.ServerAccessSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ServerAccess
+   */
+  omit?: Prisma.ServerAccessOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ServerAccessInclude<ExtArgs> | null
+  where?: Prisma.ServerAccessWhereInput
+  orderBy?: Prisma.ServerAccessOrderByWithRelationInput | Prisma.ServerAccessOrderByWithRelationInput[]
+  cursor?: Prisma.ServerAccessWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ServerAccessScalarFieldEnum | Prisma.ServerAccessScalarFieldEnum[]
+}
+
+/**
+ * Users.serverAccess
+ */
+export type Users$serverAccessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ServerAccess
+   */
+  select?: Prisma.ServerAccessSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ServerAccess
+   */
+  omit?: Prisma.ServerAccessOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ServerAccessInclude<ExtArgs> | null
+  where?: Prisma.ServerAccessWhereInput
+  orderBy?: Prisma.ServerAccessOrderByWithRelationInput | Prisma.ServerAccessOrderByWithRelationInput[]
+  cursor?: Prisma.ServerAccessWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ServerAccessScalarFieldEnum | Prisma.ServerAccessScalarFieldEnum[]
+}
+
+/**
+ * Users.alerts
+ */
+export type Users$alertsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ServerAlert
+   */
+  select?: Prisma.ServerAlertSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ServerAlert
+   */
+  omit?: Prisma.ServerAlertOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ServerAlertInclude<ExtArgs> | null
+  where?: Prisma.ServerAlertWhereInput
+  orderBy?: Prisma.ServerAlertOrderByWithRelationInput | Prisma.ServerAlertOrderByWithRelationInput[]
+  cursor?: Prisma.ServerAlertWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ServerAlertScalarFieldEnum | Prisma.ServerAlertScalarFieldEnum[]
 }
 
 /**
