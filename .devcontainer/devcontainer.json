@@ -3,19 +3,13 @@
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
   "remoteUser": "vscode",
   "shutdownAction": "stopContainer",
-
-  // Workspace
   "workspaceFolder": "/workspace",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
-
-  // Resource caps
   "hostRequirements": {
     "cpus": 2,
     "memory": "4gb",
-    "storage": "8gb"
+    "storage": "32gb"
   },
-
-  // Features — cached layers, no fat apt chains
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "version": "lts",
@@ -26,8 +20,6 @@
       "ppa": false
     }
   },
-
-  // VS Code
   "customizations": {
     "vscode": {
       "settings": {
@@ -36,8 +28,6 @@
       }
     }
   },
-
-  // Post-create installs (runs once, cached on rebuild)
   "postCreateCommand": {
     "opencode":                "curl -fsSL https://opencode.ai/install | bash",
     "caveman-code":            "npm install -g @juliusbrussee/caveman-code",
