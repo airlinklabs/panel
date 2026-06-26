@@ -80,7 +80,7 @@ export const isWorld = async (folderName: string, serverInfo: ServerInfo): Promi
       timeout: 5000,
     });
 
-    const content: Array<{ name: string }> = response.data;
+    const content: { name: string }[] = response.data;
     const names = new Set(content.map((item) => item.name));
 
     const hasRequiredFiles = REQUIRED_WORLD_FILES.some((f) => names.has(f));

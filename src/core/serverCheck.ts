@@ -3,12 +3,12 @@ import prisma from '../db';
 import { checkNodeStatus } from '../services/nodeStatus';
 import { daemonSchemeSync } from '../services/daemonRequest';
 
-type CheckInstallationResult = {
+interface CheckInstallationResult {
   installed: boolean;
   state?: string;
   failed?: boolean;
   error?: string;
-};
+}
 
 // In-memory cache so repeated calls within the same request cycle or across
 // rapid page navigations don't all hit the daemon independently.

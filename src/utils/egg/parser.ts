@@ -50,7 +50,7 @@ export interface NormalizedImageData {
 
 export function isPterodactylEgg(data: Record<string, unknown>): boolean {
   const meta = data.meta as Record<string, unknown> | undefined;
-  return !!(meta && meta.version === 'PTDL_v2');
+  return Boolean(meta?.version === 'PTDL_v2');
 }
 
 export function parseEgg(raw: Record<string, unknown>): ParsedEgg {
@@ -165,8 +165,8 @@ export function normalizeEggForDb(egg: ParsedEgg): NormalizedImageData {
 export function validateEggData(data: Record<string, unknown>): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
-  if (!data.name) errors.push('name is required');
-  if (!data.startup) errors.push('startup command is required');
+  if (!data.name) {errors.push('name is required');}
+  if (!data.startup) {errors.push('startup command is required');}
 
   if (isPterodactylEgg(data)) {
     if (!data.docker_images || typeof data.docker_images !== 'object') {

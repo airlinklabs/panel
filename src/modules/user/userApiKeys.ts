@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import logger from '../../services/logger';
@@ -68,7 +69,7 @@ const coreModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const { name, description, permissions } = req.body;
+          const { name, description: _description, permissions } = req.body;
 
           if (!name) {
             res.status(400).json({ error: 'API key name is required' });
@@ -96,9 +97,8 @@ const coreModule: Module = {
               name,
               key: rawKey,
               prefix,
-              description: description || null,
               permissions: JSON.stringify(permissionsArray),
-              userId,
+              userId: userId!,
               expiresAt,
               updatedAt: new Date(),
             },
@@ -181,7 +181,7 @@ const coreModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const id = getParamAsNumber(req.params.id);
-          const { name, description } = req.body;
+          const { name, description: _description } = req.body;
 
           if (!name) {
             res.status(400).json({ error: 'API key name is required' });
@@ -201,7 +201,6 @@ const coreModule: Module = {
             where: { id },
             data: {
               name,
-              description: description || null,
               updatedAt: new Date(),
             },
           });

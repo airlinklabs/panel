@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import { onlineUsers } from '../user/wsUsers';
@@ -43,7 +44,7 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.redirect('/login'); return;
           }
 
           const users = await listUsers(res);
@@ -60,7 +61,7 @@ const adminModule: Module = {
           });
         } catch (error) {
           logger.error('Error fetching user:', error);
-          return res.redirect('/login');
+          res.redirect('/login'); return;
         }
       },
     );
@@ -73,7 +74,7 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.redirect('/login'); return;
           }
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
@@ -82,7 +83,7 @@ const adminModule: Module = {
           res.render('admin/users/create', { user, req, settings });
         } catch (error) {
           logger.error('Error fetching user:', error);
-          return res.redirect('/login');
+          res.redirect('/login'); return;
         }
       },
     );
@@ -159,7 +160,7 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.redirect('/login'); return;
           }
 
           const dataUser = await prisma.users.findUnique({
@@ -173,7 +174,7 @@ const adminModule: Module = {
             }
           });
           if (!dataUser) {
-            return res.redirect('/admin/users');
+            res.redirect('/admin/users'); return;
           }
           const settings = await prisma.settings.findUnique({
             where: { id: 1 },
@@ -182,7 +183,7 @@ const adminModule: Module = {
           res.render('admin/users/user', { user, req, settings, dataUser, onlineUsers });
         } catch (error) {
           logger.error('Error fetching user:', error);
-          return res.redirect('/login');
+          res.redirect('/login'); return;
         }
       },
     );
@@ -195,7 +196,7 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.redirect('/login'); return;
           }
 
           const dataUser = await prisma.users.findUnique({
@@ -205,7 +206,7 @@ const adminModule: Module = {
             }
           });
           if (!dataUser) {
-            return res.redirect('/admin/users');
+            res.redirect('/admin/users'); return;
           }
 
           const settings = await prisma.settings.findUnique({
@@ -215,7 +216,7 @@ const adminModule: Module = {
           res.render('admin/users/edit', { user, req, settings, dataUser });
         } catch (error) {
           logger.error('Error fetching user:', error);
-          return res.redirect('/login');
+          res.redirect('/login'); return;
         }
       },
     );
@@ -228,14 +229,14 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.redirect('/login'); return;
           }
 
           const dataUser = await prisma.users.findUnique({
             where: { id: getParamAsNumber(req.params.id) },
           });
           if (!dataUser) {
-            return res.redirect('/admin/users');
+            res.redirect('/admin/users'); return;
           }
 
           await prisma.users.delete({
@@ -245,7 +246,7 @@ const adminModule: Module = {
           res.status(200).json({ message: 'User deleted successfully.' });
         } catch (error) {
           logger.error('Error deleting user:', error);
-          return res.redirect('/login');
+          res.redirect('/login'); return;
         }
       },
     );
@@ -253,7 +254,7 @@ const adminModule: Module = {
     router.post(
       '/admin/users/update/:id/',
       isAuthenticated(true),
-      async (req: Request, res: Response): Promise<void> => {
+      async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
           const adminUser = await prisma.users.findUnique({ where: { id: userId } });
@@ -306,9 +307,9 @@ const adminModule: Module = {
           // Prepare update data
           const updateData: Record<string, string | number | boolean | null | undefined> = {};
 
-          if (email) updateData.email = email;
-          if (username) updateData.username = username;
-          if (description) updateData.description = description;
+          if (email) {updateData.email = email;}
+          if (username) {updateData.username = username;}
+          if (description) {updateData.description = description;}
 
           if (isAdmin !== undefined) {
             updateData.isAdmin = isAdmin === true || isAdmin === 'true';

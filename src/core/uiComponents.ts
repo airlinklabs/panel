@@ -68,7 +68,7 @@ class UIComponentStore {
     }
     if (addonSlug) {
       const reg = this.ensureAddonRegistry(addonSlug);
-      if (!reg.sidebarIds.includes(resolved.id)) reg.sidebarIds.push(resolved.id);
+      if (!reg.sidebarIds.includes(resolved.id)) {reg.sidebarIds.push(resolved.id);}
     }
   }
 
@@ -97,7 +97,7 @@ class UIComponentStore {
   public getAddonSidebarIds(): Set<string> {
     const ids = new Set<string>();
     for (const reg of this.addonItemRegistry.values()) {
-      for (const id of reg.sidebarIds) ids.add(id);
+      for (const id of reg.sidebarIds) {ids.add(id);}
     }
     return ids;
   }
@@ -111,7 +111,7 @@ class UIComponentStore {
     }
     if (addonSlug) {
       const reg = this.ensureAddonRegistry(addonSlug);
-      if (!reg.menuIds.includes(item.id)) reg.menuIds.push(item.id);
+      if (!reg.menuIds.includes(item.id)) {reg.menuIds.push(item.id);}
     }
   }
 
@@ -119,7 +119,7 @@ class UIComponentStore {
     this.serverMenuItems = this.serverMenuItems.filter(item => item.id !== id);
   }
 
-  public getServerMenuItems(feature?: string, includeDefaults: boolean = true): ServerMenuItem[] {
+  public getServerMenuItems(feature?: string, includeDefaults = true): ServerMenuItem[] {
     let items = this.serverMenuItems;
 
     if (!includeDefaults) {
@@ -142,16 +142,16 @@ class UIComponentStore {
     }
     if (addonSlug) {
       const reg = this.ensureAddonRegistry(addonSlug);
-      if (!reg.sectionIds.includes(section.id)) reg.sectionIds.push(section.id);
+      if (!reg.sectionIds.includes(section.id)) {reg.sectionIds.push(section.id);}
     }
   }
 
   public clearAddonItems(addonSlug: string): void {
     const reg = this.addonItemRegistry.get(addonSlug);
-    if (!reg) return;
-    reg.sidebarIds.forEach(id => this.removeSidebarItem(id));
-    reg.menuIds.forEach(id => this.removeServerMenuItem(id));
-    reg.sectionIds.forEach(id => this.removeServerSection(id));
+    if (!reg) {return;}
+    reg.sidebarIds.forEach(id => { this.removeSidebarItem(id); });
+    reg.menuIds.forEach(id => { this.removeServerMenuItem(id); });
+    reg.sectionIds.forEach(id => { this.removeServerSection(id); });
     this.addonItemRegistry.delete(addonSlug);
   }
 

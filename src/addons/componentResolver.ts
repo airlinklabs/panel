@@ -80,12 +80,12 @@ export class AddonComponentResolver {
   }
 
   resolveViewport(requested: ViewportMode | 'auto', cookieViewport?: string): ViewportMode {
-    if (requested !== 'auto') return requested;
+    if (requested !== 'auto') {return requested;}
     return cookieViewport === 'mobile' ? 'mobile' : 'desktop';
   }
 
   getComponent(name: string, viewport: ViewportMode = 'desktop'): string | null {
-    if (!VALID_COMPONENT_NAMES.has(name)) return null;
+    if (!VALID_COMPONENT_NAMES.has(name)) {return null;}
     const resolver = COMPONENT_REGISTRY[name as ComponentName];
     return resolver(this.panelRoot, viewport);
   }
@@ -104,10 +104,10 @@ export class AddonComponentResolver {
 
   resolveViewPath(viewName: string, addonViewsPath: string, viewport: ViewportMode): string | null {
     const viewportPath = path.join(addonViewsPath, viewport, viewName);
-    if (fs.existsSync(viewportPath)) return viewportPath;
+    if (fs.existsSync(viewportPath)) {return viewportPath;}
 
     const fallbackPath = path.join(addonViewsPath, viewName);
-    if (fs.existsSync(fallbackPath)) return fallbackPath;
+    if (fs.existsSync(fallbackPath)) {return fallbackPath;}
 
     return null;
   }

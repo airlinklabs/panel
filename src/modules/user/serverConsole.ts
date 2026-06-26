@@ -4,8 +4,9 @@
 // daemon -> panel proxy -> browser WebSocket -> xterm.js. Do not convert Buffer
 // to string in the proxy path — TUI escape sequences are binary data.
 
-import { Router, Request } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { WebSocket } from 'ws';
 import axios from 'axios';
@@ -47,15 +48,15 @@ function sendSocketError(socket: WebSocket, message: string): void {
 }
 
 function normalizeWsMessage(data: WsMessage): ProxiedMessage {
-  if (typeof data === 'string') return data;
-  if (Buffer.isBuffer(data)) return data;
-  if (Array.isArray(data)) return Buffer.concat(data);
+  if (typeof data === 'string') {return data;}
+  if (Buffer.isBuffer(data)) {return data;}
+  if (Array.isArray(data)) {return Buffer.concat(data);}
   return Buffer.from(data);
 }
 
 function extractConsoleCommand(data: WsMessage): string | null {
   const raw = normalizeWsMessage(data).toString('utf8').trim();
-  if (!raw) return null;
+  if (!raw) {return null;}
 
   try {
     const payload = JSON.parse(raw) as {
@@ -83,7 +84,7 @@ function extractConsoleCommand(data: WsMessage): string | null {
     for (const candidate of candidates) {
       if (typeof candidate === 'string') {
         const command = candidate.replace(/\r\n?/g, '\n').trim();
-        if (command) return command;
+        if (command) {return command;}
       }
     }
   } catch {
@@ -134,12 +135,12 @@ async function proxyConsole(
     function flushPendingClientMessages(): void {
       while (pendingClientMessages.length > 0 && isOpen(socket)) {
         const message = pendingClientMessages.shift();
-        if (message) socket.send(message);
+        if (message) {socket.send(message);}
       }
     }
 
     async function forwardToDaemon(data: WsMessage): Promise<void> {
-      if (mode === 'readonly') return;
+      if (mode === 'readonly') {return;}
 
       const command = extractConsoleCommand(data);
       if (command) {
@@ -181,7 +182,7 @@ async function proxyConsole(
       flushPendingClientMessages();
     };
 
-    socket.onmessage = (msg) => sendIfOpen(ws, normalizeWsMessage(msg.data));
+    socket.onmessage = (msg) => { sendIfOpen(ws, normalizeWsMessage(msg.data)); };
 
     socket.onerror = () => {
       sendIfOpen(ws, '\x1b[31;1mThis instance is unavailable!\x1b[0m');
@@ -189,7 +190,7 @@ async function proxyConsole(
 
     socket.onclose = () => {
       pendingClientMessages.length = 0;
-      if (!clientClosed && isOpen(ws)) ws.close();
+      if (!clientClosed && isOpen(ws)) {ws.close();}
     };
 
     ws.on('message', forwardToDaemon);
@@ -217,7 +218,7 @@ const wsServerConsoleModule: Module = {
 
   router: (applyWs?: (router: Router) => void) => {
     const router = Router();
-    if (applyWs) applyWs(router);
+    if (applyWs) {applyWs(router);}
 
     router.ws(
       '/console/:id',

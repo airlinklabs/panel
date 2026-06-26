@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import logger from '../../services/logger';
@@ -33,7 +34,7 @@ const analyticsModule: Module = {
             prisma.users.findUnique({ where: { id: userId } }),
             prisma.settings.findUnique({ where: { id: 1 } }),
           ]);
-          if (!user) return res.redirect('/login');
+          if (!user) {res.redirect('/login'); return;}
           res.render('admin/analytics/analytics', { user, req, settings, title: 'Analytics' });
         } catch (error) {
           logger.error('Error loading analytics page:', error);
@@ -71,7 +72,7 @@ const analyticsModule: Module = {
 
           const imageCounts: Record<string, { name: string | null; count: number }> = {};
           images.forEach(img => { imageCounts[img.id] = { name: img.name, count: 0 }; });
-          servers.forEach(srv => { if (imageCounts[srv.imageId]) imageCounts[srv.imageId].count++; });
+          servers.forEach(srv => { if (imageCounts[srv.imageId]) {imageCounts[srv.imageId]!.count++;} });
           const topImages = Object.values(imageCounts)
             .sort((a, b) => b.count - a.count)
             .filter(i => i.count > 0)
@@ -145,7 +146,7 @@ const analyticsModule: Module = {
           }
           recentLogins.forEach(l => {
             const key = new Date(l.timestamp).toISOString().slice(0, 10);
-            if (loginsByDay[key] !== undefined) loginsByDay[key]++;
+            if (loginsByDay[key] !== undefined) {loginsByDay[key]++;}
           });
 
           res.json({

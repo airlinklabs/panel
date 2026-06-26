@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import otplib from 'otplib';
@@ -87,7 +88,7 @@ const twoFactorModule: Module = {
             });
           } else {
             await prisma.twoFactor.create({
-              data: { userId, secret, enabled: false },
+              data: { userId: userId!, secret, enabled: false },
             });
           }
 

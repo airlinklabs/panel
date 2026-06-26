@@ -1,10 +1,10 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import logger from '../../services/logger';
 import os from 'os';
 import prisma from '../../db';
 import { checkNodeStatus } from '../../services/nodeStatus';
-import type { Prisma } from '../../generated/prisma/client';
 
 const coreModule: Module = {
   info: {
@@ -107,14 +107,14 @@ const coreModule: Module = {
 
     router.get('/api/search', async (req: Request, res: Response) => {
       const userId = req.session?.user?.id;
-      if (!userId) return res.status(401).json({ results: [] });
+      if (!userId) {return res.status(401).json({ results: [] });}
 
       const q = String(req.query.q || '').trim().toLowerCase();
-      if (!q || q.length < 1) return res.json({ results: [] });
+      if (!q || q.length < 1) {return res.json({ results: [] });}
 
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) return res.status(401).json({ results: [] });
+        if (!user) {return res.status(401).json({ results: [] });}
 
         const results: { type: string; label: string; sub: string; url: string }[] = [];
 
@@ -123,7 +123,7 @@ const coreModule: Module = {
           : { ownerId: userId, OR: [{ name: { contains: q } }, { UUID: { contains: q } }] };
 
         const servers = await prisma.server.findMany({
-          where: serverWhere as Prisma.ServerWhereInput,
+          where: serverWhere,
           select: { UUID: true, name: true, description: true },
           take: 8,
         });
@@ -139,7 +139,7 @@ const coreModule: Module = {
             take: 5,
           });
           users.forEach(u => {
-            results.push({ type: 'user', label: u.username, sub: u.email, url: `/admin/users/view/${u.id}/` });
+            results.push({ type: 'user', label: u.username ?? '', sub: u.email, url: `/admin/users/view/${u.id}/` });
           });
 
           const nodes = await prisma.node.findMany({

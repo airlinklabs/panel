@@ -1,6 +1,7 @@
-import { Router, Request, Response } from 'express';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
 import prisma from '../../db';
-import { Module } from '../../core/moduleInit';
+import type { Module } from '../../core/moduleInit';
 import { isAuthenticated } from '../../middleware/auth';
 import logger from '../../services/logger';
 import { getCatalogueFromDb, forceRefresh, getCategoryMd } from '../../services/eggCatalog';
@@ -65,14 +66,14 @@ const adminModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.redirect('/login');
+          if (!user) {res.redirect('/login'); return;}
 
           const images = await prisma.images.findMany();
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           res.render('admin/images/images', { user, req, settings, images });
         } catch (error) {
           logger.error('Error fetching images:', error);
-          return res.redirect('/login');
+          res.redirect('/login'); return;
         }
       },
     );
@@ -161,10 +162,10 @@ const adminModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.redirect('/login');
+          if (!user) {res.redirect('/login'); return;}
 
           const image = await prisma.images.findUnique({ where: { id: Number(req.params.id) } });
-          if (!image) return res.redirect('/admin/images?error=Image+not+found');
+          if (!image) {res.redirect('/admin/images?error=Image+not+found'); return;}
 
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
@@ -173,7 +174,7 @@ const adminModule: Module = {
             const parsed = JSON.parse(image.dockerImages || '[]');
             if (Array.isArray(parsed)) {
               for (const obj of parsed) {
-                if (typeof obj === 'object') Object.assign(dockerImages, obj);
+                if (typeof obj === 'object') {Object.assign(dockerImages, obj);}
               }
             } else if (typeof parsed === 'object') {
               dockerImages = parsed;
@@ -210,7 +211,7 @@ const adminModule: Module = {
           });
         } catch (error) {
           logger.error('Error loading image for edit:', error);
-          return res.redirect('/admin/images?error=Failed+to+load+image');
+          res.redirect('/admin/images?error=Failed+to+load+image'); return;
         }
       },
     );
@@ -265,7 +266,7 @@ const adminModule: Module = {
             const parsed = JSON.parse(image.dockerImages || '[]');
             if (Array.isArray(parsed)) {
               for (const obj of parsed) {
-                if (typeof obj === 'object') Object.assign(dockerImagesRaw, obj);
+                if (typeof obj === 'object') {Object.assign(dockerImagesRaw, obj);}
               }
             }
           } catch { /* keep empty */ }
@@ -348,12 +349,12 @@ const adminModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.redirect('/login');
+          if (!user) {res.redirect('/login'); return;}
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           res.render('admin/images/store', { user, req, settings });
         } catch (error) {
           logger.error('Error rendering store:', error);
-          return res.redirect('/admin/images');
+          res.redirect('/admin/images'); return;
         }
       },
     );
@@ -381,7 +382,7 @@ const adminModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const data = await getCategoryMd(String(req.params.category));
-          if (!data) return res.status(404).json({ error: 'Category not found' });
+          if (!data) {return res.status(404).json({ error: 'Category not found' });}
           res.json(data);
         } catch (error) {
           logger.error('Error serving category MD:', error);
@@ -434,7 +435,7 @@ const adminModule: Module = {
       async (_req: Request, res: Response) => {
         try {
           // Don't await — let it run in background and return immediately
-          forceRefresh().catch(err => logger.warn(`Store force refresh failed: ${err?.message || err}`));
+          forceRefresh().catch(err => { logger.warn(`Store force refresh failed: ${err?.message || err}`); });
           res.status(200).json({ message: 'Refresh started. The catalogue will update in the background.' });
         } catch (error) {
           logger.error('Failed to start image store refresh:', error);

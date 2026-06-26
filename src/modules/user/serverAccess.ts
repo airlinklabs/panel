@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticatedForServer } from '../../middleware/serverAuth';
 import logger from '../../services/logger';
@@ -12,7 +13,7 @@ interface ErrorMessage {
 const VALID_PERMISSIONS = ['console', 'files', 'backups', 'startup', 'settings'] as const;
 
 function isValidPermissionsArray(permits: unknown): permits is string[] {
-  if (!Array.isArray(permits)) return false;
+  if (!Array.isArray(permits)) {return false;}
   return permits.every(p => typeof p === 'string' && (VALID_PERMISSIONS as readonly string[]).includes(p));
 }
 
@@ -40,7 +41,7 @@ const serverAccessModule: Module = {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             errorMessage.message = 'User not found.';
-            return res.render('user/account', { errorMessage, user, req });
+            res.render('user/account', { errorMessage, user, req }); return;
           }
 
           const server = await prisma.server.findUnique({
@@ -50,13 +51,13 @@ const serverAccessModule: Module = {
 
           if (!server) {
             errorMessage.message = 'Server not found.';
-            return res.render('user/server/access', {
+            res.render('user/server/access', {
               errorMessage,
               user,
               server: null,
               accessGrants: [],
               req,
-            });
+            }); return;
           }
 
           const accessGrants = await prisma.serverAccess.findMany({

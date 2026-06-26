@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import prisma from '../../db';
 import logger from '../../services/logger';
 import crypto from 'crypto';
@@ -19,13 +19,13 @@ async function hashingEnabled(): Promise<boolean> {
 export const apiValidator = (requiredPermission?: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const authHeader = req.headers['authorization'];
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      const authHeader = req.headers.authorization;
+      if (!authHeader?.startsWith('Bearer ')) {
         res.status(401).json({ error: 'Unauthorized: Missing or malformed Authorization header' });
         return;
       }
 
-      const rawKey = authHeader.split(' ')[1];
+      const rawKey = authHeader.split(' ')[1]!;
 
       // When key hashing is enabled, look up the SHA-256 hash of the submitted
       // key — the raw value is never stored. Fall back to plaintext if not.
@@ -49,7 +49,7 @@ export const apiValidator = (requiredPermission?: string) => {
         try {
           const permissions = JSON.parse(keyData.permissions || '[]');
           const hasPermission = permissions.some((perm: string) => {
-            if (perm === requiredPermission) return true;
+            if (perm === requiredPermission) {return true;}
             if (perm.endsWith('.*')) {
               return requiredPermission.startsWith(perm.slice(0, -2) + '.');
             }

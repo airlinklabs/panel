@@ -36,7 +36,7 @@ export async function collectPlayerStats(): Promise<void> {
       servers.map(async (server) => {
         try {
           // Parse ports to find the primary port
-          const ports = JSON.parse(server.Ports || '[]') as Array<{ primary?: boolean; Port?: string }>;
+          const ports = JSON.parse(server.Ports || '[]') as { primary?: boolean; Port?: string }[];
           const primaryPort = ports.find((p) => p.primary)?.Port;
 
           if (!primaryPort) {
@@ -106,7 +106,7 @@ export async function collectPlayerStats(): Promise<void> {
     });
 
     if (oldestToKeep.length === MAX_DATA_POINTS) {
-      const oldestTimestamp = oldestToKeep[MAX_DATA_POINTS - 1].timestamp;
+      const oldestTimestamp = oldestToKeep[MAX_DATA_POINTS - 1]!.timestamp;
 
       await prisma.playerStats.deleteMany({
         where: {
@@ -132,7 +132,7 @@ export function startPlayerStatsCollection(): void {
   }
 
   // Collect stats immediately
-  collectPlayerStats();
+  void collectPlayerStats();
 
   // Then set up interval
   statsCollectionInterval = setInterval(collectPlayerStats, COLLECTION_INTERVAL);

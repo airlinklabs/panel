@@ -7,7 +7,7 @@ class Queueer {
   addTask(task: () => Promise<void>): void {
     this.queue.push(task);
     if (!this.isProcessing) {
-      this.processQueue();
+      void this.processQueue();
     }
   }
 
@@ -27,7 +27,7 @@ class Queueer {
     } catch (error) {
       logger.error('Error processing queue task:', error);
     } finally {
-      this.processQueue();
+      void this.processQueue();
     }
   }
 }

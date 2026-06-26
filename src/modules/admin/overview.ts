@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import logger from '../../services/logger';
@@ -37,7 +38,7 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.redirect('/login'); return;
           }
 
           const userCount = await prisma.users.count();
@@ -61,7 +62,7 @@ const adminModule: Module = {
           });
         } catch (error) {
           logger.error('Error fetching user:', error);
-          return res.redirect('/login');
+          res.redirect('/login'); return;
         }
       },
     );

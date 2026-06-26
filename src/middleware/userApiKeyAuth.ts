@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import prisma from '../db';
 import logger from '../services/logger';
 
 function hasPermission(userPermissions: string[], required: string): boolean {
   return userPermissions.some((perm: string) => {
-    if (perm === required) return true;
+    if (perm === required) {return true;}
     if (perm.endsWith('.*')) {
       const base = perm.slice(0, -2);
       return required.startsWith(`${base}.`);
@@ -16,8 +16,8 @@ function hasPermission(userPermissions: string[], required: string): boolean {
 export const userApiKeyAuth = (requiredPermission?: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const authHeader = req.headers['authorization'];
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      const authHeader = req.headers.authorization;
+      if (!authHeader?.startsWith('Bearer ')) {
         res.status(401).json({ error: 'Unauthorized: Missing or malformed Authorization header' });
         return;
       }
@@ -70,7 +70,7 @@ export const userApiKeyAuth = (requiredPermission?: string) => {
         data: { lastUsedAt: new Date() },
       });
 
-       
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (req as any).user = {
         id: user.id,
         username: user.username,

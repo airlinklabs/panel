@@ -72,18 +72,22 @@ class Seeder {
 
   private async fetchImageData(url: string): Promise<ImageData | null> {
     try {
+      // eslint-disable-next-line no-console
       console.info(`Fetching image data from ${url}...`);
       const { data } = await axios.get(url);
       return data;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(`Failed to fetch image data from ${url}:`, error);
       return null;
     }
   }
 
   private async fetchAndProcessImages(): Promise<Record<string, unknown>[]> {
+    // eslint-disable-next-line no-console
     console.info(`Fetching image index from ${IMAGES_URL}...`);
     const { data: imageUrls } = await axios.get<string[]>(IMAGES_URL);
+    // eslint-disable-next-line no-console
     console.info(`Found ${imageUrls.length} images in the index.`);
 
     const results = await Promise.allSettled(
@@ -97,6 +101,7 @@ class Seeder {
 
     const failedCount = results.length - successfulResults.length;
     if (failedCount > 0) {
+      // eslint-disable-next-line no-console
       console.warn(`Failed to fetch ${failedCount} out of ${results.length} images.`);
     }
 
@@ -104,10 +109,15 @@ class Seeder {
   }
 
   private printSeedingSummary(total: number, updated: number, created: number): void {
+    // eslint-disable-next-line no-console
     console.info('\n=== Seeding Summary ===');
+    // eslint-disable-next-line no-console
     console.info(`Total images processed: ${total}`);
+    // eslint-disable-next-line no-console
     console.info(`- Updated: ${updated} existing images`);
+    // eslint-disable-next-line no-console
     console.info(`- Created: ${created} new images`);
+    // eslint-disable-next-line no-console
     console.info('=====================\n');
   }
 
@@ -116,6 +126,7 @@ class Seeder {
       const processedImages = await this.fetchAndProcessImages();
 
       if (processedImages.length === 0) {
+        // eslint-disable-next-line no-console
         console.info('No new images to seed.');
         return;
       }
@@ -126,6 +137,7 @@ class Seeder {
       let updatedCount = 0;
       let createdCount = 0;
 
+      // eslint-disable-next-line no-console
       console.info('Starting seeding process...');
 
       for (const image of processedImages) {
@@ -141,6 +153,7 @@ class Seeder {
         }
       }
 
+      // eslint-disable-next-line no-console
       console.info('Seeding completed successfully!');
       this.printSeedingSummary(processedImages.length, updatedCount, createdCount);
     } catch (error) {
@@ -159,6 +172,7 @@ class Seeder {
         );
 
         if (!shouldContinue) {
+          // eslint-disable-next-line no-console
           console.info('Seeding aborted by the user.');
           return;
         }
@@ -166,6 +180,7 @@ class Seeder {
 
       await this.seedDatabase();
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed during seeding process:', error);
       throw error;
     } finally {
@@ -176,6 +191,7 @@ class Seeder {
 }
 
 process.on('unhandledRejection', (reason, promise) => {
+  // eslint-disable-next-line no-console
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
   process.exit(1);
 });
@@ -184,9 +200,11 @@ const seeder = new Seeder();
 seeder
   .seed()
   .catch((error) => {
+    // eslint-disable-next-line no-console
     console.error('Fatal error during seeding:', error);
     process.exit(1);
   })
   .finally(() => {
+    // eslint-disable-next-line no-console
     console.info('Exiting...');
   });

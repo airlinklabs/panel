@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import { getUser } from '../../services/user';
@@ -43,7 +44,7 @@ const dashboardModule: Module = {
           include: { node: true, owner: true },
         });
 
-        let page: number = 1;
+        let page = 1;
 
         if (typeof req.query.page === 'string') {
           page = parseInt(req.query.page, 10);
@@ -94,7 +95,7 @@ const dashboardModule: Module = {
             : (settings2?.defaultServerLimit ?? 0);
           const canCreateServer = !user.isAdmin && (settings2?.allowUserCreateServer ?? false) && userServerLimit > 0;
 
-          return res.render('user/dashboard', {
+          res.render('user/dashboard', {
             errorMessage: {
               message:
                 'One or more nodes are offline. Some server information may be unavailable.',
@@ -110,7 +111,7 @@ const dashboardModule: Module = {
             totalPages: 1,
             daemonOffline: true,
             nodeStatuses,
-          });
+          }); return;
         }
 
         const serversWithStats = await Promise.all(
@@ -118,7 +119,7 @@ const dashboardModule: Module = {
             try {
               if (
                 nodeStatuses[server.node.id] &&
-                !nodeStatuses[server.node.id].online
+                !nodeStatuses[server.node.id]!.online
               ) {
                 return {
                   ...server,

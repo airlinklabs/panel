@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import prisma from '../db';
 import { renderErrorPage } from './errorHandler';
 
@@ -8,13 +8,13 @@ export const isAuthenticated =
       const userId = req.session.user?.id;
 
       if (!userId) {
-        return res.redirect('/login');
+        res.redirect('/login'); return;
       }
 
       const user = await prisma.users.findUnique({ where: { id: userId } });
 
       if (!user) {
-        return res.redirect('/login');
+        res.redirect('/login'); return;
       }
 
       if (isAdminRequired) {
@@ -22,7 +22,7 @@ export const isAuthenticated =
           return renderErrorPage(req, res, 403);
         }
 
-        return next();
+        next(); return;
       }
 
       if (requiredPermission) {
@@ -34,7 +34,7 @@ export const isAuthenticated =
         }
 
         const hasPermission = userPermissions.some((perm: string) => {
-          if (perm === requiredPermission) return true;
+          if (perm === requiredPermission) {return true;}
           if (perm.endsWith('.*')) {
             const base = perm.slice(0, -2);
             return requiredPermission.startsWith(`${base}.`);
@@ -43,7 +43,7 @@ export const isAuthenticated =
         });
 
         if (hasPermission) {
-          return next();
+          next(); return;
         }
 
         return renderErrorPage(req, res, 403);

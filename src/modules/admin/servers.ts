@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import logger from '../../services/logger';
@@ -37,7 +38,7 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.redirect('/login'); return;
           }
 
           const servers = await prisma.server.findMany({
@@ -53,7 +54,7 @@ const adminModule: Module = {
           res.render('admin/servers/servers', { user, req, settings, servers });
         } catch (error: unknown) {
           logger.error('Error fetching servers:', error);
-          return res.redirect('/login');
+          res.redirect('/login'); return;
         }
       },
     );
@@ -254,7 +255,7 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.redirect('/login'); return;
           }
 
           const users = await prisma.users.findMany();
@@ -274,7 +275,7 @@ const adminModule: Module = {
           });
         } catch (error: unknown) {
           logger.error('Error fetching data for server creation:', error);
-          return res.redirect('/login');
+          res.redirect('/login'); return;
         }
       },
     );
@@ -299,7 +300,7 @@ const adminModule: Module = {
           allowStartupEdit,
         } = req.body;
 
-        const userId = +ownerId;
+        const userId = Number(ownerId);
         if (
           !name ||
           !description ||
@@ -384,7 +385,7 @@ const adminModule: Module = {
 
           const imagesDocker = JSON.parse(dockerImages);
 
-          type ImageDocker = { [key: string]: string };
+          type ImageDocker = Record<string, string>;
 
           const imageDocker: ImageDocker | undefined = imagesDocker.find(
             (image: ImageDocker) => Object.keys(image).includes(dockerImage),
@@ -482,7 +483,7 @@ const adminModule: Module = {
                   const parsedPorts = JSON.parse(server.Ports);
                   const primary = parsedPorts.find((p: { primary?: boolean; Port?: string }) => p.primary);
                   if (primary?.Port) {
-                    serverPort = String(primary.Port).split(':')[0];
+                    serverPort = String(primary.Port).split(':')[0]!;
                   }
                 } catch { /* keep fallback */ }
                 ServerEnv.push({
@@ -693,7 +694,7 @@ const adminModule: Module = {
                 const isNotFoundError =
                   daemonError.response &&
                   (daemonError.response.status === 404 ||
-                   (daemonError.response.data && daemonError.response.data.error &&
+                   (daemonError.response.data?.error &&
                     typeof daemonError.response.data.error === 'string' &&
                     daemonError.response.data.error.includes('not exist')));
 

@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import logger from '../../services/logger';
@@ -26,8 +27,8 @@ const storage = multer.diskStorage({
   },
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname);
-    if (file.fieldname === 'favicon')  return cb(null, 'favicon' + ext);
-    if (file.fieldname === 'themeFile') return cb(null, 'theme-' + Date.now() + '.zip');
+    if (file.fieldname === 'favicon')  {cb(null, 'favicon' + ext); return;}
+    if (file.fieldname === 'themeFile') {cb(null, 'theme-' + Date.now() + '.zip'); return;}
     cb(null, file.fieldname + '-' + Date.now() + '-' + Math.round(Math.random() * 1e9) + ext);
   },
 });
@@ -35,7 +36,7 @@ const storage = multer.diskStorage({
 const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   if (file.fieldname === 'themeFile') {
     const ext = path.extname(file.originalname).toLowerCase();
-    return cb(null, ext === '.zip' || file.mimetype.includes('zip'));
+    cb(null, ext === '.zip' || file.mimetype.includes('zip')); return;
   }
   const ok = ['image/jpeg','image/png','image/gif','image/svg+xml','image/x-icon','image/vnd.microsoft.icon'];
   cb(null, ok.includes(file.mimetype));
@@ -53,9 +54,9 @@ function installThemeZip(zipPath: string): { success: boolean; error?: string } 
     const infoPath  = path.join(tempDir, 'info.json');
     const lightPath = path.join(tempDir, 'light.css');
     const darkPath  = path.join(tempDir, 'dark.css');
-    if (!fs.existsSync(infoPath))  return { success: false, error: 'Theme zip must contain info.json.' };
-    if (!fs.existsSync(lightPath)) return { success: false, error: 'Theme zip must contain light.css.' };
-    if (!fs.existsSync(darkPath))  return { success: false, error: 'Theme zip must contain dark.css.' };
+    if (!fs.existsSync(infoPath))  {return { success: false, error: 'Theme zip must contain info.json.' };}
+    if (!fs.existsSync(lightPath)) {return { success: false, error: 'Theme zip must contain light.css.' };}
+    if (!fs.existsSync(darkPath))  {return { success: false, error: 'Theme zip must contain dark.css.' };}
     JSON.parse(fs.readFileSync(infoPath, 'utf-8'));
     const themeId  = randomUUID();
     const themeDir = path.join(themesDir, themeId);
@@ -65,9 +66,9 @@ function installThemeZip(zipPath: string): { success: boolean; error?: string } 
     fs.copyFileSync(darkPath, path.join(themeDir, 'dark.css'));
     return { success: true };
   } catch (err: unknown) {
-    if (err instanceof SyntaxError) return { success: false, error: 'info.json contains invalid JSON.' };
+    if (err instanceof SyntaxError) {return { success: false, error: 'info.json contains invalid JSON.' };}
     const msg = err instanceof Error ? err.message : 'Unknown error';
-    if (msg.startsWith('Theme zip')) return { success: false, error: msg };
+    if (msg.startsWith('Theme zip')) {return { success: false, error: msg };}
     return { success: false, error: 'Failed to extract theme zip.' };
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
@@ -77,14 +78,14 @@ function installThemeZip(zipPath: string): { success: boolean; error?: string } 
 
 function loadUserThemes() {
   const dir = path.join(process.cwd(), 'public', 'themes', 'user');
-  if (!fs.existsSync(dir)) return [];
-  const themes: Array<{ name: string; lightPath: string; darkPath: string; path: string; builtin: boolean; author?: string }> = [];
+  if (!fs.existsSync(dir)) {return [];}
+  const themes: { name: string; lightPath: string; darkPath: string; path: string; builtin: boolean; author?: string }[] = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
+    if (!entry.isDirectory()) {continue;}
     const infoPath  = path.join(dir, entry.name, 'info.json');
     const lightPath = path.join(dir, entry.name, 'light.css');
     const darkPath  = path.join(dir, entry.name, 'dark.css');
-    if (!fs.existsSync(infoPath) || !fs.existsSync(lightPath) || !fs.existsSync(darkPath)) continue;
+    if (!fs.existsSync(infoPath) || !fs.existsSync(lightPath) || !fs.existsSync(darkPath)) {continue;}
     try {
       const info = JSON.parse(fs.readFileSync(infoPath, 'utf-8'));
       themes.push({
@@ -156,7 +157,7 @@ const adminModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.redirect('/login');
+          if (!user) {res.redirect('/login'); return;}
 
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
@@ -426,7 +427,7 @@ const adminModule: Module = {
           zip.addFile('light.css', Buffer.from(lightCss));
           zip.addFile('dark.css', Buffer.from(darkCss));
           zip.writeZip(archivePath);
-          res.download(archivePath, 'example-theme.zip', () => fs.rmSync(archivePath, { force: true }));
+          res.download(archivePath, 'example-theme.zip', () => { fs.rmSync(archivePath, { force: true }); });
         } catch (error) {
           logger.error('Error generating example theme:', error);
           res.status(500).json({ error: 'Failed to generate example theme.' });
@@ -452,9 +453,9 @@ const adminModule: Module = {
 
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           const update: Record<string, unknown> = {};
-          if (settings?.lightTheme?.includes(`/user/${themeId}/`)) update.lightTheme = 'default';
-          if (settings?.darkTheme?.includes(`/user/${themeId}/`)) update.darkTheme = 'default';
-          if (Object.keys(update).length > 0) await saveSettings(update);
+          if (settings?.lightTheme?.includes(`/user/${themeId}/`)) {update.lightTheme = 'default';}
+          if (settings?.darkTheme?.includes(`/user/${themeId}/`)) {update.darkTheme = 'default';}
+          if (Object.keys(update).length > 0) {await saveSettings(update);}
 
           res.json({ success: true });
         } catch (error) {
@@ -482,23 +483,23 @@ const adminModule: Module = {
 
           if (files.themeFile?.[0]) {
             const result = installThemeZip(files.themeFile[0].path);
-            if (!result.success) return res.status(400).json({ success: false, error: result.error });
+            if (!result.success) {return res.status(400).json({ success: false, error: result.error });}
           }
 
           const data: Record<string, unknown> = {};
 
-          if (typeof raw.title === 'string') data.title = raw.title;
+          if (typeof raw.title === 'string') {data.title = raw.title;}
           if (typeof raw.allowRegistration !== 'undefined') {
             data.allowRegistration = raw.allowRegistration === 'true' || raw.allowRegistration === true;
           }
-          if (typeof raw.lightTheme === 'string') data.lightTheme = raw.lightTheme;
-          if (typeof raw.darkTheme  === 'string') data.darkTheme  = raw.darkTheme;
-          if (raw.uploadLimit) data.uploadLimit = parseInt(raw.uploadLimit, 10) || 100;
+          if (typeof raw.lightTheme === 'string') {data.lightTheme = raw.lightTheme;}
+          if (typeof raw.darkTheme  === 'string') {data.darkTheme  = raw.darkTheme;}
+          if (raw.uploadLimit) {data.uploadLimit = parseInt(raw.uploadLimit, 10) || 100;}
           if (typeof raw.virusTotalApiKey === 'string') {
             data.virusTotalApiKey = raw.virusTotalApiKey.trim() || null;
           }
 
-          if (files.logo?.[0])    data.logo    = `/uploads/logos/${files.logo[0].filename}`;
+          if (files.logo?.[0])    {data.logo    = `/uploads/logos/${files.logo[0].filename}`;}
           if (files.favicon?.[0]) {
             data.favicon = `/uploads/favicons/${files.favicon[0].filename}`;
             fs.copyFileSync(files.favicon[0].path, path.join(process.cwd(), 'public', 'favicon.ico'));
@@ -509,19 +510,19 @@ const adminModule: Module = {
             data.loginWallpaper = `/uploads/wallpapers/${files.loginWallpaperFile[0].filename}`;
           } else if (typeof raw.loginWallpaperUrl === 'string') {
             const u = raw.loginWallpaperUrl.trim();
-            if (u === '') data.loginWallpaper = null;
-            else if (u.startsWith('http')) data.loginWallpaper = u;
+            if (u === '') {data.loginWallpaper = null;}
+            else if (u.startsWith('http')) {data.loginWallpaper = u;}
           }
 
           if (files.registerWallpaperFile?.[0]) {
             data.registerWallpaper = `/uploads/wallpapers/${files.registerWallpaperFile[0].filename}`;
           } else if (typeof raw.registerWallpaperUrl === 'string') {
             const u = raw.registerWallpaperUrl.trim();
-            if (u === '') data.registerWallpaper = null;
-            else if (u.startsWith('http')) data.registerWallpaper = u;
+            if (u === '') {data.registerWallpaper = null;}
+            else if (u.startsWith('http')) {data.registerWallpaper = u;}
           }
 
-          if (Object.keys(data).length > 0) await saveSettings(data);
+          if (Object.keys(data).length > 0) {await saveSettings(data);}
           res.json({ success: true });
         } catch (error) {
           logger.error('Error saving appearance settings:', error);
@@ -614,13 +615,13 @@ const adminModule: Module = {
           const defaultMaxStorage     = parseInt(req.body.defaultMaxStorage,  10);
 
           if (isNaN(defaultServerLimit) || defaultServerLimit < 0)
-            return res.status(400).json({ success: false, error: 'Server limit must be 0 or greater.' });
+          {return res.status(400).json({ success: false, error: 'Server limit must be 0 or greater.' });}
           if (isNaN(defaultMaxMemory) || defaultMaxMemory < 128)
-            return res.status(400).json({ success: false, error: 'Max memory must be at least 128 MB.' });
+          {return res.status(400).json({ success: false, error: 'Max memory must be at least 128 MB.' });}
           if (isNaN(defaultMaxCpu) || defaultMaxCpu < 10)
-            return res.status(400).json({ success: false, error: 'Max CPU must be at least 10%.' });
+          {return res.status(400).json({ success: false, error: 'Max CPU must be at least 10%.' });}
           if (isNaN(defaultMaxStorage) || defaultMaxStorage < 128)
-            return res.status(400).json({ success: false, error: 'Max storage must be at least 128 MB.' });
+          {return res.status(400).json({ success: false, error: 'Max storage must be at least 128 MB.' });}
 
           const serverPolicyData: Record<string, unknown> = {
             allowUserCreateServer,
@@ -650,7 +651,7 @@ const adminModule: Module = {
         try {
           const { ip } = req.body;
           if (!ip || typeof ip !== 'string' || !/^[\d.:a-fA-F]+$/.test(ip))
-            return res.status(400).json({ success: false, error: 'Invalid IP address.' });
+          {return res.status(400).json({ success: false, error: 'Invalid IP address.' });}
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           let banned: string[] = [];
           try { banned = JSON.parse(settings?.bannedIps || '[]'); } catch { banned = []; }
@@ -674,7 +675,7 @@ const adminModule: Module = {
         try {
           const { ip } = req.body;
           if (!ip || typeof ip !== 'string')
-            return res.status(400).json({ success: false, error: 'IP is required.' });
+          {return res.status(400).json({ success: false, error: 'IP is required.' });}
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           let banned: string[] = [];
           try { banned = JSON.parse(settings?.bannedIps || '[]'); } catch { banned = []; }
@@ -706,7 +707,7 @@ const adminModule: Module = {
           });
           const defaultFavicon = path.join(process.cwd(), 'public', 'assets', 'favicon.ico');
           const dest           = path.join(process.cwd(), 'public', 'favicon.ico');
-          if (fs.existsSync(defaultFavicon)) fs.copyFileSync(defaultFavicon, dest);
+          if (fs.existsSync(defaultFavicon)) {fs.copyFileSync(defaultFavicon, dest);}
           res.json({ success: true });
         } catch (error) {
           logger.error('Error resetting settings:', error);

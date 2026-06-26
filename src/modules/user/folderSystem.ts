@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import logger from '../../services/logger';
@@ -72,14 +73,14 @@ const folderModule: Module = {
         const folderId = parseInt(String(req.params.id), 10);
         const { name } = req.body;
 
-        if (isNaN(folderId)) return res.status(400).json({ success: false, error: 'Invalid folder ID.' });
+        if (isNaN(folderId)) {return res.status(400).json({ success: false, error: 'Invalid folder ID.' });}
         if (!name || typeof name !== 'string' || name.trim().length === 0) {
           return res.status(400).json({ success: false, error: 'Folder name is required.' });
         }
 
         const folder = await prisma.serverFolder.findUnique({ where: { id: folderId } });
-        if (!folder) return res.status(404).json({ success: false, error: 'Folder not found.' });
-        if (folder.ownerId !== userId) return res.status(403).json({ success: false, error: 'Not your folder.' });
+        if (!folder) {return res.status(404).json({ success: false, error: 'Folder not found.' });}
+        if (folder.ownerId !== userId) {return res.status(403).json({ success: false, error: 'Not your folder.' });}
 
         const updated = await prisma.serverFolder.update({
           where: { id: folderId },
@@ -99,11 +100,11 @@ const folderModule: Module = {
         const userId = getAuthenticatedUserId(req);
         const folderId = parseInt(String(req.params.id), 10);
 
-        if (isNaN(folderId)) return res.status(400).json({ success: false, error: 'Invalid folder ID.' });
+        if (isNaN(folderId)) {return res.status(400).json({ success: false, error: 'Invalid folder ID.' });}
 
         const folder = await prisma.serverFolder.findUnique({ where: { id: folderId } });
-        if (!folder) return res.status(404).json({ success: false, error: 'Folder not found.' });
-        if (folder.ownerId !== userId) return res.status(403).json({ success: false, error: 'Not your folder.' });
+        if (!folder) {return res.status(404).json({ success: false, error: 'Folder not found.' });}
+        if (folder.ownerId !== userId) {return res.status(403).json({ success: false, error: 'Not your folder.' });}
 
         await prisma.serverFolder.delete({ where: { id: folderId } });
         res.json({ success: true });
@@ -119,16 +120,16 @@ const folderModule: Module = {
         const folderId = parseInt(String(req.params.id), 10);
         const { serverUUID } = req.body;
 
-        if (isNaN(folderId)) return res.status(400).json({ success: false, error: 'Invalid folder ID.' });
-        if (!serverUUID) return res.status(400).json({ success: false, error: 'serverUUID is required.' });
+        if (isNaN(folderId)) {return res.status(400).json({ success: false, error: 'Invalid folder ID.' });}
+        if (!serverUUID) {return res.status(400).json({ success: false, error: 'serverUUID is required.' });}
 
         const folder = await prisma.serverFolder.findUnique({ where: { id: folderId } });
-        if (!folder) return res.status(404).json({ success: false, error: 'Folder not found.' });
-        if (folder.ownerId !== userId) return res.status(403).json({ success: false, error: 'Not your folder.' });
+        if (!folder) {return res.status(404).json({ success: false, error: 'Folder not found.' });}
+        if (folder.ownerId !== userId) {return res.status(403).json({ success: false, error: 'Not your folder.' });}
 
         const server = await prisma.server.findUnique({ where: { UUID: serverUUID } });
-        if (!server) return res.status(404).json({ success: false, error: 'Server not found.' });
-        if (server.ownerId !== userId) return res.status(403).json({ success: false, error: 'Not your server.' });
+        if (!server) {return res.status(404).json({ success: false, error: 'Server not found.' });}
+        if (server.ownerId !== userId) {return res.status(403).json({ success: false, error: 'Not your server.' });}
 
         // Upsert: moves the server out of any previous folder into this one
         const member = await prisma.serverFolderMember.upsert({
@@ -150,8 +151,8 @@ const folderModule: Module = {
         const serverUUID = String(req.params.serverUUID);
 
         const server = await prisma.server.findUnique({ where: { UUID: serverUUID } });
-        if (!server) return res.status(404).json({ success: false, error: 'Server not found.' });
-        if (server.ownerId !== userId) return res.status(403).json({ success: false, error: 'Not your server.' });
+        if (!server) {return res.status(404).json({ success: false, error: 'Server not found.' });}
+        if (server.ownerId !== userId) {return res.status(403).json({ success: false, error: 'Not your server.' });}
 
         await prisma.serverFolderMember.deleteMany({ where: { serverUUID } });
         res.json({ success: true });

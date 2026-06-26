@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import logger from '../../services/logger';
@@ -15,16 +16,16 @@ import {
 function pickAvailablePorts(allocatedPorts: number[], usedPorts: number[], count: number): number[] {
   const picked: number[] = [];
   for (const port of allocatedPorts) {
-    if (!usedPorts.includes(port)) picked.push(port);
-    if (picked.length === count) return picked;
+    if (!usedPorts.includes(port)) {picked.push(port);}
+    if (picked.length === count) {return picked;}
   }
   return picked;
 }
 
 async function resolveUserServerLimit(userId: number, settings: { defaultServerLimit?: number | null } | null): Promise<number> {
   const user = await prisma.users.findUnique({ where: { id: userId } });
-  if (!user) return 0;
-  if (user.serverLimit !== null && user.serverLimit !== undefined) return user.serverLimit;
+  if (!user) {return 0;}
+  if (user.serverLimit !== null && user.serverLimit !== undefined) {return user.serverLimit;}
   return settings?.defaultServerLimit ?? 0;
 }
 
@@ -54,22 +55,22 @@ const userCreateServerModule: Module = {
       try {
         const userId = req.session?.user?.id;
         const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) return res.redirect('/login');
+        if (!user) {res.redirect('/login'); return;}
 
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
         if (!settings?.allowUserCreateServer) {
-          return res.redirect('/');
+          res.redirect('/'); return;
         }
 
         const serverLimit = await resolveUserServerLimit(userId!, settings);
         if (serverLimit === 0) {
-          return res.redirect('/');
+          res.redirect('/'); return;
         }
 
         const currentCount = await prisma.server.count({ where: { ownerId: userId } });
         if (currentCount >= serverLimit) {
-          return res.redirect('/?err=SERVER_LIMIT_REACHED');
+          res.redirect('/?err=SERVER_LIMIT_REACHED'); return;
         }
 
         const resourceLimits = await resolveUserResourceLimits(userId!, settings);
@@ -88,7 +89,7 @@ const userCreateServerModule: Module = {
         });
       } catch (error) {
         logger.error('Error loading user create server page:', error);
-        return res.redirect('/');
+        res.redirect('/'); return;
       }
     });
 
@@ -96,7 +97,7 @@ const userCreateServerModule: Module = {
       try {
         const userId = req.session?.user?.id;
         const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) return res.status(401).json({ error: 'Unauthorized' });
+        if (!user) {return res.status(401).json({ error: 'Unauthorized' });}
 
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
@@ -137,17 +138,17 @@ const userCreateServerModule: Module = {
         }
 
         const node = await prisma.node.findUnique({ where: { id: parseInt(nodeId) } });
-        if (!node) return res.status(400).json({ error: 'Node not found.' });
+        if (!node) {return res.status(400).json({ error: 'Node not found.' });}
 
         let allocatedPorts: number[] = [];
         try {
-          if (node.allocatedPorts) allocatedPorts = JSON.parse(node.allocatedPorts);
+          if (node.allocatedPorts) {allocatedPorts = JSON.parse(node.allocatedPorts);}
         } catch {
           return res.status(500).json({ error: 'Node port configuration is invalid.' });
         }
 
         const image = await prisma.images.findUnique({ where: { id: parseInt(imageId) } });
-        if (!image) return res.status(400).json({ error: 'Image not found.' });
+        if (!image) {return res.status(400).json({ error: 'Image not found.' });}
 
         const portRequirements = parseImagePortRequirements(image.portRequirements);
         const requiredPortCount = Math.max(1, portRequirements.length);
@@ -166,10 +167,10 @@ const userCreateServerModule: Module = {
         }
 
         const imageDocker = dockerImages.find((img) => Object.keys(img).includes(dockerImage));
-        if (!imageDocker) return res.status(400).json({ error: 'Docker image variant not found.' });
+        if (!imageDocker) {return res.status(400).json({ error: 'Docker image variant not found.' });}
 
         const startCommand = image.startup;
-        if (!startCommand) return res.status(500).json({ error: 'Image has no startup command.' });
+        if (!startCommand) {return res.status(500).json({ error: 'Image has no startup command.' });}
 
         let imageVariables: Record<string, unknown>[] = [];
         try {
@@ -217,19 +218,19 @@ const userCreateServerModule: Module = {
               continue;
             }
 
-            let serverEnv: Array<{ env: string; value: string | number }>;
+            let serverEnv: { env: string; value: string | number }[];
             try {
               const rawVars = JSON.parse(server.Variables);
               serverEnv = rawVars.map((v: Record<string, unknown>) => ({
                 env: String(v.env_variable ?? v.env ?? ''),
                 value: String(v.value ?? v.default_value ?? ''),
               }));
-              let serverPort = assignedPorts[0];
+              let serverPort = assignedPorts[0]!;
               try {
                 const parsedPorts = JSON.parse(server.Ports);
                 const primary = parsedPorts.find((p: { primary?: boolean; Port?: string }) => p.primary);
                 if (primary?.Port) {
-                  serverPort = parseInt(String(primary.Port).split(':')[0]);
+                  serverPort = parseInt(String(primary.Port).split(':')[0]!);
                 }
               } catch { /* keep fallback */ }
               serverEnv.push({ env: 'SERVER_PORT', value: serverPort });
@@ -321,7 +322,7 @@ const userCreateServerModule: Module = {
       try {
         const userId = req.session?.user?.id;
         const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user) return res.status(401).json({ error: 'Unauthorized' });
+        if (!user) {return res.status(401).json({ error: 'Unauthorized' });}
 
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         if (!settings?.allowUserDeleteServer) {
@@ -333,8 +334,8 @@ const userCreateServerModule: Module = {
           include: { node: true },
         });
 
-        if (!server) return res.status(404).json({ error: 'Server not found.' });
-        if (server.ownerId !== userId) return res.status(403).json({ error: 'This is not your server.' });
+        if (!server) {return res.status(404).json({ error: 'Server not found.' });}
+        if (server.ownerId !== userId) {return res.status(403).json({ error: 'This is not your server.' });}
 
         const force = req.query.force === 'true';
 

@@ -39,7 +39,7 @@ export async function daemonScheme(): Promise<'http' | 'https'> {
 // Use this where you cannot await (e.g. inside a sync HMAC interceptor).
 export function daemonSchemeSync(): 'http' | 'https' {
   if (Date.now() - schemeCachedAt > SCHEME_CACHE_TTL_MS) {
-    refreshSchemeCache(); // fire-and-forget
+    void refreshSchemeCache(); // fire-and-forget
   }
   return cachedScheme;
 }
@@ -63,14 +63,14 @@ function hmacSign(key: string, method: string, path: string, body: string, times
 }
 
 function extractKeyFromAuth(auth: { username?: string; password?: string } | undefined): string | null {
-  if (!auth) return null;
+  if (!auth) {return null;}
   return auth.password ?? null;
 }
 
 function serializeRequestBody(data: unknown): string {
-  if (data == null) return '';
-  if (typeof data === 'string') return data;
-  if (Buffer.isBuffer(data)) return '';
+  if (data === null) {return '';}
+  if (typeof data === 'string') {return data;}
+  if (Buffer.isBuffer(data)) {return '';}
 
   // Streams and socket-backed objects cannot be JSON-stringified safely.
   if (typeof data === 'object' && data !== null && 'pipe' in (data as Record<string, unknown>)) {
@@ -89,12 +89,12 @@ function serializeRequestBody(data: unknown): string {
 // X-Airlink-Timestamp and X-Airlink-Signature headers added.
 export function installDaemonRequestInterceptor(): void {
   axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-    if (!config.auth || config.auth.username !== 'Airlink') {
+    if (config.auth?.username !== 'Airlink') {
       return config;
     }
 
     const key = extractKeyFromAuth(config.auth);
-    if (!key) return config;
+    if (!key) {return config;}
 
     const method = (config.method || 'GET').toUpperCase();
 
@@ -103,7 +103,7 @@ export function installDaemonRequestInterceptor(): void {
       const parsed = new URL(config.url || '', 'http://localhost');
       urlPath = parsed.pathname;
     } catch {
-      urlPath = (config.url || '/').split('?')[0];
+      urlPath = (config.url || '/').split('?')[0]!;
     }
 
     const body = serializeRequestBody(config.data);

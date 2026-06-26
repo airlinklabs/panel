@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import logger from '../../services/logger';
@@ -22,23 +23,23 @@ const vtRateLimit = {
     const now = Math.floor(Date.now() / 1000);
     const minute = Math.floor(now / 60);
     if (minute !== this.minuteWindow) { this.minuteWindow = minute; this.minuteCount = 0; }
-    if (this.minuteCount >= 4) return false;
+    if (this.minuteCount >= 4) {return false;}
     this.minuteCount++;
     return true;
   },
   allowDaily(): boolean {
     const day = Math.floor(Date.now() / 86400000);
     if (day !== this.dayWindow) { this.dayWindow = day; this.dayCount = 0; }
-    if (this.dayCount >= 500) return false;
+    if (this.dayCount >= 500) {return false;}
     this.dayCount++;
     return true;
   },
 };
 
 function deriveSeverity(matchCount: number): string {
-  if (matchCount >= 10) return 'critical';
-  if (matchCount >= 3) return 'high';
-  if (matchCount >= 1) return 'medium';
+  if (matchCount >= 10) {return 'critical';}
+  if (matchCount >= 3) {return 'high';}
+  if (matchCount >= 1) {return 'medium';}
   return 'low';
 }
 
@@ -112,7 +113,7 @@ const radarModule: Module = {
       async (_req: Request, res: Response) => {
         try {
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-          res.json({ enabled: !!settings?.virusTotalApiKey });
+          res.json({ enabled: Boolean(settings?.virusTotalApiKey) });
         } catch {
           res.json({ enabled: false });
         }
@@ -255,7 +256,7 @@ const radarModule: Module = {
             const patternMap: Record<string, string> = {};
             for (const p of script.patterns) {
               const key = (p.description || '').toLowerCase();
-              if (p.severity) patternMap[key] = p.severity;
+              if (p.severity) {patternMap[key] = p.severity;}
             }
 
             scanData.results = scanData.results.map((result: { pattern?: { description?: string }; matches?: unknown[]; severity?: string }) => {
@@ -421,7 +422,7 @@ const radarModule: Module = {
             : 'https://www.virustotal.com/gui/home/upload';
 
           const analysisPayload = analysisData.data as Record<string, Record<string, unknown>> | undefined;
-          const attributes = analysisPayload?.attributes as Record<string, unknown> | undefined;
+          const attributes = analysisPayload?.attributes;
           const results = (attributes?.results ?? {}) as Record<string, { category?: string; result?: string }>;
           const stats = (attributes?.stats ?? {}) as Record<string, number>;
           const maliciousEngines = Object.entries(results)

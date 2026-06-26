@@ -26,7 +26,7 @@ export function loadEnv() {
 
     data.split('\n').forEach((line) => {
       const eqIndex = line.indexOf('=');
-      if (eqIndex === -1) return;
+      if (eqIndex === -1) {return;}
 
       const key = line.slice(0, eqIndex).trim();
       const value = line.slice(eqIndex + 1).trim().replace(/^["']|["']$/g, '');
@@ -42,6 +42,7 @@ export function loadEnv() {
   // Fail-fast: ensure required env vars are set
   for (const key of REQUIRED_ENV_VARS) {
     if (!process.env[key]) {
+      // eslint-disable-next-line no-console
       console.error(`[env] FATAL: required env var ${key} is not set. Add it to .env`);
       process.exit(1);
     }
@@ -52,7 +53,7 @@ export function loadEnv() {
     const exampleData = fs.readFileSync(EXAMPLE_ENV_PATH, 'utf8');
     for (const line of exampleData.split('\n')) {
       const eqIndex = line.indexOf('=');
-      if (eqIndex === -1) continue;
+      if (eqIndex === -1) {continue;}
       const key = line.slice(0, eqIndex).trim();
       if (key && !process.env[key]) {
         logger.warn(`[env] optional env var ${key} is not set (see example.env)`);

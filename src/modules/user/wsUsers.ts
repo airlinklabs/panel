@@ -1,11 +1,12 @@
-import { Router, Request } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
-import { WebSocket } from 'ws';
+import type { WebSocket } from 'ws';
 import logger from '../../services/logger';
 
-export const onlineUsers: Set<string> = new Set();
-export const userTimeouts: Map<string, NodeJS.Timeout> = new Map();
+export const onlineUsers = new Set<string>();
+export const userTimeouts = new Map<string, NodeJS.Timeout>();
 
 
 const wsUsersModule: Module = {
@@ -19,7 +20,7 @@ const wsUsersModule: Module = {
 
   router: (applyWs?: (router: Router) => void) => {
     const router = Router();
-    if (applyWs) applyWs(router);
+    if (applyWs) {applyWs(router);}
 
     router.ws('/online-check', async (ws: WebSocket, req: Request) => {
       const userId = req.session?.user?.id;
@@ -30,7 +31,7 @@ const wsUsersModule: Module = {
 
       try {
         const user = await prisma.users.findUnique({ where: { id: userId } });
-        if (!user || !user.username) {
+        if (!user?.username) {
           ws.close();
           return;
         }

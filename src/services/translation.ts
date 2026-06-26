@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
 import logger from './logger';
@@ -49,7 +49,7 @@ export function translationMiddleware(
   res: Response,
   next: () => void,
 ) {
-  req.lang = req.cookies?.lang || 'en';
+  req.lang = (req.cookies?.lang as string) || 'en';
   req.translations = loadTranslations(req.lang);
   next();
 }

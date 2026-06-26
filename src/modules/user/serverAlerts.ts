@@ -1,7 +1,7 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
 import { isAuthenticatedForServer } from '../../middleware/serverAuth';
 import logger from '../../services/logger';
 import { createNotification } from '../../services/notifications';
@@ -29,7 +29,7 @@ export async function checkServerAlerts(
 
     for (const alert of alerts) {
       const currentValue = stats[alert.type as AlertType];
-      if (currentValue === undefined) continue;
+      if (currentValue === undefined) {continue;}
 
       if (currentValue > alert.threshold && !alert.triggered) {
         await prisma.serverAlert.update({
@@ -87,7 +87,7 @@ const serverAlertsModule: Module = {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             errorMessage.message = 'User not found.';
-            return res.render('user/account', { errorMessage, user, req });
+            res.render('user/account', { errorMessage, user, req }); return;
           }
 
           const server = await prisma.server.findUnique({
@@ -97,13 +97,13 @@ const serverAlertsModule: Module = {
 
           if (!server) {
             errorMessage.message = 'Server not found.';
-            return res.render('user/server/alerts', {
+            res.render('user/server/alerts', {
               errorMessage,
               user,
               server: null,
               alerts: [],
               req,
-            });
+            }); return;
           }
 
           const alerts = await prisma.serverAlert.findMany({
@@ -168,7 +168,7 @@ const serverAlertsModule: Module = {
 
           const alert = await prisma.serverAlert.create({
             data: {
-              userId,
+              userId: userId!,
               serverId,
               type,
               threshold: thresholdNum,

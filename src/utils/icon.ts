@@ -57,6 +57,7 @@ export function icon(name: string, opts: IconOptions = {}): string {
   const iconData = lucideIcons[key] as IconNode[] | undefined;
 
   if (!iconData || !Array.isArray(iconData)) {
+    // eslint-disable-next-line no-console
     console.warn(`[icon] Unknown icon: "${name}" (looked up as "${key}")`);
     return `<span aria-hidden="true" class="inline-block" style="width:${opts.size ?? 16}px;height:${opts.size ?? 16}px;"></span>`;
   }
@@ -78,10 +79,10 @@ export function icon(name: string, opts: IconOptions = {}): string {
     'aria-hidden':      'true',
   };
 
-  if (opts.class)  svgAttrs['class'] = opts.class;
-  if (opts.style)  svgAttrs['style'] = opts.style;
+  if (opts.class)  {svgAttrs.class = opts.class;}
+  if (opts.style)  {svgAttrs.style = opts.style;}
   if (opts.label) {
-    svgAttrs['role']       = 'img';
+    svgAttrs.role       = 'img';
     svgAttrs['aria-label'] = opts.label;
     delete svgAttrs['aria-hidden'];
   }

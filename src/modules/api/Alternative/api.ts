@@ -1,5 +1,6 @@
-import { Router, Request, Response, NextFunction } from 'express';
-import { Module } from '../../../core/moduleInit';
+import type { Request, Response, NextFunction } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../../core/moduleInit';
 import prisma from '../../../db';
 import logger from '../../../services/logger';
 import axios from 'axios';
@@ -33,15 +34,15 @@ const coreModule: Module = {
     async function validator(req: Request, res: Response, next: NextFunction) {
       await loadApiKeys();
 
-      const authHeader = req.headers['authorization'];
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      const authHeader = req.headers.authorization;
+      if (!authHeader?.startsWith('Bearer ')) {
         res.status(401).json({
           error: 'Unauthorized: Missing or malformed Authorization header',
         });
         return;
       }
 
-      const apiKey = authHeader.split(' ')[1];
+      const apiKey = authHeader.split(' ')[1] as string;
 
       if (validKeys.includes(apiKey)) {
         next();
@@ -86,7 +87,7 @@ const coreModule: Module = {
                 root_admin: user.isAdmin,
               },
               relationships: {
-                servers: [],
+                servers: [] as Array<{ object: string; attributes: { id: number; name: string; node: unknown } }>,
               },
             };
 
@@ -244,7 +245,7 @@ const coreModule: Module = {
       validator,
       async (req: Request, res: Response) => {
         try {
-          let { username, email, first_name, last_name, password } = req.body;
+          const { username, email, first_name, last_name, password } = req.body;
 
           if (!username || !email || !first_name || !last_name || !password) {
             res.status(400).json({ error: 'Missing required fields' });
@@ -257,7 +258,7 @@ const coreModule: Module = {
 
           if (!isFirstUser) {
             const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-            if (!settings || !settings.allowRegistration) {
+            if (!settings?.allowRegistration) {
               res.status(403).json({ error: 'Registration is disabled' });
               return;
             }
@@ -272,13 +273,13 @@ const coreModule: Module = {
             return;
           }
 
-          password = await bcrypt.hash(password, 10);
+          const hashedPassword = await bcrypt.hash(password, 10);
 
           const newUser = await prisma.users.create({
             data: {
               username,
               email,
-              password,
+              password: hashedPassword,
             },
           });
 
@@ -320,11 +321,11 @@ const coreModule: Module = {
 
           const updatedData: Record<string, string | number | boolean> = {};
 
-          if (username) updatedData.username = username;
-          if (email) updatedData.email = email;
-          if (first_name) updatedData.first_name = first_name;
-          if (last_name) updatedData.last_name = last_name;
-          if (password) updatedData.password = await bcrypt.hash(password, 10);
+          if (username) {updatedData.username = username;}
+          if (email) {updatedData.email = email;}
+          if (first_name) {updatedData.first_name = first_name;}
+          if (last_name) {updatedData.last_name = last_name;}
+          if (password) {updatedData.password = await bcrypt.hash(password, 10);}
 
           const updatedUser = await prisma.users.update({
             where: { id: userId },
@@ -472,7 +473,7 @@ const coreModule: Module = {
         const dockerImage = req.body.docker_image;
 
         const servers = await prisma.server.findMany({
-          where: { nodeId: nodeId },
+          where: { nodeId },
         });
 
         const allPossiblePorts = Array.from(
@@ -481,7 +482,7 @@ const coreModule: Module = {
         );
         const usedPorts = servers.flatMap((server) =>
           JSON.parse(server.Ports).map((portInfo: { Port: string }) =>
-            parseInt(portInfo.Port.split(':')[0]),
+            parseInt(portInfo.Port.split(':')[0]!),
           ),
         );
 
@@ -536,7 +537,7 @@ const coreModule: Module = {
 
           const imagesDocker = JSON.parse(dockerImages);
 
-          type ImageDocker = { [key: string]: string };
+          type ImageDocker = Record<string, string>;
 
           const imageDocker: ImageDocker | undefined = imagesDocker.find(
             (image: ImageDocker) => Object.values(image).includes(dockerImage),
@@ -570,7 +571,7 @@ const coreModule: Module = {
               name,
               description,
               ownerId: userId,
-              nodeId: nodeId,
+              nodeId,
               imageId: parseInt(imageId),
               Ports: Port || '[{"Port": "25565:25565", "primary": true}]',
               Memory: parseInt(Memory) || 4,
@@ -583,7 +584,7 @@ const coreModule: Module = {
           });
 
           queueer.addTask(async () => {
-            const servers = await prisma.server.findMany({
+            const queuedServers = await prisma.server.findMany({
               where: {
                 Queued: true,
               },
@@ -593,10 +594,10 @@ const coreModule: Module = {
               },
             });
 
-            for (const server of servers) {
-              if (!server.Variables) {
+            for (const queuedServer of queuedServers) {
+              if (!queuedServer.Variables) {
                 await prisma.server.update({
-                  where: { id: server.id },
+                  where: { id: queuedServer.id },
                   data: { Queued: false },
                 });
                 continue;
@@ -604,14 +605,14 @@ const coreModule: Module = {
 
               let ServerEnv;
               try {
-                ServerEnv = JSON.parse(server.Variables);
+                ServerEnv = JSON.parse(queuedServer.Variables);
               } catch (error) {
                 logger.error(
-                  `Error parsing Variables for server ID ${server.id}:`,
+                  `Error parsing Variables for server ID ${queuedServer.id}:`,
                   error,
                 );
                 await prisma.server.update({
-                  where: { id: server.id },
+                  where: { id: queuedServer.id },
                   data: { Queued: false },
                 });
                 continue;
@@ -619,10 +620,10 @@ const coreModule: Module = {
 
               if (!Array.isArray(ServerEnv)) {
                 logger.error(
-                  `ServerEnv is not an array for server ID ${server.id}. Skipping...`,
+                  `ServerEnv is not an array for server ID ${queuedServer.id}. Skipping...`,
                 );
                 await prisma.server.update({
-                  where: { id: server.id },
+                  where: { id: queuedServer.id },
                   data: { Queued: false },
                 });
                 continue;
@@ -639,25 +640,25 @@ const coreModule: Module = {
                 {},
               );
 
-              if (server.image?.scripts) {
+              if (queuedServer.image?.scripts) {
                 let scripts;
                 try {
-                  scripts = JSON.parse(server.image.scripts);
+                  scripts = JSON.parse(queuedServer.image.scripts);
                 } catch (error) {
                   logger.error(
-                    `Error parsing scripts for server ID ${server.id}:`,
+                    `Error parsing scripts for server ID ${queuedServer.id}:`,
                     error,
                   );
                   await prisma.server.update({
-                    where: { id: server.id },
+                    where: { id: queuedServer.id },
                     data: { Queued: false },
                   });
                   continue;
                 }
 
                 const requestBody = {
-                  id: server.UUID,
-                  env: env,
+                  id: queuedServer.UUID,
+                  env,
                   scripts: scripts.install.map(
                     (script: { url: string; fileName: string }) => ({
                       url: script.url,
@@ -668,12 +669,12 @@ const coreModule: Module = {
 
                 try {
                   await axios.post(
-                    `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/install`,
+                    `${daemonSchemeSync()}://${queuedServer.node.address}:${queuedServer.node.port}/container/install`,
                     requestBody,
                     {
                       auth: {
                         username: 'Airlink',
-                        password: server.node.key,
+                        password: queuedServer.node.key,
                       },
                       headers: {
                         'Content-Type': 'application/json',
@@ -682,18 +683,18 @@ const coreModule: Module = {
                   );
 
                   await prisma.server.update({
-                    where: { id: server.id },
+                    where: { id: queuedServer.id },
                     data: { Queued: false },
                   });
                 } catch (error) {
                   logger.error(
-                    `Error sending install request for server ID ${server.id}:`,
+                    `Error sending install request for server ID ${queuedServer.id}:`,
                     error,
                   );
                 }
               } else {
                 logger.warn(
-                  `No scripts found for server ID ${server.id}. Skipping...`,
+                  `No scripts found for server ID ${queuedServer.id}. Skipping...`,
                 );
               }
             }

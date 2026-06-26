@@ -160,17 +160,17 @@ export function getManifestIdentifier(manifest: AddonManifestV2, fallbackSlug: s
 }
 
 export function isVersionInRange(version: string, range: string): boolean {
-  if (!range || range === '*') return true;
+  if (!range || range === '*') {return true;}
 
   const cleanVersion = version.replace(/^[^\d]*/, '');
   const parts = cleanVersion.split('.').map(Number);
   const rangeParts = range.split('.').map(p => {
     const clean = p.replace(/^[^\d]*/, '');
-    return clean === '' ? null : Number(clean);
+    return clean === '' ? 0 : Number(clean);
   });
 
-  while (parts.length < 3) parts.push(0);
-  while (rangeParts.length < 3) rangeParts.push(null);
+  while (parts.length < 3) {parts.push(0);}
+  while (rangeParts.length < 3) {rangeParts.push(0);}
 
   if (range.startsWith('>=')) {
     return compareVersions(parts, rangeParts.slice(1)) >= 0;
@@ -189,7 +189,7 @@ export function isVersionInRange(version: string, range: string): boolean {
   }
   if (range.includes(' - ')) {
     const [min, max] = range.split(' - ');
-    return compareVersions(parts, parseVersion(min)) >= 0 && compareVersions(parts, parseVersion(max)) <= 0;
+    return compareVersions(parts, parseVersion(min!)) >= 0 && compareVersions(parts, parseVersion(max!)) <= 0;
   }
   if (range.includes('||')) {
     return range.split('||').some(r => isVersionInRange(version, r.trim()));
@@ -201,7 +201,7 @@ export function isVersionInRange(version: string, range: string): boolean {
 function parseVersion(v: string): number[] {
   const clean = v.replace(/^[^\d]*/, '');
   const parts = clean.split('.').map(Number);
-  while (parts.length < 3) parts.push(0);
+  while (parts.length < 3) {parts.push(0);}
   return parts;
 }
 
@@ -209,8 +209,8 @@ function compareVersions(a: number[], b: number[]): number {
   for (let i = 0; i < 3; i++) {
     const av = a[i] ?? 0;
     const bv = b[i] ?? 0;
-    if (av > bv) return 1;
-    if (av < bv) return -1;
+    if (av > bv) {return 1;}
+    if (av < bv) {return -1;}
   }
   return 0;
 }

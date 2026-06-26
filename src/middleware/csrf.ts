@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { doubleCsrf } from 'csrf-csrf';
 import crypto from 'crypto';
 import logger from '../services/logger';
@@ -6,7 +6,7 @@ import logger from '../services/logger';
 function ensureCsrfSessionId(req: Request): string {
   const session = req.session as { csrfSessionId?: string } | undefined;
 
-  if (!session) return '';
+  if (!session) {return '';}
 
   if (!session.csrfSessionId) {
     session.csrfSessionId = crypto.randomBytes(16).toString('hex');
@@ -20,7 +20,7 @@ const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
   // If somehow missing at runtime, fail hard rather than using an insecure default.
   getSecret: () => {
     const secret = process.env.SESSION_SECRET;
-    if (!secret) throw new Error('SESSION_SECRET is required but not set');
+    if (!secret) {throw new Error('SESSION_SECRET is required but not set');}
     return secret;
   },
   getSessionIdentifier: (req: Request) => ensureCsrfSessionId(req),
@@ -36,7 +36,7 @@ const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
   size: 32,
   getCsrfTokenFromRequest: (req: Request) =>
     (req.headers['csrf-token'] as string) ||
-    (req.headers['x-csrf-token'] as string) ||
+    (req.headers['x-csrf-token']!) ||
     ((req.body as Record<string, unknown>)?._csrf as string),
 });
 
@@ -45,7 +45,7 @@ export const csrfProtection = doubleCsrfProtection;
 export const handleCsrfError = (err: unknown, req: Request, res: Response, next: NextFunction) => {
   const csrfError = err as { code?: string };
   if (csrfError.code !== 'EBADCSRFTOKEN') {
-    return next(err);
+    next(err); return;
   }
   logger.warn(`CSRF attack detected: IP=${req.ip}, Path=${req.path}, Method=${req.method}`);
   if (req.xhr || req.headers.accept?.includes('application/json')) {

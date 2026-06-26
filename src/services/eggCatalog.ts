@@ -35,7 +35,7 @@ const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 
 // -- GitHub API helpers --------------------------------------------------------
 
-async function fetchGitHubTree(owner: string, repo: string, branch = 'master'): Promise<Array<{ path: string; type: string }>> {
+async function fetchGitHubTree(owner: string, repo: string, branch = 'master'): Promise<{ path: string; type: string }[]> {
   try {
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
     const res = await fetch(apiUrl, {
@@ -45,7 +45,7 @@ async function fetchGitHubTree(owner: string, repo: string, branch = 'master'): 
       logger.warn(`Catalog: GitHub API returned ${res.status} for ${owner}/${repo}`);
       return [];
     }
-    const data = await res.json() as { tree?: Array<{ path: string; type: string }> };
+    const data = await res.json() as { tree?: { path: string; type: string }[] };
     return data.tree || [];
   } catch (err) {
     logger.warn(`Catalog: failed to fetch tree from ${owner}/${repo}: ${err}`);
@@ -70,7 +70,7 @@ function categorizeEntry(filePath: string): { category: string; group: string; s
 async function fetchRaw(url: string): Promise<string | null> {
   try {
     const res = await fetch(url, { headers: { 'User-Agent': 'Airlink-Panel' } });
-    if (!res.ok) return null;
+    if (!res.ok) {return null;}
     return await res.text();
   } catch { return null; }
 }
@@ -78,7 +78,7 @@ async function fetchRaw(url: string): Promise<string | null> {
 async function fetchJson(url: string): Promise<Record<string, unknown> | null> {
   try {
     const res = await fetch(url, { headers: { 'User-Agent': 'Airlink-Panel' } });
-    if (!res.ok) return null;
+    if (!res.ok) {return null;}
     return await res.json() as Record<string, unknown>;
   } catch { return null; }
 }
@@ -98,9 +98,9 @@ function mdToHtml(md: string): string {
     .replace(/^[*-] (.+)$/gm, '<li>$1</li>');
   h = h.replace(/(<li>.*?<\/li>(\n|$))+/g, m => '<ul>' + m + '</ul>');
   h = h.split('\n\n').map(b => {
-    b = b.trim(); if (!b) return '';
-    if (/^<(h[1-6]|ul|ol|pre|hr)/.test(b)) return b;
-    return '<p>' + b.replace(/\n/g, ' ') + '</p>';
+    const trimmed = b.trim(); if (!trimmed) {return '';}
+    if (/^<(h[1-6]|ul|ol|pre|hr)/.test(trimmed)) {return trimmed;}
+    return '<p>' + trimmed.replace(/\n/g, ' ') + '</p>';
   }).join('');
   return h;
 }
@@ -110,7 +110,7 @@ function mdToHtml(md: string): string {
 async function syncCatalogueToDb(images: StoreImage[]): Promise<void> {
   // Upsert each egg
   for (const img of images) {
-    if (!img.filePath) continue;
+    if (!img.filePath) {continue;}
     try {
       await prisma.eggCatalog.upsert({
         where: { filePath: img.filePath },
@@ -150,7 +150,7 @@ async function syncCatalogueToDb(images: StoreImage[]): Promise<void> {
     const mdUrl = `https://raw.githubusercontent.com/${source.owner}/${source.repo}/master/${source.path}/README.md`;
     try {
       const md = await fetchRaw(mdUrl);
-      if (!md) continue;
+      if (!md) {continue;}
       const html = mdToHtml(md);
       await prisma.categoryMD.upsert({
         where: { category: source.id },
@@ -166,8 +166,9 @@ async function syncCatalogueToDb(images: StoreImage[]): Promise<void> {
 // -- Catalogue builder ---------------------------------------------------------
 
 async function buildCatalogue(): Promise<StoreImage[]> {
-  const tree = await fetchGitHubTree(EGG_SOURCES[0].owner, EGG_SOURCES[0].repo);
-  if (tree.length === 0) return [];
+  const firstSource = EGG_SOURCES[0]!;
+  const tree = await fetchGitHubTree(firstSource.owner, firstSource.repo);
+  if (tree.length === 0) {return [];}
 
   const eggFiles = tree.filter(item =>
     item.type === 'blob' && item.path.endsWith('.json') && item.path.includes('egg-')
@@ -175,7 +176,7 @@ async function buildCatalogue(): Promise<StoreImage[]> {
 
   const seen = new Set<string>();
   const unique = eggFiles.filter(item => {
-    if (seen.has(item.path)) return false;
+    if (seen.has(item.path)) {return false;}
     seen.add(item.path);
     return true;
   });
@@ -190,13 +191,14 @@ async function buildCatalogue(): Promise<StoreImage[]> {
     const results = await Promise.allSettled(
       batch.map(item => {
         const { category, group, subGroup } = categorizeEntry(item.path);
-        const url = `https://raw.githubusercontent.com/${EGG_SOURCES[0].owner}/${EGG_SOURCES[0].repo}/master/${item.path}`;
+        const firstSrc = EGG_SOURCES[0]!;
+        const url = `https://raw.githubusercontent.com/${firstSrc.owner}/${firstSrc.repo}/master/${item.path}`;
         return fetchJson(url).then(raw => ({ raw, category, group, subGroup, url, path: item.path }));
       })
     );
 
     for (const r of results) {
-      if (r.status !== 'fulfilled' || !r.value?.raw?.name) continue;
+      if (r.status !== 'fulfilled' || !r.value?.raw?.name) {continue;}
       const { raw, category, group, subGroup, url, path: filePath } = r.value;
       images.push({
         name: String(raw.name),
@@ -228,7 +230,7 @@ export async function initEggCatalogue(): Promise<void> {
       lastBuilt = Date.now();
       logger.info(`Catalog: ${count} eggs loaded from SQLite`);
       // Refresh in background
-      refreshCatalogue();
+      void refreshCatalogue();
       return;
     }
   } catch (err) {
@@ -251,13 +253,13 @@ async function refreshCatalogue(): Promise<void> {
   }
 
   // Auto-update every 2 hours
-  if (updateTimer) clearInterval(updateTimer);
+  if (updateTimer) {clearInterval(updateTimer);}
   updateTimer = setInterval(() => refreshCatalogue(), TWO_HOURS_MS);
-  if (updateTimer.unref) updateTimer.unref();
+  if (updateTimer.unref) {updateTimer.unref();}
 }
 
 export function getCatalogue(): { images: StoreImage[]; builtAt: number } {
-  if (lastBuilt === 0) return { images: [], builtAt: 0 };
+  if (lastBuilt === 0) {return { images: [], builtAt: 0 };}
   // Will be served from SQLite in the route handler
   return { images: [], builtAt: lastBuilt };
 }
@@ -288,7 +290,7 @@ export async function getCatalogueFromDb(): Promise<StoreImage[]> {
 export async function getCategoryMd(category: string): Promise<{ markdown: string; html: string } | null> {
   try {
     const row = await prisma.categoryMD.findUnique({ where: { category } });
-    if (!row) return null;
+    if (!row) {return null;}
     return { markdown: row.markdown, html: row.html };
   } catch { return null; }
 }

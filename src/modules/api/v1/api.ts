@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../../core/moduleInit';
 import prisma from '../../../db';
 import logger from '../../../services/logger';
 import { apiValidator } from '../../../utils/api/validator';
@@ -265,11 +266,11 @@ const coreModule: Module = {
           }
 
           const data: Record<string, unknown> = {};
-          if (email !== undefined) data.email = email;
-          if (username !== undefined) data.username = username;
-          if (isAdmin !== undefined) data.isAdmin = isAdmin;
-          if (description !== undefined) data.description = description;
-          if (password !== undefined) data.password = await bcrypt.hash(password, 10);
+          if (email !== undefined) {data.email = email;}
+          if (username !== undefined) {data.username = username;}
+          if (isAdmin !== undefined) {data.isAdmin = isAdmin;}
+          if (description !== undefined) {data.description = description;}
+          if (password !== undefined) {data.password = await bcrypt.hash(password, 10);}
 
           const user = await prisma.users.update({
             where: { id: userId },
@@ -476,15 +477,15 @@ const coreModule: Module = {
           }
 
           const data: Record<string, unknown> = {};
-          if (name !== undefined) data.name = name;
-          if (description !== undefined) data.description = description;
-          if (Ports !== undefined) data.Ports = Ports;
-          if (Memory !== undefined) data.Memory = Memory;
-          if (Cpu !== undefined) data.Cpu = Cpu;
-          if (Storage !== undefined) data.Storage = Storage;
-          if (Variables !== undefined) data.Variables = Variables;
-          if (StartCommand !== undefined) data.StartCommand = StartCommand;
-          if (dockerImage !== undefined) data.dockerImage = dockerImage;
+          if (name !== undefined) {data.name = name;}
+          if (description !== undefined) {data.description = description;}
+          if (Ports !== undefined) {data.Ports = Ports;}
+          if (Memory !== undefined) {data.Memory = Memory;}
+          if (Cpu !== undefined) {data.Cpu = Cpu;}
+          if (Storage !== undefined) {data.Storage = Storage;}
+          if (Variables !== undefined) {data.Variables = Variables;}
+          if (StartCommand !== undefined) {data.StartCommand = StartCommand;}
+          if (dockerImage !== undefined) {data.dockerImage = dockerImage;}
 
           const server = await prisma.server.update({
             where: { UUID: serverId },
@@ -736,14 +737,14 @@ const coreModule: Module = {
           }
 
           const data: Record<string, unknown> = {};
-          if (name !== undefined) data.name = name;
-          if (address !== undefined) data.address = address;
-          if (port !== undefined) data.port = port;
-          if (ram !== undefined) data.ram = ram;
-          if (cpu !== undefined) data.cpu = cpu;
-          if (disk !== undefined) data.disk = disk;
-          if (key !== undefined) data.key = key;
-          if (sftpPort !== undefined) data.sftpPort = sftpPort;
+          if (name !== undefined) {data.name = name;}
+          if (address !== undefined) {data.address = address;}
+          if (port !== undefined) {data.port = port;}
+          if (ram !== undefined) {data.ram = ram;}
+          if (cpu !== undefined) {data.cpu = cpu;}
+          if (disk !== undefined) {data.disk = disk;}
+          if (key !== undefined) {data.key = key;}
+          if (sftpPort !== undefined) {data.sftpPort = sftpPort;}
 
           const node = await prisma.node.update({
             where: { id: nodeId },

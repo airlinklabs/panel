@@ -1,16 +1,18 @@
-import { Router, Request, Response } from 'express';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { Module } from '../../core/moduleInit';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import logger from '../../services/logger';
 import { getAllAddons, toggleAddonStatus, reloadAddons, loadAddons, uninstallAddon } from '../../addons/handler';
 import { commandRegistry } from '../../addons/commands';
-import { registerPermission, Permission } from '../../core/permissions';
+import type { Permission } from '../../core/permissions';
+import { registerPermission } from '../../core/permissions';
 import { parseAddonManifest } from '../../addons/manifest';
 import { getParamAsString } from '../../utils/typeHelpers';
 
@@ -45,14 +47,14 @@ function isSafeCommand(cmd: string): boolean {
 
 function parseCommand(cmd: string): { bin: string; args: string[] } {
   const parts = cmd.trim().split(/\s+/);
-  return { bin: parts[0], args: parts.slice(1) };
+  return { bin: parts[0]!, args: parts.slice(1) };
 }
 
 function validateCommandArgs(bin: string, args: string[], workDir: string): { safe: boolean; error?: string } {
-  if (!PATH_LIKE_BINS.has(bin)) return { safe: true };
+  if (!PATH_LIKE_BINS.has(bin)) {return { safe: true };}
 
   for (const arg of args) {
-    if (arg.startsWith('-')) continue;
+    if (arg.startsWith('-')) {continue;}
     const resolved = path.resolve(workDir, arg);
     if (!resolved.startsWith(workDir + path.sep) && resolved !== workDir) {
       return {
@@ -86,7 +88,7 @@ async function* runInstall(
   }
 
   for (const key of keys) {
-    const cmd = commands[key].trim();
+    const cmd = commands[key]!.trim();
 
     if (!isSafeCommand(cmd)) {
       yield { type: 'error', message: `Command not permitted: "${cmd}"` };
@@ -105,7 +107,7 @@ async function* runInstall(
     try {
       const { stdout, stderr } = await execFileAsync(bin, args, { cwd: workDir });
       const output = (stdout + stderr).trim();
-      if (output) yield { type: 'output', step: `Step ${key}`, cmd, output };
+      if (output) {yield { type: 'output', step: `Step ${key}`, cmd, output };}
     } catch (err: unknown) {
       const e = err instanceof Error ? err : new Error('Unknown error');
       const execErr = err as { stdout?: string; stderr?: string };
@@ -138,7 +140,7 @@ const addonsModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.redirect('/login');
+          if (!user) {res.redirect('/login'); return;}
 
           const addons = await getAllAddons();
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
@@ -156,14 +158,14 @@ const addonsModule: Module = {
             const packageJsonPath = path.join(addonDir, 'package.json');
             const result = parseAddonManifest(packageJsonPath, addon.slug);
             const hasDisabledPh = fs.existsSync(path.join(addonDir, 'disabled.ph'));
-            if (!result.success) return { ...addon, manifest: null, hasDisabledPh };
+            if (!result.success) {return { ...addon, manifest: null, hasDisabledPh };}
             return { ...addon, manifest: result.manifest, hasDisabledPh };
           });
 
           res.render('admin/addons/addons', { user, req, settings, addons: addonsWithMeta, addonTableExists, errorMessage: {} });
         } catch (error) {
           logger.error('Error fetching addons:', error);
-          return res.redirect('/admin/overview');
+          res.redirect('/admin/overview'); return;
         }
       }
     );
@@ -189,7 +191,7 @@ const addonsModule: Module = {
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          if (!user) return res.redirect('/login');
+          if (!user) {res.redirect('/login'); return;}
 
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
           const addons = await getAllAddons();
@@ -197,7 +199,7 @@ const addonsModule: Module = {
           res.render('admin/addons/store', { user, req, settings, addons, errorMessage: {} });
         } catch (error) {
           logger.error('Error rendering addon store:', error);
-          return res.redirect('/admin/addons');
+          res.redirect('/admin/addons'); return;
         }
       }
     );
@@ -225,7 +227,7 @@ const addonsModule: Module = {
             const infoRes = await fetch(`${ADDONS_RAW_BASE}/${folder.name}/info.json`, {
               headers: { 'User-Agent': 'airlink-panel' },
             });
-            if (!infoRes.ok) return null;
+            if (!infoRes.ok) {return null;}
             const info = await infoRes.json() as Record<string, unknown>;
 
             let installManifest: InstallManifest = {};
@@ -233,7 +235,7 @@ const addonsModule: Module = {
               const instRes = await fetch(`${ADDONS_RAW_BASE}/${folder.name}/install.json`, {
                 headers: { 'User-Agent': 'airlink-panel' },
               });
-              if (instRes.ok) installManifest = await instRes.json() as InstallManifest;
+              if (instRes.ok) {installManifest = await instRes.json() as InstallManifest;}
             } catch { /* best-effort */ }
 
             return {
@@ -275,7 +277,7 @@ const addonsModule: Module = {
       async (_req: Request, res: Response) => {
         try {
           const token = process.env.GITHUB_TOKEN;
-          if (!token) return res.json({ success: true, counts: {} });
+          if (!token) {return res.json({ success: true, counts: {} });}
 
           const query = `{
             repository(owner: "${ADDONS_REPO_OWNER}", name: "${ADDONS_REPO_NAME}") {
@@ -295,16 +297,16 @@ const addonsModule: Module = {
             body: JSON.stringify({ query }),
           });
 
-          if (!ghRes.ok) return res.json({ success: true, counts: {} });
+          if (!ghRes.ok) {return res.json({ success: true, counts: {} });}
 
           const data = await ghRes.json() as Record<string, unknown>;
           const graphData = (data as Record<string, Record<string, unknown>>).data;
           const repository = graphData?.repository as Record<string, unknown> | undefined;
           const discussions = repository?.discussions as Record<string, unknown> | undefined;
-          const nodes = (discussions?.nodes ?? []) as Array<{ title: string; comments: { totalCount: number } }>;
+          const nodes = (discussions?.nodes ?? []) as { title: string; comments: { totalCount: number } }[];
           const counts: Record<string, number> = {};
           for (const d of nodes) {
-            if (d.title) counts[d.title.toLowerCase()] = d.comments.totalCount;
+            if (d.title) {counts[d.title.toLowerCase()] = d.comments.totalCount;}
           }
 
           res.json({ success: true, counts });
@@ -386,13 +388,13 @@ const addonsModule: Module = {
             } else {
               send({ type: 'error', message: `Clone failed: ${cloneMsg}` });
             }
-            if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
+            if (fs.existsSync(tempDir)) {fs.rmSync(tempDir, { recursive: true, force: true });}
             res.end();
             return;
           }
 
           const gitDir = path.join(tempDir, '.git');
-          if (fs.existsSync(gitDir)) fs.rmSync(gitDir, { recursive: true, force: true });
+          if (fs.existsSync(gitDir)) {fs.rmSync(gitDir, { recursive: true, force: true });}
 
           send({ type: 'step', step: 'Setup', cmd: `cd ${slug}-${tempId}` });
 
@@ -403,7 +405,7 @@ const addonsModule: Module = {
               res.end();
               return;
             }
-            if (event.type === 'done') break;
+            if (event.type === 'done') {break;}
           }
 
           fs.renameSync(tempDir, finalDir);
@@ -415,7 +417,7 @@ const addonsModule: Module = {
         } catch (error: unknown) {
           const msg = error instanceof Error ? error.message : 'Unknown error';
           logger.error('Error installing addon:', error);
-          if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
+          if (fs.existsSync(tempDir)) {fs.rmSync(tempDir, { recursive: true, force: true });}
           send({ type: 'error', message: msg });
         }
 
@@ -430,7 +432,7 @@ const addonsModule: Module = {
         try {
           const slug = getParamAsString(req.params.slug);
           const addon = await prisma.addon.findUnique({ where: { slug } });
-          if (!addon) return res.status(404).json({ success: false, message: 'Addon not found' });
+          if (!addon) {return res.status(404).json({ success: false, message: 'Addon not found' });}
 
           const addonsDir = path.join(__dirname, '../../../storage/addons');
           const packageJsonPath = path.join(addonsDir, slug, 'package.json');
@@ -440,7 +442,7 @@ const addonsModule: Module = {
 
           const allSettings = await prisma.addonSetting.findMany({ where: { addonSlug: slug } });
           const settingsMap: Record<string, string> = {};
-          for (const s of allSettings) settingsMap[s.key] = s.value;
+          for (const s of allSettings) {settingsMap[s.key] = s.value;}
 
           res.json({
             success: true,
@@ -501,7 +503,7 @@ const addonsModule: Module = {
         try {
           const slug = getParamAsString(req.params.slug);
           const addon = await prisma.addon.findUnique({ where: { slug } });
-          if (!addon) return res.status(404).json({ success: false, message: 'Addon not found' });
+          if (!addon) {return res.status(404).json({ success: false, message: 'Addon not found' });}
 
           const addonsDir = path.join(__dirname, '../../../storage/addons');
           const packageJsonPath = path.join(addonsDir, slug, 'package.json');
@@ -520,7 +522,7 @@ const addonsModule: Module = {
                 value = value === 'true' || value === true ? 'true' : 'false';
               } else if (field.type === 'number') {
                 const num = Number(value);
-                if (isNaN(num)) continue;
+                if (isNaN(num)) {continue;}
                 value = String(num);
               } else {
                 value = String(value);

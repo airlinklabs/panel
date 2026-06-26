@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticatedForServer } from '../../middleware/serverAuth';
 import logger from '../../services/logger';
@@ -17,8 +18,8 @@ interface ErrorMessage {
 function pickAvailablePorts(allocatedPorts: number[], usedPorts: number[], count: number): number[] {
   const picked: number[] = [];
   for (const port of allocatedPorts) {
-    if (!usedPorts.includes(port)) picked.push(port);
-    if (picked.length === count) return picked;
+    if (!usedPorts.includes(port)) {picked.push(port);}
+    if (picked.length === count) {return picked;}
   }
   return picked;
 }
@@ -47,7 +48,7 @@ const serverCloneModule: Module = {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             errorMessage.message = 'User not found.';
-            return res.render('user/account', { errorMessage, user, req });
+            res.render('user/account', { errorMessage, user, req }); return;
           }
 
           const server = await prisma.server.findUnique({
@@ -57,12 +58,12 @@ const serverCloneModule: Module = {
 
           if (!server) {
             errorMessage.message = 'Server not found.';
-            return res.render('user/server/clone', {
+            res.render('user/server/clone', {
               errorMessage,
               user,
               server: null,
               req,
-            });
+            }); return;
           }
 
           const settings = await prisma.settings.findUnique({ where: { id: 1 } });
@@ -124,7 +125,7 @@ const serverCloneModule: Module = {
 
           let allocatedPorts: number[] = [];
           try {
-            if (node.allocatedPorts) allocatedPorts = JSON.parse(node.allocatedPorts);
+            if (node.allocatedPorts) {allocatedPorts = JSON.parse(node.allocatedPorts);}
           } catch {
             return res.status(500).json({ error: 'Node port configuration is invalid.' });
           }
@@ -163,7 +164,7 @@ const serverCloneModule: Module = {
             data: {
               name: name.trim(),
               description: originalServer.description,
-              ownerId: userId,
+              ownerId: userId!,
               nodeId: originalServer.nodeId,
               imageId: originalServer.imageId,
               Ports: portsJson,

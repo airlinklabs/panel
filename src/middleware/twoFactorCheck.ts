@@ -1,4 +1,5 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
+import { Router } from 'express';
 import prisma from '../db';
 import otplib from 'otplib';
 import logger from '../services/logger';
@@ -21,7 +22,7 @@ export async function twoFactorCheck(req: Request, res: Response, next: NextFunc
   const userId = req.session?.user?.id;
 
   if (!userId) {
-    return next();
+    next(); return;
   }
 
   try {
@@ -30,19 +31,19 @@ export async function twoFactorCheck(req: Request, res: Response, next: NextFunc
     });
 
     if (!twoFactor?.enabled) {
-      return next();
+      next(); return;
     }
 
     if (req.session.twoFactorVerified) {
-      return next();
+      next(); return;
     }
 
     if (req.path === '/2fa/verify' && req.method === 'GET') {
-      return next();
+      next(); return;
     }
 
     if (req.path === '/2fa/verify' && req.method === 'POST') {
-      return next();
+      next(); return;
     }
 
     req.session.twoFactorUserId = userId;
@@ -59,7 +60,7 @@ export function twoFactorVerifyRouter() {
   router.get('/2fa/verify', async (req: Request, res: Response) => {
     const userId = req.session?.user?.id;
     if (!userId) {
-      return res.redirect('/login');
+      res.redirect('/login'); return;
     }
 
     try {
@@ -68,11 +69,11 @@ export function twoFactorVerifyRouter() {
       });
 
       if (!twoFactor?.enabled) {
-        return res.redirect('/');
+        res.redirect('/'); return;
       }
 
       if (req.session.twoFactorVerified) {
-        return res.redirect('/');
+        res.redirect('/'); return;
       }
 
       res.render('auth/2fa-verify', { req, error: null });
@@ -87,7 +88,7 @@ export function twoFactorVerifyRouter() {
     const { code } = req.body as { code: string };
 
     if (!userId) {
-      return res.redirect('/login');
+      res.redirect('/login'); return;
     }
 
     if (!code || typeof code !== 'string') {
@@ -101,7 +102,7 @@ export function twoFactorVerifyRouter() {
       });
 
       if (!twoFactor?.enabled) {
-        return res.redirect('/');
+        res.redirect('/'); return;
       }
 
       const result = await otplib.verify({ token: code, secret: twoFactor.secret });

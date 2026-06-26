@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import prisma from '../db';
 import logger from '../services/logger';
 
-type ErrorPageInfo = {
+interface ErrorPageInfo {
   title: string;
   message: string;
-};
+}
 
 const DEFAULT_SETTINGS = {
   title: 'Airlink',
@@ -130,7 +130,7 @@ export async function renderErrorPage(
   // If user is not authenticated and not requesting JSON, redirect to login
   const isAuthenticated = req.session?.user?.id;
   if (!isAuthenticated && !wantsJson(req)) {
-    return res.redirect('/login');
+    res.redirect('/login'); return;
   }
 
   if (wantsJson(req)) {
@@ -143,7 +143,7 @@ export async function renderErrorPage(
 
   try {
     const data = await getErrorRenderData(req, normalizedStatus, detail);
-    return res.status(normalizedStatus).render(getErrorView(req), data);
+    res.status(normalizedStatus).render(getErrorView(req), data); return;
   } catch (renderError) {
     logger.error('Failed to render error page:', renderError);
     return res.status(normalizedStatus).send(`${normalizedStatus} ${info.title}`);
@@ -161,7 +161,7 @@ export function errorPageHandler(
   next: NextFunction,
 ) {
   if (res.headersSent) {
-    return next(err);
+    next(err); return;
   }
 
   const statusCode = normalizeStatus(err.status || err.statusCode);

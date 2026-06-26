@@ -1,8 +1,7 @@
-import express from 'express';
+import type express from 'express';
 import fs from 'fs';
 import path from 'path';
 import logger from '../services/logger';
-import chalk from 'chalk';
 
 const isDebugMode = process.env.DEBUG === 'true';
 
@@ -12,6 +11,7 @@ export const loadModules = async (
   serverPort?: number,
   wsInstance?: { applyTo: (router: express.Router) => void },
 ) => {
+  const { default: chalk } = await import('chalk');
   const modulesDir = path.join(__dirname, '../modules');
 
   const getFilesRecursively = (dir: string): string[] => {
@@ -41,6 +41,7 @@ export const loadModules = async (
     const step = i / (ascii.length - 1);
     const channel = Math.floor(255 - step * 51);
     const hex = `#${channel.toString(16).padStart(2, '0').repeat(3)}`;
+    // eslint-disable-next-line no-console
     console.log(chalk.hex(hex)(line));
   });
 
@@ -51,7 +52,9 @@ export const loadModules = async (
     return chalk.greenBright('|') + chalk.whiteBright(text) + chalk.whiteBright(padding) + chalk.greenBright('|');
   };
 
+  // eslint-disable-next-line no-console
   console.log(border);
+  // eslint-disable-next-line no-console
   console.log(padLine('Initializing - Loading core modules and components.'));
 
   const results = await Promise.all(
@@ -74,8 +77,8 @@ export const loadModules = async (
     }
 
     const mod = result.mod?.default;
-    if (!mod || !mod.info || typeof mod.router !== 'function') {
-      if (isDebugMode) logger.warn(`Skipping non-module file: ${result.file}`);
+    if (!mod?.info || typeof mod.router !== 'function') {
+      if (isDebugMode) {logger.warn(`Skipping non-module file: ${result.file}`);}
       skipped++;
       continue;
     }
@@ -86,15 +89,18 @@ export const loadModules = async (
       continue;
     }
 
-    const router = mod.router(wsInstance ? (r) => wsInstance.applyTo(r) : undefined);
+    const router = mod.router(wsInstance ? (r: express.Router) => { wsInstance.applyTo(r); } : undefined);
     app.use(router);
     loaded++;
   }
 
+  // eslint-disable-next-line no-console
   console.log(padLine(`Loaded ${loaded} modules, skipped ${skipped}, errors ${errors}`));
 
   if (serverPort) {
+    // eslint-disable-next-line no-console
     console.log(padLine(`Server running on http://localhost:${serverPort}`));
+    // eslint-disable-next-line no-console
     console.log(border);
   }
 };

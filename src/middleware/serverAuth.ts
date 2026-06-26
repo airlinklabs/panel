@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import { WebSocket } from 'ws';
+import type { Request, Response, NextFunction } from 'express';
+import type { WebSocket } from 'ws';
 
 import logger from '../services/logger';
 import prisma from '../db';
@@ -7,7 +7,7 @@ import { getParamAsString } from '../utils/typeHelpers';
 
 export const isAuthenticatedForServer =
   (serverIdParam = 'id') =>
-    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    async (req: Request, res: Response, next: NextFunction) => {
       const userId = req.session?.user?.id;
 
       if (!userId) {
@@ -48,7 +48,7 @@ export const isAuthenticatedForServer =
 
 export const isAuthenticatedForServerWS =
   (serverIdParam = 'id') =>
-    async (ws: WebSocket, req: Request, next: NextFunction): Promise<void> => {
+    async (ws: WebSocket, req: Request, next: NextFunction) => {
       const userId = req.session?.user?.id;
 
       if (!userId) {
@@ -106,7 +106,7 @@ export async function hasServerAccess(
 
   try {
     const user = await prisma.users.findUnique({ where: { id: userId } });
-    if (!user) return defaultResult;
+    if (!user) {return defaultResult;}
 
     if (user.isAdmin) {
       return {
@@ -122,7 +122,7 @@ export async function hasServerAccess(
       select: { ownerId: true },
     });
 
-    if (!server) return defaultResult;
+    if (!server) {return defaultResult;}
 
     if (server.ownerId === userId) {
       return {
@@ -142,7 +142,7 @@ export async function hasServerAccess(
       },
     });
 
-    if (!accessGrant) return defaultResult;
+    if (!accessGrant) {return defaultResult;}
 
     let permissions: string[];
     try {

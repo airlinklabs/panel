@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import logger from '../../services/logger';
@@ -38,7 +39,7 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.redirect('/login'); return;
           }
 
           const servers = await prisma.server.findMany({
@@ -55,13 +56,13 @@ const adminModule: Module = {
         } catch (error) {
           logger.error('Error fetching player stats:', error);
           errorMessage.message = 'Error fetching player statistics.';
-          return res.render('admin/playerstats/playerstats', {
+          res.render('admin/playerstats/playerstats', {
             errorMessage,
             user: req.session?.user,
             servers: [],
             req,
             settings,
-          });
+          }); return;
         }
       }
     );

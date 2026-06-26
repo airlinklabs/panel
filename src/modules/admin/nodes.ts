@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import { checkNodeStatus } from '../../services/nodeStatus';
@@ -20,7 +21,7 @@ function generateApiKey(length: number): string {
   return result;
 }
 
-type NodeWithInstances = {
+interface NodeWithInstances {
   id: number;
   name: string;
   ram: number;
@@ -80,7 +81,7 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.redirect('/login'); return;
           }
 
           const nodes = await listNodes(res);
@@ -99,7 +100,7 @@ const adminModule: Module = {
           });
         } catch (error) {
           logger.error('Error fetching user:', error);
-          return res.redirect('/login');
+          res.redirect('/login'); return;
         }
       },
     );
@@ -112,7 +113,7 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.redirect('/login'); return;
           }
 
           const nodes = await listNodes(res);
@@ -123,7 +124,7 @@ const adminModule: Module = {
           res.render('admin/nodes/create', { user, req, settings, nodes });
         } catch (error) {
           logger.error('Error fetching user:', error);
-          return res.redirect('/login');
+          res.redirect('/login'); return;
         }
       },
     );
@@ -240,7 +241,7 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.redirect('/login'); return;
           }
 
           const nodeId = getParamAsNumber(req.params.id);
@@ -269,7 +270,7 @@ const adminModule: Module = {
               }
 
               await prisma.server.deleteMany({
-                where: { nodeId: nodeId },
+                where: { nodeId },
               });
             }
 
@@ -286,7 +287,7 @@ const adminModule: Module = {
           }
         } catch (error) {
           logger.error('Error fetching user:', error);
-          return res.redirect('/login');
+          res.redirect('/login'); return;
         }
       },
     );
@@ -299,7 +300,7 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.redirect('/login'); return;
           }
 
           const nodeId = getParamAsNumber(req.params.id);
@@ -322,7 +323,7 @@ const adminModule: Module = {
           return;
         } catch (error) {
           logger.error('Error fetching user:', error);
-          return res.redirect('/login');
+          res.redirect('/login'); return;
         }
       },
     );
@@ -335,7 +336,7 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.redirect('/login'); return;
           }
 
           const nodeId = getParamAsNumber(req.params.id);
@@ -359,7 +360,7 @@ const adminModule: Module = {
           res.render('admin/nodes/edit', { node, user, req, settings });
         } catch (error) {
           logger.error('Error fetching user:', error);
-          return res.redirect('/login');
+          res.redirect('/login'); return;
         }
       },
     );
@@ -372,7 +373,7 @@ const adminModule: Module = {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
-            return res.redirect('/login');
+            res.redirect('/login'); return;
           }
 
           const nodeId = getParamAsNumber(req.params.id);
@@ -407,8 +408,8 @@ const adminModule: Module = {
             }
 
             // Validate each port
-            for (const port of parsedPorts) {
-              if (typeof port !== 'number' || port < 1024 || port > 65535) {
+            for (const p of parsedPorts) {
+              if (typeof p !== 'number' || p < 1024 || p > 65535) {
                 throw new Error('Each port must be a number between 1024 and 65535');
               }
             }
@@ -450,7 +451,7 @@ const adminModule: Module = {
         const userId = req.session?.user?.id;
         const user = await prisma.users.findUnique({ where: { id: userId } });
         if (!user) {
-          return res.redirect('/login');
+          res.redirect('/login'); return;
         }
 
         const nodeId = getParamAsNumber(req.params.id);

@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../middleware/auth';
 import { getUser } from '../../services/user';
@@ -13,7 +14,7 @@ import validator from 'validator';
 const avatarStorage = multer.diskStorage({
   destination: (req, _file, cb) => {
     const username = req.session?.user?.username;
-    if (!username) return cb(new Error('Not authenticated'), '');
+    if (!username) {cb(new Error('Not authenticated'), ''); return;}
 
     const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', username);
 
@@ -295,7 +296,7 @@ const accountModule: Module = {
             where: { id: userId },
           });
 
-          if (currentUser && currentUser.password) {
+          if (currentUser?.password) {
             const isPasswordValid = await bcrypt.compare(
               String(currentPassword),
               currentUser.password,
@@ -339,7 +340,7 @@ const accountModule: Module = {
 
         try {
           const user = await prisma.users.findFirst({
-            where: { email: email },
+            where: { email },
           });
 
           if (user) {
@@ -428,7 +429,7 @@ const accountModule: Module = {
           const userId = req.session?.user?.id;
           const username = req.session?.user?.username;
 
-          const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', username);
+          const userDir = path.join(process.cwd(), 'public', 'uploads', 'avatars', username!);
           if (fs.existsSync(userDir)) {
             fs.readdirSync(userDir).forEach(f => {
               try { fs.unlinkSync(path.join(userDir, f)); } catch { /* ignore per-file errors */ }
@@ -460,7 +461,7 @@ const accountModule: Module = {
             prisma.users.findUnique({ where: { id: userId } }),
             prisma.settings.findUnique({ where: { id: 1 } }),
           ]);
-          if (!user) return res.redirect('/login');
+          if (!user) {res.redirect('/login'); return;}
           const pkg = JSON.parse(require('fs').readFileSync(require('path').join(process.cwd(), 'package.json'), 'utf-8'));
           res.render('user/credits', { user, req, settings, version: pkg.version });
         } catch (error) {

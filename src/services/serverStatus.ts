@@ -37,7 +37,7 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
       startedAt: null,
     };
 
-    if (data && data.running === true) {
+    if (data?.running === true) {
       status.online = true;
       if (data.startedAt) {
         status.startedAt = data.startedAt;

@@ -7,7 +7,8 @@
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
  */
 
-import express, { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import prisma from './db';
 import path from 'path';
 import session from 'express-session';
@@ -74,7 +75,7 @@ if (process.env.TRUST_PROXY === '1' || process.env.TRUST_PROXY === 'true') {
 }
 
 // Async DB read for trust proxy (fallback if env var not set)
-;(async () => {
+;void (async () => {
   try {
     const s = await prisma.settings.findUnique({ where: { id: 1 } });
     if (s?.behindReverseProxy) {
@@ -112,18 +113,19 @@ const ejsModule = ejs as unknown as {
   renderFile?: typeof ejs.renderFile;
   __express?: typeof ejs.renderFile;
 };
-const originalRenderFile = (ejsModule.renderFile || ejsModule.__express)?.bind(ejs);
+const originalRenderFile = (ejsModule.renderFile || ejsModule.__express)!.bind(ejs);
 
 const addonViewsDir = path.join(__dirname, '../../storage/addons');
 
 function getAddonDirs(): string[] {
-  if (!fs.existsSync(addonViewsDir)) return [];
+  if (!fs.existsSync(addonViewsDir)) {return [];}
   return fs
     .readdirSync(addonViewsDir, { withFileTypes: true })
     .filter((d) => d.isDirectory())
     .map((d) => d.name);
 }
 
+// @ts-expect-error - extending renderFile with addon-aware resolution
 (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile = function (
   file: string,
   data: Record<string, unknown>,
@@ -134,7 +136,7 @@ function getAddonDirs(): string[] {
   const options = typeof optionsOrCallback === 'function' ? {} : optionsOrCallback;
   try {
     if (fs.existsSync(file)) {
-      return originalRenderFile(file, data, options, callback);
+      originalRenderFile(file, data, options, callback!); return;
     }
 
     const viewName = path.basename(file);
@@ -142,27 +144,27 @@ function getAddonDirs(): string[] {
     if (data?.addonSlug) {
       const addonViewPath = path.join(addonViewsDir, String(data.addonSlug), 'views', viewName);
       if (fs.existsSync(addonViewPath)) {
-        return originalRenderFile(addonViewPath, data, options, callback);
+        originalRenderFile(addonViewPath, data, options, callback!); return;
       }
     }
 
     const mainViewPath = path.join(viewsPath, viewName);
     if (fs.existsSync(mainViewPath)) {
-      return originalRenderFile(mainViewPath, data, options, callback);
+      originalRenderFile(mainViewPath, data, options, callback!); return;
     }
 
     for (const addonDir of getAddonDirs()) {
-      if (data?.addonSlug && addonDir === data.addonSlug) continue;
+      if (data?.addonSlug && addonDir === data.addonSlug) {continue;}
       const addonViewPath = path.join(addonViewsDir, addonDir, 'views', viewName);
       if (fs.existsSync(addonViewPath)) {
-        return originalRenderFile(addonViewPath, data, options, callback);
+        originalRenderFile(addonViewPath, data, options, callback!); return;
       }
     }
 
-    return originalRenderFile(file, data, options, callback);
+    originalRenderFile(file, data, options, callback!); return;
   } catch (error) {
     logger.error('Error in EJS renderFile override:', error);
-    return originalRenderFile(file, data, options, callback);
+    originalRenderFile(file, data, options, callback!); return;
   }
 };
 
@@ -319,7 +321,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 import { refreshSecurityCache, getSecurityCache } from './services/security';
 
 // Initial load + refresh every 30 seconds
-refreshSecurityCache();
+void refreshSecurityCache();
 setInterval(refreshSecurityCache, 30_000);
 
 // IP ban middleware — uses cached list, no per-request DB hit
@@ -404,7 +406,7 @@ app.use(translationMiddleware);
 app.use((req, res, next) => {
   // Skip CSRF protection for WebSocket routes and API routes
   if (req.path.startsWith('/ws') || req.path.startsWith('/api/')) {
-    return next();
+    next(); return;
   }
   csrfProtection(req, res, next);
 });
@@ -412,7 +414,7 @@ app.use((req, res, next) => {
 // Add CSRF token to view locals
 app.use((req, res, next) => {
   if (req.path.startsWith('/ws') || req.path.startsWith('/api/')) {
-    return next();
+    next(); return;
   }
   addCsrfTokenToLocals(req, res, next);
 });
@@ -424,7 +426,7 @@ app.use(flashToastMiddleware);
 
 interface GlobalWithCustomProperties extends NodeJS.Global {
   uiComponentStore: {
-    getSidebarItems: (section?: string, isAdmin?: boolean) => Array<{
+    getSidebarItems: (section?: string, isAdmin?: boolean) => {
       id: string;
       label: string;
       icon: string;
@@ -432,12 +434,12 @@ interface GlobalWithCustomProperties extends NodeJS.Global {
       priority: number;
       isAddon?: boolean;
       matchPrefix?: string;
-    }>;
+    }[];
   };
   appName: string;
   airlinkVersion: string;
-  adminMenuItems: Array<{ id: string; label: string; icon: string; url: string }>;
-  regularMenuItems: Array<{ id: string; label: string; icon: string; url: string }>;
+  adminMenuItems: { id: string; label: string; icon: string; url: string }[];
+  regularMenuItems: { id: string; label: string; icon: string; url: string }[];
 }
 
 declare const global: GlobalWithCustomProperties;
@@ -461,24 +463,22 @@ app.use((_req, res, next) => {
   res.locals.isMobileViewport = isMobileViewport;
 
   const originalRenderBase = res.render.bind(res);
-  res.render = function (view: string, options?: Record<string, unknown> | ((err: Error | null, html?: string) => void), callback?: (err: Error | null, html?: string) => void) {
+  // @ts-expect-error - custom render wrapper with extended callback signature
+  res.render = function (view: string, optionsOrCb?: Record<string, unknown> | ((err: Error | null, html?: string) => void), maybeCb?: (err: Error | null, html?: string) => void): void {
     const isAbsolutePath = path.isAbsolute(view);
     const isAddonView = view.includes('/storage/addons/') || view.includes('\\storage\\addons\\');
 
-    if (typeof options === 'function') {
-      callback = options;
-      options = {};
-    }
-    const opts = options || {};
+    const resolvedCb: ((err: Error | null, html?: string) => void) | undefined = typeof optionsOrCb === 'function' ? optionsOrCb : maybeCb;
+    const opts = typeof optionsOrCb === 'function' ? {} : optionsOrCb || {};
 
     if (isAbsolutePath || isAddonView) {
       const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
       (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(view, data, {}, (err: Error | null, html: string) => {
         if (err) {
-          if (typeof callback === 'function') return callback(err);
+          if (typeof resolvedCb === 'function') {resolvedCb(err); return;}
           return res.status(500).send('View render error: ' + err.message);
         }
-        if (typeof callback === 'function') return callback(null, html);
+        if (typeof resolvedCb === 'function') {resolvedCb(null, html); return;}
         res.send(html);
       });
       return;
@@ -501,7 +501,7 @@ app.use((_req, res, next) => {
 
     // Addon view fallback (unchanged)
     if (!fs.existsSync(path.join(viewsPath, resolvedView + '.ejs'))) {
-      const optsRecord = opts as Record<string, unknown>;
+      const optsRecord = opts;
       if (optsRecord.addonSlug) {
         const addonSlug = optsRecord.addonSlug as string;
         const addonFallbackPath = path.join(addonViewsDir, addonSlug, 'views', view + '.ejs');
@@ -509,10 +509,10 @@ app.use((_req, res, next) => {
           const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
           (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
             if (err) {
-              if (typeof callback === 'function') return callback(err);
+              if (typeof resolvedCb === 'function') {resolvedCb(err); return;}
               return res.status(500).send('View render error: ' + err.message);
             }
-            if (typeof callback === 'function') return callback(null, html);
+            if (typeof resolvedCb === 'function') {resolvedCb(null, html); return;}
             res.send(html);
           });
           return;
@@ -520,16 +520,16 @@ app.use((_req, res, next) => {
       }
 
       for (const addonDir of getAddonDirs()) {
-        if (optsRecord.addonSlug && addonDir === optsRecord.addonSlug) continue;
+        if (optsRecord.addonSlug && addonDir === optsRecord.addonSlug) {continue;}
         const addonFallbackPath = path.join(addonViewsDir, addonDir, 'views', view + '.ejs');
         if (fs.existsSync(addonFallbackPath)) {
           const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
           (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
             if (err) {
-              if (typeof callback === 'function') return callback(err);
+              if (typeof resolvedCb === 'function') {resolvedCb(err); return;}
               return res.status(500).send('View render error: ' + err.message);
             }
-            if (typeof callback === 'function') return callback(null, html);
+            if (typeof resolvedCb === 'function') {resolvedCb(null, html); return;}
             res.send(html);
           });
           return;
@@ -537,7 +537,7 @@ app.use((_req, res, next) => {
       }
     }
 
-    return originalRenderBase(resolvedView, opts, callback);
+    originalRenderBase(resolvedView, opts, resolvedCb);
   };
 
   next();
@@ -547,7 +547,7 @@ app.use((_req, res, next) => {
 app.use(errorPageHandler);
 
 // Load modules, plugins, database and start the webserver
-(async () => {
+void (async () => {
   try {
     await databaseLoader();
     await settingsLoader();
@@ -564,16 +564,16 @@ app.use(errorPageHandler);
     const server = app.listen(port, () => {
       startPlayerStatsCollection();
       // Clone/pull egg repos on startup; auto-refreshes every 2 days
-      initEggCatalogue().catch(err => logger.warn(`Store catalogue init failed: ${err?.message || err}`));
+      initEggCatalogue().catch(err => { logger.warn(`Store catalogue init failed: ${err?.message || err}`); });
       // Purge expired sessions at startup, then every 6 hours
-      purgeExpiredSessions();
+      void purgeExpiredSessions();
       setInterval(purgeExpiredSessions, 6 * 60 * 60 * 1000);
     });
 
     let shuttingDown = false;
 
     async function shutdown(signal: string) {
-      if (shuttingDown) return;
+      if (shuttingDown) {return;}
       shuttingDown = true;
 
       logger.info(`Shutting down (${signal})...`);

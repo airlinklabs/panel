@@ -1,6 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
-import prisma from '../../db';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import { isAuthenticated } from '../../middleware/auth';
 import logger from '../../services/logger';
 import {
@@ -32,7 +32,7 @@ const notificationsModule: Module = {
           const unreadOnly = req.query.unreadOnly === 'true';
           const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
 
-          const notifications = await getNotifications(userId, { unreadOnly, limit });
+          const notifications = await getNotifications(userId!, { unreadOnly, limit });
           res.json(notifications);
         } catch (err: unknown) {
           if (err instanceof Error) {
@@ -49,7 +49,7 @@ const notificationsModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          const count = await getUnreadCount(userId);
+          const count = await getUnreadCount(userId!);
           res.json({ count });
         } catch (err: unknown) {
           if (err instanceof Error) {
@@ -73,7 +73,7 @@ const notificationsModule: Module = {
             return;
           }
 
-          const result = await markAsRead(notificationId, userId);
+          const result = await markAsRead(notificationId, userId!);
           if (result.count === 0) {
             res.status(404).json({ message: 'Notification not found.' });
             return;
@@ -95,7 +95,7 @@ const notificationsModule: Module = {
       async (req: Request, res: Response) => {
         try {
           const userId = req.session?.user?.id;
-          await markAllAsRead(userId);
+          await markAllAsRead(userId!);
           res.json({ message: 'All notifications marked as read.' });
         } catch (err: unknown) {
           if (err instanceof Error) {
@@ -119,7 +119,7 @@ const notificationsModule: Module = {
             return;
           }
 
-          const result = await deleteNotification(notificationId, userId);
+          const result = await deleteNotification(notificationId, userId!);
           if (result.count === 0) {
             res.status(404).json({ message: 'Notification not found.' });
             return;

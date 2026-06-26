@@ -7,7 +7,7 @@
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
  */
 
-import { createConsola, ConsolaInstance } from 'consola';
+import { createConsola } from 'consola';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
@@ -47,7 +47,7 @@ const consola = createConsola({
     colors: !useJsonFormat,
     compact: useJsonFormat,
   },
-}) as ConsolaInstance;
+});
 
 type LogContext = Record<string, unknown>;
 
@@ -56,7 +56,7 @@ const serializeValue = (value: unknown): string => {
     return value.stack || `${value.name}: ${value.message}`;
   }
 
-  if (typeof value === 'string') return value;
+  if (typeof value === 'string') {return value;}
 
   return util.inspect(value, {
     depth: 5,
@@ -66,7 +66,7 @@ const serializeValue = (value: unknown): string => {
 };
 
 const serializeContext = (context?: unknown): string => {
-  if (context === undefined) return '';
+  if (context === undefined) {return '';}
   return ` ${serializeValue(context)}`;
 };
 
@@ -74,7 +74,7 @@ const writeToLogFile = (level: string, message: string): void => {
   const timestamp = new Date().toISOString();
   const logMessage = `[${timestamp}] ${level}: ${message}\n`;
   fs.appendFile(path.join(logsDir, 'combined.log'), logMessage, (err) => {
-    if (err) consola.error('Failed to write to combined log file:', err);
+    if (err) {consola.error('Failed to write to combined log file:', err);}
   });
 };
 
@@ -106,7 +106,7 @@ const logger = {
 
     const timestamp = new Date().toISOString();
     fs.appendFile(path.join(logsDir, 'error.log'), `[${timestamp}] ERROR: ${fileMessage}\n`, (err) => {
-      if (err) consola.error('Failed to write to error log file:', err);
+      if (err) {consola.error('Failed to write to error log file:', err);}
     });
     writeToLogFile('ERROR', fileMessage);
   },
@@ -133,7 +133,7 @@ const logger = {
   },
 
   debug(message: string, context?: LogContext): void {
-    if (!isDebugMode) return;
+    if (!isDebugMode) {return;}
 
     const badge = `${colors.bgMagenta}${colors.white}${colors.bright} DEBUG ${colors.reset}`;
     const text = `${message}${serializeContext(context)}`;

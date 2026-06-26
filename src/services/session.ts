@@ -41,7 +41,7 @@ class PrismaSessionStore extends session.Store {
     }
   }
 
-  async length(callback: (err: Error | null, length: number) => void) {
+  override async length(callback: (err: Error | null, length: number) => void) {
     try {
       const count = await prisma.session.count();
       callback(null, count);
@@ -50,7 +50,7 @@ class PrismaSessionStore extends session.Store {
     }
   }
 
-  async clear(callback: (err?: Error) => void) {
+  override async clear(callback: (err?: Error) => void) {
     try {
       await prisma.session.deleteMany();
       callback();
@@ -59,7 +59,7 @@ class PrismaSessionStore extends session.Store {
     }
   }
 
-  async touch(sid: string, _sess: SessionData, callback: () => void) {
+  override async touch(sid: string, _sess: SessionData, callback: () => void) {
     try {
       await prisma.session.update({
         where: { session_id: sid },

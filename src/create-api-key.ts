@@ -20,15 +20,20 @@ async function createApiKey() {
       },
     });
 
+    // eslint-disable-next-line no-console
     console.log('API Key created successfully:');
+    // eslint-disable-next-line no-console
     console.log(`ID: ${apiKey.id}`);
+    // eslint-disable-next-line no-console
     console.log(`Key (shown once, stored as SHA-256 hash): ${rawKey}`);
+    // eslint-disable-next-line no-console
     console.log(`Use this key in the Authorization header: Bearer ${rawKey}`);
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error creating API key:', error);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-createApiKey();
+void createApiKey();

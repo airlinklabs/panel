@@ -1,6 +1,7 @@
-import { Router, Request, Response } from 'express';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
 import type { Prisma, Users, settings as PanelSettings } from '../../generated/prisma/client';
-import { Module } from '../../core/moduleInit';
+import type { Module } from '../../core/moduleInit';
 import { isAuthenticatedForServer } from '../../middleware/serverAuth';
 import { trackActivity } from '../../middleware/activityTracker';
 import { notifyUser } from '../../services/notifications';
@@ -18,7 +19,7 @@ import { AirlinkCloudClient } from '../../services/airlinkCloud';
 import { getPrimaryExternalPort, portsToDaemonString } from '../../services/ports';
 
 declare global {
-  var serverStoppingStates: { [key: string]: boolean };
+  var serverStoppingStates: Record<string, boolean>;
 }
 
 interface ErrorMessage {
@@ -166,7 +167,7 @@ function getServerStatusInput(server: Pick<ServerPageServer, 'UUID' | 'node'>) {
 }
 
 function getImageFeatures(image: { info?: string | Record<string, unknown> | null } | null): string[] {
-  if (!image) return [];
+  if (!image) {return [];}
   try {
     const info = typeof image.info === 'string' ? JSON.parse(image.info) : image.info;
     return Array.isArray(info?.features) ? info.features : [];
@@ -176,14 +177,14 @@ function getImageFeatures(image: { info?: string | Record<string, unknown> | nul
 }
 
 function buildEnvVariables(variables: string | null | ServerVariable[]): Record<string, string> {
-  if (!variables) return {};
+  if (!variables) {return {};}
   try {
     const vars = Array.isArray(variables) ? variables.map(v => v as unknown as Record<string, unknown>) : JSON.parse(variables) as Record<string, unknown>[];
     const env: Record<string, string> = {};
     for (const v of vars) {
       // Support both Pterodactyl egg format (env_variable) and legacy format (env)
       const key = String(v.env_variable || v.env || '');
-      if (!key) continue;
+      if (!key) {continue;}
       const raw = v.value !== undefined ? v.value : (v.default_value ?? '');
       env[key] = String(raw);
     }
@@ -215,9 +216,9 @@ function buildServerRuntimeEnv(
 ): Record<string, string> {
   const ports = getPrimaryPort(server.Ports);
   const envVariables = buildEnvVariables(variables);
-  envVariables['SERVER_PORT'] = String(ports ?? '');
-  envVariables['SERVER_MEMORY'] = String(server.Memory);
-  envVariables['SERVER_CPU'] = String(server.Cpu);
+  envVariables.SERVER_PORT = String(ports ?? '');
+  envVariables.SERVER_MEMORY = String(server.Memory);
+  envVariables.SERVER_CPU = String(server.Cpu);
   return envVariables;
 }
 
@@ -316,17 +317,17 @@ const dashboardModule: Module = {
           settings = context.settings;
           if (context.status === 'missing-user') {
             errorMessage.message = 'User not found.';
-            return res.render('user/account', { errorMessage, user: context.user, req });
+            res.render('user/account', { errorMessage, user: context.user, req }); return;
           }
           if (context.status === 'missing-server') {
             errorMessage.message = 'Server not found.';
-            return res.render('user/server/manage', {
+            res.render('user/server/manage', {
               errorMessage,
               features: [],
               user: context.user,
               req,
               settings,
-            });
+            }); return;
           }
 
           const { user, server } = context;
@@ -342,7 +343,7 @@ const dashboardModule: Module = {
           }
           const serverStatus = await getServerStatus(getServerStatusInput(server));
 
-          return res.render('user/server/manage', {
+          res.render('user/server/manage', {
             errorMessage,
             features: features || [],
             installed: await checkForServerInstallation(getParamAsString(serverId)),
@@ -351,17 +352,17 @@ const dashboardModule: Module = {
             server,
             serverStatus,
             settings,
-          });
+          }); return;
         } catch (error) {
           logger.error('Error fetching user:', error);
           errorMessage.message = 'Error fetching user data.';
-          return res.render('user/server/manage', {
+          res.render('user/server/manage', {
             errorMessage,
             features: [],
             user: req.session?.user,
             req,
             settings,
-          });
+          }); return;
         }
       },
     );
@@ -371,7 +372,7 @@ const dashboardModule: Module = {
     router.get(
       '/server/:id/status',
       isAuthenticatedForServer('id'),
-      async (req: Request, res: Response): Promise<void> => {
+      async (req: Request, res: Response) => {
         const serverId = req.params?.id;
 
         try {
@@ -416,7 +417,7 @@ const dashboardModule: Module = {
       '/server/:id/power/:poweraction',
       isAuthenticatedForServer('id'),
       trackActivity('server.power'),
-      async (req: Request, res: Response): Promise<void> => {
+      async (req: Request, res: Response) => {
         const errorMessage: ErrorMessage = {};
         const userId = req.session?.user?.id;
         const serverId = req.params?.id;
@@ -426,7 +427,7 @@ const dashboardModule: Module = {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             errorMessage.message = 'User not found.';
-            return res.render('user/account', { errorMessage, user, req });
+            res.render('user/account', { errorMessage, user, req }); return;
           }
 
           const server = await prisma.server.findUnique({
@@ -436,11 +437,11 @@ const dashboardModule: Module = {
 
           if (!server) {
             errorMessage.message = 'Server not found.';
-            return res.render('user/server/manage', {
+            res.render('user/server/manage', {
               errorMessage,
               user,
               req,
-            });
+            }); return;
           }
 
           if (server.Suspended && powerAction === 'start') {
@@ -472,8 +473,7 @@ const dashboardModule: Module = {
 
               setTimeout(() => {
                 if (
-                  global.serverStoppingStates &&
-                  global.serverStoppingStates[cacheKey]
+                  global.serverStoppingStates?.[cacheKey]
                 ) {
                   delete global.serverStoppingStates[cacheKey];
                   logger.info(
@@ -518,8 +518,7 @@ const dashboardModule: Module = {
 
                 const cacheKey = `server_stopping_${serverId}`;
                 if (
-                  global.serverStoppingStates &&
-                  global.serverStoppingStates[cacheKey]
+                  global.serverStoppingStates?.[cacheKey]
                 ) {
                   delete global.serverStoppingStates[cacheKey];
                 }
@@ -562,7 +561,7 @@ const dashboardModule: Module = {
 
             logger.info('Container restarted successfully: ' + serverId);
             res.status(200).json({ success: true, message: 'Server restarted successfully' });
-            notifyUser(userId, 'Server Restarted', `Server ${server.name} has been restarted.`, '/server/' + serverId).catch(() => {});
+            notifyUser(userId!, 'Server Restarted', `Server ${server.name} has been restarted.`, '/server/' + serverId).catch(() => {});
             return;
           }
 
@@ -578,7 +577,7 @@ const dashboardModule: Module = {
           logger.info('Container started successfully: ' + serverId);
 
           res.status(200).json({ message: 'Container started successfully.' });
-          notifyUser(userId, 'Server Started', `Server ${server.name} has been started.`, '/server/' + serverId).catch(() => {});
+          notifyUser(userId!, 'Server Started', `Server ${server.name} has been started.`, '/server/' + serverId).catch(() => {});
           return;
         } catch (error) {
           logger.error('Failed to process power action', error, {
@@ -641,7 +640,7 @@ const dashboardModule: Module = {
             },
           };
 
-          let files = (await axios(filesRequest)).data as Array<{ name: string; type: string; size?: number }>;
+          let files = (await axios(filesRequest)).data as { name: string; type: string; size?: number }[];
           files = typeof files === 'string' ? JSON.parse(files) : files;
 
           files = files.filter((file) => file.name !== 'airlink');
@@ -863,7 +862,7 @@ const dashboardModule: Module = {
             data: {
               id: server.UUID,
               path: filePath,
-              content: content,
+              content,
             },
             auth: getServerDaemonAuth(server),
           });
@@ -1177,14 +1176,14 @@ const dashboardModule: Module = {
           const primaryPort = server.Ports
             ? JSON.parse(server.Ports)
               .filter((Port: { primary?: boolean; Port?: string }) => Port.primary)
-              .map((Port: { primary?: boolean; Port?: string }) => Port.Port.split(':')[1])
+              .map((Port: { primary?: boolean; Port?: string }) => Port.Port!.split(':')[1])
               .pop()
             : '';
 
           const features = getImageFeatures(server.image);
 
           if (!primaryPort) {
-            return res.render('user/server/players', {
+            res.render('user/server/players', {
               errorMessage: { message: 'No primary port found' },
               user,
               features,
@@ -1193,10 +1192,10 @@ const dashboardModule: Module = {
               server,
               req,
               settings: await prisma.settings.findUnique({ where: { id: 1 } }),
-            });
+            }); return;
           }
 
-          let players: Array<{ name: string; uuid: string }> = [];
+          let players: { name: string; uuid: string }[] = [];
           let serverInfo = {
             maxPlayers: 0,
             onlinePlayers: 0,
@@ -1229,7 +1228,7 @@ const dashboardModule: Module = {
               serverIsOnline =
                 typeof playersResponse.data.online === 'boolean'
                   ? playersResponse.data.online
-                  : !!playersResponse.data.version;
+                  : Boolean(playersResponse.data.version);
 
               if (Array.isArray(playersResponse.data.players)) {
                 players = playersResponse.data.players;
@@ -1277,7 +1276,7 @@ const dashboardModule: Module = {
           const hasError = hadFetchError && !serverIsOnline;
           const serverStatus = await getServerStatus(getServerStatusInput(server));
 
-          return res.render('user/server/players', {
+          res.render('user/server/players', {
             errorMessage: hasError
               ? {
                 message:
@@ -1294,7 +1293,7 @@ const dashboardModule: Module = {
             serverStatus,
             req,
             settings,
-          });
+          }); return;
         } catch (error) {
           logger.error('Error getting players:', error);
           res.status(500).json({ error: 'Failed to get players' });
@@ -1357,7 +1356,7 @@ const dashboardModule: Module = {
 
             const serverStatus = await getServerStatus(serverStatusInput);
 
-            return res.render('user/server/worlds', {
+            res.render('user/server/worlds', {
               errorMessage: {},
               user,
               worlds,
@@ -1367,7 +1366,7 @@ const dashboardModule: Module = {
               serverStatus,
               req,
               settings,
-            });
+            }); return;
           } catch (fileRequestError) {
             if (axios.isAxiosError(fileRequestError)) {
               if (
@@ -1389,7 +1388,7 @@ const dashboardModule: Module = {
               nodeKey: server.node.key,
             });
 
-            return res.render('user/server/worlds', {
+            res.render('user/server/worlds', {
               errorMessage: {
                 message:
                   'Failed to fetch worlds. The server may be offline or not responding.',
@@ -1402,13 +1401,13 @@ const dashboardModule: Module = {
               serverStatus,
               req,
               settings,
-            });
+            }); return;
           }
         } catch (error) {
           logger.error('Error getting worlds:', error);
 
           // Render the worlds page with an error message
-          return res.render('user/server/worlds', {
+          res.render('user/server/worlds', {
             errorMessage: {
               message: 'Failed to load worlds. Please try again later.',
             },
@@ -1419,7 +1418,7 @@ const dashboardModule: Module = {
             server: null,
             req,
             settings: null,
-          });
+          }); return;
         }
       },
     );
@@ -1476,8 +1475,8 @@ const dashboardModule: Module = {
               data: {
                 id: server.UUID,
                 path: relativePath,
-                newName: newName,
-                newPath: newPath,
+                newName,
+                newPath,
               },
             };
 
@@ -1572,7 +1571,7 @@ const dashboardModule: Module = {
                 data: {
                   id: server.UUID,
                   path: relativePath,
-                  fileName: fileName,
+                  fileName,
                   fileContent: fileContentWithMeta,
                 },
                 maxContentLength: 15 * 1024 * 1024, // 15MB
@@ -1600,7 +1599,7 @@ const dashboardModule: Module = {
                 data: {
                   id: server.UUID,
                   path: relativePath,
-                  fileName: fileName,
+                  fileName,
                 },
                 timeout: 10000,
               };
@@ -1628,10 +1627,10 @@ const dashboardModule: Module = {
                   data: {
                     id: server.UUID,
                     path: relativePath,
-                    fileName: fileName,
+                    fileName,
                     fileContent: chunkContentWithMeta,
                     chunkIndex: i,
-                    totalChunks: totalChunks,
+                    totalChunks,
                   },
                   timeout: 30000, // 30 seconds per chunk
                 };
@@ -1647,7 +1646,7 @@ const dashboardModule: Module = {
               );
               res.status(200).json({
                 success: true,
-                fileName: fileName,
+                fileName,
                 path: relativePath,
               });
             }
@@ -1704,7 +1703,7 @@ const dashboardModule: Module = {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             errorMessage.message = 'User not found.';
-            return res.render('user/account', { errorMessage, user, req });
+            res.render('user/account', { errorMessage, user, req }); return;
           }
 
           const server = await prisma.server.findUnique({
@@ -1714,12 +1713,12 @@ const dashboardModule: Module = {
 
           if (!server) {
             errorMessage.message = 'Server not found.';
-            return res.render('user/server/startup', {
+            res.render('user/server/startup', {
               errorMessage,
               user,
               req,
               settings,
-            });
+            }); return;
           }
 
           const features = getImageFeatures(server.image);
@@ -1738,7 +1737,7 @@ const dashboardModule: Module = {
           }
           const serverStatus = await getServerStatus(getServerStatusInput(server));
 
-          return res.render('user/server/startup', {
+          res.render('user/server/startup', {
             errorMessage,
             features,
             installed: await checkForServerInstallation(getParamAsString(serverId)),
@@ -1748,16 +1747,16 @@ const dashboardModule: Module = {
             serverStatus,
             serverVariables,
             settings,
-          });
+          }); return;
         } catch (error) {
           logger.error('Error fetching server startup data:', error);
           errorMessage.message = 'Error fetching server data.';
-          return res.render('user/server/startup', {
+          res.render('user/server/startup', {
             errorMessage,
             user: req.session?.user,
             req,
             settings,
-          });
+          }); return;
         }
       },
     );
@@ -1880,7 +1879,7 @@ const dashboardModule: Module = {
           if (acceptsJson) {
             res.status(200).json({ success: true });
           } else {
-            req.flashToast('Startup command updated successfully', 'success');
+            req.flashToast!('Startup command updated successfully', 'success');
             res.redirect(`/server/${serverId}/startup`);
           }
         } catch (error) {
@@ -1892,7 +1891,7 @@ const dashboardModule: Module = {
           if (acceptsJson) {
             res.status(500).json({ error: 'Failed to update startup command' });
           } else {
-            req.flashToast('Failed to update startup command', 'error');
+            req.flashToast!('Failed to update startup command', 'error');
             res.redirect(`/server/${serverId}/startup`);
           }
         }
@@ -1935,7 +1934,7 @@ const dashboardModule: Module = {
           let validImage = false;
 
           try {
-            if (server.image && server.image.dockerImages) {
+            if (server.image?.dockerImages) {
               const dockerImagesArray = JSON.parse(server.image.dockerImages);
               dockerImagesArray.forEach((imageObj: Record<string, string>) => {
                 Object.keys(imageObj).forEach((key) => {
@@ -1972,7 +1971,7 @@ const dashboardModule: Module = {
 
           let dockerImageObj = {};
           try {
-            if (server.image && server.image.dockerImages) {
+            if (server.image?.dockerImages) {
               const dockerImagesArray = JSON.parse(server.image.dockerImages);
               for (const imageObj of dockerImagesArray) {
                 if (Object.keys(imageObj).includes(dockerImage)) {
@@ -2036,7 +2035,7 @@ const dashboardModule: Module = {
           if (acceptsJson) {
             res.status(200).json({ success: true });
           } else {
-            req.flashToast('Docker image updated successfully', 'success');
+            req.flashToast!('Docker image updated successfully', 'success');
             res.redirect(`/server/${serverId}/startup`);
           }
         } catch (error) {
@@ -2049,7 +2048,7 @@ const dashboardModule: Module = {
           if (acceptsJson) {
             res.status(500).json({ error: 'Failed to update Docker image' });
           } else {
-            req.flashToast('Failed to update Docker image', 'error');
+            req.flashToast!('Failed to update Docker image', 'error');
             res.redirect(`/server/${serverId}/startup`);
           }
         }
@@ -2125,7 +2124,7 @@ const dashboardModule: Module = {
 
             return {
               ...variable,
-              value: value,
+              value,
             };
           });
         }
@@ -2205,7 +2204,7 @@ const dashboardModule: Module = {
           if (acceptsJson) {
             res.status(200).json({ success: true });
           } else {
-            req.flashToast('Server variables updated successfully', 'success');
+            req.flashToast!('Server variables updated successfully', 'success');
             res.redirect(`/server/${serverId}/startup`);
           }
         } catch (error) {
@@ -2219,7 +2218,7 @@ const dashboardModule: Module = {
               .status(500)
               .json({ error: 'Failed to update server variables' });
           } else {
-            req.flashToast('Failed to update server variables', 'error');
+            req.flashToast!('Failed to update server variables', 'error');
             res.redirect(`/server/${serverId}/startup`);
           }
         }
@@ -2238,7 +2237,7 @@ const dashboardModule: Module = {
           const user = await prisma.users.findUnique({ where: { id: userId } });
           if (!user) {
             errorMessage.message = 'User not found.';
-            return res.render('user/account', { errorMessage, user, req });
+            res.render('user/account', { errorMessage, user, req }); return;
           }
 
           const server = await prisma.server.findUnique({
@@ -2248,17 +2247,17 @@ const dashboardModule: Module = {
 
           if (!server) {
             errorMessage.message = 'Server not found.';
-            return res.render('user/server/settings', {
+            res.render('user/server/settings', {
               errorMessage,
               user,
               req,
               settings,
-            });
+            }); return;
           }
 
           const features = getImageFeatures(server.image);
 
-          return res.render('user/server/settings', {
+          res.render('user/server/settings', {
             errorMessage,
             features,
             installed: await checkForServerInstallation(getParamAsString(serverId)),
@@ -2266,16 +2265,16 @@ const dashboardModule: Module = {
             req,
             server,
             settings,
-          });
+          }); return;
         } catch (error) {
           logger.error('Error fetching server settings data:', error);
           errorMessage.message = 'Error fetching server data.';
-          return res.render('user/server/settings', {
+          res.render('user/server/settings', {
             errorMessage,
             user: req.session?.user,
             req,
             settings,
-          });
+          }); return;
         }
       },
     );
@@ -2309,8 +2308,8 @@ const dashboardModule: Module = {
           await prisma.server.update({
             where: { UUID: getParamAsString(serverId) },
             data: {
-              name: name,
-              description: description,
+              name,
+              description,
             },
           });
 
@@ -2472,21 +2471,21 @@ const dashboardModule: Module = {
                     // Process the value based on its type
                     let processedValue: string | number | boolean;
                     switch (curr.type) {
-                    case 'boolean':
-                      processedValue =
+                      case 'boolean':
+                        processedValue =
                           curr.value === 1 ||
                           curr.value === '1' ||
                           curr.value === true
                             ? 'true'
                             : 'false';
-                      break;
-                    case 'number':
-                      processedValue = Number(curr.value);
-                      break;
-                    case 'text':
-                    default:
-                      processedValue = String(curr.value);
-                      break;
+                        break;
+                      case 'number':
+                        processedValue = Number(curr.value);
+                        break;
+                      case 'text':
+                      default:
+                        processedValue = String(curr.value);
+                        break;
                     }
                     acc[curr.env] = processedValue;
                     logger.info(
@@ -2530,7 +2529,7 @@ const dashboardModule: Module = {
                     data: {
                       id: serverToReinstall.UUID,
                       image: reinstallDockerImage,
-                      env: env,
+                      env,
                       scripts: scripts.install.map(
                         (script: {
                           url: string;
@@ -2557,7 +2556,7 @@ const dashboardModule: Module = {
                     data: { Queued: false },
                   });
                 } catch (error: unknown) {
-                  const msg = error instanceof Error ? error.message : 'Unknown error';
+                  const _msg = error instanceof Error ? error.message : 'Unknown error';
                   logger.error(
                     `Error during reinstallation of server ${serverId}:`,
                     error,
@@ -2589,7 +2588,7 @@ const dashboardModule: Module = {
                   data: { Queued: false },
                 })
                 .catch((e) =>
-                  logger.error('Error updating server queue status:', e),
+                { logger.error('Error updating server queue status:', e); },
                 );
             }
           });
@@ -2599,7 +2598,7 @@ const dashboardModule: Module = {
             message: 'Server reinstallation initiated',
           });
 
-          notifyUser(userId, 'Server Reinstalling', `Server ${server.name} is being reinstalled. This may take a few minutes.`, '/server/' + serverId).catch(() => {});
+          notifyUser(userId!, 'Server Reinstalling', `Server ${server.name} is being reinstalled. This may take a few minutes.`, '/server/' + serverId).catch(() => {});
         } catch (error) {
           logger.error('Error reinstalling server:', error);
           res.status(500).json({ error: 'Failed to reinstall server' });
@@ -2730,7 +2729,7 @@ const dashboardModule: Module = {
                   uniqueCloudFileName
                 );
 
-                if (uploadResult && uploadResult.id) {
+                if (uploadResult?.id) {
                   airlinkCloudId = uploadResult.id;
                   
                   // Delete the local backup from the daemon
@@ -2740,7 +2739,7 @@ const dashboardModule: Module = {
                       data: { backupPath: filePath },
                       auth: { username: 'Airlink', password: server.node.key },
                     }
-                  ).catch(e => logger.warn(`Failed to delete temporary local backup: ${e}`));
+                  ).catch(e => { logger.warn(`Failed to delete temporary local backup: ${e}`); });
                   
                   filePath = 'airlink-cloud'; // Marker for cloud backups
                 }
@@ -2755,9 +2754,9 @@ const dashboardModule: Module = {
                 UUID: response.data.backup.uuid,
                 name: name.trim(),
                 serverId: getParamAsString(serverId),
-                filePath: filePath,
+                filePath,
                 size: BigInt(response.data.backup.size),
-                airlinkCloudId: airlinkCloudId,
+                airlinkCloudId,
               },
             });
 
@@ -2773,7 +2772,7 @@ const dashboardModule: Module = {
               },
             });
 
-            notifyUser(userId, 'Backup Created', `Backup "${name.trim()}" for server ${server.name} has been created successfully.`, '/server/' + serverId + '/backups').catch(() => {});
+            notifyUser(userId!, 'Backup Created', `Backup "${name.trim()}" for server ${server.name} has been created successfully.`, '/server/' + serverId + '/backups').catch(() => {});
           } else {
             res
               .status(500)
@@ -2876,7 +2875,7 @@ const dashboardModule: Module = {
             `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/restore`,
             {
               id: serverId,
-              backupPath: backupPath,
+              backupPath,
             },
             {
               auth: {
@@ -2892,10 +2891,10 @@ const dashboardModule: Module = {
             axios.delete(
               `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
               {
-                data: { backupPath: backupPath },
+                data: { backupPath },
                 auth: { username: 'Airlink', password: server.node.key },
               }
-            ).catch(e => logger.warn(`Failed to delete temporary restore file: ${e}`));
+            ).catch(e => { logger.warn(`Failed to delete temporary restore file: ${e}`); });
           }
 
           if (response.data.success) {
@@ -3050,7 +3049,7 @@ const dashboardModule: Module = {
             const settings = await prisma.settings.findUnique({ where: { id: 1 } });
             if (settings?.airlinkCloudApiKey) {
               const cloudClient = new AirlinkCloudClient(settings.airlinkCloudApiKey);
-              await cloudClient.deleteFile(backup.airlinkCloudId).catch(e => logger.warn(`Failed to delete backup from Airlink Cloud: ${e}`));
+              await cloudClient.deleteFile(backup.airlinkCloudId).catch(e => { logger.warn(`Failed to delete backup from Airlink Cloud: ${e}`); });
             }
           } else {
             try {

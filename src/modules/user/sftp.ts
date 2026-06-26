@@ -1,5 +1,6 @@
-import { Router, Request, Response } from 'express';
-import { Module } from '../../core/moduleInit';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
+import type { Module } from '../../core/moduleInit';
 import { isAuthenticatedForServer } from '../../middleware/serverAuth';
 import { getParamAsString } from '../../utils/typeHelpers';
 import prisma from '../../db';
