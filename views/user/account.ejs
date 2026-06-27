@@ -102,7 +102,7 @@
       <form id="language-preference-form">
         <%- include('../components/csrf') %>
         <select id="language" name="language"
-          class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:outline-none text-sm w-full px-3 py-2.5 bg-neutral-100 dark:bg-neutral-700 text-neutral-800 dark:text-white mb-3 transition">
+          class="cs-select">
           <option value="en"  <%= req.lang === 'en'  ? 'selected' : '' %>>English</option>
           <option value="fr"  <%= req.lang === 'fr'  ? 'selected' : '' %>>Français</option>
           <option value="de"  <%= req.lang === 'de'  ? 'selected' : '' %>>Deutsch</option>
@@ -351,7 +351,7 @@
               <%- include('../components/csrf') %>
               <label class="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%- icon('globe', { class: 'w-3 h-3' }) %> <%= req.translations.languagePreference || 'Language' %></label>
               <select id="language" name="language"
-                class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-xs w-full bg-white dark:bg-neutral-700 px-3 py-1.5 text-neutral-800 dark:text-white transition-colors mb-1.5">
+                class="cs-select">
                 <option value="en"  <%= req.lang === 'en'  ? 'selected' : '' %>>English</option>
                 <option value="fr"  <%= req.lang === 'fr'  ? 'selected' : '' %>>Français</option>
                 <option value="de"  <%= req.lang === 'de'  ? 'selected' : '' %>>Deutsch</option>

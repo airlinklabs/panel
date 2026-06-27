@@ -782,6 +782,7 @@ connectWebSocket();
             }
             event.preventDefault();
         }
+    }
 
     const startButton = document.getElementById('startButton');
     const startButtonMobile = document.getElementById('startButtonMobile');
@@ -1232,6 +1233,31 @@ connectWebSocket();
         updateChart(ramChart, ramUsagePercent);
     }
 }
+
+    function updateCpuUsage(stats) {
+        let cpuUsagePercent = Number(stats?.data?.cpu?.percentage) || 0;
+        if (isNaN(cpuUsagePercent)) {
+            cpuUsagePercent = 0;
+        }
+        const cpuAllocPct = <%- server.Cpu %> || 100;
+        const cores = Math.max(1, Math.round(cpuAllocPct / 100));
+        const cpuOfAlloc = cpuAllocPct > 0
+            ? Math.round(Math.min(100, (cpuUsagePercent / cpuAllocPct) * 100))
+            : 0;
+        document.getElementById('cpuUsage').textContent =
+            `<% if (isMobileViewport) { %>${cpuOfAlloc}%<% } else { %>${cpuOfAlloc}% of ${cores} core${cores === 1 ? '' : 's'}<% } %>`;
+        if (cpuOfAlloc > 0) {
+            updateChart(cpuChart, cpuOfAlloc);
+        }
+    }
+
+    function updateDiskUsage(stats) {
+        const diskUsageRaw = parseFloat(stats.data.storage.usage) || 0;
+        const diskLimitRaw = 10 * 1024;
+        const diskPct = Math.round(diskUsageRaw / diskLimitRaw * 100);
+        document.getElementById('diskUsage').textContent =
+            `<% if (isMobileViewport) { %>${diskPct}%<% } else { %>${diskPct}% (${formatBytes(diskUsageRaw * 1024 * 1024)} / ${formatBytes(diskLimitRaw * 1024 * 1024)})<% } %>`;
+    }
 
     function updateStatus(stats) {
         if (lifecycleActive) return;

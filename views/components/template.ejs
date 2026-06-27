@@ -1,6 +1,6 @@
 <% if (isMobileViewport) { %>
 <!-- Mobile top bar -->
-<div id="mobile-topbar" data-turbo-permanent class="mobile-top-bar al-topbar fixed top-0 left-0 right-0 z-50 h-14 bg-white/90 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-neutral-200/60 dark:border-white/5">
+<div id="mobile-topbar" data-turbo-permanent class="mobile-top-bar al-topbar fixed top-0 left-0 right-0 z-50 h-14 bg-white/90 dark:bg-neutral-900/80 border-b border-neutral-200/60 dark:border-white/5">
   <div id="topbar-default" class="flex items-center justify-between h-14 px-4">
     <a href="/" class="flex items-center gap-2 min-w-0 flex-1 mr-3">
       <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="logo-bg h-8 w-8 rounded-lg bg-neutral-950/90 dark:bg-transparent p-0.5 shrink-0">
@@ -15,7 +15,7 @@
           <%- icon('bell', { class: 'h-5 w-5' }) %>
           <span id="notification-badge" class="hidden absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">0</span>
         </button>
-        <div id="notification-dropdown" class="hidden absolute right-0 top-12 w-80 max-h-96 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30 z-50">
+        <div id="notification-dropdown" class="hidden w-80 max-h-96 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30 z-[60]">
           <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/10">
             <span class="text-sm font-medium text-neutral-800 dark:text-white">Notifications</span>
             <button onclick="markAllRead()" class="text-xs font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition px-2 py-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5">Mark all read</button>
@@ -68,7 +68,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 %>
 
 <!-- Mobile bottom nav -->
-<nav id="mobile-bottom-nav" data-turbo-permanent class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-neutral-900/80 backdrop-blur-xl border-t border-neutral-200/60 dark:border-white/5">
+<nav id="mobile-bottom-nav" data-turbo-permanent class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-neutral-900 border-t border-neutral-200/60 dark:border-white/5">
   <ul class="relative flex items-center justify-around h-16">
     <% if (!sidebarItems || sidebarItems.length === 0) { %>
       <li class="flex-1 relative z-10">
@@ -257,7 +257,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 
 <!-- Sidebar -->
 <div id="pc-sidebar" data-turbo-permanent class="sidebar transition hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-56 lg:flex-col left-0">
-  <div id="pc-sidebar2" class="flex flex-col h-full bg-white/90 dark:bg-neutral-900/80 backdrop-blur-xl border-r border-neutral-200/60 dark:border-white/5">
+  <div id="pc-sidebar2" class="flex flex-col h-full bg-white/90 dark:bg-neutral-900/80 border-r border-neutral-200/60 dark:border-white/5">
 
     <!-- Static top: logo -->
     <div class="pl-6 pt-4 pb-4 flex min-w-0 shrink-0">
@@ -410,7 +410,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
           <span class="flex-1 text-left">Notifications</span>
           <span id="desktop-notification-badge" class="hidden h-5 min-w-5 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center px-1">0</span>
         </button>
-        <div id="desktop-notification-dropdown" class="hidden absolute left-3 right-3 bottom-full mb-2 w-auto max-h-80 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30 z-50">
+        <div id="desktop-notification-dropdown" class="hidden w-72 max-h-80 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30 z-[60]">
           <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/10">
             <span class="text-sm font-medium text-neutral-800 dark:text-white">Notifications</span>
             <button onclick="markAllRead()" class="text-xs font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition px-2 py-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5">Mark all read</button>
@@ -446,7 +446,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 </script>
 
 <div id="colcont" data-turbo-permanent class="lg:pl-56">
-  <div class="al-topbar fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-white/90 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-neutral-200/60 dark:border-white/5 px-4 sm:gap-x-6 sm:px-4 lg:px-4">
+  <div class="al-topbar fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-white/90 dark:bg-neutral-900/80 border-b border-neutral-200/60 dark:border-white/5 px-4 sm:gap-x-6 sm:px-4 lg:px-4">
     <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
       <div class="relative flex flex-1 flex-col">
 
@@ -473,7 +473,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
           </div>
         </div>
 
-        <div id="searchResults" role="listbox" aria-label="Search results" class="absolute z-50 bg-neutral-50 dark:bg-neutral-900 w-[19.5rem] rounded-xl shadow-2xl shadow-neutral-200/80 dark:shadow-black/40 hidden mt-20 px-2 pb-2 border border-neutral-200 dark:border-neutral-700/60">
+        <div id="searchResults" role="listbox" aria-label="Search results" class="hidden absolute left-0 top-full mt-2 w-[19.5rem] bg-white dark:bg-neutral-900 rounded-xl shadow-2xl shadow-neutral-200/80 dark:shadow-black/40 px-2 pb-2 border border-neutral-200 dark:border-neutral-700/60 z-50">
         </div>
       </div>
 
@@ -486,8 +486,10 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
         });
 
         function showSearchResults() {
-          document.getElementById('searchResults').classList.remove('hidden');
-          document.getElementById('searchInput').setAttribute('aria-expanded', 'true');
+          var searchInput = document.getElementById('searchInput');
+          var searchResults = document.getElementById('searchResults');
+          searchResults.classList.remove('hidden');
+          searchInput.setAttribute('aria-expanded', 'true');
           if (typeof showSuggestions === 'function') showSuggestions();
         }
 
@@ -519,22 +521,21 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
   var badge = document.getElementById('notification-badge');
   var desktopBadge = document.getElementById('desktop-notification-badge');
 
-  function toggle(target) {
-    if (target === 'mobile' && notifDropdown) notifDropdown.classList.toggle('hidden');
-    if (target === 'desktop' && desktopDropdown) desktopDropdown.classList.toggle('hidden');
-  }
-
-  if (bell) bell.addEventListener('click', function(e) { e.stopPropagation(); toggle('mobile'); });
-  if (desktopBtn) desktopBtn.addEventListener('click', function(e) { e.stopPropagation(); toggle('desktop'); });
-
-  document.addEventListener('click', function() {
-    if (notifDropdown) notifDropdown.classList.add('hidden');
+  if (bell) bell.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (notifDropdown) notifDropdown.classList.toggle('hidden');
     if (desktopDropdown) desktopDropdown.classList.add('hidden');
+  });
+
+  if (desktopBtn) desktopBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (desktopDropdown) desktopDropdown.classList.toggle('hidden');
+    if (notifDropdown) notifDropdown.classList.add('hidden');
   });
 
   window.toggleNotifications = function() {
     if (desktopDropdown) desktopDropdown.classList.toggle('hidden');
-    if (notifDropdown) notifDropdown.classList.toggle('hidden');
+    if (notifDropdown) notifDropdown.classList.add('hidden');
   };
 
   window.markAllRead = function() {

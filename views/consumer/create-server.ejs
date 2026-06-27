@@ -45,8 +45,7 @@
 
         <div>
           <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Node</label>
-          <select name="nodeId" required
-            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+          <select name="nodeId" required class="cs-select">
             <% if (nodes && nodes.length > 0) { %>
               <% nodes.forEach(function(node) { %>
               <option value="<%= node.id %>"><%= node.name %></option>
@@ -59,8 +58,7 @@
 
         <div>
           <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Server Image</label>
-          <select name="imageId" required id="imageSelect"
-            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+          <select name="imageId" required id="imageSelect" class="cs-select">
             <% if (images && images.length > 0) { %>
               <% images.forEach(function(img) { %>
               <option value="<%= img.id %>" data-docker="<%= img.dockerImage %>" data-name="<%= img.name %>"><%= img.name %></option>
@@ -139,8 +137,7 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Node</label>
-                <select name="nodeId" required
-                  class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-4 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                <select name="nodeId" required class="cs-select">
                   <% if (nodes && nodes.length > 0) { %>
                     <% nodes.forEach(function(node) { %>
                     <option value="<%= node.id %>"><%= node.name %></option>
@@ -152,8 +149,7 @@
               </div>
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Server Image</label>
-                <select name="imageId" required id="imageSelect"
-                  class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-4 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                <select name="imageId" required id="imageSelect" class="cs-select">
                   <% if (images && images.length > 0) { %>
                     <% images.forEach(function(img) { %>
                     <option value="<%= img.id %>" data-docker="<%= img.dockerImage %>" data-name="<%= img.name %>"><%= img.name %></option>

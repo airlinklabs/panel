@@ -33,29 +33,31 @@ const primaryItems = allItems.filter(item => primaryLabels.includes(item.label))
 const secondaryItems = allItems.filter(item => !primaryLabels.includes(item.label));
 %>
 <% if (isMobileViewport) { %>
-<div class="overflow-x-auto border-b border-neutral-200 dark:border-white/5 mb-4 -mx-4 px-4">
-  <nav class="flex gap-1 min-w-max pb-1">
+<div class="border-b border-neutral-200 dark:border-white/5 mb-4 -mx-4 px-4">
+  <nav class="flex gap-1 min-w-max pb-1 overflow-x-auto">
     <% primaryItems.forEach(function(item) { %>
     <a href="<%= item.url %>" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false"><%= item.label %></a>
     <% }); %>
     <% if (secondaryItems.length > 0) { %>
-    <div class="relative">
+    <div class="relative" id="mobile-more-wrapper">
       <button id="mobile-more-btn" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap flex items-center gap-1">
         More
         <%- icon('chevron-down', { class: 'w-3 h-3' }) %>
       </button>
-      <div id="mobile-more-dropdown" class="hidden absolute left-0 top-full mt-1 z-50 min-w-[160px] bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl shadow-lg py-1">
-        <% secondaryItems.forEach(function(item) { %>
-        <a href="<%= item.url %>" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition">
-          <% if (item.icon) { %><%- item.icon %><% } %>
-          <%= item.label %>
-        </a>
-        <% }); %>
-      </div>
     </div>
     <% } %>
   </nav>
 </div>
+<% if (secondaryItems.length > 0) { %>
+<div id="mobile-more-dropdown" class="hidden fixed z-[60] min-w-[160px] bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl shadow-xl py-1">
+  <% secondaryItems.forEach(function(item) { %>
+  <a href="<%= item.url %>" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition">
+    <% if (item.icon) { %><%- item.icon %><% } %>
+    <%= item.label %>
+  </a>
+  <% }); %>
+</div>
+<% } %>
 
 <script nonce="<%- nonce %>">
 (function() {
@@ -78,13 +80,13 @@ const secondaryItems = allItems.filter(item => !primaryLabels.includes(item.labe
   var mobileMoreBtn = document.getElementById('mobile-more-btn');
   var mobileMoreDropdown = document.getElementById('mobile-more-dropdown');
   if (mobileMoreBtn && mobileMoreDropdown) {
-    var mobileOpen = false;
     mobileMoreBtn.addEventListener('click', function(e) {
       e.stopPropagation();
-      mobileOpen = !mobileOpen;
-      mobileMoreDropdown.classList.toggle('hidden', !mobileOpen);
+      mobileMoreDropdown.classList.toggle('hidden');
     });
-    document.addEventListener('click', function() { mobileOpen = false; mobileMoreDropdown.classList.add('hidden'); });
+    document.addEventListener('click', function() {
+      mobileMoreDropdown.classList.add('hidden');
+    });
   }
 })();
 </script>

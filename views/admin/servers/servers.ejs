@@ -58,7 +58,7 @@
 
     <!-- Floating pill — fixed below mobile topbar when toolbar scrolls off screen -->
     <div id="floatingToolbar"
-      style="position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:40;opacity:0;pointer-events:none;transition:opacity 0.22s ease,transform 0.22s cubic-bezier(0.16,1,0.3,1);width:calc(100% - 2rem);max-width:420px">
+      style="position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:50;opacity:0;pointer-events:none;transition:opacity 0.22s ease,transform 0.22s cubic-bezier(0.16,1,0.3,1);width:calc(100% - 2rem);max-width:420px">
       <div data-animate-card class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-neutral-900 shadow-xl border border-neutral-200 dark:border-neutral-700/60">
         <span class="selection-count text-xs font-medium text-neutral-600 dark:text-neutral-300 mr-1">0 selected</span>
         <div class="h-3.5 w-px bg-neutral-300 dark:bg-neutral-600 mx-0.5"></div>
@@ -184,7 +184,7 @@
 
       <div id="builtinPickerSection">
         <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Script</label>
-        <select id="scriptSelect" class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm text-neutral-800 dark:text-white mb-2 focus:outline-none focus:ring-2 focus:ring-neutral-200 dark:focus:ring-white/10 focus:border-neutral-400 dark:focus:border-white/30 transition-shadow duration-150"></select>
+        <select id="scriptSelect" class="cs-select">
         <p id="scriptDescription" class="text-xs text-neutral-500 italic mb-4 min-h-4"></p>
         <button id="runScanButton" onclick="runRadarScan()"
           class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/40 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition">
@@ -764,7 +764,7 @@
 
       <!-- Floating pill — fixed below topbar when toolbar scrolls off screen -->
       <div id="floatingToolbar"
-        style="position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:40;opacity:0;pointer-events:none;transition:opacity 0.22s ease,transform 0.22s cubic-bezier(0.16,1,0.3,1)">
+        style="position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:50;opacity:0;pointer-events:none;transition:opacity 0.22s ease,transform 0.22s cubic-bezier(0.16,1,0.3,1)">
         <div data-animate-card class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-neutral-900 shadow-xl border border-neutral-200 dark:border-neutral-700/60">
           <span class="selection-count text-sm font-medium text-neutral-600 dark:text-neutral-300 mr-1">0 selected</span>
           <div class="h-4 w-px bg-neutral-200 dark:bg-neutral-700 mx-1"></div>
@@ -916,8 +916,7 @@
           <div class="flex gap-4 items-start">
             <div class="flex-1">
               <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Script</label>
-              <select id="scriptSelect"
-                class="w-full rounded-lg text-neutral-800 dark:text-white text-sm px-3 py-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/50 focus:outline-none focus:ring-2 focus:ring-neutral-200 dark:focus:ring-white/10 focus:border-neutral-400 dark:focus:border-white/30 transition-shadow duration-150">
+              <select id="scriptSelect" class="cs-select">
                 <option value="">Loading scripts...</option>
               </select>
             </div>

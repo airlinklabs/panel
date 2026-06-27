@@ -414,31 +414,24 @@
 
         <!-- ── Filters ────────────────────────────────────────── -->
         <div id="filterBar" class="flex items-center gap-2 mb-5 flex-wrap">
-          <div class="relative">
-            <button data-popover-trigger class="al-filter-btn flex items-center gap-1.5 px-3 py-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 text-sm text-neutral-700 dark:text-neutral-300 hover:border-neutral-300 dark:hover:border-white/20 transition">
-              <%- icon('filter', { class: 'h-3.5 w-3.5 text-neutral-400' }) %>
-              <span class="filter-label">Status</span>
-              <%- icon('chevron-down', { class: 'h-3 w-3 text-neutral-400' }) %>
-            </button>
-            <div data-popover class="hidden absolute left-0 mt-1.5 z-[100] w-44 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-neutral-200/80 dark:border-white/10 rounded-xl shadow-xl shadow-black/5 dark:shadow-black/30 p-1.5">
-              <button data-filter-val="" class="al-filter-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 transition">All</button>
-              <button data-filter-val="running" class="al-filter-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-emerald-600 dark:text-emerald-400 transition">Running</button>
-              <button data-filter-val="stopped" class="al-filter-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-red-600 dark:text-red-400 transition">Stopped</button>
-            </div>
+          <div class="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800">
+            <%- icon('filter', { class: 'h-3.5 w-3.5 text-neutral-400' }) %>
+            <select id="filterStatus" class="cs-select cs-sm">
+              <option value="">Status</option>
+              <option value="running">Running</option>
+              <option value="stopped">Stopped</option>
+            </select>
           </div>
-          <div class="relative">
-            <button data-popover-trigger class="al-filter-btn flex items-center gap-1.5 px-3 py-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 text-sm text-neutral-700 dark:text-neutral-300 hover:border-neutral-300 dark:hover:border-white/20 transition">
-              <%- icon('arrow-up-down', { class: 'h-3.5 w-3.5 text-neutral-400' }) %>
-              <span class="sort-label">Sort</span>
-              <%- icon('chevron-down', { class: 'h-3 w-3 text-neutral-400' }) %>
-            </button>
-            <div data-popover class="hidden absolute left-0 mt-1.5 z-[100] w-48 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-neutral-200/80 dark:border-white/10 rounded-xl shadow-xl shadow-black/5 dark:shadow-black/30 p-1.5">
-              <button data-sort-val="name" data-sort-dir="asc" class="al-sort-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 transition">Name (A-Z)</button>
-              <button data-sort-val="name" data-sort-dir="desc" class="al-sort-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 transition">Name (Z-A)</button>
-              <button data-sort-val="status" data-sort-dir="asc" class="al-sort-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 transition">Status (Running first)</button>
-              <button data-sort-val="ramUsage" data-sort-dir="desc" class="al-sort-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 transition">RAM (Highest)</button>
-              <button data-sort-val="cpuUsage" data-sort-dir="desc" class="al-sort-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 transition">CPU (Highest)</button>
-            </div>
+          <div class="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800">
+            <%- icon('arrow-up-down', { class: 'h-3.5 w-3.5 text-neutral-400' }) %>
+            <select id="sortSelect" class="cs-select cs-sm">
+              <option value="">Sort</option>
+              <option value="name-asc">Name (A-Z)</option>
+              <option value="name-desc">Name (Z-A)</option>
+              <option value="status-asc">Status (Running first)</option>
+              <option value="ramUsage-desc">RAM (Highest)</option>
+              <option value="cpuUsage-desc">CPU (Highest)</option>
+            </select>
           </div>
           <div class="relative flex-1 max-w-xs">
             <input type="text" id="serverSearch" placeholder="Search servers..."
@@ -569,7 +562,7 @@
               </div>
             </a>
             <!-- Right-click context menu -->
-            <div class="server-ctx-menu hidden absolute z-50 top-2 right-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-xl shadow-lg py-1 w-44">
+            <div class="server-ctx-menu hidden z-[60] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-xl shadow-xl py-1 w-44">
               <button class="ctx-add-to-folder w-full text-left px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition rounded-t-xl" data-uuid="<%= server.UUID %>">Add to folder</button>
               <button class="ctx-remove-from-folder w-full text-left px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition rounded-b-xl" data-uuid="<%= server.UUID %>" style="display:<%= (folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID))) ? '' : 'none' %>">Remove from folder</button>
             </div>
@@ -726,8 +719,8 @@
 <%- include('../components/toast') %>
 
 <div id="dashboard-data" class="hidden"></div>
-<script type="application/json" id="dashboard-folders-data-m"><%- JSON.stringify(folders || []) %></script>
-<script type="application/json" id="dashboard-servers-data-m"><%- JSON.stringify((allServers || []).map(s => ({ UUID: s.UUID, name: s.name, status: s.status, ramUsage: s.ramUsage, cpuUsage: s.cpuUsage }))) %></script>
+<script type="application/json" id="dashboard-folders-data"><%- JSON.stringify(folders || []) %></script>
+<script type="application/json" id="dashboard-servers-data"><%- JSON.stringify((allServers || []).map(s => ({ UUID: s.UUID, name: s.name, status: s.status, ramUsage: s.ramUsage, cpuUsage: s.cpuUsage }))) %></script>
 <script nonce="<%- nonce %>">
   document.getElementById('dashboard-data').dataset.folders = document.getElementById('dashboard-folders-data-m').textContent;
   document.getElementById('dashboard-data').dataset.servers = document.getElementById('dashboard-servers-data-m').textContent;
@@ -828,42 +821,25 @@
     }
   }
 
-  // Popover handling
-  document.querySelectorAll('#filterBar [data-popover-trigger]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const popover = btn.parentElement.querySelector('[data-popover]');
-      const wasHidden = popover.classList.contains('hidden');
-      // Close all popovers
-      document.querySelectorAll('#filterBar [data-popover]').forEach(p => p.classList.add('hidden'));
-      if (wasHidden) popover.classList.remove('hidden');
-    });
-  });
-
-  document.addEventListener('click', () => {
-    document.querySelectorAll('#filterBar [data-popover]').forEach(p => p.classList.add('hidden'));
-  });
-
-  // Filter options
-  document.querySelectorAll('.al-filter-opt').forEach(opt => {
-    opt.addEventListener('click', () => {
-      filterStatus = opt.dataset.filterVal || '';
-      const label = document.querySelector('.filter-label');
-      if (label) label.textContent = filterStatus ? (filterStatus === 'running' ? 'Running' : 'Stopped') : 'Status';
+  // Filter by status
+  var filterSelect = document.getElementById('filterStatus');
+  if (filterSelect) {
+    filterSelect.addEventListener('change', function() {
+      filterStatus = this.value;
       applyFilters();
     });
-  });
+  }
 
-  // Sort options
-  document.querySelectorAll('.al-sort-opt').forEach(opt => {
-    opt.addEventListener('click', () => {
-      sortField = opt.dataset.sortVal;
-      sortDir = opt.dataset.sortDir || 'asc';
-      const label = document.querySelector('.sort-label');
-      if (label) label.textContent = opt.textContent.trim();
+  // Sort
+  var sortSelect = document.getElementById('sortSelect');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', function() {
+      var val = this.value;
+      if (!val) { sortField = ''; sortDir = 'asc'; }
+      else { var parts = val.split('-'); sortField = parts[0]; sortDir = parts[1] || 'asc'; }
       applyFilters();
     });
-  });
+  }
 
   // Search
   if (searchInput) {

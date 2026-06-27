@@ -74,7 +74,7 @@
                             var dockerImageOptions = availableDockerImages.map(function(img) { return { value: img, label: img }; });
                             if (dockerImageOptions.length === 0) { dockerImageOptions = [{ value: '', label: 'No images available' }]; }
                         %>
-                        <div><div><select name="dockerImage" class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"><% dockerImageOptions.forEach(function(opt) { %><option value="<%= opt.value %>" <%= opt.value === currentDockerImage ? 'selected' : '' %>><%= opt.label %></option><% }); %></select></div></div>
+                        <div><div><select name="dockerImage" class="cs-select"><% dockerImageOptions.forEach(function(opt) { %><option value="<%= opt.value %>" <%= opt.value === currentDockerImage ? 'selected' : '' %>><%= opt.label %></option><% }); %></select></div></div>
                         <p class="text-xs text-neutral-500 mt-2">Changing the image will restart your server if it is running.</p>
                     </div>
                     <div class="px-4 py-3 bg-neutral-100 dark:bg-neutral-800 border-t border-neutral-200 dark:border-white/5">
@@ -98,7 +98,7 @@
                                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-0.5"><%= variable.name %></label>
                                 <p class="text-[10px] text-neutral-500 mb-2">ENV: <span class="font-mono"><%= variable.env %></span> &middot; type: <%= variable.type %></p>
                                 <% if (variable.type === 'boolean') { %>
-                                    <select name="var_<%= variable.env %>" class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition">
+                                    <select name="var_<%= variable.env %>" class="cs-select">
                                         <option value="true" <%= variable.value === 'true' || variable.value === true ? 'selected' : '' %>>Enabled</option>
                                         <option value="false" <%= variable.value === 'false' || variable.value === false ? 'selected' : '' %>>Disabled</option>
                                     </select>
@@ -203,7 +203,7 @@
                                 var dockerImageOptions = availableDockerImages.map(function(img) { return { value: img, label: img }; });
                                 if (dockerImageOptions.length === 0) { dockerImageOptions = [{ value: '', label: 'No images available' }]; }
                             %>
-                            <div><div><select name="dockerImage" class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"><% dockerImageOptions.forEach(function(opt) { %><option value="<%= opt.value %>" <%= opt.value === currentDockerImage ? 'selected' : '' %>><%= opt.label %></option><% }); %></select></div></div>
+                            <div><div><select name="dockerImage" class="cs-select"><% dockerImageOptions.forEach(function(opt) { %><option value="<%= opt.value %>" <%= opt.value === currentDockerImage ? 'selected' : '' %>><%= opt.label %></option><% }); %></select></div></div>
                             <p class="text-xs text-neutral-500 mt-2">Changing the image will restart your server if it is running.</p>
                         </div>
                         <div class="px-5 py-4 bg-neutral-100 dark:bg-neutral-800 border-t border-neutral-200 dark:border-white/5">
@@ -227,7 +227,7 @@
                                     <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-0.5"><%= variable.name %></label>
                                     <p class="text-[10px] text-neutral-500 mb-2">ENV: <span class="font-mono"><%= variable.env %></span> &middot; type: <%= variable.type %></p>
                                     <% if (variable.type === 'boolean') { %>
-                                        <select name="var_<%= variable.env %>" class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition">
+                                        <select name="var_<%= variable.env %>" class="cs-select">
                                             <option value="true" <%= variable.value === 'true' || variable.value === true ? 'selected' : '' %>>Enabled</option>
                                             <option value="false" <%= variable.value === 'false' || variable.value === false ? 'selected' : '' %>>Disabled</option>
                                         </select>

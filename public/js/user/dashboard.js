@@ -1,6 +1,8 @@
 (function () {
   document.addEventListener('contextmenu', e => e.preventDefault());
 
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
   const bridge    = document.getElementById('dashboard-data');
   const allFolders = JSON.parse(bridge.dataset.folders || '[]');
   const allServers = JSON.parse(bridge.dataset.servers || '[]');
@@ -235,7 +237,13 @@
       e.preventDefault();
       document.querySelectorAll('.server-ctx-menu').forEach(m => m.classList.add('hidden'));
       const menu = card.querySelector('.server-ctx-menu');
-      if (menu) menu.classList.remove('hidden');
+      if (menu) {
+        menu.style.position = 'fixed';
+        menu.style.top = e.clientY + 'px';
+        menu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
+        menu.style.zIndex = '2147483647';
+        menu.classList.remove('hidden');
+      }
     });
   });
 

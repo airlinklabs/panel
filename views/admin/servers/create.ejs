@@ -40,7 +40,7 @@
                 <label for="serverUser" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
                   <%- icon('user', { size: 16, class: 'shrink-0' }) %>
                   <%= req.translations.user %>:</label>
-                <select id="serverUser" name="ownerId" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                <select id="serverUser" name="ownerId" class="cs-select">
                   <% users.forEach(user => { %>
                     <option value="<%= user.id %>"><%= user.username %></option>
                   <% }); %>
@@ -54,7 +54,7 @@
                 </label>
                 <div class="relative mt-2 mb-4">
                   <select id="serverNode" name="nodeId"
-                          class="block w-full rounded-xl bg-neutral-100 dark:bg-neutral-600 border border-neutral-800/10 dark:border-white/5 text-neutral-800 dark:text-white text-sm px-4 py-2 focus:outline-none focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 hover:bg-white/5 dark:hover:bg-neutral-700/30">
+                          class="cs-select">
                     <% if (nodes.length > 0) { %>
                       <% nodes.forEach(node => { %>
                         <option value="<%= node.id %>"><%= node.name %></option>
@@ -77,7 +77,7 @@
                 <input type="hidden" id="serverCPU" name="Cpu" value="100">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverCPUDisplay" type="number" min="0.5" step="0.5" value="1" class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 border border-r-0 border-neutral-800/10 dark:border-white/5">
-                  <select id="serverCPUUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-800/10 dark:border-white/5 cursor-pointer">
+                  <select id="serverCPUUnit" class="cs-select cs-sm">
                     <option value="cores" selected>Cores</option>
                     <option value="percent">%</option>
                   </select>
@@ -94,7 +94,7 @@
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverMemoryDisplay" type="number" min="1" value="1"
                     class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 border border-r-0 border-neutral-800/10 dark:border-white/5">
-                  <select id="serverMemoryUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-800/10 dark:border-white/5 cursor-pointer">
+                  <select id="serverMemoryUnit" class="cs-select cs-sm">
                     <option value="1">MB</option>
                     <option value="1024" selected>GB</option>
                   </select>
@@ -111,7 +111,7 @@
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverStorageDisplay" type="number" min="1" value="20"
                     class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 border border-r-0 border-neutral-800/10 dark:border-white/5">
-                  <select id="serverStorageUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-800/10 dark:border-white/5 cursor-pointer">
+                  <select id="serverStorageUnit" class="cs-select cs-sm">
                     <option value="1">MB</option>
                     <option value="1024" selected>GB</option>
                   </select>
@@ -127,7 +127,7 @@
                   <%- icon('database', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Image %>:</label>
                 <select id="serverImage" name="imageId"
-                        class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                        class="cs-select">
                   <% images.forEach(image => { %>
                     <option value="<%= image.id %>" data-docker-images='<%= image.dockerImages %>' data-variables='<%= image.variables %>' data-port-requirements='<%= image.portRequirements || "[]" %>'>
                       <%= image.name %>
@@ -141,7 +141,7 @@
                   <%- icon('box', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.DockerImage %>:</label>
                 <select id="dockerImage" name="dockerImage"
-                        class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                        class="cs-select">
                   <option value="" disabled selected>Select a Docker image</option>
                 </select>
               </div>
@@ -312,7 +312,7 @@
         row.innerHTML = `
           <label class="block text-xs text-neutral-500">Port name<input data-port-field="${index}" data-field="name" value="${escapeHtml(port.name || '')}" class="mt-1 w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
           <label class="block text-xs text-neutral-500">Internal port<input data-port-field="${index}" data-field="internalPort" type="number" min="1" max="65535" value="${escapeHtml(port.internalPort || '')}" class="mt-1 w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
-          <label class="block text-xs text-neutral-500">External port<select data-port-field="${index}" data-field="externalPort" class="mt-1 w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></select></label>
+          <label class="block text-xs text-neutral-500">External port<select data-port-field="${index}" data-field="externalPort" class="cs-select"></select></label>
           <button type="button" data-remove-port="${index}" class="w-full rounded-xl border border-red-200 px-3 py-2 text-sm text-red-500 ${index < min ? 'opacity-40 pointer-events-none' : ''}">Remove</button>`;
         rows.appendChild(row);
         const select = row.querySelector('select');
@@ -498,7 +498,6 @@ const listB = ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither
 })();
 </script>
 
-<script nonce="<%- nonce %>" src="/js/user/server-create.js"></script>
 <% } else { %>
 <main class="h-screen m-auto">
   <div class="flex h-screen">
@@ -537,19 +536,18 @@ const listB = ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
                   <%- icon('user', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.user %>:</label>
-                <select id="serverUser" name="ownerId" class="hidden">
+                <select id="serverUser" name="ownerId" class="cs-select">
                   <% users.forEach(user => { %>
                     <option value="<%= user.id %>"><%= user.username %></option>
                   <% }); %>
                 </select>
-                <div class="custom-select mt-2 mb-4" data-for="serverUser"></div>
               </div>
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
                   <%- icon('server', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Node %>:
                 </label>
-                <select id="serverNode" name="nodeId" class="hidden">
+                <select id="serverNode" name="nodeId" class="cs-select">
                     <% if (nodes.length > 0) { %>
                       <% nodes.forEach(node => { %>
                         <option value="<%= node.id %>"><%= node.name %></option>
@@ -558,7 +556,6 @@ const listB = ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither
                       <option value="" disabled selected>No nodes available</option>
                     <% } %>
                   </select>
-                <div class="custom-select mt-2 mb-4" data-for="serverNode"></div>
               </div>
             </div>
             <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Resources</h2>
@@ -571,7 +568,7 @@ const listB = ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither
                 <input type="hidden" id="serverCPU" name="Cpu" value="100">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverCPUDisplay" type="number" min="0.5" step="0.5" value="1" class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 border border-r-0 border-neutral-800/10 dark:border-white/5">
-                  <select id="serverCPUUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-800/10 dark:border-white/5 cursor-pointer">
+                  <select id="serverCPUUnit" class="cs-select cs-sm">
                     <option value="cores" selected>Cores</option>
                     <option value="percent">%</option>
                   </select>
@@ -586,7 +583,7 @@ const listB = ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither
                 <input type="hidden" id="serverMemory" name="Memory" value="1024">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverMemoryDisplay" type="number" min="1" value="1024" class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-r-0 border-neutral-800/10 dark:border-white/5">
-                  <select id="serverMemoryUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-800/10 dark:border-white/5 cursor-pointer">
+                  <select id="serverMemoryUnit" class="cs-select cs-sm">
                     <option value="1" selected>MB</option>
                     <option value="1024">GB</option>
                   </select>
@@ -601,7 +598,7 @@ const listB = ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither
                 <input type="hidden" id="serverStorage" name="Storage" value="20480">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverStorageDisplay" type="number" min="1" value="20" class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-r-0 border-neutral-800/10 dark:border-white/5">
-                  <select id="serverStorageUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-800/10 dark:border-white/5 cursor-pointer">
+                  <select id="serverStorageUnit" class="cs-select cs-sm">
                     <option value="1">MB</option>
                     <option value="1024" selected>GB</option>
                   </select>
@@ -615,21 +612,19 @@ const listB = ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
                   <%- icon('box', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Image %>:</label>
-                <select id="serverImage" name="imageId" class="hidden">
+                <select id="serverImage" name="imageId" class="cs-select">
                   <% images.forEach(image => { %>
                     <option value="<%= image.id %>" data-docker-images='<%= image.dockerImages %>' data-variables='<%= image.variables %>' data-port-requirements='<%= image.portRequirements || "[]" %>'><%= image.name %></option>
                   <% }); %>
                 </select>
-                <div class="custom-select mt-2 mb-4" data-for="serverImage"></div>
               </div>
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
                   <%- icon('box', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.DockerImage %>:</label>
-                <select id="dockerImage" name="dockerImage" class="hidden">
+                <select id="dockerImage" name="dockerImage" class="cs-select">
                   <option value="" disabled selected>Select a Docker image</option>
                 </select>
-                <div class="custom-select mt-2 mb-4" data-for="dockerImage"></div>
               </div>
               <div>
                 <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
@@ -769,7 +764,7 @@ const listB = ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither
       assignedPorts.forEach((port, index) => {
         const row = document.createElement('div');
         row.className = 'grid grid-cols-1 md:grid-cols-[1fr_130px_1fr_auto] gap-2 items-end rounded-xl border border-neutral-200 dark:border-white/10 p-3 animate-[fadeSlideIn_0.2s_ease-out]';
-        row.innerHTML = `<label class="text-xs text-neutral-500">Port name<input data-port-field="${index}" data-field="name" value="${port.name || ''}" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label><label class="text-xs text-neutral-500">Internal port<input data-port-field="${index}" data-field="internalPort" type="number" min="1" max="65535" value="${port.internalPort || ''}" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label><label class="text-xs text-neutral-500">External port<select data-port-field="${index}" data-field="externalPort" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></select></label><button type="button" data-remove-port="${index}" class="rounded-lg border border-red-200 px-3 py-2 text-sm text-red-500 ${index < min ? 'opacity-40 pointer-events-none' : ''}">Remove</button>`;
+        row.innerHTML = `<label class="text-xs text-neutral-500">Port name<input data-port-field="${index}" data-field="name" value="${port.name || ''}" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label><label class="text-xs text-neutral-500">Internal port<input data-port-field="${index}" data-field="internalPort" type="number" min="1" max="65535" value="${port.internalPort || ''}" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label><label class="text-xs text-neutral-500">External port<select data-port-field="${index}" data-field="externalPort" class="cs-select"></select></label><button type="button" data-remove-port="${index}" class="rounded-lg border border-red-200 px-3 py-2 text-sm text-red-500 ${index < min ? 'opacity-40 pointer-events-none' : ''}">Remove</button>`;
         rows.appendChild(row);
         const select = row.querySelector('select');
         select.innerHTML = '<option value="">Select port</option>';
@@ -854,29 +849,6 @@ const listA = ["Charged","Fiery","Mystical","Dark","Angry","Enchanted","Blazing"
 const listB = ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither","Magma Cube","Blaze","Witch","Slime","Spider","Phantom","Villager","Pillager","Vindicator","Drowned","Illager","Ender Dragon","Husk","Stray","Ravager","Piglin","Hoglin","Shulker","Warden"];
   function generateRandomName() { let randomA, randomB; do { randomA = listA[Math.floor(Math.random() * listA.length)]; randomB = listB[Math.floor(Math.random() * listB.length)]; } while (randomA === randomB); document.getElementById("serverName").value = randomA + " " + randomB; }
 </script>
-<style>
-@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-.custom-select { position: relative; user-select: none; }
-.cs-trigger { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 8px 16px; border-radius: 12px; cursor: pointer; font-size: 14px; border: 1px solid var(--theme-border-subtle, rgba(0,0,0,0.07)); background: var(--theme-bg-secondary, rgba(180,180,180,0.1)); color: var(--theme-text-strong, #1a1a1a); transition: background 0.15s, border-color 0.15s; }
-.dark .cs-trigger { background: var(--theme-bg-secondary, #2a2a2a); color: var(--theme-text, #fff); border-color: var(--theme-border-subtle, rgba(255,255,255,0.05)); }
-.cs-trigger:hover { background: var(--theme-bg-hover, rgba(180,180,180,0.25)); }
-.dark .cs-trigger:hover { background: var(--theme-bg-hover, rgba(255,255,255,0.08)); }
-.cs-trigger.open { border-color: var(--theme-border, rgba(0,0,0,0.15)); }
-.dark .cs-trigger.open { border-color: var(--theme-border-subtle, rgba(255,255,255,0.12)); }
-.cs-trigger svg { width: 14px; height: 14px; opacity: 0.45; transition: transform 0.18s; flex-shrink: 0; }
-.cs-trigger.open svg { transform: rotate(180deg); }
-.cs-placeholder { opacity: 0.4; }
-.cs-dropdown { position: absolute; top: calc(100% + 5px); left: 0; right: 0; z-index: 70; background: var(--theme-bg-card, #fff); border: 1px solid var(--theme-border-subtle, rgba(0,0,0,0.1)); border-radius: 12px; box-shadow: 0 8px 24px var(--theme-shadow-md, rgba(0,0,0,0.1)); overflow: hidden; max-height: 220px; overflow-y: auto; animation: cs-open 0.15s cubic-bezier(0.16,1,0.3,1); }
-.dark .cs-dropdown { background: var(--theme-bg-card, #1e1e1e); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); box-shadow: 0 8px 24px var(--theme-shadow-md, rgba(0,0,0,0.4)); }
-@keyframes cs-open { from { opacity:0; transform: translateY(-4px); } to { opacity:1; transform: translateY(0); } }
-.cs-option { padding: 8px 14px; font-size: 13px; cursor: pointer; color: var(--theme-text-strong, #1a1a1a); transition: background 0.1s; }
-.dark .cs-option { color: var(--theme-text, #e5e5e5); }
-.cs-option:hover { background: var(--theme-bg-hover, rgba(0,0,0,0.05)); }
-.dark .cs-option:hover { background: var(--theme-bg-hover, rgba(255,255,255,0.06)); }
-.cs-option.selected { background: var(--theme-bg-active, rgba(0,0,0,0.07)); font-weight: 500; }
-.dark .cs-option.selected { background: var(--theme-bg-hover, rgba(255,255,255,0.08)); }
-.cs-option.disabled { opacity: 0.35; cursor: default; pointer-events: none; }
-</style>
 
 <script nonce="<%- nonce %>">
 (function () {
@@ -886,5 +858,4 @@ const listB = ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither
 })();
 </script>
 
-<script nonce="<%- nonce %>" src="/js/user/server-create.js"></script>
 <% } %>

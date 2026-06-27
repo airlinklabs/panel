@@ -370,14 +370,8 @@
   .top-1\/2 {
     top: calc(1 / 2 * 100%);
   }
-  .top-2 {
-    top: calc(var(--spacing) * 2);
-  }
   .top-4 {
     top: calc(var(--spacing) * 4);
-  }
-  .top-12 {
-    top: calc(var(--spacing) * 12);
   }
   .top-14 {
     top: calc(var(--spacing) * 14);
@@ -417,9 +411,6 @@
   }
   .bottom-16 {
     bottom: calc(var(--spacing) * 16);
-  }
-  .bottom-full {
-    bottom: 100%;
   }
   .left-0 {
     left: 0;
@@ -462,9 +453,6 @@
   }
   .z-\[90\] {
     z-index: 90;
-  }
-  .z-\[100\] {
-    z-index: 100;
   }
   .col-span-1 {
     grid-column: span 1 / span 1;
@@ -573,9 +561,6 @@
   }
   .mt-16 {
     margin-top: calc(var(--spacing) * 16);
-  }
-  .mt-20 {
-    margin-top: calc(var(--spacing) * 20);
   }
   .mt-24 {
     margin-top: calc(var(--spacing) * 24);
@@ -1061,6 +1046,9 @@
   .w-64 {
     width: calc(var(--spacing) * 64);
   }
+  .w-72 {
+    width: calc(var(--spacing) * 72);
+  }
   .w-80 {
     width: calc(var(--spacing) * 80);
   }
@@ -1072,9 +1060,6 @@
   }
   .w-\[calc\(97\%-1\.5rem\)\] {
     width: calc(97% - 1.5rem);
-  }
-  .w-auto {
-    width: auto;
   }
   .w-fit {
     width: fit-content;
@@ -1638,10 +1623,6 @@
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 2px;
   }
-  .border-l-0 {
-    border-left-style: var(--tw-border-style);
-    border-left-width: 0px;
-  }
   .border-dashed {
     --tw-border-style: dashed;
     border-style: dashed;
@@ -2106,12 +2087,6 @@
       background-color: color-mix(in oklab, var(--color-white) 90%, transparent);
     }
   }
-  .bg-white\/95 {
-    background-color: color-mix(in srgb, #fff 95%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      background-color: color-mix(in oklab, var(--color-white) 95%, transparent);
-    }
-  }
   .bg-yellow-50 {
     background-color: var(--color-yellow-50);
   }
@@ -2341,6 +2316,9 @@
   }
   .pr-8 {
     padding-right: calc(var(--spacing) * 8);
+  }
+  .pr-10 {
+    padding-right: calc(var(--spacing) * 10);
   }
   .pr-12 {
     padding-right: calc(var(--spacing) * 12);
@@ -5015,14 +4993,6 @@
       }
     }
   }
-  .dark\:bg-neutral-900\/95 {
-    &:where(.dark, .dark *) {
-      background-color: color-mix(in srgb, oklch(20.5% 0 0) 95%, transparent);
-      @supports (color: color-mix(in lab, red, red)) {
-        background-color: color-mix(in oklab, var(--color-neutral-900) 95%, transparent);
-      }
-    }
-  }
   .dark\:bg-orange-900\/20 {
     &:where(.dark, .dark *) {
       background-color: color-mix(in srgb, oklch(40.8% 0.123 38.172) 20%, transparent);
@@ -5588,18 +5558,6 @@
           border-color: color-mix(in srgb, #fff 10%, transparent);
           @supports (color: color-mix(in lab, red, red)) {
             border-color: color-mix(in oklab, var(--color-white) 10%, transparent);
-          }
-        }
-      }
-    }
-  }
-  .dark\:hover\:border-white\/20 {
-    &:where(.dark, .dark *) {
-      &:hover {
-        @media (hover: hover) {
-          border-color: color-mix(in srgb, #fff 20%, transparent);
-          @supports (color: color-mix(in lab, red, red)) {
-            border-color: color-mix(in oklab, var(--color-white) 20%, transparent);
           }
         }
       }
@@ -6659,12 +6617,15 @@ button:active:not(:disabled), .al-btn:active:not(:disabled) {
     opacity: 0.4;
   }
 }
-[data-popover], .filter-menu, .al-file-menu, .server-ctx-menu, .al-dropdown, .cs-dropdown, #searchResults, #mobileSearchResults, [role="menu"], [role="listbox"] {
+.server-ctx-menu, #searchResults, #mobileSearchResults, #mobile-more-dropdown {
   background-color: var(--theme-bg-card, #fff);
 }
-html.dark [data-popover], html.dark .filter-menu, html.dark .al-file-menu, html.dark .server-ctx-menu, html.dark .al-dropdown, html.dark .cs-dropdown, html.dark #searchResults, html.dark #mobileSearchResults, html.dark [role="menu"], html.dark [role="listbox"] {
+html.dark .server-ctx-menu, html.dark #searchResults, html.dark #mobileSearchResults, html.dark #mobile-more-dropdown {
   background-color: var(--theme-bg-card, #1a1a1a);
   border-color: var(--theme-border, rgba(255,255,255,0.08));
+}
+.server-ctx-menu, #searchResults, #mobileSearchResults, #mobile-more-dropdown {
+  z-index: 2147483647;
 }
 @layer base {
   input:where([type='text']),input:where(:not([type])),input:where([type='email']),input:where([type='url']),input:where([type='password']),input:where([type='number']),input:where([type='date']),input:where([type='datetime-local']),input:where([type='month']),input:where([type='search']),input:where([type='tel']),input:where([type='time']),input:where([type='week']),select:where([multiple]),textarea,select {
