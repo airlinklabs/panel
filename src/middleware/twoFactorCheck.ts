@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
 import { Router } from 'express';
-import prisma from '../db';
-import otplib from 'otplib';
-import logger from '../services/logger';
+import prisma from '../db.js';
+import { verify } from 'otplib';
+import logger from '../services/logger.js';
 
 declare module 'express-session' {
   interface SessionData {
@@ -105,7 +105,7 @@ export function twoFactorVerifyRouter() {
         res.redirect('/'); return;
       }
 
-      const result = await otplib.verify({ token: code, secret: twoFactor.secret });
+      const result = await verify({ token: code, secret: twoFactor.secret });
 
       if (!result.valid) {
         res.render('auth/2fa-verify', { req, error: 'Invalid verification code.' });

@@ -1,12 +1,13 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
-import { getUser } from '../../services/user';
-import logger from '../../services/logger';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import { getUser } from '../../services/user.js';
+import logger from '../../services/logger.js';
 import axios from 'axios';
-import { daemonSchemeSync } from '../../services/daemonRequest';
+import { daemonSchemeSync } from '../../services/daemonRequest.js';
+import { buildDaemonUrl } from '../../utils/daemonUrl.js';
 
 
 interface ErrorMessage {
@@ -66,7 +67,7 @@ const dashboardModule: Module = {
             try {
               await axios({
                 method: 'GET',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}`,
+                url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/'),
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -133,7 +134,7 @@ const dashboardModule: Module = {
 
               const statusResponse = await axios({
                 method: 'GET',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status`,
+                url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/container/status'),
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -151,7 +152,7 @@ const dashboardModule: Module = {
                 try {
                   const statsResponse = await axios({
                     method: 'GET',
-                    url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stats`,
+                    url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/container/stats'),
                     auth: {
                       username: 'Airlink',
                       password: server.node.key,

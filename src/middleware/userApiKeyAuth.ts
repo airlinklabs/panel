@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
-import prisma from '../db';
-import logger from '../services/logger';
+import prisma from '../db.js';
+import logger from '../services/logger.js';
 
 function hasPermission(userPermissions: string[], required: string): boolean {
   return userPermissions.some((perm: string) => {

@@ -1,12 +1,13 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import { isAuthenticatedForServer } from '../../middleware/serverAuth';
-import { getParamAsString } from '../../utils/typeHelpers';
-import prisma from '../../db';
+import type { Module } from '../../core/moduleInit.js';
+import { isAuthenticatedForServer } from '../../middleware/serverAuth.js';
+import { getParamAsString } from '../../utils/typeHelpers.js';
+import prisma from '../../db.js';
 import axios from 'axios';
-import logger from '../../services/logger';
-import { daemonSchemeSync } from '../../services/daemonRequest';
+import logger from '../../services/logger.js';
+import { daemonSchemeSync } from '../../services/daemonRequest.js';
+import { buildDaemonUrl } from '../../utils/daemonUrl.js';
 import bcrypt from 'bcryptjs';
 
 
@@ -87,7 +88,7 @@ const sftpModule: Module = {
             try {
               await axios({
                 method: 'DELETE',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/sftp/credentials`,
+                url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/sftp/credentials'),
                 data: { id: server.UUID },
                 auth: { username: 'Airlink', password: server.node.key },
                 timeout: 10000,
@@ -99,7 +100,7 @@ const sftpModule: Module = {
 
           const response = await axios({
             method: 'POST',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/sftp/credentials`,
+            url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/sftp/credentials'),
             data: { id: server.UUID },
             auth: { username: 'Airlink', password: server.node.key },
             timeout: 15000,
@@ -153,7 +154,7 @@ const sftpModule: Module = {
 
           await axios({
             method: 'DELETE',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/sftp/credentials`,
+            url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/sftp/credentials'),
             data: { id: server.UUID },
             auth: { username: 'Airlink', password: server.node.key },
             timeout: 10000,

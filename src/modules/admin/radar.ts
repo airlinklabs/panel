@@ -1,16 +1,21 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
-import logger from '../../services/logger';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import logger from '../../services/logger.js';
 import fs from 'fs/promises';
 import fsSync from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import axios from 'axios';
 import FormData from 'form-data';
-import { getParamAsNumber } from '../../utils/typeHelpers';
-import { daemonSchemeSync } from '../../services/daemonRequest';
+import { getParamAsNumber } from '../../utils/typeHelpers.js';
+import { daemonSchemeSync } from '../../services/daemonRequest.js';
+import { buildDaemonUrl } from '../../utils/daemonUrl.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 // In-memory rate limiter respecting VT free tier: 4/min, 500/day
@@ -231,7 +236,7 @@ const radarModule: Module = {
           const script = JSON.parse(scriptContent);
           
           const response = await axios.post(
-            `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/radar/scan`,
+            buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/radar/scan'),
             {
               id: server.UUID,
               script
@@ -329,7 +334,7 @@ const radarModule: Module = {
           // Folders included: plugins, mods, config, addons, datapacks
           // Folders excluded: world, world_nether, world_the_end, logs, cache, crash-reports
           const zipResponse = await axios.post(
-            `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/radar/zip`,
+            buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/radar/zip'),
             {
               id: server.UUID,
               include: ['plugins', 'mods', 'config', 'addons', 'datapacks'],

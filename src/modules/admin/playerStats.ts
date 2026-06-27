@@ -1,13 +1,14 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
-import logger from '../../services/logger';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import logger from '../../services/logger.js';
 import axios from 'axios';
-import { registerPermission } from '../../core/permissions';
-import { collectPlayerStats } from '../../services/playerStats';
-import { daemonSchemeSync } from '../../services/daemonRequest';
+import { registerPermission } from '../../core/permissions.js';
+import { collectPlayerStats } from '../../services/playerStats.js';
+import { daemonSchemeSync } from '../../services/daemonRequest.js';
+import { buildDaemonUrl } from '../../utils/daemonUrl.js';
 
 registerPermission('airlink.admin.playerstats.view');
 
@@ -98,7 +99,7 @@ const adminModule: Module = {
 
                 const response = await axios({
                   method: 'GET',
-                  url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/minecraft/players`,
+                  url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/minecraft/players'),
                   params: {
                     id: server.UUID,
                     host: server.node.address,

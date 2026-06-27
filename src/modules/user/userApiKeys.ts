@@ -1,11 +1,11 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
-import logger from '../../services/logger';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import logger from '../../services/logger.js';
 import { randomBytes } from 'crypto';
-import { getParamAsNumber } from '../../utils/typeHelpers';
+import { getParamAsNumber } from '../../utils/typeHelpers.js';
 
 const ALLOWED_PERMISSIONS = [
   'server.view',

@@ -1,7 +1,11 @@
 import type express from 'express';
 import fs from 'fs';
 import path from 'path';
-import logger from '../services/logger';
+import { fileURLToPath } from 'url';
+import logger from '../services/logger.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const isDebugMode = process.env.DEBUG === 'true';
 
@@ -18,7 +22,7 @@ export const loadModules = async (
     return fs.readdirSync(dir, { withFileTypes: true }).flatMap((dirent) => {
       const fullPath = path.join(dir, dirent.name);
       return dirent.isDirectory() ? getFilesRecursively(fullPath) : [fullPath];
-    }).filter((f) => f.endsWith('.js') || f.endsWith('.ts'));
+    }).filter((f) => f.endsWith('.js') && !f.endsWith('.d.ts'));
   };
 
   const files = getFilesRecursively(modulesDir);

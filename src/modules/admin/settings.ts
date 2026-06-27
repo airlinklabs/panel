@@ -1,14 +1,14 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
-import logger from '../../services/logger';
-import { refreshSecurityCache } from '../../services/security';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import logger from '../../services/logger.js';
+import { refreshSecurityCache } from '../../services/security.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { randomUUID } from 'crypto';
+import crypto, { randomUUID } from 'crypto';
 import AdmZip from 'adm-zip';
 
 const storage = multer.diskStorage({
@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
     const ext = path.extname(file.originalname);
     if (file.fieldname === 'favicon')  {cb(null, 'favicon' + ext); return;}
     if (file.fieldname === 'themeFile') {cb(null, 'theme-' + Date.now() + '.zip'); return;}
-    cb(null, file.fieldname + '-' + Date.now() + '-' + Math.round(Math.random() * 1e9) + ext);
+    cb(null, file.fieldname + '-' + Date.now() + '-' + crypto.randomBytes(8).toString('hex') + ext);
   },
 });
 

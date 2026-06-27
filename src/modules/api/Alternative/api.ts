@@ -1,13 +1,14 @@
 import type { Request, Response, NextFunction } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../../core/moduleInit';
-import prisma from '../../../db';
-import logger from '../../../services/logger';
+import type { Module } from '../../../core/moduleInit.js';
+import prisma from '../../../db.js';
+import logger from '../../../services/logger.js';
 import axios from 'axios';
-import { queueer } from '../../../services/queue';
+import { queueer } from '../../../services/queue.js';
 import bcrypt from 'bcryptjs';
-import { getParamAsNumber } from '../../../utils/typeHelpers';
-import { daemonSchemeSync } from '../../../services/daemonRequest';
+import { getParamAsNumber } from '../../../utils/typeHelpers.js';
+import { daemonSchemeSync } from '../../../services/daemonRequest.js';
+import { buildDaemonUrl } from '../../../utils/daemonUrl.js';
 
 
 const coreModule: Module = {
@@ -669,7 +670,7 @@ const coreModule: Module = {
 
                 try {
                   await axios.post(
-                    `${daemonSchemeSync()}://${queuedServer.node.address}:${queuedServer.node.port}/container/install`,
+                    buildDaemonUrl(daemonSchemeSync(), queuedServer.node.address, queuedServer.node.port, '/container/install'),
                     requestBody,
                     {
                       auth: {

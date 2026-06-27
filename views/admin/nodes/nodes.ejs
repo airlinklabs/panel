@@ -12,7 +12,7 @@
         <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminNodesTitle %></h1>
         <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminNodesText %></p>
       </div>
-      <button type="button" id="createButton" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">New Node</button>
+      <button type="button" id="createButton" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-lg px-4 py-2 text-sm font-medium transition">New Node</button>
     </div>
 
     <!-- Stats -->
@@ -20,8 +20,11 @@
       <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3">
         <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1"><%= req.translations.totalNodes || 'Total Nodes' %></p>
         <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= nodes.length %></p>
-        <% if (nodes.length > 0) { %>
-          <p class="text-xs text-emerald-500 mt-1"><%= nodes.filter(n => n.status === 'Online').length %> online</p>
+        <% if (nodes.length > 0) { const onlineCount = nodes.filter(n => n.status === 'Online').length; const pct = Math.round((onlineCount / nodes.length) * 100); %>
+          <p class="text-xs text-emerald-500 mt-1"><%= onlineCount %> online</p>
+          <div class="mt-2 h-1.5 bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden">
+            <div class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width: <%= pct %>%"></div>
+          </div>
         <% } else { %>
           <p class="text-xs text-neutral-500 mt-1"><%= req.translations.noNodesAvailable || 'No nodes yet — your servers have nowhere to live.' %></p>
         <% } %>
@@ -193,7 +196,7 @@
 <main class="h-screen m-auto">
   <div class="flex h-screen">
     <!-- Sidebar -->
-    <div class="w-60 h-full">
+    <div class="w-64 h-full">
       <%- include('../../components/template') %>
     </div>
     <!-- Content -->
@@ -205,7 +208,7 @@
         }) %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <div class="flex gap-2">
-            <button type="button" id="createButton" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition"><%= req.translations.createNewNode %></button>
+            <button type="button" id="createButton" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-lg px-4 py-2 text-sm font-medium transition"><%= req.translations.createNewNode %></button>
           </div>
         </div>
       </div>
@@ -215,8 +218,11 @@
         <div data-animate-card class="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.totalNodes %></h2>
           <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= nodes.length %></p>
-          <% if (nodes.length > 0) { %>
-          <p class="text-sm text-neutral-400 mt-2"><%= req.translations.onlineNodes %>: <%= nodes.filter(node => node.status === 'Online').length %></p>
+          <% if (nodes.length > 0) { const onlineCount = nodes.filter(node => node.status === 'Online').length; const pct = Math.round((onlineCount / nodes.length) * 100); %>
+          <p class="text-sm text-neutral-400 mt-2"><%= req.translations.onlineNodes %>: <%= onlineCount %></p>
+          <div class="mt-2 h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden">
+            <div class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width: <%= pct %>%"></div>
+          </div>
           <% } else { %>
           <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noNodesAvailable || 'No nodes yet — your servers have nowhere to live.' %></p>
           <% } %>
@@ -257,8 +263,51 @@
       <!-- Filter bar -->
       <div id="nodeFilterBar" class="mx-8 mt-4"></div>
 
-      <!-- Table of nodes -->
-      <div class="overflow-x-auto shadow-sm rounded-xl mx-8 mt-2 mb-8 border border-neutral-200 dark:border-neutral-800/40" id="nodeTable">
+      <!-- Node cards (mobile) -->
+      <div class="lg:hidden space-y-2 mx-8 mt-2 mb-8">
+        <% let mNodeIdx = 0; nodes.forEach(function(node) { %>
+          <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3" style="--i:<%= mNodeIdx++ %>">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 flex items-center justify-center shrink-0">
+                <% if (node.status === 'Online') { %>
+                  <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                <% } else if (node.status === 'Offline') { %>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                <% } else { %>
+                  <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                  </span>
+                <% } %>
+              </div>
+              <div class="flex-1 min-w-0">
+                <a href="/admin/node/<%= node.id %>/stats" class="text-sm font-medium text-neutral-800 dark:text-white truncate block"><%= node.name %></a>
+                <p class="text-xs text-neutral-500 truncate font-mono"><%= node.address %>:<%= node.port %></p>
+              </div>
+              <% { const _bLabel = node.versionRelease || 'unknown'; const _bVar = node.versionRelease ? 'success' : 'danger'; %><span class="inline-flex items-center rounded-md <% if (_bVar === 'success') { %>bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400<% } else if (_bVar === 'danger') { %>bg-red-50 dark:bg-red-500/10 px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400<% } %> shrink-0"><%= _bLabel %></span><% } %>
+            </div>
+            <div class="flex items-center justify-between">
+              <p class="text-xs text-neutral-500"><%= node.instances ? node.instances.length : 0 %> instance<%= node.instances && node.instances.length !== 1 ? 's' : '' %></p>
+              <div class="flex gap-1.5">
+                <button onclick="configure('<%= node.id %>')" type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Configure</button>
+                <a href="/admin/node/<%= node.id %>">
+                  <button type="button" class="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-blue-500 transition">Edit</button>
+                </a>
+                <button onclick="deleteNode('<%= node.id %>')" type="button" class="rounded-lg bg-red-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-red-500 transition">Remove</button>
+              </div>
+            </div>
+            <% if (node.error && node.status === 'Offline') { %>
+              <p class="text-[11px] text-red-500 mt-2 font-mono truncate"><%= node.error %></p>
+            <% } %>
+          </div>
+        <% }); %>
+      </div>
+
+      <!-- Table of nodes (desktop) -->
+      <div class="hidden lg:block overflow-x-auto shadow-sm rounded-xl mx-8 mt-2 mb-8 border border-neutral-200 dark:border-neutral-800/40" id="nodeTable">
         <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
           <thead class="bg-neutral-50 dark:bg-neutral-800/50">
             <tr>

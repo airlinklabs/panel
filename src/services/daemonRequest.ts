@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import axios from 'axios';
 import type { InternalAxiosRequestConfig } from 'axios';
 import { URL } from 'url';
-import prisma from '../db';
+import prisma from '../db.js';
 
 const SIGNATURE_WINDOW_S = 30;
 
@@ -89,7 +89,7 @@ function serializeRequestBody(data: unknown): string {
 // X-Airlink-Timestamp and X-Airlink-Signature headers added.
 export function installDaemonRequestInterceptor(): void {
   axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-    if (config.auth?.username !== 'Airlink') {
+    if (!config.auth || config.auth.username !== 'Airlink') {
       return config;
     }
 
@@ -109,8 +109,6 @@ export function installDaemonRequestInterceptor(): void {
     const body = serializeRequestBody(config.data);
 
     const timestamp = Math.floor(Date.now() / 1000);
-    // Cryptographic nonce prevents replay attacks within the 30s signature window.
-    // Each request gets a unique nonce so an attacker cannot resubmit a captured request.
     const nonce = crypto.randomBytes(16).toString('hex');
     const signature = hmacSign(key, method, urlPath, body, timestamp, nonce);
 

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import FormData from 'form-data';
-import logger from './logger';
+import logger from './logger.js';
 
 const AIRLINK_CLOUD_URL = 'https://api.airlinklabs.xyz';
 

@@ -9,7 +9,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import logger from '../services/logger';
+import logger from '../services/logger.js';
 
 // Required env vars that must be set for the panel to function.
 // If any are missing after .env load, the panel exits immediately.

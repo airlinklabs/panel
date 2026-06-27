@@ -9,45 +9,49 @@
 
 import type { Request, Response, NextFunction } from 'express';
 import express from 'express';
-import prisma from './db';
+import prisma from './db.js';
 import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import session from 'express-session';
-import { loadEnv } from './config/env';
-import { databaseLoader } from './loaders/database';
-import { loadModules } from './loaders/modules';
-import logger from './services/logger';
-import config from '../storage/config.json';
+import { loadEnv } from './config/env.js';
+import { databaseLoader } from './loaders/database.js';
+import { loadModules } from './loaders/modules.js';
+import logger from './services/logger.js';
 import cookieParser from 'cookie-parser';
 import expressWs from 'express-ws';
 import compression from 'compression';
-import { translationMiddleware } from './services/translation';
-import PrismaSessionStore from './services/session';
-import { settingsLoader } from './config/settings';
-import { loadAddons, setAppInstance } from './addons/handler';
+import { translationMiddleware } from './services/translation.js';
+import PrismaSessionStore from './services/session.js';
+import { settingsLoader } from './config/settings.js';
+import { loadAddons, setAppInstance } from './addons/handler.js';
 import {
   setupUIComponents,
   uiComponentStore,
-} from './core/uiComponents';
-import { installDaemonRequestInterceptor } from './services/daemonRequest';
-import { startPlayerStatsCollection } from './services/playerStats';
-import { initEggCatalogue } from './services/eggCatalog';
+} from './core/uiComponents.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+import { installDaemonRequestInterceptor } from './services/daemonRequest.js';
+installDaemonRequestInterceptor();
+import { startPlayerStatsCollection } from './services/playerStats.js';
+import { initEggCatalogue } from './services/eggCatalog.js';
 import crypto from 'crypto';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import icon from './utils/icon';
+import icon from './utils/icon.js';
 // hpp removed: Express 5's req.query parsing (qs with arrayLimit: 0) already
 // prevents HTTP Parameter Pollution. No replacement needed.
-import fs from 'fs';
 import csrfProtection, {
   handleCsrfError,
   addCsrfTokenToLocals,
-} from './middleware/csrf';
-import { flashToastMiddleware } from './middleware/flashToast';
+} from './middleware/csrf.js';
+import { flashToastMiddleware } from './middleware/flashToast.js';
 import {
   errorPageHandler,
   notFoundHandler,
   renderErrorPage,
-} from './middleware/errorHandler';
+} from './middleware/errorHandler.js';
 
 
 loadEnv();
@@ -67,6 +71,7 @@ process.setMaxListeners(20);
 const app = express();
 const port = process.env.PORT || 3000;
 const name = process.env.NAME || 'AirLink';
+const config = JSON.parse(fs.readFileSync(path.join(__dirname, '../storage/config.json'), 'utf-8')) as { meta: { version: string } };
 const airlinkVersion = config.meta.version;
 
 // Trust proxy — sync env var takes precedence; async DB read fills in if not set.
@@ -318,7 +323,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 // hpp removed: Express 5 handles parameter pollution natively
 
-import { refreshSecurityCache, getSecurityCache } from './services/security';
+import { refreshSecurityCache, getSecurityCache } from './services/security.js';
 
 // Initial load + refresh every 30 seconds
 void refreshSecurityCache();
@@ -350,7 +355,7 @@ app.use(
 // Setting secure:true on a plain HTTP server causes browsers to silently drop
 // all session cookies, breaking login on local network setups.
 const useSecureCookie = process.env.URL?.startsWith('https://') ?? false;
-const sessionCookieName = useSecureCookie ? '__Host-al.sid' : 'al.sid';
+const sessionCookieName = process.env.NODE_ENV === 'production' ? '__Host-sid' : 'sid';
 const sessionSecret = process.env.SESSION_SECRET;
 
 if (!sessionSecret && process.env.NODE_ENV === 'production') {
@@ -367,7 +372,7 @@ app.use(
     cookie: {
       secure: useSecureCookie,
       httpOnly: true,
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   }),
@@ -546,13 +551,23 @@ app.use((_req, res, next) => {
 // Catch errors from global middleware registered before modules.
 app.use(errorPageHandler);
 
+const authLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Try again later.' },
+  skip: (req) => process.env.NODE_ENV === 'test',
+});
+
+app.use('/login', authLimiter);
+app.use('/register', authLimiter);
+
 // Load modules, plugins, database and start the webserver
 void (async () => {
   try {
     await databaseLoader();
     await settingsLoader();
-    // Install HMAC signing interceptor for all panel→daemon requests
-    installDaemonRequestInterceptor();
     setupUIComponents();
     await loadModules(app, airlinkVersion, Number(port), expressWsInstance);
     setAppInstance(app);

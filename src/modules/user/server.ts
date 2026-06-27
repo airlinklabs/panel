@@ -1,22 +1,23 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Prisma, Users, settings as PanelSettings } from '../../generated/prisma/client';
-import type { Module } from '../../core/moduleInit';
-import { isAuthenticatedForServer } from '../../middleware/serverAuth';
-import { trackActivity } from '../../middleware/activityTracker';
-import { notifyUser } from '../../services/notifications';
-import logger from '../../services/logger';
+import type { Prisma, Users, settings as PanelSettings } from '../../generated/prisma/client.js';
+import type { Module } from '../../core/moduleInit.js';
+import { isAuthenticatedForServer } from '../../middleware/serverAuth.js';
+import { trackActivity } from '../../middleware/activityTracker.js';
+import { notifyUser } from '../../services/notifications.js';
+import logger from '../../services/logger.js';
 import axios from 'axios';
 import multer from 'multer';
-import { checkEulaStatus, isWorld } from '../../config/features';
-import { checkForServerInstallation } from '../../core/serverCheck';
-import { queueer } from '../../services/queue';
-import { getServerStatus } from '../../services/serverStatus';
-import { getParamAsString } from '../../utils/typeHelpers';
-import prisma from '../../db';
-import { daemonSchemeSync } from '../../services/daemonRequest';
-import { AirlinkCloudClient } from '../../services/airlinkCloud';
-import { getPrimaryExternalPort, portsToDaemonString } from '../../services/ports';
+import { checkEulaStatus, isWorld } from '../../config/features.js';
+import { checkForServerInstallation } from '../../core/serverCheck.js';
+import { queueer } from '../../services/queue.js';
+import { getServerStatus } from '../../services/serverStatus.js';
+import { getParamAsString } from '../../utils/typeHelpers.js';
+import prisma from '../../db.js';
+import { daemonSchemeSync } from '../../services/daemonRequest.js';
+import { AirlinkCloudClient } from '../../services/airlinkCloud.js';
+import { getPrimaryExternalPort, portsToDaemonString } from '../../services/ports.js';
+import { buildDaemonUrl } from '../../utils/daemonUrl.js';
 
 declare global {
   var serverStoppingStates: Record<string, boolean>;
@@ -147,7 +148,7 @@ function sendMissingServerContext(
 }
 
 function getServerDaemonAddress(server: Pick<ServerPageServer, 'node'>, path: string): string {
-  return `${daemonSchemeSync()}://${server.node.address}:${server.node.port}${path}`;
+  return buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, path);
 }
 
 function getServerDaemonAuth(server: Pick<ServerPageServer, 'node'>): { username: string; password: string } {
@@ -398,7 +399,7 @@ const dashboardModule: Module = {
               nodeKey: node.key,
             }),
             axios.get(
-              `${daemonSchemeSync()}://${node.address}:${node.port}/container/status/${server.UUID}`,
+              buildDaemonUrl(daemonSchemeSync(), node.address, node.port, `/container/status/${server.UUID}`),
               { auth: { username: 'Airlink', password: node.key }, timeout: 4000 }
             ).then(r => r.data.state as string).catch(() => null),
           ]);
@@ -490,7 +491,7 @@ const dashboardModule: Module = {
 
               const requestData = {
                 method: 'POST',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
+                url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/container/stop"),
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -630,7 +631,7 @@ const dashboardModule: Module = {
 
           const filesRequest = {
             method: 'GET',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/list?id=${server.UUID}&path=${path}`,
+            url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/fs/list?id=${server.UUID}&path=${path}"),
             auth: {
               username: 'Airlink',
               password: server.node.key,
@@ -756,7 +757,7 @@ const dashboardModule: Module = {
 
           const response = await axios({
             method: 'GET',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/file/content`,
+            url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/fs/file/content"),
             responseType: 'text',
             params: { id: server.UUID, path: filePath },
             auth: {
@@ -1211,7 +1212,7 @@ const dashboardModule: Module = {
 
             const playersResponse = await axios({
               method: 'GET',
-              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/minecraft/players`,
+              url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/minecraft/players"),
               params: {
                 id: server.UUID,
                 host: server.node.address,
@@ -1328,7 +1329,7 @@ const dashboardModule: Module = {
           try {
             const worldsRequest = {
               method: 'GET',
-              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/list?id=${server.UUID}`,
+              url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/fs/list?id=${server.UUID}"),
               auth: {
                 username: 'Airlink',
                 password: server.node.key,
@@ -1464,7 +1465,7 @@ const dashboardModule: Module = {
 
             const renameRequest = {
               method: 'POST',
-              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/rename`,
+              url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/fs/rename"),
               auth: {
                 username: 'Airlink',
                 password: server.node.key,
@@ -1536,6 +1537,11 @@ const dashboardModule: Module = {
             return;
           }
 
+          if (!server.node) {
+            res.status(503).json({ error: 'Server has no assigned node.' });
+            return;
+          }
+
           if (!fileName) {
             logger.warn('File name is required');
             res.status(400).json({ error: 'File name is required' });
@@ -1560,7 +1566,7 @@ const dashboardModule: Module = {
 
               const uploadRequest = {
                 method: 'POST',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/upload`,
+                url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/fs/upload"),
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -1591,7 +1597,7 @@ const dashboardModule: Module = {
             } else {
               const createEmptyFileRequest = {
                 method: 'POST',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/create-empty-file`,
+                url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/fs/create-empty-file"),
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -1619,7 +1625,7 @@ const dashboardModule: Module = {
 
                 const uploadChunkRequest = {
                   method: 'POST',
-                  url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/append-file`,
+                  url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/fs/append-file"),
                   auth: {
                     username: 'Airlink',
                     password: server.node.key,
@@ -1839,7 +1845,7 @@ const dashboardModule: Module = {
           try {
             const statusRequest = {
               method: 'GET',
-              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status`,
+              url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/container/status"),
               auth: {
                 username: 'Airlink',
                 password: server.node.key,
@@ -1999,7 +2005,7 @@ const dashboardModule: Module = {
           try {
             const statusRequest = {
               method: 'GET',
-              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status`,
+              url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/container/status"),
               auth: {
                 username: 'Airlink',
                 password: server.node.key,
@@ -2161,7 +2167,7 @@ const dashboardModule: Module = {
           try {
             const statusRequest = {
               method: 'GET',
-              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status`,
+              url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/container/status"),
               auth: {
                 username: 'Airlink',
                 password: server.node.key,
@@ -2398,7 +2404,7 @@ const dashboardModule: Module = {
 
           const deleteRequestData = {
             method: 'DELETE',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container`,
+            url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/container"),
             auth: {
               username: 'Airlink',
               password: server.node.key,
@@ -2518,7 +2524,7 @@ const dashboardModule: Module = {
 
                   const installRequestData = {
                     method: 'POST',
-                    url: `${daemonSchemeSync()}://${serverToReinstall.node.address}:${serverToReinstall.node.port}/container/install`,
+                    url: buildDaemonUrl(daemonSchemeSync(), serverToReinstall.node.address, serverToReinstall.node.port, '/container/install'),
                     auth: {
                       username: 'Airlink',
                       password: serverToReinstall.node.key,
@@ -2691,7 +2697,7 @@ const dashboardModule: Module = {
           const isCloudBackupEnabled = settings?.airlinkCloudBackupEnabled && settings?.airlinkCloudApiKey;
 
           const response = await axios.post(
-            `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
+            buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/container/backup"),
             {
               id: serverId,
               name: name.trim(),
@@ -2716,7 +2722,7 @@ const dashboardModule: Module = {
                 // Get the backup file from the daemon
                 const downloadResponse = await axios({
                   method: 'GET',
-                  url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup/download`,
+                  url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/container/backup/download"),
                   params: { backupPath: filePath },
                   auth: { username: 'Airlink', password: server.node.key },
                   responseType: 'stream',
@@ -2734,7 +2740,7 @@ const dashboardModule: Module = {
                   
                   // Delete the local backup from the daemon
                   await axios.delete(
-                    `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
+                    buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/container/backup"),
                     {
                       data: { backupPath: filePath },
                       auth: { username: 'Airlink', password: server.node.key },
@@ -2842,7 +2848,7 @@ const dashboardModule: Module = {
               // Upload to the daemon's temporary backup location
               const uploadResponse = await axios({
                 method: 'POST',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup/upload`,
+                url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/container/backup/upload"),
                 params: {
                   id: serverId,
                   backupUuid: backup.UUID
@@ -2872,7 +2878,7 @@ const dashboardModule: Module = {
           }
 
           const response = await axios.post(
-            `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/restore`,
+            buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/container/restore"),
             {
               id: serverId,
               backupPath,
@@ -2889,7 +2895,7 @@ const dashboardModule: Module = {
           // If it was a cloud backup, delete the temporary file from the daemon after restore
           if (backup.airlinkCloudId && backupPath !== 'airlink-cloud') {
             axios.delete(
-              `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
+              buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/container/backup"),
               {
                 data: { backupPath },
                 auth: { username: 'Airlink', password: server.node.key },
@@ -2975,7 +2981,7 @@ const dashboardModule: Module = {
             return;
           }
 
-          const downloadUrl = `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup/download`;
+          const downloadUrl = buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/container/backup/download");
           const response = await axios({
             method: 'GET',
             url: downloadUrl,
@@ -3054,7 +3060,7 @@ const dashboardModule: Module = {
           } else {
             try {
               await axios.delete(
-                `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
+                buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, "/container/backup"),
                 {
                   data: {
                     backupPath: backup.filePath,

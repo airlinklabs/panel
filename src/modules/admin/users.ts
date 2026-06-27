@@ -1,12 +1,12 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
-import { onlineUsers } from '../user/wsUsers';
-import logger from '../../services/logger';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import { onlineUsers } from '../user/wsUsers.js';
+import logger from '../../services/logger.js';
 import bcrypt from 'bcryptjs';
-import { getParamAsNumber } from '../../utils/typeHelpers';
+import { getParamAsNumber } from '../../utils/typeHelpers.js';
 
 
 async function listUsers(res: Response) {

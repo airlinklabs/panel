@@ -1,13 +1,14 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
-import logger from '../../services/logger';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import logger from '../../services/logger.js';
 import axios from 'axios';
-import { queueer } from '../../services/queue';
-import { getParamAsNumber } from '../../utils/typeHelpers';
-import { daemonSchemeSync } from '../../services/daemonRequest';
+import { queueer } from '../../services/queue.js';
+import { getParamAsNumber } from '../../utils/typeHelpers.js';
+import { daemonSchemeSync } from '../../services/daemonRequest.js';
+import { buildDaemonUrl } from '../../utils/daemonUrl.js';
 import {
   getUsedExternalPorts,
   normalizeServerPorts,
@@ -15,7 +16,7 @@ import {
   parseServerPorts,
   serializeServerPorts,
   validatePortAssignments,
-} from '../../services/ports';
+} from '../../services/ports.js';
 
 
 const adminModule: Module = {
@@ -215,7 +216,7 @@ const adminModule: Module = {
 
               const stopRequestData = {
                 method: 'POST',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
+                url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/container/stop'),
                 auth: {
                   username: 'Airlink',
                   password: server.node.key,
@@ -527,7 +528,7 @@ const adminModule: Module = {
                 {},
               );
 
-              const daemonUrl = `${daemonSchemeSync()}://${server.node.address}:${server.node.port}`;
+              const daemonUrl = buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/');
 
               if (server.image?.scripts) {
                 let scripts: Record<string, unknown>;
@@ -667,7 +668,7 @@ const adminModule: Module = {
 
               try {
                 const response = await axios.delete(
-                  `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container`,
+                  buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/container'),
                   {
                     auth: {
                       username: 'Airlink',

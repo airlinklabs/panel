@@ -97,7 +97,7 @@ export function hasPermission(userPerms: Permission[], required: Permission): bo
   });
 }
 
-import logger from '../services/logger';
+import logger from '../services/logger.js';
 
 registerPermission('airlink.api.keys.view');
 registerPermission('airlink.api.keys.create');

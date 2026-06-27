@@ -283,14 +283,14 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
       <ul role="list" class="py-2">
         <li>
           <ul role="list" class="-mx-2 space-y-1 relative">
-            <div id="active-background" class="ml-1.5 absolute left-2 w-[calc(97%-1.5rem)] h-9 z-[-1] bg-neutral-200 border border-neutral-300 dark:bg-white/5 dark:border-neutral-300/5 rounded-xl opacity-0"></div>
+            <div id="active-background" class="ml-1.5 absolute left-2 w-[calc(97%-1.5rem)] h-9 z-[-1] bg-[var(--theme-accent,#6366f1)]/10 border border-[var(--theme-accent,#6366f1)]/20 rounded-xl opacity-0"></div>
             <%
             const sidebarItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
             if (!sidebarItems || sidebarItems.length === 0) {
             %>
               <li class="nav-item">
                 <a href="/" class="nav-link mt-1 text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" data-search="container instances servers" data-subterm="jegli:/server/servername" data-match-prefix="/server">
-                  <%- icon('layout-dashboard', { class: 'w-5 h-5 mt-0.5' }) %>
+                  <%- icon('layout-dashboard', { class: 'w-4 h-4 mt-0.5' }) %>
                   <span><%= req.translations.navServers || 'Servers' %></span>
                 </a>
               </li>
@@ -309,55 +309,55 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
               <p class="pl-8 text-neutral-600 dark:text-neutral-400 text-xs font-medium pt-6 pb-2"><span><%= req.translations.navAdminPanel || 'Admin Panel' %></span></p>
               <li>
                 <a href="/admin/overview" data-search="admin overview control" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
-                  <%- icon('layout-grid', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
+                  <%- icon('layout-grid', { class: 'w-4 h-4 mt-0.5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navOverview || 'Overview' %></span>
                 </a>
               </li>
               <li>
                 <a href="/admin/settings" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
-                  <%- icon('settings', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
+                  <%- icon('settings', { class: 'w-4 h-4 mt-0.5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navSettings || 'Settings' %></span>
                 </a>
               </li>
               <li>
                 <a href="/admin/servers" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
-                  <%- icon('server', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
+                  <%- icon('server', { class: 'w-4 h-4 mt-0.5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navServers || 'Servers' %></span>
                 </a>
               </li>
               <li>
                 <a href="/admin/users" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
-                  <%- icon('users', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
+                  <%- icon('users', { class: 'w-4 h-4 mt-0.5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navUsers || 'Users' %></span>
                 </a>
               </li>
               <li>
                 <a href="/admin/nodes" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
-                  <%- icon('network', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
+                  <%- icon('network', { class: 'w-4 h-4 mt-0.5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navNodes || 'Nodes' %></span>
                 </a>
               </li>
               <li>
                 <a href="/admin/images" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
-                  <%- icon('box', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
+                  <%- icon('box', { class: 'w-4 h-4 mt-0.5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navImages || 'Images' %></span>
                 </a>
               </li>
               <li>
                 <a href="/admin/addons" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
-                  <%- icon('puzzle', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
+                  <%- icon('puzzle', { class: 'w-4 h-4 mt-0.5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navAddons || 'Addons' %></span>
                 </a>
               </li>
               <li>
                 <a href="/admin/airlink-cloud" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
-                  <%- icon('cloud', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
+                  <%- icon('cloud', { class: 'w-4 h-4 mt-0.5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navAirlinkCloud || 'Airlink Cloud' %></span>
                 </a>
               </li>
               <li>
                 <a href="/admin/apikeys" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
-                  <%- icon('key', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
+                  <%- icon('key', { class: 'w-4 h-4 mt-0.5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navApiKeys || 'API Keys' %></span>
                 </a>
               </li>

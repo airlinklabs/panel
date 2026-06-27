@@ -1,5 +1,7 @@
 import axios from 'axios';
-import { daemonSchemeSync } from './daemonRequest';
+import { daemonSchemeSync } from './daemonRequest.js';
+import { buildDaemonUrl } from '../utils/daemonUrl.js';
+import logger from './logger.js';
 
 interface ServerInfo {
   nodeAddress: string;
@@ -22,7 +24,7 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
   try {
     const response = await axios({
       method: 'GET',
-      url: `${daemonSchemeSync()}://${serverInfo.nodeAddress}:${serverInfo.nodePort}/container/status`,
+      url: buildDaemonUrl(daemonSchemeSync(), serverInfo.nodeAddress, serverInfo.nodePort, '/container/status'),
       auth: { username: 'Airlink', password: serverInfo.nodeKey },
       params: { id: serverInfo.serverUUID },
       timeout: 3000,
@@ -47,6 +49,10 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
 
     return status;
   } catch (error: unknown) {
+    logger.warn(`Server status check failed for ${serverInfo.serverUUID}`, {
+      address: serverInfo.nodeAddress,
+      error: axios.isAxiosError(error) ? error.message : String(error),
+    });
     const errorStatus: ServerStatus = {
       online: false,
       starting: false,

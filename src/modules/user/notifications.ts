@@ -1,15 +1,15 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import { isAuthenticated } from '../../middleware/auth';
-import logger from '../../services/logger';
+import type { Module } from '../../core/moduleInit.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import logger from '../../services/logger.js';
 import {
   getNotifications,
   getUnreadCount,
   markAsRead,
   markAllAsRead,
   deleteNotification,
-} from '../../services/notifications';
+} from '../../services/notifications.js';
 
 const notificationsModule: Module = {
   info: {

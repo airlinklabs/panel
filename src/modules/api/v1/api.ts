@@ -1,10 +1,10 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../../core/moduleInit';
-import prisma from '../../../db';
-import logger from '../../../services/logger';
-import { apiValidator } from '../../../utils/api/validator';
-import { getParamAsString, getParamAsNumber } from '../../../utils/typeHelpers';
+import type { Module } from '../../../core/moduleInit.js';
+import prisma from '../../../db.js';
+import logger from '../../../services/logger.js';
+import { apiValidator } from '../../../utils/api/validator.js';
+import { getParamAsString, getParamAsNumber } from '../../../utils/typeHelpers.js';
 import bcrypt from 'bcryptjs';
 import validator from 'validator';
 import crypto from 'crypto';

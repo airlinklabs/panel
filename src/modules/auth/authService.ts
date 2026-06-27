@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs';
-import prisma from '../../db';
+import prisma from '../../db.js';
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import logger from '../../services/logger';
+import type { Module } from '../../core/moduleInit.js';
+import logger from '../../services/logger.js';
 import rateLimit from 'express-rate-limit';
 
 declare module 'express-session' {

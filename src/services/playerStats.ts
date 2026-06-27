@@ -7,10 +7,11 @@
  * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
  */
 
-import prisma from '../db';
+import prisma from '../db.js';
 import axios from 'axios';
-import logger from './logger';
-import { daemonSchemeSync } from './daemonRequest';
+import logger from './logger.js';
+import { daemonSchemeSync } from './daemonRequest.js';
+import { buildDaemonUrl } from '../utils/daemonUrl.js';
 
 
 // Interval in milliseconds (5 minutes)
@@ -51,7 +52,7 @@ export async function collectPlayerStats(): Promise<void> {
           // Fetch player data from the daemon
           const response = await axios({
             method: 'GET',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/minecraft/players`,
+            url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/minecraft/players'),
             params: {
               id: server.UUID,
               host: server.node.address,

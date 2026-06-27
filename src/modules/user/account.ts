@@ -1,11 +1,11 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
-import { getUser } from '../../services/user';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import { getUser } from '../../services/user.js';
 import bcrypt from 'bcryptjs';
-import logger from '../../services/logger';
+import logger from '../../services/logger.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -462,7 +462,7 @@ const accountModule: Module = {
             prisma.settings.findUnique({ where: { id: 1 } }),
           ]);
           if (!user) {res.redirect('/login'); return;}
-          const pkg = JSON.parse(require('fs').readFileSync(require('path').join(process.cwd(), 'package.json'), 'utf-8'));
+          const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8')) as { version: string };
           res.render('user/credits', { user, req, settings, version: pkg.version });
         } catch (error) {
           logger.error('Error loading credits page:', error);

@@ -1,25 +1,29 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
 import type { Express, Application, Request, Response, NextFunction } from 'express';
 import express, { Router } from 'express';
-import type { SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from '../core/uiComponents';
-import { uiComponentStore } from '../core/uiComponents';
-import type { SlotId } from './slotRegistry';
-import { slotRegistry } from './slotRegistry';
-import type { RegisteredCommand, ScheduledTask } from './commands';
-import { commandRegistry, scheduler } from './commands';
-import type { AddonConfigStore } from './configStore';
-import { createConfigStore } from './configStore';
-import type { AddonManifestV2} from './manifest';
-import { parseAddonManifest, isVersionInRange } from './manifest';
-import { registerAddonPermission, clearAddonPermissions } from '../core/permissions';
-import prisma from '../db';
-import type { PrismaClient } from '../generated/prisma/client';
-import logger from '../services/logger';
-import { isAuthenticated } from '../middleware/auth';
-import { apiValidator } from '../utils/api/validator';
-import csrfProtection from '../middleware/csrf';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+import type { SidebarItem, ServerMenuItem, ServerSection, ServerSectionItem } from '../core/uiComponents.js';
+import { uiComponentStore } from '../core/uiComponents.js';
+import type { SlotId } from './slotRegistry.js';
+import { slotRegistry } from './slotRegistry.js';
+import type { RegisteredCommand, ScheduledTask } from './commands.js';
+import { commandRegistry, scheduler } from './commands.js';
+import type { AddonConfigStore } from './configStore.js';
+import { createConfigStore } from './configStore.js';
+import type { AddonManifestV2} from './manifest.js';
+import { parseAddonManifest, isVersionInRange } from './manifest.js';
+import { registerAddonPermission, clearAddonPermissions } from '../core/permissions.js';
+import prisma from '../db.js';
+import type { PrismaClient } from '../generated/prisma/client.js';
+import logger from '../services/logger.js';
+import { isAuthenticated } from '../middleware/auth.js';
+import { apiValidator } from '../utils/api/validator.js';
+import csrfProtection from '../middleware/csrf.js';
 
 // ── Security Utilities ──────────────────────────────────────────
 
@@ -290,13 +294,13 @@ function containPath(baseDir: string, targetPath: string): boolean {
   return resolved.startsWith(realBase + path.sep) || resolved === realBase;
 }
 
-function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifestV2): AddonAPI {
+async function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifestV2): Promise<AddonAPI> {
   const addonViewsPath = path.join(addonPath, 'views');
   const addonDesktopViewsPath = path.join(addonViewsPath, 'desktop');
   const addonMobileViewsPath = path.join(addonViewsPath, 'mobile');
 
   const panelViewsPath = path.join(__dirname, '../../views');
-  const { AddonComponentResolver } = require('./componentResolver');
+  const { AddonComponentResolver } = await import('./componentResolver.js');
   const componentResolver = new AddonComponentResolver(panelViewsPath);
 
   return {
@@ -381,7 +385,7 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
       requireCsrf: () => createRequireCsrf(),
     },
     renderView: async (viewName: string, data: AddonViewData = {}, isMobile = false): Promise<string> => {
-      const ejs = require('ejs');
+      const ejs = await import('ejs');
       const viewportDir = isMobile ? addonMobileViewsPath : addonDesktopViewsPath;
       const viewportPath = path.join(viewportDir, viewName);
       const fallbackPath = path.join(addonViewsPath, viewName);
@@ -715,7 +719,7 @@ export async function loadAddons(appExpress: Application) {
     }
 
     if (manifest.engines?.panel) {
-      const panelVersion = require('../../package.json').version;
+      const panelVersion = JSON.parse(fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf-8')).version as string;
       if (!isVersionInRange(panelVersion, manifest.engines.panel)) {
         logger.warn(`Addon ${manifest.name} targets panel ${manifest.engines.panel}, running panel ${panelVersion}`);
       }
@@ -749,7 +753,7 @@ export async function loadAddons(appExpress: Application) {
     if (!fs.existsSync(addonMobileViewsPath)) {fs.mkdirSync(addonMobileViewsPath, { recursive: true });}
 
     const addonRouter = Router();
-    const addonAPI = buildAddonAPI(folder, addonPath, manifest);
+    const addonAPI = await buildAddonAPI(folder, addonPath, manifest);
     const animationsDisabled = manifest.dontfuckinganimateme === true;
 
     addonRouter.use((_req: Request, res: Response, next: NextFunction) => {
@@ -763,7 +767,7 @@ export async function loadAddons(appExpress: Application) {
     try {
       let addonModule: Record<string, unknown>;
       try {
-        addonModule = require(mainFilePath);
+        addonModule = await import(mainFilePath) as Record<string, unknown>;
       } finally {
         cacheTracker();
       }

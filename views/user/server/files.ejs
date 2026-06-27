@@ -125,7 +125,7 @@ function isImageFile(filename) {
           <div class="data-animate-card al-file-panel rounded-xl border border-neutral-200 dark:border-neutral-700/40 overflow-hidden">
             <div class="p-2 overflow-hidden">
               <nav class="flex items-center gap-0 text-xs overflow-hidden min-w-0">
-                <a class="text-neutral-400 dark:text-neutral-500 shrink-0 hover:text-neutral-600 dark:hover:text-neutral-300 transition" href="./files">/home/container/</a>
+                <a class="text-neutral-400 dark:text-neutral-500 shrink-0 hover:text-neutral-600 dark:hover:text-neutral-300 transition text-sm" href="./files">/home/container/</a>
                 <%
                     if (req.query.path) {
                         const parts = req.query.path.split('/');
@@ -136,7 +136,7 @@ function isImageFile(filename) {
 
                             if (index < parts.length - 1) {
                                 %>
-                                <a href="./files?path=<%= currentPath %>" class="text-neutral-400 dark:text-neutral-500 hover:text-neutral-300 transition"><%= part %></a><span class="text-neutral-500 mx-0.5">/</span>
+                                <a href="./files?path=<%= currentPath %>" class="text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition"><%= part %></a><span class="text-neutral-300 dark:text-neutral-600 mx-0.5">/</span>
                                 <%
                                 currentPath += '/';
                             } else {
@@ -174,7 +174,7 @@ function isImageFile(filename) {
               </thead>
               <tbody>
                 <% files.forEach((file, index) => { %>
-                  <tr class="al-file-row hover:bg-neutral-50 dark:hover:bg-white/[0.02] border-b border-neutral-100 dark:border-neutral-700/30 last:border-0 cursor-pointer transition-colors duration-150" style="--i:<%= Math.min(index, 10) %>">
+                  <tr class="al-file-row hover:bg-neutral-100 dark:hover:bg-white/5 border-b border-neutral-100 dark:border-neutral-700/30 last:border-0 cursor-pointer transition-colors duration-150" style="--i:<%= Math.min(index, 10) %>">
                     <td class="px-3 py-3 w-9">
                       <input type="checkbox" class="form-checkbox h-4 w-4 text-neutral-500 bg-white/5 border border-white/10 rounded transition file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>">
                     </td>
@@ -365,7 +365,7 @@ function isImageFile(filename) {
           <div class="data-animate-card al-file-panel overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700/40">
             <div class="px-3 py-2.5 flex items-center overflow-hidden">
               <nav class="flex items-center gap-0 text-xs min-w-0 overflow-hidden">
-                <a class="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition shrink-0" href="./files">/home/container/</a><span class="text-neutral-400 dark:text-neutral-600 mx-0.5"></span>
+                <a class="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition shrink-0 text-sm" href="./files">/home/container/</a><span class="text-neutral-300 dark:text-neutral-600 mx-0.5"></span>
                 <%
                     if (req.query.path) {
                         const parts = req.query.path.split('/');
@@ -376,7 +376,7 @@ function isImageFile(filename) {
 
                             if (index < parts.length - 1) {
                                 %>
-                                <a href="./files?path=<%= currentPath %>" class="text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition"><%= part %></a><span class="text-neutral-400 dark:text-neutral-600 mx-0.5">/</span>
+                                <a href="./files?path=<%= currentPath %>" class="text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition"><%= part %></a><span class="text-neutral-300 dark:text-neutral-600 mx-0.5">/</span>
                                 <%
                                 currentPath += '/';
                             } else {
@@ -415,7 +415,7 @@ function isImageFile(filename) {
               </thead>
               <tbody>
                 <% files.forEach((file, index) => { %>
-                  <tr class="al-file-row hover:bg-neutral-50 dark:hover:bg-white/[0.02] border-b border-neutral-100 dark:border-neutral-700/30 last:border-0 cursor-pointer transition-colors duration-150" style="--i:<%= Math.min(index, 10) %>">
+                  <tr class="al-file-row hover:bg-neutral-100 dark:hover:bg-white/5 border-b border-neutral-100 dark:border-neutral-700/30 last:border-0 cursor-pointer transition-colors duration-150" style="--i:<%= Math.min(index, 10) %>">
                     <td class="px-4 py-3 w-10">
                       <input type="checkbox" class="form-checkbox h-4 w-4 text-neutral-500 bg-neutral-50 dark:bg-white/5 border border-neutral-300 dark:border-white/10 rounded transition file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>">
                     </td>
@@ -577,7 +577,7 @@ function isImageFile(filename) {
     </div>
     <div class="px-5 py-4">
       <input type="text" id="FileName" data-mode="file"
-        class="w-full px-3 py-2.5 rounded-xl text-sm bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/30 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono transition"
+        class="w-full px-3 py-2.5 rounded-xl text-sm bg-white dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 font-mono transition"
         placeholder="filename.txt or folder/filename.txt"
         onkeydown="handleFileNameKeyPress(event)">
       <p id="fileNamePreview" class="mt-2 text-xs font-mono hidden"></p>
@@ -653,7 +653,7 @@ function isImageFile(filename) {
     </div>
     <div class="px-5 py-4">
       <input type="text" id="newFileName"
-        class="w-full px-3 py-2.5 rounded-xl text-sm bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/30 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono transition"
+        class="w-full px-3 py-2.5 rounded-xl text-sm bg-white dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 font-mono transition"
         placeholder="new-name.txt or subfolder/new-name.txt">
       <p id="renamePreview" class="mt-2 text-xs font-mono hidden"></p>
     </div>
@@ -682,7 +682,7 @@ function isImageFile(filename) {
     <div class="px-5 py-4">
       <input type="hidden" id="moveSourcePath">
       <input type="text" id="moveDestPath"
-        class="w-full px-3 py-2.5 rounded-xl text-sm bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/30 text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 font-mono transition"
+        class="w-full px-3 py-2.5 rounded-xl text-sm bg-white dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 font-mono transition"
         placeholder="path/to/destination/">
     </div>
     <div class="flex gap-2 px-5 pb-5 justify-end">

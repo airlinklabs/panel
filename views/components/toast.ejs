@@ -63,10 +63,17 @@
           toast.classList.add('opacity-100', 'translate-x-0');
         });
 
+        let dismissTimer;
         const removeToast = () => {
           toast.classList.add('opacity-0', 'translate-x-full');
           setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
         };
+
+        if (type !== 'loading') {
+          dismissTimer = setTimeout(removeToast, 5000);
+          toast.addEventListener('pointerenter', () => { clearTimeout(dismissTimer); });
+          toast.addEventListener('pointerleave', () => { dismissTimer = setTimeout(removeToast, 2000); });
+        }
 
         (function addSwipeDismiss(el, removeFn) {
           var startX = 0, dx = 0, swiping = false;
@@ -91,8 +98,6 @@
             dx = 0;
           });
         })(toast, removeToast);
-
-        if (type !== 'loading') setTimeout(removeToast, 5000);
 
         return {
           updateProgress: (percent) => {

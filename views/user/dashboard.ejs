@@ -85,11 +85,11 @@
     <% if (servers.length === 0 && (!folders || folders.length === 0)) { %>
       <section class="mt-24 overflow-hidden rounded-2xl border border-neutral-200/80 bg-white/80 p-5 text-left shadow-sm shadow-stone-300/40 backdrop-blur dark:border-white/10 dark:bg-white/[0.045] dark:shadow-black/20">
         <div class="mb-5 flex items-center gap-3">
-          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eef2ee] text-[#344f48] dark:bg-white/10 dark:text-neutral-100">
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-100 dark:bg-white/10 text-neutral-400 dark:text-neutral-500">
             <%- icon('server', { class: 'h-6 w-6' }) %>
           </div>
           <div>
-            <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400">No servers assigned</p>
+            <p class="text-xs font-medium text-neutral-400 dark:text-neutral-500">No servers assigned</p>
             <h2 class="mt-1 text-lg font-semibold text-neutral-900 dark:text-white"><%= req.translations.noServersYet || "Your server list is empty" %></h2>
           </div>
         </div>
@@ -131,16 +131,19 @@
                   <% } %>
                 </div>
                 <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-md shrink-0
-                    <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' %>">
+                    <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : server.status === 'starting' ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30' : 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20' %>">
                   <span class="relative flex h-1.5 w-1.5">
                     <% if (server.status === 'running') { %>
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                    <% } else if (server.status === 'starting') { %>
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
                     <% } else { %>
-                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500"></span>
+                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
                     <% } %>
                   </span>
-                  <%= server.status === 'running' ? 'Running' : 'Stopped' %>
+                  <%= server.status === 'running' ? 'Running' : server.status === 'starting' ? 'Starting' : 'Stopped' %>
                 </span>
               </div>
               <div class="flex gap-2 mb-3">
@@ -182,8 +185,11 @@
               <% if (server.status === 'running') { %>
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <% } else if (server.status === 'starting') { %>
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
               <% } else { %>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
               <% } %>
             </span>
             <div class="min-w-0 flex-1">
@@ -192,8 +198,8 @@
             <div class="flex items-center gap-3 shrink-0">
               <span class="text-xs text-neutral-500 dark:text-neutral-400"><%= server.ramUsage %>% RAM</span>
               <span class="text-[10px] font-medium px-1.5 py-0.5 rounded
-                <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400' %>">
-                <%= server.status === 'running' ? 'On' : 'Off' %>
+                <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : server.status === 'starting' ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400' : 'bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400' %>">
+                <%= server.status === 'running' ? 'On' : server.status === 'starting' ? 'Starting' : 'Off' %>
               </span>
             </div>
           </a>
@@ -244,7 +250,7 @@
   <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5">
     <h2 class="text-base font-medium text-neutral-800 dark:text-white mb-4">New folder</h2>
     <input type="text" id="newFolderName" maxlength="64" placeholder="Folder name"
-      class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/30 px-4 py-3 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none mb-4">
+      class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-3 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition mb-4">
     <div class="flex gap-2">
       <button id="cancelNewFolder" class="flex-1 py-2.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-700 rounded-xl transition">Cancel</button>
       <button id="confirmNewFolder" class="flex-1 py-2.5 text-sm font-medium text-white dark:text-neutral-900 bg-neutral-900 dark:bg-white rounded-xl transition">Create</button>
@@ -257,7 +263,7 @@
   <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5">
     <p class="text-base font-medium text-neutral-800 dark:text-white mb-1">Rename folder</p>
     <input type="text" id="renameFolderNameMobile" maxlength="64" placeholder="Folder name"
-      class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/30 px-4 py-3 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none mb-4">
+      class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-3 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition mb-4">
     <div class="flex gap-2">
       <button id="cancelRenameFolderMobile" class="flex-1 py-2.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-700 rounded-xl transition">Cancel</button>
       <button id="confirmRenameFolderMobile" class="flex-1 py-2.5 text-sm font-medium text-white dark:text-neutral-900 bg-neutral-900 dark:bg-white rounded-xl transition">Rename</button>
@@ -309,7 +315,7 @@
     <p class="text-base font-medium text-neutral-800 dark:text-white mb-1">Add servers to folder</p>
     <p class="text-xs text-neutral-500 mb-3">Toggle servers to add or remove.</p>
     <input type="text" id="mobileServerPickerSearch" placeholder="Search servers…"
-      class="w-full rounded-xl bg-neutral-100 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/30 px-4 py-3 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none mb-3">
+      class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-3 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition mb-3">
     <div id="mobileServerPickerList" class="flex-1 overflow-y-auto space-y-1.5 max-h-[50dvh]"></div>
     <button id="mobileCancelAddServers" class="w-full py-2.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-700 rounded-xl transition mt-3">Done</button>
   </div>
@@ -417,7 +423,7 @@
             <div data-popover class="hidden absolute left-0 mt-1.5 z-50 w-44 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-neutral-200/80 dark:border-white/10 rounded-xl shadow-xl shadow-black/5 dark:shadow-black/30 p-1.5">
               <button data-filter-val="" class="al-filter-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 transition">All</button>
               <button data-filter-val="running" class="al-filter-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-emerald-600 dark:text-emerald-400 transition">Running</button>
-              <button data-filter-val="stopped" class="al-filter-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-rose-600 dark:text-rose-400 transition">Stopped</button>
+              <button data-filter-val="stopped" class="al-filter-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-red-600 dark:text-red-400 transition">Stopped</button>
             </div>
           </div>
           <div class="relative">
@@ -436,7 +442,7 @@
           </div>
           <div class="relative flex-1 max-w-xs">
             <input type="text" id="serverSearch" placeholder="Search servers..."
-              class="w-full pl-3 pr-8 py-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-400 dark:focus:border-white/25 transition">
+              class="w-full pl-3 pr-8 py-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition">
             <button id="clearSearch" class="hidden absolute right-2 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition">
               <%- icon('x', { class: 'h-3.5 w-3.5' }) %>
             </button>
@@ -447,11 +453,11 @@
         <% if (servers.length === 0 && (!folders || folders.length === 0)) { %>
         <section class="mx-auto mt-28 max-w-2xl overflow-hidden rounded-2xl border border-neutral-200/80 bg-white/80 p-7 text-left shadow-sm shadow-stone-300/40 backdrop-blur dark:border-white/10 dark:bg-white/[0.045] dark:shadow-black/20">
           <div class="mb-5 flex items-center gap-4">
-            <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-[#eef2ee] text-[#344f48] dark:bg-white/10 dark:text-neutral-100">
+            <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-neutral-100 dark:bg-white/10 text-neutral-400 dark:text-neutral-500">
               <%- icon('server', { class: 'h-7 w-7' }) %>
             </div>
             <div>
-              <p class="text-sm font-medium text-neutral-500 dark:text-neutral-400">No servers assigned</p>
+              <p class="text-sm font-medium text-neutral-400 dark:text-neutral-500">No servers assigned</p>
               <h2 class="mt-1 text-2xl font-semibold text-neutral-900 dark:text-white"><%= req.translations.noServersYet || "Your server list is empty" %></h2>
             </div>
           </div>
@@ -523,16 +529,19 @@
                     <p class="text-xs text-neutral-400 mt-0.5 truncate italic"><%= req.translations.noDescription || 'No description' %></p>
                   <% } %>
                 </div>
-                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-md shrink-0 <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' %>">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-md shrink-0 <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : server.status === 'starting' ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30' : 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20' %>">
                   <span class="relative flex h-1.5 w-1.5">
                     <% if (server.status === 'running') { %>
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                    <% } else if (server.status === 'starting') { %>
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
                     <% } else { %>
-                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500"></span>
+                      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
                     <% } %>
                   </span>
-                  <%= server.status === 'running' ? 'Running' : 'Stopped' %>
+                  <%= server.status === 'running' ? 'Running' : server.status === 'starting' ? 'Starting' : 'Stopped' %>
                 </span>
               </div>
               <div class="flex gap-3 mb-3">
@@ -589,9 +598,9 @@
                   <% if (server.description) { %><p class="text-xs text-neutral-500 dark:text-neutral-400 truncate max-w-xs"><%= server.description %></p><% } %>
                 </td>
                 <td class="px-3 py-3.5">
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-md <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' %>">
-                    <span class="relative flex h-1.5 w-1.5"><% if (server.status === 'running') { %><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span><% } else { %><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500"></span><% } %></span>
-                    <%= server.status === 'running' ? 'Running' : 'Stopped' %>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-md <%= server.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : server.status === 'starting' ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30' : 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20' %>">
+                    <span class="relative flex h-1.5 w-1.5"><% if (server.status === 'running') { %><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span><% } else if (server.status === 'starting') { %><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span><% } else { %><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span><% } %></span>
+                    <%= server.status === 'running' ? 'Running' : server.status === 'starting' ? 'Starting' : 'Stopped' %>
                   </span>
                 </td>
                 <td class="px-3 py-3.5 text-sm text-neutral-600 dark:text-neutral-300"><%= server.owner ? server.owner.username : 'Unknown' %></td>

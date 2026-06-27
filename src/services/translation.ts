@@ -1,7 +1,11 @@
 import type { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
-import logger from './logger';
+import { fileURLToPath } from 'url';
+import logger from './logger.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const translationCache = new Map<string, Record<string, unknown>>();
 

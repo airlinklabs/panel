@@ -1,12 +1,13 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
-import logger from '../../services/logger';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import logger from '../../services/logger.js';
 import axios from 'axios';
-import { registerPermission } from '../../core/permissions';
-import { daemonSchemeSync } from '../../services/daemonRequest';
+import { registerPermission } from '../../core/permissions.js';
+import { daemonSchemeSync } from '../../services/daemonRequest.js';
+import { buildDaemonUrl } from '../../utils/daemonUrl.js';
 
 
 registerPermission('airlink.admin.analytics.view');
@@ -101,7 +102,7 @@ const analyticsModule: Module = {
               try {
                 const r = await axios({
                   method: 'get',
-                  url: `${daemonSchemeSync()}://${node.address}:${node.port}`,
+                  url: buildDaemonUrl(daemonSchemeSync(), node.address, node.port, '/'),
                   auth: { username: 'Airlink', password: node.key },
                   timeout: TIMEOUT,
                 });

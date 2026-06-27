@@ -1,25 +1,17 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
-import { checkNodeStatus } from '../../services/nodeStatus';
-import logger from '../../services/logger';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import { checkNodeStatus } from '../../services/nodeStatus.js';
+import logger from '../../services/logger.js';
 import axios from 'axios';
-import { getParamAsNumber } from '../../utils/typeHelpers';
-import { daemonSchemeSync } from '../../services/daemonRequest';
-
-
-function generateApiKey(length: number): string {
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    result += characters[randomIndex];
-  }
-  return result;
-}
+import { getParamAsNumber } from '../../utils/typeHelpers.js';
+import { daemonSchemeSync } from '../../services/daemonRequest.js';
+import { generateSecureKey } from '../../utils/generateKey.js';
+import { buildDaemonUrl } from '../../utils/daemonUrl.js';
+import { z } from 'zod';
+import { parseBody } from '../../utils/validate.js';
 
 interface NodeWithInstances {
   id: number;
@@ -60,6 +52,15 @@ async function listNodes(res: Response, includeServers = false) {
     res.status(500).json({ message: 'Error fetching nodes.' });
   }
 }
+
+const CreateNodeBody = z.object({
+  name: z.string().min(3).max(50),
+  ram: z.coerce.number().positive(),
+  cpu: z.coerce.number().positive(),
+  disk: z.coerce.number().positive(),
+  address: z.string().regex(/^(localhost|(?:\d{1,3}\.){3}\d{1,3}|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})$/),
+  port: z.coerce.number().min(1025).max(65535),
+});
 
 const adminModule: Module = {
   info: {
@@ -143,57 +144,10 @@ const adminModule: Module = {
       '/admin/nodes/create',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const { name, ram, cpu, disk, address, port } = req.body;
+        const parsed = parseBody(CreateNodeBody, req, res);
+        if (!parsed) return;
 
-        if (!name || typeof name !== 'string') {
-          res.status(400).json({ message: 'Name must be a string.' });
-          return;
-        } else if (name.length < 3 || name.length > 50) {
-          res.status(400).json({
-            message: 'Name must be between 3 and 50 characters long.',
-          });
-          return;
-        }
-
-        if (!ram || isNaN(parseInt(ram)) || parseInt(ram) <= 0) {
-          res.status(400).json({ message: 'RAM must be a positive number.' });
-          return;
-        }
-
-        if (!cpu || isNaN(parseInt(cpu)) || parseInt(cpu) <= 0) {
-          res.status(400).json({ message: 'CPU must be a positive number.' });
-          return;
-        }
-
-        if (!disk || isNaN(parseInt(disk)) || parseInt(disk) <= 0) {
-          res.status(400).json({ message: 'Disk must be a positive number.' });
-          return;
-        }
-
-        const addressRegex =
-          /^(localhost|(?:\d{1,3}\.){3}\d{1,3}|(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})$/;
-        if (
-          !address ||
-          typeof address !== 'string' ||
-          !addressRegex.test(address)
-        ) {
-          res.status(400).json({
-            message: 'Address must be a valid IPv4, domain, or localhost.',
-          });
-          return;
-        }
-
-        if (
-          !port ||
-          isNaN(parseInt(port)) ||
-          parseInt(port) <= 1024 ||
-          parseInt(port) > 65535
-        ) {
-          res
-            .status(400)
-            .json({ message: 'Port must be a number between 1025 and 65535.' });
-          return;
-        }
+        const { name, ram, cpu, disk, address, port } = parsed;
 
         try {
           const userId = req.session?.user?.id;
@@ -203,21 +157,16 @@ const adminModule: Module = {
             return;
           }
 
-          const key = generateApiKey(32);
-
-          const ramValue = parseFloat(ram);
-          const cpuValue = parseFloat(cpu);
-          const diskValue = parseFloat(disk);
-          const portValue = parseInt(port);
+          const key = generateSecureKey(24);
 
           const node = await prisma.node.create({
             data: {
               name,
-              ram: ramValue,
-              cpu: cpuValue,
-              disk: diskValue,
+              ram,
+              cpu,
+              disk,
               address,
-              port: portValue,
+              port,
               key,
               createdAt: new Date(),
             },
@@ -258,7 +207,7 @@ const adminModule: Module = {
                 await Promise.allSettled(
                   node.servers.map((server) =>
                     axios.delete(
-                      `${daemonSchemeSync()}://${node.address}:${node.port}/container`,
+                      buildDaemonUrl(daemonSchemeSync(), node.address, node.port, '/container'),
                       {
                         auth: { username: 'Airlink', password: node.key },
                         data: { id: server.UUID },
@@ -311,15 +260,17 @@ const adminModule: Module = {
             return;
           }
 
-          res
-            .status(200)
-            .json(
-              'configure -- -- --panel "' +
-                process.env.URL +
-                '" --key "' +
-                node.key +
-                '"',
-            );
+          const panelUrl = process.env.URL;
+          if (!panelUrl) {
+            res.status(500).json({ message: 'Panel URL not configured. Set URL in .env.' });
+            return;
+          }
+
+          res.status(200).json({
+            command: `airlinkd configure --panel "${panelUrl}" --key "${node.key}"`,
+            panelUrl,
+            nodeKey: node.key,
+          });
           return;
         } catch (error) {
           logger.error('Error fetching user:', error);
@@ -470,7 +421,7 @@ const adminModule: Module = {
 
         try {
           const response = await axios.get(
-            `${daemonSchemeSync()}://${node.address}:${node.port}/stats`,
+            buildDaemonUrl(daemonSchemeSync(), node.address, node.port, '/stats'),
             {
               auth: {
                 username: 'Airlink',
@@ -490,6 +441,32 @@ const adminModule: Module = {
       }
     );
 
+
+    router.post(
+      '/admin/node/:id/test-connection',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        const nodeId = getParamAsNumber(req.params.id);
+        const node = await prisma.node.findUnique({ where: { id: nodeId } });
+        if (!node) { res.status(404).json({ message: 'Node not found.' }); return; }
+
+        try {
+          const response = await axios.get(
+            buildDaemonUrl(daemonSchemeSync(), node.address, node.port, '/'),
+            {
+              auth: { username: 'Airlink', password: node.key },
+              timeout: 5000,
+            },
+          );
+          res.json({ ok: true, status: response.data?.status, version: response.data?.versionRelease });
+        } catch (err) {
+          const msg = axios.isAxiosError(err)
+            ? (err.response?.status === 401 ? 'Key mismatch — check daemon .env and node key' : err.message)
+            : 'Connection failed';
+          res.status(502).json({ ok: false, message: msg });
+        }
+      },
+    );
 
     return router;
   },

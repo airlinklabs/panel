@@ -1,17 +1,18 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
-import logger from '../../services/logger';
-import { queueer } from '../../services/queue';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import logger from '../../services/logger.js';
+import { queueer } from '../../services/queue.js';
 import axios from 'axios';
-import { daemonSchemeSync } from '../../services/daemonRequest';
+import { daemonSchemeSync } from '../../services/daemonRequest.js';
+import { buildDaemonUrl } from '../../utils/daemonUrl.js';
 import {
   getUsedExternalPorts,
   parseImagePortRequirements,
   serializeServerPorts,
-} from '../../services/ports';
+} from '../../services/ports.js';
 
 function pickAvailablePorts(allocatedPorts: number[], usedPorts: number[], count: number): number[] {
   const picked: number[] = [];
@@ -247,7 +248,7 @@ const userCreateServerModule: Module = {
               return acc;
             }, {});
 
-            const daemonUrl = `${daemonSchemeSync()}://${server.node.address}:${server.node.port}`;
+            const daemonUrl = buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/');
 
             if (!server.image?.scripts) {
               await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
@@ -341,7 +342,7 @@ const userCreateServerModule: Module = {
 
         if (!force) {
           try {
-            await axios.delete(`${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container`, {
+            await axios.delete(buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/container'), {
               auth: { username: 'Airlink', password: server.node.key },
               headers: { 'Content-Type': 'application/json' },
               data: { id: server.UUID },

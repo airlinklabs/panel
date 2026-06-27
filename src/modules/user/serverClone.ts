@@ -1,15 +1,15 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticatedForServer } from '../../middleware/serverAuth';
-import logger from '../../services/logger';
-import { getParamAsString } from '../../utils/typeHelpers';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticatedForServer } from '../../middleware/serverAuth.js';
+import logger from '../../services/logger.js';
+import { getParamAsString } from '../../utils/typeHelpers.js';
 import {
   getUsedExternalPorts,
   parseImagePortRequirements,
   serializeServerPorts,
-} from '../../services/ports';
+} from '../../services/ports.js';
 
 interface ErrorMessage {
   message?: string;

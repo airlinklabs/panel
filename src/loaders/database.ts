@@ -1,5 +1,5 @@
-import logger from '../services/logger';
-import prisma from '../db';
+import logger from '../services/logger.js';
+import prisma from '../db.js';
 
 const SESSION_WRITE_TEST_ID = '__database_loader_write_test__';
 

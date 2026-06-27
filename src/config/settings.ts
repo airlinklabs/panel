@@ -1,5 +1,5 @@
-import logger from '../services/logger';
-import prisma from '../db';
+import logger from '../services/logger.js';
+import prisma from '../db.js';
 
 export const settingsLoader = async () => {
   try {

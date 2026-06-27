@@ -1,9 +1,9 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { WebSocket } from 'ws';
 
-import logger from '../services/logger';
-import prisma from '../db';
-import { getParamAsString } from '../utils/typeHelpers';
+import logger from '../services/logger.js';
+import prisma from '../db.js';
+import { getParamAsString } from '../utils/typeHelpers.js';
 
 export const isAuthenticatedForServer =
   (serverIdParam = 'id') =>

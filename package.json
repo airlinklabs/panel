@@ -8,7 +8,7 @@
   },
   "author": "AirlinkLabs",
   "license": "MIT",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "setup": "pnpm install && prisma generate && prisma db push && pnpm run build",
     "build": "tsc && tsc -p tsconfig.prisma.json && tailwindcss -i ./public/tw.css -o ./public/styles.css",

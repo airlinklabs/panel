@@ -2,7 +2,7 @@
  * Shared in-memory cache for security settings (rate limits, banned IPs).
  * Refreshed periodically from DB and also on-demand after admin changes.
  */
-import prisma from '../db';
+import prisma from '../db.js';
 
 const securityCache = {
   bannedIps: [] as string[],

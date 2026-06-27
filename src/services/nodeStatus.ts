@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { daemonSchemeSync } from './daemonRequest';
-import logger from './logger';
+import { daemonSchemeSync } from './daemonRequest.js';
+import logger from './logger.js';
+import { buildDaemonUrl } from '../utils/daemonUrl.js';
 
 interface Node {
   address: string;
@@ -15,7 +16,7 @@ interface Node {
 
 export async function checkNodeStatus(node: Node): Promise<Node> {
   try {
-    const url = `${daemonSchemeSync()}://${node.address}:${node.port}`;
+    const url = buildDaemonUrl(daemonSchemeSync(), node.address, node.port, '/');
 
     const requestData = {
       method: 'get',
@@ -30,7 +31,7 @@ export async function checkNodeStatus(node: Node): Promise<Node> {
       timeout: 3000,
     };
 
-    const response = await axios(requestData);
+        const response = await axios(requestData);
 
     const { versionFamily, versionRelease, status, remote } = response.data;
 

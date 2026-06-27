@@ -14,9 +14,9 @@
                     <h2 class="text-sm font-medium text-neutral-800 dark:text-white mb-1"><%= req.translations.serverSettings || 'Server Settings' %></h2>
                     <p class="text-xs text-neutral-500 mb-4"><%= req.translations.serverSettingsDesc || "Configure your server's basic settings." %></p>
                     <form id="serverSettingsForm" class="space-y-3">
-                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1"><%= req.translations.serverName || 'Server Name' %></label><input type="text" name="name" value="<%= server.name %>" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800/50 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
-                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</label><input type="text" name="description" value="<%= server.description || '' %>" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800/50 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
-                        <button type="submit" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90"><%= req.translations.saveSettings || 'Save Settings' %></button>
+                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1"><%= req.translations.serverName || 'Server Name' %></label><input type="text" name="name" value="<%= server.name %>" class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
+                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</label><input type="text" name="description" value="<%= server.description || '' %>" class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
+                        <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-lg px-4 py-2 text-sm font-medium"><%= req.translations.saveSettings || 'Save Settings' %></button>
                     </form>
                 </div>
 
@@ -117,14 +117,14 @@
                         <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white">Server Settings</h2>
                         <form id="serverSettingsForm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Server Name</label><input type="text" name="name" value="<%= server.name %>" required class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800/50 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
+                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Server Name</label><input type="text" name="name" value="<%= server.name %>" required class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
                                 <div>
-                                    <label class="block text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2">Server Description</label>
-                                    <textarea class="w-full rounded-xl text-sm px-4 py-2 bg-neutral-100 dark:bg-neutral-600/20 border border-neutral-200 dark:border-white/5 text-neutral-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-400" name="description" rows="3"><%= server.description || '' %></textarea>
+                                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Server Description</label>
+                                    <textarea class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition" name="description" rows="3"><%= server.description || '' %></textarea>
                                 </div>
                             </div>
                             <div class="mt-6">
-                                <button type="submit" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Save Settings</button>
+                                <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-lg px-4 py-2 text-sm font-medium">Save Settings</button>
                             </div>
                         </form>
                     </div>

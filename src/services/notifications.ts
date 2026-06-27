@@ -1,5 +1,5 @@
-import prisma from '../db';
-import logger from './logger';
+import prisma from '../db.js';
+import logger from './logger.js';
 
 interface CreateNotificationData {
   userId: number;

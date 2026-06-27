@@ -1,4 +1,4 @@
-import prisma from './db';
+import prisma from './db.js';
 import crypto from 'crypto';
 
 function hashApiKey(raw: string): string {

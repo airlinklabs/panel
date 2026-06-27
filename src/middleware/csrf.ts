@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { doubleCsrf } from 'csrf-csrf';
 import crypto from 'crypto';
-import logger from '../services/logger';
+import logger from '../services/logger.js';
 
 function ensureCsrfSessionId(req: Request): string {
   const session = req.session as { csrfSessionId?: string } | undefined;
@@ -36,8 +36,8 @@ const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
   size: 32,
   getCsrfTokenFromRequest: (req: Request) =>
     (req.headers['csrf-token'] as string) ||
-    (req.headers['x-csrf-token']!) ||
-    ((req.body as Record<string, unknown>)?._csrf as string),
+    (req.headers['x-csrf-token'] as string),
+    // Removed: req.body._csrf — form field CSRF is incompatible with double-submit cookie
 });
 
 export const csrfProtection = doubleCsrfProtection;

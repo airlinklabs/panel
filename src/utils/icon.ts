@@ -7,8 +7,8 @@
  *   <%- icon('cpu', { class: 'text-emerald-500 w-5 h-5' }) %>
  */
 
-// lucide exports icons as arrays of [tag, attrs, children?] tuples
-const lucideIcons = require('lucide') as Record<string, unknown>;
+import * as _lucideIcons from 'lucide';
+const lucideIcons = _lucideIcons as unknown as Record<string, unknown>;
 
 interface IconOptions {
   /** Extra CSS classes applied to the <svg> element */

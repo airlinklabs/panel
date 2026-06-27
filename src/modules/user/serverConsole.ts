@@ -6,14 +6,15 @@
 
 import type { Request } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
 import { WebSocket } from 'ws';
 import axios from 'axios';
-import { isAuthenticatedForServerWS } from '../../middleware/serverAuth';
-import logger from '../../services/logger';
-import { getParamAsString } from '../../utils/typeHelpers';
-import { daemonSchemeSync } from '../../services/daemonRequest';
+import { isAuthenticatedForServerWS } from '../../middleware/serverAuth.js';
+import logger from '../../services/logger.js';
+import { getParamAsString } from '../../utils/typeHelpers.js';
+import { daemonSchemeSync } from '../../services/daemonRequest.js';
+import { buildDaemonUrl } from '../../utils/daemonUrl.js';
 
 function wsScheme(): 'ws' | 'wss' {
   return daemonSchemeSync() === 'https' ? 'wss' : 'ws';
@@ -146,7 +147,7 @@ async function proxyConsole(
       if (command) {
         try {
           await axios.post(
-            `${daemonSchemeSync()}://${node.address}:${node.port}/container/command`,
+            buildDaemonUrl(daemonSchemeSync(), node.address, node.port, '/container/command'),
             { id: serverId, command },
             {
               auth: { username: 'Airlink', password: node.key },
@@ -154,7 +155,10 @@ async function proxyConsole(
             },
           );
         } catch (error) {
-          logger.error(`Failed to send console command to ${serverId}:`, error);
+          logger.error(`Failed to send console command to ${serverId}`, {
+            status: axios.isAxiosError(error) ? error.response?.status : 'unknown',
+            code: axios.isAxiosError(error) ? error.code : undefined,
+          });
           sendIfOpen(
             ws,
             '\x1b[31;1mCommand failed to reach the daemon. Check panel logs for details.\x1b[0m\r\n',
@@ -182,7 +186,23 @@ async function proxyConsole(
       flushPendingClientMessages();
     };
 
-    socket.onmessage = (msg) => { sendIfOpen(ws, normalizeWsMessage(msg.data)); };
+    socket.onmessage = (msg) => {
+      const data = normalizeWsMessage(msg.data);
+      try {
+        const parsed = JSON.parse(data.toString('utf8')) as { error?: string };
+        if (parsed.error === 'invalid key') {
+          sendIfOpen(ws, '\x1b[31;1mDaemon auth failed: node key mismatch. Check node configuration.\x1b[0m\r\n');
+          ws.close();
+          return;
+        }
+        if (parsed.error === 'auth timeout') {
+          sendIfOpen(ws, '\x1b[31;1mDaemon did not receive auth in time. Reconnect.\x1b[0m\r\n');
+          ws.close();
+          return;
+        }
+      } catch { /* binary frame — not JSON, pass through */ }
+      sendIfOpen(ws, data);
+    };
 
     socket.onerror = () => {
       sendIfOpen(ws, '\x1b[31;1mThis instance is unavailable!\x1b[0m');
@@ -202,7 +222,9 @@ async function proxyConsole(
       }
     });
   } catch (error) {
-    logger.error('Error in console proxy:', error);
+    logger.error('Error in console proxy', {
+      error: error instanceof Error ? error.message : String(error),
+    });
     sendSocketError(ws, 'Internal server error');
   }
 }
@@ -234,7 +256,7 @@ const wsServerConsoleModule: Module = {
           ws,
           req,
           userId,
-          (addr, port, id) => `${wsScheme()}://${addr}:${port}/container/${id}`,
+          (addr, port, id) => buildDaemonUrl(wsScheme(), addr, port, `/container/${id}`),
           'interactive',
         );
       },
@@ -255,7 +277,7 @@ const wsServerConsoleModule: Module = {
           req,
           userId,
           (addr, port, id) =>
-            `${wsScheme()}://${addr}:${port}/containerstatus/${id}`,
+            buildDaemonUrl(wsScheme(), addr, port, `/containerstatus/${id}`),
           'readonly',
         );
       },
@@ -276,7 +298,7 @@ const wsServerConsoleModule: Module = {
           req,
           userId,
           (addr, port, id) =>
-            `${wsScheme()}://${addr}:${port}/containerevents/${id}`,
+            buildDaemonUrl(wsScheme(), addr, port, `/containerevents/${id}`),
           'readonly',
         );
       },

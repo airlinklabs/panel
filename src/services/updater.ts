@@ -2,7 +2,7 @@ import axios from 'axios';
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import logger from './logger';
+import logger from './logger.js';
 
 interface GithubRelease {
   tag_name: string;

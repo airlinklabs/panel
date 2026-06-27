@@ -1,13 +1,13 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
-import otplib from 'otplib';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import { generateSecret, generateURI, verify } from 'otplib';
 import QRCode from 'qrcode';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import logger from '../../services/logger';
+import logger from '../../services/logger.js';
 
 function generateBackupCodes(): string[] {
   const codes: string[] = [];
@@ -72,8 +72,8 @@ const twoFactorModule: Module = {
           }
 
           const user = await prisma.users.findUnique({ where: { id: userId } });
-          const secret = otplib.generateSecret();
-          const otpauth = otplib.generateURI({
+          const secret = generateSecret();
+          const otpauth = generateURI({
             secret,
             issuer: 'AirLink Panel',
             label: user?.email ?? '',
@@ -122,7 +122,7 @@ const twoFactorModule: Module = {
             return;
           }
 
-          const result = await otplib.verify({ token: code, secret: twoFactor.secret });
+          const result = await verify({ token: code, secret: twoFactor.secret });
 
           if (!result.valid) {
             res.status(400).json({ error: 'Invalid verification code.' });

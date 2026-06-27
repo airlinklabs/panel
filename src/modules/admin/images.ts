@@ -1,16 +1,16 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import prisma from '../../db';
-import type { Module } from '../../core/moduleInit';
-import { isAuthenticated } from '../../middleware/auth';
-import logger from '../../services/logger';
-import { getCatalogueFromDb, forceRefresh, getCategoryMd } from '../../services/eggCatalog';
+import prisma from '../../db.js';
+import type { Module } from '../../core/moduleInit.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import logger from '../../services/logger.js';
+import { getCatalogueFromDb, forceRefresh, getCategoryMd } from '../../services/eggCatalog.js';
 import {
   isPterodactylEgg,
   parseEgg,
   normalizeEggForDb,
   validateEggData,
-} from '../../utils/egg/parser';
+} from '../../utils/egg/parser.js';
 
 function normalizeImageData(raw: Record<string, unknown>) {
   if (isPterodactylEgg(raw)) {

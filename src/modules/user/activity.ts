@@ -1,12 +1,12 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
-import { isAuthenticatedForServer } from '../../middleware/serverAuth';
-import { getActivityLogs, getServerActivity } from '../../services/activityLog';
-import { getParamAsString } from '../../utils/typeHelpers';
-import logger from '../../services/logger';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import { isAuthenticatedForServer } from '../../middleware/serverAuth.js';
+import { getActivityLogs, getServerActivity } from '../../services/activityLog.js';
+import { getParamAsString } from '../../utils/typeHelpers.js';
+import logger from '../../services/logger.js';
 
 interface ErrorMessage {
   message?: string;

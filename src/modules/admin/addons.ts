@@ -4,17 +4,21 @@ import { execFile } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import crypto from 'crypto';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
-import logger from '../../services/logger';
-import { getAllAddons, toggleAddonStatus, reloadAddons, loadAddons, uninstallAddon } from '../../addons/handler';
-import { commandRegistry } from '../../addons/commands';
-import type { Permission } from '../../core/permissions';
-import { registerPermission } from '../../core/permissions';
-import { parseAddonManifest } from '../../addons/manifest';
-import { getParamAsString } from '../../utils/typeHelpers';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import logger from '../../services/logger.js';
+import { getAllAddons, toggleAddonStatus, reloadAddons, loadAddons, uninstallAddon } from '../../addons/handler.js';
+import { commandRegistry } from '../../addons/commands.js';
+import type { Permission } from '../../core/permissions.js';
+import { registerPermission } from '../../core/permissions.js';
+import { parseAddonManifest } from '../../addons/manifest.js';
+import { getParamAsString } from '../../utils/typeHelpers.js';
 
 const execFileAsync = promisify(execFile);
 

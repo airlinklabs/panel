@@ -1,8 +1,9 @@
 import axios from 'axios';
-import prisma from '../db';
-import { checkNodeStatus } from '../services/nodeStatus';
-import logger from '../services/logger';
-import { daemonSchemeSync } from '../services/daemonRequest';
+import prisma from '../db.js';
+import { checkNodeStatus } from '../services/nodeStatus.js';
+import logger from '../services/logger.js';
+import { daemonSchemeSync } from '../services/daemonRequest.js';
+import { buildDaemonUrl } from '../utils/daemonUrl.js';
 
 interface ServerInfo {
   serverUUID: string;
@@ -34,7 +35,7 @@ export async function checkEulaStatus(serverId: string): Promise<CheckEulaResult
 
     const eulaResponse = await axios({
       method: 'GET',
-      url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/file/content`,
+      url: buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/fs/file/content'),
       responseType: 'text',
       params: { id: server.UUID, path: 'eula.txt' },
       auth: { username: 'Airlink', password: server.node.key },
@@ -74,7 +75,7 @@ export const isWorld = async (folderName: string, serverInfo: ServerInfo): Promi
   try {
     const response = await axios({
       method: 'GET',
-      url: `${daemonSchemeSync()}://${serverInfo.nodeAddress}:${serverInfo.nodePort}/fs/list`,
+      url: buildDaemonUrl(daemonSchemeSync(), serverInfo.nodeAddress, serverInfo.nodePort, '/fs/list'),
       params: { id: serverInfo.serverUUID, path: folderName },
       auth: { username: 'Airlink', password: serverInfo.nodeKey },
       timeout: 5000,

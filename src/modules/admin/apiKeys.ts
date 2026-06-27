@@ -1,12 +1,13 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
-import type { Module } from '../../core/moduleInit';
-import prisma from '../../db';
-import { isAuthenticated } from '../../middleware/auth';
-import logger from '../../services/logger';
-import { registerPermission } from '../../core/permissions';
-import { getParamAsNumber } from '../../utils/typeHelpers';
+import type { Module } from '../../core/moduleInit.js';
+import prisma from '../../db.js';
+import { isAuthenticated } from '../../middleware/auth.js';
+import logger from '../../services/logger.js';
+import { registerPermission } from '../../core/permissions.js';
+import { getParamAsNumber } from '../../utils/typeHelpers.js';
 import crypto from 'crypto';
+import { generateSecureKey } from '../../utils/generateKey.js';
 
 function sha256(value: string): string {
   return crypto.createHash('sha256').update(value).digest('hex');
@@ -26,17 +27,6 @@ registerPermission('airlink.admin.apikeys.create');
 registerPermission('airlink.admin.apikeys.delete');
 registerPermission('airlink.admin.apikeys.edit');
 registerPermission('airlink.admin.api.docs.view');
-
-function generateApiKey(length: number): string {
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    result += characters[randomIndex];
-  }
-  return result;
-}
 
 const coreModule: Module = {
   info: {
@@ -550,7 +540,7 @@ const coreModule: Module = {
             return;
           }
 
-          const rawKey = generateApiKey(32);
+          const rawKey = generateSecureKey(24);
           const userId = req.session.user?.id;
           const useHash = await shouldHashKeys();
           const storedKey = useHash ? sha256(rawKey) : rawKey;

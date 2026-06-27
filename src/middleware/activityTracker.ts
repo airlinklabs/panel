@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { logActivity } from '../services/activityLog';
+import { logActivity } from '../services/activityLog.js';
 
 export function trackActivity(action: string) {
   return (req: Request, res: Response, next: NextFunction): void => {

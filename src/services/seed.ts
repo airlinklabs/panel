@@ -1,6 +1,6 @@
 import { createInterface } from 'readline';
 import axios from 'axios';
-import prisma from '../db';
+import prisma from '../db.js';
 
 /**
  * Validates the seed data before inserting it into the database
