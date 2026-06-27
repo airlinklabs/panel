@@ -394,6 +394,25 @@ const accountModule: Module = {
     );
 
     router.post(
+      '/account/animations',
+      isAuthenticated(),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const { animationsDisabled } = req.body;
+          await prisma.users.update({
+            where: { id: userId },
+            data: { animationsDisabled: animationsDisabled === 'true' || animationsDisabled === true },
+          });
+          res.json({ success: true });
+        } catch (error) {
+          logger.error('Error toggling animations preference:', error);
+          res.status(500).json({ error: 'Internal Server Error' });
+        }
+      },
+    );
+
+    router.post(
       '/upload-avatar',
       isAuthenticated(),
       avatarUpload.single('avatar'),

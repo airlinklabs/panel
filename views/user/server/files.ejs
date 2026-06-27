@@ -219,7 +219,7 @@ function isImageFile(filename) {
               <%
                 const _ctxFilePath = currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name;
               %>
-              <div id="dropdown-<%= file.name %>" class="al-file-menu fixed w-44 rounded-xl shadow-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 z-[100] transform opacity-0 scale-95 transition-all duration-150 ease-out pointer-events-none overflow-hidden">
+              <div id="dropdown-<%= file.name %>" class="al-file-menu fixed w-44 rounded-xl shadow-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 z-[70] transform opacity-0 scale-95 transition-all duration-150 ease-out pointer-events-none overflow-hidden">
                 <div class="py-1" role="menu">
                   <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
                     onclick="rename('<%= file.name %>', '<%= _ctxFilePath %>')">
@@ -467,7 +467,7 @@ function isImageFile(filename) {
               <%
                 const _dCtxFilePath = currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name;
               %>
-              <div id="dropdown-<%= file.name %>" class="al-file-menu fixed w-44 rounded-xl shadow-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 z-[100] transform opacity-0 scale-95 transition-all duration-150 ease-out pointer-events-none overflow-hidden">
+              <div id="dropdown-<%= file.name %>" class="al-file-menu fixed w-44 rounded-xl shadow-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 z-[70] transform opacity-0 scale-95 transition-all duration-150 ease-out pointer-events-none overflow-hidden">
                 <div class="py-1" role="menu">
                   <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
                     onclick="rename('<%= file.name %>', '<%= _dCtxFilePath %>')">
@@ -563,7 +563,7 @@ function isImageFile(filename) {
 <!-- Shared modals (work for both mobile and desktop) -->
 
 <!-- Create File Modal -->
-<div id="createFileModal" class="fixed inset-0 bg-black/50 z-[100] hidden flex flex-col items-end sm:items-center justify-center backdrop-blur-sm">
+<div id="createFileModal" class="fixed inset-0 bg-black/50 z-[70] hidden flex flex-col items-end sm:items-center justify-center backdrop-blur-sm">
   <div onclick="closeCreateFileModal()" class="absolute inset-0"></div>
   <div class="al-modal-panel relative bg-white dark:bg-neutral-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-neutral-700/40 shadow-xl translate-y-full opacity-0 sm:scale-95 sm:translate-y-0 transition-all duration-300 sm:mx-4">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
@@ -590,7 +590,7 @@ function isImageFile(filename) {
 </div>
 
 <!-- Upload File Modal -->
-<div id="uploadFileModal" class="fixed inset-0 bg-black/50 z-[100] hidden flex flex-col items-end sm:items-center justify-center backdrop-blur-sm">
+<div id="uploadFileModal" class="fixed inset-0 bg-black/50 z-[70] hidden flex flex-col items-end sm:items-center justify-center backdrop-blur-sm">
   <div onclick="closeUploadFileModal()" class="absolute inset-0"></div>
   <div class="al-modal-panel relative bg-white dark:bg-neutral-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md p-5 sm:p-8 translate-y-full opacity-0 sm:scale-95 sm:translate-y-0 transition-all duration-300 border border-neutral-200 dark:border-neutral-700/40 shadow-xl sm:mx-4">
     <h2 class="text-xl sm:text-2xl font-medium mb-1 text-neutral-800 dark:text-white">Upload File</h2>
@@ -624,7 +624,7 @@ function isImageFile(filename) {
 </div>
 
 <!-- Mass Delete Modal -->
-<div id="massDeleteModal" class="fixed inset-0 bg-black/50 z-[100] hidden flex flex-col items-end sm:items-center justify-center backdrop-blur-sm">
+<div id="massDeleteModal" class="fixed inset-0 bg-black/50 z-[70] hidden flex flex-col items-end sm:items-center justify-center backdrop-blur-sm">
   <div onclick="closeMassDeleteModal()" class="absolute inset-0"></div>
   <div class="al-modal-panel relative bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-sm translate-y-full opacity-0 sm:scale-95 sm:translate-y-0 transition-all duration-300 sm:mx-4">
     <div class="px-5 pt-5 pb-4">
@@ -639,7 +639,7 @@ function isImageFile(filename) {
 </div>
 
 <!-- Rename Modal -->
-<div id="renameModal" class="fixed inset-0 bg-black/50 z-[100] hidden flex flex-col items-end sm:items-center justify-center backdrop-blur-sm">
+<div id="renameModal" class="fixed inset-0 bg-black/50 z-[70] hidden flex flex-col items-end sm:items-center justify-center backdrop-blur-sm">
   <div onclick="closeRenameModal()" class="absolute inset-0"></div>
   <div class="al-modal-panel relative bg-white dark:bg-neutral-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-neutral-700/40 shadow-xl translate-y-full opacity-0 sm:scale-95 sm:translate-y-0 transition-all duration-300 sm:mx-4">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
@@ -667,7 +667,7 @@ function isImageFile(filename) {
 </div>
 
 <!-- Move Modal -->
-<div id="moveModal" class="fixed inset-0 bg-black/50 z-[100] hidden flex flex-col items-end sm:items-center justify-center backdrop-blur-sm">
+<div id="moveModal" class="fixed inset-0 bg-black/50 z-[70] hidden flex flex-col items-end sm:items-center justify-center backdrop-blur-sm">
   <div onclick="closeMoveModal()" class="absolute inset-0"></div>
   <div class="al-modal-panel relative bg-white dark:bg-neutral-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-neutral-700/40 shadow-xl translate-y-full opacity-0 sm:scale-95 sm:translate-y-0 transition-all duration-300 sm:mx-4">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
@@ -693,7 +693,7 @@ function isImageFile(filename) {
 </div>
 
 <!-- SFTP Modal -->
-<div id="sftpModal" class="fixed inset-0 bg-black/50 z-[100] hidden flex flex-col items-end sm:items-center justify-center backdrop-blur-sm">
+<div id="sftpModal" class="fixed inset-0 bg-black/50 z-[70] hidden flex flex-col items-end sm:items-center justify-center backdrop-blur-sm">
   <div onclick="closeSftpModal()" class="absolute inset-0"></div>
   <div class="al-modal-panel relative bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-md translate-y-full opacity-0 sm:scale-95 sm:translate-y-0 transition-all duration-300 sm:mx-4">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">

@@ -22,6 +22,7 @@ model Users {
   maxStorage    Int?      @default(0)
   loginAttempts Int       @default(0)
   lockedUntil   DateTime?
+  animationsDisabled Boolean @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

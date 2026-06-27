@@ -55,7 +55,7 @@
 
       <!-- Action buttons -->
       <div class="flex gap-2">
-        <button type="button" onclick="document.getElementById('checkUpdateBtn').click()" class="flex-1 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Check Updates</button>
+        <button id="checkUpdateBtn" type="button" class="flex-1 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Check Updates</button>
         <button id="performUpdateBtn" type="button" class="hidden flex-1 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-500 transition">
           Install Update
         </button>
@@ -273,7 +273,7 @@
               </div>
             </div>
             <div class="flex gap-2">
-              <button type="button" onclick="document.getElementById('checkUpdateBtn').click()" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Check Updates</button>
+              <button id="checkUpdateBtn" type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Check Updates</button>
               <button id="performUpdateBtn" class="hidden rounded-xl bg-neutral-200 dark:bg-neutral-700/60 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border border-neutral-300 dark:border-white/5 px-3 py-2 text-sm font-medium transition-colors items-center gap-1.5">
                 <%- icon('download', { size: 16, class: 'shrink-0' }) %>
                 <%= req.translations.update || 'Update' %>

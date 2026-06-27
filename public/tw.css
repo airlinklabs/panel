@@ -132,6 +132,14 @@
   #al-progress       { transition: none !important; }
 }
 
+.animations-disabled *,
+.animations-disabled *::before,
+.animations-disabled *::after {
+  animation-duration: 0.01ms !important;
+  transition-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+}
+
 /* ── Sidebar active indicator ────────────────────────────────────── */
 #active-background {
   background: rgb(var(--al-accent) / 0.1);
@@ -159,6 +167,14 @@ html.dark #active-background {
 .nav-link.active,
 .mobile-nav-link.active-mobile {
   will-change: color;
+}
+
+.nav-link.active {
+  background-color: rgb(var(--al-accent) / 0.1);
+  border-radius: 0.75rem;
+}
+html.dark .nav-link.active {
+  background-color: rgb(255 255 255 / 0.06);
 }
 
 .mobile-nav-link svg,

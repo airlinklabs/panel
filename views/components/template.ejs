@@ -15,7 +15,7 @@
           <%- icon('bell', { class: 'h-5 w-5' }) %>
           <span id="notification-badge" class="hidden absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">0</span>
         </button>
-        <div id="notification-dropdown" class="hidden absolute right-0 top-12 w-80 max-h-96 overflow-y-auto bg-white/95 dark:bg-neutral-800/95 backdrop-blur-xl rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30 z-50">
+        <div id="notification-dropdown" class="hidden absolute right-0 top-12 w-80 max-h-96 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30 z-50">
           <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/10">
             <span class="text-sm font-medium text-neutral-800 dark:text-white">Notifications</span>
             <button onclick="markAllRead()" class="text-xs font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition px-2 py-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5">Mark all read</button>
@@ -372,6 +372,28 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
               </li>
               <% }); } %>
             <% } %>
+
+            <% if (!user.isAdmin) { %>
+              <p class="pl-8 text-neutral-600 dark:text-neutral-400 text-xs font-medium pt-6 pb-2">My Panel</p>
+              <li>
+                <a href="/consumer/overview" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
+                  <%- icon('layout-grid', { class: 'w-4 h-4 mt-0.5', strokeWidth: 1.5 }) %>
+                  <span>Overview</span>
+                </a>
+              </li>
+              <li>
+                <a href="/consumer/create-server" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
+                  <%- icon('plus-circle', { class: 'w-4 h-4 mt-0.5', strokeWidth: 1.5 }) %>
+                  <span>Create Server</span>
+                </a>
+              </li>
+              <li>
+                <a href="/consumer/api-keys" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
+                  <%- icon('key', { class: 'w-4 h-4 mt-0.5', strokeWidth: 1.5 }) %>
+                  <span>API Keys</span>
+                </a>
+              </li>
+            <% } %>
           </ul>
         </li>
       </ul>
@@ -385,7 +407,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
           <span class="flex-1 text-left">Notifications</span>
           <span id="desktop-notification-badge" class="hidden h-5 min-w-5 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center px-1">0</span>
         </button>
-        <div id="desktop-notification-dropdown" class="hidden absolute left-3 right-3 bottom-full mb-2 w-auto max-h-80 overflow-y-auto bg-white/95 dark:bg-neutral-800/95 backdrop-blur-xl rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30 z-50">
+        <div id="desktop-notification-dropdown" class="hidden absolute left-3 right-3 bottom-full mb-2 w-auto max-h-80 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30 z-50">
           <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/10">
             <span class="text-sm font-medium text-neutral-800 dark:text-white">Notifications</span>
             <button onclick="markAllRead()" class="text-xs font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition px-2 py-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5">Mark all read</button>

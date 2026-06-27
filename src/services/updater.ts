@@ -91,8 +91,8 @@ export async function runUpdate(): Promise<boolean> {
     }
 
     // Update dependencies and rebuild
-    execSync('npm install', { stdio: 'inherit' });
-    execSync('npm run build-ts', { stdio: 'inherit' });
+    execSync('pnpm install', { stdio: 'inherit' });
+    execSync('pnpm run build', { stdio: 'inherit' });
 
     // Restart if using PM2 in production
     if (process.env.NODE_ENV === 'production') {

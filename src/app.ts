@@ -467,85 +467,104 @@ app.use((_req, res, next) => {
   const isMobileViewport = viewportCookie === 'mobile';
   res.locals.isMobileViewport = isMobileViewport;
 
-  const originalRenderBase = res.render.bind(res);
-  // @ts-expect-error - custom render wrapper with extended callback signature
-  res.render = function (view: string, optionsOrCb?: Record<string, unknown> | ((err: Error | null, html?: string) => void), maybeCb?: (err: Error | null, html?: string) => void): void {
-    const isAbsolutePath = path.isAbsolute(view);
-    const isAddonView = view.includes('/storage/addons/') || view.includes('\\storage\\addons\\');
+  // Animation preference — fetch from DB for authenticated users, then continue
+  const sessionUser = (_req.session as Record<string, unknown> | undefined)?.user as { id?: number } | undefined;
+  const proceedWithRenderOverride = () => {
+    const originalRenderBase = res.render.bind(res);
+    // @ts-expect-error - custom render wrapper with extended callback signature
+    res.render = function (view: string, optionsOrCb?: Record<string, unknown> | ((err: Error | null, html?: string) => void), maybeCb?: (err: Error | null, html?: string) => void): void {
+      const isAbsolutePath = path.isAbsolute(view);
+      const isAddonView = view.includes('/storage/addons/') || view.includes('\\storage\\addons\\');
 
-    const resolvedCb: ((err: Error | null, html?: string) => void) | undefined = typeof optionsOrCb === 'function' ? optionsOrCb : maybeCb;
-    const opts = typeof optionsOrCb === 'function' ? {} : optionsOrCb || {};
+      const resolvedCb: ((err: Error | null, html?: string) => void) | undefined = typeof optionsOrCb === 'function' ? optionsOrCb : maybeCb;
+      const opts = typeof optionsOrCb === 'function' ? {} : optionsOrCb || {};
 
-    if (isAbsolutePath || isAddonView) {
-      const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-      (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(view, data, {}, (err: Error | null, html: string) => {
-        if (err) {
-          if (typeof resolvedCb === 'function') {resolvedCb(err); return;}
-          return res.status(500).send('View render error: ' + err.message);
-        }
-        if (typeof resolvedCb === 'function') {resolvedCb(null, html); return;}
-        res.send(html);
-      });
-      return;
-    }
-
-    // Views now live at views/ root. isMobileViewport is in res.locals for templates.
-    const rootViewPath = path.join(viewsPath, view + '.ejs');
-    const legacyDesktopPath = path.join(viewsPath, 'desktop/' + view + '.ejs');
-    const legacyMobilePath  = path.join(viewsPath, 'mobile/'  + view + '.ejs');
-
-    let resolvedView = view;
-    if (!fs.existsSync(rootViewPath)) {
-      if (fs.existsSync(legacyDesktopPath)) {
-        resolvedView = 'desktop/' + view;
-      } else if (fs.existsSync(legacyMobilePath)) {
-        resolvedView = 'mobile/' + view;
-      }
-      // If none exist, Express throws "view not found" — correct behaviour.
-    }
-
-    // Addon view fallback (unchanged)
-    if (!fs.existsSync(path.join(viewsPath, resolvedView + '.ejs'))) {
-      const optsRecord = opts;
-      if (optsRecord.addonSlug) {
-        const addonSlug = optsRecord.addonSlug as string;
-        const addonFallbackPath = path.join(addonViewsDir, addonSlug, 'views', view + '.ejs');
-        if (fs.existsSync(addonFallbackPath)) {
-          const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-          (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
-            if (err) {
-              if (typeof resolvedCb === 'function') {resolvedCb(err); return;}
-              return res.status(500).send('View render error: ' + err.message);
-            }
-            if (typeof resolvedCb === 'function') {resolvedCb(null, html); return;}
-            res.send(html);
-          });
-          return;
-        }
+      if (isAbsolutePath || isAddonView) {
+        const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
+        (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(view, data, {}, (err: Error | null, html: string) => {
+          if (err) {
+            if (typeof resolvedCb === 'function') {resolvedCb(err); return;}
+            return res.status(500).send('View render error: ' + err.message);
+          }
+          if (typeof resolvedCb === 'function') {resolvedCb(null, html); return;}
+          res.send(html);
+        });
+        return;
       }
 
-      for (const addonDir of getAddonDirs()) {
-        if (optsRecord.addonSlug && addonDir === optsRecord.addonSlug) {continue;}
-        const addonFallbackPath = path.join(addonViewsDir, addonDir, 'views', view + '.ejs');
-        if (fs.existsSync(addonFallbackPath)) {
-          const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-          (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
-            if (err) {
-              if (typeof resolvedCb === 'function') {resolvedCb(err); return;}
-              return res.status(500).send('View render error: ' + err.message);
-            }
-            if (typeof resolvedCb === 'function') {resolvedCb(null, html); return;}
-            res.send(html);
-          });
-          return;
+      // Views now live at views/ root. isMobileViewport is in res.locals for templates.
+      const rootViewPath = path.join(viewsPath, view + '.ejs');
+      const legacyDesktopPath = path.join(viewsPath, 'desktop/' + view + '.ejs');
+      const legacyMobilePath  = path.join(viewsPath, 'mobile/'  + view + '.ejs');
+
+      let resolvedView = view;
+      if (!fs.existsSync(rootViewPath)) {
+        if (fs.existsSync(legacyDesktopPath)) {
+          resolvedView = 'desktop/' + view;
+        } else if (fs.existsSync(legacyMobilePath)) {
+          resolvedView = 'mobile/' + view;
+        }
+        // If none exist, Express throws "view not found" — correct behaviour.
+      }
+
+      // Addon view fallback (unchanged)
+      if (!fs.existsSync(path.join(viewsPath, resolvedView + '.ejs'))) {
+        const optsRecord = opts;
+        if (optsRecord.addonSlug) {
+          const addonSlug = optsRecord.addonSlug as string;
+          const addonFallbackPath = path.join(addonViewsDir, addonSlug, 'views', view + '.ejs');
+          if (fs.existsSync(addonFallbackPath)) {
+            const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
+            (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
+              if (err) {
+                if (typeof resolvedCb === 'function') {resolvedCb(err); return;}
+                return res.status(500).send('View render error: ' + err.message);
+              }
+              if (typeof resolvedCb === 'function') {resolvedCb(null, html); return;}
+              res.send(html);
+            });
+            return;
+          }
+        }
+
+        for (const addonDir of getAddonDirs()) {
+          if (optsRecord.addonSlug && addonDir === optsRecord.addonSlug) {continue;}
+          const addonFallbackPath = path.join(addonViewsDir, addonDir, 'views', view + '.ejs');
+          if (fs.existsSync(addonFallbackPath)) {
+            const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
+            (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
+              if (err) {
+                if (typeof resolvedCb === 'function') {resolvedCb(err); return;}
+                return res.status(500).send('View render error: ' + err.message);
+              }
+              if (typeof resolvedCb === 'function') {resolvedCb(null, html); return;}
+              res.send(html);
+            });
+            return;
+          }
         }
       }
-    }
 
-    originalRenderBase(resolvedView, opts, resolvedCb);
+      originalRenderBase(resolvedView, opts, resolvedCb);
+    };
+
+    next();
   };
 
-  next();
+  if (sessionUser?.id) {
+    prisma.users.findUnique({ where: { id: sessionUser.id }, select: { animationsDisabled: true } })
+      .then((dbUser) => {
+        res.locals.animationsDisabled = dbUser?.animationsDisabled ?? false;
+        proceedWithRenderOverride();
+      })
+      .catch(() => {
+        res.locals.animationsDisabled = false;
+        proceedWithRenderOverride();
+      });
+  } else {
+    res.locals.animationsDisabled = false;
+    proceedWithRenderOverride();
+  }
 });
 
 // Catch errors from global middleware registered before modules.

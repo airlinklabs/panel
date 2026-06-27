@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function openCropPopup(dataUrl, csrf) {
     const isMobile = window.innerWidth < 768;
     const overlay = document.createElement('div');
-    overlay.className = 'fixed inset-0 z-[9999] bg-black/70 flex ' + (isMobile ? 'items-end justify-center p-0' : 'items-center justify-center p-4');
+    overlay.className = 'fixed inset-0 z-[60] bg-black/70 flex ' + (isMobile ? 'items-end justify-center p-0' : 'items-center justify-center p-4');
     overlay.innerHTML = isMobile
       ? `<div class="bg-white dark:bg-neutral-900 rounded-t-2xl w-full overflow-hidden" style="max-height:90vh">
         <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-neutral-100 dark:border-white/5">
