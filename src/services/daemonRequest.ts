@@ -68,7 +68,7 @@ function extractKeyFromAuth(auth: { username?: string; password?: string } | und
 }
 
 function serializeRequestBody(data: unknown): string {
-  if (data === null) {return '';}
+  if (data == null) {return '';}
   if (typeof data === 'string') {return data;}
   if (Buffer.isBuffer(data)) {return '';}
 

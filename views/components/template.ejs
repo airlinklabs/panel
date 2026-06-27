@@ -1,6 +1,6 @@
 <% if (isMobileViewport) { %>
 <!-- Mobile top bar -->
-<div id="mobile-topbar" data-turbo-permanent class="mobile-top-bar al-topbar fixed top-0 left-0 right-0 z-50 h-14 bg-white/90 dark:bg-[#141414]/80 backdrop-blur-xl border-b border-neutral-200/60 dark:border-white/5">
+<div id="mobile-topbar" data-turbo-permanent class="mobile-top-bar al-topbar fixed top-0 left-0 right-0 z-50 h-14 bg-white/90 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-neutral-200/60 dark:border-white/5">
   <div id="topbar-default" class="flex items-center justify-between h-14 px-4">
     <a href="/" class="flex items-center gap-2 min-w-0 flex-1 mr-3">
       <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="logo-bg h-8 w-8 rounded-lg bg-neutral-950/90 dark:bg-transparent p-0.5 shrink-0">
@@ -50,7 +50,7 @@
   </div>
 </div>
 
-<div id="mobileSearchResults" class="hidden fixed top-14 left-0 right-0 z-40 bg-white dark:bg-[#141414] border-b border-neutral-200/30 dark:border-white/5 max-h-[60dvh] overflow-y-auto shadow-lg">
+<div id="mobileSearchResults" class="hidden fixed top-14 left-0 right-0 z-40 bg-white dark:bg-neutral-900 border-b border-neutral-200/30 dark:border-white/5 max-h-[60dvh] overflow-y-auto shadow-lg">
 </div>
 
 <%
@@ -68,7 +68,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 %>
 
 <!-- Mobile bottom nav -->
-<nav id="mobile-bottom-nav" data-turbo-permanent class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-[#141414]/80 backdrop-blur-xl border-t border-neutral-200/60 dark:border-white/5">
+<nav id="mobile-bottom-nav" data-turbo-permanent class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-neutral-900/80 backdrop-blur-xl border-t border-neutral-200/60 dark:border-white/5">
   <ul class="relative flex items-center justify-around h-16">
     <% if (!sidebarItems || sidebarItems.length === 0) { %>
       <li class="flex-1 relative z-10">
@@ -105,10 +105,13 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
     </li>
 
     <li class="flex-1 relative z-10">
-      <a href="/logout" data-turbo="false" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400">
-        <%- icon('log-out', { class: 'w-5 h-5' }) %>
-        <span class="text-[10px] font-medium"><%= req.translations.navLogout || 'Logout' %></span>
-      </a>
+      <form action="/logout" method="POST" data-turbo="false" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400">
+        <%- include('csrf') %>
+        <button type="submit" class="flex flex-col items-center justify-center h-full gap-1 text-neutral-500 dark:text-neutral-400">
+          <%- icon('log-out', { class: 'w-5 h-5' }) %>
+          <span class="text-[10px] font-medium"><%= req.translations.navLogout || 'Logout' %></span>
+        </button>
+      </form>
     </li>
 
   </ul>
@@ -116,7 +119,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 
 <% if (extraItems.length > 0) { %>
 <div id="more-sheet-backdrop" data-turbo-permanent class="fixed inset-0 z-40 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-200"></div>
-<div id="more-sheet" data-turbo-permanent class="mobile-more-sheet fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#1c1c1c] border-t border-neutral-200/30 dark:border-white/5 rounded-t-2xl translate-y-full transition-transform duration-300 ease-out">
+<div id="more-sheet" data-turbo-permanent class="mobile-more-sheet fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-neutral-800 border-t border-neutral-200/30 dark:border-white/5 rounded-t-2xl translate-y-full transition-transform duration-300 ease-out">
   <div class="flex items-center justify-between px-4 pt-4 pb-2">
     <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.navMore || 'More' %></p>
     <button id="more-sheet-close" class="w-11 h-11 flex items-center justify-center rounded-lg text-neutral-500 hover:text-neutral-700 dark:text-neutral-300 dark:hover:text-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition" aria-label="Close more navigation">
@@ -254,7 +257,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 
 <!-- Sidebar -->
 <div id="pc-sidebar" data-turbo-permanent class="sidebar transition hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-56 lg:flex-col left-0">
-  <div id="pc-sidebar2" class="flex flex-col h-full bg-white/90 dark:bg-[#141414]/80 backdrop-blur-xl border-r border-neutral-200/60 dark:border-white/5">
+  <div id="pc-sidebar2" class="flex flex-col h-full bg-white/90 dark:bg-neutral-900/80 backdrop-blur-xl border-r border-neutral-200/60 dark:border-white/5">
 
     <!-- Static top: logo -->
     <div class="pl-6 pt-4 pb-4 flex min-w-0 shrink-0">
@@ -422,10 +425,13 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
           </div>
         </div>
       </div>
-      <a href="/logout" data-turbo="false" id="sidebar-logout-link" class="sidebar-special-link group flex gap-x-3 pl-6 py-4 text-sm font-medium leading-6 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-500 transition-colors duration-200">
-        <%- icon('log-out', { class: 'w-5 h-5 mt-0.5 shrink-0', strokeWidth: 1.5 }) %>
-        <span><%= req.translations.navLogout || 'Logout' %></span>
-      </a>
+      <form action="/logout" method="POST" data-turbo="false" class="w-full">
+        <%- include('csrf') %>
+        <button type="submit" id="sidebar-logout-link" class="sidebar-special-link group flex gap-x-3 pl-6 py-4 text-sm font-medium leading-6 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-500 transition-colors duration-200 w-full">
+          <%- icon('log-out', { class: 'w-5 h-5 mt-0.5 shrink-0', strokeWidth: 1.5 }) %>
+          <span><%= req.translations.navLogout || 'Logout' %></span>
+        </button>
+      </form>
     </div>
 
   </div>
@@ -440,7 +446,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 </script>
 
 <div id="colcont" data-turbo-permanent class="lg:pl-56">
-  <div class="al-topbar fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-white/90 dark:bg-[#141414]/80 backdrop-blur-xl border-b border-neutral-200/60 dark:border-white/5 px-4 sm:gap-x-6 sm:px-4 lg:px-4">
+  <div class="al-topbar fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-white/90 dark:bg-neutral-900/80 backdrop-blur-xl border-b border-neutral-200/60 dark:border-white/5 px-4 sm:gap-x-6 sm:px-4 lg:px-4">
     <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
       <div class="relative flex flex-1 flex-col">
 
@@ -467,7 +473,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
           </div>
         </div>
 
-        <div id="searchResults" role="listbox" aria-label="Search results" class="absolute bg-neutral-50 dark:bg-neutral-900 w-[19.5rem] rounded-xl shadow-2xl shadow-neutral-200/80 dark:shadow-black/40 hidden mt-20 px-2 pb-2 border border-neutral-200 dark:border-neutral-700/60">
+        <div id="searchResults" role="listbox" aria-label="Search results" class="absolute z-50 bg-neutral-50 dark:bg-neutral-900 w-[19.5rem] rounded-xl shadow-2xl shadow-neutral-200/80 dark:shadow-black/40 hidden mt-20 px-2 pb-2 border border-neutral-200 dark:border-neutral-700/60">
         </div>
       </div>
 

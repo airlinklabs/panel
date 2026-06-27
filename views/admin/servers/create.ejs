@@ -866,7 +866,7 @@ const listB = ["Creeper","Dragon","Zombie","Ghoul","Enderman","Skeleton","Wither
 .cs-trigger svg { width: 14px; height: 14px; opacity: 0.45; transition: transform 0.18s; flex-shrink: 0; }
 .cs-trigger.open svg { transform: rotate(180deg); }
 .cs-placeholder { opacity: 0.4; }
-.cs-dropdown { position: absolute; top: calc(100% + 5px); left: 0; right: 0; z-index: 200; background: var(--theme-bg-card, #fff); border: 1px solid var(--theme-border-subtle, rgba(0,0,0,0.1)); border-radius: 12px; box-shadow: 0 8px 24px var(--theme-shadow-md, rgba(0,0,0,0.1)); overflow: hidden; max-height: 220px; overflow-y: auto; animation: cs-open 0.15s cubic-bezier(0.16,1,0.3,1); }
+.cs-dropdown { position: absolute; top: calc(100% + 5px); left: 0; right: 0; z-index: 70; background: var(--theme-bg-card, #fff); border: 1px solid var(--theme-border-subtle, rgba(0,0,0,0.1)); border-radius: 12px; box-shadow: 0 8px 24px var(--theme-shadow-md, rgba(0,0,0,0.1)); overflow: hidden; max-height: 220px; overflow-y: auto; animation: cs-open 0.15s cubic-bezier(0.16,1,0.3,1); }
 .dark .cs-dropdown { background: var(--theme-bg-card, #1e1e1e); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); box-shadow: 0 8px 24px var(--theme-shadow-md, rgba(0,0,0,0.4)); }
 @keyframes cs-open { from { opacity:0; transform: translateY(-4px); } to { opacity:1; transform: translateY(0); } }
 .cs-option { padding: 8px 14px; font-size: 13px; cursor: pointer; color: var(--theme-text-strong, #1a1a1a); transition: background 0.1s; }

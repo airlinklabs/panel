@@ -50,7 +50,7 @@ async function configure(nodeId) {
     const response = await fetch(`/admin/node/${nodeId}/configure`);
     if (!response.ok) throw new Error('Failed to fetch configure command');
     const data = await response.json();
-    showPopup(data);
+    showPopup(data.command);
   } catch (error) {
     console.error(error);
   }

@@ -13,10 +13,10 @@
 
     <!-- Stats grid -->
     <div class="grid grid-cols-2 gap-3 mb-5">
-      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4"><p class="text-xs text-neutral-500 mb-1"><%= req.translations.users || 'Users' %></p><p class="text-xl font-semibold text-neutral-800 dark:text-white"><%= userCount %></p></div>
-      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4"><p class="text-xs text-neutral-500 mb-1"><%= req.translations.instances || 'Servers' %></p><p class="text-xl font-semibold text-neutral-800 dark:text-white"><%= instanceCount %></p></div>
-      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4"><p class="text-xs text-neutral-500 mb-1"><%= req.translations.nodes || 'Nodes' %></p><p class="text-xl font-semibold text-neutral-800 dark:text-white"><%= nodeCount %></p></div>
-      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4"><p class="text-xs text-neutral-500 mb-1"><%= req.translations.images || 'Images' %></p><p class="text-xl font-semibold text-neutral-800 dark:text-white"><%= imageCount %></p></div>
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3"><p class="text-xs text-neutral-500 mb-1"><%= req.translations.users || 'Users' %></p><p class="text-xl font-semibold text-neutral-800 dark:text-white"><%= userCount %></p></div>
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3"><p class="text-xs text-neutral-500 mb-1"><%= req.translations.instances || 'Servers' %></p><p class="text-xl font-semibold text-neutral-800 dark:text-white"><%= instanceCount %></p></div>
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3"><p class="text-xs text-neutral-500 mb-1"><%= req.translations.nodes || 'Nodes' %></p><p class="text-xl font-semibold text-neutral-800 dark:text-white"><%= nodeCount %></p></div>
+      <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3"><p class="text-xs text-neutral-500 mb-1"><%= req.translations.images || 'Images' %></p><p class="text-xl font-semibold text-neutral-800 dark:text-white"><%= imageCount %></p></div>
     </div>
 
     <!-- Panel info card -->
@@ -53,7 +53,15 @@
         </div>
       </div>
 
-      <!-- Action buttons -->
+      <!-- Branch selector + Action buttons -->
+      <div class="flex items-center gap-2 mb-3">
+        <p class="text-xs text-neutral-500 flex-1">Update channel</p>
+        <div class="flex rounded-lg overflow-hidden border border-neutral-200 dark:border-white/10 text-xs">
+          <button class="branch-btn px-3 py-1.5 font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300" data-branch="stable">Stable</button>
+          <button class="branch-btn px-3 py-1.5 font-medium text-neutral-500 dark:text-neutral-500" data-branch="dev">Dev</button>
+        </div>
+      </div>
+
       <div class="flex gap-2">
         <button id="checkUpdateBtn" type="button" class="flex-1 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Check Updates</button>
         <button id="performUpdateBtn" type="button" class="hidden flex-1 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-500 transition">
@@ -112,6 +120,27 @@
   const currentVersion = '<%= airlinkVersion %>';
   document.querySelectorAll('.current-version').forEach(el => { el.textContent = currentVersion; });
 
+  let currentBranch = localStorage.getItem('updateBranch') || 'stable';
+  function updateBranchButtons() {
+    document.querySelectorAll('.branch-btn').forEach(btn => {
+      const isActive = btn.dataset.branch === currentBranch;
+      btn.classList.toggle('bg-neutral-100', isActive);
+      btn.classList.toggle('dark:bg-neutral-800', isActive);
+      btn.classList.toggle('text-neutral-700', isActive);
+      btn.classList.toggle('dark:text-neutral-300', isActive);
+      btn.classList.toggle('text-neutral-500', !isActive);
+      btn.classList.toggle('dark:text-neutral-500', !isActive);
+    });
+  }
+  updateBranchButtons();
+  document.querySelectorAll('.branch-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentBranch = btn.dataset.branch;
+      localStorage.setItem('updateBranch', currentBranch);
+      updateBranchButtons();
+    });
+  });
+
   document.getElementById('checkUpdateBtn').addEventListener('click', async () => {
     const btn = document.getElementById('checkUpdateBtn');
     const statusDiv = document.getElementById('updateStatus');
@@ -120,7 +149,7 @@
     btn.disabled = true;
 
     try {
-      const response = await fetch('/admin/check-update');
+      const response = await fetch('/admin/check-update?branch=' + encodeURIComponent(currentBranch));
       const data = await response.json();
       const updateBtn = document.getElementById('performUpdateBtn');
 
@@ -157,7 +186,7 @@
         statusText.textContent = 'Installing...';
         statusText.className = 'text-xs text-blue-500';
         try {
-          const response = await fetch('/admin/perform-update', { method: 'POST' });
+          const response = await fetch('/admin/perform-update?branch=' + encodeURIComponent(currentBranch), { method: 'POST' });
           const data = await response.json();
           showToast(data.message || 'Update started. Restarting...', 'success');
           statusText.textContent = 'Restarting...';
@@ -272,7 +301,11 @@
                 </div>
               </div>
             </div>
-            <div class="flex gap-2">
+            <div class="flex items-center gap-2">
+              <div class="flex rounded-lg overflow-hidden border border-neutral-200 dark:border-white/10 text-xs">
+                <button class="branch-btn px-3 py-1.5 font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300" data-branch="stable">Stable</button>
+                <button class="branch-btn px-3 py-1.5 font-medium text-neutral-500 dark:text-neutral-500" data-branch="dev">Dev</button>
+              </div>
               <button id="checkUpdateBtn" type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Check Updates</button>
               <button id="performUpdateBtn" class="hidden rounded-xl bg-neutral-200 dark:bg-neutral-700/60 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 border border-neutral-300 dark:border-white/5 px-3 py-2 text-sm font-medium transition-colors items-center gap-1.5">
                 <%- icon('download', { size: 16, class: 'shrink-0' }) %>
@@ -288,7 +321,7 @@
                 <span id="apiLatency" class="text-sm font-mono text-neutral-700 dark:text-neutral-300">-- ms</span>
               </div>
               <div class="w-full bg-neutral-200 dark:bg-neutral-700/40 rounded-full h-1.5">
-                <div id="latencyBar" class="bg-neutral-400 dark:bg-neutral-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                <div id="latencyBarDesktop" class="bg-neutral-400 dark:bg-neutral-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
               </div>
             </div>
 
@@ -343,7 +376,7 @@
 
 <%- include('../../components/footer') %>
 
-<div id="page-data" style="display:none"
+<div id="page-data" class="hidden"
   data-airlink-version="<%= airlinkVersion %>"
   data-running-latest-version="<%= req.translations.runningLatestVersion %>"
 ></div>

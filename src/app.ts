@@ -468,7 +468,7 @@ app.use((_req, res, next) => {
   res.locals.isMobileViewport = isMobileViewport;
 
   // Animation preference — fetch from DB for authenticated users, then continue
-  const sessionUser = (_req.session as Record<string, unknown> | undefined)?.user as { id?: number } | undefined;
+  const sessionUser = (_req.session as unknown as Record<string, unknown>)?.user as { id?: number } | undefined;
   const proceedWithRenderOverride = () => {
     const originalRenderBase = res.render.bind(res);
     // @ts-expect-error - custom render wrapper with extended callback signature

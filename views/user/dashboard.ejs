@@ -5,7 +5,7 @@
   <%- include('../components/template') %>
 
   <div class="px-4 py-5">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-5">
       <div>
         <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.userDashboardTitle %></h1>
         <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.userDashboardText %></p>
@@ -31,21 +31,21 @@
     </div>
 
     <% if (req.query.err === "NOTACTIVEYET") { %>
-      <div class="data-animate-card rounded-xl bg-amber-50 dark:bg-amber-800/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-4">
+      <div class="data-animate-card rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-4">
         <p class="text-sm font-medium text-amber-700 dark:text-amber-400"><%= req.translations.awaitingInstallation || "This server's still getting its act together. Check back in a moment." %></p>
         <p class="text-xs text-amber-600 dark:text-amber-400/60 mt-0.5"><%= req.translations.awaitingInstallationDesc || "The server isn't installed yet or is in a failed state." %></p>
       </div>
     <% } %>
 
     <% if (req.query.err === 'SERVER_LIMIT_REACHED') { %>
-      <div class="data-animate-card rounded-xl bg-amber-50 dark:bg-amber-800/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-4">
+      <div class="data-animate-card rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-4">
         <p class="text-sm font-medium text-amber-700 dark:text-amber-400">You've hit your server limit — talk to your admin if you need more room.</p>
         <p class="text-xs text-amber-600 dark:text-amber-400/60 mt-0.5">You have reached the maximum number of servers allowed.</p>
       </div>
     <% } %>
 
     <% if (typeof daemonOffline !== 'undefined' && daemonOffline) { %>
-      <div class="data-animate-card rounded-xl bg-red-50 dark:bg-red-800/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-4">
+      <div class="data-animate-card rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-4">
         <p class="text-sm font-medium text-red-700 dark:text-red-400"><%= req.translations.connectionError || 'Connection Error' %></p>
         <p class="text-xs text-red-600 dark:text-red-400/60 mt-0.5"><%= req.translations.connectionErrorDesc || 'One or more nodes are offline.' %></p>
         <button onclick="window.location.reload()" class="mt-3 px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg transition hover:bg-red-700 active:scale-95"><%= req.translations.retry || 'Retry' %></button>
@@ -393,19 +393,19 @@
 
         <!-- Alerts -->
         <% if (req.query.err === 'NOTACTIVEYET') { %>
-        <div class="data-animate-card rounded-xl bg-amber-50 dark:bg-amber-800/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-5">
+        <div class="data-animate-card rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-5">
           <p class="text-sm font-medium text-amber-700 dark:text-amber-400"><%= req.translations.awaitingInstallation || "This server's still getting its act together. Check back in a moment." %></p>
           <p class="text-xs text-amber-600 dark:text-amber-400/60 mt-0.5"><%= req.translations.awaitingInstallationDesc || "The server isn't installed yet or is in a failed state." %></p>
         </div>
         <% } %>
         <% if (req.query.err === 'SERVER_LIMIT_REACHED') { %>
-        <div class="data-animate-card rounded-xl bg-amber-50 dark:bg-amber-800/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-5">
+        <div class="data-animate-card rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 mb-5">
           <p class="text-sm font-medium text-amber-700 dark:text-amber-400">You've hit your server limit — talk to your admin if you need more room.</p>
           <p class="text-xs text-amber-600 dark:text-amber-400/60 mt-0.5">You have reached the maximum number of servers allowed.</p>
         </div>
         <% } %>
         <% if (typeof daemonOffline !== 'undefined' && daemonOffline) { %>
-        <div class="data-animate-card rounded-xl bg-red-50 dark:bg-red-800/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-5">
+        <div class="data-animate-card rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-5">
           <p class="text-sm font-medium text-red-700 dark:text-red-400"><%= req.translations.connectionError || 'Connection Error' %></p>
           <p class="text-xs text-red-600 dark:text-red-400/60 mt-0.5"><%= req.translations.connectionErrorDesc || 'One or more nodes are offline.' %></p>
           <button onclick="window.location.reload()" class="mt-3 px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg transition hover:bg-red-700 active:scale-95"><%= req.translations.retry || 'Retry' %></button>
@@ -420,7 +420,7 @@
               <span class="filter-label">Status</span>
               <%- icon('chevron-down', { class: 'h-3 w-3 text-neutral-400' }) %>
             </button>
-            <div data-popover class="hidden absolute left-0 mt-1.5 z-50 w-44 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-neutral-200/80 dark:border-white/10 rounded-xl shadow-xl shadow-black/5 dark:shadow-black/30 p-1.5">
+            <div data-popover class="hidden absolute left-0 mt-1.5 z-[100] w-44 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-neutral-200/80 dark:border-white/10 rounded-xl shadow-xl shadow-black/5 dark:shadow-black/30 p-1.5">
               <button data-filter-val="" class="al-filter-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 transition">All</button>
               <button data-filter-val="running" class="al-filter-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-emerald-600 dark:text-emerald-400 transition">Running</button>
               <button data-filter-val="stopped" class="al-filter-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-red-600 dark:text-red-400 transition">Stopped</button>
@@ -432,7 +432,7 @@
               <span class="sort-label">Sort</span>
               <%- icon('chevron-down', { class: 'h-3 w-3 text-neutral-400' }) %>
             </button>
-            <div data-popover class="hidden absolute left-0 mt-1.5 z-50 w-48 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-neutral-200/80 dark:border-white/10 rounded-xl shadow-xl shadow-black/5 dark:shadow-black/30 p-1.5">
+            <div data-popover class="hidden absolute left-0 mt-1.5 z-[100] w-48 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-neutral-200/80 dark:border-white/10 rounded-xl shadow-xl shadow-black/5 dark:shadow-black/30 p-1.5">
               <button data-sort-val="name" data-sort-dir="asc" class="al-sort-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 transition">Name (A-Z)</button>
               <button data-sort-val="name" data-sort-dir="desc" class="al-sort-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 transition">Name (Z-A)</button>
               <button data-sort-val="status" data-sort-dir="asc" class="al-sort-opt w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 transition">Status (Running first)</button>
@@ -569,7 +569,7 @@
               </div>
             </a>
             <!-- Right-click context menu -->
-            <div class="server-ctx-menu hidden absolute z-40 top-2 right-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-xl shadow-lg py-1 w-44">
+            <div class="server-ctx-menu hidden absolute z-50 top-2 right-2 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-xl shadow-lg py-1 w-44">
               <button class="ctx-add-to-folder w-full text-left px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition rounded-t-xl" data-uuid="<%= server.UUID %>">Add to folder</button>
               <button class="ctx-remove-from-folder w-full text-left px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition rounded-b-xl" data-uuid="<%= server.UUID %>" style="display:<%= (folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID))) ? '' : 'none' %>">Remove from folder</button>
             </div>
@@ -638,7 +638,7 @@
 </main>
 
 <!-- Drag ghost element -->
-<div id="drag-ghost" class="fixed z-[70] pointer-events-none bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-[13px] font-medium text-neutral-900 dark:text-neutral-100 shadow-[0_8px_24px_rgba(0,0,0,0.18)] flex items-center gap-2 opacity-95 max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis" style="display:none; transform:rotate(2deg)">
+<div id="drag-ghost" class="hidden rotate-2 fixed z-[70] pointer-events-none bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-[13px] font-medium text-neutral-900 dark:text-neutral-100 shadow-[0_8px_24px_rgba(0,0,0,0.18)] flex items-center gap-2 opacity-95 max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis">
   <%- icon('folder', { class: 'w-3.5 h-3.5 text-amber-500 shrink-0', fill: 'currentColor' }) %>
   <span id="drag-ghost-name"></span>
 </div>

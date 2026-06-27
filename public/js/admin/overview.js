@@ -9,13 +9,34 @@
   const versionById = document.getElementById('current-version');
   if (versionById) versionById.textContent = currentVersion;
 
+  let currentBranch = localStorage.getItem('updateBranch') || 'stable';
+  function updateBranchButtons() {
+    document.querySelectorAll('.branch-btn').forEach(btn => {
+      const isActive = btn.dataset.branch === currentBranch;
+      btn.classList.toggle('bg-neutral-100', isActive);
+      btn.classList.toggle('dark:bg-neutral-800', isActive);
+      btn.classList.toggle('text-neutral-700', isActive);
+      btn.classList.toggle('dark:text-neutral-300', isActive);
+      btn.classList.toggle('text-neutral-500', !isActive);
+      btn.classList.toggle('dark:text-neutral-500', !isActive);
+    });
+  }
+  updateBranchButtons();
+  document.querySelectorAll('.branch-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentBranch = btn.dataset.branch;
+      localStorage.setItem('updateBranch', currentBranch);
+      updateBranchButtons();
+    });
+  });
+
   document.getElementById('checkUpdateBtn').addEventListener('click', async () => {
     const statusDiv = document.getElementById('updateStatus');
     statusDiv.innerHTML = '<span class="text-neutral-500">Checking...</span>';
     statusDiv.classList.remove('hidden');
 
     try {
-      const response = await fetch('/admin/check-update');
+      const response = await fetch('/admin/check-update?branch=' + encodeURIComponent(currentBranch));
       const data = await response.json();
       const updateBtn = document.getElementById('performUpdateBtn');
       const updateInfo = document.getElementById('updateInfo');
@@ -54,7 +75,7 @@
         statusDiv.innerHTML = '<span class="text-neutral-500">Installing...</span>';
         fadeIn(statusDiv);
         try {
-          const response = await fetch('/admin/perform-update', { method: 'POST' });
+          const response = await fetch('/admin/perform-update?branch=' + encodeURIComponent(currentBranch), { method: 'POST' });
           const data = await response.json();
           showToast(data.message || 'Update complete. Restarting.', 'success');
           statusDiv.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400">Update successful. Restarting...</span>';
@@ -94,7 +115,7 @@
       const latency = Math.round(performance.now() - start);
       if (response.ok) {
         document.getElementById('apiLatency').textContent = latency + ' ms';
-        const bar = document.getElementById('latencyBar');
+        const bar = document.getElementById('latencyBarDesktop');
         bar.style.width = Math.min((latency / 500) * 100, 100) + '%';
         bar.classList.remove('bg-emerald-500', 'bg-amber-500', 'bg-red-500', 'bg-neutral-400', 'dark:bg-neutral-500');
         if (latency < 100) bar.classList.add('bg-emerald-500');

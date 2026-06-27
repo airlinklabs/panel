@@ -26,7 +26,7 @@ function pickAvailablePorts(allocatedPorts: number[], usedPorts: number[], count
 async function resolveUserServerLimit(userId: number, settings: { defaultServerLimit?: number | null } | null): Promise<number> {
   const user = await prisma.users.findUnique({ where: { id: userId } });
   if (!user) {return 0;}
-  if (user.serverLimit !== null && user.serverLimit !== undefined) {return user.serverLimit;}
+  if (user.serverLimit !== null && user.serverLimit !== undefined && user.serverLimit > 0) {return user.serverLimit;}
   return settings?.defaultServerLimit ?? 0;
 }
 

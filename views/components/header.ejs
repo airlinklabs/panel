@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="h-full<% if (typeof animationsDisabled !== 'undefined' && animationsDisabled) { %> animations-disabled<% } %>" lang="en">
+<html class="h-full<% if (typeof animationsDisabled !== 'undefined' && animationsDisabled) { %> animations-disabled<% } %><% if (typeof user !== 'undefined' && user) { %><% if (user.highContrast) { %> high-contrast<% } %><% if (user.compactMode) { %> compact-mode<% } %><% if (user.fontSize && user.fontSize !== 'medium') { %> text-size-<%= user.fontSize %><% } %><% } %>" lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,7 +44,7 @@
       body { overscroll-behavior: none; }
     </style>
 </head>
-<body class="bg-neutral-50 dark:bg-[#141414] h-full text-neutral-800 dark:text-white overflow-x-hidden">
+<body class="bg-neutral-50 dark:bg-neutral-900 h-full text-neutral-800 dark:text-white overflow-x-hidden">
 
 <div id="toast-container" data-turbo-permanent class="fixed top-4 right-4 z-[90] flex flex-col gap-2 pointer-events-none max-w-xs w-full" aria-live="polite" aria-atomic="false" role="status"></div>
 

@@ -1,0 +1,240 @@
+<%- include('../components/header', { title: 'Create Server' }) %>
+
+<% if (isMobileViewport) { %>
+<main id="page-content" class="">
+  <%- include('../components/template') %>
+
+  <div class="px-4 py-5">
+    <div class="mb-5">
+      <nav class="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 mb-3">
+        <a href="/consumer/overview" class="hover:text-neutral-800 dark:hover:text-white transition">Overview</a>
+        <%- icon('chevron-right', { class: 'w-3 h-3 shrink-0' }) %>
+        <span class="text-neutral-800 dark:text-white font-medium">Create Server</span>
+      </nav>
+      <h1 class="text-base font-medium text-neutral-800 dark:text-white">Create Server</h1>
+      <p class="text-xs text-neutral-500 mt-0.5">Spin up a new server in a few steps.</p>
+    </div>
+
+    <% if (typeof atLimit !== 'undefined' && atLimit) { %>
+    <!-- At Limit: Locked State -->
+    <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-6 text-center">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-neutral-100 dark:bg-white/5 mb-4">
+        <%- icon('lock', { class: 'w-7 h-7 text-neutral-400 dark:text-neutral-500' }) %>
+      </div>
+      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-1">Server limit reached</p>
+      <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-4">You've used all <%= serverLimit %> of your available server slots.</p>
+      <a href="/consumer/overview" class="inline-flex items-center justify-center rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-xs font-medium transition active:scale-95">
+        Back to Overview
+      </a>
+    </div>
+    <% } else { %>
+    <!-- Create Form -->
+    <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
+      <form id="createServerForm" class="flex flex-col gap-4">
+        <div>
+          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Server Name</label>
+          <input type="text" name="name" required placeholder="my-server"
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Description</label>
+          <textarea name="description" rows="2" placeholder="Optional description"
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition resize-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Node</label>
+          <select name="nodeId" required
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+            <% if (nodes && nodes.length > 0) { %>
+              <% nodes.forEach(function(node) { %>
+              <option value="<%= node.id %>"><%= node.name %></option>
+              <% }); %>
+            <% } else { %>
+              <option value="" disabled selected>No nodes available</option>
+            <% } %>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Server Image</label>
+          <select name="imageId" required id="imageSelect"
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+            <% if (images && images.length > 0) { %>
+              <% images.forEach(function(img) { %>
+              <option value="<%= img.id %>" data-docker="<%= img.dockerImage %>" data-name="<%= img.name %>"><%= img.name %></option>
+              <% }); %>
+            <% } else { %>
+              <option value="" disabled selected>No images available</option>
+            <% } %>
+          </select>
+          <input type="hidden" name="dockerImage" id="dockerImageInput" value="<%= images && images.length > 0 ? images[0].dockerImage : '' %>">
+        </div>
+
+        <% if (typeof remainingSlots !== 'undefined') { %>
+        <p class="text-xs text-neutral-400">Slots: <%= currentCount %> / <%= serverLimit %> (<%= remainingSlots %> remaining)</p>
+        <% } %>
+
+        <div class="flex gap-2">
+          <a href="/consumer/overview" class="flex-1 text-center rounded-xl text-sm font-medium py-2.5 text-neutral-500 border border-neutral-200 dark:border-white/10 hover:bg-neutral-100 dark:hover:bg-white/[0.05] transition">Cancel</a>
+          <button type="submit" id="submitBtn"
+            class="flex-1 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2.5 text-sm font-medium transition hover:bg-neutral-700 dark:hover:bg-neutral-200 active:scale-[0.98]">
+            Create Server
+          </button>
+        </div>
+      </form>
+    </div>
+    <% } %>
+
+  </div>
+</main>
+
+<% } else { %>
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <div class="w-60 h-full"><%- include('../components/template') %></div>
+
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16">
+      <div class="px-12 pt-6 pb-8 max-w-2xl mx-auto">
+
+        <div class="mb-6">
+          <nav class="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 mb-3">
+            <a href="/consumer/overview" class="hover:text-neutral-800 dark:hover:text-white transition">Overview</a>
+            <%- icon('chevron-right', { class: 'w-3 h-3 shrink-0' }) %>
+            <span class="text-neutral-800 dark:text-white font-medium">Create Server</span>
+          </nav>
+          <h1 class="text-base font-medium text-neutral-800 dark:text-white">Create Server</h1>
+          <p class="text-sm text-neutral-500 mt-0.5">Spin up a new server in a few steps.</p>
+        </div>
+
+        <% if (typeof atLimit !== 'undefined' && atLimit) { %>
+        <!-- At Limit: Locked State -->
+        <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-8 text-center">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-neutral-100 dark:bg-white/5 mb-4">
+            <%- icon('lock', { class: 'w-8 h-8 text-neutral-400 dark:text-neutral-500' }) %>
+          </div>
+          <p class="text-sm font-medium text-neutral-800 dark:text-white mb-1">Server limit reached</p>
+          <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-5">You've used all <%= serverLimit %> of your available server slots.</p>
+          <a href="/consumer/overview" class="inline-flex items-center justify-center rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-5 py-2.5 text-sm font-medium transition hover:bg-neutral-700 dark:hover:bg-neutral-200 active:scale-[0.98]">
+            Back to Overview
+          </a>
+        </div>
+        <% } else { %>
+        <!-- Create Form -->
+        <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-6">
+          <form id="createServerForm" class="space-y-5">
+            <div>
+              <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Server Name</label>
+              <input type="text" name="name" required placeholder="my-server"
+                class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Description</label>
+              <textarea name="description" rows="2" placeholder="Optional description"
+                class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition resize-none"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Node</label>
+                <select name="nodeId" required
+                  class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-4 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                  <% if (nodes && nodes.length > 0) { %>
+                    <% nodes.forEach(function(node) { %>
+                    <option value="<%= node.id %>"><%= node.name %></option>
+                    <% }); %>
+                  <% } else { %>
+                    <option value="" disabled selected>No nodes available</option>
+                  <% } %>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Server Image</label>
+                <select name="imageId" required id="imageSelect"
+                  class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-4 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                  <% if (images && images.length > 0) { %>
+                    <% images.forEach(function(img) { %>
+                    <option value="<%= img.id %>" data-docker="<%= img.dockerImage %>" data-name="<%= img.name %>"><%= img.name %></option>
+                    <% }); %>
+                  <% } else { %>
+                    <option value="" disabled selected>No images available</option>
+                  <% } %>
+                </select>
+                <input type="hidden" name="dockerImage" id="dockerImageInput" value="<%= images && images.length > 0 ? images[0].dockerImage : '' %>">
+              </div>
+            </div>
+
+            <% if (typeof remainingSlots !== 'undefined') { %>
+            <p class="text-xs text-neutral-400">Slots: <%= currentCount %> / <%= serverLimit %> (<%= remainingSlots %> remaining)</p>
+            <% } %>
+
+            <div class="flex items-center gap-3 pt-2">
+              <a href="/consumer/overview" class="min-h-10 px-4 py-2 rounded-xl text-sm font-medium bg-transparent text-neutral-500 border border-neutral-200 dark:border-white/10 hover:bg-neutral-100 dark:hover:bg-white/[0.05] transition">Cancel</a>
+              <button type="submit" id="submitBtn"
+                class="min-h-10 px-6 py-2 rounded-xl text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-white focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950 active:scale-[0.98]">
+                Create Server
+              </button>
+            </div>
+          </form>
+        </div>
+        <% } %>
+
+      </div>
+    </div>
+  </div>
+</main>
+<% } %>
+
+<script nonce="<%- nonce %>">
+(function() {
+  var imageSelect = document.getElementById('imageSelect');
+  var dockerInput = document.getElementById('dockerImageInput');
+  var form = document.getElementById('createServerForm');
+  var submitBtn = document.getElementById('submitBtn');
+
+  if (imageSelect && dockerInput) {
+    imageSelect.addEventListener('change', function() {
+      var opt = imageSelect.options[imageSelect.selectedIndex];
+      if (opt && opt.dataset.docker) {
+        dockerInput.value = opt.dataset.docker;
+      }
+    });
+  }
+
+  if (form) {
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating...';
+
+      var data = {};
+      var fd = new FormData(form);
+      fd.forEach(function(val, key) { data[key] = val; });
+
+      try {
+        var r = await fetch('/consumer/create-server', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        var result = await r.json();
+        if (r.ok && result.success) {
+          window.location.href = result.redirect || '/consumer/overview';
+        } else {
+          showToast(result.error || 'Failed to create server.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Create Server';
+        }
+      } catch (err) {
+        showToast('Something went wrong. Please try again.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create Server';
+      }
+    });
+  }
+})();
+</script>
+
+<%- include('../components/footer') %>

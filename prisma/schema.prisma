@@ -23,6 +23,9 @@ model Users {
   loginAttempts Int       @default(0)
   lockedUntil   DateTime?
   animationsDisabled Boolean @default(false)
+  highContrast   Boolean @default(false)
+  compactMode    Boolean @default(false)
+  fontSize       String  @default("medium")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -99,6 +102,7 @@ model Images {
   scripts          String?
   variables        String?
   portRequirements String   @default("[]")
+  visibleToUsers   Boolean  @default(true)
 
   servers Server[]
 }

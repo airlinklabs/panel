@@ -105,6 +105,7 @@ export const UsersScalarFieldEnum = {
   maxStorage: 'maxStorage',
   loginAttempts: 'loginAttempts',
   lockedUntil: 'lockedUntil',
+  animationsDisabled: 'animationsDisabled',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -166,7 +167,8 @@ export const ImagesScalarFieldEnum = {
   info: 'info',
   scripts: 'scripts',
   variables: 'variables',
-  portRequirements: 'portRequirements'
+  portRequirements: 'portRequirements',
+  visibleToUsers: 'visibleToUsers'
 } as const
 
 export type ImagesScalarFieldEnum = (typeof ImagesScalarFieldEnum)[keyof typeof ImagesScalarFieldEnum]

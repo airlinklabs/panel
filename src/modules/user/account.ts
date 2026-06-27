@@ -413,6 +413,63 @@ const accountModule: Module = {
     );
 
     router.post(
+      '/account/font-size',
+      isAuthenticated(),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const { fontSize } = req.body;
+          await prisma.users.update({
+            where: { id: userId },
+            data: { fontSize: fontSize || 'medium' },
+          });
+          res.json({ success: true });
+        } catch (error) {
+          logger.error('Error setting font size:', error);
+          res.status(500).json({ error: 'Internal Server Error' });
+        }
+      },
+    );
+
+    router.post(
+      '/account/high-contrast',
+      isAuthenticated(),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const { highContrast } = req.body;
+          await prisma.users.update({
+            where: { id: userId },
+            data: { highContrast: highContrast === 'true' || highContrast === true },
+          });
+          res.json({ success: true });
+        } catch (error) {
+          logger.error('Error toggling high contrast:', error);
+          res.status(500).json({ error: 'Internal Server Error' });
+        }
+      },
+    );
+
+    router.post(
+      '/account/compact-mode',
+      isAuthenticated(),
+      async (req: Request, res: Response) => {
+        try {
+          const userId = req.session?.user?.id;
+          const { compactMode } = req.body;
+          await prisma.users.update({
+            where: { id: userId },
+            data: { compactMode: compactMode === 'true' || compactMode === true },
+          });
+          res.json({ success: true });
+        } catch (error) {
+          logger.error('Error toggling compact mode:', error);
+          res.status(500).json({ error: 'Internal Server Error' });
+        }
+      },
+    );
+
+    router.post(
       '/upload-avatar',
       isAuthenticated(),
       avatarUpload.single('avatar'),

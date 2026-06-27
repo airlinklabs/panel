@@ -36,8 +36,8 @@ const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
   size: 32,
   getCsrfTokenFromRequest: (req: Request) =>
     (req.headers['csrf-token'] as string) ||
-    (req.headers['x-csrf-token'] as string),
-    // Removed: req.body._csrf — form field CSRF is incompatible with double-submit cookie
+    (req.headers['x-csrf-token'] as string) ||
+    (typeof req.body === 'object' && req.body !== null ? (req.body._csrf as string | undefined) : undefined),
 });
 
 export const csrfProtection = doubleCsrfProtection;

@@ -91,7 +91,7 @@ const dashboardModule: Module = {
             orderBy: { createdAt: 'asc' },
           });
           const settings2 = await prisma.settings.findUnique({ where: { id: 1 } });
-          const userServerLimit = user.serverLimit !== null && user.serverLimit !== undefined
+          const userServerLimit = user.serverLimit !== null && user.serverLimit !== undefined && user.serverLimit > 0
             ? user.serverLimit
             : (settings2?.defaultServerLimit ?? 0);
           const canCreateServer = !user.isAdmin && (settings2?.allowUserCreateServer ?? false) && userServerLimit > 0;
@@ -228,7 +228,7 @@ const dashboardModule: Module = {
         });
 
         const settings2 = await prisma.settings.findUnique({ where: { id: 1 } });
-        const userServerLimit = user.serverLimit !== null && user.serverLimit !== undefined
+        const userServerLimit = user.serverLimit !== null && user.serverLimit !== undefined && user.serverLimit > 0
           ? user.serverLimit
           : (settings2?.defaultServerLimit ?? 0);
         const canCreateServer = !user.isAdmin && (settings2?.allowUserCreateServer ?? false) && userServerLimit > 0;

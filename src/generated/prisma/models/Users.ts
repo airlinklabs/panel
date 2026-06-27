@@ -59,6 +59,7 @@ export type UsersMinAggregateOutputType = {
   maxStorage: number | null
   loginAttempts: number | null
   lockedUntil: Date | null
+  animationsDisabled: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -78,6 +79,7 @@ export type UsersMaxAggregateOutputType = {
   maxStorage: number | null
   loginAttempts: number | null
   lockedUntil: Date | null
+  animationsDisabled: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -97,6 +99,7 @@ export type UsersCountAggregateOutputType = {
   maxStorage: number
   loginAttempts: number
   lockedUntil: number
+  animationsDisabled: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -136,6 +139,7 @@ export type UsersMinAggregateInputType = {
   maxStorage?: true
   loginAttempts?: true
   lockedUntil?: true
+  animationsDisabled?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -155,6 +159,7 @@ export type UsersMaxAggregateInputType = {
   maxStorage?: true
   loginAttempts?: true
   lockedUntil?: true
+  animationsDisabled?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -174,6 +179,7 @@ export type UsersCountAggregateInputType = {
   maxStorage?: true
   loginAttempts?: true
   lockedUntil?: true
+  animationsDisabled?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -280,6 +286,7 @@ export type UsersGroupByOutputType = {
   maxStorage: number | null
   loginAttempts: number
   lockedUntil: Date | null
+  animationsDisabled: boolean
   createdAt: Date
   updatedAt: Date
   _count: UsersCountAggregateOutputType | null
@@ -322,6 +329,7 @@ export type UsersWhereInput = {
   maxStorage?: Prisma.IntNullableFilter<"Users"> | number | null
   loginAttempts?: Prisma.IntFilter<"Users"> | number
   lockedUntil?: Prisma.DateTimeNullableFilter<"Users"> | Date | string | null
+  animationsDisabled?: Prisma.BoolFilter<"Users"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Users"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Users"> | Date | string
   servers?: Prisma.ServerListRelationFilter
@@ -353,6 +361,7 @@ export type UsersOrderByWithRelationInput = {
   maxStorage?: Prisma.SortOrderInput | Prisma.SortOrder
   loginAttempts?: Prisma.SortOrder
   lockedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
+  animationsDisabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   servers?: Prisma.ServerOrderByRelationAggregateInput
@@ -387,6 +396,7 @@ export type UsersWhereUniqueInput = Prisma.AtLeast<{
   maxStorage?: Prisma.IntNullableFilter<"Users"> | number | null
   loginAttempts?: Prisma.IntFilter<"Users"> | number
   lockedUntil?: Prisma.DateTimeNullableFilter<"Users"> | Date | string | null
+  animationsDisabled?: Prisma.BoolFilter<"Users"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Users"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Users"> | Date | string
   servers?: Prisma.ServerListRelationFilter
@@ -418,6 +428,7 @@ export type UsersOrderByWithAggregationInput = {
   maxStorage?: Prisma.SortOrderInput | Prisma.SortOrder
   loginAttempts?: Prisma.SortOrder
   lockedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
+  animationsDisabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UsersCountOrderByAggregateInput
@@ -445,6 +456,7 @@ export type UsersScalarWhereWithAggregatesInput = {
   maxStorage?: Prisma.IntNullableWithAggregatesFilter<"Users"> | number | null
   loginAttempts?: Prisma.IntWithAggregatesFilter<"Users"> | number
   lockedUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"Users"> | Date | string | null
+  animationsDisabled?: Prisma.BoolWithAggregatesFilter<"Users"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Users"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Users"> | Date | string
 }
@@ -463,6 +475,7 @@ export type UsersCreateInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -494,6 +507,7 @@ export type UsersUncheckedCreateInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -524,6 +538,7 @@ export type UsersUpdateInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -555,6 +570,7 @@ export type UsersUncheckedUpdateInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -586,6 +602,7 @@ export type UsersCreateManyInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -604,6 +621,7 @@ export type UsersUpdateManyMutationInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -623,6 +641,7 @@ export type UsersUncheckedUpdateManyInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -642,6 +661,7 @@ export type UsersCountOrderByAggregateInput = {
   maxStorage?: Prisma.SortOrder
   loginAttempts?: Prisma.SortOrder
   lockedUntil?: Prisma.SortOrder
+  animationsDisabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -670,6 +690,7 @@ export type UsersMaxOrderByAggregateInput = {
   maxStorage?: Prisma.SortOrder
   loginAttempts?: Prisma.SortOrder
   lockedUntil?: Prisma.SortOrder
+  animationsDisabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -689,6 +710,7 @@ export type UsersMinOrderByAggregateInput = {
   maxStorage?: Prisma.SortOrder
   loginAttempts?: Prisma.SortOrder
   lockedUntil?: Prisma.SortOrder
+  animationsDisabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -932,6 +954,7 @@ export type UsersCreateWithoutServersInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
@@ -962,6 +985,7 @@ export type UsersUncheckedCreateWithoutServersInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
@@ -1007,6 +1031,7 @@ export type UsersUpdateWithoutServersInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
@@ -1037,6 +1062,7 @@ export type UsersUncheckedUpdateWithoutServersInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1066,6 +1092,7 @@ export type UsersCreateWithoutFoldersInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1096,6 +1123,7 @@ export type UsersUncheckedCreateWithoutFoldersInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1141,6 +1169,7 @@ export type UsersUpdateWithoutFoldersInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1171,6 +1200,7 @@ export type UsersUncheckedUpdateWithoutFoldersInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1200,6 +1230,7 @@ export type UsersCreateWithoutApiKeysInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1230,6 +1261,7 @@ export type UsersUncheckedCreateWithoutApiKeysInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1275,6 +1307,7 @@ export type UsersUpdateWithoutApiKeysInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1305,6 +1338,7 @@ export type UsersUncheckedUpdateWithoutApiKeysInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1334,6 +1368,7 @@ export type UsersCreateWithoutLoginHistoryInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1364,6 +1399,7 @@ export type UsersUncheckedCreateWithoutLoginHistoryInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1409,6 +1445,7 @@ export type UsersUpdateWithoutLoginHistoryInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1439,6 +1476,7 @@ export type UsersUncheckedUpdateWithoutLoginHistoryInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1468,6 +1506,7 @@ export type UsersCreateWithoutActivityLogsInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1498,6 +1537,7 @@ export type UsersUncheckedCreateWithoutActivityLogsInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1543,6 +1583,7 @@ export type UsersUpdateWithoutActivityLogsInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1573,6 +1614,7 @@ export type UsersUncheckedUpdateWithoutActivityLogsInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1602,6 +1644,7 @@ export type UsersCreateWithoutNotificationsInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1632,6 +1675,7 @@ export type UsersUncheckedCreateWithoutNotificationsInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1677,6 +1721,7 @@ export type UsersUpdateWithoutNotificationsInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1707,6 +1752,7 @@ export type UsersUncheckedUpdateWithoutNotificationsInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1736,6 +1782,7 @@ export type UsersCreateWithoutUserApiKeysInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1766,6 +1813,7 @@ export type UsersUncheckedCreateWithoutUserApiKeysInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1811,6 +1859,7 @@ export type UsersUpdateWithoutUserApiKeysInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1841,6 +1890,7 @@ export type UsersUncheckedUpdateWithoutUserApiKeysInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1870,6 +1920,7 @@ export type UsersCreateWithoutTwoFactorInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1900,6 +1951,7 @@ export type UsersUncheckedCreateWithoutTwoFactorInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1945,6 +1997,7 @@ export type UsersUpdateWithoutTwoFactorInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1975,6 +2028,7 @@ export type UsersUncheckedUpdateWithoutTwoFactorInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2004,6 +2058,7 @@ export type UsersCreateWithoutScheduledTasksInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -2034,6 +2089,7 @@ export type UsersUncheckedCreateWithoutScheduledTasksInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -2079,6 +2135,7 @@ export type UsersUpdateWithoutScheduledTasksInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -2109,6 +2166,7 @@ export type UsersUncheckedUpdateWithoutScheduledTasksInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2138,6 +2196,7 @@ export type UsersCreateWithoutAlertsInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -2168,6 +2227,7 @@ export type UsersUncheckedCreateWithoutAlertsInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -2213,6 +2273,7 @@ export type UsersUpdateWithoutAlertsInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -2243,6 +2304,7 @@ export type UsersUncheckedUpdateWithoutAlertsInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2272,6 +2334,7 @@ export type UsersCreateWithoutGrantedAccessInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -2302,6 +2365,7 @@ export type UsersUncheckedCreateWithoutGrantedAccessInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -2336,6 +2400,7 @@ export type UsersCreateWithoutServerAccessInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -2366,6 +2431,7 @@ export type UsersUncheckedCreateWithoutServerAccessInput = {
   maxStorage?: number | null
   loginAttempts?: number
   lockedUntil?: Date | string | null
+  animationsDisabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -2411,6 +2477,7 @@ export type UsersUpdateWithoutGrantedAccessInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -2441,6 +2508,7 @@ export type UsersUncheckedUpdateWithoutGrantedAccessInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2481,6 +2549,7 @@ export type UsersUpdateWithoutServerAccessInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -2511,6 +2580,7 @@ export type UsersUncheckedUpdateWithoutServerAccessInput = {
   maxStorage?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2662,6 +2732,7 @@ export type UsersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   maxStorage?: boolean
   loginAttempts?: boolean
   lockedUntil?: boolean
+  animationsDisabled?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   servers?: boolean | Prisma.Users$serversArgs<ExtArgs>
@@ -2694,6 +2765,7 @@ export type UsersSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   maxStorage?: boolean
   loginAttempts?: boolean
   lockedUntil?: boolean
+  animationsDisabled?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["users"]>
@@ -2713,6 +2785,7 @@ export type UsersSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   maxStorage?: boolean
   loginAttempts?: boolean
   lockedUntil?: boolean
+  animationsDisabled?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["users"]>
@@ -2732,11 +2805,12 @@ export type UsersSelectScalar = {
   maxStorage?: boolean
   loginAttempts?: boolean
   lockedUntil?: boolean
+  animationsDisabled?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UsersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "username" | "password" | "isAdmin" | "description" | "avatar" | "permissions" | "serverLimit" | "maxMemory" | "maxCpu" | "maxStorage" | "loginAttempts" | "lockedUntil" | "createdAt" | "updatedAt", ExtArgs["result"]["users"]>
+export type UsersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "username" | "password" | "isAdmin" | "description" | "avatar" | "permissions" | "serverLimit" | "maxMemory" | "maxCpu" | "maxStorage" | "loginAttempts" | "lockedUntil" | "animationsDisabled" | "createdAt" | "updatedAt", ExtArgs["result"]["users"]>
 export type UsersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   servers?: boolean | Prisma.Users$serversArgs<ExtArgs>
   folders?: boolean | Prisma.Users$foldersArgs<ExtArgs>
@@ -2786,6 +2860,7 @@ export type $UsersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     maxStorage: number | null
     loginAttempts: number
     lockedUntil: Date | null
+    animationsDisabled: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["users"]>
@@ -3237,6 +3312,7 @@ export interface UsersFieldRefs {
   readonly maxStorage: Prisma.FieldRef<"Users", 'Int'>
   readonly loginAttempts: Prisma.FieldRef<"Users", 'Int'>
   readonly lockedUntil: Prisma.FieldRef<"Users", 'DateTime'>
+  readonly animationsDisabled: Prisma.FieldRef<"Users", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Users", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Users", 'DateTime'>
 }

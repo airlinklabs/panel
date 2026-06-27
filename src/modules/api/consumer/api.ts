@@ -100,8 +100,9 @@ const consumerApiModule: Module = {
     router.get('/api/consumer/v1/servers/:uuid', validateUserApiKey, requirePermission('server.view'), async (req: Request, res: Response) => {
       try {
         const user = (req as unknown as Record<string, unknown>).consumerUser as { id: number };
+        const uuid = String(req.params.uuid);
         const server = await prisma.server.findFirst({
-          where: { UUID: req.params.uuid, ownerId: user.id },
+          where: { UUID: uuid, ownerId: user.id },
           select: {
             UUID: true,
             name: true,
@@ -125,8 +126,9 @@ const consumerApiModule: Module = {
     router.post('/api/consumer/v1/servers/:uuid/power', validateUserApiKey, requirePermission('server.start'), async (req: Request, res: Response) => {
       try {
         const user = (req as unknown as Record<string, unknown>).consumerUser as { id: number };
+        const uuid = String(req.params.uuid);
         const server = await prisma.server.findFirst({
-          where: { UUID: req.params.uuid, ownerId: user.id },
+          where: { UUID: uuid, ownerId: user.id },
           include: { node: true },
         });
         if (!server) { res.status(404).json({ error: 'Server not found' }); return; }

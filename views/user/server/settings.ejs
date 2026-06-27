@@ -42,7 +42,7 @@
                         </div>
                         <div>
                             <dt class="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Storage</dt>
-                            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5"><%= server.Storage %> GB</dd>
+                            <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-0.5"><%= server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB' %></dd>
                         </div>
                         <div>
                             <dt class="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Status</dt>
@@ -151,7 +151,7 @@
                             </div>
                             <div>
                                 <dt class="text-xs font-medium text-neutral-500 uppercase tracking-wide">Storage</dt>
-                                <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-1"><%= server.Storage %> GB</dd>
+                                <dd class="text-sm text-neutral-700 dark:text-neutral-300 mt-1"><%= server.Storage >= 1024 ? (server.Storage / 1024).toFixed(1) + ' GB' : server.Storage + ' MB' %></dd>
                             </div>
                             <div>
                                 <dt class="text-xs font-medium text-neutral-500 uppercase tracking-wide">Status</dt>

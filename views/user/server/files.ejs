@@ -261,7 +261,7 @@ function isImageFile(filename) {
 
     <!-- Floating Action Bar (mobile) -->
    <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-   <div id="floatingActionBar" class="fixed left-0 right-0 bottom-16 bg-white dark:bg-[#1a1a1a] border-t border-neutral-200 dark:border-white/5 z-40 text-neutral-800 dark:text-white py-3 px-4 transition-transform duration-200 ease-out flex justify-between items-center pointer-events-none translate-y-[calc(100%+80px)] shadow-lg">
+   <div id="floatingActionBar" class="fixed left-0 right-0 bottom-16 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-white/5 z-40 text-neutral-800 dark:text-white py-3 px-4 transition-transform duration-200 ease-out flex justify-between items-center pointer-events-none translate-y-[calc(100%+80px)] shadow-lg">
     <span id="selectedFilesCount" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">0 files selected</span>
     <div class="flex gap-2">
         <button id="massRenameBtn" class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 px-2.5 py-1.5 text-xs font-medium transition active:scale-95">
@@ -523,7 +523,7 @@ function isImageFile(filename) {
 
    <!-- Floating Action Bar (only show when daemon is online) -->
    <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-   <div id="floatingActionBar" class="data-animate-card fixed bottom-0 left-0 lg:left-56 right-0 bg-white dark:bg-[#1a1a1a] border-t border-neutral-200 dark:border-white/5 z-40 text-neutral-800 dark:text-white py-3.5 px-6 flex items-center justify-between gap-4 translate-y-full transition-transform duration-300 ease-out shadow-lg">
+   <div id="floatingActionBar" class="data-animate-card fixed bottom-0 left-0 lg:left-56 right-0 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-white/5 z-40 text-neutral-800 dark:text-white py-3.5 px-6 flex items-center justify-between gap-4 translate-y-full transition-transform duration-300 ease-out shadow-lg">
      <div class="flex items-center gap-2.5">
        <%- icon('check-square', { size: 15, class: 'text-neutral-400 shrink-0' }) %>
        <span id="selectedFilesCount" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">0 files selected</span>

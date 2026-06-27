@@ -120,6 +120,99 @@
       </form>
     </div>
 
+    <!-- Animations toggle -->
+    <div data-animate-card class="rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">Reduce animations</p>
+          <p class="text-xs text-neutral-500 mt-0.5">Disable motion effects across the panel. Applies on next page load.</p>
+        </div>
+        <button type="button" id="anim-toggle"
+          class="w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 bg-neutral-300 dark:bg-neutral-700/70"
+          data-on="<%= user.animationsDisabled ? 'true' : 'false' %>"
+          aria-pressed="<%= user.animationsDisabled %>"
+          aria-label="Toggle animations">
+          <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300"
+                data-on="<%= user.animationsDisabled ? 'true' : 'false' %>"
+                style="transform: translateX(<%= user.animationsDisabled ? '20px' : '0' %>)"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Font size -->
+    <div data-animate-card class="rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">Text size</p>
+          <p class="text-xs text-neutral-500 mt-0.5">Adjust the text size across the panel.</p>
+        </div>
+        <div class="flex items-center gap-1" role="radiogroup" aria-label="Text size">
+          <button type="button" data-font-size="small"
+            class="font-size-btn px-2.5 py-1 text-xs rounded-lg border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
+            aria-label="Small text">A</button>
+          <button type="button" data-font-size="medium"
+            class="font-size-btn px-2.5 py-1 text-sm rounded-lg border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
+            aria-label="Medium text">A</button>
+          <button type="button" data-font-size="large"
+            class="font-size-btn px-2.5 py-1 text-base rounded-lg border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
+            aria-label="Large text">A</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- High contrast -->
+    <div data-animate-card class="rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">High contrast</p>
+          <p class="text-xs text-neutral-500 mt-0.5">Increase contrast for better readability.</p>
+        </div>
+        <button type="button" id="contrast-toggle"
+          class="w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 bg-neutral-300 dark:bg-neutral-700/70"
+          data-on="<%= user.highContrast ? 'true' : 'false' %>"
+          aria-pressed="<%= user.highContrast %>"
+          aria-label="Toggle high contrast">
+          <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300"
+                data-on="<%= user.highContrast ? 'true' : 'false' %>"
+                style="transform: translateX(<%= user.highContrast ? '20px' : '0' %>)"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Compact mode -->
+    <div data-animate-card class="rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-neutral-800 dark:text-white">Compact mode</p>
+          <p class="text-xs text-neutral-500 mt-0.5">Reduce spacing for a denser layout.</p>
+        </div>
+        <button type="button" id="compact-toggle"
+          class="w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 bg-neutral-300 dark:bg-neutral-700/70"
+          data-on="<%= user.compactMode ? 'true' : 'false' %>"
+          aria-pressed="<%= user.compactMode %>"
+          aria-label="Toggle compact mode">
+          <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300"
+                data-on="<%= user.compactMode ? 'true' : 'false' %>"
+                style="transform: translateX(<%= user.compactMode ? '20px' : '0' %>)"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2FA -->
+    <div data-animate-card class="rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
+      <p class="flex items-center gap-1.5 text-sm font-medium text-neutral-800 dark:text-white mb-3"><%- icon('shield', { class: 'w-3.5 h-3.5' }) %> <%= req.translations.twoFactorAuth || 'Two-factor authentication' %></p>
+      <% if (user['2fa'] !== true) { %>
+      <p class="text-xs text-neutral-500 dark:text-neutral-400">Not yet available.</p>
+      <% } else { %>
+      <form action="/disable-2fa" method="POST">
+        <%- include('../components/csrf') %>
+        <button class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 text-sm font-medium transition">
+          <%= req.translations.disable2FA || 'Disable 2FA' %>
+        </button>
+      </form>
+      <% } %>
+    </div>
+
     <!-- Login history -->
     <div data-animate-card class="rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
       <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3"><%= req.translations.loginHistory || 'Login history' %></p>
@@ -276,6 +369,84 @@
               </button>
             </form>
 
+            <!-- Animations toggle -->
+            <div class="col-span-1">
+              <div class="flex items-center justify-between py-4 border-b border-neutral-200 dark:border-white/5">
+                <div>
+                  <p class="text-sm font-medium text-neutral-800 dark:text-white">Reduce animations</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Disable motion effects across the panel. Applies on next page load.</p>
+                </div>
+                <button type="button" id="anim-toggle"
+                  class="w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 bg-neutral-300 dark:bg-neutral-700/70"
+                  data-on="<%= user.animationsDisabled ? 'true' : 'false' %>"
+                  aria-pressed="<%= user.animationsDisabled %>"
+                  aria-label="Toggle animations">
+                  <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300"
+                        data-on="<%= user.animationsDisabled ? 'true' : 'false' %>"
+                        style="transform: translateX(<%= user.animationsDisabled ? '20px' : '0' %>)"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Font size -->
+            <div class="col-span-1">
+              <div class="flex items-center justify-between py-4 border-b border-neutral-200 dark:border-white/5">
+                <div>
+                  <p class="text-sm font-medium text-neutral-800 dark:text-white">Text size</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Adjust the text size across the panel.</p>
+                </div>
+                <div class="flex items-center gap-1" role="radiogroup" aria-label="Text size">
+                  <button type="button" data-font-size="small"
+                    class="font-size-btn px-2.5 py-1 text-xs rounded-lg border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
+                    aria-label="Small text">A</button>
+                  <button type="button" data-font-size="medium"
+                    class="font-size-btn px-2.5 py-1 text-sm rounded-lg border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
+                    aria-label="Medium text">A</button>
+                  <button type="button" data-font-size="large"
+                    class="font-size-btn px-2.5 py-1 text-base rounded-lg border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
+                    aria-label="Large text">A</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- High contrast -->
+            <div class="col-span-1">
+              <div class="flex items-center justify-between py-4 border-b border-neutral-200 dark:border-white/5">
+                <div>
+                  <p class="text-sm font-medium text-neutral-800 dark:text-white">High contrast</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Increase contrast for better readability.</p>
+                </div>
+                <button type="button" id="contrast-toggle"
+                  class="w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 bg-neutral-300 dark:bg-neutral-700/70"
+                  data-on="<%= user.highContrast ? 'true' : 'false' %>"
+                  aria-pressed="<%= user.highContrast %>"
+                  aria-label="Toggle high contrast">
+                  <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300"
+                        data-on="<%= user.highContrast ? 'true' : 'false' %>"
+                        style="transform: translateX(<%= user.highContrast ? '20px' : '0' %>)"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Compact mode -->
+            <div class="col-span-1">
+              <div class="flex items-center justify-between py-4 border-b border-neutral-200 dark:border-white/5">
+                <div>
+                  <p class="text-sm font-medium text-neutral-800 dark:text-white">Compact mode</p>
+                  <p class="text-xs text-neutral-500 mt-0.5">Reduce spacing for a denser layout.</p>
+                </div>
+                <button type="button" id="compact-toggle"
+                  class="w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 bg-neutral-300 dark:bg-neutral-700/70"
+                  data-on="<%= user.compactMode ? 'true' : 'false' %>"
+                  aria-pressed="<%= user.compactMode %>"
+                  aria-label="Toggle compact mode">
+                  <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300"
+                        data-on="<%= user.compactMode ? 'true' : 'false' %>"
+                        style="transform: translateX(<%= user.compactMode ? '20px' : '0' %>)"></span>
+                </button>
+              </div>
+            </div>
+
             <!-- 2FA -->
             <div class="col-span-1">
               <p class="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%- icon('shield', { class: 'w-3 h-3' }) %> <%= req.translations.twoFactorAuth || 'Two-factor authentication' %></p>
@@ -424,6 +595,105 @@ document.addEventListener('DOMContentLoaded', () => {
     const lang = e.target.querySelector('#language').value;
     const res = await fetch('/set-language', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken }, body: JSON.stringify({ language: lang }) });
     if (res.ok) { showToast('Language saved.', 'success'); setTimeout(() => location.reload(), 1400); } else showToast('Something went wrong.', 'error');
+  });
+
+  document.getElementById('anim-toggle')?.addEventListener('click', async function() {
+    const btn = this;
+    const dot = btn.querySelector('.dot');
+    const isOn = btn.dataset.on === 'true';
+    const newState = !isOn;
+    btn.dataset.on = String(newState);
+    dot.dataset.on = String(newState);
+    dot.style.transform = newState ? 'translateX(20px)' : 'translateX(0)';
+    btn.setAttribute('aria-pressed', String(newState));
+    
+    if (newState) {
+      document.documentElement.classList.add('animations-disabled');
+    } else {
+      document.documentElement.classList.remove('animations-disabled');
+    }
+    
+    await fetch('/account/animations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ animationsDisabled: String(newState) })
+    });
+  });
+
+  document.querySelectorAll('.font-size-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const size = this.dataset.fontSize;
+      document.querySelectorAll('.font-size-btn').forEach(b => {
+        b.classList.remove('bg-neutral-900', 'dark:bg-white', 'text-white', 'dark:text-neutral-900');
+        b.classList.add('text-neutral-600', 'dark:text-neutral-400');
+      });
+      this.classList.add('bg-neutral-900', 'dark:bg-white', 'text-white', 'dark:text-neutral-900');
+      this.classList.remove('text-neutral-600', 'dark:text-neutral-400');
+      
+      document.documentElement.classList.remove('text-size-small', 'text-size-medium', 'text-size-large');
+      if (size !== 'medium') document.documentElement.classList.add('text-size-' + size);
+      
+      await fetch('/account/font-size', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fontSize: size })
+      });
+    });
+  });
+
+  const currentFontSize = '<%= user.fontSize || "medium" %>';
+  document.querySelectorAll('.font-size-btn').forEach(btn => {
+    if (btn.dataset.fontSize === currentFontSize) {
+      btn.classList.add('bg-neutral-900', 'dark:bg-white', 'text-white', 'dark:text-neutral-900');
+      btn.classList.remove('text-neutral-600', 'dark:text-neutral-400');
+    }
+  });
+  if (currentFontSize !== 'medium') document.documentElement.classList.add('text-size-' + currentFontSize);
+
+  document.getElementById('contrast-toggle')?.addEventListener('click', async function() {
+    const btn = this;
+    const dot = btn.querySelector('.dot');
+    const isOn = btn.dataset.on === 'true';
+    const newState = !isOn;
+    btn.dataset.on = String(newState);
+    dot.dataset.on = String(newState);
+    dot.style.transform = newState ? 'translateX(20px)' : 'translateX(0)';
+    btn.setAttribute('aria-pressed', String(newState));
+    
+    if (newState) {
+      document.documentElement.classList.add('high-contrast');
+    } else {
+      document.documentElement.classList.remove('high-contrast');
+    }
+    
+    await fetch('/account/high-contrast', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ highContrast: String(newState) })
+    });
+  });
+
+  document.getElementById('compact-toggle')?.addEventListener('click', async function() {
+    const btn = this;
+    const dot = btn.querySelector('.dot');
+    const isOn = btn.dataset.on === 'true';
+    const newState = !isOn;
+    btn.dataset.on = String(newState);
+    dot.dataset.on = String(newState);
+    dot.style.transform = newState ? 'translateX(20px)' : 'translateX(0)';
+    btn.setAttribute('aria-pressed', String(newState));
+    
+    if (newState) {
+      document.documentElement.classList.add('compact-mode');
+    } else {
+      document.documentElement.classList.remove('compact-mode');
+    }
+    
+    await fetch('/account/compact-mode', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ compactMode: String(newState) })
+    });
   });
 
   const avatarInput   = document.getElementById('avatar-input');

@@ -1,0 +1,277 @@
+<%- include('../components/header', { title: 'Overview' }) %>
+
+<% if (isMobileViewport) { %>
+<main id="page-content" class="">
+  <%- include('../components/template') %>
+  <%- include('../components/toast') %>
+
+  <div class="px-4 py-5">
+
+    <!-- Welcome Banner -->
+    <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4 mb-4">
+      <div class="flex items-center gap-3">
+        <img class="h-10 w-10 rounded-xl border border-neutral-200 dark:border-neutral-700 shrink-0" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
+        <div class="min-w-0">
+          <h1 class="text-base font-medium text-neutral-800 dark:text-white">Welcome back, <%= user.username %></h1>
+          <p class="text-xs text-neutral-500 mt-0.5">Here's an overview of your resources.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-3" style="--i:0">
+        <div class="flex items-center gap-2 mb-1.5">
+          <div class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-500/15 flex items-center justify-center">
+            <%- icon('server', { class: 'w-3.5 h-3.5 text-blue-600 dark:text-blue-400' }) %>
+          </div>
+          <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium uppercase tracking-wider">Servers</span>
+        </div>
+        <p class="text-lg font-semibold text-neutral-800 dark:text-white"><%= servers ? servers.length : 0 %></p>
+      </div>
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-3" style="--i:1">
+        <div class="flex items-center gap-2 mb-1.5">
+          <div class="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-500/15 flex items-center justify-center">
+            <%- icon('memory-stick', { class: 'w-3.5 h-3.5 text-purple-600 dark:text-purple-400' }) %>
+          </div>
+          <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium uppercase tracking-wider">Memory</span>
+        </div>
+        <p class="text-lg font-semibold text-neutral-800 dark:text-white"><%= typeof totalMemory !== 'undefined' ? totalMemory : 0 %> MB</p>
+      </div>
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-3" style="--i:2">
+        <div class="flex items-center gap-2 mb-1.5">
+          <div class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-500/15 flex items-center justify-center">
+            <%- icon('cpu', { class: 'w-3.5 h-3.5 text-amber-600 dark:text-amber-400' }) %>
+          </div>
+          <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium uppercase tracking-wider">CPU</span>
+        </div>
+        <p class="text-lg font-semibold text-neutral-800 dark:text-white"><%= typeof totalCpu !== 'undefined' ? totalCpu : 0 %>%</p>
+      </div>
+      <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-3" style="--i:3">
+        <div class="flex items-center gap-2 mb-1.5">
+          <div class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-500/15 flex items-center justify-center">
+            <%- icon('hard-drive', { class: 'w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400' }) %>
+          </div>
+          <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium uppercase tracking-wider">Storage</span>
+        </div>
+        <p class="text-lg font-semibold text-neutral-800 dark:text-white"><%= typeof totalStorage !== 'undefined' ? totalStorage : 0 %> MB</p>
+      </div>
+    </div>
+
+    <!-- Server Limit -->
+    <% if (typeof serverLimit !== 'undefined' && serverLimit !== null) { %>
+    <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4 mb-4" style="--i:4">
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400">Server Slots</p>
+        <p class="text-xs text-neutral-500"><%= servers ? servers.length : 0 %> / <%= serverLimit %></p>
+      </div>
+      <div class="w-full h-1.5 bg-neutral-100 dark:bg-neutral-700 rounded-full overflow-hidden">
+        <div class="h-full bg-neutral-900 dark:bg-white rounded-full transition-all" style="width: <%= serverLimit > 0 ? Math.min(((servers ? servers.length : 0) / serverLimit) * 100, 100) : 0 %>%"></div>
+      </div>
+      <p class="text-[10px] text-neutral-400 mt-1.5"><%= serverLimit - (servers ? servers.length : 0) %> slot<%= serverLimit - (servers ? servers.length : 0) !== 1 ? 's' : '' %> remaining</p>
+    </div>
+    <% } %>
+
+    <!-- Quick Links -->
+    <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-3 mb-4" style="--i:5">
+      <p class="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-2 px-1">Quick Links</p>
+      <div class="space-y-1">
+        <a href="/" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition">
+          <div class="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center shrink-0">
+            <%- icon('layout-dashboard', { class: 'w-4 h-4 text-neutral-600 dark:text-neutral-300' }) %>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-neutral-800 dark:text-white">Dashboard</p>
+            <p class="text-[10px] text-neutral-400">View all servers</p>
+          </div>
+        </a>
+        <a href="/consumer/create-server" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition">
+          <div class="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center shrink-0">
+            <%- icon('plus-circle', { class: 'w-4 h-4 text-neutral-600 dark:text-neutral-300' }) %>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-neutral-800 dark:text-white">Create Server</p>
+            <p class="text-[10px] text-neutral-400">Spin up a new instance</p>
+          </div>
+        </a>
+        <a href="/account" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition">
+          <div class="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center shrink-0">
+            <%- icon('user', { class: 'w-4 h-4 text-neutral-600 dark:text-neutral-300' }) %>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-neutral-800 dark:text-white">Account</p>
+            <p class="text-[10px] text-neutral-400">Manage your profile</p>
+          </div>
+        </a>
+        <a href="/consumer/api-keys" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition">
+          <div class="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center shrink-0">
+            <%- icon('key', { class: 'w-4 h-4 text-neutral-600 dark:text-neutral-300' }) %>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-neutral-800 dark:text-white">API Keys</p>
+            <p class="text-[10px] text-neutral-400">Access the panel API</p>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Empty State: No Servers -->
+    <% if (!servers || servers.length === 0) { %>
+    <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-6 text-center" style="--i:6">
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-neutral-100 dark:bg-white/5 mb-3">
+        <%- icon('server', { class: 'w-6 h-6 text-neutral-400 dark:text-neutral-500' }) %>
+      </div>
+      <p class="text-sm font-medium text-neutral-800 dark:text-white mb-1">No servers yet</p>
+      <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-4">Create your first server to get started.</p>
+      <a href="/consumer/create-server" class="inline-flex items-center justify-center rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-xs font-medium transition active:scale-95">
+        <%- icon('plus', { class: 'w-3.5 h-3.5 mr-1' }) %>
+        Create Server
+      </a>
+    </div>
+    <% } %>
+
+  </div>
+</main>
+
+<% } else { %>
+<main class="h-screen m-auto">
+  <div class="flex h-screen">
+    <div class="w-60 h-full"><%- include('../components/template') %></div>
+
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16">
+      <div class="px-12 pt-6 pb-8 max-w-4xl">
+
+        <!-- Welcome Banner -->
+        <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-6 mb-6">
+          <div class="flex items-center gap-4">
+            <img class="h-12 w-12 rounded-xl border border-neutral-200 dark:border-neutral-700 shrink-0" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
+            <div>
+              <h1 class="text-lg font-medium text-neutral-800 dark:text-white">Welcome back, <%= user.username %></h1>
+              <p class="text-sm text-neutral-500 mt-0.5">Here's an overview of your resources.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+          <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4" style="--i:0">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-500/15 flex items-center justify-center">
+                <%- icon('server', { class: 'w-4 h-4 text-blue-600 dark:text-blue-400' }) %>
+              </div>
+            </div>
+            <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= servers ? servers.length : 0 %></p>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Servers</p>
+          </div>
+          <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4" style="--i:1">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-500/15 flex items-center justify-center">
+                <%- icon('memory-stick', { class: 'w-4 h-4 text-purple-600 dark:text-purple-400' }) %>
+              </div>
+            </div>
+            <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= typeof totalMemory !== 'undefined' ? totalMemory : 0 %><span class="text-sm font-normal text-neutral-500 ml-0.5">MB</span></p>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Total Memory</p>
+          </div>
+          <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4" style="--i:2">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-500/15 flex items-center justify-center">
+                <%- icon('cpu', { class: 'w-4 h-4 text-amber-600 dark:text-amber-400' }) %>
+              </div>
+            </div>
+            <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= typeof totalCpu !== 'undefined' ? totalCpu : 0 %><span class="text-sm font-normal text-neutral-500 ml-0.5">%</span></p>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Total CPU</p>
+          </div>
+          <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4" style="--i:3">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/15 flex items-center justify-center">
+                <%- icon('hard-drive', { class: 'w-4 h-4 text-emerald-600 dark:text-emerald-400' }) %>
+              </div>
+            </div>
+            <p class="text-2xl font-semibold text-neutral-800 dark:text-white"><%= typeof totalStorage !== 'undefined' ? totalStorage : 0 %><span class="text-sm font-normal text-neutral-500 ml-0.5">MB</span></p>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Total Storage</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-6">
+          <div class="col-span-2 space-y-6">
+            <!-- Server Limit -->
+            <% if (typeof serverLimit !== 'undefined' && serverLimit !== null) { %>
+            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-5" style="--i:4">
+              <div class="flex items-center justify-between mb-3">
+                <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Server Slots</p>
+                <p class="text-sm text-neutral-500"><%= servers ? servers.length : 0 %> / <%= serverLimit %></p>
+              </div>
+              <div class="w-full h-2 bg-neutral-100 dark:bg-neutral-700 rounded-full overflow-hidden">
+                <div class="h-full bg-neutral-900 dark:bg-white rounded-full transition-all" style="width: <%= serverLimit > 0 ? Math.min(((servers ? servers.length : 0) / serverLimit) * 100, 100) : 0 %>%"></div>
+              </div>
+              <p class="text-xs text-neutral-400 mt-2"><%= serverLimit - (servers ? servers.length : 0) %> slot<%= serverLimit - (servers ? servers.length : 0) !== 1 ? 's' : '' %> remaining</p>
+            </div>
+            <% } %>
+
+            <!-- Empty State -->
+            <% if (!servers || servers.length === 0) { %>
+            <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-8 text-center" style="--i:5">
+              <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-neutral-100 dark:bg-white/5 mb-4">
+                <%- icon('server', { class: 'w-7 h-7 text-neutral-400 dark:text-neutral-500' }) %>
+              </div>
+              <p class="text-sm font-medium text-neutral-800 dark:text-white mb-1">No servers yet</p>
+              <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-5">Create your first server to get started.</p>
+              <a href="/consumer/create-server" class="inline-flex items-center justify-center rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-5 py-2.5 text-sm font-medium transition hover:bg-neutral-700 dark:hover:bg-neutral-200 active:scale-[0.98]">
+                <%- icon('plus', { class: 'w-4 h-4 mr-1.5' }) %>
+                Create Server
+              </a>
+            </div>
+            <% } %>
+          </div>
+
+          <!-- Quick Links -->
+          <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4 h-fit" style="--i:6">
+            <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3 px-1">Quick Links</p>
+            <div class="space-y-1">
+              <a href="/" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition">
+                <div class="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center shrink-0">
+                  <%- icon('layout-dashboard', { class: 'w-4 h-4 text-neutral-600 dark:text-neutral-300' }) %>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-neutral-800 dark:text-white">Dashboard</p>
+                  <p class="text-[10px] text-neutral-400">View all servers</p>
+                </div>
+              </a>
+              <a href="/consumer/create-server" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition">
+                <div class="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center shrink-0">
+                  <%- icon('plus-circle', { class: 'w-4 h-4 text-neutral-600 dark:text-neutral-300' }) %>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-neutral-800 dark:text-white">Create Server</p>
+                  <p class="text-[10px] text-neutral-400">Spin up a new instance</p>
+                </div>
+              </a>
+              <a href="/account" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition">
+                <div class="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center shrink-0">
+                  <%- icon('user', { class: 'w-4 h-4 text-neutral-600 dark:text-neutral-300' }) %>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-neutral-800 dark:text-white">Account</p>
+                  <p class="text-[10px] text-neutral-400">Manage your profile</p>
+                </div>
+              </a>
+              <a href="/consumer/api-keys" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition">
+                <div class="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-neutral-700 flex items-center justify-center shrink-0">
+                  <%- icon('key', { class: 'w-4 h-4 text-neutral-600 dark:text-neutral-300' }) %>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-neutral-800 dark:text-white">API Keys</p>
+                  <p class="text-[10px] text-neutral-400">Access the panel API</p>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+<% } %>
+
+<%- include('../components/footer') %>

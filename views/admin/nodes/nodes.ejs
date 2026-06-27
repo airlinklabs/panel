@@ -139,7 +139,7 @@
       const response = await fetch(`/admin/node/${nodeId}/configure`);
       if (!response.ok) throw new Error('Failed to fetch configure command');
       const data = await response.json();
-      showConfigurePopup(data);
+      showConfigurePopup(data.command);
     } catch (err) {
       console.error(err);
     }
@@ -334,13 +334,8 @@
                           <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                         </span>
                       <% } else if (node.status == "Offline") { %>
-                        <span class="flex h-2 w-2 group relative">
+                        <span class="flex h-2 w-2">
                           <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                          <% if (node.error) { %>
-                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 w-48 bg-neutral-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
-                              <%= node.error %>
-                            </div>
-                          <% } %>
                         </span>
                       <% } else { %>
                         <span class="flex h-2 w-2">

@@ -21,19 +21,19 @@
         <div>
           <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Server Name</label>
           <input type="text" name="name" required placeholder="my-server"
-            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
         </div>
 
         <div>
           <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Description</label>
           <input type="text" name="description" placeholder="Optional description"
-            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
         </div>
 
         <div>
           <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Node</label>
           <select name="nodeId" required
-            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
             <% if (nodes && nodes.length > 0) { %>
               <% nodes.forEach(function(node) { %>
               <option value="<%= node.id %>"><%= node.name %></option>
@@ -47,7 +47,7 @@
         <div>
           <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Server Image</label>
           <select name="imageId" required id="imageSelect"
-            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+            class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
             <% if (images && images.length > 0) { %>
               <% images.forEach(function(img) { %>
               <option value="<%= img.id %>" data-docker="<%= img.dockerImage %>" data-name="<%= img.name %>"><%= img.name %></option>
@@ -61,19 +61,46 @@
 
         <div class="grid grid-cols-3 gap-3">
           <div>
-            <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Memory (MB)</label>
-            <input type="number" name="Memory" value="1024" min="128" max="<%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxMemory : 8192 %>"
-              class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+            <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Memory</label>
+            <input type="hidden" name="Memory" id="userMemory" value="1024">
+            <div class="flex items-stretch gap-0">
+              <input id="userMemoryDisplay" type="number" min="1" value="1"
+                class="w-full rounded-l-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+              <select id="userMemoryUnit"
+                class="rounded-r-xl border border-l-0 border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-white/[0.03] px-1.5 text-xs text-neutral-600 dark:text-neutral-400 focus:outline-none">
+                <option value="1">MB</option>
+                <option value="1024" selected>GB</option>
+              </select>
+            </div>
+            <p class="text-[10px] text-neutral-400 mt-0.5">Max: <%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxMemory : 8192 %> MB</p>
           </div>
           <div>
-            <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">CPU (%)</label>
-            <input type="number" name="Cpu" value="100" min="50" max="<%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxCpu : 400 %>" step="50"
-              class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+            <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">CPU</label>
+            <input type="hidden" name="Cpu" id="userCPU" value="100">
+            <div class="flex items-stretch gap-0">
+              <input id="userCPUDisplay" type="number" min="0.5" step="0.5" value="1"
+                class="w-full rounded-l-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+              <select id="userCPUUnit"
+                class="rounded-r-xl border border-l-0 border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-white/[0.03] px-1.5 text-xs text-neutral-600 dark:text-neutral-400 focus:outline-none">
+                <option value="cores" selected>Cores</option>
+                <option value="percent">%</option>
+              </select>
+            </div>
+            <p class="text-[10px] text-neutral-400 mt-0.5">1 core = 100%. Max: <%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxCpu : 400 %>%</p>
           </div>
           <div>
-            <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Disk (MB)</label>
-            <input type="number" name="Storage" value="10240" min="128" max="<%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxStorage : 51200 %>"
-              class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+            <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Disk</label>
+            <input type="hidden" name="Storage" id="userStorage" value="10240">
+            <div class="flex items-stretch gap-0">
+              <input id="userStorageDisplay" type="number" min="1" value="10"
+                class="w-full rounded-l-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+              <select id="userStorageUnit"
+                class="rounded-r-xl border border-l-0 border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-white/[0.03] px-1.5 text-xs text-neutral-600 dark:text-neutral-400 focus:outline-none">
+                <option value="1">MB</option>
+                <option value="1024" selected>GB</option>
+              </select>
+            </div>
+            <p class="text-[10px] text-neutral-400 mt-0.5">Max: <%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxStorage : 51200 %> MB</p>
           </div>
         </div>
 
@@ -114,20 +141,20 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Server Name</label>
                 <input type="text" name="name" required placeholder="my-server"
-                  class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                  class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Description</label>
                 <input type="text" name="description" placeholder="Optional description"
-                  class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                  class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-2.5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
               </div>
 
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Node</label>
                   <select name="nodeId" required
-                    class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-4 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                    class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
                     <% if (nodes && nodes.length > 0) { %>
                       <% nodes.forEach(function(node) { %>
                       <option value="<%= node.id %>"><%= node.name %></option>
@@ -140,7 +167,7 @@
                 <div>
                   <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Server Image</label>
                   <select name="imageId" required id="imageSelect"
-                    class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-4 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                    class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
                     <% if (images && images.length > 0) { %>
                       <% images.forEach(function(img) { %>
                       <option value="<%= img.id %>" data-docker="<%= img.dockerImage %>" data-name="<%= img.name %>"><%= img.name %></option>
@@ -157,19 +184,46 @@
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Resources</label>
         <div class="flex flex-col gap-3 sm:grid sm:grid-cols-3 sm:gap-3">
                   <div>
-                    <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Memory (MB)</label>
-                    <input type="number" name="Memory" value="1024" min="128" max="<%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxMemory : 8192 %>"
-                      class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                    <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Memory</label>
+                    <input type="hidden" name="Memory" id="userMemoryDesktop" value="1024">
+                    <div class="flex items-stretch gap-0">
+                      <input id="userMemoryDisplayDesktop" type="number" min="1" value="1"
+                        class="w-full rounded-l-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                      <select id="userMemoryUnitDesktop"
+                        class="rounded-r-xl border border-l-0 border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-white/[0.03] px-1.5 text-xs text-neutral-600 dark:text-neutral-400 focus:outline-none">
+                        <option value="1">MB</option>
+                        <option value="1024" selected>GB</option>
+                      </select>
+                    </div>
+                    <p class="text-[10px] text-neutral-400 mt-0.5">Max: <%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxMemory : 8192 %> MB</p>
                   </div>
                   <div>
-                    <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">CPU (%)</label>
-                    <input type="number" name="Cpu" value="100" min="50" max="<%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxCpu : 400 %>" step="50"
-                      class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                    <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">CPU</label>
+                    <input type="hidden" name="Cpu" id="userCPUDesktop" value="100">
+                    <div class="flex items-stretch gap-0">
+                      <input id="userCPUDisplayDesktop" type="number" min="0.5" step="0.5" value="1"
+                        class="w-full rounded-l-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                      <select id="userCPUUnitDesktop"
+                        class="rounded-r-xl border border-l-0 border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-white/[0.03] px-1.5 text-xs text-neutral-600 dark:text-neutral-400 focus:outline-none">
+                        <option value="cores" selected>Cores</option>
+                        <option value="percent">%</option>
+                      </select>
+                    </div>
+                    <p class="text-[10px] text-neutral-400 mt-0.5">1 core = 100%. Max: <%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxCpu : 400 %>%</p>
                   </div>
                   <div>
-                    <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Disk (MB)</label>
-                    <input type="number" name="Storage" value="10240" min="128" max="<%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxStorage : 51200 %>"
-                      class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-700/50 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                    <label class="block text-xs text-neutral-500 dark:text-neutral-400 mb-1">Disk</label>
+                    <input type="hidden" name="Storage" id="userStorageDesktop" value="10240">
+                    <div class="flex items-stretch gap-0">
+                      <input id="userStorageDisplayDesktop" type="number" min="1" value="10"
+                        class="w-full rounded-l-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2.5 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30 transition">
+                      <select id="userStorageUnitDesktop"
+                        class="rounded-r-xl border border-l-0 border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-white/[0.03] px-1.5 text-xs text-neutral-600 dark:text-neutral-400 focus:outline-none">
+                        <option value="1">MB</option>
+                        <option value="1024" selected>GB</option>
+                      </select>
+                    </div>
+                    <p class="text-[10px] text-neutral-400 mt-0.5">Max: <%= typeof resourceLimits !== 'undefined' ? resourceLimits.maxStorage : 51200 %> MB</p>
                   </div>
                 </div>
               </div>
@@ -209,6 +263,45 @@
       }
     });
   }
+
+  function syncUnit(displayId, unitId, hiddenId) {
+    var display = document.getElementById(displayId);
+    var unit = document.getElementById(unitId);
+    var hidden = document.getElementById(hiddenId);
+    if (!display || !unit || !hidden) return;
+    function update() {
+      hidden.value = Math.round(parseFloat(display.value || 0) * parseInt(unit.value));
+    }
+    display.addEventListener('input', update);
+    unit.addEventListener('change', function() {
+      var prevMult = this.value === '1024' ? 1 : 1024;
+      var newMult = parseInt(this.value);
+      if (prevMult !== newMult) display.value = Math.round(parseFloat(display.value || 0) * prevMult / newMult) || 1;
+      update();
+    });
+    update();
+  }
+
+  function syncCPU(displayId, unitId, hiddenId) {
+    var display = document.getElementById(displayId);
+    var unit = document.getElementById(unitId);
+    var hidden = document.getElementById(hiddenId);
+    if (!display || !unit || !hidden) return;
+    function syncHidden() {
+      var val = parseFloat(display.value) || 0;
+      hidden.value = unit.value === 'cores' ? String(Math.round(val * 100)) : String(Math.round(val));
+    }
+    unit.addEventListener('change', syncHidden);
+    display.addEventListener('input', syncHidden);
+    syncHidden();
+  }
+
+  syncUnit('userMemoryDisplay', 'userMemoryUnit', 'userMemory');
+  syncUnit('userStorageDisplay', 'userStorageUnit', 'userStorage');
+  syncCPU('userCPUDisplay', 'userCPUUnit', 'userCPU');
+  syncUnit('userMemoryDisplayDesktop', 'userMemoryUnitDesktop', 'userMemoryDesktop');
+  syncUnit('userStorageDisplayDesktop', 'userStorageUnitDesktop', 'userStorageDesktop');
+  syncCPU('userCPUDisplayDesktop', 'userCPUUnitDesktop', 'userCPUDesktop');
 
   if (form) {
     form.addEventListener('submit', async function(e) {

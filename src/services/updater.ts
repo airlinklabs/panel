@@ -19,7 +19,7 @@ interface GithubCommit {
   };
 }
 
-export async function checkForUpdates(): Promise<{
+export async function checkForUpdates(branch: 'stable' | 'dev' = 'stable'): Promise<{
   hasUpdate: boolean;
   latestVersion: string;
   currentVersion: string;
@@ -29,9 +29,8 @@ export async function checkForUpdates(): Promise<{
     const configPath = path.join(process.cwd(), 'storage', 'config.json');
     const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
     const currentVersion = config.meta.version;
-    const isDev = process.env.NODE_ENV === 'development';
 
-    if (isDev) {
+    if (branch === 'dev') {
       // Check latest commit on main branch
       const response = await axios.get(
         'https://api.github.com/repos/airlinklabs/panel/commits/main',
@@ -66,16 +65,14 @@ export async function checkForUpdates(): Promise<{
   }
 }
 
-export async function runUpdate(): Promise<boolean> {
+export async function runUpdate(branch: 'stable' | 'dev' = 'stable'): Promise<boolean> {
   try {
     const backupDir = path.join(process.cwd(), 'backup');
     if (!fs.existsSync(backupDir)) {
       fs.mkdirSync(backupDir);
     }
 
-    const isDev = process.env.NODE_ENV === 'development';
-
-    if (isDev) {
+    if (branch === 'dev') {
       // Pull latest commits
       execSync('git fetch origin main', { stdio: 'inherit' });
       execSync('git reset --hard origin/main', { stdio: 'inherit' });

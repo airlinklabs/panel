@@ -52,6 +52,7 @@ export type ImagesMinAggregateOutputType = {
   scripts: string | null
   variables: string | null
   portRequirements: string | null
+  visibleToUsers: boolean | null
 }
 
 export type ImagesMaxAggregateOutputType = {
@@ -72,6 +73,7 @@ export type ImagesMaxAggregateOutputType = {
   scripts: string | null
   variables: string | null
   portRequirements: string | null
+  visibleToUsers: boolean | null
 }
 
 export type ImagesCountAggregateOutputType = {
@@ -92,6 +94,7 @@ export type ImagesCountAggregateOutputType = {
   scripts: number
   variables: number
   portRequirements: number
+  visibleToUsers: number
   _all: number
 }
 
@@ -122,6 +125,7 @@ export type ImagesMinAggregateInputType = {
   scripts?: true
   variables?: true
   portRequirements?: true
+  visibleToUsers?: true
 }
 
 export type ImagesMaxAggregateInputType = {
@@ -142,6 +146,7 @@ export type ImagesMaxAggregateInputType = {
   scripts?: true
   variables?: true
   portRequirements?: true
+  visibleToUsers?: true
 }
 
 export type ImagesCountAggregateInputType = {
@@ -162,6 +167,7 @@ export type ImagesCountAggregateInputType = {
   scripts?: true
   variables?: true
   portRequirements?: true
+  visibleToUsers?: true
   _all?: true
 }
 
@@ -269,6 +275,7 @@ export type ImagesGroupByOutputType = {
   scripts: string | null
   variables: string | null
   portRequirements: string
+  visibleToUsers: boolean
   _count: ImagesCountAggregateOutputType | null
   _avg: ImagesAvgAggregateOutputType | null
   _sum: ImagesSumAggregateOutputType | null
@@ -312,6 +319,7 @@ export type ImagesWhereInput = {
   scripts?: Prisma.StringNullableFilter<"Images"> | string | null
   variables?: Prisma.StringNullableFilter<"Images"> | string | null
   portRequirements?: Prisma.StringFilter<"Images"> | string
+  visibleToUsers?: Prisma.BoolFilter<"Images"> | boolean
   servers?: Prisma.ServerListRelationFilter
 }
 
@@ -333,6 +341,7 @@ export type ImagesOrderByWithRelationInput = {
   scripts?: Prisma.SortOrderInput | Prisma.SortOrder
   variables?: Prisma.SortOrderInput | Prisma.SortOrder
   portRequirements?: Prisma.SortOrder
+  visibleToUsers?: Prisma.SortOrder
   servers?: Prisma.ServerOrderByRelationAggregateInput
 }
 
@@ -357,6 +366,7 @@ export type ImagesWhereUniqueInput = Prisma.AtLeast<{
   scripts?: Prisma.StringNullableFilter<"Images"> | string | null
   variables?: Prisma.StringNullableFilter<"Images"> | string | null
   portRequirements?: Prisma.StringFilter<"Images"> | string
+  visibleToUsers?: Prisma.BoolFilter<"Images"> | boolean
   servers?: Prisma.ServerListRelationFilter
 }, "id" | "UUID">
 
@@ -378,6 +388,7 @@ export type ImagesOrderByWithAggregationInput = {
   scripts?: Prisma.SortOrderInput | Prisma.SortOrder
   variables?: Prisma.SortOrderInput | Prisma.SortOrder
   portRequirements?: Prisma.SortOrder
+  visibleToUsers?: Prisma.SortOrder
   _count?: Prisma.ImagesCountOrderByAggregateInput
   _avg?: Prisma.ImagesAvgOrderByAggregateInput
   _max?: Prisma.ImagesMaxOrderByAggregateInput
@@ -406,6 +417,7 @@ export type ImagesScalarWhereWithAggregatesInput = {
   scripts?: Prisma.StringNullableWithAggregatesFilter<"Images"> | string | null
   variables?: Prisma.StringNullableWithAggregatesFilter<"Images"> | string | null
   portRequirements?: Prisma.StringWithAggregatesFilter<"Images"> | string
+  visibleToUsers?: Prisma.BoolWithAggregatesFilter<"Images"> | boolean
 }
 
 export type ImagesCreateInput = {
@@ -425,6 +437,7 @@ export type ImagesCreateInput = {
   scripts?: string | null
   variables?: string | null
   portRequirements?: string
+  visibleToUsers?: boolean
   servers?: Prisma.ServerCreateNestedManyWithoutImageInput
 }
 
@@ -446,6 +459,7 @@ export type ImagesUncheckedCreateInput = {
   scripts?: string | null
   variables?: string | null
   portRequirements?: string
+  visibleToUsers?: boolean
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutImageInput
 }
 
@@ -466,6 +480,7 @@ export type ImagesUpdateInput = {
   scripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   portRequirements?: Prisma.StringFieldUpdateOperationsInput | string
+  visibleToUsers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   servers?: Prisma.ServerUpdateManyWithoutImageNestedInput
 }
 
@@ -487,6 +502,7 @@ export type ImagesUncheckedUpdateInput = {
   scripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   portRequirements?: Prisma.StringFieldUpdateOperationsInput | string
+  visibleToUsers?: Prisma.BoolFieldUpdateOperationsInput | boolean
   servers?: Prisma.ServerUncheckedUpdateManyWithoutImageNestedInput
 }
 
@@ -508,6 +524,7 @@ export type ImagesCreateManyInput = {
   scripts?: string | null
   variables?: string | null
   portRequirements?: string
+  visibleToUsers?: boolean
 }
 
 export type ImagesUpdateManyMutationInput = {
@@ -527,6 +544,7 @@ export type ImagesUpdateManyMutationInput = {
   scripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   portRequirements?: Prisma.StringFieldUpdateOperationsInput | string
+  visibleToUsers?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ImagesUncheckedUpdateManyInput = {
@@ -547,6 +565,7 @@ export type ImagesUncheckedUpdateManyInput = {
   scripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   portRequirements?: Prisma.StringFieldUpdateOperationsInput | string
+  visibleToUsers?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ImagesScalarRelationFilter = {
@@ -572,6 +591,7 @@ export type ImagesCountOrderByAggregateInput = {
   scripts?: Prisma.SortOrder
   variables?: Prisma.SortOrder
   portRequirements?: Prisma.SortOrder
+  visibleToUsers?: Prisma.SortOrder
 }
 
 export type ImagesAvgOrderByAggregateInput = {
@@ -596,6 +616,7 @@ export type ImagesMaxOrderByAggregateInput = {
   scripts?: Prisma.SortOrder
   variables?: Prisma.SortOrder
   portRequirements?: Prisma.SortOrder
+  visibleToUsers?: Prisma.SortOrder
 }
 
 export type ImagesMinOrderByAggregateInput = {
@@ -616,6 +637,7 @@ export type ImagesMinOrderByAggregateInput = {
   scripts?: Prisma.SortOrder
   variables?: Prisma.SortOrder
   portRequirements?: Prisma.SortOrder
+  visibleToUsers?: Prisma.SortOrder
 }
 
 export type ImagesSumOrderByAggregateInput = {
@@ -653,6 +675,7 @@ export type ImagesCreateWithoutServersInput = {
   scripts?: string | null
   variables?: string | null
   portRequirements?: string
+  visibleToUsers?: boolean
 }
 
 export type ImagesUncheckedCreateWithoutServersInput = {
@@ -673,6 +696,7 @@ export type ImagesUncheckedCreateWithoutServersInput = {
   scripts?: string | null
   variables?: string | null
   portRequirements?: string
+  visibleToUsers?: boolean
 }
 
 export type ImagesCreateOrConnectWithoutServersInput = {
@@ -708,6 +732,7 @@ export type ImagesUpdateWithoutServersInput = {
   scripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   portRequirements?: Prisma.StringFieldUpdateOperationsInput | string
+  visibleToUsers?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ImagesUncheckedUpdateWithoutServersInput = {
@@ -728,6 +753,7 @@ export type ImagesUncheckedUpdateWithoutServersInput = {
   scripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   variables?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   portRequirements?: Prisma.StringFieldUpdateOperationsInput | string
+  visibleToUsers?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -779,6 +805,7 @@ export type ImagesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   scripts?: boolean
   variables?: boolean
   portRequirements?: boolean
+  visibleToUsers?: boolean
   servers?: boolean | Prisma.Images$serversArgs<ExtArgs>
   _count?: boolean | Prisma.ImagesCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["images"]>
@@ -801,6 +828,7 @@ export type ImagesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   scripts?: boolean
   variables?: boolean
   portRequirements?: boolean
+  visibleToUsers?: boolean
 }, ExtArgs["result"]["images"]>
 
 export type ImagesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -821,6 +849,7 @@ export type ImagesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   scripts?: boolean
   variables?: boolean
   portRequirements?: boolean
+  visibleToUsers?: boolean
 }, ExtArgs["result"]["images"]>
 
 export type ImagesSelectScalar = {
@@ -841,9 +870,10 @@ export type ImagesSelectScalar = {
   scripts?: boolean
   variables?: boolean
   portRequirements?: boolean
+  visibleToUsers?: boolean
 }
 
-export type ImagesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "UUID" | "name" | "description" | "author" | "authorName" | "createdAt" | "meta" | "dockerImages" | "startup" | "stop" | "startup_done" | "config_files" | "info" | "scripts" | "variables" | "portRequirements", ExtArgs["result"]["images"]>
+export type ImagesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "UUID" | "name" | "description" | "author" | "authorName" | "createdAt" | "meta" | "dockerImages" | "startup" | "stop" | "startup_done" | "config_files" | "info" | "scripts" | "variables" | "portRequirements" | "visibleToUsers", ExtArgs["result"]["images"]>
 export type ImagesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   servers?: boolean | Prisma.Images$serversArgs<ExtArgs>
   _count?: boolean | Prisma.ImagesCountOutputTypeDefaultArgs<ExtArgs>
@@ -874,6 +904,7 @@ export type $ImagesPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     scripts: string | null
     variables: string | null
     portRequirements: string
+    visibleToUsers: boolean
   }, ExtArgs["result"]["images"]>
   composites: {}
 }
@@ -1315,6 +1346,7 @@ export interface ImagesFieldRefs {
   readonly scripts: Prisma.FieldRef<"Images", 'String'>
   readonly variables: Prisma.FieldRef<"Images", 'String'>
   readonly portRequirements: Prisma.FieldRef<"Images", 'String'>
+  readonly visibleToUsers: Prisma.FieldRef<"Images", 'Boolean'>
 }
     
 

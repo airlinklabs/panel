@@ -72,9 +72,10 @@ const adminModule: Module = {
     router.get(
       '/admin/check-update',
       isAuthenticated(true, 'airlink.admin.overview.checkForUpdates'),
-      async (_req: Request, res: Response) => {
+      async (req: Request, res: Response) => {
         try {
-          const updateInfo = await checkForUpdates();
+          const branch = (req.query.branch as string) === 'dev' ? 'dev' : 'stable';
+          const updateInfo = await checkForUpdates(branch);
           res.json(updateInfo);
         } catch (error) {
           logger.error('Error checking for updates:', error);
@@ -86,9 +87,10 @@ const adminModule: Module = {
     router.post(
       '/admin/perform-update',
       isAuthenticated(true, 'airlink.admin.overview.performUpdate'),
-      async (_req: Request, res: Response) => {
+      async (req: Request, res: Response) => {
         try {
-          const success = await runUpdate();
+          const branch = (req.query.branch as string) === 'dev' ? 'dev' : 'stable';
+          const success = await runUpdate(branch);
           if (success) {
             res.json({ message: 'Update completed successfully' });
           } else {

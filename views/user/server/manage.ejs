@@ -94,7 +94,7 @@
   <div class="mobile-server-chrome px-4 pt-5">
 
     <!-- Page Header -->
-    <div class="mb-4">
+    <div class="mb-5">
       <div class="flex items-start justify-between gap-3">
         <%- include('../../components/serverHeader') %>
         <!-- Server meta: right side of header, 3 small lines -->
@@ -181,9 +181,9 @@
     </div>
 
       <!-- Terminal -->
-      <div class="data-animate-card rounded-xl bg-[#141414] border border-neutral-800 overflow-hidden">
+      <div class="data-animate-card rounded-xl dark:bg-neutral-900 border border-neutral-800 overflow-hidden">
         <!-- Chrome bar -->
-        <div class="flex items-center px-3 py-2 bg-[#1c1c1c] border-b border-neutral-800 shrink-0">
+        <div class="flex items-center px-3 py-2 dark:bg-neutral-800 border-b border-neutral-800 shrink-0">
           <span class="text-[11px] font-medium text-neutral-600 select-none tracking-wide">console</span>
         </div>
         <div id="terminal-container" class="w-full relative">
@@ -306,7 +306,7 @@
 
         <!-- Server Suspended Warning -->
         <% if (server.Suspended) { %>
-        <div class="mt-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
+        <div class="mt-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
           <%- icon('triangle-alert', { class: 'h-5 w-5 shrink-0 text-red-500' }) %>
           <div>
             <p class="text-sm font-medium text-red-500"><%= req.translations.serverSuspended || "This server's been grounded. Reach out to your admin if you think that's a mistake." %></p>
@@ -317,7 +317,7 @@
 
         <!-- Daemon Offline Warning — hidden by default, shown by JS when daemon unreachable -->
         <div id="daemonOfflineWarningRow" class="<% if (typeof serverStatus === 'undefined' || !serverStatus.daemonOffline) { %>hidden<% } %> mt-3">
-          <div id="daemonOfflineWarning" class="data-animate-card bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
+          <div id="daemonOfflineWarning" class="data-animate-card bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
             <%- icon('triangle-alert', { class: 'h-5 w-5 shrink-0 text-red-500' }) %>
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium text-red-500"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'This node isn\'t talking to us right now. Check the daemon — it might just need a nudge.' %></p>
@@ -341,10 +341,10 @@
 <div class="w-full lg:w-2/3 lg:pr-5 flex flex-col min-w-0">
     <div class="data-animate-card flex flex-col rounded-xl overflow-hidden border border-neutral-800 shadow-lg flex-1 console-wrap">
         <!-- Console chrome bar -->
-        <div class="flex items-center gap-2 px-3 py-2 bg-[#1c1c1c] border-b border-neutral-800 shrink-0">
+        <div class="flex items-center gap-2 px-3 py-2 dark:bg-neutral-800 border-b border-neutral-800 shrink-0">
             <span class="text-[11px] font-medium text-neutral-600 select-none tracking-wide">console</span>
         </div>
-        <div class="bg-[#141414] flex-1 relative">
+        <div class="dark:bg-neutral-900 flex-1 relative">
             <div id="terminal"></div>
         </div>
     </div>
@@ -1443,6 +1443,21 @@ connectWebSocket();
     }
 
     initStatsWebSocket();
+
+    document.addEventListener('turbo:before-visit', function() {
+      if (window._serverWs) {
+        window._serverWs.close();
+        window._serverWs = null;
+      }
+      if (socket) {
+        try { socket.close(); } catch {}
+        socket = null;
+      }
+      if (statsWs) {
+        try { statsWs.close(); } catch {}
+        statsWs = null;
+      }
+    });
 
     <% if (isMobileViewport) { %>
     function updateHeaderDot(state) {
