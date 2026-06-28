@@ -91,7 +91,7 @@
   </div>
 </main>
 
-<div id="createApiKeyModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/50 backdrop-blur-sm" aria-hidden="true">
+<div id="createApiKeyModal" class="fixed inset-0 z-[40] hidden items-end justify-center bg-black/50 backdrop-blur-sm" aria-hidden="true">
   <div class="bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-white/5 rounded-t-2xl w-full shadow-xl max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="createApiKeyTitle" aria-describedby="createApiKeyDescription" tabindex="-1">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60 sticky top-0 bg-white dark:bg-neutral-900 z-10">
       <div>
@@ -160,7 +160,7 @@
   </div>
 </div>
 
-<div id="editApiKeyModal" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/50 backdrop-blur-sm" aria-hidden="true">
+<div id="editApiKeyModal" class="fixed inset-0 z-[40] hidden items-end justify-center bg-black/50 backdrop-blur-sm" aria-hidden="true">
   <div class="bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-white/5 rounded-t-2xl w-full shadow-xl max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="editApiKeyTitle" aria-describedby="editApiKeyDescription" tabindex="-1">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60 sticky top-0 bg-white dark:bg-neutral-900 z-10">
       <div>
@@ -387,7 +387,7 @@
 <script nonce="<%- nonce %>">
   function showConfirmModal(title, message, onConfirm) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/60 z-50 flex items-end justify-center';
+    modal.className = 'fixed inset-0 bg-black/60 z-30 flex items-end justify-center';
     modal.innerHTML = `
       <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl p-5 w-full shadow-2xl">
         <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">${title}</h2>
@@ -565,7 +565,7 @@
   </div>
 </main>
 
-<div id="createApiKeyModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-hidden="true">
+<div id="createApiKeyModal" class="fixed inset-0 z-[40] hidden overflow-y-auto" aria-hidden="true">
   <div class="flex min-h-full items-center justify-center p-4">
     <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" onclick="hideCreateModal()"></div>
     <div class="relative bg-white dark:bg-neutral-800 rounded-2xl shadow-xl w-full max-w-2xl border border-neutral-200 dark:border-white/5" role="dialog" aria-modal="true" aria-labelledby="createApiKeyTitle" aria-describedby="createApiKeyDescription" tabindex="-1">
@@ -660,7 +660,7 @@
   </div>
 </div>
 
-<div id="editApiKeyModal" class="fixed inset-0 z-[70] hidden items-center justify-center" aria-hidden="true">
+<div id="editApiKeyModal" class="fixed inset-0 z-[40] hidden items-center justify-center" aria-hidden="true">
   <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="editApiKeyModalBackdrop"></div>
   <div id="editApiKeyModalPanel" role="dialog" aria-modal="true" aria-labelledby="editApiKeyTitle" aria-describedby="editApiKeyDescription" tabindex="-1" class="relative bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60 shrink-0">
@@ -733,7 +733,7 @@
 
   function showToast(message, type = 'success') {
     const toast = document.createElement('div');
-    toast.className = `fixed bottom-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg transition-opacity duration-500 ${type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`;
+    toast.className = `fixed bottom-4 right-4 z-[60] px-4 py-2 rounded-lg shadow-lg transition-opacity duration-500 ${type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`;
     toast.textContent = message;
     document.body.appendChild(toast);
     setTimeout(() => { toast.style.opacity = '1'; }, 10);

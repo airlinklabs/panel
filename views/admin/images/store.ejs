@@ -79,7 +79,7 @@
   </div>
 </main>
 
-<div id="installModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-end">
+<div id="installModal" class="hidden fixed inset-0 z-[40] bg-black/50 flex items-end">
   <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 rounded-t-2xl w-full p-5">
     <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-0.5" id="modalTitle">Install image</h2>
     <p class="text-xs text-neutral-500 mb-4" id="modalSubtitle">Add this image to your panel.</p>
@@ -252,7 +252,7 @@ loadCatalogue();
 <style>
   ::-webkit-scrollbar { display: none; }
   .modal-overlay {
-    position: fixed; inset: 0; z-index: 50;
+    position: fixed; inset: 0; z-index: 40;
     background: var(--theme-overlay, rgba(0,0,0,0.5));
     display: flex; align-items: center; justify-content: center; padding: 16px;
     opacity: 0; pointer-events: none; transition: opacity 0.25s;

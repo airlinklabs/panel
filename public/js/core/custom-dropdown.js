@@ -99,8 +99,55 @@
       var allDropdowns = document.querySelectorAll('.cs-dropdown');
       for (var i = 0; i < allDropdowns.length; i++) {
         allDropdowns[i].style.display = 'none';
+        allDropdowns[i].classList.remove('cs-portaled');
         allDropdowns[i].previousElementSibling.classList.remove(OPEN_CLASS);
         allDropdowns[i].previousElementSibling.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    function isInsideScrollable(el) {
+      var parent = el.parentElement;
+      while (parent && parent !== document.body) {
+        var style = getComputedStyle(parent);
+        var ov = style.overflow + style.overflowY + style.overflowX;
+        if (parent.scrollHeight > parent.clientHeight && (style.overflowY === 'auto' || style.overflowY === 'scroll')) {
+          return true;
+        }
+        if (style.overflow === 'hidden' || style.overflowY === 'hidden' || style.overflowX === 'hidden') {
+          return true;
+        }
+        if (style.overflow === 'clip' || style.overflowY === 'clip') {
+          return true;
+        }
+        parent = parent.parentElement;
+      }
+      return false;
+    }
+
+    function portalDropdown() {
+      if (!isInsideScrollable(wrap)) {
+        dropdown.classList.remove('cs-portaled');
+        return;
+      }
+      var rect = trigger.getBoundingClientRect();
+      dropdown.style.position = 'fixed';
+      dropdown.style.left = rect.left + 'px';
+      dropdown.style.top = (rect.bottom + 6) + 'px';
+      dropdown.style.width = rect.width + 'px';
+      dropdown.style.zIndex = 'var(--z-dropdown, 30)';
+      document.body.appendChild(dropdown);
+      dropdown.classList.add('cs-portaled');
+    }
+
+    function unportalDropdown() {
+      if (dropdown.classList.contains('cs-portaled')) {
+        dropdown.classList.remove('cs-portaled');
+        dropdown.style.position = '';
+        dropdown.style.left = '';
+        dropdown.style.top = '';
+        dropdown.style.width = '';
+        dropdown.style.zIndex = '';
+        wrap.appendChild(dropdown);
       }
     }
 
@@ -111,13 +158,15 @@
       if (!isOpen) {
         syncOptions();
         dropdown.style.display = 'block';
+        portalDropdown();
         trigger.classList.add(OPEN_CLASS);
         trigger.setAttribute('aria-expanded', 'true');
       }
     });
 
     document.addEventListener('click', function (e) {
-      if (!wrap.contains(e.target)) {
+      if (!wrap.contains(e.target) && e.target !== dropdown && !dropdown.contains(e.target)) {
+        unportalDropdown();
         dropdown.style.display = 'none';
         trigger.classList.remove(OPEN_CLASS);
         trigger.setAttribute('aria-expanded', 'false');
@@ -126,6 +175,7 @@
 
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
+        unportalDropdown();
         dropdown.style.display = 'none';
         trigger.classList.remove(OPEN_CLASS);
         trigger.setAttribute('aria-expanded', 'false');

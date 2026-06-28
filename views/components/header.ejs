@@ -48,9 +48,9 @@
 </head>
 <body class="bg-neutral-50 dark:bg-neutral-900 h-full text-neutral-800 dark:text-white overflow-x-hidden">
 
-<div id="toast-container" data-turbo-permanent class="fixed top-4 right-4 z-[90] flex flex-col gap-2 pointer-events-none max-w-xs w-full" aria-live="polite" aria-atomic="false" role="status"></div>
+<div id="toast-container" data-turbo-permanent class="fixed top-4 right-4 z-[60] flex flex-col gap-2 pointer-events-none max-w-xs w-full" aria-live="polite" aria-atomic="false" role="status"></div>
 
-<a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-neutral-900 focus:text-white focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
+<a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-70 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-neutral-900 focus:text-white focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
 
 <% if (isMobileViewport) { %>
 <style>
@@ -105,7 +105,7 @@
 </script>
 
 <% if (!isMobileViewport) { %>
-<button id="theme-toggle" class="fixed right-4 top-4 w-14 h-8 flex items-center bg-neutral-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500 z-50" aria-label="Switch to dark mode" aria-pressed="false">
+<button id="theme-toggle" class="fixed right-4 top-4 w-14 h-8 flex items-center bg-neutral-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500 z-10" aria-label="Switch to dark mode" aria-pressed="false">
     <span class="dot bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
 </button>
 <script nonce="<%- nonce %>">

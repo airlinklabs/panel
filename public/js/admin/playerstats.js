@@ -1,3 +1,5 @@
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+
 const ctx = document.getElementById('playerChart').getContext('2d');
 const playerChart = new Chart(ctx, {
   type: 'line',
@@ -120,8 +122,8 @@ async function fetchPlayerData() {
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center">
               <div class="ml-4">
-                <div class="text-sm font-medium text-neutral-800 dark:text-white">${server.serverName}</div>
-                <div class="text-sm text-neutral-400">${server.serverId}</div>
+                <div class="text-sm font-medium text-neutral-800 dark:text-white">${esc(server.serverName)}</div>
+                <div class="text-sm text-neutral-400">${esc(server.serverId)}</div>
               </div>
             </div>
           </td>
@@ -134,7 +136,7 @@ async function fetchPlayerData() {
             ${server.playerCount} / ${server.maxPlayers}
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-400">
-            ${server.version || 'Unknown'}
+            ${esc(server.version || 'Unknown')}
           </td>
         `;
 
@@ -195,5 +197,9 @@ document.getElementById('refreshBtn').addEventListener('dblclick', (e) => {
 });
 
 window.addEventListener('beforeunload', () => {
+  clearInterval(refreshInterval);
+});
+
+document.addEventListener('turbo:before-render', () => {
   clearInterval(refreshInterval);
 });

@@ -1,7 +1,7 @@
 (function () {
   document.addEventListener('contextmenu', e => e.preventDefault());
 
-  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 
   const bridge    = document.getElementById('dashboard-data');
   const allFolders = JSON.parse(bridge.dataset.folders || '[]');
@@ -100,7 +100,7 @@
           const running = s.status === 'running';
           row.innerHTML = `
             <a href="/server/${s.UUID}" class="flex items-center gap-2 flex-1 min-w-0">
-              <span class="text-sm font-medium text-neutral-800 dark:text-white truncate">${s.name}</span>
+              <span class="text-sm font-medium text-neutral-800 dark:text-white truncate">${esc(s.name)}</span>
               <span class="ml-auto shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded-md ${running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'}">
                 ${running ? 'Running' : 'Stopped'}
               </span>
@@ -241,7 +241,6 @@
         menu.style.position = 'fixed';
         menu.style.top = e.clientY + 'px';
         menu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
-        menu.style.zIndex = '2147483647';
         menu.classList.remove('hidden');
       }
     });

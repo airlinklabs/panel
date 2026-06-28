@@ -57,10 +57,14 @@
     setCookie(COOKIE_NAME, getRequiredMode());
   }
 
-  // If force desktop is set but cookie says mobile, correct it immediately
+  // If force desktop is set, ensure cookie matches — but don't reload
+  // on initial load to prevent infinite reload loops on narrow screens
   if (isForceDesktop() && getCookie(COOKIE_NAME) !== 'desktop') {
     setCookie(COOKIE_NAME, 'desktop');
-    window.location.reload();
+    // Only reload if we're not on the initial page load
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      window.location.reload();
+    }
   }
 
   window.addEventListener('resize', function () {

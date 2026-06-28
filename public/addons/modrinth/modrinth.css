@@ -177,7 +177,7 @@ html.dark .confirm-value { color: var(--theme-text-strong, #e5e5e5); }
 
 /* ── Desktop modal overlay ──────────────────────────────────── */
 .modal-overlay {
-  position: fixed; inset: 0; z-index: 50;
+  position: fixed; inset: 0; z-index: var(--z-modal-backdrop);
   background: rgba(0,0,0,0.5);
   display: flex; align-items: center; justify-content: center; padding: 16px;
   opacity: 0; pointer-events: none; transition: opacity 0.2s;
@@ -211,7 +211,7 @@ html.dark .modal-left { border-right-color: var(--theme-border-subtle, rgba(255,
 
 /* ── Mobile bottom sheet ────────────────────────────────────── */
 .mobile-modal-overlay {
-  position: fixed; inset: 0; z-index: 50;
+  position: fixed; inset: 0; z-index: var(--z-modal-backdrop);
   background: rgba(0,0,0,0.5);
   display: flex; align-items: flex-end; justify-content: center;
   opacity: 0; pointer-events: none; transition: opacity 0.2s;

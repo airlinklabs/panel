@@ -146,7 +146,7 @@
           <%= req.translations.start %>
         </button>
         <button id="restartButtonMobile" type="button"
-          class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
+          class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-neutral-800 dark:bg-neutral-600 hover:bg-neutral-700 dark:hover:bg-neutral-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>" <%= server.Suspended ? 'disabled' : '' %>>
           <%- icon('refresh-cw', { class: 'w-3.5 h-3.5 shrink-0' }) %>
           <%= req.translations.restart %>
         </button>

@@ -1,4 +1,6 @@
 (function () {
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+
   const tabBtns   = document.querySelectorAll('.tab-btn');
   const tabPanels = document.querySelectorAll('.tab-panel');
   let data        = null;
@@ -82,8 +84,8 @@
     heavyEl.innerHTML = s.topServers.map(sv => `
       <div class="flex items-center gap-4 px-5 py-3">
         <div class="min-w-0 flex-1">
-          <p class="text-sm text-neutral-700 dark:text-neutral-300 truncate font-medium">${sv.name}</p>
-          <p class="text-xs text-neutral-400">${sv.owner} · ${sv.image}</p>
+          <p class="text-sm text-neutral-700 dark:text-neutral-300 truncate font-medium">${esc(sv.name)}</p>
+          <p class="text-xs text-neutral-400">${esc(sv.owner)} · ${esc(sv.image)}</p>
         </div>
         <div class="flex items-center gap-3 shrink-0 text-xs text-neutral-500 dark:text-neutral-400 tabular-nums">
           <span>${fmt(sv.memory)} MB</span>
@@ -115,8 +117,8 @@
           <div class="flex items-center gap-3">
             <span class="w-2 h-2 rounded-full ${n.online ? 'bg-emerald-500' : 'bg-red-500'} shrink-0"></span>
             <div>
-              <p class="text-sm font-medium text-neutral-800 dark:text-white">${n.name}</p>
-              <p class="text-xs text-neutral-400 font-mono">${n.address}:${n.port}</p>
+              <p class="text-sm font-medium text-neutral-800 dark:text-white">${esc(n.name)}</p>
+              <p class="text-xs text-neutral-400 font-mono">${esc(n.address)}:${esc(n.port)}</p>
             </div>
           </div>
           <div class="flex items-center gap-3 text-xs text-neutral-500">
@@ -186,7 +188,7 @@
     tbody.innerHTML = (a.recentLogins || []).map(l => `
       <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition">
         <td class="px-5 py-3 text-xs font-mono text-neutral-500">#${l.userId}</td>
-        <td class="px-5 py-3 text-xs font-mono text-neutral-600 dark:text-neutral-400">${l.ipAddress || 'Unknown'}</td>
+        <td class="px-5 py-3 text-xs font-mono text-neutral-600 dark:text-neutral-400">${esc(l.ipAddress || 'Unknown')}</td>
         <td class="px-5 py-3 text-xs text-neutral-500">${new Date(l.timestamp).toLocaleString()}</td>
       </tr>`).join('') || '<tr><td colspan="3" class="px-5 py-5 text-center text-sm text-neutral-400">No login history.</td></tr>';
   }

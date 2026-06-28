@@ -12,6 +12,17 @@
     --al-paper: 247 247 243;
     --al-paper-soft: 239 240 235;
     --al-focus: rgb(var(--al-accent) / 0.72);
+
+    /* ── Global z-index layering tokens ─────────────────────────────── */
+    --z-bg:             -1;  /* Background decorations */
+    --z-base:            0;  /* Normal page content */
+    --z-nav:            10;  /* Navigation: sidebar, topbar, bottom nav */
+    --z-floating:       20;  /* Floating buttons, theme toggle */
+    --z-dropdown:       30;  /* Dropdowns, menus, context menus, search results */
+    --z-modal-backdrop: 40;  /* Modal backdrop / overlay */
+    --z-modal:          50;  /* Modal content */
+    --z-toast:          60;  /* Toast notifications */
+    --z-loading:        70;  /* Global loading overlays */
   }
 
   html {
@@ -31,7 +42,7 @@
   }
 
   html.dark body {
-    background-color: #141414;
+    background-color: var(--theme-bg, #141414);
   }
 
   h1,
@@ -330,27 +341,72 @@ button:active:not(:disabled), .al-btn:active:not(:disabled) {
   50%       { opacity: 0.4; }
 }
 
-/* ── Dropdown backgrounds ──────────────────────────────────────────────── */
-/* Ensures all dropdowns, popovers, context menus, and select menus have    */
-/* solid backgrounds. Theme authors can override via --theme-bg-card.       */
+/* ── Dropdown & popover enforcement ───────────────────────────────────── */
+/* Ensures all dropdowns, popovers, context menus, and overlays have       */
+/* solid opaque backgrounds, correct z-index, and block pointer events.    */
 .server-ctx-menu,
 #searchResults,
 #mobileSearchResults,
-#mobile-more-dropdown {
+#mobile-more-dropdown,
+#notification-dropdown,
+#desktop-notification-dropdown,
+#server-nav-more-dropdown,
+.al-file-menu,
+.filter-menu,
+.cs-dropdown,
+[role="menu"],
+[role="listbox"],
+[role="listbox"] > * {
   background-color: var(--theme-bg-card, #fff);
+  border-color: var(--theme-border, rgba(0,0,0,0.08));
 }
+
 html.dark .server-ctx-menu,
 html.dark #searchResults,
 html.dark #mobileSearchResults,
-html.dark #mobile-more-dropdown {
+html.dark #mobile-more-dropdown,
+html.dark #notification-dropdown,
+html.dark #desktop-notification-dropdown,
+html.dark #server-nav-more-dropdown,
+html.dark .al-file-menu,
+html.dark .filter-menu,
+html.dark .cs-dropdown,
+html.dark [role="menu"],
+html.dark [role="listbox"],
+html.dark [role="listbox"] > * {
   background-color: var(--theme-bg-card, #1a1a1a);
   border-color: var(--theme-border, rgba(255,255,255,0.08));
 }
 
-/* ── Dropdown z-index enforcement ─────────────────────────────────────── */
+/* z-index enforcement for all dropdowns */
 .server-ctx-menu,
 #searchResults,
 #mobileSearchResults,
-#mobile-more-dropdown {
-  z-index: 2147483647;
+#mobile-more-dropdown,
+#notification-dropdown,
+#desktop-notification-dropdown,
+#server-nav-more-dropdown,
+.al-file-menu,
+.filter-menu,
+.cs-dropdown,
+[role="menu"],
+[role="listbox"] {
+  z-index: var(--z-dropdown);
+  pointer-events: auto;
+}
+
+/* Hidden dropdowns must not intercept clicks */
+.server-ctx-menu.hidden,
+#searchResults.hidden,
+#mobileSearchResults.hidden,
+#mobile-more-dropdown.hidden,
+#notification-dropdown.hidden,
+#desktop-notification-dropdown.hidden,
+#server-nav-more-dropdown.hidden,
+.al-file-menu.hidden,
+.filter-menu.hidden,
+.cs-dropdown.hidden,
+[role="menu"][aria-hidden="true"],
+[role="listbox"][aria-hidden="true"] {
+  pointer-events: none;
 }

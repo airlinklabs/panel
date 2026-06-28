@@ -1,6 +1,8 @@
 (function () {
   document.addEventListener('contextmenu', e => e.preventDefault());
 
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+
   let activeFolderId = null;
 
   // ── Grid / List view toggle ──────────────────────────────────────────
@@ -74,7 +76,7 @@
           const running = s.status === 'running';
           row.innerHTML = `
             <a href="/server/${s.UUID}" class="flex items-center gap-2 flex-1 min-w-0 active:opacity-60">
-              <span class="text-sm font-medium text-neutral-800 dark:text-white truncate">${s.name}</span>
+              <span class="text-sm font-medium text-neutral-800 dark:text-white truncate">${esc(s.name)}</span>
               <span class="ml-auto shrink-0 text-[10px] font-medium px-2 py-0.5 rounded-md ${running ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400'}">${running ? 'Running' : 'Stopped'}</span>
             </a>
             <button data-uuid="${s.UUID}" class="mob-remove-btn shrink-0 p-2 rounded-lg text-neutral-400 active:bg-red-50 dark:active:bg-red-500/10 active:text-red-500 transition">
@@ -207,7 +209,7 @@
       allFolders.forEach(f => {
         const b = document.createElement('button');
         b.className = 'w-full flex items-center gap-2.5 px-3 py-3 rounded-xl bg-neutral-50 dark:bg-neutral-700/30 border border-neutral-200 dark:border-white/5 text-left active:scale-[0.98] transition-transform';
-        b.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-amber-500 shrink-0"><path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 12h-15a4.483 4.483 0 0 0-3 1.146Z"/></svg><span class="text-sm text-neutral-800 dark:text-white">${f.name}</span>`;
+        b.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-amber-500 shrink-0"><path d="M19.5 21a3 3 0 0 0 3-3v-4.5a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3V18a3 3 0 0 0 3 3h15ZM1.5 10.146V6a3 3 0 0 1 3-3h5.379a2.25 2.25 0 0 1 1.59.659l2.122 2.121c.14.141.331.22.53.22H19.5a3 3 0 0 1 3 3v1.146A4.483 4.483 0 0 0 19.5 12h-15a4.483 4.483 0 0 0-3 1.146Z"/></svg><span class="text-sm text-neutral-800 dark:text-white">${esc(f.name)}</span>`;
         b.addEventListener('click', async () => {
           const r = await fetch('/api/folders/' + f.id + '/servers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ serverUUID: uuid }) });
           const d = await r.json();
@@ -250,7 +252,7 @@
       row.innerHTML = `
         <input type="checkbox" ${inFolder ? 'checked' : ''} data-uuid="${s.UUID}"
           class="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-white bg-white dark:bg-neutral-800">
-        <span class="text-sm font-medium text-neutral-800 dark:text-white truncate flex-1">${s.name}</span>
+        <span class="text-sm font-medium text-neutral-800 dark:text-white truncate flex-1">${esc(s.name)}</span>
         <span class="text-[10px] font-medium px-1.5 py-0.5 rounded ${s.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-500 dark:text-rose-400'}">${s.status === 'running' ? 'Running' : 'Stopped'}</span>`;
       const cb = row.querySelector('input');
       cb.addEventListener('change', async () => {

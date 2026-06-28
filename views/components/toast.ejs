@@ -139,8 +139,8 @@
 <script nonce="<%- nonce %>">
   (function() {
     try {
-      var msg = '<%= flashToast.message ? flashToast.message.replace(/'/g, "\\'") : "" %>';
-      var type = '<%= flashToast.type || "success" %>';
+      var msg = <%- JSON.stringify(flashToast.message || '') %>;
+      var type = <%- JSON.stringify(flashToast.type || 'success') %>;
       if (msg && window.showToast) {
         setTimeout(function() { window.showToast(msg, type); }, 200);
       }

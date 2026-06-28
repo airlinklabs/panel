@@ -1,6 +1,6 @@
 function showConfirmModal(title, message, onConfirm) {
   const modal = document.createElement('div');
-  modal.className = 'fixed inset-0 bg-black/60 z-50 flex items-center justify-center';
+  modal.className = 'fixed inset-0 bg-black/60 z-[40] flex items-center justify-center';
   modal.innerHTML = `
     <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">${title}</h2>

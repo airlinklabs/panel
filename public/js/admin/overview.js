@@ -128,5 +128,10 @@
   }
 
   measureApiLatency();
-  setInterval(measureApiLatency, 30000);
+  var latencyInterval = setInterval(measureApiLatency, 30000);
+
+  // Clean up on SPA navigation
+  document.addEventListener('turbo:before-render', function () {
+    clearInterval(latencyInterval);
+  });
 })();

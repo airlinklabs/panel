@@ -273,3 +273,22 @@ canvas,
 .animate-ping {
   transition: none !important;
 }
+
+/* ── Reduced motion ─────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .card-enter,
+  .row-enter,
+  .stats-card,
+  .skeleton {
+    animation: none !important;
+  }
+
+  @starting-style {
+    .card-enter,
+    .row-enter,
+    .stats-card {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+}

@@ -130,6 +130,9 @@
     };
     ws.onclose = () => {
       if (shouldLog) console.log('WebSocket disconnected, reconnecting in 5s...');
+      // Clear intervals to prevent accumulation on reconnect
+      if (backendFetchInterval) { clearInterval(backendFetchInterval); backendFetchInterval = null; }
+      if (uptimeInterval) { clearInterval(uptimeInterval); uptimeInterval = null; }
       setTimeout(connectWebSocket, 5000);
     };
     ws.onerror = (error) => {

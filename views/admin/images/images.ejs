@@ -134,7 +134,7 @@
   </div>
 </main>
 
-<div id="installModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-end">
+<div id="installModal" class="hidden fixed inset-0 z-[40] bg-black/50 flex items-end">
   <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 rounded-t-2xl w-full p-5">
     <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-0.5" id="modalTitle">Install image</h2>
     <p class="text-xs text-neutral-500 mb-4" id="modalSubtitle">Add this image to your panel.</p>
@@ -148,7 +148,7 @@
   </div>
 </div>
 
-<div id="createModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60">
+<div id="createModal" class="fixed inset-0 z-[40] hidden items-center justify-center p-4 bg-black/60">
   <div data-animate-card class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-2xl w-full shadow-xl max-h-[92vh] overflow-y-auto">
     <div class="flex items-start justify-between px-4 pt-4 pb-3 border-b border-neutral-100 dark:border-white/5">
       <div>
@@ -400,7 +400,7 @@
 
   function showConfirmModal(title, message, onConfirm) {
     var modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-end justify-center opacity-0 pointer-events-none transition-opacity duration-200';
+    modal.className = 'fixed inset-0 bg-black/50 z-[40] flex items-end justify-center opacity-0 pointer-events-none transition-opacity duration-200';
     modal.innerHTML = '\
       <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 rounded-t-2xl p-5 w-full translate-y-full transition-transform duration-200 shadow-2xl">\
         <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">'+title+'</h2>\
@@ -486,7 +486,7 @@
 <style>
   ::-webkit-scrollbar { display: none; }
   .modal-overlay {
-    position: fixed; inset: 0; z-index: 50;
+    position: fixed; inset: 0; z-index: 40;
     background: var(--theme-overlay, rgba(0,0,0,0.5));
     display: flex; align-items: center; justify-content: center; padding: 16px;
     opacity: 0; pointer-events: none; transition: opacity 0.25s;

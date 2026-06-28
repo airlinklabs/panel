@@ -1,9 +1,9 @@
 <% if (isMobileViewport) { %>
 <!-- Mobile top bar -->
-<div id="mobile-topbar" data-turbo-permanent class="mobile-top-bar al-topbar fixed top-0 left-0 right-0 z-50 h-14 bg-white/90 dark:bg-neutral-900/80 border-b border-neutral-200/60 dark:border-white/5">
+<div id="mobile-topbar" data-turbo-permanent class="mobile-top-bar al-topbar fixed top-0 left-0 right-0 z-10 h-14 bg-white/90 dark:bg-neutral-900/80 border-b border-neutral-200/60 dark:border-white/5">
   <div id="topbar-default" class="flex items-center justify-between h-14 px-4">
     <a href="/" class="flex items-center gap-2 min-w-0 flex-1 mr-3">
-      <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="logo-bg h-8 w-8 rounded-lg bg-neutral-950/90 dark:bg-transparent p-0.5 shrink-0">
+      <img src="<%= settings.logo ? (settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo) : '/assets/logo.png' %>" alt="Logo" class="logo-bg h-8 w-8 rounded-lg bg-neutral-950/90 dark:bg-transparent p-0.5 shrink-0">
       <span class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= settings.title %></span>
     </a>
     <div class="flex items-center gap-2.5 shrink-0">
@@ -15,7 +15,7 @@
           <%- icon('bell', { class: 'h-5 w-5' }) %>
           <span id="notification-badge" class="hidden absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">0</span>
         </button>
-        <div id="notification-dropdown" class="hidden w-80 max-h-96 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30 z-[60]">
+        <div id="notification-dropdown" class="hidden w-80 max-h-96 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30" style="z-index: var(--z-dropdown)">
           <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/10">
             <span class="text-sm font-medium text-neutral-800 dark:text-white">Notifications</span>
             <button onclick="markAllRead()" class="text-xs font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition px-2 py-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5">Mark all read</button>
@@ -50,7 +50,7 @@
   </div>
 </div>
 
-<div id="mobileSearchResults" class="hidden fixed top-14 left-0 right-0 z-40 bg-white dark:bg-neutral-900 border-b border-neutral-200/30 dark:border-white/5 max-h-[60dvh] overflow-y-auto shadow-lg">
+<div id="mobileSearchResults" class="hidden fixed top-14 left-0 right-0 bg-white dark:bg-neutral-900 border-b border-neutral-200/30 dark:border-white/5 max-h-[60dvh] overflow-y-auto shadow-lg" style="z-index: var(--z-dropdown)">
 </div>
 
 <%
@@ -68,7 +68,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 %>
 
 <!-- Mobile bottom nav -->
-<nav id="mobile-bottom-nav" data-turbo-permanent class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-neutral-900 border-t border-neutral-200/60 dark:border-white/5">
+<nav id="mobile-bottom-nav" data-turbo-permanent class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-10 bg-white dark:bg-neutral-900 border-t border-neutral-200/60 dark:border-white/5">
   <ul class="relative flex items-center justify-around h-16">
     <% if (!sidebarItems || sidebarItems.length === 0) { %>
       <li class="flex-1 relative z-10">
@@ -118,8 +118,8 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 </nav>
 
 <% if (extraItems.length > 0) { %>
-<div id="more-sheet-backdrop" data-turbo-permanent class="fixed inset-0 z-40 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-200"></div>
-<div id="more-sheet" data-turbo-permanent class="mobile-more-sheet fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-neutral-800 border-t border-neutral-200/30 dark:border-white/5 rounded-t-2xl translate-y-full transition-transform duration-300 ease-out">
+<div id="more-sheet-backdrop" data-turbo-permanent class="fixed inset-0 z-[20] bg-black/50 opacity-0 pointer-events-none transition-opacity duration-200"></div>
+<div id="more-sheet" data-turbo-permanent class="mobile-more-sheet fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-neutral-800 border-t border-neutral-200/30 dark:border-white/5 rounded-t-2xl translate-y-full transition-transform duration-300 ease-out">
   <div class="flex items-center justify-between px-4 pt-4 pb-2">
     <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.navMore || 'More' %></p>
     <button id="more-sheet-close" class="w-11 h-11 flex items-center justify-center rounded-lg text-neutral-500 hover:text-neutral-700 dark:text-neutral-300 dark:hover:text-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition" aria-label="Close more navigation">
@@ -256,13 +256,13 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 <% } else { %>
 
 <!-- Sidebar -->
-<div id="pc-sidebar" data-turbo-permanent class="sidebar transition hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-56 lg:flex-col left-0">
+<div id="pc-sidebar" data-turbo-permanent class="sidebar transition hidden lg:fixed lg:inset-y-0 lg:z-10 lg:flex lg:w-56 lg:flex-col left-0">
   <div id="pc-sidebar2" class="flex flex-col h-full bg-white/90 dark:bg-neutral-900/80 border-r border-neutral-200/60 dark:border-white/5">
 
     <!-- Static top: logo -->
     <div class="pl-6 pt-4 pb-4 flex min-w-0 shrink-0">
       <a href="/" class="flex items-center min-w-0">
-        <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="logo-bg bg-neutral-950/90 p-1 dark:bg-transparent h-10 w-10 rounded-xl mr-3 shrink-0 inline-flex">
+        <img src="<%= settings.logo ? (settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo) : '/assets/logo.png' %>" alt="Logo" class="logo-bg bg-neutral-950/90 p-1 dark:bg-transparent h-10 w-10 rounded-xl mr-3 shrink-0 inline-flex">
         <h1 class="text-neutral-700 dark:text-white font-medium tracking-tight text-lg truncate min-w-0"><%= settings.title || 'Airlink' %></h1>
       </a>
     </div>
@@ -286,7 +286,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
       <ul role="list" class="py-2">
         <li>
           <ul role="list" class="-mx-2 space-y-1 relative">
-            <div id="active-background" class="ml-1.5 absolute left-2 w-[calc(97%-1.5rem)] h-9 z-[-1] bg-[var(--theme-accent,#6366f1)]/10 border border-[var(--theme-accent,#6366f1)]/20 rounded-xl opacity-0"></div>
+            <div id="active-background" class="ml-1.5 absolute left-2 w-[calc(97%-1.5rem)] h-9 z-0 bg-[var(--theme-accent,#6366f1)]/10 border border-[var(--theme-accent,#6366f1)]/20 rounded-xl opacity-0"></div>
             <%
             const sidebarItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
             if (!sidebarItems || sidebarItems.length === 0) {
@@ -410,7 +410,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
           <span class="flex-1 text-left">Notifications</span>
           <span id="desktop-notification-badge" class="hidden h-5 min-w-5 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center px-1">0</span>
         </button>
-        <div id="desktop-notification-dropdown" class="hidden w-72 max-h-80 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30 z-[60]">
+        <div id="desktop-notification-dropdown" class="hidden w-72 max-h-80 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30" style="z-index: var(--z-dropdown)">
           <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/10">
             <span class="text-sm font-medium text-neutral-800 dark:text-white">Notifications</span>
             <button onclick="markAllRead()" class="text-xs font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition px-2 py-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5">Mark all read</button>
@@ -446,7 +446,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 </script>
 
 <div id="colcont" data-turbo-permanent class="lg:pl-56">
-  <div class="al-topbar fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-white/90 dark:bg-neutral-900/80 border-b border-neutral-200/60 dark:border-white/5 px-4 sm:gap-x-6 sm:px-4 lg:px-4">
+  <div class="al-topbar fixed top-0 left-0 lg:left-56 right-0 z-10 flex h-16 shrink-0 items-center gap-x-4 bg-white/90 dark:bg-neutral-900/80 border-b border-neutral-200/60 dark:border-white/5 px-4 sm:gap-x-6 sm:px-4 lg:px-4">
     <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
       <div class="relative flex flex-1 flex-col">
 
@@ -473,7 +473,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
           </div>
         </div>
 
-        <div id="searchResults" role="listbox" aria-label="Search results" class="hidden absolute left-0 top-full mt-2 w-[19.5rem] bg-white dark:bg-neutral-900 rounded-xl shadow-2xl shadow-neutral-200/80 dark:shadow-black/40 px-2 pb-2 border border-neutral-200 dark:border-neutral-700/60 z-50">
+        <div id="searchResults" role="listbox" aria-label="Search results" class="hidden absolute left-0 top-full mt-2 w-[19.5rem] bg-white dark:bg-neutral-900 rounded-xl shadow-2xl shadow-neutral-200/80 dark:shadow-black/40 px-2 pb-2 border border-neutral-200 dark:border-neutral-700/60" style="z-index: var(--z-dropdown)">
         </div>
       </div>
 

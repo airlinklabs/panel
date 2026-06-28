@@ -55,22 +55,8 @@
     });
   }
 
-  var mo = new MutationObserver(function (mutations) {
-    mutations.forEach(function (m) {
-      if (m.type === 'childList') {
-        var snap = snapSiblings(m.target);
-        requestAnimationFrame(function () { flipSiblings(snap); });
-      }
-
-      if (m.type === 'attributes') {
-        var el = m.target;
-        if (shouldSkip(el)) return;
-        if (el.closest && el.closest('.no-anim')) return;
-        var snap2 = snapSiblings(el.parentElement);
-        requestAnimationFrame(function () { flipSiblings(snap2); });
-      }
-    });
-  });
+  var mo = null;
+  var observedElements = [];
 
   var OBS_OPTS = {
     childList:       true,
@@ -80,10 +66,34 @@
   };
 
   function initObserver() {
+    // Disconnect previous observer to prevent stacking
+    if (mo) {
+      mo.disconnect();
+      mo = null;
+    }
+    observedElements = [];
+
+    mo = new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        if (m.type === 'childList') {
+          var snap = snapSiblings(m.target);
+          requestAnimationFrame(function () { flipSiblings(snap); });
+        }
+
+        if (m.type === 'attributes') {
+          var el = m.target;
+          if (shouldSkip(el)) return;
+          if (el.closest && el.closest('.no-anim')) return;
+          var snap2 = snapSiblings(el.parentElement);
+          requestAnimationFrame(function () { flipSiblings(snap2); });
+        }
+      });
+    });
+
     var pc  = document.getElementById('page-content');
     var spb = document.getElementById('server-page-body');
-    if (pc)  mo.observe(pc,  OBS_OPTS);
-    if (spb) mo.observe(spb, OBS_OPTS);
+    if (pc)  { mo.observe(pc,  OBS_OPTS); observedElements.push(pc); }
+    if (spb) { mo.observe(spb, OBS_OPTS); observedElements.push(spb); }
   }
 
   if (document.readyState === 'loading') {
@@ -451,7 +461,7 @@
 
   // ── Stat counter animation ──────────────────────────────────────────────
   window.airlinkCountUp = function (el, target, opts) {
-    if (reducedMotion()) { el.textContent = target; return; }
+    if (prefersReduced) { el.textContent = target; return; }
     var o        = opts || {};
     var duration = o.duration || 900;
     var start    = o.from     || 0;

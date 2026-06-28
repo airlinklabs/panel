@@ -427,8 +427,14 @@
   .left-4 {
     left: calc(var(--spacing) * 4);
   }
+  .z-0 {
+    z-index: 0;
+  }
   .z-10 {
     z-index: 10;
+  }
+  .z-20 {
+    z-index: 20;
   }
   .z-30 {
     z-index: 30;
@@ -439,20 +445,17 @@
   .z-50 {
     z-index: 50;
   }
-  .z-60 {
-    z-index: 60;
+  .z-\[20\] {
+    z-index: 20;
   }
-  .z-\[-1\] {
-    z-index: -1;
+  .z-\[40\] {
+    z-index: 40;
+  }
+  .z-\[50\] {
+    z-index: 50;
   }
   .z-\[60\] {
     z-index: 60;
-  }
-  .z-\[70\] {
-    z-index: 70;
-  }
-  .z-\[90\] {
-    z-index: 90;
   }
   .col-span-1 {
     grid-column: span 1 / span 1;
@@ -1526,6 +1529,9 @@
   }
   .overflow-auto {
     overflow: auto;
+  }
+  .overflow-clip {
+    overflow: clip;
   }
   .overflow-hidden {
     overflow: hidden;
@@ -3649,9 +3655,9 @@
       left: calc(var(--spacing) * 2);
     }
   }
-  .focus\:z-\[100\] {
+  .focus\:z-70 {
     &:focus {
-      z-index: 100;
+      z-index: 70;
     }
   }
   .focus\:rounded-lg {
@@ -4240,9 +4246,9 @@
       left: calc(var(--spacing) * 56);
     }
   }
-  .lg\:z-50 {
+  .lg\:z-10 {
     @media (width >= 64rem) {
-      z-index: 50;
+      z-index: 10;
     }
   }
   .lg\:col-span-1 {
@@ -6197,6 +6203,15 @@
     --al-paper: 247 247 243;
     --al-paper-soft: 239 240 235;
     --al-focus: rgb(var(--al-accent) / 0.72);
+    --z-bg: -1;
+    --z-base: 0;
+    --z-nav: 10;
+    --z-floating: 20;
+    --z-dropdown: 30;
+    --z-modal-backdrop: 40;
+    --z-modal: 50;
+    --z-toast: 60;
+    --z-loading: 70;
   }
   html {
     scroll-behavior: smooth;
@@ -6625,7 +6640,7 @@ html.dark .server-ctx-menu, html.dark #searchResults, html.dark #mobileSearchRes
   border-color: var(--theme-border, rgba(255,255,255,0.08));
 }
 .server-ctx-menu, #searchResults, #mobileSearchResults, #mobile-more-dropdown {
-  z-index: 2147483647;
+  z-index: var(--z-dropdown);
 }
 @layer base {
   input:where([type='text']),input:where(:not([type])),input:where([type='email']),input:where([type='url']),input:where([type='password']),input:where([type='number']),input:where([type='date']),input:where([type='datetime-local']),input:where([type='month']),input:where([type='search']),input:where([type='tel']),input:where([type='time']),input:where([type='week']),select:where([multiple]),textarea,select {
