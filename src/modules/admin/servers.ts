@@ -630,7 +630,7 @@ const adminModule: Module = {
       },
     );
 
-    router.get(
+    router.post(
       '/admin/server/delete/:id',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
@@ -646,7 +646,7 @@ const adminModule: Module = {
 
           const serverId = getParamAsNumber(id);
           if (isNaN(serverId)) {
-            res.status(400).send('Invalid server ID');
+            res.status(400).json({ error: 'Invalid server ID' });
             return;
           }
 
@@ -656,11 +656,11 @@ const adminModule: Module = {
           });
 
           if (!server) {
-            res.status(404).send('Server not found');
+            res.status(404).json({ error: 'Server not found' });
             return;
           }
 
-          const force = req.query.force === 'true';
+          const force = req.body.force === true;
 
           try {
             if (!force) {
@@ -700,7 +700,7 @@ const adminModule: Module = {
                     daemonError.response.data.error.includes('not exist')));
 
                 if (!isNotFoundError) {
-                  throw new Error(`Daemon unreachable${daemonError?.message ? `: ${String(daemonError.message)}` : ''}. Use ?force=true to remove from panel only.`, { cause: error });
+                  throw new Error(`Daemon unreachable${daemonError?.message ? `: ${String(daemonError.message)}` : ''}. Use force=true to remove from panel only.`, { cause: error });
                 } else {
                   logger.warn(`Container ${server.UUID} not found on daemon, proceeding with database cleanup`);
                 }
@@ -722,18 +722,99 @@ const adminModule: Module = {
             });
 
             logger.info(`Server ${serverId} successfully deleted`);
-            res.redirect('/admin/servers');
+            res.json({ success: true });
             return;
           } catch (error: unknown) {
             logger.error('Error deleting server:', error);
             const errorMessage = error instanceof Error ? error.message : String(error);
-            res.status(500).send(`Failed to delete server: ${errorMessage}`);
+            res.status(500).json({ error: `Failed to delete server: ${errorMessage}` });
             return;
           }
         } catch (error: unknown) {
           logger.error('Error in delete server route:', error);
-          res.status(500).send('Error deleting server');
+          res.status(500).json({ error: 'Error deleting server' });
           return;
+        }
+      },
+    );
+
+    router.post(
+      '/admin/server/reinstall/:id',
+      isAuthenticated(true),
+      async (req: Request, res: Response) => {
+        const { id } = req.params;
+
+        try {
+          const userId = req.session?.user?.id;
+          const user = await prisma.users.findUnique({ where: { id: userId } });
+          if (!user) {
+            res.redirect('/login');
+            return;
+          }
+
+          const serverId = getParamAsNumber(id);
+          if (isNaN(serverId)) {
+            res.status(400).json({ error: 'Invalid server ID' });
+            return;
+          }
+
+          const server = await prisma.server.findUnique({
+            where: { id: serverId },
+            include: { node: true, image: true },
+          });
+
+          if (!server) {
+            res.status(404).json({ error: 'Server not found' });
+            return;
+          }
+
+          await prisma.server.update({
+            where: { id: serverId },
+            data: { Installing: true },
+          });
+
+          logger.info(`Reinstalling server ${serverId} on node ${server.node.address}`);
+
+          try {
+            await axios.delete(
+              buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/container'),
+              {
+                auth: { username: 'Airlink', password: server.node.key },
+                data: { id: server.UUID },
+              },
+            );
+          } catch (err: unknown) {
+            logger.warn('Container delete during reinstall (non-fatal)', { error: err instanceof Error ? err.message : String(err) });
+          }
+
+          const scripts = server.image?.scripts as Record<string, unknown> | null;
+          const installScripts = scripts?.installation || scripts?.install;
+          if (installScripts && typeof installScripts === 'object') {
+            const scriptObj = installScripts as Record<string, string>;
+            const containerInstall = scriptObj.container || scriptObj.script;
+            if (containerInstall) {
+              const dockerImages = server.image?.dockerImages as Record<string, string> | null;
+              const imageKey = dockerImages ? Object.keys(dockerImages)[0] : undefined;
+              const daemonUrl = buildDaemonUrl(daemonSchemeSync(), server.node.address, server.node.port, '/container/installer');
+              await axios.post(daemonUrl, {
+                id: server.UUID,
+                script: containerInstall,
+                entrypoint: scriptObj.entrypoint || '/bin/bash',
+                image: imageKey || scriptObj.dockerImage,
+              }, {
+                auth: { username: 'Airlink', password: server.node.key },
+              });
+            }
+          }
+
+          res.json({ success: true });
+        } catch (error: unknown) {
+          logger.error('Error reinstalling server:', error);
+          await prisma.server.update({
+            where: { id: getParamAsNumber(id) },
+            data: { Installing: false },
+          }).catch(() => {});
+          res.status(500).json({ error: 'Failed to reinstall server' });
         }
       },
     );

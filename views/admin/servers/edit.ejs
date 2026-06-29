@@ -104,7 +104,7 @@
                   </label>
                   <div class="flex items-center gap-1 text-xs">
                     <button type="button" id="cpuModeToggle"
-                      class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition"
+                      class="inline-flex items-center gap-1 rounded-xl px-2 py-1 text-xs font-medium bg-neutral-100 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition"
                       data-mode="cores"
                       title="Switch between core count and percentage weight">
                       <span id="cpuModeLabel">Cores</span>
@@ -150,7 +150,7 @@
                   Startup Command:</label>
                 <textarea id="startCommand" name="StartCommand" rows="3" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5"><%= server.StartCommand %></textarea>
               </div>
-              <div data-animate-card class="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
+              <div data-animate-card class="bg-neutral-100 dark:bg-neutral-800 rounded-xl p-4 border border-neutral-300 dark:border-white/5 mt-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between">
                   <div class="flex items-center mb-2 md:mb-0">
                     <div class="flex-shrink-0 mr-3">
@@ -185,7 +185,7 @@
                   <p class="text-xs text-neutral-500">Server ID: <%= server.UUID %></p>
                 </div>
               </div>
-              <div data-animate-card class="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-4 border border-neutral-300 dark:border-white/5 w-full">
+              <div data-animate-card class="bg-neutral-100 dark:bg-neutral-800 rounded-xl p-4 border border-neutral-300 dark:border-white/5 w-full">
                 <div class="flex items-start justify-between gap-4">
                   <div class="flex items-start gap-3 flex-1 min-w-0">
                     <div class="shrink-0 mt-0.5">
@@ -233,7 +233,7 @@
   <div id="portsModalPanel" class="w-full max-h-[88vh] overflow-clip rounded-2xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800">
     <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700/60 px-4 py-3">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
-      <button type="button" id="closePortsModal" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">
+      <button type="button" id="closePortsModal" class="p-1 rounded-xl text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">
         <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>
@@ -620,7 +620,7 @@
                   Startup Command:</label>
                 <textarea id="startCommand" name="StartCommand" rows="3" class="al-textarea mt-2 mb-4"><%= server.StartCommand %></textarea>
               </div>
-              <div data-animate-card class="bg-neutral-100 dark:bg-neutral-700 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
+              <div data-animate-card class="bg-neutral-100 dark:bg-neutral-700 rounded-xl p-4 border border-neutral-300 dark:border-white/5 mt-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between">
                   <div class="flex items-center mb-2 md:mb-0">
                     <div class="flex-shrink-0 mr-3">
@@ -658,7 +658,7 @@
                     <p class="text-xs text-neutral-500">Server ID: <%= server.UUID %></p>
                   </div>
                 </div>
-                <div data-animate-card class="bg-neutral-100 dark:bg-neutral-700 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
+                <div data-animate-card class="bg-neutral-100 dark:bg-neutral-700 rounded-xl p-4 border border-neutral-300 dark:border-white/5 mt-4">
                   <div class="flex flex-col md:flex-row md:items-center justify-between">
                     <div class="flex items-center mb-2 md:mb-0">
                       <div class="flex-shrink-0 mr-3">
@@ -711,7 +711,7 @@
   <div data-animate-card class="al-modal-panel w-full max-w-4xl rounded-2xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 shadow-xl max-h-[80vh] flex flex-col">
     <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700/60 px-5 py-4 shrink-0">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
-      <button type="button" id="closePortsModal" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">
+      <button type="button" id="closePortsModal" class="p-1 rounded-xl text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">
         <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>
@@ -814,10 +814,10 @@
         const row = document.createElement('div');
         row.className = 'grid grid-cols-1 md:grid-cols-[1fr_130px_1fr_auto] gap-2 items-end rounded-xl border border-neutral-200 dark:border-white/10 p-3 animate-[fadeSlideIn_0.2s_ease-out]';
         row.innerHTML = `
-          <label class="text-xs text-neutral-500">Port name<input data-port-field="${index}" data-field="name" value="${port.name || ''}" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
-          <label class="text-xs text-neutral-500">Internal port<input data-port-field="${index}" data-field="internalPort" type="number" min="1" max="65535" value="${port.internalPort || ''}" class="mt-1 w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
+          <label class="text-xs text-neutral-500">Port name<input data-port-field="${index}" data-field="name" value="${port.name || ''}" class="mt-1 w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
+          <label class="text-xs text-neutral-500">Internal port<input data-port-field="${index}" data-field="internalPort" type="number" min="1" max="65535" value="${port.internalPort || ''}" class="mt-1 w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
           <label class="text-xs text-neutral-500">External port<select data-port-field="${index}" data-field="externalPort" class="cs-select"></select></label>
-          <button type="button" data-remove-port="${index}" class="rounded-lg border border-red-200 px-3 py-2 text-sm text-red-500 ${index < min ? 'opacity-40 pointer-events-none' : ''}">Remove</button>`;
+          <button type="button" data-remove-port="${index}" class="rounded-xl border border-red-200 px-3 py-2 text-sm text-red-500 ${index < min ? 'opacity-40 pointer-events-none' : ''}">Remove</button>`;
         rows.appendChild(row);
         const select = row.querySelector('select');
         select.innerHTML = '<option value="">Select port</option>';

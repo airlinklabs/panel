@@ -157,13 +157,59 @@
       danger: true,
       confirmLabel: 'Delete',
       onConfirm: function () {
-        fetch('/admin/server/delete/' + id, { method: 'POST' })
-          .then(function() { window.location.reload(); })
-          .catch(function() { window.location.reload(); });
+        var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        fetch('/admin/server/delete/' + id, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+          body: JSON.stringify({ force: false })
+        })
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            if (d.success) {
+              var row = document.querySelector('tr[data-server-id="' + id + '"]');
+              if (row) {
+                row.style.transition = 'opacity 0.3s, transform 0.3s';
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(20px)';
+                setTimeout(function() { row.remove(); }, 300);
+              }
+              window.showToast && window.showToast('Server deleted', 'success');
+            } else {
+              window.showToast && window.showToast(d.error || 'Delete failed', 'error');
+            }
+          })
+          .catch(function() { window.showToast && window.showToast('Delete failed', 'error'); });
       }
     });
   }
+
+  function reinstallServer(id, name) {
+    window.modal.confirm({
+      title: 'Reinstall Server',
+      body: 'Reinstall "' + name + '"? The server will be stopped and reinstalled.',
+      danger: false,
+      confirmLabel: 'Reinstall',
+      onConfirm: function () {
+        var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        fetch('/admin/server/reinstall/' + id, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken }
+        })
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            if (d.success) {
+              window.showToast && window.showToast('Reinstall started', 'success');
+            } else {
+              window.showToast && window.showToast(d.error || 'Reinstall failed', 'error');
+            }
+          })
+          .catch(function() { window.showToast && window.showToast('Reinstall failed', 'error'); });
+      }
+    });
+  }
+
   window.deleteServer = deleteServer;
+  window.reinstallServer = reinstallServer;
 
   fetch('/admin/radar/virustotal-enabled')
     .then(function (r) { return r.json(); })

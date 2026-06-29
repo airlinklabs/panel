@@ -12,7 +12,7 @@
       </div>
       <div class="flex items-center gap-2">
         <% if (servers && servers.length > 0) { %>
-        <div id="viewToggle" class="flex items-center gap-0.5 bg-neutral-100 dark:bg-neutral-800/60 p-0.5 rounded-lg border border-neutral-200 dark:border-white/5">
+        <div id="viewToggle" class="flex items-center gap-0.5 bg-neutral-100 dark:bg-neutral-800/60 p-0.5 rounded-xl border border-neutral-200 dark:border-white/5">
           <button id="gridViewBtn" class="p-2.5 rounded-md text-neutral-500 dark:text-neutral-400 transition" aria-label="Grid view">
             <%- icon('grid-2x2', { size: 14 }) %>
           </button>
@@ -48,7 +48,7 @@
       <div class="data-animate-card rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-4">
         <p class="text-sm font-medium text-red-700 dark:text-red-400"><%= req.translations.connectionError || 'Connection Error' %></p>
         <p class="text-xs text-red-600 dark:text-red-400/60 mt-0.5"><%= req.translations.connectionErrorDesc || 'One or more nodes are offline.' %></p>
-        <button onclick="window.location.reload()" class="mt-3 px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg transition hover:bg-red-700 active:scale-95"><%= req.translations.retry || 'Retry' %></button>
+        <button onclick="window.location.reload()" class="mt-3 px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-xl transition hover:bg-red-700 active:scale-95"><%= req.translations.retry || 'Retry' %></button>
       </div>
     <% } %>
 
@@ -103,9 +103,9 @@
           <% } %>
         </p>
         <% if (user.isAdmin) { %>
-          <a href="/admin/servers/create" class="mt-5 inline-flex items-center justify-center rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200">Create server</a>
+          <a href="/admin/servers/create" class="mt-5 inline-flex items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200">Create server</a>
         <% } else if (canCreateServer) { %>
-          <a href="/create-server" class="mt-5 inline-flex items-center justify-center rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200">Create server</a>
+          <a href="/create-server" class="mt-5 inline-flex items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200">Create server</a>
         <% } %>
       </section>
     <% } else { %>
@@ -147,15 +147,15 @@
                 </span>
               </div>
               <div class="flex gap-2 mb-3">
-                <div class="flex-1 bg-white dark:bg-neutral-700 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
+                <div class="flex-1 bg-white dark:bg-neutral-700 rounded-xl px-3 py-2 border border-neutral-100 dark:border-transparent">
                   <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">RAM</p>
                   <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsage %>%</p>
                 </div>
-                <div class="flex-1 bg-white dark:bg-neutral-700 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
+                <div class="flex-1 bg-white dark:bg-neutral-700 rounded-xl px-3 py-2 border border-neutral-100 dark:border-transparent">
                   <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">CPU</p>
                   <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.cpuUsage %>%</p>
                 </div>
-                <div class="flex-1 bg-white dark:bg-neutral-700 rounded-lg px-3 py-2 border border-neutral-100 dark:border-transparent">
+                <div class="flex-1 bg-white dark:bg-neutral-700 rounded-xl px-3 py-2 border border-neutral-100 dark:border-transparent">
                   <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">Used</p>
                   <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsed || '0MB' %></p>
                 </div>
@@ -379,11 +379,11 @@
             </button>
             <% if (servers && servers.length > 0) { %>
             <div class="flex items-center gap-1 bg-neutral-100 dark:bg-neutral-800/60 p-1 rounded-xl border border-neutral-200 dark:border-white/5">
-              <button id="gridViewBtn" class="vt-active min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition-colors">
+              <button id="gridViewBtn" class="vt-active min-h-9 px-3 py-1.5 text-sm font-medium rounded-xl flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition-colors">
                 <%- icon('grid-2x2', { class: 'h-4 w-4' }) %>
                 Grid
               </button>
-              <button id="listViewBtn" class="min-h-9 px-3 py-1.5 text-sm font-medium rounded-lg flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition-colors">
+              <button id="listViewBtn" class="min-h-9 px-3 py-1.5 text-sm font-medium rounded-xl flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition-colors">
                 <%- icon('list', { class: 'h-4 w-4' }) %>
                 List
               </button>
@@ -409,7 +409,7 @@
         <div class="data-animate-card rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-5">
           <p class="text-sm font-medium text-red-700 dark:text-red-400"><%= req.translations.connectionError || 'Connection Error' %></p>
           <p class="text-xs text-red-600 dark:text-red-400/60 mt-0.5"><%= req.translations.connectionErrorDesc || 'One or more nodes are offline.' %></p>
-          <button onclick="window.location.reload()" class="mt-3 px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg transition hover:bg-red-700 active:scale-95"><%= req.translations.retry || 'Retry' %></button>
+          <button onclick="window.location.reload()" class="mt-3 px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-xl transition hover:bg-red-700 active:scale-95"><%= req.translations.retry || 'Retry' %></button>
         </div>
         <% } %>
 
@@ -461,9 +461,9 @@
             <% } else { %>An admin will assign one to you.<% } %>
           </p>
           <% if (user.isAdmin) { %>
-          <a href="/admin/servers/create" class="mt-6 inline-flex items-center justify-center rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-neutral-800 active:translate-y-0 dark:bg-white dark:text-neutral-900"><%= req.translations.createOneNow || 'Create server' %></a>
+          <a href="/admin/servers/create" class="mt-6 inline-flex items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-neutral-800 active:translate-y-0 dark:bg-white dark:text-neutral-900"><%= req.translations.createOneNow || 'Create server' %></a>
           <% } else if (canCreateServer) { %>
-          <a href="/create-server" class="mt-6 inline-flex items-center justify-center rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-neutral-800 active:translate-y-0 dark:bg-white dark:text-neutral-900">Create server</a>
+          <a href="/create-server" class="mt-6 inline-flex items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-neutral-800 active:translate-y-0 dark:bg-white dark:text-neutral-900">Create server</a>
           <% } %>
         </section>
         <% } else { %>
@@ -539,15 +539,15 @@
                 </span>
               </div>
               <div class="flex gap-3 mb-3">
-                <div class="flex-1 bg-neutral-100 dark:bg-neutral-700 rounded-lg px-3 py-2">
+                <div class="flex-1 bg-neutral-100 dark:bg-neutral-700 rounded-xl px-3 py-2">
                   <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">RAM</p>
                   <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= Math.round(server.ramUsage) %>%</p>
                 </div>
-                <div class="flex-1 bg-neutral-100 dark:bg-neutral-700 rounded-lg px-3 py-2">
+                <div class="flex-1 bg-neutral-100 dark:bg-neutral-700 rounded-xl px-3 py-2">
                   <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">CPU</p>
                   <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= Math.round(server.cpuUsage) %>%</p>
                 </div>
-                <div class="flex-1 bg-neutral-100 dark:bg-neutral-700 rounded-lg px-3 py-2">
+                <div class="flex-1 bg-neutral-100 dark:bg-neutral-700 rounded-xl px-3 py-2">
                   <p class="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">Used</p>
                   <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300"><%= server.ramUsed || '0MB' %></p>
                 </div>
@@ -644,16 +644,16 @@
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5 flex-shrink-0">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white" id="folderPopupTitle"></h2>
       <div class="flex items-center gap-1">
-        <button id="addServersToFolderBtn" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-400 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500" title="Add servers" aria-label="Add servers to folder">
+        <button id="addServersToFolderBtn" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-400 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500" title="Add servers" aria-label="Add servers to folder">
           <%- icon('plus', { class: 'w-3.5 h-3.5', strokeWidth: 1.5 }) %>
         </button>
-        <button id="renameFolderBtn" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-400 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500" title="Rename folder" aria-label="Rename folder">
+        <button id="renameFolderBtn" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-400 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500" title="Rename folder" aria-label="Rename folder">
           <%- icon('pencil', { class: 'w-3.5 h-3.5', strokeWidth: 1.5 }) %>
         </button>
-        <button id="deleteFolderBtn" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 text-red-600 dark:text-red-400 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" title="Delete folder" aria-label="Delete folder">
+        <button id="deleteFolderBtn" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-red-600 dark:text-red-400 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" title="Delete folder" aria-label="Delete folder">
           <%- icon('trash-2', { class: 'w-3.5 h-3.5', strokeWidth: 1.5 }) %>
         </button>
-        <button id="closeFolderPopup" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-300 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500" aria-label="Close folder">
+        <button id="closeFolderPopup" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-300 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500" aria-label="Close folder">
           <%- icon('x', { class: 'w-4 h-4' }) %>
         </button>
       </div>
@@ -699,7 +699,7 @@
     <p class="text-xs text-neutral-600 dark:text-neutral-300 mb-4">Servers inside will stay accessible. They just won't be in this folder.</p>
     <div class="flex gap-2 justify-end">
       <button id="cancelDeleteFolder" class="inline-flex items-center justify-center min-h-10 px-4 py-2 rounded-[9px] text-[13px] font-medium bg-transparent text-neutral-500 border border-neutral-200 dark:border-white/10 cursor-pointer hover:bg-neutral-100 dark:hover:bg-white/[0.05] transition-[background]">Cancel</button>
-      <button id="confirmDeleteFolder" class="min-h-10 px-4 py-2 rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 text-white border-none cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950">Delete folder</button>
+      <button id="confirmDeleteFolder" class="min-h-10 px-4 py-2 rounded-xl text-sm font-medium bg-red-600 hover:bg-red-700 text-white border-none cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950">Delete folder</button>
     </div>
   </div>
 </div>

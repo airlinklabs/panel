@@ -127,14 +127,13 @@
           <p class="text-sm font-medium text-neutral-800 dark:text-white">Reduce animations</p>
           <p class="text-xs text-neutral-500 mt-0.5">Disable motion effects across the panel. Applies on next page load.</p>
         </div>
-        <button type="button" id="anim-toggle"
-          class="w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 bg-neutral-300 dark:bg-neutral-700/70"
+        <button type="button" role="switch" id="anim-toggle"
+          class="al-switch relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 bg-neutral-200 dark:bg-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900"
           data-on="<%= user.animationsDisabled ? 'true' : 'false' %>"
-          aria-pressed="<%= user.animationsDisabled %>"
+          aria-checked="<%= user.animationsDisabled %>"
           aria-label="Toggle animations">
-          <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300"
-                data-on="<%= user.animationsDisabled ? 'true' : 'false' %>"
-                style="transform: translateX(<%= user.animationsDisabled ? '20px' : '0' %>)"></span>
+          <span class="al-switch-dot inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200"
+                style="transform: translateX(<%= user.animationsDisabled ? '24px' : '4px' %>)"></span>
         </button>
       </div>
     </div>
@@ -147,14 +146,14 @@
           <p class="text-xs text-neutral-500 mt-0.5">Adjust the text size across the panel.</p>
         </div>
         <div class="flex items-center gap-1" role="radiogroup" aria-label="Text size">
-          <button type="button" data-font-size="small"
-            class="font-size-btn px-2.5 py-1 text-xs rounded-lg border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
+          <button type="button" role="radio" data-font-size="small" aria-checked="false"
+            class="font-size-btn px-2.5 py-1 text-xs rounded-xl border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
             aria-label="Small text">A</button>
-          <button type="button" data-font-size="medium"
-            class="font-size-btn px-2.5 py-1 text-sm rounded-lg border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
+          <button type="button" role="radio" data-font-size="medium" aria-checked="true"
+            class="font-size-btn px-2.5 py-1 text-sm rounded-xl border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
             aria-label="Medium text">A</button>
-          <button type="button" data-font-size="large"
-            class="font-size-btn px-2.5 py-1 text-base rounded-lg border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
+          <button type="button" role="radio" data-font-size="large" aria-checked="false"
+            class="font-size-btn px-2.5 py-1 text-base rounded-xl border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
             aria-label="Large text">A</button>
         </div>
       </div>
@@ -167,14 +166,13 @@
           <p class="text-sm font-medium text-neutral-800 dark:text-white">High contrast</p>
           <p class="text-xs text-neutral-500 mt-0.5">Increase contrast for better readability.</p>
         </div>
-        <button type="button" id="contrast-toggle"
-          class="w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 bg-neutral-300 dark:bg-neutral-700/70"
+        <button type="button" role="switch" id="contrast-toggle"
+          class="al-switch relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 bg-neutral-200 dark:bg-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900"
           data-on="<%= user.highContrast ? 'true' : 'false' %>"
-          aria-pressed="<%= user.highContrast %>"
+          aria-checked="<%= user.highContrast %>"
           aria-label="Toggle high contrast">
-          <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300"
-                data-on="<%= user.highContrast ? 'true' : 'false' %>"
-                style="transform: translateX(<%= user.highContrast ? '20px' : '0' %>)"></span>
+          <span class="al-switch-dot inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200"
+                style="transform: translateX(<%= user.highContrast ? '24px' : '4px' %>)"></span>
         </button>
       </div>
     </div>
@@ -186,14 +184,13 @@
           <p class="text-sm font-medium text-neutral-800 dark:text-white">Compact mode</p>
           <p class="text-xs text-neutral-500 mt-0.5">Reduce spacing for a denser layout.</p>
         </div>
-        <button type="button" id="compact-toggle"
-          class="w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 bg-neutral-300 dark:bg-neutral-700/70"
+        <button type="button" role="switch" id="compact-toggle"
+          class="al-switch relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 bg-neutral-200 dark:bg-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900"
           data-on="<%= user.compactMode ? 'true' : 'false' %>"
-          aria-pressed="<%= user.compactMode %>"
+          aria-checked="<%= user.compactMode %>"
           aria-label="Toggle compact mode">
-          <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300"
-                data-on="<%= user.compactMode ? 'true' : 'false' %>"
-                style="transform: translateX(<%= user.compactMode ? '20px' : '0' %>)"></span>
+          <span class="al-switch-dot inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200"
+                style="transform: translateX(<%= user.compactMode ? '24px' : '4px' %>)"></span>
         </button>
       </div>
     </div>
@@ -290,9 +287,9 @@
               <label class="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%- icon('user', { class: 'w-3 h-3' }) %> <%= req.translations.username || 'Username' %></label>
               <div class="flex gap-1.5">
                 <input id="username" type="text" name="username" placeholder="<%= user.username %>"
-                  class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
                 <button type="submit" id="change-username-btn" disabled
-                  class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1.5 text-xs font-medium shrink-0 disabled:opacity-40 disabled:cursor-not-allowed transition">
+                  class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1.5 text-xs font-medium shrink-0 disabled:opacity-40 disabled:cursor-not-allowed transition">
                   Save
                 </button>
               </div>
@@ -305,9 +302,9 @@
               <label class="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%- icon('mail', { class: 'w-3 h-3' }) %> <%= req.translations.email || 'Email' %></label>
               <div class="flex gap-1.5">
                 <input id="email" type="email" name="email" placeholder="<%= user.email %>"
-                  class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
                 <button type="submit"
-                  class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1.5 text-xs font-medium shrink-0 transition">
+                  class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1.5 text-xs font-medium shrink-0 transition">
                   Save
                 </button>
               </div>
@@ -321,15 +318,15 @@
                 <div>
                   <span id="current-password-feedback" class="text-[11px] text-neutral-400 block mb-1"><%= req.translations.checking || 'Checking...' %></span>
                   <input id="currentPassword" type="password" name="currentPassword" placeholder="<%= req.translations.currentPassword || 'Current password' %>"
-                    class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+                    class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
                 </div>
                 <div>
                   <span class="text-[11px] text-transparent block mb-1">.</span>
                   <input id="newPassword" type="password" name="newPassword" placeholder="<%= req.translations.newPassword || 'New password' %>" disabled
-                    class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors disabled:opacity-50">
+                    class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors disabled:opacity-50">
                 </div>
               </div>
-              <button type="submit" class="mt-2 rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1.5 text-xs font-medium transition">
+              <button type="submit" class="mt-2 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1.5 text-xs font-medium transition">
                 <%= req.translations.update_password || 'Update password' %>
               </button>
             </form>
@@ -339,9 +336,9 @@
               <%- include('../components/csrf') %>
               <label class="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%- icon('file-text', { class: 'w-3 h-3' }) %> <%= req.translations.description || 'Description' %></label>
               <textarea id="description" name="description" rows="2"
-                class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors resize-none"
+                class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors resize-none"
                 placeholder="<%= user.description %>"><%= user.description %></textarea>
-              <button type="submit" class="mt-1.5 rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1.5 text-xs font-medium transition">
+              <button type="submit" class="mt-1.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1.5 text-xs font-medium transition">
                 Save
               </button>
             </form>
@@ -364,7 +361,7 @@
                 <option value="ta"  <%= req.lang === 'ta'  ? 'selected' : '' %>>தமிழ்</option>
               </select>
               <button type="submit"
-                class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1.5 text-xs font-medium transition">
+                class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1.5 text-xs font-medium transition">
                 Save
               </button>
             </form>
@@ -376,14 +373,13 @@
                   <p class="text-sm font-medium text-neutral-800 dark:text-white">Reduce animations</p>
                   <p class="text-xs text-neutral-500 mt-0.5">Disable motion effects across the panel. Applies on next page load.</p>
                 </div>
-                <button type="button" id="anim-toggle"
-                  class="w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 bg-neutral-300 dark:bg-neutral-700/70"
+                <button type="button" role="switch" id="anim-toggle"
+                  class="al-switch relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 bg-neutral-200 dark:bg-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900"
                   data-on="<%= user.animationsDisabled ? 'true' : 'false' %>"
-                  aria-pressed="<%= user.animationsDisabled %>"
+                  aria-checked="<%= user.animationsDisabled %>"
                   aria-label="Toggle animations">
-                  <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300"
-                        data-on="<%= user.animationsDisabled ? 'true' : 'false' %>"
-                        style="transform: translateX(<%= user.animationsDisabled ? '20px' : '0' %>)"></span>
+                  <span class="al-switch-dot inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200"
+                        style="transform: translateX(<%= user.animationsDisabled ? '24px' : '4px' %>)"></span>
                 </button>
               </div>
             </div>
@@ -396,14 +392,14 @@
                   <p class="text-xs text-neutral-500 mt-0.5">Adjust the text size across the panel.</p>
                 </div>
                 <div class="flex items-center gap-1" role="radiogroup" aria-label="Text size">
-                  <button type="button" data-font-size="small"
-                    class="font-size-btn px-2.5 py-1 text-xs rounded-lg border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
+                  <button type="button" role="radio" data-font-size="small" aria-checked="false"
+                    class="font-size-btn px-2.5 py-1 text-xs rounded-xl border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
                     aria-label="Small text">A</button>
-                  <button type="button" data-font-size="medium"
-                    class="font-size-btn px-2.5 py-1 text-sm rounded-lg border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
+                  <button type="button" role="radio" data-font-size="medium" aria-checked="true"
+                    class="font-size-btn px-2.5 py-1 text-sm rounded-xl border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
                     aria-label="Medium text">A</button>
-                  <button type="button" data-font-size="large"
-                    class="font-size-btn px-2.5 py-1 text-base rounded-lg border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
+                  <button type="button" role="radio" data-font-size="large" aria-checked="false"
+                    class="font-size-btn px-2.5 py-1 text-base rounded-xl border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 transition"
                     aria-label="Large text">A</button>
                 </div>
               </div>
@@ -416,14 +412,13 @@
                   <p class="text-sm font-medium text-neutral-800 dark:text-white">High contrast</p>
                   <p class="text-xs text-neutral-500 mt-0.5">Increase contrast for better readability.</p>
                 </div>
-                <button type="button" id="contrast-toggle"
-                  class="w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 bg-neutral-300 dark:bg-neutral-700/70"
+                <button type="button" role="switch" id="contrast-toggle"
+                  class="al-switch relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 bg-neutral-200 dark:bg-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900"
                   data-on="<%= user.highContrast ? 'true' : 'false' %>"
-                  aria-pressed="<%= user.highContrast %>"
+                  aria-checked="<%= user.highContrast %>"
                   aria-label="Toggle high contrast">
-                  <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300"
-                        data-on="<%= user.highContrast ? 'true' : 'false' %>"
-                        style="transform: translateX(<%= user.highContrast ? '20px' : '0' %>)"></span>
+                  <span class="al-switch-dot inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200"
+                        style="transform: translateX(<%= user.highContrast ? '24px' : '4px' %>)"></span>
                 </button>
               </div>
             </div>
@@ -435,14 +430,13 @@
                   <p class="text-sm font-medium text-neutral-800 dark:text-white">Compact mode</p>
                   <p class="text-xs text-neutral-500 mt-0.5">Reduce spacing for a denser layout.</p>
                 </div>
-                <button type="button" id="compact-toggle"
-                  class="w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 bg-neutral-300 dark:bg-neutral-700/70"
+                <button type="button" role="switch" id="compact-toggle"
+                  class="al-switch relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 bg-neutral-200 dark:bg-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900"
                   data-on="<%= user.compactMode ? 'true' : 'false' %>"
-                  aria-pressed="<%= user.compactMode %>"
+                  aria-checked="<%= user.compactMode %>"
                   aria-label="Toggle compact mode">
-                  <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300"
-                        data-on="<%= user.compactMode ? 'true' : 'false' %>"
-                        style="transform: translateX(<%= user.compactMode ? '20px' : '0' %>)"></span>
+                  <span class="al-switch-dot inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200"
+                        style="transform: translateX(<%= user.compactMode ? '24px' : '4px' %>)"></span>
                 </button>
               </div>
             </div>
@@ -455,7 +449,7 @@
               <% } else { %>
               <form action="/disable-2fa" method="POST">
                 <%- include('../components/csrf') %>
-                <button class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1.5 text-xs font-medium transition">
+                <button class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1.5 text-xs font-medium transition">
                   <%= req.translations.disable2FA || 'Disable 2FA' %>
                 </button>
               </form>
@@ -599,13 +593,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('anim-toggle')?.addEventListener('click', async function() {
     const btn = this;
-    const dot = btn.querySelector('.dot');
+    const dot = btn.querySelector('.al-switch-dot');
     const isOn = btn.dataset.on === 'true';
     const newState = !isOn;
     btn.dataset.on = String(newState);
     dot.dataset.on = String(newState);
     dot.style.transform = newState ? 'translateX(20px)' : 'translateX(0)';
-    btn.setAttribute('aria-pressed', String(newState));
+    btn.setAttribute('aria-checked', String(newState));
     
     if (newState) {
       document.documentElement.classList.add('animations-disabled');
@@ -652,13 +646,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('contrast-toggle')?.addEventListener('click', async function() {
     const btn = this;
-    const dot = btn.querySelector('.dot');
+    const dot = btn.querySelector('.al-switch-dot');
     const isOn = btn.dataset.on === 'true';
     const newState = !isOn;
     btn.dataset.on = String(newState);
     dot.dataset.on = String(newState);
     dot.style.transform = newState ? 'translateX(20px)' : 'translateX(0)';
-    btn.setAttribute('aria-pressed', String(newState));
+    btn.setAttribute('aria-checked', String(newState));
     
     if (newState) {
       document.documentElement.classList.add('high-contrast');
@@ -675,13 +669,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('compact-toggle')?.addEventListener('click', async function() {
     const btn = this;
-    const dot = btn.querySelector('.dot');
+    const dot = btn.querySelector('.al-switch-dot');
     const isOn = btn.dataset.on === 'true';
     const newState = !isOn;
     btn.dataset.on = String(newState);
     dot.dataset.on = String(newState);
     dot.style.transform = newState ? 'translateX(20px)' : 'translateX(0)';
-    btn.setAttribute('aria-pressed', String(newState));
+    btn.setAttribute('aria-checked', String(newState));
     
     if (newState) {
       document.documentElement.classList.add('compact-mode');
@@ -723,7 +717,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ? `<div class="bg-white dark:bg-neutral-900 rounded-t-2xl w-full overflow-hidden" style="max-height:90vh">
         <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-neutral-100 dark:border-white/5">
           <p class="text-sm font-semibold text-neutral-800 dark:text-white">Position photo</p>
-          <button id="crop-cancel" class="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400">
+          <button id="crop-cancel" class="w-7 h-7 flex items-center justify-center rounded-xl text-neutral-400">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
           </button>
         </div>
@@ -747,7 +741,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="text-sm font-semibold text-neutral-800 dark:text-white">Position your photo</p>
             <p class="text-xs text-neutral-500 mt-0.5">Drag and resize the selection box.</p>
           </div>
-          <button id="crop-cancel" class="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
+          <button id="crop-cancel" class="w-7 h-7 flex items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition">
             <%- icon('x', { class: 'w-4 h-4', strokeWidth: 2 }) %>
           </button>
         </div>

@@ -127,7 +127,7 @@
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium text-red-500"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'This node isn\'t talking to us right now. Check the daemon.' %></p>
             </div>
-            <button onclick="window.location.reload()" class="shrink-0 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-lg transition">
+            <button onclick="window.location.reload()" class="shrink-0 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-medium rounded-xl transition">
               Retry Connection
             </button>
           </div>
@@ -213,6 +213,7 @@
 <% } %>
 
 <%- include('../../components/toast') %>
+<%- include('../../components/modal') %>
 
 <script nonce="<%- nonce %>">
 document.addEventListener('DOMContentLoaded', () => {

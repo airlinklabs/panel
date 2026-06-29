@@ -14,9 +14,9 @@
                     <h2 class="text-sm font-medium text-neutral-800 dark:text-white mb-1"><%= req.translations.serverSettings || 'Server Settings' %></h2>
                     <p class="text-xs text-neutral-500 mb-4"><%= req.translations.serverSettingsDesc || "Configure your server's basic settings." %></p>
                     <form id="serverSettingsForm" class="space-y-3">
-                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1"><%= req.translations.serverName || 'Server Name' %></label><input type="text" name="name" value="<%= server.name %>" class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
-                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</label><input type="text" name="description" value="<%= server.description || '' %>" class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
-                        <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-lg px-4 py-2 text-sm font-medium"><%= req.translations.saveSettings || 'Save Settings' %></button>
+                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1"><%= req.translations.serverName || 'Server Name' %></label><input type="text" name="name" value="<%= server.name %>" class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
+                        <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Description</label><input type="text" name="description" value="<%= server.description || '' %>" class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
+                        <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-xl px-4 py-2 text-sm font-medium"><%= req.translations.saveSettings || 'Save Settings' %></button>
                     </form>
                 </div>
 
@@ -75,7 +75,7 @@
                                 <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Delete Server</p>
                                 <p class="text-xs text-neutral-500">Permanently delete this server and all its data.</p>
                             </div>
-                            <button id="deleteServerButton" class="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700 shrink-0">Delete</button>
+                            <button id="deleteServerButton" class="rounded-xl bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700 shrink-0">Delete</button>
                         </div>
                         <div class="h-px bg-red-200 dark:bg-red-800/30"></div>
                         <% } %>
@@ -84,7 +84,7 @@
                                 <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Reinstall Server</p>
                                 <p class="text-xs text-neutral-500">Reinstall from scratch — all data will be lost.</p>
                             </div>
-                            <button id="reinstallButton" class="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700 shrink-0">Reinstall</button>
+                            <button id="reinstallButton" class="rounded-xl bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700 shrink-0">Reinstall</button>
                         </div>
                     </div>
                 </div>
@@ -117,14 +117,14 @@
                         <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white">Server Settings</h2>
                         <form id="serverSettingsForm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Server Name</label><input type="text" name="name" value="<%= server.name %>" required class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
+                                <div><label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Server Name</label><input type="text" name="name" value="<%= server.name %>" required class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
                                 <div>
                                     <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Server Description</label>
-                                    <textarea class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition" name="description" rows="3"><%= server.description || '' %></textarea>
+                                    <textarea class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition" name="description" rows="3"><%= server.description || '' %></textarea>
                                 </div>
                             </div>
                             <div class="mt-6">
-                                <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-lg px-4 py-2 text-sm font-medium">Save Settings</button>
+                                <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-xl px-4 py-2 text-sm font-medium">Save Settings</button>
                             </div>
                         </form>
                     </div>
@@ -184,7 +184,7 @@
                                     <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Delete Server</p>
                                     <p class="text-xs text-neutral-500">Permanently delete this server and all its data.</p>
                                 </div>
-                                <button id="deleteServerButton" class="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700 shrink-0">Delete</button>
+                                <button id="deleteServerButton" class="rounded-xl bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700 shrink-0">Delete</button>
                             </div>
                             <div class="h-px bg-red-200 dark:bg-red-800/30"></div>
                             <% } %>
@@ -193,7 +193,7 @@
                                     <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Reinstall Server</p>
                                     <p class="text-xs text-neutral-500">Reinstall from scratch — all data will be lost.</p>
                                 </div>
-                                <button id="reinstallButton" class="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700 shrink-0">Reinstall</button>
+                                <button id="reinstallButton" class="rounded-xl bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700 shrink-0">Reinstall</button>
                             </div>
                         </div>
                     </div>

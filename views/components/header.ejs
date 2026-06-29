@@ -108,47 +108,34 @@
 </script>
 
 <% if (!isMobileViewport) { %>
-<button id="theme-toggle" class="fixed right-4 top-4 w-14 h-8 flex items-center bg-neutral-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500 z-10" aria-label="Switch to dark mode" aria-pressed="false">
-    <span class="dot bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
+<button id="theme-toggle" role="switch" aria-checked="false" class="fixed right-4 top-4 al-switch relative inline-flex h-8 w-14 items-center rounded-full transition-colors duration-500 bg-neutral-300 dark:bg-neutral-700/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900 z-[var(--z-sticky)]" aria-label="Switch to dark mode">
+    <span class="al-switch-dot inline-block h-6 w-6 rounded-full bg-white shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
 </button>
+<% } else { %>
+<button id="theme-toggle" role="switch" aria-checked="false" class="fixed right-3 top-3 al-switch relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-500 bg-neutral-300 dark:bg-neutral-700/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900 z-50" aria-label="Switch to dark mode">
+    <span class="al-switch-dot inline-block h-5 w-5 rounded-full bg-white shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
+</button>
+<% } %>
 <script nonce="<%- nonce %>">
   (function() {
     const btn = document.getElementById('theme-toggle');
-    const dot = document.querySelector('#theme-toggle .dot');
+    const dot = document.querySelector('#theme-toggle .al-switch-dot');
 
     function updateSwitchPosition() {
       const isDark = document.documentElement.classList.contains('dark');
-      if (isDark) {
-        dot.classList.add('translate-x-6');
-        if (btn) { btn.setAttribute('aria-pressed', 'true'); btn.setAttribute('aria-label', 'Switch to light mode'); }
-      } else {
-        dot.classList.remove('translate-x-6');
-        if (btn) { btn.setAttribute('aria-pressed', 'false'); btn.setAttribute('aria-label', 'Switch to dark mode'); }
-      }
-    }
-
-    btn.addEventListener('click', toggleTheme);
-    updateSwitchPosition();
-  })();
-</script>
-<% } else { %>
-<script nonce="<%- nonce %>">
-  (function() {
-    const dot = document.querySelector('#theme-toggle .dot');
-    const btn = document.getElementById('theme-toggle');
-
-    function updateToggleDot() {
-      const isDark = document.documentElement.classList.contains('dark');
-      if (dot) dot.style.transform = isDark ? 'translateX(20px)' : 'translateX(0)';
+      if (dot) dot.style.transform = isDark ? 'translateX(24px)' : 'translateX(4px)';
       if (btn) {
-        btn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+        btn.setAttribute('aria-checked', isDark ? 'true' : 'false');
         btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
       }
     }
 
-    if (btn) btn.addEventListener('click', toggleTheme);
-    updateToggleDot();
+    if (btn) btn.addEventListener('click', function() {
+      toggleTheme();
+      updateSwitchPosition();
+    });
+    updateSwitchPosition();
+    window.updateToggleDot = updateSwitchPosition;
   })();
 </script>
-<% } %>
 <%- include("./modal") %>

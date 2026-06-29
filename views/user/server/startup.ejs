@@ -42,7 +42,7 @@
                         </p>
                     </div>
                     <div class="px-4 py-3 bg-neutral-100 dark:bg-neutral-800 border-t border-neutral-200 dark:border-white/5">
-                        <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-lg px-4 py-2 text-sm font-medium <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %>><%= req.translations.saveCommand || 'Save Command' %></button>
+                        <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-xl px-4 py-2 text-sm font-medium <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %>><%= req.translations.saveCommand || 'Save Command' %></button>
                     </div>
                 </form>
             </div>
@@ -78,7 +78,7 @@
                         <p class="text-xs text-neutral-500 mt-2">Changing the image will restart your server if it is running.</p>
                     </div>
                     <div class="px-4 py-3 bg-neutral-100 dark:bg-neutral-800 border-t border-neutral-200 dark:border-white/5">
-                        <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-lg px-4 py-2 text-sm font-medium">Update Image</button>
+                        <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-xl px-4 py-2 text-sm font-medium">Update Image</button>
                     </div>
                 </form>
             </div>
@@ -103,9 +103,9 @@
                                         <option value="false" <%= variable.value === 'false' || variable.value === false ? 'selected' : '' %>>Disabled</option>
                                     </select>
                                 <% } else if (variable.type === 'number') { %>
-                                    <div><input type="number" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
+                                    <div><input type="number" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
                                 <% } else { %>
-                                    <div><input type="text" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
+                                    <div><input type="text" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
                                 <% } %>
                             </div>
                             <% }); %>
@@ -114,7 +114,7 @@
                         <% } %>
                     </div>
                     <div class="px-4 py-3 bg-neutral-100 dark:bg-neutral-800 border-t border-neutral-200 dark:border-white/5">
-                        <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-lg px-4 py-2 text-sm font-medium"><%= req.translations.saveVariables || 'Save Variables' %></button>
+                        <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-xl px-4 py-2 text-sm font-medium"><%= req.translations.saveVariables || 'Save Variables' %></button>
                     </div>
                 </form>
             </div>
@@ -171,7 +171,7 @@
                             </p>
                         </div>
                         <div class="px-5 py-4 bg-neutral-100 dark:bg-neutral-800 border-t border-neutral-200 dark:border-white/5">
-                            <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-lg px-4 py-2 text-sm font-medium <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %>><%= req.translations.saveCommand || 'Save Command' %></button>
+                            <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-xl px-4 py-2 text-sm font-medium <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %>><%= req.translations.saveCommand || 'Save Command' %></button>
                         </div>
                     </form>
                 </div>
@@ -207,7 +207,7 @@
                             <p class="text-xs text-neutral-500 mt-2">Changing the image will restart your server if it is running.</p>
                         </div>
                         <div class="px-5 py-4 bg-neutral-100 dark:bg-neutral-800 border-t border-neutral-200 dark:border-white/5">
-                            <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-lg px-4 py-2 text-sm font-medium">Update Image</button>
+                            <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-xl px-4 py-2 text-sm font-medium">Update Image</button>
                         </div>
                     </form>
                 </div>
@@ -232,9 +232,9 @@
                                             <option value="false" <%= variable.value === 'false' || variable.value === false ? 'selected' : '' %>>Disabled</option>
                                         </select>
                                     <% } else if (variable.type === 'number') { %>
-                                        <div><input type="number" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
+                                        <div><input type="number" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
                                     <% } else { %>
-                                        <div><input type="text" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
+                                        <div><input type="text" name="var_<%= variable.env %>" value="<%= variable.value %>" class="w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"></div>
                                     <% } %>
                                 </div>
                                 <% }); %>
@@ -243,7 +243,7 @@
                             <% } %>
                         </div>
                         <div class="px-5 py-4 bg-neutral-100 dark:bg-neutral-800 border-t border-neutral-200 dark:border-white/5">
-                            <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-lg px-4 py-2 text-sm font-medium"><%= req.translations.saveVariables || 'Save Variables' %></button>
+                            <button type="submit" class="bg-[var(--theme-accent)] hover:bg-[var(--theme-accent-hover)] text-white rounded-xl px-4 py-2 text-sm font-medium"><%= req.translations.saveVariables || 'Save Variables' %></button>
                         </div>
                     </form>
                 </div>

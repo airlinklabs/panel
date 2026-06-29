@@ -36,11 +36,11 @@ const secondaryItems = allItems.filter(item => !primaryLabels.includes(item.labe
 <div class="border-b border-neutral-200 dark:border-white/5 mb-4 -mx-4 px-4">
   <nav class="flex gap-1 min-w-max pb-1 overflow-x-auto">
     <% primaryItems.forEach(function(item) { %>
-    <a href="<%= item.url %>" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false"><%= item.label %></a>
+    <a href="<%= item.url %>" class="nav-link2 px-3 py-2 text-xs font-medium rounded-xl border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap" data-active="false"><%= item.label %></a>
     <% }); %>
     <% if (secondaryItems.length > 0) { %>
     <div class="relative" id="mobile-more-wrapper">
-      <button id="mobile-more-btn" class="nav-link2 px-3 py-2 text-xs font-medium rounded-lg border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap flex items-center gap-1">
+      <button id="mobile-more-btn" class="nav-link2 px-3 py-2 text-xs font-medium rounded-xl border border-transparent text-neutral-600 dark:text-neutral-400 whitespace-nowrap flex items-center gap-1">
         More
         <%- icon('chevron-down', { class: 'w-3 h-3' }) %>
       </button>

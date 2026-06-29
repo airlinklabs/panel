@@ -91,7 +91,7 @@ function isImageFile(filename) {
         <div>
           <h3 class="text-sm font-medium text-red-500">Connection Error</h3>
           <p class="text-xs text-red-400"><%= errorMessage.message %></p>
-          <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors">
+          <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-xl transition-colors">
             Retry Connection
           </button>
         </div>
@@ -113,7 +113,7 @@ function isImageFile(filename) {
               The daemon appears to be offline. File management is unavailable until the connection is restored.
             </p>
             <div class="mt-6">
-              <button onclick="window.location.reload()" class="px-4 py-2 bg-neutral-800 dark:bg-neutral-600 hover:bg-neutral-700 dark:hover:bg-neutral-500 text-white text-sm rounded-lg transition-colors">
+              <button onclick="window.location.reload()" class="px-4 py-2 bg-neutral-800 dark:bg-neutral-600 hover:bg-neutral-700 dark:hover:bg-neutral-500 text-white text-sm rounded-xl transition-colors">
                 Retry Connection
               </button>
             </div>
@@ -299,13 +299,13 @@ function isImageFile(filename) {
         <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-2">
           <button id="createFile" onclick="openCreateFileModal()" type="button"
-              class="inline-flex items-center gap-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+              class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
               <%- icon('file-plus', { class: 'w-4 h-4 shrink-0' }) %>
               New File
           </button>
 
           <button id="uploadFile" onclick="openUploadFileModal()" type="button"
-              class="inline-flex items-center gap-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+              class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
               <%- icon('upload', { class: 'w-4 h-4 shrink-0' }) %>
               Upload File
           </button>
@@ -331,7 +331,7 @@ function isImageFile(filename) {
         <div>
           <h3 class="text-sm font-medium text-red-500">Connection Error</h3>
           <p class="text-xs text-red-400"><%= errorMessage.message %></p>
-          <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors">
+          <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-xl transition-colors">
             Retry Connection
           </button>
         </div>
@@ -353,7 +353,7 @@ function isImageFile(filename) {
               The daemon appears to be offline. File management is unavailable until the connection is restored.
             </p>
             <div class="mt-6">
-              <button onclick="window.location.reload()" class="px-4 py-2 bg-neutral-700 dark:bg-neutral-600 hover:bg-neutral-600 text-white text-sm rounded-lg transition-colors">
+              <button onclick="window.location.reload()" class="px-4 py-2 bg-neutral-700 dark:bg-neutral-600 hover:bg-neutral-600 text-white text-sm rounded-xl transition-colors">
                 Retry Connection
               </button>
             </div>
@@ -571,7 +571,7 @@ function isImageFile(filename) {
         <h2 id="createModalTitle" class="text-sm font-semibold text-neutral-800 dark:text-white">New File</h2>
         <p id="createModalHint" class="text-xs text-neutral-500 mt-0.5">Use / to create files inside new folders.</p>
       </div>
-      <button onclick="closeCreateFileModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">
+      <button onclick="closeCreateFileModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">
         <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>
@@ -647,7 +647,7 @@ function isImageFile(filename) {
         <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Rename</h2>
         <p class="text-xs text-neutral-500 mt-0.5">Use / to move the file into a different folder.</p>
       </div>
-      <button onclick="closeRenameModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">
+      <button onclick="closeRenameModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">
         <%- icon('x', { class: 'w-4 h-4' }) %>
       </button>
     </div>
@@ -675,7 +675,7 @@ function isImageFile(filename) {
         <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Move file</h2>
         <p class="text-xs text-neutral-500 mt-0.5">Enter the destination path. Use / for subdirectories.</p>
       </div>
-      <button onclick="closeMoveModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">
+      <button onclick="closeMoveModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">
         <%- icon('x', { size: 16 }) %>
       </button>
     </div>
@@ -706,7 +706,7 @@ function isImageFile(filename) {
           <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Connect using any SFTP client</p>
         </div>
       </div>
-      <button onclick="closeSftpModal()" aria-label="Close SFTP modal" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">
+      <button onclick="closeSftpModal()" aria-label="Close SFTP modal" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">
         <%- icon('x', { class: 'w-4 h-4' }) %>
       </button>
     </div>
@@ -725,8 +725,8 @@ function isImageFile(filename) {
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <button onclick="generateSftpCredentials()" class="px-3 py-1.5 rounded-lg bg-neutral-100 dark:bg-white/10 hover:bg-neutral-200 dark:hover:bg-white/15 text-neutral-800 dark:text-white border border-neutral-200 dark:border-transparent text-xs font-medium transition">Generate credentials</button>
-        <button onclick="closeSftpModal()" class="px-3 py-1.5 rounded-lg text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white text-xs font-medium transition">Close</button>
+        <button onclick="generateSftpCredentials()" class="px-3 py-1.5 rounded-xl bg-neutral-100 dark:bg-white/10 hover:bg-neutral-200 dark:hover:bg-white/15 text-neutral-800 dark:text-white border border-neutral-200 dark:border-transparent text-xs font-medium transition">Generate credentials</button>
+        <button onclick="closeSftpModal()" class="px-3 py-1.5 rounded-xl text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white text-xs font-medium transition">Close</button>
       </div>
     </div>
 
@@ -765,8 +765,8 @@ function isImageFile(filename) {
         </div>
       </div>
       <div class="flex items-center gap-2 px-5 py-4 border-t border-neutral-200 dark:border-neutral-700/60">
-        <button onclick="generateSftpCredentials()" id="sftpRegenBtn" class="px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-400 text-black text-xs font-semibold transition disabled:opacity-40">Regenerate</button>
-        <button onclick="revokeSftpCredentials()" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition">Revoke</button>
+        <button onclick="generateSftpCredentials()" id="sftpRegenBtn" class="px-3 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-black text-xs font-semibold transition disabled:opacity-40">Regenerate</button>
+        <button onclick="revokeSftpCredentials()" class="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition">Revoke</button>
       </div>
     </div>
   </div>

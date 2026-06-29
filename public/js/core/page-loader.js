@@ -24,6 +24,8 @@
     });
   }
 
+  var prevPillRect = null;
+
   function moveDesktopIndicator(link) {
     var bg = document.getElementById('active-background');
     if (!bg || !link) return;
@@ -36,18 +38,31 @@
     var targetY = linkRect.top - ulRect.top + ul.scrollTop;
 
     bg.style.height = linkRect.height + 'px';
-    bg.style.transform = 'translate3d(0, ' + targetY + 'px, 0)';
-    bg.style.opacity = '1';
 
     if (!bg.dataset.ready || prefersReducedMotion()) {
       bg.dataset.ready = 'true';
-      bg.classList.add('is-ready');
+      bg.style.transform = 'translate3d(0, ' + targetY + 'px, 0)';
+      bg.style.opacity = '1';
+      bg.style.transition = 'none';
+      prevPillRect = { y: targetY, h: linkRect.height };
       return;
     }
 
-    bg.classList.remove('is-travelling');
-    void bg.offsetWidth;
-    bg.classList.add('is-travelling');
+    if (prevPillRect) {
+      var deltaY = prevPillRect.y - targetY;
+      bg.style.transition = 'none';
+      bg.style.transform = 'translate3d(0, ' + (targetY + deltaY) + 'px, 0)';
+      bg.style.opacity = '1';
+      void bg.offsetWidth;
+      bg.style.transition = 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1)';
+      bg.style.transform = 'translate3d(0, ' + targetY + 'px, 0)';
+    } else {
+      bg.style.transition = 'none';
+      bg.style.transform = 'translate3d(0, ' + targetY + 'px, 0)';
+      bg.style.opacity = '1';
+    }
+
+    prevPillRect = { y: targetY, h: linkRect.height };
   }
 
   function setSearchStateBindings() {
@@ -109,9 +124,7 @@
       var active = prefix ? path.startsWith(prefix) : exact ? path === href : (path === href || (href !== '/' && path.startsWith(href)));
       var mAlso = link.getAttribute('data-match-prefix-also');
       if (!active && mAlso && path.startsWith(mAlso)) active = true;
-      link.classList.toggle('text-neutral-900', active);
-      link.classList.toggle('dark:text-white', active);
-      link.classList.toggle('active-mobile', active);
+      link.classList.toggle('mobile-nav-active', active);
       link.classList.toggle('text-neutral-500', !active);
       link.classList.toggle('dark:text-neutral-400', !active);
       if (active && !activeMobileLink) activeMobileLink = link;

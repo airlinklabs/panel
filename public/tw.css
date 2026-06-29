@@ -19,10 +19,12 @@
     --z-nav:            10;  /* Navigation: sidebar, topbar, bottom nav */
     --z-floating:       20;  /* Floating buttons, theme toggle */
     --z-dropdown:       30;  /* Dropdowns, menus, context menus, search results */
-    --z-modal-backdrop: 40;  /* Modal backdrop / overlay */
-    --z-modal:          50;  /* Modal content */
-    --z-toast:          60;  /* Toast notifications */
-    --z-loading:        70;  /* Global loading overlays */
+    --z-sticky:         40;  /* Sticky elements */
+    --z-modal-backdrop: 50;  /* Modal backdrop / overlay */
+    --z-modal:          60;  /* Modal content */
+    --z-toast:          70;  /* Toast notifications */
+    --z-tooltip:        80;  /* Tooltips */
+    --z-loading:        90;  /* Global loading overlays */
   }
 
   html {
@@ -163,6 +165,10 @@
   .z-modal { z-index: var(--z-modal); }
   .z-toast { z-index: var(--z-toast); }
   .z-loading { z-index: var(--z-loading); }
+
+  .mobile-nav-active {
+    color: var(--theme-accent, #6366f1);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

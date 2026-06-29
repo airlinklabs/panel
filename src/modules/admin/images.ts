@@ -193,6 +193,9 @@ const adminModule: Module = {
           let portRequirements: unknown[] = [];
           try { portRequirements = JSON.parse(image.portRequirements || '[]'); } catch { /* keep empty */ }
 
+          let meta: Record<string, unknown> = {};
+          try { meta = JSON.parse((image as Record<string, unknown>).meta as string || '{}'); } catch { /* keep empty */ }
+
           const parsedImage = {
             ...image,
             dockerImages,
@@ -200,6 +203,7 @@ const adminModule: Module = {
             scripts,
             info,
             portRequirements,
+            meta,
           };
 
           res.render('admin/images/edit', {

@@ -13,7 +13,7 @@
         <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminServersTitle %></h1>
         <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminServersText %></p>
       </div>
-      <button type="button" onclick="location.href='/admin/servers/create'" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">New Server</button>
+      <button type="button" onclick="location.href='/admin/servers/create'" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">New Server</button>
     </div>
 
     <div class="grid grid-cols-2 gap-3 mb-5">
@@ -30,7 +30,7 @@
     </div>
 
     <% if (req.query.err == "none") { %>
-    <div class="mb-4 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400"><%= req.translations.actionCompleted %></div>
+    <div class="mb-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400"><%= req.translations.actionCompleted %></div>
     <% } %>
 
     <!-- Sentinel — watched by IntersectionObserver -->
@@ -43,12 +43,12 @@
           <span class="selection-count text-xs font-medium text-neutral-600 dark:text-neutral-300 mr-1">0 selected</span>
           <div class="h-3.5 w-px bg-neutral-300 dark:bg-neutral-600 mx-0.5"></div>
           <button type="button" onclick="bulkRadarScan()"
-            class="inline-flex items-center gap-1 rounded-lg bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors">
+            class="inline-flex items-center gap-1 rounded-xl bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-600 transition-colors">
             <%- icon('radar', { size: 14, class: 'shrink-0' }) %>
             Radar
           </button>
           <button type="button" onclick="bulkDelete()"
-            class="inline-flex items-center gap-1 rounded-lg bg-red-600 hover:bg-red-500 px-2.5 py-1.5 text-xs font-medium text-white transition-colors ml-auto">
+            class="inline-flex items-center gap-1 rounded-xl bg-red-600 hover:bg-red-500 px-2.5 py-1.5 text-xs font-medium text-white transition-colors ml-auto">
             <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
             Delete
           </button>
@@ -63,12 +63,12 @@
         <span class="selection-count text-xs font-medium text-neutral-600 dark:text-neutral-300 mr-1">0 selected</span>
         <div class="h-3.5 w-px bg-neutral-300 dark:bg-neutral-600 mx-0.5"></div>
         <button type="button" onclick="bulkRadarScan()"
-          class="inline-flex items-center gap-1 rounded-lg bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-200 transition-colors">
+          class="inline-flex items-center gap-1 rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-200 transition-colors">
           <%- icon('radar', { size: 14, class: 'shrink-0' }) %>
           Radar
         </button>
         <button type="button" onclick="bulkDelete()"
-          class="inline-flex items-center gap-1 rounded-lg bg-red-600 hover:bg-red-500 px-2.5 py-1.5 text-xs font-medium text-white transition-colors ml-auto">
+          class="inline-flex items-center gap-1 rounded-xl bg-red-600 hover:bg-red-500 px-2.5 py-1.5 text-xs font-medium text-white transition-colors ml-auto">
           <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
           Delete
         </button>
@@ -86,7 +86,7 @@
         <div class="flex items-center gap-3 mb-3">
           <input type="checkbox" class="server-checkbox rounded border-neutral-300 dark:border-neutral-600 cursor-pointer shrink-0"
             value="<%= server.id %>" data-uuid="<%= server.UUID %>" data-name="<%= server.name %>">
-          <div data-animate-card class="w-7 h-7 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 flex items-center justify-center shrink-0">
+          <div data-animate-card class="w-7 h-7 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 flex items-center justify-center shrink-0">
             <% if (server.Suspended) { %>
               <span class="relative inline-flex rounded-full h-2 w-2 bg-neutral-400"></span>
             <% } else { %>
@@ -104,7 +104,7 @@
         </div>
 
         <div class="flex gap-2 mb-3">
-          <div data-animate-card class="flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg px-2.5 py-2">
+          <div data-animate-card class="flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl px-2.5 py-2">
             <p class="text-[10px] text-neutral-500 mb-0.5">Owner</p>
             <a href="/admin/users/view/<%= server.owner.id %>" class="flex items-center gap-1.5" onclick="event.stopPropagation()">
               <img class="h-4 w-4 rounded object-cover shrink-0"
@@ -112,11 +112,11 @@
               <span class="text-xs font-medium text-blue-600 dark:text-blue-400 truncate"><%= server.owner.username %></span>
             </a>
           </div>
-          <div data-animate-card class="flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg px-2.5 py-2">
+          <div data-animate-card class="flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl px-2.5 py-2">
             <p class="text-[10px] text-neutral-500 mb-0.5">Node</p>
             <a href="/admin/node/<%= server.node ? server.node.id : '' %>/stats" class="text-xs font-medium text-blue-600 dark:text-blue-400 truncate block" onclick="event.stopPropagation()"><%= server.node ? server.node.name : 'Unknown' %></a>
           </div>
-          <div data-animate-card class="flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg px-2.5 py-2">
+          <div data-animate-card class="flex-1 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl px-2.5 py-2">
             <p class="text-[10px] text-neutral-500 mb-0.5">Port</p>
             <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300 font-mono truncate"><%= server.node.address %>:<%= JSON.parse(server.Ports).filter(p => p.primary).map(p => p.externalPort || String(p.Port || '').split(':')[0]).pop() %></p>
           </div>
@@ -124,21 +124,21 @@
 
         <div class="flex gap-2 justify-end">
           <a href="/server/<%= server.UUID %>" onclick="event.stopPropagation()">
-            <button type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition" title="Open console">
+            <button type="button" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition" title="Open console">
               <%- icon('external-link', { size: 16, class: 'shrink-0' }) %>
             </button>
           </a>
           <a href="/admin/servers/edit/<%= server.id %>" onclick="event.stopPropagation()">
-            <button type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition" title="Edit">
+            <button type="button" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition" title="Edit">
               <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
             </button>
           </a>
           <button type="button" onclick="event.stopPropagation(); openRadarScanModal('<%= server.id %>', '<%= server.name %>')"
-            class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition" title="Radar scan">
+            class="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-2 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition" title="Radar scan">
             <%- icon('radar', { size: 16, class: 'shrink-0' }) %>
           </button>
           <button type="button" onclick="event.stopPropagation(); confirmDelete('<%= server.id %>', '<%= server.name %>')"
-            class="rounded-lg bg-red-600 p-2 text-white hover:bg-red-500 transition" title="Delete">
+            class="rounded-xl bg-red-600 p-2 text-white hover:bg-red-500 transition" title="Delete">
             <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
           </button>
         </div>
@@ -214,7 +214,7 @@
       <div id="radarResultsBody" class="px-5 py-4 overflow-y-auto flex-1"></div>
       <div class="px-5 py-3 border-t border-neutral-200 dark:border-white/10 flex justify-between items-center shrink-0">
         <button type="button" onclick="resetRadarToPickerPhase()" class="text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">&larr; Run another scan</button>
-        <button onclick="closeRadarScanModal()" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-200 transition">Close</button>
+        <button onclick="closeRadarScanModal()" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-200 transition">Close</button>
       </div>
     </div>
 
@@ -613,7 +613,7 @@
 
     var html = '<div class="space-y-1">';
     data.maliciousEngines.forEach(function (e) {
-      html += '<div data-animate-card class="flex items-center justify-between px-3 py-2 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20">';
+      html += '<div data-animate-card class="flex items-center justify-between px-3 py-2 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20">';
       html += '<span class="text-xs font-medium text-neutral-700 dark:text-neutral-300">' + escapeHtml(e.engine) + '</span>';
       html += '<span class="text-xs text-red-600 dark:text-red-400 font-mono">' + escapeHtml(e.result || 'flagged') + '</span>';
       html += '</div>';
@@ -646,7 +646,7 @@
     scanResults.results.forEach(function (result) {
       var sev = result.severity || 'low';
       var count = result.matches ? result.matches.length : 0;
-      html += '<div class="rounded-lg border border-neutral-200 dark:border-neutral-700/40 overflow-hidden">';
+      html += '<div class="rounded-xl border border-neutral-200 dark:border-neutral-700/40 overflow-hidden">';
       html += '<div class="flex items-center justify-between px-3 py-2 bg-neutral-100 dark:bg-neutral-800/60">';
       html += '<p class="text-xs font-medium text-neutral-700 dark:text-neutral-200 flex-1 min-w-0 pr-2">' + escapeHtml(result.pattern.description) + '</p>';
       html += '<div class="flex items-center gap-1.5 shrink-0"><span class="text-xs font-medium px-2 py-0.5 rounded-full ' + (sevStyles[sev] || sevStyles.low) + '">' + sev + '</span><span class="text-xs text-neutral-500">' + count + '</span></div>';
@@ -733,7 +733,7 @@
 
       <% if (req.query.err == "none") { %>
       <div class="mt-6 mx-8">
-        <div class="rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400"><%= req.translations.actionCompleted %></div>
+        <div class="rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400"><%= req.translations.actionCompleted %></div>
       </div>
       <% } %>
 
@@ -748,12 +748,12 @@
               <span class="selection-count text-sm font-medium text-neutral-600 dark:text-neutral-300 mr-1">0 selected</span>
               <div class="h-4 w-px bg-neutral-200 dark:bg-neutral-700 mx-1"></div>
               <button type="button" onclick="bulkRadarScan()"
-                class="inline-flex items-center gap-1.5 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+                class="inline-flex items-center gap-1.5 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
                 <%- icon('radar', { size: 14, class: 'shrink-0' }) %>
                 Radar Scan
               </button>
               <button type="button" onclick="bulkDelete()"
-                class="inline-flex items-center gap-1.5 rounded-lg bg-red-600 hover:bg-red-500 border border-red-700/30 px-3 py-1.5 text-xs font-medium text-white transition-colors ml-auto">
+                class="inline-flex items-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-500 border border-red-700/30 px-3 py-1.5 text-xs font-medium text-white transition-colors ml-auto">
                 <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
                 Delete
               </button>
@@ -769,12 +769,12 @@
           <span class="selection-count text-sm font-medium text-neutral-600 dark:text-neutral-300 mr-1">0 selected</span>
           <div class="h-4 w-px bg-neutral-200 dark:bg-neutral-700 mx-1"></div>
           <button type="button" onclick="bulkRadarScan()"
-            class="inline-flex items-center gap-1.5 rounded-lg bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+            class="inline-flex items-center gap-1.5 rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
             <%- icon('radar', { size: 14, class: 'shrink-0' }) %>
             Radar Scan
           </button>
           <button type="button" onclick="bulkDelete()"
-            class="inline-flex items-center gap-1.5 rounded-lg bg-red-600 hover:bg-red-500 border border-red-700/30 px-3 py-1.5 text-xs font-medium text-white transition-colors ml-auto">
+            class="inline-flex items-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-500 border border-red-700/30 px-3 py-1.5 text-xs font-medium text-white transition-colors ml-auto">
             <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
             Delete
           </button>
@@ -846,17 +846,27 @@
               <td class="whitespace-nowrap px-3 py-4 text-sm">
                 <div class="flex items-center gap-1.5">
                   <a href="/server/<%= server.UUID %>" onclick="event.stopPropagation()" title="Open console"
-                    class="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+                    class="rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
                     <%- icon('external-link', { size: 16, class: 'shrink-0' }) %>
                   </a>
                   <a href="/admin/servers/edit/<%= server.id %>" onclick="event.stopPropagation()" title="Edit"
-                    class="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+                    class="rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
                     <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
                   </a>
-                  <button type="button" onclick="event.stopPropagation(); deleteServer('<%= server.id %>', '<%= server.name %>')" title="Delete"
-                    class="rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 p-1.5 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-800 dark:hover:text-red-200 transition-colors">
-                    <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
-                  </button>
+                  <div class="relative">
+                    <button type="button" onclick="event.stopPropagation(); this.nextElementSibling.classList.toggle('hidden')" title="More actions"
+                      class="rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors">
+                      <%- icon('ellipsis-vertical', { size: 16, class: 'shrink-0' }) %>
+                    </button>
+                    <div class="hidden absolute right-0 top-full mt-1 w-36 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-xl py-1 z-dropdown">
+                      <button onclick="event.stopPropagation(); reinstallServer('<%= server.id %>', '<%= server.name %>')" class="w-full text-left px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition">
+                        Reinstall
+                      </button>
+                      <button onclick="event.stopPropagation(); deleteServer('<%= server.id %>', '<%= server.name %>')" class="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition">
+                        Delete
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </td>
             </tr>
@@ -899,12 +909,12 @@
           <p class="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2">Scan method</p>
           <div class="flex gap-2">
             <button type="button" id="modeBuiltin" onclick="setScanMode('builtin')"
-              class="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-neutral-800 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition-all">
+              class="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 border-neutral-800 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs font-medium transition-all">
               <%- icon('radar', { size: 14, class: 'shrink-0' }) %>
               Built-in patterns
             </button>
             <button type="button" id="modeVT" onclick="setScanMode('vt')"
-              class="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-xs font-medium transition-all hover:border-neutral-400 dark:hover:border-neutral-500">
+              class="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 text-xs font-medium transition-all hover:border-neutral-400 dark:hover:border-neutral-500">
               <%- icon('shield', { size: 14, class: 'shrink-0' }) %>
               VirusTotal file scan
             </button>
@@ -922,7 +932,7 @@
             </div>
             <div class="pt-5">
               <button type="button" id="runScanButton" onclick="runRadarScan()"
-                class="inline-flex items-center gap-2 rounded-lg bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/30 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 dark:hover:bg-neutral-600 transition-colors">
+                class="inline-flex items-center gap-2 rounded-xl bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/30 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 dark:hover:bg-neutral-600 transition-colors">
                 <%- icon('radar', { size: 16, class: 'shrink-0' }) %>
                 Run Scan
               </button>
@@ -933,13 +943,13 @@
 
         <!-- VT file scan -->
         <div id="vtScanSection" class="hidden">
-          <div data-animate-card class="rounded-lg bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700/50 p-4 mb-4 text-xs text-neutral-500 space-y-1">
+          <div data-animate-card class="rounded-xl bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700/50 p-4 mb-4 text-xs text-neutral-500 space-y-1">
             <p>Zips <span class="font-mono text-neutral-700 dark:text-neutral-300">plugins/</span>, <span class="font-mono text-neutral-700 dark:text-neutral-300">mods/</span>, <span class="font-mono text-neutral-700 dark:text-neutral-300">config/</span>, <span class="font-mono text-neutral-700 dark:text-neutral-300">addons/</span>, <span class="font-mono text-neutral-700 dark:text-neutral-300">datapacks/</span> and uploads to VirusTotal.</p>
             <p>Excludes world folders, logs, cache. Max 32 MB zip. Takes 30–120 seconds.</p>
             <p class="text-amber-600 dark:text-amber-400">Free tier: 4 requests/min · 500/day. Do not use for automated scanning.</p>
           </div>
           <button type="button" id="runVtScanButton" onclick="runVtFileScan()"
-            class="inline-flex items-center gap-2 rounded-lg bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/30 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 dark:hover:bg-neutral-600 transition-colors">
+            class="inline-flex items-center gap-2 rounded-xl bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/30 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 dark:hover:bg-neutral-600 transition-colors">
             <%- icon('shield', { size: 16, class: 'shrink-0' }) %>
             Upload to VirusTotal
           </button>
@@ -961,7 +971,7 @@
         </button>
         <div class="ml-auto">
           <button type="button" onclick="closeRadarScanModal()"
-            class="rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 px-3 py-1.5 text-sm font-medium transition-colors">
+            class="rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-200 px-3 py-1.5 text-sm font-medium transition-colors">
             Close
           </button>
         </div>

@@ -1,8 +1,8 @@
 # Node.js modules
-node_modules/
+node_modules
 
 # Build outputs
-dist/
+dist
 
 # Prisma files
 prisma/*
@@ -33,12 +33,11 @@ storage/dev.db-shm
 
 # Storage (keep structure, ignore data)
 storage/eggs
-
-.agents/
-.codex/
+*agent*
+.codex
 .opencode
 .github/skills
 .impeccable
 *log*
-
+*skills*
 public/uploads/*

@@ -9,7 +9,7 @@
             <div class="data-animate-card rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
                 <div class="flex items-center justify-between mb-3">
                     <h2 class="text-sm font-medium text-neutral-800 dark:text-white">Backups</h2>
-                    <button type="button" onclick="openCreateBackupModal()" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">New Backup</button>
+                    <button type="button" onclick="openCreateBackupModal()" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">New Backup</button>
                 </div>
                 <div id="backups-list" class="space-y-2">
                     <% if (backups.length === 0) { %>
@@ -27,9 +27,9 @@
                                     </div>
                                 </div>
                                 <div class="flex gap-1.5 mt-2">
-                                    <button type="button" onclick="downloadBackup('<%= backup.id %>')" class="flex-1 inline-flex items-center justify-center font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 cursor-pointer">Download</button>
-                                    <button type="button" onclick="restoreBackup('<%= backup.id %>', '<%= backup.name %>')" class="flex-1 inline-flex items-center justify-center font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-green-600 text-white hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 cursor-pointer">Restore</button>
-                                    <button type="button" onclick="deleteBackup('<%= backup.id %>', '<%= backup.name %>')" class="flex-1 inline-flex items-center justify-center font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 cursor-pointer">Delete</button>
+                                    <button type="button" onclick="downloadBackup('<%= backup.id %>')" class="flex-1 inline-flex items-center justify-center font-medium rounded-xl transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 cursor-pointer">Download</button>
+                                    <button type="button" onclick="restoreBackup('<%= backup.id %>', '<%= backup.name %>')" class="flex-1 inline-flex items-center justify-center font-medium rounded-xl transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-green-600 text-white hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 cursor-pointer">Restore</button>
+                                    <button type="button" onclick="deleteBackup('<%= backup.id %>', '<%= backup.name %>')" class="flex-1 inline-flex items-center justify-center font-medium rounded-xl transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 cursor-pointer">Delete</button>
                                 </div>
                             </div>
                         <% }) %>
@@ -59,7 +59,7 @@
                 <div class="data-animate-card bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Backups</h2>
-                        <button type="button" onclick="openCreateBackupModal()" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">New Backup</button>
+                        <button type="button" onclick="openCreateBackupModal()" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">New Backup</button>
                     </div>
                     <div id="backups-list" class="space-y-3">
                         <% if (backups.length === 0) { %>
@@ -76,9 +76,9 @@
                                             </p>
                                         </div>
                                         <div class="flex gap-2 shrink-0">
-                                            <button type="button" onclick="downloadBackup('<%= backup.id %>')" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Download</button>
-                                            <button type="button" onclick="restoreBackup('<%= backup.id %>', '<%= backup.name %>')" class="rounded-lg bg-green-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-green-700">Restore</button>
-                                            <button type="button" onclick="deleteBackup('<%= backup.id %>', '<%= backup.name %>')" class="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700">Delete</button>
+                                            <button type="button" onclick="downloadBackup('<%= backup.id %>')" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Download</button>
+                                            <button type="button" onclick="restoreBackup('<%= backup.id %>', '<%= backup.name %>')" class="rounded-xl bg-green-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-green-700">Restore</button>
+                                            <button type="button" onclick="deleteBackup('<%= backup.id %>', '<%= backup.name %>')" class="rounded-xl bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700">Delete</button>
                                         </div>
                                     </div>
                                 </div>
@@ -106,11 +106,11 @@
             <p class="text-xs text-neutral-500 mt-0.5">Choose a name for this backup.</p>
         </div>
         <div class="px-5 py-4">
-            <div><input type="text" name="backupName" id="backupName" placeholder="Backup name" class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800/50 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
+            <div><input type="text" name="backupName" id="backupName" placeholder="Backup name" class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-800/50 px-3 py-2 text-sm text-neutral-800 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-white/30"></div>
         </div>
         <div class="flex gap-2 px-5 pb-5 justify-end">
-            <button type="button" onclick="closeCreateBackupModal()" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Cancel</button>
-            <button type="button" onclick="confirmCreateBackup()" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Create</button>
+            <button type="button" onclick="closeCreateBackupModal()" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Cancel</button>
+            <button type="button" onclick="confirmCreateBackup()" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Create</button>
         </div>
     </div>
 </div>
@@ -250,9 +250,9 @@ function addBackupRow(backup) {
             '</div>' +
         '</div>' +
         '<div class="flex gap-1.5 mt-2">' +
-            '<button class="flex-1 inline-flex items-center justify-center font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 cursor-pointer" onclick="downloadBackup(\'' + backup.id + '\')">Download</button>' +
-            '<button class="flex-1 inline-flex items-center justify-center font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-green-600 text-white hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 cursor-pointer" onclick="restoreBackup(\'' + backup.id + '\', \'' + backup.name.replace(/'/g, "\\'") + '\')">Restore</button>' +
-            '<button class="flex-1 inline-flex items-center justify-center font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 cursor-pointer" onclick="deleteBackup(\'' + backup.id + '\', \'' + backup.name.replace(/'/g, "\\'") + '\')">Delete</button>' +
+            '<button class="flex-1 inline-flex items-center justify-center font-medium rounded-xl transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 cursor-pointer" onclick="downloadBackup(\'' + backup.id + '\')">Download</button>' +
+            '<button class="flex-1 inline-flex items-center justify-center font-medium rounded-xl transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-green-600 text-white hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 cursor-pointer" onclick="restoreBackup(\'' + backup.id + '\', \'' + backup.name.replace(/'/g, "\\'") + '\')">Restore</button>' +
+            '<button class="flex-1 inline-flex items-center justify-center font-medium rounded-xl transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 px-2.5 py-1.5 text-[11px] bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 cursor-pointer" onclick="deleteBackup(\'' + backup.id + '\', \'' + backup.name.replace(/'/g, "\\'") + '\')">Delete</button>' +
         '</div>';
     list.prepend(div);
 }

@@ -34,7 +34,7 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Logo</label>
                 <input type="file" name="logo" accept="image/*"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-xl file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <% if (settings.logo) { %>
                 <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 mt-2 object-contain">
                 <% } %>
@@ -42,7 +42,7 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Favicon</label>
                 <input type="file" name="favicon" accept=".ico,.png,.jpg,.jpeg"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-xl file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <p class="text-xs text-neutral-400 mt-1">PNG or JPG auto-converted to .ico</p>
               </div>
             </div>
@@ -90,7 +90,7 @@
                     </div>
                     <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
                     <% if (!theme.builtin && theme.path) { %>
-                    <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
+                    <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-xl text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
                       <%- icon('trash-2', { class: 'w-4 h-4' }) %>
                     </button>
                     <% } %>
@@ -124,7 +124,7 @@
                     </div>
                     <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
                     <% if (!theme.builtin && theme.path) { %>
-                    <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
+                    <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-xl text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
                       <%- icon('trash-2', { class: 'w-4 h-4' }) %>
                     </button>
                     <% } %>
@@ -140,7 +140,7 @@
               </div>
               <p class="text-xs text-neutral-500 mb-3">A .zip containing info.json, light.css, dark.css.</p>
               <input type="file" name="themeFile" accept=".zip"
-                class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-xl file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
             </div>
           </div>
 
@@ -156,7 +156,7 @@
                 <% } %>
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
                 <input type="file" name="loginWallpaperFile" accept="image/*"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-xl file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" name="loginWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.loginWallpaper && settings.loginWallpaper.startsWith('http')) ? settings.loginWallpaper : '' %>"
@@ -169,7 +169,7 @@
                 <% } %>
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
                 <input type="file" name="registerWallpaperFile" accept="image/*"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
+                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-xl file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" name="registerWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.registerWallpaper && settings.registerWallpaper.startsWith('http')) ? settings.registerWallpaper : '' %>"
@@ -179,8 +179,8 @@
           </div>
 
           <div class="flex justify-end gap-3">
-            <button type="button" id="resetButton" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Reset defaults</button>
-            <button type="submit" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Save appearance</button>
+            <button type="button" id="resetButton" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Reset defaults</button>
+            <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Save appearance</button>
           </div>
         </form>
 
@@ -263,7 +263,7 @@
               </div>
             </div>
             <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
-              <button type="button" id="saveServerPolicy" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Save</button>
+              <button type="button" id="saveServerPolicy" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Save</button>
             </div>
           </div>
         </div>
@@ -286,7 +286,7 @@
               <p class="mt-1.5 text-xs text-neutral-500">Used to scan uploaded files. Get a free key at <a href="https://www.virustotal.com" target="_blank" class="underline hover:text-neutral-700 dark:hover:text-neutral-300 transition">virustotal.com</a>.</p>
             </div>
             <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
-              <button type="button" id="saveVtKey" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Save</button>
+              <button type="button" id="saveVtKey" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Save</button>
             </div>
           </div>
 
@@ -354,7 +354,7 @@
               </div>
             </div>
             <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
-              <button type="button" id="saveRateLimit" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Save security settings</button>
+              <button type="button" id="saveRateLimit" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Save security settings</button>
             </div>
           </div>
 
@@ -365,7 +365,7 @@
               <div class="flex gap-3 mb-4">
                 <input type="text" id="banIpInput" placeholder="192.168.1.1"
                   class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors flex-1 max-w-xs">
-                <button type="button" id="banIpBtn" class="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700">Ban IP</button>
+                <button type="button" id="banIpBtn" class="rounded-xl bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700">Ban IP</button>
               </div>
               <div id="bannedIpList" class="space-y-2">
                 <% let banned = []; try { banned = JSON.parse(settings.bannedIps || '[]'); } catch {} %>
@@ -425,7 +425,7 @@
               <div>
                 <label class="al-label mb-2">Logo</label>
                 <input type="file" name="logo" accept="image/*"
-                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-xl file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <% if (settings.logo) { %>
                 <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 mt-2 object-contain">
                 <% } %>
@@ -433,7 +433,7 @@
               <div>
                 <label class="al-label mb-2">Favicon</label>
                 <input type="file" name="favicon" accept=".ico,.png,.jpg,.jpeg"
-                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-xl file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <p class="text-xs text-neutral-400 mt-1">PNG or JPG auto-converted to .ico</p>
               </div>
             </div>
@@ -481,7 +481,7 @@
                     </div>
                     <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
                     <% if (!theme.builtin && theme.path) { %>
-                    <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
+                    <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-xl text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
                       <%- icon('trash-2', { class: 'w-4 h-4' }) %>
                     </button>
                     <% } %>
@@ -515,7 +515,7 @@
                     </div>
                     <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
                     <% if (!theme.builtin && theme.path) { %>
-                    <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
+                    <button type="button" onclick="deleteCustomTheme('<%= theme.path.split('/').pop() %>', '<%= theme.name.replace(/'/g, "\\'") %>')" class="shrink-0 p-1 rounded-xl text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition" title="Delete theme">
                       <%- icon('trash-2', { class: 'w-4 h-4' }) %>
                     </button>
                     <% } %>
@@ -531,7 +531,7 @@
               </div>
               <p class="text-xs text-neutral-500 mb-3">A .zip containing info.json, light.css, dark.css.</p>
               <input type="file" name="themeFile" accept=".zip"
-                class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-xl file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
             </div>
           </div>
 
@@ -547,7 +547,7 @@
                 <% } %>
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
                 <input type="file" name="loginWallpaperFile" accept="image/*"
-                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
+                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-xl file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" name="loginWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.loginWallpaper && settings.loginWallpaper.startsWith('http')) ? settings.loginWallpaper : '' %>"
@@ -560,7 +560,7 @@
                 <% } %>
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
                 <input type="file" name="registerWallpaperFile" accept="image/*"
-                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
+                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-xl file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" name="registerWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.registerWallpaper && settings.registerWallpaper.startsWith('http')) ? settings.registerWallpaper : '' %>"

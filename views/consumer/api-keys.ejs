@@ -42,7 +42,7 @@
               </div>
             </div>
 
-            <div class="flex items-center gap-2 mb-3 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg px-3 py-2">
+            <div class="flex items-center gap-2 mb-3 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl px-3 py-2">
               <code class="text-xs font-mono text-neutral-600 dark:text-neutral-400 flex-1 truncate"><%= apiKey.key.substring(0, 8) %>****<%= apiKey.key.slice(-4) %></code>
               <button type="button" onclick="copyToClipboard('<%= apiKey.key %>')" class="shrink-0 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition active:scale-90" aria-label="Copy API key">
                 <%- icon('copy', { size: 16, class: 'shrink-0' }) %>
@@ -62,13 +62,13 @@
               <div class="flex gap-1.5">
                 <form action="/consumer/api-keys/toggle/<%= apiKey.id %>" method="POST" class="inline">
                   <%- include('../components/csrf') %>
-                  <button type="submit" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="<%= apiKey.active ? 'Deactivate' : 'Activate' %>">
+                  <button type="submit" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="<%= apiKey.active ? 'Deactivate' : 'Activate' %>">
                     <%- icon(apiKey.active ? 'pause' : 'play', { size: 14, class: 'shrink-0' }) %>
                   </button>
                 </form>
                 <form id="deleteKeyForm_<%= apiKey.id %>" action="/consumer/api-keys/delete/<%= apiKey.id %>" method="POST" class="inline">
                   <%- include('../components/csrf') %>
-                  <button type="button" onclick="confirmDeleteKey('<%= apiKey.id %>')" class="rounded-lg bg-red-600 p-1.5 text-white hover:bg-red-500 transition active:scale-90" aria-label="Delete API key">
+                  <button type="button" onclick="confirmDeleteKey('<%= apiKey.id %>')" class="rounded-xl bg-red-600 p-1.5 text-white hover:bg-red-500 transition active:scale-90" aria-label="Delete API key">
                     <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
                   </button>
                 </form>
@@ -90,15 +90,15 @@
       <div class="space-y-3">
         <div>
           <p class="text-[10px] text-neutral-400 mb-1 font-medium">Base URL</p>
-          <code class="text-xs font-mono text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/50 px-2 py-1 rounded-lg block"><%= typeof req !== 'undefined' ? req.protocol + '://' + req.get('host') : window.location.origin %>/api</code>
+          <code class="text-xs font-mono text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/50 px-2 py-1 rounded-xl block"><%= typeof req !== 'undefined' ? req.protocol + '://' + req.get('host') : window.location.origin %>/api</code>
         </div>
         <div>
           <p class="text-[10px] text-neutral-400 mb-1 font-medium">Auth Header</p>
-          <code class="text-xs font-mono text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/50 px-2 py-1 rounded-lg block">Authorization: Bearer &lt;YOUR_API_KEY&gt;</code>
+          <code class="text-xs font-mono text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/50 px-2 py-1 rounded-xl block">Authorization: Bearer &lt;YOUR_API_KEY&gt;</code>
         </div>
         <div>
           <p class="text-[10px] text-neutral-400 mb-1 font-medium">Example</p>
-          <pre class="text-[10px] font-mono text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/50 px-2 py-1.5 rounded-lg overflow-x-auto whitespace-pre">curl -H "Authorization: Bearer YOUR_KEY" \
+          <pre class="text-[10px] font-mono text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/50 px-2 py-1.5 rounded-xl overflow-x-auto whitespace-pre">curl -H "Authorization: Bearer YOUR_KEY" \
   <%= typeof req !== 'undefined' ? req.protocol + '://' + req.get('host') : window.location.origin %>/api/servers</pre>
         </div>
       </div>
@@ -115,7 +115,7 @@
         <p id="createApiKeyTitle" class="text-sm font-semibold text-neutral-800 dark:text-white">New API Key</p>
         <p class="text-xs text-neutral-500 mt-0.5">Set a name and choose permissions.</p>
       </div>
-      <button type="button" onclick="hideCreateModal()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="Close">
+      <button type="button" onclick="hideCreateModal()" class="w-7 h-7 flex items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="Close">
         <%- icon('x', { size: 14, class: 'shrink-0' }) %>
       </button>
     </div>
@@ -129,27 +129,27 @@
       <div>
         <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-2">Permissions</p>
         <div class="space-y-2">
-          <label class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
+          <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
             <input type="checkbox" name="permissions" value="server.view" class="h-3.5 w-3.5 rounded shrink-0">
             <span class="text-xs text-neutral-600 dark:text-neutral-300">server.view</span>
           </label>
-          <label class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
+          <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
             <input type="checkbox" name="permissions" value="server.start" class="h-3.5 w-3.5 rounded shrink-0">
             <span class="text-xs text-neutral-600 dark:text-neutral-300">server.start</span>
           </label>
-          <label class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
+          <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
             <input type="checkbox" name="permissions" value="server.stop" class="h-3.5 w-3.5 rounded shrink-0">
             <span class="text-xs text-neutral-600 dark:text-neutral-300">server.stop</span>
           </label>
-          <label class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
+          <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
             <input type="checkbox" name="permissions" value="server.restart" class="h-3.5 w-3.5 rounded shrink-0">
             <span class="text-xs text-neutral-600 dark:text-neutral-300">server.restart</span>
           </label>
-          <label class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
+          <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
             <input type="checkbox" name="permissions" value="server.console" class="h-3.5 w-3.5 rounded shrink-0">
             <span class="text-xs text-neutral-600 dark:text-neutral-300">server.console</span>
           </label>
-          <label class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
+          <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
             <input type="checkbox" name="permissions" value="server.files.read" class="h-3.5 w-3.5 rounded shrink-0">
             <span class="text-xs text-neutral-600 dark:text-neutral-300">server.files.read</span>
           </label>
@@ -272,15 +272,15 @@
           <div class="space-y-4">
             <div>
               <p class="text-xs text-neutral-400 mb-1.5 font-medium">Base URL</p>
-              <code class="text-xs font-mono text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/50 px-3 py-1.5 rounded-lg block"><%= typeof req !== 'undefined' ? req.protocol + '://' + req.get('host') : window.location.origin %>/api</code>
+              <code class="text-xs font-mono text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/50 px-3 py-1.5 rounded-xl block"><%= typeof req !== 'undefined' ? req.protocol + '://' + req.get('host') : window.location.origin %>/api</code>
             </div>
             <div>
               <p class="text-xs text-neutral-400 mb-1.5 font-medium">Auth Header</p>
-              <code class="text-xs font-mono text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/50 px-3 py-1.5 rounded-lg block">Authorization: Bearer &lt;YOUR_API_KEY&gt;</code>
+              <code class="text-xs font-mono text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/50 px-3 py-1.5 rounded-xl block">Authorization: Bearer &lt;YOUR_API_KEY&gt;</code>
             </div>
             <div>
               <p class="text-xs text-neutral-400 mb-1.5 font-medium">Example</p>
-              <pre class="text-xs font-mono text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/50 px-3 py-2 rounded-lg overflow-x-auto whitespace-pre">curl -H "Authorization: Bearer YOUR_KEY" \
+              <pre class="text-xs font-mono text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/50 px-3 py-2 rounded-xl overflow-x-auto whitespace-pre">curl -H "Authorization: Bearer YOUR_KEY" \
   <%= typeof req !== 'undefined' ? req.protocol + '://' + req.get('host') : window.location.origin %>/api/servers</pre>
             </div>
           </div>
@@ -301,7 +301,7 @@
           <h3 id="createApiKeyTitle" class="text-sm font-semibold text-neutral-900 dark:text-white">Create API Key</h3>
           <p class="text-xs text-neutral-500 mt-0.5">Set a name and choose what this key can do.</p>
         </div>
-        <button type="button" onclick="hideCreateModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800" aria-label="Close">
+        <button type="button" onclick="hideCreateModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition p-1 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800" aria-label="Close">
           <%- icon('x', { size: 16, class: 'shrink-0' }) %>
         </button>
       </div>
@@ -315,27 +315,27 @@
         <div>
           <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-2">Permissions</p>
           <div class="space-y-2">
-            <label class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
+            <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
               <input type="checkbox" name="permissions" value="server.view" class="h-3.5 w-3.5 rounded shrink-0">
               <span class="text-xs text-neutral-600 dark:text-neutral-300">server.view</span>
             </label>
-            <label class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
+            <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
               <input type="checkbox" name="permissions" value="server.start" class="h-3.5 w-3.5 rounded shrink-0">
               <span class="text-xs text-neutral-600 dark:text-neutral-300">server.start</span>
             </label>
-            <label class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
+            <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
               <input type="checkbox" name="permissions" value="server.stop" class="h-3.5 w-3.5 rounded shrink-0">
               <span class="text-xs text-neutral-600 dark:text-neutral-300">server.stop</span>
             </label>
-            <label class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
+            <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
               <input type="checkbox" name="permissions" value="server.restart" class="h-3.5 w-3.5 rounded shrink-0">
               <span class="text-xs text-neutral-600 dark:text-neutral-300">server.restart</span>
             </label>
-            <label class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
+            <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
               <input type="checkbox" name="permissions" value="server.console" class="h-3.5 w-3.5 rounded shrink-0">
               <span class="text-xs text-neutral-600 dark:text-neutral-300">server.console</span>
             </label>
-            <label class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
+            <label class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
               <input type="checkbox" name="permissions" value="server.files.read" class="h-3.5 w-3.5 rounded shrink-0">
               <span class="text-xs text-neutral-600 dark:text-neutral-300">server.files.read</span>
             </label>

@@ -57,7 +57,7 @@
               </div>
             </div>
 
-            <div data-animate-card class="flex items-center gap-2 mb-3 bg-neutral-100 dark:bg-neutral-800/50 rounded-lg px-3 py-2">
+            <div data-animate-card class="flex items-center gap-2 mb-3 bg-neutral-100 dark:bg-neutral-800/50 rounded-xl px-3 py-2">
               <code class="text-xs font-mono text-neutral-600 dark:text-neutral-400 flex-1 truncate"><%= apiKey.key.substring(0, 8) %>...</code>
               <button type="button" onclick="copyToClipboard('<%= apiKey.key %>')" class="shrink-0 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition active:scale-90" aria-label="Copy API key">
                 <%- icon('copy', { size: 16, class: 'shrink-0' }) %>
@@ -67,18 +67,18 @@
             <div class="flex items-center justify-between">
               <p class="text-xs text-neutral-500">By <%= apiKey.user ? apiKey.user.username : 'System' %> · <%= new Date(apiKey.createdAt).toLocaleDateString() %></p>
               <div class="flex gap-1.5">
-                <button onclick="showEditModal('<%= apiKey.id %>', '<%= apiKey.name %>', '<%= (apiKey.description || '').replace(/'/g, "\\'") %>', <%= JSON.stringify(apiKey.permissions) %>)" type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="Edit API key">
+                <button onclick="showEditModal('<%= apiKey.id %>', '<%= apiKey.name %>', '<%= (apiKey.description || '').replace(/'/g, "\\'") %>', <%= JSON.stringify(apiKey.permissions) %>)" type="button" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="Edit API key">
                   <%- icon('pencil', { size: 14, class: 'shrink-0' }) %>
                 </button>
                 <form action="/admin/apikeys/toggle/<%= apiKey.id %>" method="POST" class="inline">
                   <%- include('../../components/csrf') %>
-                  <button type="submit" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="<%= apiKey.active ? 'Disable API key' : 'Enable API key' %>">
+                  <button type="submit" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 p-1.5 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="<%= apiKey.active ? 'Disable API key' : 'Enable API key' %>">
                     <%- icon('play-circle', { size: 14, class: 'shrink-0' }) %>
                   </button>
                 </form>
                 <form id="deleteKeyForm_<%= apiKey.id %>" action="/admin/apikeys/delete/<%= apiKey.id %>" method="POST" class="inline">
                   <%- include('../../components/csrf') %>
-                  <button type="button" onclick="confirmDeleteApiKey('<%= apiKey.id %>')" class="rounded-lg bg-red-600 p-1.5 text-white hover:bg-red-500 transition active:scale-90" aria-label="Delete API key">
+                  <button type="button" onclick="confirmDeleteApiKey('<%= apiKey.id %>')" class="rounded-xl bg-red-600 p-1.5 text-white hover:bg-red-500 transition active:scale-90" aria-label="Delete API key">
                     <%- icon('trash-2', { size: 14, class: 'shrink-0' }) %>
                   </button>
                 </form>
@@ -98,7 +98,7 @@
         <p id="createApiKeyTitle" class="text-sm font-semibold text-neutral-800 dark:text-white">New API Key</p>
         <p id="createApiKeyDescription" class="text-xs text-neutral-500 mt-0.5">Set a name and choose what this key can do.</p>
       </div>
-      <button type="button" onclick="hideCreateModal()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="Close new API key dialog">
+      <button type="button" onclick="hideCreateModal()" class="w-7 h-7 flex items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="Close new API key dialog">
         <%- icon('x', { size: 14, class: 'shrink-0' }) %>
       </button>
     </div>
@@ -113,12 +113,12 @@
       <div>
         <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-2">Presets</p>
         <div class="flex flex-wrap gap-2">
-          <button type="button" data-preset="full-admin" class="create-preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Full Admin</button>
-          <button type="button" data-preset="read-only" class="create-preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Read-Only</button>
-          <button type="button" data-preset="server-manager" class="create-preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Server Manager</button>
-          <button type="button" data-preset="user-manager" class="create-preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">User Manager</button>
-          <button type="button" data-preset="node-monitor" class="create-preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Node Monitor</button>
-          <button type="button" data-preset="none" class="create-preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Clear All</button>
+          <button type="button" data-preset="full-admin" class="create-preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Full Admin</button>
+          <button type="button" data-preset="read-only" class="create-preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Read-Only</button>
+          <button type="button" data-preset="server-manager" class="create-preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Server Manager</button>
+          <button type="button" data-preset="user-manager" class="create-preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">User Manager</button>
+          <button type="button" data-preset="node-monitor" class="create-preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Node Monitor</button>
+          <button type="button" data-preset="none" class="create-preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Clear All</button>
         </div>
       </div>
       <div>
@@ -139,7 +139,7 @@
               <div class="category-panel hidden px-3 py-3 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60">
                 <div class="grid grid-cols-2 gap-2">
                   <% allPermissions.filter(p => p.value.includes(category)).forEach(permission => { %>
-                    <label class="create-perm-label flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150">
+                    <label class="create-perm-label flex items-center gap-2 px-3 py-2.5 rounded-xl border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150">
                       <input type="checkbox" name="permissions" value="<%= permission.value %>"
                         class="permission-checkbox h-3.5 w-3.5 rounded shrink-0" data-category="<%= category %>"
                         onchange="refreshLabels(this, 'create', '<%= category %>')">
@@ -167,7 +167,7 @@
         <p id="editApiKeyTitle" class="text-sm font-semibold text-neutral-800 dark:text-white">Edit API Key</p>
         <p id="editApiKeyDescription" class="text-xs text-neutral-500 mt-0.5">Update permissions and details.</p>
       </div>
-      <button type="button" onclick="hideEditModal()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="Close edit API key dialog">
+      <button type="button" onclick="hideEditModal()" class="w-7 h-7 flex items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition active:scale-90" aria-label="Close edit API key dialog">
         <%- icon('x', { size: 14, class: 'shrink-0' }) %>
       </button>
     </div>
@@ -182,12 +182,12 @@
       <div>
         <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-2">Presets</p>
         <div class="flex flex-wrap gap-2">
-          <button type="button" data-preset="full-admin" class="edit-preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Full Admin</button>
-          <button type="button" data-preset="read-only" class="edit-preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Read-Only</button>
-          <button type="button" data-preset="server-manager" class="edit-preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Server Manager</button>
-          <button type="button" data-preset="user-manager" class="edit-preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">User Manager</button>
-          <button type="button" data-preset="node-monitor" class="edit-preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Node Monitor</button>
-          <button type="button" data-preset="none" class="edit-preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Clear All</button>
+          <button type="button" data-preset="full-admin" class="edit-preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Full Admin</button>
+          <button type="button" data-preset="read-only" class="edit-preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Read-Only</button>
+          <button type="button" data-preset="server-manager" class="edit-preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Server Manager</button>
+          <button type="button" data-preset="user-manager" class="edit-preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">User Manager</button>
+          <button type="button" data-preset="node-monitor" class="edit-preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Node Monitor</button>
+          <button type="button" data-preset="none" class="edit-preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition-all duration-150 active:scale-95">Clear All</button>
         </div>
       </div>
       <div>
@@ -208,7 +208,7 @@
               <div class="category-panel hidden px-3 py-3 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60">
                 <div class="grid grid-cols-2 gap-2">
                   <% allPermissions.filter(p => p.value.includes(category)).forEach(permission => { %>
-                    <label class="edit-perm-label flex items-center gap-2 px-3 py-2.5 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150">
+                    <label class="edit-perm-label flex items-center gap-2 px-3 py-2.5 rounded-xl border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer active:scale-95 transition-all duration-150">
                       <input type="checkbox" name="permissions" value="<%= permission.value %>"
                         id="edit-permission-<%= permission.value %>"
                         class="edit-permission-checkbox h-3.5 w-3.5 rounded shrink-0" data-category="<%= category %>"
@@ -574,7 +574,7 @@
           <h3 id="createApiKeyTitle" class="text-sm font-semibold text-neutral-900 dark:text-white"><%= req.translations.createNewApiKey || 'Create API Key' %></h3>
           <p id="createApiKeyDescription" class="text-xs text-neutral-500 mt-0.5">Set a name and choose what this key is allowed to do.</p>
         </div>
-        <button type="button" onclick="hideCreateModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800" aria-label="Close create API key dialog">
+        <button type="button" onclick="hideCreateModal()" class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition p-1 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800" aria-label="Close create API key dialog">
           <%- icon('x', { class: 'h-4 w-4' }) %>
         </button>
       </div>
@@ -597,12 +597,12 @@
         <div>
           <p class="text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-2">Presets</p>
           <div class="flex flex-wrap gap-2">
-            <button type="button" data-preset="full-admin" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95">Full Admin</button>
-            <button type="button" data-preset="read-only" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95">Read-Only</button>
-            <button type="button" data-preset="server-manager" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95">Server Manager</button>
-            <button type="button" data-preset="user-manager" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95">User Manager</button>
-            <button type="button" data-preset="node-monitor" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95">Node Monitor</button>
-            <button type="button" data-preset="none" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95">Clear All</button>
+            <button type="button" data-preset="full-admin" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95">Full Admin</button>
+            <button type="button" data-preset="read-only" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95">Read-Only</button>
+            <button type="button" data-preset="server-manager" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95">Server Manager</button>
+            <button type="button" data-preset="user-manager" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95">User Manager</button>
+            <button type="button" data-preset="node-monitor" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95">Node Monitor</button>
+            <button type="button" data-preset="none" class="preset-btn px-3 py-1.5 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all duration-150 active:scale-95">Clear All</button>
           </div>
         </div>
         <div>
@@ -632,7 +632,7 @@
                 <div class="category-panel hidden px-4 py-3 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60">
                   <div class="grid grid-cols-2 gap-2">
                     <% allPermissions.filter(p => p.value.includes(category)).forEach(permission => { %>
-                      <label class="permission-label flex items-center gap-2 px-3 py-2 rounded-lg border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
+                      <label class="permission-label flex items-center gap-2 px-3 py-2 rounded-xl border border-neutral-100 dark:border-neutral-700/40 bg-neutral-50 dark:bg-neutral-800/50 cursor-pointer hover:border-neutral-300 dark:hover:border-neutral-600 transition-all duration-150 has-[:checked]:border-neutral-900 dark:has-[:checked]:border-white/30 has-[:checked]:bg-neutral-900 dark:has-[:checked]:bg-white/10">
                         <input type="checkbox" name="permissions" value="<%= permission.value %>"
                           class="permission-checkbox h-3.5 w-3.5 rounded shrink-0" data-category="<%= category %>"
                           onchange="updateCategoryCount('<%= category %>')">
@@ -668,7 +668,7 @@
         <p id="editApiKeyTitle" class="text-sm font-semibold text-neutral-800 dark:text-white"><%= req.translations.editApiKey || 'Edit API Key' %></p>
         <p id="editApiKeyDescription" class="text-xs text-neutral-500 mt-0.5">Update name, description, and permissions.</p>
       </div>
-      <button type="button" onclick="hideEditModal()" class="w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition" aria-label="Close edit API key dialog">
+      <button type="button" onclick="hideEditModal()" class="w-7 h-7 flex items-center justify-center rounded-xl text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition" aria-label="Close edit API key dialog">
         <%- icon('x', { class: 'w-4 h-4' }) %>
       </button>
     </div>

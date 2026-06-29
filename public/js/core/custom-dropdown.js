@@ -1,122 +1,165 @@
 /**
- * Custom Animated Dropdown - replaces native <select> elements
- * and provides a portal-aware dropdown system for all menus.
+ * Custom Dropdown System — Portal-based dropdowns for the entire panel.
  *
- * Usage for <select>: Add class="cs-select" and call initCustomDropdowns()
- * Usage for arbitrary menus: Call initPortalDropdown(trigger, panel, options)
+ * Replaces native <select> elements (via cs-select class) and provides
+ * a generic activator+panel dropdown API (initPortalDropdown).
+ *
+ * Globals:
+ *   initCustomDropdowns()           — scan all .cs-select, build replacements
+ *   initCustomDropdown(el)          — build replacement for one <select>
+ *   initPortalDropdown(trigger, panel, options) — generic dropdown
+ *
+ * Every dropdown uses position:fixed, repositions on scroll/resize,
+ * flips direction near viewport edges, and closes on outside click / Escape.
  */
 (function () {
   'use strict';
 
-  var OPEN_CLASS = 'cs-open';
-  var WRAP_CLASS = 'cs-wrap';
+  var PANEL_BG = 'bg-white dark:bg-neutral-800';
+  var PANEL_BORDER = 'border border-neutral-200 dark:border-neutral-700';
+  var PANEL_RADIUS = 'rounded-xl shadow-xl';
+  var ANIM_CUBIC = 'cubic-bezier(0.16, 1, 0.3, 1)';
+  var ANIM_MS = 220;
+  var FLIP_THRESHOLD = 260;
 
-  /* ── Utility: check if element is inside a scrollable container ─── */
-  function isInsideScrollable(el) {
-    var parent = el.parentElement;
-    while (parent && parent !== document.body) {
-      var style = getComputedStyle(parent);
-      if ((style.overflowY === 'auto' || style.overflowY === 'scroll') && parent.scrollHeight > parent.clientHeight) {
-        return true;
-      }
-      if (style.overflow === 'hidden' || style.overflowY === 'hidden' || style.overflowY === 'clip') {
-        return true;
-      }
-      parent = parent.parentElement;
-    }
-    return false;
+  /* ── Track all open dropdowns for close-all ─────────────────────── */
+  var openInstances = [];
+
+  /* ── Helpers ────────────────────────────────────────────────────── */
+  function isDarkMode() {
+    return document.documentElement.classList.contains('dark');
   }
 
-  /* ── Utility: get visible rect of an element ────────────────────── */
-  function getVisibleRect(el) {
-    var rect = el.getBoundingClientRect();
-    var vh = window.innerHeight;
-    var vw = window.innerWidth;
-    return {
-      top: Math.max(rect.top, 0),
-      bottom: Math.min(rect.bottom, vh),
-      left: Math.max(rect.left, 0),
-      right: Math.min(rect.right, vw),
-      width: rect.width,
-      height: Math.min(rect.height, vh)
-    };
+  function getComputedBg(el) {
+    return isDarkMode() ? 'rgb(38, 38, 38)' : '#ffffff';
   }
 
-  /* ── Portal dropdown system ─────────────────────────────────────── */
-  function positionPortaled(dropdown, trigger) {
-    var rect = trigger.getBoundingClientRect();
+  function clamp(val, min, max) {
+    return Math.max(min, Math.min(max, val));
+  }
+
+  function closeAll(except) {
+    for (var i = openInstances.length - 1; i >= 0; i--) {
+      if (openInstances[i] !== except) {
+        openInstances[i].close();
+      }
+    }
+  }
+
+  /* ── Position a panel relative to its trigger ───────────────────── */
+  function positionPanel(panel, trigger) {
+    var tRect = trigger.getBoundingClientRect();
     var vh = window.innerHeight;
     var vw = window.innerWidth;
-    var ddHeight = dropdown.scrollHeight || 240;
-    var ddWidth = rect.width;
+    var pH = panel.scrollHeight || 240;
+    var pW = tRect.width;
 
-    var top = rect.bottom + 6;
-    var left = rect.left;
+    var spaceBelow = vh - tRect.bottom;
+    var openUp = spaceBelow < FLIP_THRESHOLD;
 
-    // Flip above if not enough space below
-    if (top + ddHeight > vh - 8) {
-      top = rect.top - ddHeight - 6;
-    }
+    var top = openUp ? tRect.top - pH - 6 : tRect.bottom + 6;
+    var left = tRect.left;
 
-    // Clamp to viewport
     if (top < 8) top = 8;
-    if (left + ddWidth > vw - 8) left = vw - ddWidth - 8;
+    if (left + pW > vw - 8) left = vw - pW - 8;
     if (left < 8) left = 8;
 
-    dropdown.style.position = 'fixed';
-    dropdown.style.top = top + 'px';
-    dropdown.style.left = left + 'px';
-    dropdown.style.width = ddWidth + 'px';
-    dropdown.style.zIndex = 'var(--z-dropdown, 30)';
+    panel.style.position = 'fixed';
+    panel.style.top = top + 'px';
+    panel.style.left = left + 'px';
+    panel.style.width = pW + 'px';
+    panel.style.zIndex = 'var(--z-dropdown)';
   }
 
-  function portalDropdown(dropdown, trigger) {
-    if (!isInsideScrollable(trigger.closest('.cs-wrap') || trigger.parentElement)) {
-      dropdown.classList.remove('cs-portaled');
-      return;
-    }
-    positionPortaled(dropdown, trigger);
-    document.body.appendChild(dropdown);
-    dropdown.classList.add('cs-portaled');
-  }
-
-  function unportalDropdown(dropdown) {
-    if (dropdown.classList.contains('cs-portaled')) {
-      dropdown.classList.remove('cs-portaled');
-      dropdown.style.position = '';
-      dropdown.style.top = '';
-      dropdown.style.left = '';
-      dropdown.style.width = '';
-      dropdown.style.zIndex = '';
-      // Re-parent back
-      var wrap = dropdown._csWrap;
-      if (wrap) wrap.appendChild(dropdown);
-    }
-  }
-
-  /* ── Scroll reposition (keeps dropdown open while scrolling) ───── */
-  function addScrollReposition(dropdown, trigger) {
-    var onScroll = function () {
-      if (dropdown.style.display === 'block' || dropdown.style.display === '') {
-        positionPortaled(dropdown, trigger);
+  /* ── Scroll / resize reposition ─────────────────────────────────── */
+  function addReposition(panel, trigger) {
+    var onRepos = function () {
+      if (panel.getAttribute('aria-hidden') === 'false') {
+        positionPanel(panel, trigger);
       }
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    // Store cleanup ref
-    dropdown._csScrollCleanup = function () {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
+    window.addEventListener('scroll', onRepos, { passive: true });
+    window.addEventListener('resize', onRepos, { passive: true });
+    panel._ddReposCleanup = function () {
+      window.removeEventListener('scroll', onRepos);
+      window.removeEventListener('resize', onRepos);
     };
   }
 
-  /* ── <select> replacement buildDropdown ─────────────────────────── */
+  /* ── Generic portal dropdown (initPortalDropdown) ────────────────── */
+  function initPortalDropdown(trigger, panel, options) {
+    if (!trigger || !panel) return null;
+    options = options || {};
+
+    var state = { open: false };
+
+    function open() {
+      if (state.open) return;
+      closeAll({ close: function () {} });
+      panel.style.display = 'block';
+      panel.classList.remove('hidden');
+      panel.setAttribute('aria-hidden', 'false');
+      panel.style.pointerEvents = 'auto';
+      positionPanel(panel, trigger);
+      addReposition(panel, trigger);
+      trigger.setAttribute('aria-expanded', 'true');
+      state.open = true;
+      openInstances.push(inst);
+    }
+
+    function close() {
+      if (!state.open) return;
+      panel.style.display = 'none';
+      panel.classList.add('hidden');
+      panel.setAttribute('aria-hidden', 'true');
+      panel.style.pointerEvents = '';
+      panel.style.position = '';
+      panel.style.top = '';
+      panel.style.left = '';
+      panel.style.width = '';
+      panel.style.zIndex = '';
+      trigger.setAttribute('aria-expanded', 'false');
+      if (panel._ddReposCleanup) {
+        panel._ddReposCleanup();
+        panel._ddReposCleanup = null;
+      }
+      state.open = false;
+      var idx = openInstances.indexOf(inst);
+      if (idx !== -1) openInstances.splice(idx, 1);
+    }
+
+    function toggle() {
+      state.open ? close() : open();
+    }
+
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      toggle();
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!trigger.contains(e.target) && !panel.contains(e.target)) {
+        if (state.open) close();
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && state.open) close();
+    });
+
+    var inst = { open: open, close: close, toggle: toggle };
+    trigger._portalDropdown = inst;
+    panel._portalDropdown = inst;
+    return inst;
+  }
+
+  /* ── <select> replacement (buildDropdown) ────────────────────────── */
   function buildDropdown(select) {
     if (select.dataset.csInit) return;
     select.dataset.csInit = '1';
 
     var wrap = document.createElement('div');
-    wrap.className = WRAP_CLASS;
+    wrap.className = 'cs-wrap';
     wrap.style.position = 'relative';
 
     var trigger = document.createElement('button');
@@ -141,18 +184,19 @@
     chevron.appendChild(cp);
     trigger.appendChild(chevron);
 
-    var dropdown = document.createElement('div');
-    dropdown.className = 'cs-dropdown';
-    dropdown.setAttribute('role', 'listbox');
-    dropdown._csWrap = wrap;
+    var panel = document.createElement('div');
+    panel.className = 'cs-dropdown ' + PANEL_BG + ' ' + PANEL_BORDER + ' ' + PANEL_RADIUS;
+    panel.setAttribute('role', 'listbox');
+    panel.style.display = 'none';
+    panel.style.pointerEvents = 'auto';
 
     select.parentNode.insertBefore(wrap, select);
     wrap.appendChild(select);
     wrap.appendChild(trigger);
-    wrap.appendChild(dropdown);
+    wrap.appendChild(panel);
 
     function syncOptions() {
-      dropdown.innerHTML = '';
+      panel.innerHTML = '';
       var opts = select.options;
       for (var i = 0; i < opts.length; i++) {
         var opt = opts[i];
@@ -161,24 +205,20 @@
         item.setAttribute('role', 'option');
         item.setAttribute('data-value', opt.value);
         item.textContent = opt.text;
-        if (opt.disabled) {
-          item.classList.add('cs-disabled');
-        }
-        if (opt.selected) {
-          item.classList.add('cs-selected');
-        }
+        if (opt.disabled) item.classList.add('cs-disabled');
+        if (opt.selected) item.classList.add('cs-selected');
         if (!opt.disabled) {
           item.addEventListener('click', (function (o) {
-            return function (e) {
-              e.stopPropagation();
+            return function (ev) {
+              ev.stopPropagation();
               select.value = o.value;
               select.dispatchEvent(new Event('change', { bubbles: true }));
-              closeAll();
+              inst.close();
               syncLabel();
             };
           })(opt));
         }
-        dropdown.appendChild(item);
+        panel.appendChild(item);
       }
     }
 
@@ -192,56 +232,52 @@
         label.textContent = ph ? ph.text : 'Select\u2026';
         label.classList.add('cs-placeholder');
       }
-      var items = dropdown.querySelectorAll('.cs-option');
-      for (var i = 0; i < items.length; i++) {
-        items[i].classList.toggle('cs-selected', items[i].dataset.value === select.value);
+      var items = panel.querySelectorAll('.cs-option');
+      for (var j = 0; j < items.length; j++) {
+        items[j].classList.toggle('cs-selected', items[j].dataset.value === select.value);
       }
     }
 
-    function closeAll() {
-      var allDropdowns = document.querySelectorAll('.cs-dropdown');
-      for (var i = 0; i < allDropdowns.length; i++) {
-        allDropdowns[i].style.display = 'none';
-        unportalDropdown(allDropdowns[i]);
-        allDropdowns[i].classList.remove('cs-portaled');
-        allDropdowns[i].previousElementSibling.classList.remove(OPEN_CLASS);
-        allDropdowns[i].previousElementSibling.setAttribute('aria-expanded', 'false');
-        if (allDropdowns[i]._csScrollCleanup) allDropdowns[i]._csScrollCleanup();
-      }
+    function doOpen() {
+      syncOptions();
+      panel.style.display = 'block';
+      panel.classList.remove('hidden');
+      panel.setAttribute('aria-hidden', 'false');
+      positionPanel(panel, trigger);
+      addReposition(panel, trigger);
+      trigger.setAttribute('aria-expanded', 'true');
+      openInstances.push(inst);
     }
 
-    function closeThisDropdown() {
-      unportalDropdown(dropdown);
-      dropdown.style.display = 'none';
-      trigger.classList.remove(OPEN_CLASS);
+    function doClose() {
+      panel.style.display = 'none';
+      panel.classList.add('hidden');
+      panel.setAttribute('aria-hidden', 'true');
       trigger.setAttribute('aria-expanded', 'false');
-      if (dropdown._csScrollCleanup) dropdown._csScrollCleanup();
+      if (panel._ddReposCleanup) {
+        panel._ddReposCleanup();
+        panel._ddReposCleanup = null;
+      }
+      var idx = openInstances.indexOf(inst);
+      if (idx !== -1) openInstances.splice(idx, 1);
+    }
+
+    function doToggle() {
+      panel.getAttribute('aria-hidden') === 'false' ? doClose() : doOpen();
     }
 
     trigger.addEventListener('click', function (e) {
       e.stopPropagation();
-      var isOpen = dropdown.style.display === 'block';
-      closeAll();
-      if (!isOpen) {
-        syncOptions();
-        dropdown.style.display = 'block';
-        portalDropdown(dropdown, trigger);
-        addScrollReposition(dropdown, trigger);
-        trigger.classList.add(OPEN_CLASS);
-        trigger.setAttribute('aria-expanded', 'true');
-      }
+      closeAll(inst);
+      doToggle();
     });
 
     document.addEventListener('click', function (e) {
-      if (!wrap.contains(e.target) && e.target !== dropdown && !dropdown.contains(e.target)) {
-        closeThisDropdown();
-      }
+      if (!wrap.contains(e.target)) doClose();
     });
 
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') {
-        closeThisDropdown();
-      }
+      if (e.key === 'Escape') doClose();
     });
 
     var obs = new MutationObserver(function () {
@@ -253,58 +289,13 @@
 
     syncOptions();
     syncLabel();
+
+    var inst = { open: doOpen, close: doClose, toggle: doToggle };
+    trigger._portalDropdown = inst;
+    panel._portalDropdown = inst;
   }
 
-  /* ── Generic portal dropdown for arbitrary trigger+panel ────────── */
-  function initPortalDropdown(trigger, panel, options) {
-    if (!trigger || !panel) return;
-    options = options || {};
-    var isOpen = false;
-
-    function open() {
-      panel.style.display = 'block';
-      panel.classList.remove('hidden');
-      portalDropdown(panel, trigger);
-      addScrollReposition(panel, trigger);
-      trigger.setAttribute('aria-expanded', 'true');
-      isOpen = true;
-    }
-
-    function close() {
-      panel.style.display = 'none';
-      panel.classList.add('hidden');
-      unportalDropdown(panel);
-      trigger.setAttribute('aria-expanded', 'false');
-      if (panel._csScrollCleanup) panel._csScrollCleanup();
-      isOpen = false;
-    }
-
-    function toggle() {
-      if (isOpen) close(); else open();
-    }
-
-    trigger.addEventListener('click', function (e) {
-      e.stopPropagation();
-      toggle();
-    });
-
-    document.addEventListener('click', function (e) {
-      if (!trigger.contains(e.target) && !panel.contains(e.target)) {
-        if (isOpen) close();
-      }
-    });
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && isOpen) close();
-    });
-
-    // Expose API
-    trigger._portalDropdown = { open: open, close: close, toggle: toggle };
-    panel._portalDropdown = { open: open, close: close, toggle: toggle };
-
-    return { open: open, close: close, toggle: toggle };
-  }
-
+  /* ── Public API ─────────────────────────────────────────────────── */
   function initCustomDropdowns() {
     var selects = document.querySelectorAll('.cs-select:not([data-cs-init])');
     for (var i = 0; i < selects.length; i++) {
@@ -312,8 +303,12 @@
     }
   }
 
-  window.initCustomDropdown = buildDropdown;
+  function initCustomDropdown(el) {
+    if (el) buildDropdown(el);
+  }
+
   window.initCustomDropdowns = initCustomDropdowns;
+  window.initCustomDropdown = initCustomDropdown;
   window.initPortalDropdown = initPortalDropdown;
 
   if (document.readyState === 'loading') {

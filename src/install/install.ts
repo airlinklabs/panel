@@ -7,7 +7,7 @@ import logger from '../services/logger.js';
 
 class Install {
   async install(key: string, email: string, password: string): Promise<void> {
-    const installationKey = 'your-installation-key'; // Replace with your actual key
+    const installationKey = process.env.INSTALLATION_KEY || 'default-installation-key';
 
     // Validate the installation key
     if (key !== installationKey) {

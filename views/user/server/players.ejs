@@ -34,7 +34,7 @@
             <div class="text-xs text-neutral-500 flex items-center gap-1.5">
               <%- icon('refresh-cw', { class: 'h-3 w-3', strokeWidth: 2 }) %>
               <span><span id="refresh-countdown">30</span>s</span>
-                      <button type="button" onclick="window.location.reload()" class="rounded-lg bg-transparent px-2 py-1 text-sm font-medium transition text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800">now</button>
+                      <button type="button" onclick="window.location.reload()" class="rounded-xl bg-transparent px-2 py-1 text-sm font-medium transition text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800">now</button>
             </div>
           </div>
         </div>
@@ -46,7 +46,7 @@
             <img
               src="https://crafatar.com/avatars/<%= player.uuid %>?size=64&overlay"
               alt="<%= player.name %>"
-              class="w-10 h-10 rounded-lg border border-neutral-200 dark:border-white/10 shrink-0"
+              class="w-10 h-10 rounded-xl border border-neutral-200 dark:border-white/10 shrink-0"
             />
             <div class="min-w-0">
               <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= player.name %></p>
@@ -67,7 +67,7 @@
             <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Server offline</p>
             <p class="text-xs text-neutral-500 mt-1">Start your server to see online players.</p>
             <div class="mt-4">
-                      <button type="button" onclick="window.location.reload()" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Refresh</button>
+                      <button type="button" onclick="window.location.reload()" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Refresh</button>
             </div>
           <% } else if (serverIsOnline) { %>
             <div class="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-700/20 flex items-center justify-center mx-auto mb-3">
@@ -130,7 +130,7 @@
                     <div class="text-xs text-neutral-500 flex items-center gap-1.5">
                       <%- icon('refresh-cw', { class: 'h-3 w-3', strokeWidth: 2 }) %>
                       <span><span id="refresh-countdown">30</span>s</span>
-                       <button type="button" onclick="window.location.reload()" class="rounded-lg bg-transparent px-2 py-1 text-sm font-medium transition text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800">now</button>
+                       <button type="button" onclick="window.location.reload()" class="rounded-xl bg-transparent px-2 py-1 text-sm font-medium transition text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800">now</button>
                     </div>
                   </div>
                 </div>
@@ -143,7 +143,7 @@
                       <img
                         src="https://crafatar.com/avatars/<%= player.uuid %>?size=64&overlay"
                         alt="<%= player.name %>"
-                        class="w-10 h-10 rounded-lg border border-neutral-200 dark:border-white/10 shrink-0"
+                        class="w-10 h-10 rounded-xl border border-neutral-200 dark:border-white/10 shrink-0"
                       />
                       <div class="min-w-0">
                         <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= player.name %></p>
@@ -153,7 +153,7 @@
                         </div>
                       </div>
                     </div>
-                    <button type="button" onclick="kickPlayer('<%= player.name %>')" class="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700 shrink-0">Kick</button>
+                    <button type="button" onclick="kickPlayer('<%= player.name %>')" class="rounded-xl bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700 shrink-0">Kick</button>
                   </div>
                   <% }); %>
                 </div>
@@ -166,7 +166,7 @@
                     <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Server offline</p>
                     <p class="text-xs text-neutral-500 mt-1">Start your server to see online players.</p>
                     <div class="mt-4">
-              <button type="button" onclick="window.location.reload()" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Refresh</button>
+              <button type="button" onclick="window.location.reload()" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Refresh</button>
                     </div>
                   <% } else if (serverIsOnline) { %>
                     <div class="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-700/20 flex items-center justify-center mx-auto mb-3">

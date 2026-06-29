@@ -3,22 +3,22 @@
 <div id="mobile-topbar" data-turbo-permanent class="mobile-top-bar al-topbar fixed top-0 left-0 right-0 z-10 h-14 bg-white/90 dark:bg-neutral-900/80 border-b border-neutral-200/60 dark:border-white/5">
   <div id="topbar-default" class="flex items-center justify-between h-14 px-4">
     <a href="/" class="flex items-center gap-2 min-w-0 flex-1 mr-3">
-      <img src="<%= settings.logo ? (settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo) : '/assets/logo.png' %>" alt="Logo" class="logo-bg h-8 w-8 rounded-lg bg-neutral-950/90 dark:bg-transparent p-0.5 shrink-0">
+      <img src="<%= settings.logo ? (settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo) : '/assets/logo.png' %>" alt="Logo" class="logo-bg h-8 w-8 rounded-xl bg-neutral-950/90 dark:bg-transparent p-0.5 shrink-0">
       <span class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= settings.title %></span>
     </a>
     <div class="flex items-center gap-2.5 shrink-0">
-      <button id="mobile-search-open" class="flex h-11 w-11 items-center justify-center rounded-lg text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition" aria-label="Open navigation search">
+      <button id="mobile-search-open" class="flex h-11 w-11 items-center justify-center rounded-xl text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition" aria-label="Open navigation search">
         <%- icon('search', { class: 'h-5 w-5' }) %>
       </button>
       <div class="relative" id="notification-bell-container">
-        <button id="notification-bell" class="flex h-11 w-11 items-center justify-center rounded-lg text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition relative" aria-label="Notifications">
+        <button id="notification-bell" class="flex h-11 w-11 items-center justify-center rounded-xl text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition relative" aria-label="Notifications">
           <%- icon('bell', { class: 'h-5 w-5' }) %>
           <span id="notification-badge" class="hidden absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">0</span>
         </button>
         <div id="notification-dropdown" class="hidden absolute top-full right-0 mt-1 w-80 max-h-96 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30" style="z-index: var(--z-dropdown)">
           <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/10">
             <span class="text-sm font-medium text-neutral-800 dark:text-white">Notifications</span>
-            <button onclick="markAllRead()" class="text-xs font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition px-2 py-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5">Mark all read</button>
+            <button onclick="markAllRead()" class="text-xs font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition px-2 py-1 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5">Mark all read</button>
           </div>
           <div id="notification-list" class="divide-y divide-neutral-100 dark:divide-white/5">
             <div class="px-4 py-10 text-center">
@@ -34,12 +34,12 @@
         <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
       </button>
       <a href="/account" class="flex items-center justify-center p-1.5 min-w-[44px] min-h-[44px]">
-        <img class="h-8 w-8 rounded-lg border border-neutral-200 dark:border-neutral-700" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
+        <img class="h-8 w-8 rounded-xl border border-neutral-200 dark:border-neutral-700" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
       </a>
     </div>
   </div>
   <div id="topbar-search" class="hidden items-center h-14 px-3 gap-2">
-    <button id="mobile-search-close" class="flex h-11 w-11 items-center justify-center rounded-lg text-neutral-600 dark:text-neutral-300 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500" aria-label="Close navigation search">
+    <button id="mobile-search-close" class="flex h-11 w-11 items-center justify-center rounded-xl text-neutral-600 dark:text-neutral-300 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500" aria-label="Close navigation search">
       <%- icon('x', { class: 'h-5 w-5' }) %>
     </button>
     <div class="al-mobile-search-shell flex-1 flex items-center bg-neutral-100 dark:bg-neutral-800 rounded-xl px-3 py-2 gap-2">
@@ -122,14 +122,14 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 <div id="more-sheet" data-turbo-permanent class="mobile-more-sheet fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-neutral-800 border-t border-neutral-200/30 dark:border-white/5 rounded-t-2xl translate-y-full pointer-events-none transition-transform duration-300 ease-out">
   <div class="flex items-center justify-between px-4 pt-4 pb-2">
     <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.navMore || 'More' %></p>
-    <button id="more-sheet-close" class="w-11 h-11 flex items-center justify-center rounded-lg text-neutral-500 hover:text-neutral-700 dark:text-neutral-300 dark:hover:text-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition" aria-label="Close more navigation">
+    <button id="more-sheet-close" class="w-11 h-11 flex items-center justify-center rounded-xl text-neutral-500 hover:text-neutral-700 dark:text-neutral-300 dark:hover:text-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition" aria-label="Close more navigation">
       <%- icon('x', { size: 16, class: 'shrink-0' }) %>
     </button>
   </div>
   <div class="px-4 pb-8 space-y-1">
     <% extraItems.forEach(function(item) { %>
     <a href="<%= item.url %>" class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition">
-      <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 shrink-0 [&>svg]:w-4 [&>svg]:h-4 [&>svg]:shrink-0">
+      <div class="w-8 h-8 flex items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-800 shrink-0 [&>svg]:w-4 [&>svg]:h-4 [&>svg]:shrink-0">
         <%- item.icon %>
       </div>
       <span class="text-sm font-medium text-neutral-700 dark:text-neutral-200"><%= item.label %></span>
@@ -413,7 +413,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
         <div id="desktop-notification-dropdown" class="hidden absolute bottom-full left-0 mb-2 w-80 max-h-80 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30" style="z-index: var(--z-dropdown)">
           <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/10">
             <span class="text-sm font-medium text-neutral-800 dark:text-white">Notifications</span>
-            <button onclick="markAllRead()" class="text-xs font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition px-2 py-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5">Mark all read</button>
+            <button onclick="markAllRead()" class="text-xs font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition px-2 py-1 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5">Mark all read</button>
           </div>
           <div id="desktop-notification-list" class="divide-y divide-neutral-100 dark:divide-white/5">
             <div class="px-4 py-10 text-center">
@@ -622,7 +622,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
       html += '<p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 leading-relaxed line-clamp-2">' + escapeHtml(n.message) + '</p>';
       html += '<p class="text-[10px] text-neutral-400 mt-1.5 font-medium">' + timeAgo + '</p></div>';
       html += '<div class="flex items-center gap-1.5 shrink-0 mt-0.5">' + dot;
-      html += '<button onclick="deleteNotification(\'' + n.id + '\')" class="p-1.5 rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors" aria-label="Delete"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg></button>';
+      html += '<button onclick="deleteNotification(\'' + n.id + '\')" class="p-1.5 rounded-xl text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors" aria-label="Delete"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg></button>';
       html += '</div></div>';
     });
     lists.forEach(function(el) { if (el) el.innerHTML = html; });

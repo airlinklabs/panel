@@ -11,7 +11,7 @@
         <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= req.translations.adminUsersTitle %></h1>
         <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminUsersText %></p>
       </div>
-      <button type="button" onclick="location.href='/admin/users/create'" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">New User</button>
+      <button type="button" onclick="location.href='/admin/users/create'" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">New User</button>
     </div>
 
     <div class="grid grid-cols-2 gap-3 mb-5">
@@ -58,12 +58,12 @@
             <p class="text-xs text-neutral-500"><%= user.servers ? user.servers.length : 0 %> server<%= (user.servers && user.servers.length !== 1) ? 's' : '' %></p>
             <div class="flex gap-1.5">
               <a href="/admin/users/view/<%= user.id %>/">
-                <button type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">View</button>
+                <button type="button" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">View</button>
               </a>
               <a href="/admin/users/edit/<%= user.id %>/">
-                <button type="button" class="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-blue-500 transition">Edit</button>
+                <button type="button" class="rounded-xl bg-blue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-blue-500 transition">Edit</button>
               </a>
-              <button onclick="deleteUser('<%= user.id %>')" type="button" class="rounded-lg bg-red-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-red-500 transition">Remove</button>
+              <button onclick="deleteUser('<%= user.id %>')" type="button" class="rounded-xl bg-red-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-red-500 transition">Remove</button>
             </div>
           </div>
         </div>

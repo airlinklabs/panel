@@ -28,8 +28,8 @@
         <p class="text-xs text-neutral-500 mt-0.5"><%= req.translations.adminImagesText %></p>
       </div>
       <div class="flex gap-2 shrink-0">
-        <button type="button" id="uploadimage" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Upload</button>
-        <button type="button" onclick="openModal('createModal')" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Create</button>
+        <button type="button" id="uploadimage" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Upload</button>
+        <button type="button" onclick="openModal('createModal')" class="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Create</button>
       </div>
     </div>
 
@@ -58,7 +58,7 @@
         <% let imgIdx = 0; images.forEach(function(image) { %>
           <div data-animate-card class="grid-item-animate rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-3" style="--i:<%= imgIdx++ %>">
             <div class="flex items-center gap-3 mb-3">
-              <div data-animate-card class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 flex items-center justify-center shrink-0">
+              <div data-animate-card class="w-9 h-9 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 flex items-center justify-center shrink-0">
                 <%- icon('image', { size: 16, class: 'text-neutral-500 shrink-0' }) %>
               </div>
               <div class="flex-1 min-w-0">
@@ -69,12 +69,12 @@
             </div>
             <div class="flex gap-2 justify-end">
               <a href="/admin/images/edit/<%= image.id %>">
-                <button type="button" class="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-blue-500 transition">Edit</button>
+                <button type="button" class="rounded-xl bg-blue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-blue-500 transition">Edit</button>
               </a>
               <a href="/admin/images/export/<%= image.id %>">
-                <button type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Export</button>
+                <button type="button" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Export</button>
               </a>
-              <button onclick="deleteImage('<%= image.id %>')" type="button" class="rounded-lg bg-red-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-red-500 transition">Delete</button>
+              <button onclick="deleteImage('<%= image.id %>')" type="button" class="rounded-xl bg-red-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-red-500 transition">Delete</button>
             </div>
           </div>
         <% }); %>
@@ -155,7 +155,7 @@
         <p class="text-sm font-semibold text-neutral-800 dark:text-white">Create Image</p>
         <p class="text-xs text-neutral-500 mt-0.5">Configure Docker images and variables after creation.</p>
       </div>
-      <button onclick="closeModal('createModal')" class="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition ml-3">
+      <button onclick="closeModal('createModal')" class="shrink-0 w-7 h-7 flex items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition ml-3">
         <%- icon('x', { size: 14, class: 'shrink-0' }) %>
       </button>
     </div>
@@ -524,9 +524,9 @@
       <div class="sm:flex sm:items-center px-8 pt-4">
         <%- include('../../components/pageTitle', { title: 'Images', description: 'Manage server images installed on this panel' }) %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-2 flex-wrap">
-          <button type="button" id="uploadBtn" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Upload JSON</button>
-          <button type="button" onclick="openCreate()" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">New Image</button>
-          <a href="/admin/images/store"><button type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Browse Store</button></a>
+          <button type="button" id="uploadBtn" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Upload JSON</button>
+          <button type="button" onclick="openCreate()" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">New Image</button>
+          <a href="/admin/images/store"><button type="button" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Browse Store</button></a>
         </div>
       </div>
 
@@ -605,7 +605,7 @@
         <p class="text-sm font-semibold text-neutral-800 dark:text-white">New Image</p>
         <p class="text-xs text-neutral-500 mt-0.5">Configure Docker images and variables after creation.</p>
       </div>
-      <button onclick="closeCreate()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
+      <button onclick="closeCreate()" class="w-7 h-7 flex items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
         <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>
