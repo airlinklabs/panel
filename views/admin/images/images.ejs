@@ -134,7 +134,7 @@
   </div>
 </main>
 
-<div id="installModal" class="hidden fixed inset-0 z-[40] bg-black/50 flex items-end">
+<div id="installModal" class="hidden fixed inset-0 z-modal-backdrop bg-black/50 flex items-end">
   <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 rounded-t-2xl w-full p-5">
     <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-0.5" id="modalTitle">Install image</h2>
     <p class="text-xs text-neutral-500 mb-4" id="modalSubtitle">Add this image to your panel.</p>
@@ -148,7 +148,7 @@
   </div>
 </div>
 
-<div id="createModal" class="fixed inset-0 z-[40] hidden items-center justify-center p-4 bg-black/60">
+<div id="createModal" class="fixed inset-0 z-modal-backdrop hidden items-center justify-center p-4 bg-black/60">
   <div data-animate-card class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/5 rounded-2xl w-full shadow-xl max-h-[92vh] overflow-y-auto">
     <div class="flex items-start justify-between px-4 pt-4 pb-3 border-b border-neutral-100 dark:border-white/5">
       <div>
@@ -400,7 +400,7 @@
 
   function showConfirmModal(title, message, onConfirm) {
     var modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/50 z-[40] flex items-end justify-center opacity-0 pointer-events-none transition-opacity duration-200';
+    modal.className = 'fixed inset-0 bg-black/50 z-modal-backdrop flex items-end justify-center opacity-0 pointer-events-none transition-opacity duration-200';
     modal.innerHTML = '\
       <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 rounded-t-2xl p-5 w-full translate-y-full transition-transform duration-200 shadow-2xl">\
         <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">'+title+'</h2>\
@@ -486,7 +486,7 @@
 <style>
   ::-webkit-scrollbar { display: none; }
   .modal-overlay {
-    position: fixed; inset: 0; z-index: 40;
+    position: fixed; inset: 0; z-index: var(--z-modal-backdrop);
     background: var(--theme-overlay, rgba(0,0,0,0.5));
     display: flex; align-items: center; justify-content: center; padding: 16px;
     opacity: 0; pointer-events: none; transition: opacity 0.25s;
@@ -551,12 +551,12 @@
       <% if (images.length === 0) { %>
       <div class="flex flex-col items-center justify-center py-24 text-center">
         <p class="text-sm text-neutral-500">No images installed yet.</p>
-        <a href="/admin/images/store"><button type="button" class="mt-4 border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Browse Store</button></a>
+        <a href="/admin/images/store"><button type="button" class="mt-4 al-ui-button">Browse Store</button></a>
       </div>
       <% } else { %>
 
       <div class="mx-8 mt-5 mb-1">
-        <input id="imageFilterInput" type="text" placeholder="Filter images…" class="w-56 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
+        <input id="imageFilterInput" type="text" placeholder="Filter images…" class="w-56 al-input">
       </div>
 
       <div class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40">
@@ -580,9 +580,9 @@
               <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400 col-hide"><%= new Date(image.createdAt).toLocaleDateString() %></td>
               <td class="whitespace-nowrap px-3 py-4 text-sm">
                 <div class="flex gap-2">
-                  <a href="/admin/images/edit/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Edit</button></a>
-                  <a href="/admin/images/export/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Export</button></a>
-                  <button onclick="event.stopPropagation(); openDelete('<%= image.id %>', '<%= image.name %>')" type="button" class="rounded-xl bg-red-600 hover:bg-red-500 px-3 py-2 text-sm font-medium shadow-sm transition">
+                  <a href="/admin/images/edit/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="al-ui-button">Edit</button></a>
+                  <a href="/admin/images/export/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="al-ui-button">Export</button></a>
+                  <button onclick="event.stopPropagation(); openDelete('<%= image.id %>', '<%= image.name %>')" type="button" class="al-ui-danger">
                     <%- icon('trash-2', { size: 16, class: 'text-white shrink-0' }) %>
                   </button>
                 </div>
@@ -605,7 +605,7 @@
         <p class="text-sm font-semibold text-neutral-800 dark:text-white">New Image</p>
         <p class="text-xs text-neutral-500 mt-0.5">Configure Docker images and variables after creation.</p>
       </div>
-      <button onclick="closeCreate()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
+      <button onclick="closeCreate()" class="w-7 h-7 flex items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
         <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>
@@ -618,8 +618,8 @@
         <div class="col-span-2"><label class="field-label">Description</label><textarea class="field-input" name="description" rows="2" placeholder="What does this image run?" style="resize:none;"></textarea></div>
       </div>
       <div class="flex gap-2 pt-1">
-        <button type="button" onclick="closeCreate()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition">Cancel</button>
-        <button type="submit" class="flex-1 py-2 rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 text-sm font-medium shadow-lg transition">Create & Edit</button>
+        <button type="button" onclick="closeCreate()" class="flex-1 al-ui-button">Cancel</button>
+        <button type="submit" class="flex-1 al-ui-button-primary">Create & Edit</button>
       </div>
     </form>
   </div>
@@ -631,8 +631,8 @@
       <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Delete image?</p>
       <p id="deleteMsg" class="text-xs text-neutral-500 mb-5"></p>
       <div class="flex gap-2">
-        <button onclick="closeDelete()" class="flex-1 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition">Cancel</button>
-        <button id="deleteConfirm" class="flex-1 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-medium shadow-sm transition">Delete</button>
+        <button onclick="closeDelete()" class="flex-1 al-ui-button">Cancel</button>
+        <button id="deleteConfirm" class="flex-1 al-ui-danger">Delete</button>
       </div>
     </div>
   </div>

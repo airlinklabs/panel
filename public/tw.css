@@ -128,9 +128,41 @@
     @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-neutral-950 px-3 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-55 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200;
   }
 
-  .al-ui-muted {
+  .al-ui-danger {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-55;
+  }
+
+  .al-input {
+    @apply w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 placeholder-neutral-500 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 dark:border-neutral-700 dark:bg-white/5 dark:text-white dark:placeholder-neutral-500 dark:focus:ring-neutral-500;
+  }
+
+  .al-input-sm {
+    @apply w-full rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm text-neutral-800 placeholder-neutral-500 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 dark:border-neutral-700 dark:bg-white/5 dark:text-white dark:placeholder-neutral-500 dark:focus:ring-neutral-500;
+  }
+
+  .al-select {
+    @apply w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 dark:border-neutral-700 dark:bg-white/5 dark:text-white dark:focus:ring-neutral-500;
+  }
+
+  .al-textarea {
+    @apply w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 placeholder-neutral-500 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 dark:border-neutral-700 dark:bg-white/5 dark:text-white dark:placeholder-neutral-500 dark:focus:ring-neutral-500;
+  }
+
+  .al-label {
+    @apply block text-sm font-medium text-neutral-700 dark:text-neutral-300;
+  }
+
+  .al-muted {
     @apply text-neutral-600 dark:text-neutral-400;
   }
+
+  .z-nav { z-index: var(--z-nav); }
+  .z-floating { z-index: var(--z-floating); }
+  .z-dropdown { z-index: var(--z-dropdown); }
+  .z-modal-backdrop { z-index: var(--z-modal-backdrop); }
+  .z-modal { z-index: var(--z-modal); }
+  .z-toast { z-index: var(--z-toast); }
+  .z-loading { z-index: var(--z-loading); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -325,6 +357,11 @@ button:active:not(:disabled), .al-btn:active:not(:disabled) {
 
 /* ── Selection ───────────────────────────────────────────────────────────── */
 ::selection { background: rgb(var(--al-accent) / 0.24); }
+
+/* ── File manager modals ─────────────────────────────────────────────────── */
+/* Fixes hidden+flex display conflict: when .hidden is removed, flex is applied */
+.file-modal { display: flex; flex-direction: column; }
+.file-modal.hidden { display: none !important; }
 
 /* ── Smooth scroll inside swapped panels ────────────────────────────────── */
 #page-content { scroll-behavior: smooth; }

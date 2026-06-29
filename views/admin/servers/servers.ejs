@@ -58,7 +58,7 @@
 
     <!-- Floating pill — fixed below mobile topbar when toolbar scrolls off screen -->
     <div id="floatingToolbar"
-      style="position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:40;opacity:0;pointer-events:none;transition:opacity 0.22s ease,transform 0.22s cubic-bezier(0.16,1,0.3,1);width:calc(100% - 2rem);max-width:420px">
+      style="position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:var(--z-modal-backdrop);opacity:0;pointer-events:none;transition:opacity 0.22s ease,transform 0.22s cubic-bezier(0.16,1,0.3,1);width:calc(100% - 2rem);max-width:420px">
       <div data-animate-card class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-neutral-900 shadow-xl border border-neutral-200 dark:border-neutral-700/60">
         <span class="selection-count text-xs font-medium text-neutral-600 dark:text-neutral-300 mr-1">0 selected</span>
         <div class="h-3.5 w-px bg-neutral-300 dark:bg-neutral-600 mx-0.5"></div>
@@ -151,7 +151,7 @@
 </main>
 
 <!-- Radar scan modal -->
-<div id="radarScanModal" class="fixed inset-0 z-[40] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+<div id="radarScanModal" class="fixed inset-0 z-modal-backdrop hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
   <div data-animate-card class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-2xl w-full shadow-xl overflow-clip max-h-[90vh] flex flex-col">
 
     <div class="flex items-start justify-between px-5 pt-5 pb-4 border-b border-neutral-200 dark:border-white/10 shrink-0">
@@ -184,7 +184,7 @@
 
       <div id="builtinPickerSection">
         <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Script</label>
-        <select id="scriptSelect" class="cs-select">
+        <select id="scriptSelect" class="cs-select"></select>
         <p id="scriptDescription" class="text-xs text-neutral-500 italic mb-4 min-h-4"></p>
         <button id="runScanButton" onclick="runRadarScan()"
           class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-neutral-900 dark:bg-neutral-700 border border-neutral-700/40 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 transition">
@@ -714,7 +714,7 @@
           <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminServersText %></p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button type="button" onclick="location.href='/admin/servers/create'" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition"><%= req.translations.createNewServer %></button>
+          <a href="/admin/servers/create" class="al-ui-button-primary"><%= req.translations.createNewServer %></a>
         </div>
       </div>
 
@@ -764,7 +764,7 @@
 
       <!-- Floating pill — fixed below topbar when toolbar scrolls off screen -->
       <div id="floatingToolbar"
-        style="position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:40;opacity:0;pointer-events:none;transition:opacity 0.22s ease,transform 0.22s cubic-bezier(0.16,1,0.3,1)">
+        style="position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:var(--z-modal-backdrop);opacity:0;pointer-events:none;transition:opacity 0.22s ease,transform 0.22s cubic-bezier(0.16,1,0.3,1)">
         <div data-animate-card class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-neutral-900 shadow-xl border border-neutral-200 dark:border-neutral-700/60">
           <span class="selection-count text-sm font-medium text-neutral-600 dark:text-neutral-300 mr-1">0 selected</span>
           <div class="h-4 w-px bg-neutral-200 dark:bg-neutral-700 mx-1"></div>
@@ -876,10 +876,10 @@
 <%- include('../../components/loadingPopup') %>
 
 <!-- Radar scan modal -->
-<div id="radarScanModal" class="fixed inset-0 z-[40] hidden">
+<div id="radarScanModal" class="fixed inset-0 z-modal-backdrop hidden flex items-center justify-center">
   <div class="flex items-center justify-center min-h-screen p-4">
-    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[40]" id="radarScanModalBackdrop"></div>
-    <div data-animate-card class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-2xl max-w-2xl w-full overflow-clip">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-modal-backdrop" id="radarScanModalBackdrop"></div>
+    <div data-animate-card class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-2xl max-w-2xl w-full overflow-clip" style="z-index: var(--z-modal)">
 
       <div class="flex justify-between items-start px-6 py-4 border-b border-neutral-200 dark:border-neutral-700/50">
         <div>

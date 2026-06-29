@@ -167,18 +167,6 @@
 </main>
 
 <script nonce="<%- nonce %>">
-  function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `fixed bottom-4 right-4 z-[60] px-4 py-2 rounded-lg shadow-lg transition-opacity duration-500 ${type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = '1'; }, 10);
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      setTimeout(() => { document.body.removeChild(toast); }, 500);
-    }, 3000);
-  }
-
   const apiKeySelect = document.getElementById('apiKeySelect');
   const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
   const testButtons = document.querySelectorAll('.test-endpoint-btn');
@@ -337,7 +325,7 @@
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <div class="flex gap-2">
             <a href="/admin/apikeys"
-              class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+              class="w-full md:w-auto al-ui-button-primary">
               Manage API Keys
             </a>
           </div>
@@ -361,7 +349,7 @@
           </div>
           <div class="flex-shrink-0 self-end sm:self-center">
             <button id="saveApiKeyBtn"
-              class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2"
+              class="w-full md:w-auto al-ui-button-primary"
               disabled>
               Use for Testing
             </button>
@@ -441,11 +429,11 @@
                                     const paramName = param.replace(':', '');
                                   %>
                                     <input type="text" data-param-name="<%= paramName %>"
-                                      class="inline-block w-12 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white text-xs px-2 py-1 shadow-sm focus:border-neutral-500 focus:ring-neutral-500"
+                                      class="inline-block w-12 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-white/5 text-neutral-800 dark:text-white text-xs px-2 py-1 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 dark:focus:ring-neutral-500"
                                       placeholder="<%= paramName %>" />
                                   <% }); %>
                                   <button type="button"
-                                    class="test-endpoint-btn text-xs rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-3 py-1 font-medium shadow-sm transition focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none"
+                                    class="test-endpoint-btn al-ui-button-primary"
                                     data-method="<%= endpoint.method %>" data-path="<%= endpoint.path %>"
                                     data-permission="<%= endpoint.permission %>"
                                     data-request="<%= endpoint.requestExample ? encodeURIComponent(endpoint.requestExample) : '' %>"
@@ -456,7 +444,7 @@
                               <% } %>
                               <% if (!dynamicParams) { %>
                                 <button type="button"
-                                  class="test-endpoint-btn text-xs rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-3 py-1 font-medium shadow-sm transition focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none"
+                                  class="test-endpoint-btn al-ui-button-primary"
                                   data-method="<%= endpoint.method %>" data-path="<%= endpoint.path %>"
                                   data-permission="<%= endpoint.permission %>"
                                   data-request="<%= endpoint.requestExample ? encodeURIComponent(endpoint.requestExample) : '' %>"
@@ -469,7 +457,7 @@
                               <div class="mb-2">
                                 <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">Request Body:</label>
                                 <textarea
-                                  class="request-body block w-full rounded-md border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 text-xs h-24"
+                                  class="request-body al-textarea h-24"
                                   placeholder="Enter request body in JSON format"
                                   data-endpoint-path="<%= endpoint.path %>"><%= endpoint.requestExample ? endpoint.requestExample.replace(/\n/g, '\n').trim() : '' %></textarea>
                               </div>

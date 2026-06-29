@@ -91,7 +91,7 @@
   </div>
 </main>
 
-<div id="createApiKeyModal" class="fixed inset-0 z-[40] hidden items-end justify-center bg-black/50 backdrop-blur-sm" aria-hidden="true">
+<div id="createApiKeyModal" class="fixed inset-0 z-modal-backdrop hidden items-end justify-center bg-black/50 backdrop-blur-sm" aria-hidden="true">
   <div class="bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-white/5 rounded-t-2xl w-full shadow-xl max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="createApiKeyTitle" aria-describedby="createApiKeyDescription" tabindex="-1">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60 sticky top-0 bg-white dark:bg-neutral-900 z-10">
       <div>
@@ -160,7 +160,7 @@
   </div>
 </div>
 
-<div id="editApiKeyModal" class="fixed inset-0 z-[40] hidden items-end justify-center bg-black/50 backdrop-blur-sm" aria-hidden="true">
+<div id="editApiKeyModal" class="fixed inset-0 z-modal-backdrop hidden items-end justify-center bg-black/50 backdrop-blur-sm" aria-hidden="true">
   <div class="bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-white/5 rounded-t-2xl w-full shadow-xl max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="editApiKeyTitle" aria-describedby="editApiKeyDescription" tabindex="-1">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60 sticky top-0 bg-white dark:bg-neutral-900 z-10">
       <div>
@@ -387,7 +387,7 @@
 <script nonce="<%- nonce %>">
   function showConfirmModal(title, message, onConfirm) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/60 z-[40] flex items-end justify-center';
+    modal.className = 'fixed inset-0 bg-black/60 z-modal-backdrop flex items-end justify-center';
     modal.innerHTML = `
       <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl p-5 w-full shadow-2xl">
         <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">${title}</h2>
@@ -449,10 +449,10 @@
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <div class="flex gap-2">
-            <button id="createApiKeyBtn" type="button" class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+            <button id="createApiKeyBtn" type="button" class="w-full md:w-auto al-ui-button-primary">
               Create API Key
             </button>
-            <a href="/admin/api/docs" class="w-full md:w-auto rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 px-3 py-2 text-sm font-medium shadow-sm transition focus:outline focus:outline-2 focus:outline-offset-2">
+            <a href="/admin/api/docs" class="w-full md:w-auto al-ui-button">
               API Documentation
             </a>
           </div>
@@ -565,7 +565,7 @@
   </div>
 </main>
 
-<div id="createApiKeyModal" class="fixed inset-0 z-[40] hidden overflow-y-auto" aria-hidden="true">
+<div id="createApiKeyModal" class="fixed inset-0 z-modal-backdrop hidden flex items-center justify-center overflow-y-auto" aria-hidden="true">
   <div class="flex min-h-full items-center justify-center p-4">
     <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" onclick="hideCreateModal()"></div>
     <div class="relative bg-white dark:bg-neutral-800 rounded-2xl shadow-xl w-full max-w-2xl border border-neutral-200 dark:border-white/5" role="dialog" aria-modal="true" aria-labelledby="createApiKeyTitle" aria-describedby="createApiKeyDescription" tabindex="-1">
@@ -584,13 +584,13 @@
           <div>
             <label for="name" class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5"><%= req.translations.apiKeyName || 'Name' %></label>
             <input type="text" name="name" id="name" required
-              class="block w-full rounded-xl px-3 py-2 text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 transition"
+              class="al-input"
               placeholder="<%= req.translations.apiKeyNamePlaceholder || 'My API Key' %>">
           </div>
           <div>
             <label for="description" class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5"><%= req.translations.apiKeyDescriptionLabel || 'Description' %> <span class="text-neutral-400 font-normal">(optional)</span></label>
             <input type="text" name="description" id="description"
-              class="block w-full rounded-xl px-3 py-2 text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 transition"
+              class="al-input"
               placeholder="What is this key used for?">
           </div>
         </div>
@@ -647,11 +647,11 @@
         </div>
         <div class="flex justify-end gap-2 pt-1 border-t border-neutral-200 dark:border-neutral-700/60">
           <button type="button" onclick="hideCreateModal()"
-            class="px-4 py-2 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition active:scale-95">
+            class="al-ui-button">
             Cancel
           </button>
           <button type="submit"
-            class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition active:scale-95">
+            class="al-ui-button-primary">
             Create API key
           </button>
         </div>
@@ -660,7 +660,7 @@
   </div>
 </div>
 
-<div id="editApiKeyModal" class="fixed inset-0 z-[40] hidden items-center justify-center" aria-hidden="true">
+<div id="editApiKeyModal" class="fixed inset-0 z-modal-backdrop hidden items-center justify-center" aria-hidden="true">
   <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="editApiKeyModalBackdrop"></div>
   <div id="editApiKeyModalPanel" role="dialog" aria-modal="true" aria-labelledby="editApiKeyTitle" aria-describedby="editApiKeyDescription" tabindex="-1" class="relative bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60 shrink-0">
@@ -679,20 +679,20 @@
           <div>
             <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1"><%= req.translations.apiKeyName || 'Name' %></label>
             <input type="text" name="name" id="edit-name" required
-              class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700/50 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-white text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 transition"
+              class="al-input"
               placeholder="<%= req.translations.apiKeyNamePlaceholder || 'My API Key' %>">
           </div>
           <div>
             <label class="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1"><%= req.translations.apiKeyDescriptionLabel || 'Description' %></label>
             <input type="text" name="description" id="edit-description"
-              class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700/50 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-white text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600 transition"
+              class="al-input"
               placeholder="<%= req.translations.apiKeyDescriptionPlaceholder || 'Used for server management' %>">
           </div>
         </div>
         <div class="flex gap-2">
-          <button type="button" id="editSelectAllBtn" class="text-xs px-3 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Select all</button>
-          <button type="button" id="editSelectNoneBtn" class="text-xs px-3 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Clear all</button>
-          <button type="button" id="editSelectReadOnlyBtn" class="text-xs px-3 py-1.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Read only</button>
+          <button type="button" id="editSelectAllBtn" class="al-ui-button">Select all</button>
+          <button type="button" id="editSelectNoneBtn" class="al-ui-button">Clear all</button>
+          <button type="button" id="editSelectReadOnlyBtn" class="al-ui-button">Read only</button>
         </div>
         <div class="space-y-3">
           <% ['servers', 'users', 'nodes', 'settings'].forEach(cat => { %>
@@ -715,8 +715,8 @@
         </div>
       </div>
       <div class="flex gap-2 px-5 py-4 border-t border-neutral-200 dark:border-neutral-700/60 justify-end shrink-0">
-        <button type="button" onclick="hideEditModal()" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Cancel</button>
-        <button type="submit" class="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-neutral-700 text-white hover:bg-neutral-800 dark:hover:bg-neutral-600 transition">Save changes</button>
+        <button type="button" onclick="hideEditModal()" class="al-ui-button">Cancel</button>
+        <button type="submit" class="al-ui-button-primary">Save changes</button>
       </div>
     </form>
   </div>
@@ -729,18 +729,6 @@
   function getFocusableElements(root) {
     return Array.from(root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
       .filter(el => !el.disabled && el.offsetParent !== null);
-  }
-
-  function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `fixed bottom-4 right-4 z-[60] px-4 py-2 rounded-lg shadow-lg transition-opacity duration-500 ${type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = '1'; }, 10);
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      setTimeout(() => { document.body.removeChild(toast); }, 500);
-    }, 3000);
   }
 
   function copyToClipboard(text) {

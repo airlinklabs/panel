@@ -1,11 +1,13 @@
 (function () {
-  document.addEventListener('contextmenu', e => e.preventDefault());
+
 
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 
   const bridge    = document.getElementById('dashboard-data');
-  const allFolders = JSON.parse(bridge.dataset.folders || '[]');
-  const allServers = JSON.parse(bridge.dataset.servers || '[]');
+  let allFolders;
+  try { allFolders = JSON.parse(bridge.dataset.folders || '[]'); } catch { allFolders = []; }
+  let allServers;
+  try { allServers = JSON.parse(bridge.dataset.servers || '[]'); } catch { allServers = []; }
 
   // ── View toggle ───────────────────────────────────────────
   const gridView    = document.getElementById('gridView');
@@ -86,7 +88,8 @@
     });
     card.addEventListener('click', e => {
       if (e.target.closest('.folder-delete-btn')) return;
-      const memberUUIDs = JSON.parse(card.dataset.folderMembers || '[]');
+      let memberUUIDs;
+      try { memberUUIDs = JSON.parse(card.dataset.folderMembers || '[]'); } catch { memberUUIDs = []; }
       activeFolderId = card.dataset.folderId;
       folderPopupTitle.textContent = card.dataset.folderName;
       folderPopupContent.innerHTML = '';
@@ -356,7 +359,8 @@
     const q = (filter || '').toLowerCase();
     serverPickerList.innerHTML = '';
     const folderCard = document.querySelector(`.folder-card[data-folder-id="${activeFolderId}"]`);
-    const memberUUIDs = folderCard ? JSON.parse(folderCard.dataset.folderMembers || '[]') : [];
+    let memberUUIDs;
+    try { memberUUIDs = folderCard ? JSON.parse(folderCard.dataset.folderMembers || '[]') : []; } catch { memberUUIDs = []; }
 
     const filtered = allServers.filter(s => {
       if (q && !s.name.toLowerCase().includes(q)) return false;

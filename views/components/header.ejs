@@ -11,7 +11,7 @@
     <meta property="og:title" content="<%= settings.title %> - <%= title %>">
     <meta property="og:description" content="Manage game servers, access, files, and node health from <%= settings.title %>.">
     <meta property="og:image" content="<%= settings.logo && settings.logo.startsWith('/') ? settings.logo : '/assets/logo.png' %>">
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/styles.css?v=<%= Date.now() %>">
     <link rel="stylesheet" href="/layout-animations.css">
     <link rel="stylesheet" href="/styles/motion.css">
     <link rel="stylesheet" href="/styles/custom-dropdown.css">
@@ -40,15 +40,18 @@
     <script nonce="<%- nonce %>" src="/js/core/animations.js"></script>
     <script nonce="<%- nonce %>" src="/js/core/custom-dropdown.js"></script>
     <style>
-      html, body, * { scrollbar-width: none; -ms-overflow-style: none; }
-      ::-webkit-scrollbar { display: none; }
+      html, body { scrollbar-width: thin; scrollbar-color: rgba(120,120,120,0.3) transparent; }
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: rgba(120,120,120,0.3); border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: rgba(120,120,120,0.5); }
       html, body { transition: background-color 0.25s ease-in, color 0.25s ease-in; }
       body { overscroll-behavior: none; }
     </style>
 </head>
 <body class="bg-neutral-50 dark:bg-neutral-900 h-full text-neutral-800 dark:text-white overflow-x-hidden">
 
-<div id="toast-container" data-turbo-permanent class="fixed top-4 right-4 z-[60] flex flex-col gap-2 pointer-events-none max-w-xs w-full" aria-live="polite" aria-atomic="false" role="status"></div>
+<div id="toast-container" data-turbo-permanent class="fixed top-4 right-4 z-toast flex flex-col gap-2 pointer-events-none max-w-sm w-full" aria-live="polite" aria-atomic="false" role="status"></div>
 
 <a href="#page-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-70 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-neutral-900 focus:text-white focus:text-sm focus:font-medium focus:shadow-lg">Skip to main content</a>
 

@@ -15,7 +15,7 @@
           <%- icon('bell', { class: 'h-5 w-5' }) %>
           <span id="notification-badge" class="hidden absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">0</span>
         </button>
-        <div id="notification-dropdown" class="hidden w-80 max-h-96 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30" style="z-index: var(--z-dropdown)">
+        <div id="notification-dropdown" class="hidden absolute top-full right-0 mt-1 w-80 max-h-96 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30" style="z-index: var(--z-dropdown)">
           <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/10">
             <span class="text-sm font-medium text-neutral-800 dark:text-white">Notifications</span>
             <button onclick="markAllRead()" class="text-xs font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition px-2 py-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5">Mark all read</button>
@@ -30,10 +30,10 @@
           </div>
         </div>
       </div>
-      <button id="theme-toggle" class="w-11 h-6 flex items-center bg-neutral-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950" aria-label="Switch to dark mode" aria-pressed="false">
+      <button id="theme-toggle" class="w-11 min-h-[44px] flex items-center bg-neutral-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950" aria-label="Switch to dark mode" aria-pressed="false">
         <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
       </button>
-      <a href="/account">
+      <a href="/account" class="flex items-center justify-center p-1.5 min-w-[44px] min-h-[44px]">
         <img class="h-8 w-8 rounded-lg border border-neutral-200 dark:border-neutral-700" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
       </a>
     </div>
@@ -405,12 +405,12 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
     <!-- Static bottom: notifications + logout -->
     <div class="shrink-0 border-t border-neutral-800/10 dark:border-white/5">
       <div class="relative px-3 py-2">
-        <button onclick="event.stopPropagation(); toggleNotifications()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/[0.05] transition-colors" id="desktop-notification-btn">
+        <button onclick="event.stopPropagation(); toggleNotifications()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/[0.05] transition-colors" id="desktop-notification-btn">
           <%- icon('bell', { class: 'h-5 w-5 shrink-0' }) %>
           <span class="flex-1 text-left">Notifications</span>
           <span id="desktop-notification-badge" class="hidden h-5 min-w-5 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center px-1">0</span>
         </button>
-        <div id="desktop-notification-dropdown" class="hidden w-72 max-h-80 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30" style="z-index: var(--z-dropdown)">
+        <div id="desktop-notification-dropdown" class="hidden absolute bottom-full left-0 mb-2 w-80 max-h-80 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30" style="z-index: var(--z-dropdown)">
           <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/10">
             <span class="text-sm font-medium text-neutral-800 dark:text-white">Notifications</span>
             <button onclick="markAllRead()" class="text-xs font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition px-2 py-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5">Mark all read</button>
@@ -537,6 +537,23 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
     if (desktopDropdown) desktopDropdown.classList.toggle('hidden');
     if (notifDropdown) notifDropdown.classList.add('hidden');
   };
+
+  document.addEventListener('click', function(e) {
+    if (desktopDropdown && !desktopDropdown.classList.contains('hidden')) {
+      if (!desktopBtn || !desktopBtn.contains(e.target)) {
+        if (!desktopDropdown.contains(e.target)) {
+          desktopDropdown.classList.add('hidden');
+        }
+      }
+    }
+    if (notifDropdown && !notifDropdown.classList.contains('hidden')) {
+      if (!bell || !bell.contains(e.target)) {
+        if (!notifDropdown.contains(e.target)) {
+          notifDropdown.classList.add('hidden');
+        }
+      }
+    }
+  });
 
   window.markAllRead = function() {
     fetch('/api/notifications/read-all', { method: 'POST', headers: { 'Content-Type': 'application/json' } })

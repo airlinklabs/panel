@@ -1,5 +1,5 @@
 <!-- Image Viewer Modal Component -->
-<div id="imageViewerModal" class="fixed inset-0 bg-black/75 z-[50] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+<div id="imageViewerModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-modal flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
     <div class="bg-white dark:bg-neutral-800 rounded-xl p-4 <% if (isMobileViewport) { %>w-full mx-4<% } else { %>max-w-4xl w-full<% } %> max-h-[90vh] transform scale-95 transition-transform duration-300 flex flex-col">
         <div class="flex justify-between items-center mb-2">
             <h2 id="imageViewerTitle" class="text-xl font-medium text-neutral-800 dark:text-white truncate"></h2>
@@ -46,8 +46,6 @@
             let currentServerUUID = '';
 
             const showImageViewer = (fileName, filePath, fileSize, serverUUID) => {
-                console.log('Opening image viewer for:', fileName, filePath, fileSize, serverUUID);
-
                 currentImagePath = filePath;
                 currentFileName = fileName;
                 currentServerUUID = serverUUID;

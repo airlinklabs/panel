@@ -313,7 +313,7 @@
       <div class="sm:flex sm:items-center px-8 pt-4">
         <%- include('../../components/pageTitle', { title: 'Addons', description: 'Manage installed addons and browse the store' }) %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-2">
-          <button id="reloadBtn" type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Reload</button>
+          <button id="reloadBtn" type="button" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 px-4 py-2 text-sm font-medium transition">Reload</button>
         </div>
       </div>
 
@@ -382,11 +382,11 @@
               <td class="whitespace-nowrap px-3 py-4 text-sm">
                 <div class="flex gap-2">
                   <button onclick="toggleAddon('<%= addon.slug %>', <%= !addon.enabled %>)" type="button"
-                    class="toggle-btn rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">
+                    class="toggle-btn rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 px-3 py-2 text-sm font-medium transition">
                     <%= addon.enabled ? 'Disable' : 'Enable' %>
                   </button>
                   <button onclick="confirmUninstall('<%= addon.slug %>', '<%= addon.name %>')" type="button"
-                    class="rounded-xl bg-red-600 hover:bg-red-500 px-3 py-2 text-sm font-medium shadow-sm transition">
+                    class="rounded-xl bg-red-600 hover:bg-red-500 px-3 py-2 text-sm font-medium transition">
                     <%- icon('trash-2', { size: 16, class: 'text-white shrink-0' }) %>
                   </button>
                 </div>
@@ -401,7 +401,7 @@
       <div class="flex flex-col items-center justify-center py-24 text-center">
         <p class="text-sm text-neutral-500"><% if (addonTableExists) { %>No addons installed<% } else { %>Migration required<% } %></p>
         <% if (addonTableExists) { %>
-        <a href="/admin/addons/store"><button type="button" class="mt-4 border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Browse Store</button></a>
+        <a href="/admin/addons/store"><button type="button" class="mt-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 px-3 py-2 text-sm font-medium transition">Browse Store</button></a>
         <% } %>
       </div>
       <% } %>

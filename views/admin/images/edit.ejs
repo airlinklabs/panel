@@ -34,6 +34,9 @@
 
     <div class="mb-4 flex gap-1 overflow-x-auto border-b border-neutral-200 dark:border-white/10">
       <button type="button" data-mobile-tab="general" class="mobile-tab px-3 py-2 text-sm font-medium border-b-2">General</button>
+      <button type="button" data-mobile-tab="docker" class="mobile-tab px-3 py-2 text-sm font-medium border-b-2">Docker Images</button>
+      <button type="button" data-mobile-tab="variables" class="mobile-tab px-3 py-2 text-sm font-medium border-b-2">Variables</button>
+      <button type="button" data-mobile-tab="install" class="mobile-tab px-3 py-2 text-sm font-medium border-b-2">Install Script</button>
       <button type="button" data-mobile-tab="settings" class="mobile-tab px-3 py-2 text-sm font-medium border-b-2">Settings</button>
       <button type="button" data-mobile-tab="raw" class="mobile-tab px-3 py-2 text-sm font-medium border-b-2">Raw JSON</button>
     </div>
@@ -80,14 +83,81 @@
           </div>
           <button type="button" id="addPortRequirement"
             class="shrink-0 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300">
-            Add
+            Add Port
           </button>
         </div>
-        <div class="p-4">
-          <div id="portRequirementsList" class="space-y-3"></div>
-          <button id="saveSettingsButton" type="button"
+        <div class="px-4 py-3">
+          <div id="port-requirements-list" class="space-y-2"></div>
+          <button id="saveSettingsBtn" type="button"
             class="mt-4 w-full rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-900 px-4 py-3 text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-100 transition">
             Save Settings
+          </button>
+        </div>
+      </div>
+
+      <div id="mobileTabDocker" class="hidden rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <div>
+            <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Docker Images</h2>
+            <p class="text-xs text-neutral-500 mt-0.5">Map labels to Docker image references.</p>
+          </div>
+          <button type="button" id="add-docker-image-mobile"
+            class="shrink-0 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300">
+            Add Image
+          </button>
+        </div>
+        <div class="px-4 py-3">
+          <div id="docker-images-list-mobile" class="space-y-2"></div>
+          <button id="save-docker-mobile" type="button"
+            class="mt-4 w-full rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-900 px-4 py-3 text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-100 transition">
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+      <div id="mobileTabVariables" class="hidden rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <div>
+            <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Egg Variables</h2>
+            <p class="text-xs text-neutral-500 mt-0.5">Environment variables injected into containers.</p>
+          </div>
+          <button type="button" id="add-variable-mobile"
+            class="shrink-0 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300">
+            Add Variable
+          </button>
+        </div>
+        <div class="px-4 py-3">
+          <div id="variables-list-mobile" class="space-y-3"></div>
+          <button id="save-variables-mobile" type="button"
+            class="mt-4 w-full rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-900 px-4 py-3 text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-100 transition">
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+      <div id="mobileTabInstall" class="hidden rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 overflow-hidden">
+        <div class="px-4 py-3 border-b border-neutral-200 dark:border-white/5">
+          <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Installation Script</h2>
+        </div>
+        <div class="px-4 py-3 space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Container Image</label>
+            <input type="text" id="field-install-container-mobile" placeholder="e.g. eclipse-temurin:21-jdk-jammy"
+              class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-700 px-3 py-2.5 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Entrypoint</label>
+            <input type="text" id="field-install-entrypoint-mobile" placeholder="bash"
+              class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-700 px-3 py-2.5 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Script</label>
+            <textarea id="field-install-script-mobile" rows="12" placeholder="#!/bin/bash&#10;apt update && apt install -y curl"
+              class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-700 px-3 py-2.5 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none transition resize-y"></textarea>
+          </div>
+          <button id="save-install-mobile" type="button"
+            class="w-full rounded-xl bg-neutral-950 dark:bg-white text-white dark:text-neutral-900 px-4 py-3 text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-100 transition">
+            Save Changes
           </button>
         </div>
       </div>
@@ -113,6 +183,9 @@
   require(['vs/editor/editor.main'], function() {
     const tabPanels = {
       general: document.getElementById('mobileTabGeneral'),
+      docker: document.getElementById('mobileTabDocker'),
+      variables: document.getElementById('mobileTabVariables'),
+      install: document.getElementById('mobileTabInstall'),
       settings: document.getElementById('mobileTabSettings'),
       raw: document.getElementById('mobileTabRaw'),
     };
@@ -303,17 +376,17 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Name</label>
                 <input type="text" id="field-name" value="<%= image.name || '' %>"
-                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                  class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-white/5 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 dark:focus:ring-neutral-500 transition">
               </div>
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Author</label>
                 <input type="text" id="field-author" value="<%= image.author || '' %>"
-                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                  class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-white/5 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 dark:focus:ring-neutral-500 transition">
               </div>
               <div class="sm:col-span-2">
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Description</label>
                 <textarea id="field-description" rows="2"
-                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition resize-none"><%= image.description || '' %></textarea>
+                  class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-white/5 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 dark:focus:ring-neutral-500 transition resize-none"><%= image.description || '' %></textarea>
               </div>
             </div>
           </div>
@@ -323,26 +396,26 @@
               <div class="sm:col-span-2">
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Startup Command</label>
                 <input type="text" id="field-startup" value="<%= image.startup || '' %>" placeholder="e.g. java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}"
-                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                  class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-white/5 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 dark:focus:ring-neutral-500 transition">
                 <p class="mt-1.5 text-xs text-neutral-400">Use <code class="font-mono bg-neutral-100 dark:bg-neutral-800 px-1 rounded">{{VARIABLE_NAME}}</code> to reference egg variables.</p>
               </div>
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Stop Command</label>
                 <input type="text" id="field-stop" value="<%= image.stop || 'stop' %>" placeholder="stop"
-                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                  class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-white/5 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 dark:focus:ring-neutral-500 transition">
                 <p class="mt-1.5 text-xs text-neutral-400">Command sent to the container to stop it gracefully.</p>
               </div>
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Startup Done Signal</label>
                 <input type="text" id="field-startup-done" value="<%= image.startup_done || '' %>" placeholder="e.g. For help, type"
-                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                  class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-white/5 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 dark:focus:ring-neutral-500 transition">
                 <p class="mt-1.5 text-xs text-neutral-400">String in the server output that means the server finished starting.</p>
               </div>
             </div>
           </div>
           <div class="flex justify-end">
             <button type="button" id="save-general"
-              class="px-5 py-2.5 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+              class="al-ui-button-primary">
               Save Changes
             </button>
           </div>
@@ -354,7 +427,7 @@
             <div class="flex items-center justify-between px-5 py-3.5 bg-neutral-100 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">
               <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white">Docker Images</h2>
               <button type="button" id="add-docker-image"
-                class="px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition">
+                class="al-ui-button">
                 Add Image
               </button>
             </div>
@@ -365,7 +438,7 @@
           </div>
           <div class="flex justify-end">
             <button type="button" id="save-docker"
-              class="px-5 py-2.5 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+              class="al-ui-button-primary">
               Save Changes
             </button>
           </div>
@@ -377,7 +450,7 @@
             <div class="flex items-center justify-between px-5 py-3.5 bg-neutral-100 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">
               <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white">Egg Variables</h2>
               <button type="button" id="add-variable"
-                class="px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition">
+                class="al-ui-button">
                 Add Variable
               </button>
             </div>
@@ -388,7 +461,7 @@
           </div>
           <div class="flex justify-end">
             <button type="button" id="save-variables"
-              class="px-5 py-2.5 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+              class="al-ui-button-primary">
               Save Changes
             </button>
           </div>
@@ -402,26 +475,26 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Container Image</label>
                 <input type="text" id="field-install-container" placeholder="e.g. eclipse-temurin:21-jdk-jammy"
-                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                  class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-white/5 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 dark:focus:ring-neutral-500 transition">
                 <p class="mt-1.5 text-xs text-neutral-400">Docker image the install script runs inside.</p>
               </div>
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Entrypoint</label>
                 <input type="text" id="field-install-entrypoint" placeholder="bash"
-                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                  class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-white/5 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 dark:focus:ring-neutral-500 transition">
                 <p class="mt-1.5 text-xs text-neutral-400">Shell that executes the script (usually <code class="font-mono">bash</code>).</p>
               </div>
               <div class="sm:col-span-2">
                 <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Script</label>
                 <textarea id="field-install-script" rows="16" placeholder="#!/bin/bash&#10;# Install script runs inside the container&#10;apt update && apt install -y curl"
-                  class="w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition resize-y"></textarea>
+                  class="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-white/5 px-3 py-2 text-sm text-neutral-800 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-1 dark:focus:ring-neutral-500 transition resize-y"></textarea>
                 <p class="mt-1.5 text-xs text-neutral-400">Files are placed in <code class="font-mono bg-neutral-100 dark:bg-neutral-800 px-1 rounded">/mnt/server</code> inside the install container. The script runs as root.</p>
               </div>
             </div>
           </div>
           <div class="flex justify-end">
             <button type="button" id="save-install"
-              class="px-5 py-2.5 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+              class="al-ui-button-primary">
               Save Changes
             </button>
           </div>
@@ -433,7 +506,7 @@
             <div class="flex items-center justify-between px-5 py-3.5 bg-neutral-100 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">
               <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white">Required Ports</h2>
               <button type="button" id="add-port-requirement"
-                class="px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition">
+                class="al-ui-button">
                 Add Port
               </button>
             </div>
@@ -444,7 +517,7 @@
           </div>
           <div class="flex justify-end">
             <button type="button" id="save-settings"
-              class="px-5 py-2.5 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+              class="al-ui-button-primary">
               Save Changes
             </button>
           </div>
@@ -461,7 +534,7 @@
           </div>
           <div class="flex justify-end">
             <button type="button" id="save-raw"
-              class="px-5 py-2.5 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
+              class="al-ui-button-primary">
               Save Raw JSON
             </button>
           </div>

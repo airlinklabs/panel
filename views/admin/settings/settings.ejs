@@ -598,22 +598,21 @@
             <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Branding</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 px-5 py-5">
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Site title</label>
-                <input type="text" name="title" value="<%= settings.title %>"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                <label class="al-label mb-2">Site title</label>
+                <input type="text" name="title" value="<%= settings.title %>" class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Logo</label>
+                <label class="al-label mb-2">Logo</label>
                 <input type="file" name="logo" accept="image/*"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <% if (settings.logo) { %>
                 <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 mt-2 object-contain">
                 <% } %>
               </div>
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Favicon</label>
+                <label class="al-label mb-2">Favicon</label>
                 <input type="file" name="favicon" accept=".ico,.png,.jpg,.jpeg"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <p class="text-xs text-neutral-400 mt-1">PNG or JPG auto-converted to .ico</p>
               </div>
             </div>
@@ -669,7 +668,6 @@
                   <% }); %>
                 </div>
               </div>
-            </div>
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white mb-1">Dark mode</p>
                 <p class="text-xs text-neutral-500 mb-3">Applied when the panel is in dark mode.</p>
@@ -712,7 +710,7 @@
               </div>
               <p class="text-xs text-neutral-500 mb-3">A .zip containing info.json, light.css, dark.css.</p>
               <input type="file" name="themeFile" accept=".zip"
-                class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
             </div>
           </div>
 
@@ -728,11 +726,11 @@
                 <% } %>
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
                 <input type="file" name="loginWallpaperFile" accept="image/*"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
+                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" name="loginWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.loginWallpaper && settings.loginWallpaper.startsWith('http')) ? settings.loginWallpaper : '' %>"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+                  class="al-input">
               </div>
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white mb-3">Register page</p>
@@ -741,18 +739,18 @@
                 <% } %>
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
                 <input type="file" name="registerWallpaperFile" accept="image/*"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
+                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
                 <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" name="registerWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.registerWallpaper && settings.registerWallpaper.startsWith('http')) ? settings.registerWallpaper : '' %>"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+                  class="al-input">
               </div>
             </div>
           </div>
 
           <div class="flex justify-end gap-3">
-            <button type="button" id="resetButton" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition">Reset defaults</button>
-            <button type="submit" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Save appearance</button>
+            <button type="button" id="resetButton" class="al-ui-button">Reset defaults</button>
+            <button type="submit" class="al-ui-button-primary">Save appearance</button>
           </div>
         </form>
 
@@ -782,10 +780,10 @@
           <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
             <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">File uploads</h2>
             <div class="px-5 py-5">
-              <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Upload limit <span class="text-neutral-400 font-normal">(MB)</span></label>
+              <label class="al-label mb-2">Upload limit <span class="text-neutral-400 font-normal">(MB)</span></label>
               <div class="relative max-w-xs">
                 <input type="number" id="uploadLimitInput" value="<%= settings.uploadLimit %>" min="1" max="10000"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 pr-12 text-neutral-800 dark:text-white transition-colors">
+                  class="al-input pr-12">
                 <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-neutral-400 pointer-events-none">MB</span>
               </div>
               <p class="mt-1.5 text-xs text-neutral-500">Maximum file size users can upload via the file manager.</p>
@@ -797,18 +795,18 @@
             <p class="text-xs text-neutral-500 px-5 pt-3">Applied to new users unless overridden per-user.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 px-5 py-5">
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Server limit</label>
+                <label class="al-label mb-2">Server limit</label>
                 <input type="number" id="defaultServerLimit" value="<%= settings.defaultServerLimit %>" min="0" max="100"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="al-input">
                 <p class="mt-1 text-xs text-neutral-500">0 = cannot create.</p>
               </div>
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max memory</label>
+                <label class="al-label mb-2">Max memory</label>
                 <input type="hidden" id="defaultMaxMemory" value="<%= settings.defaultMaxMemory %>">
                 <div class="flex items-stretch gap-0">
                   <input type="number" id="defaultMaxMemoryDisplay" min="1"
                     value="<%= settings.defaultMaxMemory >= 1024 ? Math.round(settings.defaultMaxMemory / 1024) : settings.defaultMaxMemory %>"
-                    class="rounded-l-xl flex-1 border border-r-0 border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                    class="al-input w-auto flex-1 rounded-l-xl rounded-r-none border-r-0">
                   <select id="defaultMaxMemoryUnit" class="cs-select cs-sm">
                     <option value="1"    <%= settings.defaultMaxMemory < 1024  ? 'selected' : '' %>>MB</option>
                     <option value="1024" <%= settings.defaultMaxMemory >= 1024 ? 'selected' : '' %>>GB</option>
@@ -816,17 +814,17 @@
                 </div>
               </div>
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max CPU <span class="text-neutral-400 font-normal">(%)</span></label>
+                <label class="al-label mb-2">Max CPU <span class="text-neutral-400 font-normal">(%)</span></label>
                 <input type="number" id="defaultMaxCpu" value="<%= settings.defaultMaxCpu %>" min="50" max="10000"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max storage</label>
+                <label class="al-label mb-2">Max storage</label>
                 <input type="hidden" id="defaultMaxStorage" value="<%= settings.defaultMaxStorage %>">
                 <div class="flex items-stretch gap-0">
                   <input type="number" id="defaultMaxStorageDisplay" min="1"
                     value="<%= settings.defaultMaxStorage >= 1024 ? Math.round(settings.defaultMaxStorage / 1024) : settings.defaultMaxStorage %>"
-                    class="rounded-l-xl flex-1 border border-r-0 border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                    class="al-input w-auto flex-1 rounded-l-xl rounded-r-none border-r-0">
                   <select id="defaultMaxStorageUnit" class="cs-select cs-sm">
                     <option value="1"    <%= settings.defaultMaxStorage < 1024  ? 'selected' : '' %>>MB</option>
                     <option value="1024" <%= settings.defaultMaxStorage >= 1024 ? 'selected' : '' %>>GB</option>
@@ -835,7 +833,7 @@
               </div>
             </div>
             <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
-              <button type="button" id="saveServerPolicy" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Save</button>
+              <button type="button" id="saveServerPolicy" class="al-ui-button-primary">Save</button>
             </div>
           </div>
         </div>
@@ -847,10 +845,10 @@
           <div data-animate-card class="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
             <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-neutral-800 rounded-t-xl border-b border-neutral-200 dark:border-white/5">VirusTotal</h2>
             <div class="px-5 py-5">
-              <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">API key</label>
+              <label class="al-label mb-2">API key</label>
               <div class="relative max-w-sm">
                 <input type="password" id="vtKeyInput" value="<%= settings.virusTotalApiKey || '' %>" placeholder="Paste your key" autocomplete="off"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 pr-16 text-neutral-800 dark:text-white placeholder-neutral-400 font-mono transition-colors">
+                  class="al-input pr-16 font-mono">
                 <button type="button" onclick="const i=this.previousElementSibling;i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'Show':'Hide';"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Show</button>
               </div>
@@ -858,7 +856,7 @@
               <p class="mt-1.5 text-xs text-neutral-500">Used to scan uploaded files. Get a free key at <a href="https://www.virustotal.com" target="_blank" class="underline hover:text-neutral-700 dark:hover:text-neutral-300 transition">virustotal.com</a>.</p>
             </div>
             <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
-              <button type="button" id="saveVtKey" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Save</button>
+              <button type="button" id="saveVtKey" class="al-ui-button-primary">Save</button>
             </div>
           </div>
 
@@ -874,9 +872,9 @@
                 <label class="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300"><input type="checkbox" name="rateLimitEnabled" class="w-4 h-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-500" <%= settings.rateLimitEnabled ? 'checked' : '' %>></label>
               </div>
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Requests per minute</label>
+                <label class="al-label mb-2">Requests per minute</label>
                 <input type="number" id="rateLimitRpm" value="<%= settings.rateLimitRpm %>" min="1" max="10000"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-48 bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="al-input w-48">
               </div>
             </div>
           </div>
@@ -887,14 +885,14 @@
             <p class="text-xs text-neutral-500 px-5 pt-3">After N failed attempts from a single account, that account is locked for the configured duration. Errors always say "invalid credentials" — the username is never revealed.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 px-5 py-5">
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max failed attempts before lockout</label>
+                <label class="al-label mb-2">Max failed attempts before lockout</label>
                 <input type="number" id="loginMaxAttempts" value="<%= settings.loginMaxAttempts ?? 5 %>" min="1" max="100"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="al-input">
               </div>
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Lockout duration <span class="text-neutral-400 font-normal">(minutes)</span></label>
+                <label class="al-label mb-2">Lockout duration <span class="text-neutral-400 font-normal">(minutes)</span></label>
                 <input type="number" id="loginLockoutMinutes" value="<%= settings.loginLockoutMinutes ?? 15 %>" min="1" max="1440"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="al-input">
               </div>
             </div>
           </div>
@@ -926,7 +924,7 @@
               </div>
             </div>
             <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
-              <button type="button" id="saveRateLimit" class="rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">Save security settings</button>
+              <button type="button" id="saveRateLimit" class="al-ui-button-primary">Save security settings</button>
             </div>
           </div>
 
@@ -936,8 +934,8 @@
             <div class="px-5 py-5">
               <div class="flex gap-3 mb-4">
                 <input type="text" id="banIpInput" placeholder="192.168.1.1"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors flex-1 max-w-xs">
-                <button type="button" id="banIpBtn" class="rounded-lg bg-red-600 text-white px-4 py-2 text-sm font-medium transition hover:bg-red-700">Ban IP</button>
+                  class="al-input flex-1 max-w-xs">
+                <button type="button" id="banIpBtn" class="al-ui-danger">Ban IP</button>
               </div>
               <div id="bannedIpList" class="space-y-2">
                 <% let banned = []; try { banned = JSON.parse(settings.bannedIps || '[]'); } catch {} %>

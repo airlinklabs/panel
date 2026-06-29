@@ -41,3 +41,4 @@ storage/eggs
 .impeccable
 *log*
 
+public/uploads/*

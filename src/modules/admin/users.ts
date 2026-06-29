@@ -92,7 +92,7 @@ const adminModule: Module = {
       '/admin/users/create-user',
       isAuthenticated(true),
       async (req: Request, res: Response) => {
-        const { email, username, password, isAdmin } = req.body;
+        const { email, username, password, isAdmin, serverLimit, maxMemory, maxCpu, maxStorage } = req.body;
 
         if (!email || !username || !password) {
           res.status(400).json({
@@ -137,6 +137,10 @@ const adminModule: Module = {
               username,
               password: await bcrypt.hash(password, 12),
               isAdmin: isAdminBool,
+              serverLimit: serverLimit != null ? Number(serverLimit) : null,
+              maxMemory: maxMemory != null ? Number(maxMemory) : null,
+              maxCpu: maxCpu != null ? Number(maxCpu) : null,
+              maxStorage: maxStorage != null ? Number(maxStorage) : null,
             },
           });
 

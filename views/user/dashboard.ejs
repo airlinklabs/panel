@@ -13,10 +13,10 @@
       <div class="flex items-center gap-2">
         <% if (servers && servers.length > 0) { %>
         <div id="viewToggle" class="flex items-center gap-0.5 bg-neutral-100 dark:bg-neutral-800/60 p-0.5 rounded-lg border border-neutral-200 dark:border-white/5">
-          <button id="gridViewBtn" class="p-1.5 rounded-md text-neutral-500 dark:text-neutral-400 transition" aria-label="Grid view">
+          <button id="gridViewBtn" class="p-2.5 rounded-md text-neutral-500 dark:text-neutral-400 transition" aria-label="Grid view">
             <%- icon('grid-2x2', { size: 14 }) %>
           </button>
-          <button id="listViewBtn" class="p-1.5 rounded-md text-neutral-500 dark:text-neutral-400 transition" aria-label="List view">
+          <button id="listViewBtn" class="p-2.5 rounded-md text-neutral-500 dark:text-neutral-400 transition" aria-label="List view">
             <%- icon('list', { size: 14 }) %>
           </button>
         </div>
@@ -208,12 +208,13 @@
 
       <% if (totalPages > 1) { %>
         <div class="flex items-center justify-center gap-3 mt-6">
+          <% const pageParams = '&status=' + encodeURIComponent(req.query.status || '') + '&search=' + encodeURIComponent(req.query.search || ''); %>
           <% if (currentPage > 1) { %>
-            <a href="/?page=<%= currentPage - 1 %>" class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition"><%= req.translations.prev || 'Prev' %></a>
+            <a href="/?page=<%= currentPage - 1 %><%= pageParams %>" class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition"><%= req.translations.prev || 'Prev' %></a>
           <% } %>
           <span class="text-sm text-neutral-500"><%= currentPage %> / <%= totalPages %></span>
           <% if (currentPage < totalPages) { %>
-            <a href="/?page=<%= currentPage + 1 %>" class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition"><%= req.translations.next || 'Next' %></a>
+            <a href="/?page=<%= currentPage + 1 %><%= pageParams %>" class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition"><%= req.translations.next || 'Next' %></a>
           <% } %>
         </div>
       <% } %>
@@ -222,7 +223,7 @@
 </main>
 
 <!-- Folder popup -->
-<div id="folderOverlay" class="hidden fixed inset-0 z-[40] bg-black/40 flex items-end p-0">
+<div id="folderOverlay" class="hidden fixed inset-0 z-modal-backdrop bg-black/40 flex items-end p-0">
   <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5 max-h-[70dvh] overflow-y-auto">
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-base font-medium text-neutral-800 dark:text-white" id="folderOverlayTitle">Folder</h2>
@@ -246,7 +247,7 @@
 </div>
 
 <!-- New folder dialog -->
-<div id="newFolderDialog" class="hidden fixed inset-0 z-[40] bg-black/40 flex items-end p-0">
+<div id="newFolderDialog" class="hidden fixed inset-0 z-modal-backdrop bg-black/40 flex items-end p-0">
   <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5">
     <h2 class="text-base font-medium text-neutral-800 dark:text-white mb-4">New folder</h2>
     <input type="text" id="newFolderName" maxlength="64" placeholder="Folder name"
@@ -259,7 +260,7 @@
 </div>
 
 <!-- Rename folder sheet -->
-<div id="renameFolderSheet" class="hidden fixed inset-0 z-[40] bg-black/40 flex items-end p-0">
+<div id="renameFolderSheet" class="hidden fixed inset-0 z-modal-backdrop bg-black/40 flex items-end p-0">
   <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5">
     <p class="text-base font-medium text-neutral-800 dark:text-white mb-1">Rename folder</p>
     <input type="text" id="renameFolderNameMobile" maxlength="64" placeholder="Folder name"
@@ -272,7 +273,7 @@
 </div>
 
 <!-- Delete folder confirm sheet -->
-<div id="deleteFolderSheet" class="hidden fixed inset-0 z-[40] bg-black/40 flex items-end p-0">
+<div id="deleteFolderSheet" class="hidden fixed inset-0 z-modal-backdrop bg-black/40 flex items-end p-0">
   <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5">
     <p class="text-base font-medium text-neutral-800 dark:text-white mb-1">Delete folder?</p>
     <p class="text-sm text-neutral-500 mb-4">Servers inside stay accessible — they just won't be in this folder.</p>
@@ -282,7 +283,7 @@
     </div>
   </div>
 </div>
-<div id="addToFolderDialog" class="hidden fixed inset-0 z-[40] bg-black/40 flex items-end p-0">
+<div id="addToFolderDialog" class="hidden fixed inset-0 z-modal-backdrop bg-black/40 flex items-end p-0">
   <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5 max-h-[60dvh] overflow-y-auto">
     <h2 class="text-base font-medium text-neutral-800 dark:text-white mb-4">Move to folder</h2>
     <div id="folderPickList" class="space-y-2 mb-4"></div>
@@ -291,7 +292,7 @@
 </div>
 
 <!-- Long-press action sheet -->
-<div id="longPressSheet" class="hidden fixed inset-0 z-[40] bg-black/40 flex items-end p-0">
+<div id="longPressSheet" class="hidden fixed inset-0 z-modal-backdrop bg-black/40 flex items-end p-0">
   <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5">
     <p class="text-sm font-medium text-neutral-800 dark:text-white mb-1" id="longPressServerName"></p>
     <p class="text-xs text-neutral-500 mb-4">Choose an action</p>
@@ -310,7 +311,7 @@
 </div>
 
 <!-- Mobile add servers to folder -->
-<div id="mobileAddServersSheet" class="hidden fixed inset-0 z-[40] bg-black/40 flex items-end p-0">
+<div id="mobileAddServersSheet" class="hidden fixed inset-0 z-modal-backdrop bg-black/40 flex items-end p-0">
   <div class="bg-white dark:bg-neutral-800 rounded-t-2xl w-full p-5 max-h-[70dvh] flex flex-col">
     <p class="text-base font-medium text-neutral-800 dark:text-white mb-1">Add servers to folder</p>
     <p class="text-xs text-neutral-500 mb-3">Toggle servers to add or remove.</p>
@@ -607,12 +608,13 @@
 
         <% if (totalPages > 1) { %>
         <div class="flex items-center justify-center gap-3 mt-2">
+          <% const desktopPageParams = '&status=' + encodeURIComponent(req.query.status || '') + '&search=' + encodeURIComponent(req.query.search || ''); %>
           <% if (currentPage > 1) { %>
-          <a href="/?page=<%= currentPage - 1 %>" class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition"><%= req.translations.prev || 'Prev' %></a>
+          <a href="/?page=<%= currentPage - 1 %><%= desktopPageParams %>" class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition"><%= req.translations.prev || 'Prev' %></a>
           <% } %>
           <span class="text-sm text-neutral-500"><%= currentPage %> / <%= totalPages %></span>
           <% if (currentPage < totalPages) { %>
-          <a href="/?page=<%= currentPage + 1 %>" class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition"><%= req.translations.next || 'Next' %></a>
+          <a href="/?page=<%= currentPage + 1 %><%= desktopPageParams %>" class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700/60 transition"><%= req.translations.next || 'Next' %></a>
           <% } %>
         </div>
         <% } %>
@@ -631,13 +633,13 @@
 </main>
 
 <!-- Drag ghost element -->
-<div id="drag-ghost" class="hidden rotate-2 fixed z-[60] pointer-events-none bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-[13px] font-medium text-neutral-900 dark:text-neutral-100 shadow-[0_8px_24px_rgba(0,0,0,0.18)] flex items-center gap-2 opacity-95 max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis">
+<div id="drag-ghost" class="hidden rotate-2 fixed z-toast pointer-events-none bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-[13px] font-medium text-neutral-900 dark:text-neutral-100 shadow-[0_8px_24px_rgba(0,0,0,0.18)] flex items-center gap-2 opacity-95 max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis">
   <%- icon('folder', { class: 'w-3.5 h-3.5 text-amber-500 shrink-0', fill: 'currentColor' }) %>
   <span id="drag-ghost-name"></span>
 </div>
 
 <!-- Folder popup -->
-<div class="fixed inset-0 z-[40] bg-black/45 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity data-[open]:opacity-100 data-[open]:pointer-events-auto" id="folderPopupOverlay">
+<div class="fixed inset-0 z-modal-backdrop bg-black/45 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity data-[open]:opacity-100 data-[open]:pointer-events-auto" id="folderPopupOverlay">
     <div class="bg-white dark:bg-[var(--theme-bg-card,#1c1c1c)] border border-neutral-200 dark:border-white/[0.08] rounded-2xl w-full max-w-[440px] max-h-[80vh] flex flex-col scale-[0.96] opacity-0 transition-[transform,opacity] duration-200 overflow-hidden [[data-open]>&]:scale-100 [[data-open]>&]:opacity-100" role="dialog" aria-modal="true" aria-labelledby="folderPopupTitle">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5 flex-shrink-0">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white" id="folderPopupTitle"></h2>
@@ -663,7 +665,7 @@
 </div>
 
 <!-- New folder dialog -->
-<div class="fixed inset-0 z-[40] bg-black/45 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity data-[open]:opacity-100 data-[open]:pointer-events-auto" id="newFolderOverlay">
+<div class="fixed inset-0 z-modal-backdrop bg-black/45 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity data-[open]:opacity-100 data-[open]:pointer-events-auto" id="newFolderOverlay">
     <div class="bg-white dark:bg-[var(--theme-bg-card,#1c1c1c)] border border-neutral-200 dark:border-white/[0.08] rounded-[14px] w-full max-w-[380px] p-[22px] scale-[0.96] opacity-0 transition-[transform,opacity] duration-200 [[data-open]>&]:scale-100 [[data-open]>&]:opacity-100" role="dialog" aria-modal="true" aria-labelledby="newFolderTitle">
     <p id="newFolderTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">New folder</p>
     <p class="text-xs text-neutral-500 mb-4">Give your folder a name. Drag server cards onto it to add servers.</p>
@@ -677,7 +679,7 @@
 </div>
 
 <!-- Rename folder dialog -->
-<div class="fixed inset-0 z-[40] bg-black/45 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity data-[open]:opacity-100 data-[open]:pointer-events-auto" id="renameFolderOverlay">
+<div class="fixed inset-0 z-modal-backdrop bg-black/45 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity data-[open]:opacity-100 data-[open]:pointer-events-auto" id="renameFolderOverlay">
     <div class="bg-white dark:bg-[var(--theme-bg-card,#1c1c1c)] border border-neutral-200 dark:border-white/[0.08] rounded-[14px] w-full max-w-[380px] p-[22px] scale-[0.96] opacity-0 transition-[transform,opacity] duration-200 [[data-open]>&]:scale-100 [[data-open]>&]:opacity-100" role="dialog" aria-modal="true" aria-labelledby="renameFolderTitle">
     <p id="renameFolderTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Rename folder</p>
     <p class="text-xs text-neutral-500 mb-4">Choose a new name for this folder.</p>
@@ -691,7 +693,7 @@
 </div>
 
 <!-- Delete folder confirm dialog -->
-<div class="fixed inset-0 z-[40] bg-black/45 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity data-[open]:opacity-100 data-[open]:pointer-events-auto" id="deleteFolderOverlay">
+<div class="fixed inset-0 z-modal-backdrop bg-black/45 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity data-[open]:opacity-100 data-[open]:pointer-events-auto" id="deleteFolderOverlay">
     <div class="bg-white dark:bg-[var(--theme-bg-card,#1c1c1c)] border border-neutral-200 dark:border-white/[0.08] rounded-[14px] w-full max-w-[380px] p-[22px] scale-[0.96] opacity-0 transition-[transform,opacity] duration-200 [[data-open]>&]:scale-100 [[data-open]>&]:opacity-100" role="dialog" aria-modal="true" aria-labelledby="deleteFolderTitle">
     <p id="deleteFolderTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Delete folder?</p>
     <p class="text-xs text-neutral-600 dark:text-neutral-300 mb-4">Servers inside will stay accessible. They just won't be in this folder.</p>
@@ -703,7 +705,7 @@
 </div>
 
 <!-- Add servers to folder picker -->
-<div class="fixed inset-0 z-[40] bg-black/45 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity data-[open]:opacity-100 data-[open]:pointer-events-auto" id="addServersOverlay">
+<div class="fixed inset-0 z-modal-backdrop bg-black/45 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity data-[open]:opacity-100 data-[open]:pointer-events-auto" id="addServersOverlay">
     <div class="bg-white dark:bg-[var(--theme-bg-card,#1c1c1c)] border border-neutral-200 dark:border-white/[0.08] rounded-[14px] w-full max-w-[440px] max-h-[70vh] flex flex-col p-[22px] scale-[0.96] opacity-0 transition-[transform,opacity] duration-200 [[data-open]>&]:scale-100 [[data-open]>&]:opacity-100" role="dialog" aria-modal="true" aria-labelledby="addServersTitle">
     <p id="addServersTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Add servers to folder</p>
     <p class="text-xs text-neutral-500 mb-3">Toggle servers to add or remove them from this folder.</p>
@@ -722,8 +724,8 @@
 <script type="application/json" id="dashboard-folders-data"><%- JSON.stringify(folders || []) %></script>
 <script type="application/json" id="dashboard-servers-data"><%- JSON.stringify((allServers || []).map(s => ({ UUID: s.UUID, name: s.name, status: s.status, ramUsage: s.ramUsage, cpuUsage: s.cpuUsage }))) %></script>
 <script nonce="<%- nonce %>">
-  document.getElementById('dashboard-data').dataset.folders = document.getElementById('dashboard-folders-data-m').textContent;
-  document.getElementById('dashboard-data').dataset.servers = document.getElementById('dashboard-servers-data-m').textContent;
+  document.getElementById('dashboard-data').dataset.folders = document.getElementById('dashboard-folders-data').textContent;
+  document.getElementById('dashboard-data').dataset.servers = document.getElementById('dashboard-servers-data').textContent;
 </script>
 
 <script nonce="<%- nonce %>" src="/js/core/filter-sort.js"></script>

@@ -1,5 +1,6 @@
 (function() {
-  const imageData = JSON.parse(document.getElementById('page-data').dataset.image);
+  let imageData;
+  try { imageData = JSON.parse(document.getElementById('page-data').dataset.image); } catch { imageData = {}; }
   const imageId = imageData.id;
 
   let state = {

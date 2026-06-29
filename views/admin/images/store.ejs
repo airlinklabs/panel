@@ -79,7 +79,7 @@
   </div>
 </main>
 
-<div id="installModal" class="hidden fixed inset-0 z-[40] bg-black/50 flex items-end">
+<div id="installModal" class="hidden fixed inset-0 z-modal-backdrop bg-black/50 flex items-end">
   <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 rounded-t-2xl w-full p-5">
     <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-0.5" id="modalTitle">Install image</h2>
     <p class="text-xs text-neutral-500 mb-4" id="modalSubtitle">Add this image to your panel.</p>
@@ -252,7 +252,7 @@ loadCatalogue();
 <style>
   ::-webkit-scrollbar { display: none; }
   .modal-overlay {
-    position: fixed; inset: 0; z-index: 40;
+    position: fixed; inset: 0; z-index: var(--z-modal-backdrop);
     background: var(--theme-overlay, rgba(0,0,0,0.5));
     display: flex; align-items: center; justify-content: center; padding: 16px;
     opacity: 0; pointer-events: none; transition: opacity 0.25s;
@@ -352,7 +352,7 @@ loadCatalogue();
       <div class="sm:flex sm:items-center px-8 pt-4">
         <%- include('../../components/pageTitle', { title: 'Image Store', description: 'Browse and install images from the Pterodactyl community' }) %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button id="refreshBtn" onclick="doRefresh()" type="button" class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Refresh</button>
+          <button id="refreshBtn" onclick="doRefresh()" type="button" class="al-ui-button">Refresh</button>
         </div>
       </div>
 
@@ -363,7 +363,7 @@ loadCatalogue();
 
       <div class="mx-8 mt-5 flex items-center justify-between gap-3 flex-wrap mb-1">
         <div class="flex items-center gap-3">
-          <input id="imageFilterInput" type="text" placeholder="Search…" class="w-52 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
+          <input id="imageFilterInput" type="text" placeholder="Search…" class="w-52 al-input">
           <span id="statusText" class="text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap"></span>
         </div>
         <div class="vtog">
@@ -446,7 +446,7 @@ loadCatalogue();
       </div>
       <div id="eggErr" style="display:none" class="err-box"><p id="eggErrTxt" class="err-txt"></p></div>
       <button id="eggInstallBtn" onclick="confirmInstall()" type="button"
-        class="w-full border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 py-2.5 text-sm font-medium shadow-lg transition mt-auto">
+        class="w-full al-ui-button-primary mt-auto">
         Install
       </button>
     </div>

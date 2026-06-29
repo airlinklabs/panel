@@ -77,6 +77,22 @@ createBtn.addEventListener('click', async () => {
     return;
   }
 
+  const serverLimitVal = document.getElementById('serverLimit').value;
+  const maxMemoryVal = document.getElementById('maxMemory').value;
+  const maxCpuVal = document.getElementById('maxCpu').value;
+  const maxStorageVal = document.getElementById('maxStorage').value;
+
+  const payload = {
+    email: emailVal,
+    username: usernameVal,
+    password: passwordVal,
+    isAdmin,
+    serverLimit: serverLimitVal === '' ? null : parseInt(serverLimitVal, 10),
+    maxMemory: maxMemoryVal === '' ? null : parseInt(maxMemoryVal, 10),
+    maxCpu: maxCpuVal === '' ? null : parseInt(maxCpuVal, 10),
+    maxStorage: maxStorageVal === '' ? null : parseInt(maxStorageVal, 10),
+  };
+
   const loader = showLoadingPopup('Creating User', 'Processing user creation...');
   loader.updateProgress(20, 'Sending user information...');
 
@@ -84,7 +100,7 @@ createBtn.addEventListener('click', async () => {
     const response = await fetch('/admin/users/create-user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: emailVal, username: usernameVal, password: passwordVal, isAdmin }),
+      body: JSON.stringify(payload),
     });
 
     if (response.ok) {

@@ -43,7 +43,7 @@
         toast.appendChild(icon);
 
         const messageSpan = document.createElement('span');
-        messageSpan.className = 'font-medium text-sm';
+        messageSpan.className = 'font-medium text-sm line-clamp-2';
         messageSpan.textContent = message;
         toast.appendChild(messageSpan);
 
@@ -73,6 +73,10 @@
           dismissTimer = setTimeout(removeToast, 5000);
           toast.addEventListener('pointerenter', () => { clearTimeout(dismissTimer); });
           toast.addEventListener('pointerleave', () => { dismissTimer = setTimeout(removeToast, 2000); });
+        } else {
+          dismissTimer = setTimeout(removeToast, 60000);
+          toast.addEventListener('pointerenter', () => { clearTimeout(dismissTimer); });
+          toast.addEventListener('pointerleave', () => { dismissTimer = setTimeout(removeToast, 60000); });
         }
 
         (function addSwipeDismiss(el, removeFn) {
@@ -85,15 +89,13 @@
           el.addEventListener('pointermove', function (e) {
             if (!swiping) return;
             dx = e.clientX - startX;
-            if (dx > 0) {
-              el.style.transform = 'translateX(' + dx + 'px)';
-              el.style.opacity = Math.max(0, 1 - dx / 160).toString();
-            }
+            el.style.transform = 'translateX(' + dx + 'px)';
+            el.style.opacity = Math.max(0, 1 - Math.abs(dx) / 160).toString();
           });
           el.addEventListener('pointerup', function () {
             swiping = false;
             el.style.transition = '';
-            if (dx > 80) { removeFn(); }
+            if (Math.abs(dx) > 80) { removeFn(); }
             else { el.style.transform = ''; el.style.opacity = '1'; }
             dx = 0;
           });

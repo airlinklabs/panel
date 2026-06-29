@@ -148,7 +148,7 @@
   function showConfigurePopup(command) {
     const overlay = document.createElement('div');
     overlay.id = 'config-overlay';
-    overlay.className = 'fixed inset-0 z-[40] flex items-end justify-center bg-black/60 opacity-0 pointer-events-none transition-opacity duration-200';
+    overlay.className = 'fixed inset-0 z-modal-backdrop flex items-end justify-center bg-black/60 opacity-0 pointer-events-none transition-opacity duration-200';
 
     const panel = document.createElement('div');
     panel.className = 'relative bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl shadow-2xl w-full translate-y-full transition-transform duration-200';
@@ -196,7 +196,7 @@
 <main class="h-screen m-auto">
   <div class="flex h-screen">
     <!-- Sidebar -->
-    <div class="w-64 h-full">
+    <div class="w-60 h-full">
       <%- include('../../components/template') %>
     </div>
     <!-- Content -->
@@ -254,7 +254,7 @@
       <% if (nodes.some(node => node.status === 'Offline')) { %>
         <div class="mt-6 ml-8 mr-8">
           <div class="shadow-lg rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3 text-sm text-red-700 dark:text-red-400"><%= 'One or more nodes are offline. Some information may be unavailable.' %></div>
-          <button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors">
+          <button onclick="window.location.reload()" class="mt-2 px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs rounded-xl transition">
             Retry Connection
           </button>
         </div>
@@ -352,11 +352,11 @@
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400"><%= node.instances ? node.instances.length : 0 %></td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                   <div class="flex gap-2">
-                    <button onclick="configure('<%= node.id %>')" type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Configure</button>
+                    <button onclick="configure('<%= node.id %>')" type="button" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Configure</button>
                     <a href="./node/<%= node.id %>">
-                      <button type="button" class="rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Edit</button>
+                      <button type="button" class="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">Edit</button>
                     </a>
-                    <button onclick="deleteNode('<%= node.id %>')" type="button" class="rounded-lg bg-red-600 hover:bg-red-500 px-2.5 py-1.5 text-xs font-medium text-white transition" aria-label="Delete node">
+                    <button onclick="deleteNode('<%= node.id %>')" type="button" class="rounded-xl bg-red-600 hover:bg-red-500 px-2.5 py-1.5 text-xs font-medium text-white transition" aria-label="Delete node">
                       <%- icon('trash-2', { size: 14, class: 'text-white' }) %>
                     </button>
                   </div>

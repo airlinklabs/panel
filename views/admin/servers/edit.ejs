@@ -229,7 +229,7 @@
   </div>
 </main>
 
-<div id="portsModal" class="fixed inset-0 z-[40] hidden items-end justify-center bg-black/50 backdrop-blur-sm px-3 pb-3 pt-16">
+<div id="portsModal" class="fixed inset-0 z-modal-backdrop hidden items-end justify-center bg-black/50 backdrop-blur-sm px-3 pb-3 pt-16">
   <div id="portsModalPanel" class="w-full max-h-[88vh] overflow-clip rounded-2xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800">
     <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700/60 px-4 py-3">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
@@ -504,13 +504,13 @@
                 <label for="serverName" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
                   <%- icon('tag', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.name %>:</label>
-                <input id="serverName" name="name" value="<%= server.name %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5">
+                <input id="serverName" name="name" value="<%= server.name %>" class="al-input mt-2 mb-4">
               </div>
               <div>
                 <label for="serverDescription" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
                   <%- icon('file-text', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.description %>:</label>
-                <input id="serverDescription" name="description" value="<%= server.description || '' %>" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="Server description">
+                <input id="serverDescription" name="description" value="<%= server.description || '' %>" class="al-input mt-2 mb-4" placeholder="Server description">
               </div>
             </div>
 
@@ -551,7 +551,7 @@
                   <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
                   Ports:</label>
                 <input type="hidden" id="serverPorts" name="Ports">
-          <button type="button" id="assignPortsBtn" class="mt-2 mb-4 w-full inline-flex items-center gap-2 rounded-xl bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white px-4 py-2.5 text-sm font-medium border border-neutral-200 dark:border-white/5 transition">
+          <button type="button" id="assignPortsBtn" class="al-ui-button mt-2 mb-4 w-full">
             <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
             Assign ports
           </button>
@@ -569,7 +569,7 @@
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverMemoryDisplay" type="number" min="1"
                     value="<%= server.Memory >= 1024 ? Math.round(server.Memory / 1024) : server.Memory %>"
-                    class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-r-0 border-neutral-800/10 dark:border-white/5">
+                    class="al-input rounded-l-xl rounded-r-none border-r-0 flex-1">
                   <select id="serverMemoryUnit" class="cs-select cs-sm">
                     <option value="1"    <%= server.Memory < 1024  ? 'selected' : '' %>>MB</option>
                     <option value="1024" <%= server.Memory >= 1024 ? 'selected' : '' %>>GB</option>
@@ -585,7 +585,7 @@
                 <input type="hidden" id="serverCPU" name="Cpu" value="<%= server.Cpu %>">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverCPUDisplay" type="number" min="0.5" step="0.5" value="<%= (server.Cpu / 100).toFixed(1) %>"
-                    class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 border border-r-0 border-neutral-800/10 dark:border-white/5">
+                    class="al-input rounded-l-xl rounded-r-none border-r-0 flex-1">
                   <select id="serverCPUUnit" class="cs-select cs-sm">
                     <option value="cores" selected>Cores</option>
                     <option value="percent">%</option>
@@ -602,7 +602,7 @@
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverStorageDisplay" type="number" min="1"
                     value="<%= server.Storage >= 1024 ? Math.round(server.Storage / 1024) : server.Storage %>"
-                    class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-r-0 border-neutral-800/10 dark:border-white/5">
+                    class="al-input rounded-l-xl rounded-r-none border-r-0 flex-1">
                   <select id="serverStorageUnit" class="cs-select cs-sm">
                     <option value="1"    <%= server.Storage < 1024  ? 'selected' : '' %>>MB</option>
                     <option value="1024" <%= server.Storage >= 1024 ? 'selected' : '' %>>GB</option>
@@ -618,7 +618,7 @@
                 <label for="startCommand" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
                   <%- icon('terminal', { size: 14, class: 'shrink-0' }) %>
                   Startup Command:</label>
-                <textarea id="startCommand" name="StartCommand" rows="3" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-100 dark:bg-neutral-600 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5"><%= server.StartCommand %></textarea>
+                <textarea id="startCommand" name="StartCommand" rows="3" class="al-textarea mt-2 mb-4"><%= server.StartCommand %></textarea>
               </div>
               <div data-animate-card class="bg-neutral-100 dark:bg-neutral-700 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between">
@@ -693,10 +693,10 @@
             </div>
 
             <div class="flex justify-between items-center">
-              <button type="submit" id="updateServerBtn" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-lg hover:bg-blue-700 hover:scale-105 transition-all duration-200">
+              <button type="submit" id="updateServerBtn" class="al-ui-button-primary">
                 Save changes
               </button>
-              <a href="/admin/servers" class="rounded-xl bg-neutral-200 dark:bg-neutral-800 px-3 py-2 text-center text-sm font-medium text-neutral-700 dark:text-neutral-200 shadow-sm hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-all duration-200">
+              <a href="/admin/servers" class="al-ui-button">
                 Cancel
               </a>
             </div>
@@ -707,7 +707,7 @@
   </div>
 </main>
 
-<div id="portsModal" class="fixed inset-0 z-[40] hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+<div id="portsModal" class="fixed inset-0 z-modal-backdrop hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
   <div data-animate-card class="al-modal-panel w-full max-w-4xl rounded-2xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 shadow-xl">
     <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700/60 px-5 py-4">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
@@ -717,10 +717,10 @@
     </div>
     <div class="p-5">
       <div id="portsRows" class="space-y-3"></div>
-      <button type="button" id="addPortRow" class="mt-4 rounded-xl border border-neutral-200 dark:border-white/10 px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition">Add port</button>
+      <button type="button" id="addPortRow" class="al-ui-button mt-4">Add port</button>
     </div>
     <div class="flex justify-end gap-2 border-t border-neutral-200 dark:border-neutral-700/60 px-5 py-4">
-      <button type="button" id="savePortsModal" class="rounded-xl bg-neutral-900 dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-neutral-900 transition hover:bg-neutral-700 dark:hover:bg-neutral-100">Save ports</button>
+      <button type="button" id="savePortsModal" class="al-ui-button-primary">Save ports</button>
     </div>
   </div>
 </div>

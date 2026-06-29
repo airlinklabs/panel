@@ -2,7 +2,7 @@
   <% if (isMobileViewport) { %>
   #actionFeedback {
     position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
-    z-index: 70; display: flex; align-items: center; gap: 8px;
+    z-index: var(--z-loading); display: flex; align-items: center; gap: 8px;
     padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 500;
     background: var(--theme-bg-card, #fff); color: var(--theme-text-strong, #171717);
     border: 1px solid var(--theme-border, #e5e5e5);
