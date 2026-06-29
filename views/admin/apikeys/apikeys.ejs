@@ -387,7 +387,7 @@
 <script nonce="<%- nonce %>">
   function showConfirmModal(title, message, onConfirm) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/60 z-30 flex items-end justify-center';
+    modal.className = 'fixed inset-0 bg-black/60 z-[40] flex items-end justify-center';
     modal.innerHTML = `
       <div class="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl p-5 w-full shadow-2xl">
         <h2 class="text-sm font-semibold text-neutral-800 dark:text-white mb-1">${title}</h2>

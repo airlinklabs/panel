@@ -304,6 +304,7 @@ button.bg-white:hover,
 #searchResults {
   background-color: var(--theme-search-results) !important;
   border-color: var(--theme-border) !important;
+  border-top: 2px solid var(--theme-accent, rgb(var(--al-accent) / 0.6)) !important;
 }
 
 /* ================================================================== */
@@ -330,8 +331,8 @@ button.bg-white:hover,
 /* Modals / sheets                                                     */
 /* ================================================================== */
 
-[class*="rounded"][class*="bg-neutral"],
-[class*="rounded"][class*="dark:bg-neutral"] {
+[class*="rounded"][class*="bg-neutral"]:not(.server-ctx-menu):not(.al-file-menu):not(.cs-dropdown):not(.filter-menu),
+[class*="rounded"][class*="dark:bg-neutral"]:not(.server-ctx-menu):not(.al-file-menu):not(.cs-dropdown):not(.filter-menu) {
   background-color: var(--theme-bg-card) !important;
   border-color: var(--theme-border) !important;
 }

@@ -119,7 +119,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
 
 <% if (extraItems.length > 0) { %>
 <div id="more-sheet-backdrop" data-turbo-permanent class="fixed inset-0 z-[20] bg-black/50 opacity-0 pointer-events-none transition-opacity duration-200"></div>
-<div id="more-sheet" data-turbo-permanent class="mobile-more-sheet fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-neutral-800 border-t border-neutral-200/30 dark:border-white/5 rounded-t-2xl translate-y-full transition-transform duration-300 ease-out">
+<div id="more-sheet" data-turbo-permanent class="mobile-more-sheet fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-neutral-800 border-t border-neutral-200/30 dark:border-white/5 rounded-t-2xl translate-y-full pointer-events-none transition-transform duration-300 ease-out">
   <div class="flex items-center justify-between px-4 pt-4 pb-2">
     <p class="text-sm font-medium text-neutral-800 dark:text-white"><%= req.translations.navMore || 'More' %></p>
     <button id="more-sheet-close" class="w-11 h-11 flex items-center justify-center rounded-lg text-neutral-500 hover:text-neutral-700 dark:text-neutral-300 dark:hover:text-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition" aria-label="Close more navigation">

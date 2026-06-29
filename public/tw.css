@@ -359,6 +359,7 @@ button:active:not(:disabled), .al-btn:active:not(:disabled) {
 [role="listbox"] > * {
   background-color: var(--theme-bg-card, #fff);
   border-color: var(--theme-border, rgba(0,0,0,0.08));
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
 }
 
 html.dark .server-ctx-menu,
@@ -376,6 +377,20 @@ html.dark [role="listbox"],
 html.dark [role="listbox"] > * {
   background-color: var(--theme-bg-card, #1a1a1a);
   border-color: var(--theme-border, rgba(255,255,255,0.08));
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Accent top border on dropdowns — matches sidebar active indicator color */
+.server-ctx-menu,
+#searchResults,
+#mobileSearchResults,
+#mobile-more-dropdown,
+#notification-dropdown,
+#desktop-notification-dropdown,
+#server-nav-more-dropdown,
+.al-file-menu,
+.cs-dropdown {
+  border-top: 2px solid var(--theme-accent, rgb(var(--al-accent) / 0.6));
 }
 
 /* z-index enforcement for all dropdowns */
