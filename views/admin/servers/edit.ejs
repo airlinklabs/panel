@@ -707,19 +707,19 @@
   </div>
 </main>
 
-<div id="portsModal" class="fixed inset-0 z-modal-backdrop hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-  <div data-animate-card class="al-modal-panel w-full max-w-4xl rounded-2xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 shadow-xl">
-    <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700/60 px-5 py-4">
+<div id="portsModal" class="fixed inset-0 z-modal-backdrop hidden items-center justify-center bg-black/50 p-4">
+  <div data-animate-card class="al-modal-panel w-full max-w-4xl rounded-2xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 shadow-xl max-h-[80vh] flex flex-col">
+    <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700/60 px-5 py-4 shrink-0">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
       <button type="button" id="closePortsModal" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition">
         <%- icon('x', { size: 16, class: 'shrink-0' }) %>
       </button>
     </div>
-    <div class="p-5">
+    <div class="p-5 overflow-y-auto flex-1 min-h-0">
       <div id="portsRows" class="space-y-3"></div>
       <button type="button" id="addPortRow" class="al-ui-button mt-4">Add port</button>
     </div>
-    <div class="flex justify-end gap-2 border-t border-neutral-200 dark:border-neutral-700/60 px-5 py-4">
+    <div class="flex justify-end gap-2 border-t border-neutral-200 dark:border-neutral-700/60 px-5 py-4 shrink-0">
       <button type="button" id="savePortsModal" class="al-ui-button-primary">Save ports</button>
     </div>
   </div>
@@ -852,6 +852,9 @@
     }
     document.getElementById('assignPortsBtn').addEventListener('click', openPortsModal);
     document.getElementById('closePortsModal').addEventListener('click', closePortsModal);
+    document.getElementById('portsModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closePortsModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !document.getElementById('portsModal').classList.contains('hidden')) closePortsModal(); });
+    window.addEventListener('scroll', () => { const m = document.getElementById('portsModal'); if (!m.classList.contains('hidden')) closePortsModal(); }, { passive: true, capture: true });
     document.getElementById('addPortRow').addEventListener('click', () => {
       assignedPorts.push({ name: `Port ${assignedPorts.length + 1}`, internalPort: 25565, externalPort: '', primary: assignedPorts.length === 0 });
       renderPortRows();

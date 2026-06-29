@@ -1,4 +1,4 @@
-(function() {
+function initImageEdit() {
   let imageData;
   try { imageData = JSON.parse(document.getElementById('page-data').dataset.image); } catch { imageData = {}; }
   const imageId = imageData.id;
@@ -309,4 +309,6 @@
   function escHtml(str) {
     return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
-})();
+}
+document.addEventListener('DOMContentLoaded', initImageEdit);
+document.addEventListener('turbo:load', initImageEdit);

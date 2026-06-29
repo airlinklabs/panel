@@ -1,4 +1,4 @@
-(function () {
+function initSettingsFormHandlers() {
   const tabBtns   = document.querySelectorAll('.tab-btn');
   const tabPanels = document.querySelectorAll('.tab-panel');
 
@@ -162,4 +162,6 @@
       });
     });
   });
-})();
+}
+document.addEventListener('DOMContentLoaded', initSettingsFormHandlers);
+document.addEventListener('turbo:load', initSettingsFormHandlers);

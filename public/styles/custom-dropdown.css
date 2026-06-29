@@ -16,7 +16,7 @@
   font-family: inherit;
   cursor: pointer;
   text-align: left;
-  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  transition: border-color 0.15s, background 0.15s;
   outline: none;
   -webkit-appearance: none;
   appearance: none;
@@ -33,11 +33,11 @@ html.dark .cs-trigger:hover {
   border-color: rgba(255,255,255,0.2);
 }
 .cs-trigger:focus-visible {
-  box-shadow: 0 0 0 2px var(--theme-accent, #3b82f6);
+  outline: 2px solid var(--theme-accent, #3b82f6);
+  outline-offset: 2px;
 }
 .cs-trigger.cs-open {
   border-color: var(--theme-accent, #3b82f6);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme-accent, #3b82f6) 15%, transparent);
 }
 
 .cs-label {
@@ -80,22 +80,24 @@ html.dark .cs-trigger svg {
   overscroll-behavior: contain;
   border-radius: 12px;
   border: 1px solid var(--theme-border, #e5e5e5);
-  border-top: 2px solid var(--theme-accent, rgb(var(--al-accent) / 0.6));
   background: var(--theme-bg-card, #fff);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
   padding: 4px;
-  animation: cs-drop-in 0.18s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  opacity: 0;
+  transform: translateY(-4px);
+  transform-origin: top left;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 html.dark .cs-dropdown {
   background: var(--theme-bg-card, #1c1c1c);
   border-color: var(--theme-border-subtle, rgba(255,255,255,0.1));
-  border-top-color: var(--theme-accent, rgb(var(--al-accent) / 0.6));
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.2);
 }
-
-@keyframes cs-drop-in {
-  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+.cs-dropdown[style*="display: block"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+.cs-dropdown.cs-portaled {
+  position: fixed;
+  margin: 0;
 }
 
 .cs-option {

@@ -391,7 +391,7 @@
 <%- include('../../components/modal') %>
 
 <script nonce="<%- nonce %>">
-(function () {
+function initSettingsTabs() {
   const tabBtns   = document.querySelectorAll('.tab-btn');
   const tabPanels = document.querySelectorAll('.tab-panel');
 
@@ -420,6 +420,9 @@
   let saved = null;
   try { saved = localStorage.getItem('settings_tab'); } catch {}
   activate(saved || 'appearance');
+}
+document.addEventListener('DOMContentLoaded', initSettingsTabs);
+document.addEventListener('turbo:load', initSettingsTabs);
 
   function post(url, body, btn) {
     const orig = btn ? btn.textContent : '';

@@ -124,6 +124,13 @@
       return false;
     }
 
+    function closeThisDropdown() {
+      unportalDropdown();
+      dropdown.style.display = 'none';
+      trigger.classList.remove(OPEN_CLASS);
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+
     function portalDropdown() {
       if (!isInsideScrollable(wrap)) {
         dropdown.classList.remove('cs-portaled');
@@ -166,21 +173,23 @@
 
     document.addEventListener('click', function (e) {
       if (!wrap.contains(e.target) && e.target !== dropdown && !dropdown.contains(e.target)) {
-        unportalDropdown();
-        dropdown.style.display = 'none';
-        trigger.classList.remove(OPEN_CLASS);
-        trigger.setAttribute('aria-expanded', 'false');
+        closeThisDropdown();
       }
     });
 
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
-        unportalDropdown();
-        dropdown.style.display = 'none';
-        trigger.classList.remove(OPEN_CLASS);
-        trigger.setAttribute('aria-expanded', 'false');
+        closeThisDropdown();
       }
     });
+
+    var scrollHandler = function () {
+      if (dropdown.style.display === 'block') {
+        closeThisDropdown();
+      }
+    };
+    window.addEventListener('scroll', scrollHandler, { passive: true, capture: true });
+    document.addEventListener('scroll', scrollHandler, { passive: true, capture: true });
 
     var obs = new MutationObserver(function () {
       syncOptions();
@@ -208,4 +217,5 @@
   } else {
     initCustomDropdowns();
   }
+  document.addEventListener('turbo:load', initCustomDropdowns);
 })();
