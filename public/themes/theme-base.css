@@ -304,7 +304,6 @@ button.bg-white:hover,
 #searchResults {
   background-color: var(--theme-search-results) !important;
   border-color: var(--theme-border) !important;
-  border-top: 2px solid var(--theme-accent, rgb(var(--al-accent) / 0.6)) !important;
 }
 
 /* ================================================================== */

@@ -64,7 +64,7 @@
       btn.innerHTML = '<span class="filter-label">' + escHtml(f.label) + '</span>' +
         '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 text-neutral-400"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>';
       var dropdown = document.createElement('div');
-      dropdown.className = 'filter-menu hidden absolute top-full left-0 mt-1 z-dropdown min-w-[160px] rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 shadow-xl py-1';
+      dropdown.className = 'filter-menu hidden absolute top-full left-0 mt-1 z-dropdown min-w-[160px] rounded-xl py-1';
       f.options.forEach(function (opt) {
         var item = document.createElement('button');
         item.type = 'button';
@@ -93,6 +93,39 @@
         e.stopPropagation();
         document.querySelectorAll('.filter-menu').forEach(function (m) { if (m !== dropdown) m.classList.add('hidden'); });
         dropdown.classList.toggle('hidden');
+        if (!dropdown.classList.contains('hidden')) {
+          var firstItem = dropdown.querySelector('button');
+          if (firstItem) firstItem.focus();
+        }
+      });
+
+      var filterFocusedIdx = -1;
+      function highlightFilterItem(idx) {
+        var items = dropdown.querySelectorAll('button');
+        if (!items.length) return;
+        items.forEach(function (el) { el.classList.remove('cs-focused'); });
+        if (idx < 0) idx = items.length - 1;
+        if (idx >= items.length) idx = 0;
+        filterFocusedIdx = idx;
+        items[filterFocusedIdx].classList.add('cs-focused');
+        items[filterFocusedIdx].scrollIntoView({ block: 'nearest' });
+      }
+      btn.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          dropdown.classList.remove('hidden');
+          highlightFilterItem(filterFocusedIdx + (e.key === 'ArrowDown' ? 1 : -1));
+        }
+      });
+      dropdown.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { dropdown.classList.add('hidden'); btn.focus(); return; }
+        if (e.key === 'ArrowDown') { e.preventDefault(); highlightFilterItem(filterFocusedIdx + 1); return; }
+        if (e.key === 'ArrowUp') { e.preventDefault(); highlightFilterItem(filterFocusedIdx - 1); return; }
+        if (e.key === 'Enter' && filterFocusedIdx >= 0) {
+          e.preventDefault();
+          var items = dropdown.querySelectorAll('button');
+          if (items[filterFocusedIdx]) items[filterFocusedIdx].click();
+        }
       });
       wrap.appendChild(btn);
       wrap.appendChild(dropdown);

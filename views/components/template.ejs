@@ -15,7 +15,7 @@
           <%- icon('bell', { class: 'h-5 w-5' }) %>
           <span id="notification-badge" class="hidden absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">0</span>
         </button>
-        <div id="notification-dropdown" class="hidden absolute top-full right-0 mt-1 w-80 max-h-96 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30" style="z-index: var(--z-dropdown)">
+        <div id="notification-dropdown" class="hidden absolute top-full right-0 mt-1 w-80 max-h-96 overflow-y-auto rounded-xl" style="z-index: var(--z-dropdown)">
           <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/10">
             <span class="text-sm font-medium text-neutral-800 dark:text-white">Notifications</span>
             <button onclick="markAllRead()" class="text-xs font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition px-2 py-1 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5">Mark all read</button>
@@ -30,8 +30,8 @@
           </div>
         </div>
       </div>
-      <button id="theme-toggle" class="w-11 min-h-[44px] flex items-center bg-neutral-300 dark:bg-neutral-700/70 rounded-full p-1 transition-colors duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950" aria-label="Switch to dark mode" aria-pressed="false">
-        <span class="dot bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
+      <button id="theme-toggle" role="switch" aria-checked="false" class="al-switch relative inline-flex h-6 w-10 items-center rounded-full transition-colors duration-500 bg-neutral-300 dark:bg-neutral-700/70 border border-neutral-400 dark:border-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-950 shrink-0" aria-label="Switch to dark mode">
+        <span class="al-switch-dot inline-block h-4 w-4 rounded-full bg-white shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
       </button>
       <a href="/account" class="flex items-center justify-center p-1.5 min-w-[44px] min-h-[44px]">
         <img class="h-8 w-8 rounded-xl border border-neutral-200 dark:border-neutral-700" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
@@ -50,7 +50,7 @@
   </div>
 </div>
 
-<div id="mobileSearchResults" class="hidden fixed top-14 left-0 right-0 bg-white dark:bg-neutral-800 border-b border-neutral-200/30 dark:border-white/5 max-h-[60dvh] overflow-y-auto shadow-lg" style="z-index: var(--z-dropdown)">
+<div id="mobileSearchResults" class="hidden fixed top-14 left-0 right-0 border-b max-h-[60dvh] overflow-y-auto" style="z-index: var(--z-dropdown)">
 </div>
 
 <%
@@ -144,12 +144,6 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
   // Mobile nav active state is handled by page-loader.js.
   // Keep sheet toggle and presence WebSocket here.
   document.addEventListener('DOMContentLoaded', function () {
-    if (typeof updateToggleDot === 'function') updateToggleDot();
-    var themeBtn = document.getElementById('theme-toggle');
-    if (themeBtn && typeof toggleTheme === 'function') {
-      themeBtn.addEventListener('click', toggleTheme);
-    }
-
     var moreBtn      = document.getElementById('more-nav-btn');
     var moreSheet    = document.getElementById('more-sheet');
     var moreBackdrop = document.getElementById('more-sheet-backdrop');
@@ -410,7 +404,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
           <span class="flex-1 text-left">Notifications</span>
           <span id="desktop-notification-badge" class="hidden h-5 min-w-5 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center px-1">0</span>
         </button>
-        <div id="desktop-notification-dropdown" class="hidden absolute bottom-full left-0 mb-2 w-80 max-h-80 overflow-y-auto bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30" style="z-index: var(--z-dropdown)">
+        <div id="desktop-notification-dropdown" class="hidden absolute bottom-full left-0 mb-2 w-80 max-h-80 overflow-y-auto rounded-xl" style="z-index: var(--z-dropdown)">
           <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-white/10">
             <span class="text-sm font-medium text-neutral-800 dark:text-white">Notifications</span>
             <button onclick="markAllRead()" class="text-xs font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition px-2 py-1 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5">Mark all read</button>
@@ -473,7 +467,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
           </div>
         </div>
 
-        <div id="searchResults" role="listbox" aria-label="Search results" class="hidden absolute left-0 top-full mt-2 w-[19.5rem] bg-white dark:bg-neutral-800 rounded-xl shadow-2xl shadow-neutral-200/80 dark:shadow-black/40 px-2 pb-2 border border-neutral-200 dark:border-white/10" style="z-index: var(--z-dropdown)">
+        <div id="searchResults" role="listbox" aria-label="Search results" class="hidden absolute left-0 top-full mt-2 w-[19.5rem] rounded-xl px-2 pb-2" style="z-index: var(--z-dropdown)">
         </div>
       </div>
 
@@ -507,6 +501,9 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
       </script>
       <script nonce="<%- nonce %>" src="/js/core/search.js"></script>
     </div>
+    <button id="theme-toggle" role="switch" aria-checked="false" class="al-switch relative inline-flex h-8 w-14 items-center rounded-full transition-colors duration-500 bg-neutral-300 dark:bg-neutral-700/70 border border-neutral-400 dark:border-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900 shrink-0" aria-label="Switch to dark mode">
+      <span class="al-switch-dot inline-block h-6 w-6 rounded-full bg-white shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
+    </button>
   </div>
 </div>
 

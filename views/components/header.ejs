@@ -105,37 +105,30 @@
   }
 
   initializeTheme();
-</script>
 
-<% if (!isMobileViewport) { %>
-<button id="theme-toggle" role="switch" aria-checked="false" class="fixed right-4 top-4 al-switch relative inline-flex h-8 w-14 items-center rounded-full transition-colors duration-500 bg-neutral-300 dark:bg-neutral-700/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900 z-[var(--z-sticky)]" aria-label="Switch to dark mode">
-    <span class="al-switch-dot inline-block h-6 w-6 rounded-full bg-white shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
-</button>
-<% } else { %>
-<button id="theme-toggle" role="switch" aria-checked="false" class="fixed right-3 top-3 al-switch relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-500 bg-neutral-300 dark:bg-neutral-700/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900 z-50" aria-label="Switch to dark mode">
-    <span class="al-switch-dot inline-block h-5 w-5 rounded-full bg-white shadow-md transform transition-transform duration-500 border border-neutral-950/20"></span>
-</button>
-<% } %>
-<script nonce="<%- nonce %>">
-  (function() {
-    const btn = document.getElementById('theme-toggle');
-    const dot = document.querySelector('#theme-toggle .al-switch-dot');
+  window.updateToggleDot = function() {
+    var btn = document.getElementById('theme-toggle');
+    var dot = document.querySelector('#theme-toggle .al-switch-dot');
+    if (!btn) return;
+    var isDark = document.documentElement.classList.contains('dark');
+    var isMobile = window.innerWidth < 768;
+    var translate = isMobile ? (isDark ? 'translateX(20px)' : 'translateX(4px)') : (isDark ? 'translateX(28px)' : 'translateX(4px)');
+    if (dot) dot.style.transform = translate;
+    btn.setAttribute('aria-checked', isDark ? 'true' : 'false');
+    btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+  };
 
-    function updateSwitchPosition() {
-      const isDark = document.documentElement.classList.contains('dark');
-      if (dot) dot.style.transform = isDark ? 'translateX(24px)' : 'translateX(4px)';
-      if (btn) {
-        btn.setAttribute('aria-checked', isDark ? 'true' : 'false');
-        btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
-      }
+  document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('theme-toggle');
+    if (btn) {
+      btn.addEventListener('click', function() {
+        toggleTheme();
+        window.updateToggleDot();
+      });
     }
-
-    if (btn) btn.addEventListener('click', function() {
-      toggleTheme();
-      updateSwitchPosition();
-    });
-    updateSwitchPosition();
-    window.updateToggleDot = updateSwitchPosition;
-  })();
+    window.updateToggleDot();
+  });
 </script>
+
+
 <%- include("./modal") %>

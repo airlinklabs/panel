@@ -157,23 +157,21 @@
           </button>
               </div>
 
-              <div data-animate-card class="bg-neutral-100 dark:bg-neutral-800 rounded-xl p-4 border border-neutral-300 dark:border-white/5 mt-4">
-                <div class="flex flex-col md:flex-row md:items-center justify-between">
-                  <div class="flex items-center mb-2 md:mb-0">
-                    <div class="flex-shrink-0 mr-3">
-                      <%- icon('pencil', { size: 24, class: 'text-blue-500' }) %>
-                    </div>
-                    <div>
-                      <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
-                      <p class="text-xs text-neutral-600 dark:text-neutral-400">When enabled, users can modify the startup command for this server.</p>
-                    </div>
+              <div class="flex flex-col md:flex-row md:items-center justify-between rounded-xl p-4 mt-4">
+                <div class="flex items-center mb-2 md:mb-0">
+                  <div class="flex-shrink-0 mr-3">
+                    <%- icon('pencil', { size: 24, class: 'text-blue-500' }) %>
                   </div>
-                  <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true">
-                    <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="allowStartupEditLabel">Disabled</span>
-                  </label>
+                  <div>
+                    <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
+                    <p class="text-xs text-neutral-600 dark:text-neutral-400">When enabled, users can modify the startup command for this server.</p>
+                  </div>
                 </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true">
+                  <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="allowStartupEditLabel">Disabled</span>
+                </label>
               </div>
             </div>
 
@@ -362,21 +360,19 @@
             Assign ports
           </button>
               </div>
-              <div data-animate-card class="bg-neutral-100 dark:bg-neutral-700 rounded-xl p-4 border border-neutral-300 dark:border-white/5 mt-4">
-                <div class="flex flex-col md:flex-row md:items-center justify-between">
-                  <div class="flex items-center mb-2 md:mb-0">
-                    <div class="flex-shrink-0 mr-3"><%- icon('pencil', { size: 24, class: 'text-blue-500' }) %></div>
-                    <div>
-                      <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
-                      <p class="text-xs text-neutral-600 dark:text-neutral-400">When enabled, users can modify the startup command for this server.</p>
-                    </div>
+              <div class="flex flex-col md:flex-row md:items-center justify-between rounded-xl p-4 mt-4">
+                <div class="flex items-center mb-2 md:mb-0">
+                  <div class="flex-shrink-0 mr-3"><%- icon('pencil', { size: 24, class: 'text-blue-500' }) %></div>
+                  <div>
+                    <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
+                    <p class="text-xs text-neutral-600 dark:text-neutral-400">When enabled, users can modify the startup command for this server.</p>
                   </div>
-                  <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true">
-                    <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="allowStartupEditLabel">Disabled</span>
-                  </label>
                 </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true">
+                  <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="allowStartupEditLabel">Disabled</span>
+                </label>
               </div>
             </div>
             <div class="collapsible-row no-anim" id="variablesSectionRow"><div><div id="variablesSection">

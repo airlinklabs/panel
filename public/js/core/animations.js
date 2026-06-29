@@ -134,7 +134,7 @@
         if (c.indexOf('data-animate-card') !== -1) return true;
         if (c.indexOf('rounded-xl') === -1 && c.indexOf('rounded-2xl') === -1 && c.indexOf('rounded-lg') === -1) return false;
         return c.indexOf('bg-') !== -1 || c.indexOf('border-') !== -1 || c.indexOf('shadow') !== -1;
-      }, anim: { from: { opacity: 0, transform: 'translateY(6px)' }, to: { opacity: 1, transform: 'translateY(0)' }, dur: 200, ease: EASING } },
+      }, anim: { from: { opacity: 0 }, to: { opacity: 1 }, dur: 200, ease: EASING } },
     { name: 'table', match: function (el) { return el.tagName === 'TABLE'; },
       anim: { from: { opacity: 0 }, to: { opacity: 1 }, dur: 150, ease: EASING } },
     { name: 'table-row', match: function (el) { return el.tagName === 'TR' && el.parentElement && el.parentElement.tagName === 'TBODY'; },
@@ -242,7 +242,7 @@
       // Animate with fill:'forwards' so element STAYS at opacity:1 after animation
       (function (element, delay, animType) {
         setTimeout(function () {
-          element.animate([
+          var anim = element.animate([
             animType.anim.from,
             animType.anim.to
           ], {
@@ -251,6 +251,10 @@
             easing: animType.anim.ease,
             fill: 'forwards'
           });
+          anim.onfinish = function () {
+            element.style.opacity = '1';
+            element.style.transform = '';
+          };
         }, delay);
       })(el, totalDelay, type);
     }
@@ -291,13 +295,17 @@
     if (!el || el.nodeType !== 1) return;
     var duration = (options && options.duration) || 200;
     var delay    = (options && options.delay)    || 0;
-    el.animate(
+    var anim = el.animate(
       [
         { opacity: 0, transform: 'translateY(4px)' },
         { opacity: 1, transform: 'translateY(0)' }
       ],
       { duration: duration, delay: delay, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' }
     );
+    anim.onfinish = function () {
+      el.style.opacity = '1';
+      el.style.transform = '';
+    };
   };
 
   window.airlinkAnimateChildren = function (container, options) {

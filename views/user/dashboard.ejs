@@ -563,7 +563,7 @@
               </div>
             </a>
             <!-- Right-click context menu -->
-            <div class="server-ctx-menu hidden bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl shadow-xl py-1 w-44 z-dropdown">
+            <div class="server-ctx-menu hidden rounded-xl py-1 w-44 z-dropdown">
               <button class="ctx-add-to-folder w-full text-left px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition rounded-t-xl" data-uuid="<%= server.UUID %>">Add to folder</button>
               <button class="ctx-remove-from-folder w-full text-left px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition rounded-b-xl" data-uuid="<%= server.UUID %>" style="display:<%= (folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID))) ? '' : 'none' %>">Remove from folder</button>
             </div>

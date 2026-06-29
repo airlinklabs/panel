@@ -9,8 +9,8 @@
  *   initCustomDropdown(el)          — build replacement for one <select>
  *   initPortalDropdown(trigger, panel, options) — generic dropdown
  *
- * Every dropdown uses position:fixed, repositions on scroll/resize,
- * flips direction near viewport edges, and closes on outside click / Escape.
+ * Every dropdown uses position:absolute within its .cs-wrap parent,
+ * and closes on outside click / Escape.
  */
 (function () {
   'use strict';
@@ -48,27 +48,23 @@
 
   /* ── Position a panel relative to its trigger ───────────────────── */
   function positionPanel(panel, trigger) {
-    var tRect = trigger.getBoundingClientRect();
-    var vh = window.innerHeight;
-    var vw = window.innerWidth;
-    var pH = panel.scrollHeight || 240;
-    var pW = tRect.width;
-
-    var spaceBelow = vh - tRect.bottom;
-    var openUp = spaceBelow < FLIP_THRESHOLD;
-
-    var top = openUp ? tRect.top - pH - 6 : tRect.bottom + 6;
-    var left = tRect.left;
-
-    if (top < 8) top = 8;
-    if (left + pW > vw - 8) left = vw - pW - 8;
-    if (left < 8) left = 8;
-
-    panel.style.position = 'fixed';
-    panel.style.top = top + 'px';
-    panel.style.left = left + 'px';
-    panel.style.width = pW + 'px';
-    panel.style.zIndex = 'var(--z-dropdown)';
+    var wrap = trigger.closest('.cs-wrap') || trigger.parentNode;
+    if (!wrap) return;
+    var isDocker = trigger.id === 'dockerImage';
+    if (isDocker) {
+      var tRect = trigger.getBoundingClientRect();
+      panel.style.position = 'fixed';
+      panel.style.top = (tRect.bottom + 2) + 'px';
+      panel.style.left = tRect.left + 'px';
+      panel.style.width = tRect.width + 'px';
+      panel.style.zIndex = '2147483647';
+    } else {
+      panel.style.position = 'absolute';
+      panel.style.top = '';
+      panel.style.left = '';
+      panel.style.width = '';
+      panel.style.zIndex = '';
+    }
   }
 
   /* ── Scroll / resize reposition ─────────────────────────────────── */
@@ -98,8 +94,10 @@
       closeAll({ close: function () {} });
       panel.style.display = 'block';
       panel.classList.remove('hidden');
+      panel.classList.add('cs-open');
       panel.setAttribute('aria-hidden', 'false');
       panel.style.pointerEvents = 'auto';
+      trigger.classList.add('cs-open');
       positionPanel(panel, trigger);
       addReposition(panel, trigger);
       trigger.setAttribute('aria-expanded', 'true');
@@ -111,6 +109,7 @@
       if (!state.open) return;
       panel.style.display = 'none';
       panel.classList.add('hidden');
+      panel.classList.remove('cs-open');
       panel.setAttribute('aria-hidden', 'true');
       panel.style.pointerEvents = '';
       panel.style.position = '';
@@ -118,6 +117,7 @@
       panel.style.left = '';
       panel.style.width = '';
       panel.style.zIndex = '';
+      trigger.classList.remove('cs-open');
       trigger.setAttribute('aria-expanded', 'false');
       if (panel._ddReposCleanup) {
         panel._ddReposCleanup();
@@ -143,8 +143,39 @@
       }
     });
 
+    var focusedIdx = -1;
+    function getNavItems() {
+      return panel.querySelectorAll('button:not([disabled]), a[href], [role="option"], .cs-option:not(.cs-disabled)');
+    }
+    function highlightNavItem(idx) {
+      var items = getNavItems();
+      if (!items.length) return;
+      items.forEach(function (el) { el.classList.remove('cs-focused'); });
+      if (idx < 0) idx = items.length - 1;
+      if (idx >= items.length) idx = 0;
+      focusedIdx = idx;
+      items[focusedIdx].classList.add('cs-focused');
+      items[focusedIdx].scrollIntoView({ block: 'nearest' });
+    }
+
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && state.open) close();
+      if (!state.open) return;
+      if (e.key === 'Escape') { close(); trigger.focus(); return; }
+      if (e.key === 'ArrowDown') { e.preventDefault(); highlightNavItem(focusedIdx + 1); return; }
+      if (e.key === 'ArrowUp') { e.preventDefault(); highlightNavItem(focusedIdx - 1); return; }
+      if (e.key === 'Enter' && focusedIdx >= 0) {
+        e.preventDefault();
+        var items = getNavItems();
+        if (items[focusedIdx]) items[focusedIdx].click();
+      }
+    });
+
+    trigger.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!state.open) open();
+        highlightNavItem(focusedIdx + (e.key === 'ArrowDown' ? 1 : -1));
+      }
     });
 
     var inst = { open: open, close: close, toggle: toggle };
@@ -242,7 +273,9 @@
       syncOptions();
       panel.style.display = 'block';
       panel.classList.remove('hidden');
+      panel.classList.add('cs-open');
       panel.setAttribute('aria-hidden', 'false');
+      trigger.classList.add('cs-open');
       positionPanel(panel, trigger);
       addReposition(panel, trigger);
       trigger.setAttribute('aria-expanded', 'true');
@@ -252,7 +285,9 @@
     function doClose() {
       panel.style.display = 'none';
       panel.classList.add('hidden');
+      panel.classList.remove('cs-open');
       panel.setAttribute('aria-hidden', 'true');
+      trigger.classList.remove('cs-open');
       trigger.setAttribute('aria-expanded', 'false');
       if (panel._ddReposCleanup) {
         panel._ddReposCleanup();
@@ -276,8 +311,36 @@
       if (!wrap.contains(e.target)) doClose();
     });
 
+    var focusedIdx = -1;
+    function highlightOption(idx) {
+      var items = panel.querySelectorAll('.cs-option:not(.cs-disabled)');
+      if (!items.length) return;
+      items.forEach(function (el) { el.classList.remove('cs-focused'); });
+      if (idx < 0) idx = items.length - 1;
+      if (idx >= items.length) idx = 0;
+      focusedIdx = idx;
+      items[focusedIdx].classList.add('cs-focused');
+      items[focusedIdx].scrollIntoView({ block: 'nearest' });
+    }
+
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') doClose();
+      if (panel.getAttribute('aria-hidden') !== 'false') return;
+      if (e.key === 'Escape') { doClose(); trigger.focus(); return; }
+      if (e.key === 'ArrowDown') { e.preventDefault(); highlightOption(focusedIdx + 1); return; }
+      if (e.key === 'ArrowUp') { e.preventDefault(); highlightOption(focusedIdx - 1); return; }
+      if (e.key === 'Enter' && focusedIdx >= 0) {
+        e.preventDefault();
+        var items = panel.querySelectorAll('.cs-option:not(.cs-disabled)');
+        if (items[focusedIdx]) items[focusedIdx].click();
+      }
+    });
+
+    trigger.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (panel.getAttribute('aria-hidden') !== 'false') doOpen();
+        highlightOption(focusedIdx + (e.key === 'ArrowDown' ? 1 : -1));
+      }
     });
 
     var obs = new MutationObserver(function () {

@@ -369,9 +369,6 @@
   .top-1\/2 {
     top: calc(1 / 2 * 100%);
   }
-  .top-3 {
-    top: calc(var(--spacing) * 3);
-  }
   .top-4 {
     top: calc(var(--spacing) * 4);
   }
@@ -444,14 +441,8 @@
   .z-40 {
     z-index: 40;
   }
-  .z-50 {
-    z-index: 50;
-  }
   .z-\[20\] {
     z-index: 20;
-  }
-  .z-\[var\(--z-sticky\)\] {
-    z-index: var(--z-sticky);
   }
   .col-span-1 {
     grid-column: span 1 / span 1;
@@ -2782,18 +2773,6 @@
     --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
-  .shadow-black\/5 {
-    --tw-shadow-color: color-mix(in srgb, #000 5%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      --tw-shadow-color: color-mix(in oklab, color-mix(in oklab, var(--color-black) 5%, transparent) var(--tw-shadow-alpha), transparent);
-    }
-  }
-  .shadow-neutral-200\/80 {
-    --tw-shadow-color: color-mix(in srgb, oklch(92.2% 0 0) 80%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      --tw-shadow-color: color-mix(in oklab, color-mix(in oklab, var(--color-neutral-200) 80%, transparent) var(--tw-shadow-alpha), transparent);
-    }
-  }
   .ring-amber-600\/20 {
     --tw-ring-color: color-mix(in srgb, oklch(66.6% 0.179 58.318) 20%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -4476,6 +4455,11 @@
       }
     }
   }
+  .dark\:border-neutral-500 {
+    &:where(.dark, .dark *) {
+      border-color: var(--color-neutral-500);
+    }
+  }
   .dark\:border-neutral-600 {
     &:where(.dark, .dark *) {
       border-color: var(--color-neutral-600);
@@ -5332,22 +5316,6 @@
       box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
     }
   }
-  .dark\:shadow-black\/30 {
-    &:where(.dark, .dark *) {
-      --tw-shadow-color: color-mix(in srgb, #000 30%, transparent);
-      @supports (color: color-mix(in lab, red, red)) {
-        --tw-shadow-color: color-mix(in oklab, color-mix(in oklab, var(--color-black) 30%, transparent) var(--tw-shadow-alpha), transparent);
-      }
-    }
-  }
-  .dark\:shadow-black\/40 {
-    &:where(.dark, .dark *) {
-      --tw-shadow-color: color-mix(in srgb, #000 40%, transparent);
-      @supports (color: color-mix(in lab, red, red)) {
-        --tw-shadow-color: color-mix(in oklab, color-mix(in oklab, var(--color-black) 40%, transparent) var(--tw-shadow-alpha), transparent);
-      }
-    }
-  }
   .dark\:ring-amber-400\/20 {
     &:where(.dark, .dark *) {
       --tw-ring-color: color-mix(in srgb, oklch(82.8% 0.189 84.429) 20%, transparent);
@@ -6173,7 +6141,7 @@
     --z-base: 0;
     --z-nav: 10;
     --z-floating: 20;
-    --z-dropdown: 30;
+    --z-dropdown: 2147483647;
     --z-sticky: 40;
     --z-modal-backdrop: 50;
     --z-modal: 60;
@@ -6890,24 +6858,39 @@ button:active:not(:disabled), .al-btn:active:not(:disabled) {
   }
 }
 .server-ctx-menu, #searchResults, #mobileSearchResults, #mobile-more-dropdown, #notification-dropdown, #desktop-notification-dropdown, #server-nav-more-dropdown, .al-file-menu, .filter-menu, .cs-dropdown, [role="menu"], [role="listbox"], [role="listbox"] > * {
-  background-color: var(--theme-bg-card, #fff);
-  border-color: var(--theme-border, rgba(0,0,0,0.08));
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
+  background-color: #ffffff;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 html.dark .server-ctx-menu, html.dark #searchResults, html.dark #mobileSearchResults, html.dark #mobile-more-dropdown, html.dark #notification-dropdown, html.dark #desktop-notification-dropdown, html.dark #server-nav-more-dropdown, html.dark .al-file-menu, html.dark .filter-menu, html.dark .cs-dropdown, html.dark [role="menu"], html.dark [role="listbox"], html.dark [role="listbox"] > * {
-  background-color: var(--theme-bg-card, #1a1a1a);
-  border-color: var(--theme-border, rgba(255,255,255,0.08));
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.2);
-}
-.server-ctx-menu, #searchResults, #mobileSearchResults, #mobile-more-dropdown, #notification-dropdown, #desktop-notification-dropdown, #server-nav-more-dropdown, .al-file-menu, .cs-dropdown {
-  border-top: 2px solid var(--theme-accent, rgb(var(--al-accent) / 0.6));
+  background-color: #262626;
+  border: 1px solid #404040;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 .server-ctx-menu, #searchResults, #mobileSearchResults, #mobile-more-dropdown, #notification-dropdown, #desktop-notification-dropdown, #server-nav-more-dropdown, .al-file-menu, .filter-menu, .cs-dropdown, [role="menu"], [role="listbox"] {
-  z-index: var(--z-dropdown);
+  z-index: 2147483647 !important;
   pointer-events: auto;
 }
 .server-ctx-menu.hidden, #searchResults.hidden, #mobileSearchResults.hidden, #mobile-more-dropdown.hidden, #notification-dropdown.hidden, #desktop-notification-dropdown.hidden, #server-nav-more-dropdown.hidden, .al-file-menu.hidden, .filter-menu.hidden, .cs-dropdown.hidden, [role="menu"][aria-hidden="true"], [role="listbox"][aria-hidden="true"] {
   pointer-events: none;
+}
+.peer.rounded-full {
+  border: 1px solid #a3a3a3;
+}
+html.dark .peer.rounded-full {
+  border: 1px solid #525252;
+}
+.al-switch {
+  border: 1px solid #a3a3a3;
+}
+html.dark .al-switch {
+  border: 1px solid #525252;
+}
+.cs-focused, .filter-menu button.cs-focused {
+  background: #f5f5f5;
+}
+html.dark .cs-focused, html.dark .filter-menu button.cs-focused {
+  background: rgba(255,255,255,0.06);
 }
 @layer base {
   input:where([type='text']),input:where(:not([type])),input:where([type='email']),input:where([type='url']),input:where([type='password']),input:where([type='number']),input:where([type='date']),input:where([type='datetime-local']),input:where([type='month']),input:where([type='search']),input:where([type='tel']),input:where([type='time']),input:where([type='week']),select:where([multiple]),textarea,select {
