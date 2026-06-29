@@ -18,10 +18,11 @@
     --z-base:            0;  /* Normal page content */
     --z-nav:            10;  /* Navigation: sidebar, topbar, bottom nav */
     --z-floating:       20;  /* Floating buttons, theme toggle */
-    --z-dropdown:       2147483647;  /* Dropdowns, menus, context menus, search results */
-    --z-sticky:         40;  /* Sticky elements */
+    --z-sticky:         30;  /* Sticky elements */
+    --z-dropdown:       40;  /* Dropdowns, menus, context menus, search results */
     --z-modal-backdrop: 50;  /* Modal backdrop / overlay */
     --z-modal:          60;  /* Modal content */
+    --z-modal-dropdown: 65;  /* Dropdowns opened from modal content */
     --z-toast:          70;  /* Toast notifications */
     --z-tooltip:        80;  /* Tooltips */
     --z-loading:        90;  /* Global loading overlays */
@@ -160,10 +161,13 @@
 
   .z-nav { z-index: var(--z-nav); }
   .z-floating { z-index: var(--z-floating); }
+  .z-sticky { z-index: var(--z-sticky); }
   .z-dropdown { z-index: var(--z-dropdown); }
   .z-modal-backdrop { z-index: var(--z-modal-backdrop); }
   .z-modal { z-index: var(--z-modal); }
+  .z-modal-dropdown { z-index: var(--z-modal-dropdown); }
   .z-toast { z-index: var(--z-toast); }
+  .z-tooltip { z-index: var(--z-tooltip); }
   .z-loading { z-index: var(--z-loading); }
 
   .mobile-nav-active {
@@ -440,8 +444,13 @@ html.dark [role="listbox"] > * {
 .cs-dropdown,
 [role="menu"],
 [role="listbox"] {
-  z-index: 2147483647 !important;
+  z-index: var(--z-dropdown, 40) !important;
   pointer-events: auto !important;
+}
+
+.cs-dropdown.cs-modal-layer,
+.filter-menu.cs-modal-layer {
+  z-index: var(--z-modal-dropdown, 65) !important;
 }
 
 /* Hidden dropdowns must not intercept clicks */
@@ -462,10 +471,10 @@ html.dark [role="listbox"] > * {
 
 /* ── Toggle switch border ─────────────────────────────────────────────── */
 .peer.rounded-full {
-  border: 1px solid #a3a3a3;
+  border: 1px solid var(--theme-border, #a3a3a3);
 }
 html.dark .peer.rounded-full {
-  border: 1px solid #525252;
+  border: 1px solid var(--theme-border-subtle, #525252);
 }
 .al-switch {
   border: 1px solid #a3a3a3;
@@ -478,6 +487,12 @@ html.dark .al-switch {
 .cs-focused,
 .filter-menu button.cs-focused {
   background: #f5f5f5;
+}
+.filter-dot {
+  background: transparent;
+}
+.filter-dot[data-active="true"] {
+  background: currentColor;
 }
 html.dark .cs-focused,
 html.dark .filter-menu button.cs-focused {

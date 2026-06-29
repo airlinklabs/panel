@@ -661,7 +661,7 @@
     featEl.innerHTML = '';
     if ((addon.features || []).length) {
       const lbl = document.createElement('p');
-      lbl.style.cssText = 'font-size:10px;color:#404040;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;';
+      lbl.style.cssText = 'font-size:10px;color:var(--theme-text-muted, #737373);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;';
       lbl.textContent = 'Features';
       featEl.appendChild(lbl);
       addon.features.forEach(f => {
@@ -688,7 +688,7 @@
     const keys     = Object.keys(commands).sort((a, b) => Number(a) - Number(b));
     if (keys.length) {
       const lbl = document.createElement('p');
-      lbl.style.cssText = 'font-size:10px;color:#404040;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
+      lbl.style.cssText = 'font-size:10px;color:var(--theme-text-muted, #737373);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
       lbl.textContent = 'Commands';
       guideEl.appendChild(lbl);
       const block     = document.createElement('div');

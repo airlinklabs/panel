@@ -74,7 +74,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
       <li class="flex-1 relative z-10">
         <a href="/" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400" data-match-exact="true" data-match-prefix-also="/server">
           <%- icon('layout-dashboard', { class: 'w-5 h-5' }) %>
-          <span class="text-[10px] font-medium"><%= req.translations.navServers || 'Servers' %></span>
+          <span class="text-[11px] font-medium"><%= req.translations.navServers || 'Servers' %></span>
         </a>
       </li>
     <% } else { %>
@@ -82,7 +82,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
       <li class="flex-1 relative z-10">
         <a href="<%= item.url %>" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400"<% if (item.matchPrefix) { %> data-match-prefix="<%= item.matchPrefix %>"<% } %>>
           <div class="w-5 h-5 flex items-center justify-center [&>svg]:w-5 [&>svg]:h-5 [&>svg]:shrink-0"><%- item.icon %></div>
-          <span class="text-[10px] font-medium"><%= item.label %></span>
+          <span class="text-[11px] font-medium"><%= item.label %></span>
         </a>
       </li>
       <% }); %>
@@ -92,7 +92,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
     <li class="flex-1 relative z-10">
       <button id="more-nav-btn" class="flex flex-col items-center justify-center w-full h-16 gap-1 text-neutral-500 dark:text-neutral-400">
         <%- icon('menu', { class: 'w-5 h-5' }) %>
-        <span class="text-[10px] font-medium"><%= req.translations.navMore || 'More' %></span>
+        <span class="text-[11px] font-medium"><%= req.translations.navMore || 'More' %></span>
       </button>
     </li>
     <% } %>
@@ -100,7 +100,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
     <li class="flex-1 relative z-10">
       <a href="/menu" class="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400" data-match-prefix="/menu">
         <%- icon('menu', { size: 18, class: 'shrink-0' }) %>
-        <span class="text-[10px] font-medium"><%= req.translations.navMenu || 'Menu' %></span>
+        <span class="text-[11px] font-medium"><%= req.translations.navMenu || 'Menu' %></span>
       </a>
     </li>
 
@@ -109,7 +109,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
         <%- include('csrf') %>
         <button type="submit" class="flex flex-col items-center justify-center h-full gap-1 text-neutral-500 dark:text-neutral-400">
           <%- icon('log-out', { class: 'w-5 h-5' }) %>
-          <span class="text-[10px] font-medium"><%= req.translations.navLogout || 'Logout' %></span>
+          <span class="text-[11px] font-medium"><%= req.translations.navLogout || 'Logout' %></span>
         </button>
       </form>
     </li>

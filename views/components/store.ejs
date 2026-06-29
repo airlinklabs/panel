@@ -631,7 +631,7 @@
     featEl.innerHTML = '';
     if ((addon.features || []).length) {
       const lbl = document.createElement('p');
-      lbl.style.cssText = 'font-size:11px;color:#404040;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
+      lbl.style.cssText = 'font-size:11px;color:var(--theme-text-muted, #737373);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;';
       lbl.textContent = 'Features';
       featEl.appendChild(lbl);
       addon.features.forEach(f => {

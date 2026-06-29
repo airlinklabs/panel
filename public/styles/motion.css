@@ -42,15 +42,18 @@
 }
 
 @keyframes motion-blur-in {
-  from { opacity: 0; filter: blur(4px); }
-  to { opacity: 1; filter: blur(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
+
+/* Keep this effect opacity-only. CSS filter creates a stacking context and can
+   break portaled dropdown layering while controls animate into view. */
 
 /* ── Base animation class ────────────────────────────────────────── */
 
 [data-animate]:not([data-animate-card]):not([data-animate-group]):not([data-animate-delay]) {
   opacity: 0;
-  will-change: opacity, transform, filter;
+  will-change: opacity, transform;
 }
 
 [data-animate]:not([data-animate-card]):not([data-animate-group]):not([data-animate-delay]).motion-visible {

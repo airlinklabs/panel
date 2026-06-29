@@ -70,11 +70,7 @@ html.dark .cs-trigger svg {
 
 .cs-dropdown {
   display: none;
-  position: absolute;
-  top: calc(100% + 2px);
-  left: 0;
-  right: 0;
-  z-index: 2147483647 !important;
+  z-index: var(--z-dropdown, 40) !important;
   max-height: 240px;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -108,6 +104,9 @@ html.dark .cs-dropdown {
 .cs-dropdown.cs-portaled {
   position: fixed;
   margin: 0;
+}
+.cs-dropdown.cs-portaled.cs-modal-layer {
+  z-index: var(--z-modal-dropdown, 65) !important;
 }
 
 .cs-option {
@@ -162,6 +161,11 @@ html.dark .cs-option.cs-selected {
   padding: 6px 10px;
   font-size: 12px;
   border-radius: 6px;
+}
+.cs-dropdown.cs-sm .cs-option,
+.cs-wrap.cs-sm .cs-dropdown .cs-option {
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 /* Hide the native select */

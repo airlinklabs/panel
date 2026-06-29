@@ -36,6 +36,7 @@
   }
 
   function open({ title: t, body: b, danger = true, confirmLabel = 'Confirm', onConfirm }) {
+    window.closeAllDropdowns?.();
     lastFocused = document.activeElement;
     title.textContent = t || '';
     body.textContent  = b || '';

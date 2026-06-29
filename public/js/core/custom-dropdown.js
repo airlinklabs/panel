@@ -9,32 +9,16 @@
  *   initCustomDropdown(el)          — build replacement for one <select>
  *   initPortalDropdown(trigger, panel, options) — generic dropdown
  *
- * Every dropdown uses position:absolute within its .cs-wrap parent,
- * and closes on outside click / Escape.
+ * Every dropdown portals its panel to document.body and uses fixed
+ * positioning so overflow-hidden ancestors cannot clip the menu.
  */
 (function () {
   'use strict';
-
-  var ANIM_CUBIC = 'cubic-bezier(0.16, 1, 0.3, 1)';
-  var ANIM_MS = 220;
-  var FLIP_THRESHOLD = 260;
 
   /* ── Track all open dropdowns for close-all ─────────────────────── */
   var openInstances = [];
 
   /* ── Helpers ────────────────────────────────────────────────────── */
-  function isDarkMode() {
-    return document.documentElement.classList.contains('dark');
-  }
-
-  function getComputedBg(el) {
-    return isDarkMode() ? 'rgb(38, 38, 38)' : '#ffffff';
-  }
-
-  function clamp(val, min, max) {
-    return Math.max(min, Math.min(max, val));
-  }
-
   function closeAll(except) {
     for (var i = openInstances.length - 1; i >= 0; i--) {
       if (openInstances[i] !== except) {
@@ -43,29 +27,107 @@
     }
   }
 
+  function isInModal(trigger) {
+    return !!(trigger && trigger.closest('[role="dialog"], #globalModal'));
+  }
+
+  function getDropdownZIndex(trigger) {
+    return isInModal(trigger) ? 'var(--z-modal-dropdown, 65)' : 'var(--z-dropdown, 40)';
+  }
+
+  function portalPanel(panel) {
+    if (!panel || panel.parentNode === document.body) return;
+    panel._ddOriginalParent = panel.parentNode;
+    panel._ddOriginalNextSibling = panel.nextSibling;
+    document.body.appendChild(panel);
+    panel.classList.add('cs-portaled');
+  }
+
+  function restorePanel(panel) {
+    if (!panel || !panel._ddOriginalParent) return;
+    panel.classList.remove('cs-portaled');
+    if (panel._ddOriginalNextSibling && panel._ddOriginalNextSibling.parentNode === panel._ddOriginalParent) {
+      panel._ddOriginalParent.insertBefore(panel, panel._ddOriginalNextSibling);
+    } else {
+      panel._ddOriginalParent.appendChild(panel);
+    }
+    panel._ddOriginalParent = null;
+    panel._ddOriginalNextSibling = null;
+  }
+
+  function getScrollParents(el) {
+    var parents = [];
+    var node = el ? el.parentElement : null;
+    var overflowRe = /(auto|scroll|overlay)/;
+    while (node && node !== document.body && node !== document.documentElement) {
+      var style = window.getComputedStyle(node);
+      if (overflowRe.test(style.overflow + style.overflowY + style.overflowX)) {
+        parents.push(node);
+      }
+      node = node.parentElement;
+    }
+    return parents;
+  }
+
+  function isTriggerInViewport(trigger) {
+    if (!trigger || !trigger.isConnected) return false;
+    var rect = trigger.getBoundingClientRect();
+    return rect.bottom > 0 &&
+      rect.right > 0 &&
+      rect.top < window.innerHeight &&
+      rect.left < window.innerWidth;
+  }
+
   /* ── Position a panel relative to its trigger ───────────────────── */
   function positionPanel(panel, trigger) {
-    var wrap = trigger.closest('.cs-wrap') || trigger.parentNode;
-    if (!wrap) return;
-    panel.style.position = 'absolute';
-    panel.style.top = '';
-    panel.style.left = '';
-    panel.style.width = '';
-    panel.style.zIndex = '';
+    if (!panel || !trigger) return;
+    var rect = trigger.getBoundingClientRect();
+    var panelHeight = 240;
+    var spaceBelow = window.innerHeight - rect.bottom;
+    var openAbove = spaceBelow < panelHeight && rect.top > panelHeight;
+
+    panel.style.position = 'fixed';
+    panel.style.width = rect.width + 'px';
+    panel.style.left = rect.left + 'px';
+    panel.style.zIndex = getDropdownZIndex(trigger);
+    panel.classList.toggle('cs-modal-layer', isInModal(trigger));
+
+    if (openAbove) {
+      panel.style.top = '';
+      panel.style.bottom = (window.innerHeight - rect.top + 2) + 'px';
+    } else {
+      panel.style.bottom = '';
+      panel.style.top = (rect.bottom + 2) + 'px';
+    }
   }
 
   /* ── Scroll / resize reposition ─────────────────────────────────── */
-  function addReposition(panel, trigger) {
+  function addReposition(panel, trigger, closeFn) {
+    if (panel._ddReposCleanup) {
+      panel._ddReposCleanup();
+      panel._ddReposCleanup = null;
+    }
     var onRepos = function () {
       if (panel.getAttribute('aria-hidden') === 'false') {
+        if (!isTriggerInViewport(trigger)) {
+          if (typeof closeFn === 'function') closeFn();
+          return;
+        }
         positionPanel(panel, trigger);
       }
     };
+    var scrollParents = getScrollParents(trigger);
     window.addEventListener('scroll', onRepos, { passive: true });
     window.addEventListener('resize', onRepos, { passive: true });
+    scrollParents.forEach(function (parent) {
+      parent.addEventListener('scroll', onRepos, { passive: true });
+    });
     panel._ddReposCleanup = function () {
       window.removeEventListener('scroll', onRepos);
       window.removeEventListener('resize', onRepos);
+      scrollParents.forEach(function (parent) {
+        parent.removeEventListener('scroll', onRepos);
+      });
     };
   }
 
@@ -79,16 +141,17 @@
     function open() {
       if (state.open) return;
       closeAll(inst);
+      portalPanel(panel);
       panel.style.display = 'block';
       panel.classList.remove('hidden');
       panel.classList.add('cs-open');
       panel.setAttribute('aria-hidden', 'false');
       trigger.classList.add('cs-open');
       positionPanel(panel, trigger);
-      addReposition(panel, trigger);
+      addReposition(panel, trigger, close);
       trigger.setAttribute('aria-expanded', 'true');
       state.open = true;
-      openInstances.push(inst);
+      if (openInstances.indexOf(inst) === -1) openInstances.push(inst);
     }
 
     function close() {
@@ -102,12 +165,15 @@
       panel.style.left = '';
       panel.style.width = '';
       panel.style.zIndex = '';
+      panel.style.bottom = '';
+      panel.classList.remove('cs-modal-layer');
       trigger.classList.remove('cs-open');
       trigger.setAttribute('aria-expanded', 'false');
       if (panel._ddReposCleanup) {
         panel._ddReposCleanup();
         panel._ddReposCleanup = null;
       }
+      restorePanel(panel);
       state.open = false;
       var idx = openInstances.indexOf(inst);
       if (idx !== -1) openInstances.splice(idx, 1);
@@ -177,10 +243,12 @@
     var wrap = document.createElement('div');
     wrap.className = 'cs-wrap';
     wrap.style.position = 'relative';
+    if (select.classList.contains('cs-sm')) wrap.classList.add('cs-sm');
 
     var trigger = document.createElement('button');
     trigger.type = 'button';
     trigger.className = 'cs-trigger';
+    if (select.classList.contains('cs-sm')) trigger.classList.add('cs-sm');
     trigger.setAttribute('aria-haspopup', 'listbox');
     trigger.setAttribute('aria-expanded', 'false');
 
@@ -202,6 +270,7 @@
 
     var panel = document.createElement('div');
     panel.className = 'cs-dropdown';
+    if (select.classList.contains('cs-sm')) panel.classList.add('cs-sm');
     panel.setAttribute('role', 'listbox');
     panel.style.display = 'none';
 
@@ -254,16 +323,18 @@
     }
 
     function doOpen() {
+      closeAll(inst);
       syncOptions();
+      portalPanel(panel);
       panel.style.display = 'block';
       panel.classList.remove('hidden');
       panel.classList.add('cs-open');
       panel.setAttribute('aria-hidden', 'false');
       trigger.classList.add('cs-open');
       positionPanel(panel, trigger);
-      addReposition(panel, trigger);
+      addReposition(panel, trigger, doClose);
       trigger.setAttribute('aria-expanded', 'true');
-      openInstances.push(inst);
+      if (openInstances.indexOf(inst) === -1) openInstances.push(inst);
     }
 
     function doClose() {
@@ -271,12 +342,20 @@
       panel.classList.add('hidden');
       panel.classList.remove('cs-open');
       panel.setAttribute('aria-hidden', 'true');
+      panel.style.position = '';
+      panel.style.top = '';
+      panel.style.left = '';
+      panel.style.width = '';
+      panel.style.zIndex = '';
+      panel.style.bottom = '';
+      panel.classList.remove('cs-modal-layer');
       trigger.classList.remove('cs-open');
       trigger.setAttribute('aria-expanded', 'false');
       if (panel._ddReposCleanup) {
         panel._ddReposCleanup();
         panel._ddReposCleanup = null;
       }
+      restorePanel(panel);
       var idx = openInstances.indexOf(inst);
       if (idx !== -1) openInstances.splice(idx, 1);
     }
@@ -287,12 +366,11 @@
 
     trigger.addEventListener('click', function (e) {
       e.stopPropagation();
-      closeAll(inst);
       doToggle();
     });
 
     document.addEventListener('click', function (e) {
-      if (!wrap.contains(e.target)) doClose();
+      if (!wrap.contains(e.target) && !panel.contains(e.target)) doClose();
     });
 
     var focusedIdx = -1;
@@ -357,6 +435,9 @@
   window.initCustomDropdowns = initCustomDropdowns;
   window.initCustomDropdown = initCustomDropdown;
   window.initPortalDropdown = initPortalDropdown;
+  window.closeAllDropdowns = function () {
+    closeAll();
+  };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initCustomDropdowns);
