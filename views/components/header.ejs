@@ -12,9 +12,9 @@
     <meta property="og:description" content="Manage game servers, access, files, and node health from <%= settings.title %>.">
     <meta property="og:image" content="<%= settings.logo && settings.logo.startsWith('/') ? settings.logo : '/assets/logo.png' %>">
     <link rel="stylesheet" href="/styles.css?v=<%= Date.now() %>">
-    <link rel="stylesheet" href="/layout-animations.css">
-    <link rel="stylesheet" href="/styles/motion.css">
-    <link rel="stylesheet" href="/styles/custom-dropdown.css">
+    <link rel="stylesheet" href="/layout-animations.css?v=<%= Date.now() %>">
+    <link rel="stylesheet" href="/styles/motion.css?v=<%= Date.now() %>">
+    <link rel="stylesheet" href="/styles/custom-dropdown.css?v=<%= Date.now() %>">
     <link rel="icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
     <link rel="shortcut icon" href="<%= settings.favicon && settings.favicon.startsWith('/') ? settings.favicon : '/favicon.ico' %>" type="image/x-icon">
     <% const hasCustomTheme = (settings.lightTheme && settings.lightTheme !== 'default') || (settings.darkTheme && settings.darkTheme !== 'default'); %>

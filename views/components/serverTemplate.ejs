@@ -44,7 +44,7 @@ const secondaryItems = allItems.filter(item => !primaryLabels.includes(item.labe
         More
         <%- icon('chevron-down', { class: 'w-3 h-3' }) %>
       </button>
-      <div id="mobile-more-dropdown" class="hidden absolute top-full left-0 mt-1 min-w-[160px] rounded-xl py-1" style="z-index: var(--z-dropdown)">
+      <div id="mobile-more-dropdown" class="hidden absolute top-full left-0 mt-1 min-w-[160px] rounded-xl py-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 shadow-lg" style="z-index: var(--z-dropdown)">
         <% secondaryItems.forEach(function(item) { %>
         <a href="<%= item.url %>" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition">
           <% if (item.icon) { %><%- item.icon %><% } %>
@@ -91,7 +91,7 @@ const secondaryItems = allItems.filter(item => !primaryLabels.includes(item.labe
           More
           <%- icon('chevron-down', { class: 'w-3.5 h-3.5' }) %>
         </button>
-        <div id="server-nav-more-dropdown" class="hidden absolute left-0 top-full mt-1 min-w-[180px] rounded-xl py-1" style="z-index: var(--z-dropdown)">
+        <div id="server-nav-more-dropdown" class="hidden absolute left-0 top-full mt-1 min-w-[180px] rounded-xl py-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 shadow-lg" style="z-index: var(--z-dropdown)">
           <% secondaryItems.forEach(function(item) { %>
           <a href="<%= item.url %>" class="flex items-center gap-2 px-3 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition">
             <% if (item.icon) { %><%- item.icon %><% } %>

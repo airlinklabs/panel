@@ -79,21 +79,31 @@ html.dark .cs-trigger svg {
   overflow-y: auto;
   overscroll-behavior: contain;
   border-radius: 12px;
-  border: 1px solid #e5e5e5;
-  background: #ffffff;
+  border: 1px solid #e5e5e5 !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
   padding: 4px;
-  opacity: 0;
-  transform: translateY(-4px);
-  transform-origin: top left;
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-html.dark .cs-dropdown {
-  background: #262626;
-  border-color: #404040;
-}
-.cs-dropdown.cs-open {
   opacity: 1;
   transform: translateY(0);
+  transform-origin: top left;
+  pointer-events: auto !important;
+}
+html.dark .cs-dropdown {
+  background: #262626 !important;
+  background-color: #262626 !important;
+  background-image: none !important;
+  border-color: #404040 !important;
+}
+.cs-dropdown[aria-hidden="true"],
+.cs-dropdown.hidden {
+  opacity: 0;
+  pointer-events: none !important;
+}
+.cs-dropdown.cs-open {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  pointer-events: auto !important;
 }
 .cs-dropdown.cs-portaled {
   position: fixed;

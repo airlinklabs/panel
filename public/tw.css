@@ -400,9 +400,11 @@ button:active:not(:disabled), .al-btn:active:not(:disabled) {
 [role="menu"],
 [role="listbox"],
 [role="listbox"] > * {
-  background-color: #ffffff;
-  border: 1px solid #e5e5e5;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid #e5e5e5 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
 }
 
 html.dark .server-ctx-menu,
@@ -418,9 +420,11 @@ html.dark .cs-dropdown,
 html.dark [role="menu"],
 html.dark [role="listbox"],
 html.dark [role="listbox"] > * {
-  background-color: #262626;
-  border: 1px solid #404040;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  background: #262626 !important;
+  background-color: #262626 !important;
+  background-image: none !important;
+  border: 1px solid #404040 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
 }
 
 /* z-index enforcement for all dropdowns */
@@ -437,7 +441,7 @@ html.dark [role="listbox"] > * {
 [role="menu"],
 [role="listbox"] {
   z-index: 2147483647 !important;
-  pointer-events: auto;
+  pointer-events: auto !important;
 }
 
 /* Hidden dropdowns must not intercept clicks */
@@ -453,7 +457,7 @@ html.dark [role="listbox"] > * {
 .cs-dropdown.hidden,
 [role="menu"][aria-hidden="true"],
 [role="listbox"][aria-hidden="true"] {
-  pointer-events: none;
+  pointer-events: none !important;
 }
 
 /* ── Toggle switch border ─────────────────────────────────────────────── */

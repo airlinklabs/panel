@@ -254,6 +254,7 @@
           anim.onfinish = function () {
             element.style.opacity = '1';
             element.style.transform = '';
+            element.style.willChange = 'auto';
           };
         }, delay);
       })(el, totalDelay, type);

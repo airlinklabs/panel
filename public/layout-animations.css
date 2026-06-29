@@ -58,9 +58,6 @@
 /* apikeys/docs.ejs — response panel */
 #responseContainer,
 
-/* template.ejs — search dropdown */
-#searchResults,
-
 /* sftp.ejs — sftp state panels */
 #sftpLoading,
 #sftpError,
@@ -135,7 +132,6 @@
   #renamePreview,
   #createApiKeyModal,
   #responseContainer,
-  #searchResults,
   #sftpLoading,
   #sftpError,
   #sftpCredentials,

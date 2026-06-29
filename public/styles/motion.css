@@ -48,18 +48,18 @@
 
 /* ── Base animation class ────────────────────────────────────────── */
 
-[data-animate] {
+[data-animate]:not([data-animate-card]):not([data-animate-group]):not([data-animate-delay]) {
   opacity: 0;
   will-change: opacity, transform, filter;
 }
 
-[data-animate].motion-visible {
+[data-animate]:not([data-animate-card]):not([data-animate-group]):not([data-animate-delay]).motion-visible {
   animation-duration: 350ms;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   animation-fill-mode: both;
 }
 
-[data-animate].motion-hidden {
+[data-animate]:not([data-animate-card]):not([data-animate-group]):not([data-animate-delay]).motion-hidden {
   opacity: 0;
 }
 
@@ -186,7 +186,6 @@ button:hover svg[class*="refresh"] {
 
 /* Dropdown scale in — default to top, allow override via data attribute */
 .al-dropdown,
-.cs-dropdown,
 [data-popover],
 #searchResults,
 #mobileSearchResults,
@@ -194,7 +193,7 @@ button:hover svg[class*="refresh"] {
 .al-file-menu,
 .server-ctx-menu,
 [role="menu"],
-[role="listbox"] {
+[role="listbox"]:not(.cs-dropdown) {
   transform-origin: top;
   transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1),
               opacity 0.15s ease;

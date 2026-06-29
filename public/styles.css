@@ -6858,21 +6858,25 @@ button:active:not(:disabled), .al-btn:active:not(:disabled) {
   }
 }
 .server-ctx-menu, #searchResults, #mobileSearchResults, #mobile-more-dropdown, #notification-dropdown, #desktop-notification-dropdown, #server-nav-more-dropdown, .al-file-menu, .filter-menu, .cs-dropdown, [role="menu"], [role="listbox"], [role="listbox"] > * {
-  background-color: #ffffff;
-  border: 1px solid #e5e5e5;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid #e5e5e5 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
 }
 html.dark .server-ctx-menu, html.dark #searchResults, html.dark #mobileSearchResults, html.dark #mobile-more-dropdown, html.dark #notification-dropdown, html.dark #desktop-notification-dropdown, html.dark #server-nav-more-dropdown, html.dark .al-file-menu, html.dark .filter-menu, html.dark .cs-dropdown, html.dark [role="menu"], html.dark [role="listbox"], html.dark [role="listbox"] > * {
-  background-color: #262626;
-  border: 1px solid #404040;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  background: #262626 !important;
+  background-color: #262626 !important;
+  background-image: none !important;
+  border: 1px solid #404040 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
 }
 .server-ctx-menu, #searchResults, #mobileSearchResults, #mobile-more-dropdown, #notification-dropdown, #desktop-notification-dropdown, #server-nav-more-dropdown, .al-file-menu, .filter-menu, .cs-dropdown, [role="menu"], [role="listbox"] {
   z-index: 2147483647 !important;
-  pointer-events: auto;
+  pointer-events: auto !important;
 }
 .server-ctx-menu.hidden, #searchResults.hidden, #mobileSearchResults.hidden, #mobile-more-dropdown.hidden, #notification-dropdown.hidden, #desktop-notification-dropdown.hidden, #server-nav-more-dropdown.hidden, .al-file-menu.hidden, .filter-menu.hidden, .cs-dropdown.hidden, [role="menu"][aria-hidden="true"], [role="listbox"][aria-hidden="true"] {
-  pointer-events: none;
+  pointer-events: none !important;
 }
 .peer.rounded-full {
   border: 1px solid #a3a3a3;

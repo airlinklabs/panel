@@ -15,9 +15,6 @@
 (function () {
   'use strict';
 
-  var PANEL_BG = 'bg-white dark:bg-neutral-800';
-  var PANEL_BORDER = 'border border-neutral-200 dark:border-neutral-700';
-  var PANEL_RADIUS = 'rounded-xl shadow-xl';
   var ANIM_CUBIC = 'cubic-bezier(0.16, 1, 0.3, 1)';
   var ANIM_MS = 220;
   var FLIP_THRESHOLD = 260;
@@ -50,21 +47,11 @@
   function positionPanel(panel, trigger) {
     var wrap = trigger.closest('.cs-wrap') || trigger.parentNode;
     if (!wrap) return;
-    var isDocker = trigger.id === 'dockerImage';
-    if (isDocker) {
-      var tRect = trigger.getBoundingClientRect();
-      panel.style.position = 'fixed';
-      panel.style.top = (tRect.bottom + 2) + 'px';
-      panel.style.left = tRect.left + 'px';
-      panel.style.width = tRect.width + 'px';
-      panel.style.zIndex = '2147483647';
-    } else {
-      panel.style.position = 'absolute';
-      panel.style.top = '';
-      panel.style.left = '';
-      panel.style.width = '';
-      panel.style.zIndex = '';
-    }
+    panel.style.position = 'absolute';
+    panel.style.top = '';
+    panel.style.left = '';
+    panel.style.width = '';
+    panel.style.zIndex = '';
   }
 
   /* ── Scroll / resize reposition ─────────────────────────────────── */
@@ -91,12 +78,11 @@
 
     function open() {
       if (state.open) return;
-      closeAll({ close: function () {} });
+      closeAll(inst);
       panel.style.display = 'block';
       panel.classList.remove('hidden');
       panel.classList.add('cs-open');
       panel.setAttribute('aria-hidden', 'false');
-      panel.style.pointerEvents = 'auto';
       trigger.classList.add('cs-open');
       positionPanel(panel, trigger);
       addReposition(panel, trigger);
@@ -111,7 +97,6 @@
       panel.classList.add('hidden');
       panel.classList.remove('cs-open');
       panel.setAttribute('aria-hidden', 'true');
-      panel.style.pointerEvents = '';
       panel.style.position = '';
       panel.style.top = '';
       panel.style.left = '';
@@ -216,10 +201,9 @@
     trigger.appendChild(chevron);
 
     var panel = document.createElement('div');
-    panel.className = 'cs-dropdown ' + PANEL_BG + ' ' + PANEL_BORDER + ' ' + PANEL_RADIUS;
+    panel.className = 'cs-dropdown';
     panel.setAttribute('role', 'listbox');
     panel.style.display = 'none';
-    panel.style.pointerEvents = 'auto';
 
     select.parentNode.insertBefore(wrap, select);
     wrap.appendChild(select);
