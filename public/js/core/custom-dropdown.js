@@ -27,6 +27,26 @@
     }
   }
 
+  function getItemText(item) {
+    return (item.textContent || '').trim().toLowerCase();
+  }
+
+  function isKeyboardOpenKey(e) {
+    return e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp';
+  }
+
+  function setItemActive(items, activeIdx, activeClass) {
+    for (var i = 0; i < items.length; i++) {
+      var active = i === activeIdx;
+      items[i].classList.toggle(activeClass || 'cs-focused', active);
+      items[i].setAttribute('aria-selected', active ? 'true' : 'false');
+      if (!items[i].hasAttribute('tabindex')) items[i].setAttribute('tabindex', '-1');
+    }
+    if (items[activeIdx]) {
+      items[activeIdx].scrollIntoView({ block: 'nearest' });
+    }
+  }
+
   function isInModal(trigger) {
     return !!(trigger && trigger.closest('[role="dialog"], #globalModal'));
   }
@@ -195,18 +215,29 @@
     });
 
     var focusedIdx = -1;
+    var typeBuffer = '';
+    var typeTimer = null;
     function getNavItems() {
       return panel.querySelectorAll('button:not([disabled]), a[href], [role="option"], .cs-option:not(.cs-disabled)');
     }
     function highlightNavItem(idx) {
       var items = getNavItems();
       if (!items.length) return;
-      items.forEach(function (el) { el.classList.remove('cs-focused'); });
       if (idx < 0) idx = items.length - 1;
       if (idx >= items.length) idx = 0;
       focusedIdx = idx;
-      items[focusedIdx].classList.add('cs-focused');
-      items[focusedIdx].scrollIntoView({ block: 'nearest' });
+      setItemActive(items, focusedIdx, 'cs-focused');
+    }
+    function highlightByPrefix(prefix) {
+      var items = getNavItems();
+      prefix = (prefix || '').toLowerCase();
+      for (var i = 0; i < items.length; i++) {
+        var idx = (focusedIdx + 1 + i) % items.length;
+        if (getItemText(items[idx]).indexOf(prefix) === 0) {
+          highlightNavItem(idx);
+          return;
+        }
+      }
     }
 
     document.addEventListener('keydown', function (e) {
@@ -214,18 +245,28 @@
       if (e.key === 'Escape') { close(); trigger.focus(); return; }
       if (e.key === 'ArrowDown') { e.preventDefault(); highlightNavItem(focusedIdx + 1); return; }
       if (e.key === 'ArrowUp') { e.preventDefault(); highlightNavItem(focusedIdx - 1); return; }
-      if (e.key === 'Enter' && focusedIdx >= 0) {
+      if (e.key === 'Home') { e.preventDefault(); highlightNavItem(0); return; }
+      if (e.key === 'End') { e.preventDefault(); highlightNavItem(getNavItems().length - 1); return; }
+      if ((e.key === 'Enter' || e.key === ' ') && focusedIdx >= 0) {
         e.preventDefault();
         var items = getNavItems();
         if (items[focusedIdx]) items[focusedIdx].click();
+        return;
+      }
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        typeBuffer += e.key.toLowerCase();
+        clearTimeout(typeTimer);
+        typeTimer = setTimeout(function () { typeBuffer = ''; }, 500);
+        highlightByPrefix(typeBuffer);
       }
     });
 
     trigger.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (isKeyboardOpenKey(e)) {
         e.preventDefault();
         if (!state.open) open();
-        highlightNavItem(focusedIdx + (e.key === 'ArrowDown' ? 1 : -1));
+        if (e.key === 'ArrowUp') highlightNavItem(focusedIdx - 1);
+        else highlightNavItem(focusedIdx >= 0 ? focusedIdx : 0);
       }
     });
 
@@ -287,6 +328,7 @@
         var item = document.createElement('div');
         item.className = 'cs-option';
         item.setAttribute('role', 'option');
+        item.setAttribute('tabindex', '-1');
         item.setAttribute('data-value', opt.value);
         item.textContent = opt.text;
         if (opt.disabled) item.classList.add('cs-disabled');
@@ -374,15 +416,26 @@
     });
 
     var focusedIdx = -1;
+    var typeBuffer = '';
+    var typeTimer = null;
     function highlightOption(idx) {
       var items = panel.querySelectorAll('.cs-option:not(.cs-disabled)');
       if (!items.length) return;
-      items.forEach(function (el) { el.classList.remove('cs-focused'); });
       if (idx < 0) idx = items.length - 1;
       if (idx >= items.length) idx = 0;
       focusedIdx = idx;
-      items[focusedIdx].classList.add('cs-focused');
-      items[focusedIdx].scrollIntoView({ block: 'nearest' });
+      setItemActive(items, focusedIdx, 'cs-focused');
+    }
+    function highlightOptionByPrefix(prefix) {
+      var items = panel.querySelectorAll('.cs-option:not(.cs-disabled)');
+      prefix = (prefix || '').toLowerCase();
+      for (var i = 0; i < items.length; i++) {
+        var idx = (focusedIdx + 1 + i) % items.length;
+        if (getItemText(items[idx]).indexOf(prefix) === 0) {
+          highlightOption(idx);
+          return;
+        }
+      }
     }
 
     document.addEventListener('keydown', function (e) {
@@ -390,18 +443,28 @@
       if (e.key === 'Escape') { doClose(); trigger.focus(); return; }
       if (e.key === 'ArrowDown') { e.preventDefault(); highlightOption(focusedIdx + 1); return; }
       if (e.key === 'ArrowUp') { e.preventDefault(); highlightOption(focusedIdx - 1); return; }
-      if (e.key === 'Enter' && focusedIdx >= 0) {
+      if (e.key === 'Home') { e.preventDefault(); highlightOption(0); return; }
+      if (e.key === 'End') { e.preventDefault(); highlightOption(panel.querySelectorAll('.cs-option:not(.cs-disabled)').length - 1); return; }
+      if ((e.key === 'Enter' || e.key === ' ') && focusedIdx >= 0) {
         e.preventDefault();
         var items = panel.querySelectorAll('.cs-option:not(.cs-disabled)');
         if (items[focusedIdx]) items[focusedIdx].click();
+        return;
+      }
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        typeBuffer += e.key.toLowerCase();
+        clearTimeout(typeTimer);
+        typeTimer = setTimeout(function () { typeBuffer = ''; }, 500);
+        highlightOptionByPrefix(typeBuffer);
       }
     });
 
     trigger.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (isKeyboardOpenKey(e)) {
         e.preventDefault();
         if (panel.getAttribute('aria-hidden') !== 'false') doOpen();
-        highlightOption(focusedIdx + (e.key === 'ArrowDown' ? 1 : -1));
+        if (e.key === 'ArrowUp') highlightOption(focusedIdx - 1);
+        else highlightOption(focusedIdx >= 0 ? focusedIdx : 0);
       }
     });
 

@@ -99,7 +99,7 @@
     <!-- Language -->
     <div data-animate-card class="rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4">
       <p class="text-sm font-medium text-neutral-800 dark:text-white mb-3"><%= req.translations.languagePreference || 'Language' %></p>
-      <form id="language-preference-form">
+      <form id="language-preference-form" class="space-y-3">
         <%- include('../components/csrf') %>
         <select id="language" name="language"
           class="cs-select">
@@ -344,7 +344,7 @@
             </form>
 
             <!-- Language -->
-            <form id="language-preference-form" class="col-span-1">
+            <form id="language-preference-form" class="col-span-1 space-y-2">
               <%- include('../components/csrf') %>
               <label class="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%- icon('globe', { class: 'w-3 h-3' }) %> <%= req.translations.languagePreference || 'Language' %></label>
               <select id="language" name="language"
@@ -367,9 +367,9 @@
             </form>
 
             <!-- Animations toggle -->
-            <div class="col-span-1">
-              <div class="flex items-center justify-between py-4 border-b border-neutral-200 dark:border-white/5">
-                <div>
+            <div class="col-span-1 rounded-xl border border-neutral-200/70 bg-white/70 px-4 py-3 dark:border-white/5 dark:bg-white/[0.03]">
+              <div class="flex items-center justify-between gap-4">
+                <div class="min-w-0">
                   <p class="text-sm font-medium text-neutral-800 dark:text-white">Reduce animations</p>
                   <p class="text-xs text-neutral-500 mt-0.5">Disable motion effects across the panel. Applies on next page load.</p>
                 </div>
@@ -385,9 +385,9 @@
             </div>
 
             <!-- Font size -->
-            <div class="col-span-1">
-              <div class="flex items-center justify-between py-4 border-b border-neutral-200 dark:border-white/5">
-                <div>
+            <div class="col-span-1 rounded-xl border border-neutral-200/70 bg-white/70 px-4 py-3 dark:border-white/5 dark:bg-white/[0.03]">
+              <div class="flex items-center justify-between gap-4">
+                <div class="min-w-0">
                   <p class="text-sm font-medium text-neutral-800 dark:text-white">Text size</p>
                   <p class="text-xs text-neutral-500 mt-0.5">Adjust the text size across the panel.</p>
                 </div>
@@ -406,9 +406,9 @@
             </div>
 
             <!-- High contrast -->
-            <div class="col-span-1">
-              <div class="flex items-center justify-between py-4 border-b border-neutral-200 dark:border-white/5">
-                <div>
+            <div class="col-span-1 rounded-xl border border-neutral-200/70 bg-white/70 px-4 py-3 dark:border-white/5 dark:bg-white/[0.03]">
+              <div class="flex items-center justify-between gap-4">
+                <div class="min-w-0">
                   <p class="text-sm font-medium text-neutral-800 dark:text-white">High contrast</p>
                   <p class="text-xs text-neutral-500 mt-0.5">Increase contrast for better readability.</p>
                 </div>
@@ -424,9 +424,9 @@
             </div>
 
             <!-- Compact mode -->
-            <div class="col-span-1">
-              <div class="flex items-center justify-between py-4 border-b border-neutral-200 dark:border-white/5">
-                <div>
+            <div class="col-span-1 rounded-xl border border-neutral-200/70 bg-white/70 px-4 py-3 dark:border-white/5 dark:bg-white/[0.03]">
+              <div class="flex items-center justify-between gap-4">
+                <div class="min-w-0">
                   <p class="text-sm font-medium text-neutral-800 dark:text-white">Compact mode</p>
                   <p class="text-xs text-neutral-500 mt-0.5">Reduce spacing for a denser layout.</p>
                 </div>

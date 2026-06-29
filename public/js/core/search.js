@@ -83,6 +83,7 @@ function renderResults(items, term) {
       row.id        = 'search-result-' + type + '-' + searchResults.querySelectorAll('.search-result').length;
       row.setAttribute('role', 'option');
       row.setAttribute('aria-selected', 'false');
+      row.setAttribute('tabindex', '-1');
       row.className = 'search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer';
       row.innerHTML = (typeIcon[item.type] || typeIcon.nav) +
         '<span class="flex-1 min-w-0">' +
@@ -144,6 +145,10 @@ function showSuggestions() {
   links.forEach(function(link) {
     var row = document.createElement('a');
     row.href = link.href || '#';
+    row.id = 'search-suggestion-' + searchResults.querySelectorAll('.search-result').length;
+    row.setAttribute('role', 'option');
+    row.setAttribute('aria-selected', 'false');
+    row.setAttribute('tabindex', '-1');
     row.className = 'search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer';
     var icon = link.querySelector('svg');
     if (icon) { var ic = icon.cloneNode(true); ic.className = 'w-4 h-4 text-neutral-400 shrink-0'; row.appendChild(ic); }
@@ -168,6 +173,7 @@ function updateActiveResult() {
   });
   const activeRow = rows[activeIndex];
   searchInput.setAttribute('aria-activedescendant', activeRow ? activeRow.id : '');
+  if (activeRow) activeRow.scrollIntoView({ block: 'nearest' });
 }
 
 searchInput.addEventListener('input', function() {
@@ -184,7 +190,22 @@ searchInput.addEventListener('input', function() {
 
 searchInput.addEventListener('keydown', function(e) {
   const rows = searchResults.querySelectorAll('.search-result');
-  if (!rows.length) return;
+  if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && searchResults.classList.contains('hidden')) {
+    e.preventDefault();
+    showSuggestions();
+    activeIndex = e.key === 'ArrowUp' ? searchResults.querySelectorAll('.search-result').length - 1 : 0;
+    updateActiveResult();
+    return;
+  }
+  if (!rows.length) {
+    if (e.key === 'Escape') {
+      searchResults.classList.add('hidden');
+      searchInput.setAttribute('aria-expanded', 'false');
+      searchInput.setAttribute('aria-activedescendant', '');
+      searchInput.blur();
+    }
+    return;
+  }
   if (e.key === 'ArrowDown') {
     e.preventDefault();
     activeIndex = (activeIndex + 1) % rows.length;
@@ -193,9 +214,19 @@ searchInput.addEventListener('keydown', function(e) {
     e.preventDefault();
     activeIndex = (activeIndex - 1 + rows.length) % rows.length;
     updateActiveResult();
-  } else if (e.key === 'Enter') {
+  } else if (e.key === 'Home') {
     e.preventDefault();
-    if (activeIndex >= 0 && rows[activeIndex]) rows[activeIndex].click();
+    activeIndex = 0;
+    updateActiveResult();
+  } else if (e.key === 'End') {
+    e.preventDefault();
+    activeIndex = rows.length - 1;
+    updateActiveResult();
+  } else if (e.key === 'Enter') {
+    if (activeIndex >= 0 && rows[activeIndex]) {
+      e.preventDefault();
+      rows[activeIndex].click();
+    }
   } else if (e.key === 'Escape') {
     searchResults.classList.add('hidden');
     searchInput.setAttribute('aria-expanded', 'false');
