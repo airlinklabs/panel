@@ -18,9 +18,12 @@ function initImageEdit() {
     portRequirements: imageData.portRequirements,
   };
 
+  const isMobile = !!document.querySelector('[data-mobile-tab]');
+
   function activateTab(name) {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      const active = btn.dataset.tab === name;
+    document.querySelectorAll(isMobile ? '[data-mobile-tab]' : '.tab-btn').forEach(btn => {
+      const tabName = isMobile ? btn.dataset.mobileTab : btn.dataset.tab;
+      const active = tabName === name;
       btn.classList.toggle('border-neutral-800', active);
       btn.classList.toggle('dark:border-white', active);
       btn.classList.toggle('text-neutral-800', active);
@@ -28,36 +31,53 @@ function initImageEdit() {
       btn.classList.toggle('border-transparent', !active);
       btn.classList.toggle('text-neutral-500', !active);
     });
-    document.querySelectorAll('.tab-form').forEach(form => {
-      form.classList.toggle('hidden', form.dataset.tabForm !== name);
+    document.querySelectorAll(isMobile ? '[id^="mobileTab"]' : '.tab-form').forEach(form => {
+      const formName = isMobile ? form.id.replace('mobileTab', '').toLowerCase() : form.dataset.tabForm;
+      form.classList.toggle('hidden', formName !== name);
     });
     if (name === 'raw') renderRawEditor();
   }
 
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => activateTab(btn.dataset.tab));
+  document.querySelectorAll(isMobile ? '[data-mobile-tab]' : '.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabName = isMobile ? btn.dataset.mobileTab : btn.dataset.tab;
+      activateTab(tabName);
+    });
   });
   activateTab('general');
 
-  document.getElementById('field-name').value = state.name;
-  document.getElementById('field-description').value = state.description;
-  document.getElementById('field-author').value = state.author;
-  document.getElementById('field-startup').value = state.startup;
-  document.getElementById('field-stop').value = state.stop;
-  document.getElementById('field-startup-done').value = state.startup_done;
+  function el(id) { return document.getElementById(id); }
 
-  document.getElementById('save-general').addEventListener('click', async () => {
-    state.name = document.getElementById('field-name').value.trim();
-    state.description = document.getElementById('field-description').value;
-    state.author = document.getElementById('field-author').value.trim();
-    state.startup = document.getElementById('field-startup').value.trim();
-    state.stop = document.getElementById('field-stop').value.trim();
-    state.startup_done = document.getElementById('field-startup-done').value.trim();
-    await saveState();
-  });
+  const fieldName = el('field-name') || el('name');
+  const fieldAuthor = el('field-author') || el('author');
+  const fieldStartup = el('field-startup') || el('startup');
+  const fieldStop = el('field-stop');
+  const fieldStartupDone = el('field-startup-done');
+  const fieldDescription = el('field-description') || el('description');
+
+  if (fieldName) fieldName.value = state.name;
+  if (fieldAuthor) fieldAuthor.value = state.author;
+  if (fieldStartup) fieldStartup.value = state.startup;
+  if (fieldStop) fieldStop.value = state.stop;
+  if (fieldStartupDone) fieldStartupDone.value = state.startup_done;
+  if (fieldDescription) fieldDescription.value = state.description;
+
+  const saveGeneral = el('save-general');
+  if (saveGeneral) {
+    saveGeneral.addEventListener('click', async () => {
+      state.name = (fieldName || el('name')).value.trim();
+      state.description = (fieldDescription || el('description')).value;
+      state.author = (fieldAuthor || el('author')).value.trim();
+      state.startup = (fieldStartup || el('startup')).value.trim();
+      if (fieldStop) state.stop = fieldStop.value.trim();
+      if (fieldStartupDone) state.startup_done = fieldStartupDone.value.trim();
+      await saveState();
+    });
+  }
 
   function renderDockerImages() {
-    const list = document.getElementById('docker-images-list');
+    const list = el('docker-images-list') || el('docker-images-list-mobile');
+    if (!list) return;
     list.innerHTML = '';
     const entries = Object.entries(state.docker_images);
     if (entries.length === 0) {
@@ -92,25 +112,32 @@ function initImageEdit() {
   }
   renderDockerImages();
 
-  document.getElementById('add-docker-image').addEventListener('click', () => {
-    state.docker_images[''] = '';
-    renderDockerImages();
-  });
-
-  document.getElementById('save-docker').addEventListener('click', async () => {
-    const newImages = {};
-    document.querySelectorAll('[data-docker-label]').forEach((labelInput, idx) => {
-      const imageInput = document.querySelector('[data-docker-image="' + idx + '"]');
-      const label = labelInput.value.trim();
-      const img = imageInput.value.trim();
-      if (label && img) newImages[label] = img;
+  const addDockerImage = el('add-docker-image') || el('add-docker-image-mobile');
+  if (addDockerImage) {
+    addDockerImage.addEventListener('click', () => {
+      state.docker_images[''] = '';
+      renderDockerImages();
     });
-    state.docker_images = newImages;
-    await saveState();
-  });
+  }
+
+  const saveDocker = el('save-docker') || el('save-docker-mobile');
+  if (saveDocker) {
+    saveDocker.addEventListener('click', async () => {
+      const newImages = {};
+      document.querySelectorAll('[data-docker-label]').forEach((labelInput, idx) => {
+        const imageInput = document.querySelector('[data-docker-image="' + idx + '"]');
+        const label = labelInput.value.trim();
+        const img = imageInput.value.trim();
+        if (label && img) newImages[label] = img;
+      });
+      state.docker_images = newImages;
+      await saveState();
+    });
+  }
 
   function renderVariables() {
-    const list = document.getElementById('variables-list');
+    const list = el('variables-list') || el('variables-list-mobile');
+    if (!list) return;
     list.innerHTML = '';
     if (!state.variables.length) {
       list.innerHTML = '<p class="text-xs text-neutral-400">No variables defined. Click Add Variable to add one.</p>';
@@ -167,41 +194,54 @@ function initImageEdit() {
   }
   renderVariables();
 
-  document.getElementById('add-variable').addEventListener('click', () => {
-    state.variables.push({ name: '', description: '', env_variable: '', default_value: '', user_viewable: true, user_editable: true, rules: '', field_type: 'text' });
-    renderVariables();
-  });
-
-  document.getElementById('save-variables').addEventListener('click', async () => {
-    document.querySelectorAll('[data-var-field]').forEach(input => {
-      const idx = parseInt(input.dataset.varField);
-      const field = input.dataset.field;
-      if (!state.variables[idx]) return;
-      if (input.type === 'checkbox') {
-        state.variables[idx][field] = input.checked;
-      } else {
-        state.variables[idx][field] = input.value;
-      }
+  const addVariable = el('add-variable') || el('add-variable-mobile');
+  if (addVariable) {
+    addVariable.addEventListener('click', () => {
+      state.variables.push({ name: '', description: '', env_variable: '', default_value: '', user_viewable: true, user_editable: true, rules: '', field_type: 'text' });
+      renderVariables();
     });
-    await saveState();
-  });
+  }
+
+  const saveVariables = el('save-variables') || el('save-variables-mobile');
+  if (saveVariables) {
+    saveVariables.addEventListener('click', async () => {
+      document.querySelectorAll('[data-var-field]').forEach(input => {
+        const idx = parseInt(input.dataset.varField);
+        const field = input.dataset.field;
+        if (!state.variables[idx]) return;
+        if (input.type === 'checkbox') {
+          state.variables[idx][field] = input.checked;
+        } else {
+          state.variables[idx][field] = input.value;
+        }
+      });
+      await saveState();
+    });
+  }
 
   const installScript = state.scripts.installation || {};
-  document.getElementById('field-install-container').value = installScript.container || '';
-  document.getElementById('field-install-entrypoint').value = installScript.entrypoint || 'bash';
-  document.getElementById('field-install-script').value = installScript.script || '';
+  const installContainer = el('field-install-container') || el('field-install-container-mobile');
+  const installEntrypoint = el('field-install-entrypoint') || el('field-install-entrypoint-mobile');
+  const installScriptEl = el('field-install-script') || el('field-install-script-mobile');
+  if (installContainer) installContainer.value = installScript.container || '';
+  if (installEntrypoint) installEntrypoint.value = installScript.entrypoint || 'bash';
+  if (installScriptEl) installScriptEl.value = installScript.script || '';
 
-  document.getElementById('save-install').addEventListener('click', async () => {
-    state.scripts.installation = {
-      container: document.getElementById('field-install-container').value.trim(),
-      entrypoint: document.getElementById('field-install-entrypoint').value.trim() || 'bash',
-      script: document.getElementById('field-install-script').value,
-    };
-    await saveState();
-  });
+  const saveInstall = el('save-install') || el('save-install-mobile');
+  if (saveInstall) {
+    saveInstall.addEventListener('click', async () => {
+      state.scripts.installation = {
+        container: (installContainer || el('field-install-container')).value.trim(),
+        entrypoint: (installEntrypoint || el('field-install-entrypoint')).value.trim() || 'bash',
+        script: (installScriptEl || el('field-install-script')).value,
+      };
+      await saveState();
+    });
+  }
 
   function renderPortRequirements() {
-    const list = document.getElementById('port-requirements-list');
+    const list = el('port-requirements-list');
+    if (!list) return;
     list.innerHTML = '';
     if (!state.portRequirements.length) {
       list.innerHTML = '<p class="text-xs text-neutral-400">No required ports. Servers can be created without port bindings unless an admin adds ports.</p>';
@@ -227,20 +267,26 @@ function initImageEdit() {
   }
   renderPortRequirements();
 
-  document.getElementById('add-port-requirement').addEventListener('click', () => {
-    state.portRequirements.push({ name: 'Port ' + (state.portRequirements.length + 1), internalPort: 25565 });
-    renderPortRequirements();
-  });
-
-  document.getElementById('save-settings').addEventListener('click', async () => {
-    document.querySelectorAll('[data-port-req]').forEach(input => {
-      const idx = Number(input.dataset.portReq);
-      const field = input.dataset.field;
-      state.portRequirements[idx][field] = field === 'internalPort' ? Number(input.value) : input.value;
+  const addPortReq = el('add-port-requirement') || el('addPortRequirement');
+  if (addPortReq) {
+    addPortReq.addEventListener('click', () => {
+      state.portRequirements.push({ name: 'Port ' + (state.portRequirements.length + 1), internalPort: 25565 });
+      renderPortRequirements();
     });
-    state.portRequirements = state.portRequirements.filter(port => port.name && port.internalPort);
-    await saveState();
-  });
+  }
+
+  const saveSettings = el('save-settings') || el('saveSettingsBtn');
+  if (saveSettings) {
+    saveSettings.addEventListener('click', async () => {
+      document.querySelectorAll('[data-port-req]').forEach(input => {
+        const idx = Number(input.dataset.portReq);
+        const field = input.dataset.field;
+        state.portRequirements[idx][field] = field === 'internalPort' ? Number(input.value) : input.value;
+      });
+      state.portRequirements = state.portRequirements.filter(port => port.name && port.internalPort);
+      await saveState();
+    });
+  }
 
   let monacoEditor = null;
 
@@ -249,9 +295,11 @@ function initImageEdit() {
       monacoEditor.setValue(buildExportJson());
       return;
     }
+    const editorEl = el('json-editor') || el('jsonEditor');
+    if (!editorEl) return;
     require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' } });
     require(['vs/editor/editor.main'], () => {
-      monacoEditor = monaco.editor.create(document.getElementById('json-editor'), {
+      monacoEditor = monaco.editor.create(editorEl, {
         value: buildExportJson(),
         language: 'json',
         theme: document.documentElement.classList.contains('dark') ? 'vs-dark' : 'vs',
@@ -264,13 +312,16 @@ function initImageEdit() {
     });
   }
 
-  document.getElementById('save-raw').addEventListener('click', async () => {
-    if (!monacoEditor) return;
-    let parsed;
-    try { parsed = JSON.parse(monacoEditor.getValue()); }
-    catch (e) { showToast('Invalid JSON: ' + e.message, 'error'); return; }
-    await savePayload(parsed);
-  });
+  const saveRaw = el('save-raw') || el('saveButton');
+  if (saveRaw) {
+    saveRaw.addEventListener('click', async () => {
+      if (!monacoEditor) return;
+      let parsed;
+      try { parsed = JSON.parse(monacoEditor.getValue()); }
+      catch (e) { showToast('Invalid JSON: ' + e.message, 'error'); return; }
+      await savePayload(parsed);
+    });
+  }
 
   function buildExportJson() {
     return JSON.stringify({

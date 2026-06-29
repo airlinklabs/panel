@@ -219,7 +219,7 @@ function isImageFile(filename) {
               <%
                 const _ctxFilePath = currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name;
               %>
-              <div id="dropdown-<%= file.name %>" class="al-file-menu fixed w-44 rounded-xl shadow-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 z-30 transform opacity-0 scale-95 transition-all duration-150 ease-out pointer-events-none overflow-hidden">
+              <div id="dropdown-<%= file.name %>" class="al-file-menu fixed w-44 rounded-xl shadow-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 z-dropdown transform opacity-0 scale-95 transition-all duration-150 ease-out pointer-events-none overflow-hidden">
                 <div class="py-1" role="menu">
                   <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
                     onclick="rename('<%= file.name %>', '<%= _ctxFilePath %>')">
@@ -467,7 +467,7 @@ function isImageFile(filename) {
               <%
                 const _dCtxFilePath = currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name;
               %>
-              <div id="dropdown-<%= file.name %>" class="al-file-menu fixed w-44 rounded-xl shadow-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 z-30 transform opacity-0 scale-95 transition-all duration-150 ease-out pointer-events-none overflow-hidden">
+              <div id="dropdown-<%= file.name %>" class="al-file-menu fixed w-44 rounded-xl shadow-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 z-dropdown transform opacity-0 scale-95 transition-all duration-150 ease-out pointer-events-none overflow-hidden">
                 <div class="py-1" role="menu">
                   <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
                     onclick="rename('<%= file.name %>', '<%= _dCtxFilePath %>')">

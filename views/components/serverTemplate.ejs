@@ -44,52 +44,22 @@ const secondaryItems = allItems.filter(item => !primaryLabels.includes(item.labe
         More
         <%- icon('chevron-down', { class: 'w-3 h-3' }) %>
       </button>
+      <div id="mobile-more-dropdown" class="hidden absolute top-full left-0 mt-1 min-w-[160px] bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl shadow-xl py-1" style="z-index: var(--z-dropdown)">
+        <% secondaryItems.forEach(function(item) { %>
+        <a href="<%= item.url %>" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition">
+          <% if (item.icon) { %><%- item.icon %><% } %>
+          <%= item.label %>
+        </a>
+        <% }); %>
+      </div>
     </div>
     <% } %>
   </nav>
 </div>
 <% if (secondaryItems.length > 0) { %>
-<div id="mobile-more-dropdown" class="hidden fixed min-w-[160px] bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl shadow-xl py-1" style="z-index: var(--z-dropdown)">
-  <% secondaryItems.forEach(function(item) { %>
-  <a href="<%= item.url %>" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition">
-    <% if (item.icon) { %><%- item.icon %><% } %>
-    <%= item.label %>
-  </a>
-  <% }); %>
-</div>
 <% } %>
 
-<script nonce="<%- nonce %>">
-(function() {
-  var currentPath = window.location.pathname.replace(/\/$/, '');
-  document.querySelectorAll('.nav-link2').forEach(function(link) {
-    if (link.tagName === 'BUTTON') return;
-    var href = link.getAttribute('href');
-    if (!href) return;
-    if (href.replace(/\/$/, '') === currentPath) {
-      link.classList.add('bg-neutral-100', 'dark:bg-white/10', 'border-neutral-200', 'dark:border-neutral-700/30', 'text-neutral-900', 'dark:text-white', 'font-medium');
-      var strip = link.closest('.overflow-x-auto');
-      if (strip) {
-        var linkLeft = link.offsetLeft;
-        var linkWidth = link.offsetWidth;
-        var stripWidth = strip.offsetWidth;
-        strip.scrollLeft = linkLeft - (stripWidth / 2) + (linkWidth / 2);
-      }
-    }
-  });
-  var mobileMoreBtn = document.getElementById('mobile-more-btn');
-  var mobileMoreDropdown = document.getElementById('mobile-more-dropdown');
-  if (mobileMoreBtn && mobileMoreDropdown) {
-    mobileMoreBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      mobileMoreDropdown.classList.toggle('hidden');
-    });
-    document.addEventListener('click', function() {
-      mobileMoreDropdown.classList.add('hidden');
-    });
-  }
-})();
-</script>
+<script nonce="<%- nonce %>" src="/js/core/server-nav.js"></script>
 
 <% if (global.uiComponentStore) {
   const serverSections = global.uiComponentStore.getServerSections(server.UUID);
@@ -121,7 +91,7 @@ const secondaryItems = allItems.filter(item => !primaryLabels.includes(item.labe
           More
           <%- icon('chevron-down', { class: 'w-3.5 h-3.5' }) %>
         </button>
-        <div id="server-nav-more-dropdown" class="hidden absolute left-0 top-full mt-1 min-w-[180px] bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl shadow-lg py-1 overflow-hidden" style="z-index: var(--z-dropdown)">
+        <div id="server-nav-more-dropdown" class="hidden absolute left-0 top-full mt-1 min-w-[180px] bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl shadow-lg py-1" style="z-index: var(--z-dropdown)">
           <% secondaryItems.forEach(function(item) { %>
           <a href="<%= item.url %>" class="flex items-center gap-2 px-3 py-2 text-[13px] font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition">
             <% if (item.icon) { %><%- item.icon %><% } %>
@@ -135,44 +105,7 @@ const secondaryItems = allItems.filter(item => !primaryLabels.includes(item.labe
   </div>
 </div>
 
-<script nonce="<%- nonce %>">
-(function() {
-  var moreBtn = document.getElementById('server-nav-more-btn');
-  var moreDropdown = document.getElementById('server-nav-more-dropdown');
-  if (!moreBtn || !moreDropdown) return;
-
-  var dropdownOpen = false;
-  moreBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    dropdownOpen = !dropdownOpen;
-    moreDropdown.classList.toggle('hidden', !dropdownOpen);
-  });
-  document.addEventListener('click', function() {
-    dropdownOpen = false;
-    moreDropdown.classList.add('hidden');
-  });
-
-  var currentPagePath = window.location.pathname;
-  function updateActiveLink() {
-    var activeLink = null;
-    var navLinks = document.querySelectorAll('.nav-link2');
-    navLinks.forEach(function(link) {
-      link.setAttribute('data-active', 'false');
-      if (currentPagePath.startsWith(link.getAttribute('href'))) {
-        activeLink = link;
-      }
-    });
-    if (activeLink) {
-      activeLink.setAttribute('data-active', 'true');
-    }
-  }
-  updateActiveLink();
-  window.addEventListener('popstate', function() {
-    currentPagePath = window.location.pathname;
-    updateActiveLink();
-  });
-})();
-</script>
+<script nonce="<%- nonce %>" src="/js/core/server-nav.js"></script>
 
  <!-- Server Sections -->
  <% if (global.uiComponentStore) {

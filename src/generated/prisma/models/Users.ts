@@ -60,6 +60,9 @@ export type UsersMinAggregateOutputType = {
   loginAttempts: number | null
   lockedUntil: Date | null
   animationsDisabled: boolean | null
+  highContrast: boolean | null
+  compactMode: boolean | null
+  fontSize: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -80,6 +83,9 @@ export type UsersMaxAggregateOutputType = {
   loginAttempts: number | null
   lockedUntil: Date | null
   animationsDisabled: boolean | null
+  highContrast: boolean | null
+  compactMode: boolean | null
+  fontSize: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -100,6 +106,9 @@ export type UsersCountAggregateOutputType = {
   loginAttempts: number
   lockedUntil: number
   animationsDisabled: number
+  highContrast: number
+  compactMode: number
+  fontSize: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -140,6 +149,9 @@ export type UsersMinAggregateInputType = {
   loginAttempts?: true
   lockedUntil?: true
   animationsDisabled?: true
+  highContrast?: true
+  compactMode?: true
+  fontSize?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -160,6 +172,9 @@ export type UsersMaxAggregateInputType = {
   loginAttempts?: true
   lockedUntil?: true
   animationsDisabled?: true
+  highContrast?: true
+  compactMode?: true
+  fontSize?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -180,6 +195,9 @@ export type UsersCountAggregateInputType = {
   loginAttempts?: true
   lockedUntil?: true
   animationsDisabled?: true
+  highContrast?: true
+  compactMode?: true
+  fontSize?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -287,6 +305,9 @@ export type UsersGroupByOutputType = {
   loginAttempts: number
   lockedUntil: Date | null
   animationsDisabled: boolean
+  highContrast: boolean
+  compactMode: boolean
+  fontSize: string
   createdAt: Date
   updatedAt: Date
   _count: UsersCountAggregateOutputType | null
@@ -330,6 +351,9 @@ export type UsersWhereInput = {
   loginAttempts?: Prisma.IntFilter<"Users"> | number
   lockedUntil?: Prisma.DateTimeNullableFilter<"Users"> | Date | string | null
   animationsDisabled?: Prisma.BoolFilter<"Users"> | boolean
+  highContrast?: Prisma.BoolFilter<"Users"> | boolean
+  compactMode?: Prisma.BoolFilter<"Users"> | boolean
+  fontSize?: Prisma.StringFilter<"Users"> | string
   createdAt?: Prisma.DateTimeFilter<"Users"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Users"> | Date | string
   servers?: Prisma.ServerListRelationFilter
@@ -362,6 +386,9 @@ export type UsersOrderByWithRelationInput = {
   loginAttempts?: Prisma.SortOrder
   lockedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   animationsDisabled?: Prisma.SortOrder
+  highContrast?: Prisma.SortOrder
+  compactMode?: Prisma.SortOrder
+  fontSize?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   servers?: Prisma.ServerOrderByRelationAggregateInput
@@ -397,6 +424,9 @@ export type UsersWhereUniqueInput = Prisma.AtLeast<{
   loginAttempts?: Prisma.IntFilter<"Users"> | number
   lockedUntil?: Prisma.DateTimeNullableFilter<"Users"> | Date | string | null
   animationsDisabled?: Prisma.BoolFilter<"Users"> | boolean
+  highContrast?: Prisma.BoolFilter<"Users"> | boolean
+  compactMode?: Prisma.BoolFilter<"Users"> | boolean
+  fontSize?: Prisma.StringFilter<"Users"> | string
   createdAt?: Prisma.DateTimeFilter<"Users"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Users"> | Date | string
   servers?: Prisma.ServerListRelationFilter
@@ -429,6 +459,9 @@ export type UsersOrderByWithAggregationInput = {
   loginAttempts?: Prisma.SortOrder
   lockedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   animationsDisabled?: Prisma.SortOrder
+  highContrast?: Prisma.SortOrder
+  compactMode?: Prisma.SortOrder
+  fontSize?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UsersCountOrderByAggregateInput
@@ -457,6 +490,9 @@ export type UsersScalarWhereWithAggregatesInput = {
   loginAttempts?: Prisma.IntWithAggregatesFilter<"Users"> | number
   lockedUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"Users"> | Date | string | null
   animationsDisabled?: Prisma.BoolWithAggregatesFilter<"Users"> | boolean
+  highContrast?: Prisma.BoolWithAggregatesFilter<"Users"> | boolean
+  compactMode?: Prisma.BoolWithAggregatesFilter<"Users"> | boolean
+  fontSize?: Prisma.StringWithAggregatesFilter<"Users"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Users"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Users"> | Date | string
 }
@@ -476,6 +512,9 @@ export type UsersCreateInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -508,6 +547,9 @@ export type UsersUncheckedCreateInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -539,6 +581,9 @@ export type UsersUpdateInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -571,6 +616,9 @@ export type UsersUncheckedUpdateInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -603,6 +651,9 @@ export type UsersCreateManyInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -622,6 +673,9 @@ export type UsersUpdateManyMutationInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -642,6 +696,9 @@ export type UsersUncheckedUpdateManyInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -662,6 +719,9 @@ export type UsersCountOrderByAggregateInput = {
   loginAttempts?: Prisma.SortOrder
   lockedUntil?: Prisma.SortOrder
   animationsDisabled?: Prisma.SortOrder
+  highContrast?: Prisma.SortOrder
+  compactMode?: Prisma.SortOrder
+  fontSize?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -691,6 +751,9 @@ export type UsersMaxOrderByAggregateInput = {
   loginAttempts?: Prisma.SortOrder
   lockedUntil?: Prisma.SortOrder
   animationsDisabled?: Prisma.SortOrder
+  highContrast?: Prisma.SortOrder
+  compactMode?: Prisma.SortOrder
+  fontSize?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -711,6 +774,9 @@ export type UsersMinOrderByAggregateInput = {
   loginAttempts?: Prisma.SortOrder
   lockedUntil?: Prisma.SortOrder
   animationsDisabled?: Prisma.SortOrder
+  highContrast?: Prisma.SortOrder
+  compactMode?: Prisma.SortOrder
+  fontSize?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -955,6 +1021,9 @@ export type UsersCreateWithoutServersInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   folders?: Prisma.ServerFolderCreateNestedManyWithoutOwnerInput
@@ -986,6 +1055,9 @@ export type UsersUncheckedCreateWithoutServersInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   folders?: Prisma.ServerFolderUncheckedCreateNestedManyWithoutOwnerInput
@@ -1032,6 +1104,9 @@ export type UsersUpdateWithoutServersInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   folders?: Prisma.ServerFolderUpdateManyWithoutOwnerNestedInput
@@ -1063,6 +1138,9 @@ export type UsersUncheckedUpdateWithoutServersInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   folders?: Prisma.ServerFolderUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1093,6 +1171,9 @@ export type UsersCreateWithoutFoldersInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1124,6 +1205,9 @@ export type UsersUncheckedCreateWithoutFoldersInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1170,6 +1254,9 @@ export type UsersUpdateWithoutFoldersInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1201,6 +1288,9 @@ export type UsersUncheckedUpdateWithoutFoldersInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1231,6 +1321,9 @@ export type UsersCreateWithoutApiKeysInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1262,6 +1355,9 @@ export type UsersUncheckedCreateWithoutApiKeysInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1308,6 +1404,9 @@ export type UsersUpdateWithoutApiKeysInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1339,6 +1438,9 @@ export type UsersUncheckedUpdateWithoutApiKeysInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1369,6 +1471,9 @@ export type UsersCreateWithoutLoginHistoryInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1400,6 +1505,9 @@ export type UsersUncheckedCreateWithoutLoginHistoryInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1446,6 +1554,9 @@ export type UsersUpdateWithoutLoginHistoryInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1477,6 +1588,9 @@ export type UsersUncheckedUpdateWithoutLoginHistoryInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1507,6 +1621,9 @@ export type UsersCreateWithoutActivityLogsInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1538,6 +1655,9 @@ export type UsersUncheckedCreateWithoutActivityLogsInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1584,6 +1704,9 @@ export type UsersUpdateWithoutActivityLogsInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1615,6 +1738,9 @@ export type UsersUncheckedUpdateWithoutActivityLogsInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1645,6 +1771,9 @@ export type UsersCreateWithoutNotificationsInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1676,6 +1805,9 @@ export type UsersUncheckedCreateWithoutNotificationsInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1722,6 +1854,9 @@ export type UsersUpdateWithoutNotificationsInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1753,6 +1888,9 @@ export type UsersUncheckedUpdateWithoutNotificationsInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1783,6 +1921,9 @@ export type UsersCreateWithoutUserApiKeysInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1814,6 +1955,9 @@ export type UsersUncheckedCreateWithoutUserApiKeysInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1860,6 +2004,9 @@ export type UsersUpdateWithoutUserApiKeysInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -1891,6 +2038,9 @@ export type UsersUncheckedUpdateWithoutUserApiKeysInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -1921,6 +2071,9 @@ export type UsersCreateWithoutTwoFactorInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -1952,6 +2105,9 @@ export type UsersUncheckedCreateWithoutTwoFactorInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -1998,6 +2154,9 @@ export type UsersUpdateWithoutTwoFactorInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -2029,6 +2188,9 @@ export type UsersUncheckedUpdateWithoutTwoFactorInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2059,6 +2221,9 @@ export type UsersCreateWithoutScheduledTasksInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -2090,6 +2255,9 @@ export type UsersUncheckedCreateWithoutScheduledTasksInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -2136,6 +2304,9 @@ export type UsersUpdateWithoutScheduledTasksInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -2167,6 +2338,9 @@ export type UsersUncheckedUpdateWithoutScheduledTasksInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2197,6 +2371,9 @@ export type UsersCreateWithoutAlertsInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -2228,6 +2405,9 @@ export type UsersUncheckedCreateWithoutAlertsInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -2274,6 +2454,9 @@ export type UsersUpdateWithoutAlertsInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -2305,6 +2488,9 @@ export type UsersUncheckedUpdateWithoutAlertsInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2335,6 +2521,9 @@ export type UsersCreateWithoutGrantedAccessInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -2366,6 +2555,9 @@ export type UsersUncheckedCreateWithoutGrantedAccessInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -2401,6 +2593,9 @@ export type UsersCreateWithoutServerAccessInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerCreateNestedManyWithoutOwnerInput
@@ -2432,6 +2627,9 @@ export type UsersUncheckedCreateWithoutServerAccessInput = {
   loginAttempts?: number
   lockedUntil?: Date | string | null
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   servers?: Prisma.ServerUncheckedCreateNestedManyWithoutOwnerInput
@@ -2478,6 +2676,9 @@ export type UsersUpdateWithoutGrantedAccessInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -2509,6 +2710,9 @@ export type UsersUncheckedUpdateWithoutGrantedAccessInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2550,6 +2754,9 @@ export type UsersUpdateWithoutServerAccessInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUpdateManyWithoutOwnerNestedInput
@@ -2581,6 +2788,9 @@ export type UsersUncheckedUpdateWithoutServerAccessInput = {
   loginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   animationsDisabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  highContrast?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  fontSize?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   servers?: Prisma.ServerUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2733,6 +2943,9 @@ export type UsersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   loginAttempts?: boolean
   lockedUntil?: boolean
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   servers?: boolean | Prisma.Users$serversArgs<ExtArgs>
@@ -2766,6 +2979,9 @@ export type UsersSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   loginAttempts?: boolean
   lockedUntil?: boolean
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["users"]>
@@ -2786,6 +3002,9 @@ export type UsersSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   loginAttempts?: boolean
   lockedUntil?: boolean
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["users"]>
@@ -2806,11 +3025,14 @@ export type UsersSelectScalar = {
   loginAttempts?: boolean
   lockedUntil?: boolean
   animationsDisabled?: boolean
+  highContrast?: boolean
+  compactMode?: boolean
+  fontSize?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UsersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "username" | "password" | "isAdmin" | "description" | "avatar" | "permissions" | "serverLimit" | "maxMemory" | "maxCpu" | "maxStorage" | "loginAttempts" | "lockedUntil" | "animationsDisabled" | "createdAt" | "updatedAt", ExtArgs["result"]["users"]>
+export type UsersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "username" | "password" | "isAdmin" | "description" | "avatar" | "permissions" | "serverLimit" | "maxMemory" | "maxCpu" | "maxStorage" | "loginAttempts" | "lockedUntil" | "animationsDisabled" | "highContrast" | "compactMode" | "fontSize" | "createdAt" | "updatedAt", ExtArgs["result"]["users"]>
 export type UsersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   servers?: boolean | Prisma.Users$serversArgs<ExtArgs>
   folders?: boolean | Prisma.Users$foldersArgs<ExtArgs>
@@ -2861,6 +3083,9 @@ export type $UsersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     loginAttempts: number
     lockedUntil: Date | null
     animationsDisabled: boolean
+    highContrast: boolean
+    compactMode: boolean
+    fontSize: string
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["users"]>
@@ -3313,6 +3538,9 @@ export interface UsersFieldRefs {
   readonly loginAttempts: Prisma.FieldRef<"Users", 'Int'>
   readonly lockedUntil: Prisma.FieldRef<"Users", 'DateTime'>
   readonly animationsDisabled: Prisma.FieldRef<"Users", 'Boolean'>
+  readonly highContrast: Prisma.FieldRef<"Users", 'Boolean'>
+  readonly compactMode: Prisma.FieldRef<"Users", 'Boolean'>
+  readonly fontSize: Prisma.FieldRef<"Users", 'String'>
   readonly createdAt: Prisma.FieldRef<"Users", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Users", 'DateTime'>
 }

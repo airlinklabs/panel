@@ -2255,6 +2255,9 @@ export const UsersScalarFieldEnum = {
   loginAttempts: 'loginAttempts',
   lockedUntil: 'lockedUntil',
   animationsDisabled: 'animationsDisabled',
+  highContrast: 'highContrast',
+  compactMode: 'compactMode',
+  fontSize: 'fontSize',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

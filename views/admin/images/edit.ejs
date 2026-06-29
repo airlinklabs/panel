@@ -178,154 +178,26 @@
 <%- include('../../components/toast') %>
 
 <script nonce="<%- nonce %>" src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
-<script nonce="<%- nonce %>">
-  require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
-  require(['vs/editor/editor.main'], function() {
-    const tabPanels = {
-      general: document.getElementById('mobileTabGeneral'),
-      docker: document.getElementById('mobileTabDocker'),
-      variables: document.getElementById('mobileTabVariables'),
-      install: document.getElementById('mobileTabInstall'),
-      settings: document.getElementById('mobileTabSettings'),
-      raw: document.getElementById('mobileTabRaw'),
-    };
 
-    function activateMobileTab(name) {
-      Object.entries(tabPanels).forEach(([key, panel]) => {
-        panel.classList.toggle('hidden', key !== name);
-      });
-      document.querySelectorAll('.mobile-tab').forEach(button => {
-        const active = button.dataset.mobileTab === name;
-        button.classList.toggle('border-neutral-900', active);
-        button.classList.toggle('dark:border-white', active);
-        button.classList.toggle('text-neutral-900', active);
-        button.classList.toggle('dark:text-white', active);
-        button.classList.toggle('border-transparent', !active);
-        button.classList.toggle('text-neutral-500', !active);
-      });
-      if (name === 'raw') editor.layout();
-    }
+<div id="page-data" style="display:none"
+  data-image="<%- JSON.stringify({
+    id: image.id,
+    name: image.name || '',
+    description: image.description || '',
+    author: image.author || '',
+    startup: image.startup || '',
+    stop: image.stop || 'stop',
+    startup_done: image.startup_done || '',
+    docker_images: image.dockerImages || {},
+    variables: image.variables || [],
+    scripts: image.scripts || {},
+    info: image.info || {},
+    meta: image.meta || {},
+    portRequirements: image.portRequirements || []
+  }) %>"
+></div>
 
-    const editor = monaco.editor.create(document.getElementById('jsonEditor'), {
-      value: `<%- imageJson.replace(/\n/g, '\\n').replace(/"/g, '\\"') %>`,
-      language: 'json',
-      theme: document.documentElement.classList.contains('dark') ? 'vs-dark' : 'vs',
-      automaticLayout: true,
-      minimap: { enabled: false },
-      scrollBeyondLastLine: false,
-      fontSize: 13,
-      tabSize: 2,
-      lineNumbers: 'off',
-      folding: false,
-    });
-    activateMobileTab('general');
-
-    function getPayload() { return JSON.parse(editor.getValue()); }
-    function setPayload(payload) { editor.setValue(JSON.stringify(payload, null, 2)); }
-    function escapeHtml(value) { return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-
-    function getPortRequirements() {
-      try { const payload = getPayload(); return Array.isArray(payload.portRequirements) ? payload.portRequirements : []; } catch { return []; }
-    }
-
-    function renderPortRequirements() {
-      const list = document.getElementById('portRequirementsList');
-      const ports = getPortRequirements();
-      list.innerHTML = '';
-      if (!ports.length) {
-        list.innerHTML = '<p class="text-xs text-neutral-400">No required ports. Servers can be created without port bindings unless an admin adds ports.</p>';
-        return;
-      }
-      ports.forEach((port, index) => {
-        const row = document.createElement('div');
-        row.className = 'rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800/50 p-3 space-y-2';
-        row.innerHTML = `
-          <label class="block text-xs text-neutral-500">Port name<input data-port-req="${index}" data-field="name" value="${escapeHtml(port.name || '')}" class="mt-1 w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
-          <label class="block text-xs text-neutral-500">Internal port<input data-port-req="${index}" data-field="internalPort" type="number" min="1" max="65535" value="${escapeHtml(port.internalPort || '')}" class="mt-1 w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-neutral-50 dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white"></label>
-          <button type="button" data-port-req-remove="${index}" class="w-full rounded-xl border border-red-200 dark:border-red-900/30 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-red-500">Remove</button>`;
-        list.appendChild(row);
-      });
-      list.querySelectorAll('[data-port-req-remove]').forEach(button => {
-        button.addEventListener('click', () => {
-          const payload = getPayload();
-          payload.portRequirements = getPortRequirements();
-          payload.portRequirements.splice(Number(button.dataset.portReqRemove), 1);
-          setPayload(payload);
-          renderPortRequirements();
-        });
-      });
-    }
-
-    document.querySelectorAll('.mobile-tab').forEach(button => {
-      button.addEventListener('click', () => {
-        if (button.dataset.mobileTab === 'settings') renderPortRequirements();
-        activateMobileTab(button.dataset.mobileTab);
-      });
-    });
-
-    document.getElementById('addPortRequirement').addEventListener('click', () => {
-      const payload = getPayload();
-      const ports = getPortRequirements();
-      ports.push({ name: `Port ${ports.length + 1}`, internalPort: 25565 });
-      payload.portRequirements = ports;
-      setPayload(payload);
-      renderPortRequirements();
-    });
-
-    document.getElementById('saveSettingsButton').addEventListener('click', function() {
-      try {
-        const payload = getPayload();
-        const ports = getPortRequirements();
-        document.querySelectorAll('[data-port-req]').forEach(input => {
-          const index = Number(input.dataset.portReq);
-          const field = input.dataset.field;
-          ports[index][field] = field === 'internalPort' ? Number(input.value) : input.value;
-        });
-        payload.portRequirements = ports.filter(port => port.name && port.internalPort);
-        fetch('/admin/images/edit/<%= image.id %>', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        })
-        .then(response => {
-          if (response.ok) { setPayload(payload); renderPortRequirements(); showToast('Settings saved. Looking good.', 'success'); }
-          else { return response.json().then(data => { throw new Error(data.error || 'Failed to update image'); }); }
-        })
-        .catch(error => { showToast(error.message || 'Failed to update image', 'error'); });
-      } catch (error) { showToast('Invalid JSON: ' + error.message, 'error'); }
-    });
-
-    document.getElementById('saveButton').addEventListener('click', function() {
-      try {
-        const jsonValue = editor.getValue();
-        const parsed = JSON.parse(jsonValue);
-        document.getElementById('name').value = parsed.name || '';
-        document.getElementById('author').value = parsed.author || '';
-        document.getElementById('authorName').value = parsed.authorName || '';
-        document.getElementById('startup').value = parsed.startup || '';
-        document.getElementById('description').value = parsed.description || '';
-        fetch('/admin/images/edit/<%= image.id %>', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: jsonValue
-        })
-        .then(response => {
-          if (response.ok) { window.location.href = '/admin/images/edit/<%= image.id %>?success=true'; }
-          else { return response.json().then(data => { throw new Error(data.error || 'Failed to update image'); }); }
-        })
-        .catch(error => { showToast(error.message || 'Failed to update image', 'error'); });
-      } catch (error) { showToast('Invalid JSON: ' + error.message, 'error'); }
-    });
-
-    const formFields = ['name', 'author', 'authorName', 'startup', 'description'];
-    formFields.forEach(field => {
-      document.getElementById(field).addEventListener('change', function() {
-        try { const parsed = JSON.parse(editor.getValue()); parsed[field] = this.value; editor.setValue(JSON.stringify(parsed, null, 2)); }
-        catch (error) { showToast('Invalid JSON: ' + error.message, 'error'); }
-      });
-    });
-  });
-</script>
+<script nonce="<%- nonce %>" src="/js/admin/image-edit.js"></script>
 
 <% } else { %>
 <main class="min-h-screen">

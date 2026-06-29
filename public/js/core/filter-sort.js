@@ -64,23 +64,23 @@
       btn.innerHTML = '<span class="filter-label">' + escHtml(f.label) + '</span>' +
         '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 text-neutral-400"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>';
       var dropdown = document.createElement('div');
-      dropdown.className = 'filter-menu hidden absolute top-full left-0 mt-1 z-30 min-w-[160px] rounded-xl border border-neutral-200 dark:border-neutral-700/60 bg-white dark:bg-neutral-900 shadow-xl py-1';
+      dropdown.className = 'filter-menu hidden absolute top-full left-0 mt-1 z-dropdown min-w-[160px] rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 shadow-xl py-1';
       f.options.forEach(function (opt) {
         var item = document.createElement('button');
         item.type = 'button';
-        item.className = 'w-full text-left px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition flex items-center gap-2';
+        item.className = 'w-full text-left px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 transition flex items-center gap-2 rounded-lg mx-1';
         item.dataset.value = opt.value;
         item.innerHTML = '<span class="filter-dot w-1.5 h-1.5 rounded-full shrink-0" style="background:transparent"></span>' + escHtml(opt.label);
         if (opt.value === f.defaultValue) {
-          item.classList.add('bg-neutral-100', 'dark:bg-white/5');
+          item.classList.add('bg-neutral-100', 'dark:bg-white/10');
           item.querySelector('.filter-dot').style.background = 'currentColor';
         }
         item.addEventListener('click', function () {
           dropdown.querySelectorAll('button').forEach(function (b) {
-            b.classList.remove('bg-neutral-100', 'dark:bg-white/5');
+            b.classList.remove('bg-neutral-100', 'dark:bg-white/10');
             b.querySelector('.filter-dot').style.background = 'transparent';
           });
-          item.classList.add('bg-neutral-100', 'dark:bg-white/5');
+          item.classList.add('bg-neutral-100', 'dark:bg-white/10');
           item.querySelector('.filter-dot').style.background = 'currentColor';
           btn.querySelector('.filter-label').textContent = opt.label;
           dropdown.classList.add('hidden');

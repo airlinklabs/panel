@@ -50,7 +50,7 @@
   </div>
 </div>
 
-<div id="mobileSearchResults" class="hidden fixed top-14 left-0 right-0 bg-white dark:bg-neutral-900 border-b border-neutral-200/30 dark:border-white/5 max-h-[60dvh] overflow-y-auto shadow-lg" style="z-index: var(--z-dropdown)">
+<div id="mobileSearchResults" class="hidden fixed top-14 left-0 right-0 bg-white dark:bg-neutral-800 border-b border-neutral-200/30 dark:border-white/5 max-h-[60dvh] overflow-y-auto shadow-lg" style="z-index: var(--z-dropdown)">
 </div>
 
 <%
@@ -473,7 +473,7 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
           </div>
         </div>
 
-        <div id="searchResults" role="listbox" aria-label="Search results" class="hidden absolute left-0 top-full mt-2 w-[19.5rem] bg-white dark:bg-neutral-900 rounded-xl shadow-2xl shadow-neutral-200/80 dark:shadow-black/40 px-2 pb-2 border border-neutral-200 dark:border-neutral-700/60" style="z-index: var(--z-dropdown)">
+        <div id="searchResults" role="listbox" aria-label="Search results" class="hidden absolute left-0 top-full mt-2 w-[19.5rem] bg-white dark:bg-neutral-800 rounded-xl shadow-2xl shadow-neutral-200/80 dark:shadow-black/40 px-2 pb-2 border border-neutral-200 dark:border-white/10" style="z-index: var(--z-dropdown)">
         </div>
       </div>
 
@@ -521,35 +521,61 @@ const extraItems = sidebarItems.length > 3 ? sidebarItems.slice(3) : [];
   var badge = document.getElementById('notification-badge');
   var desktopBadge = document.getElementById('desktop-notification-badge');
 
-  if (bell) bell.addEventListener('click', function(e) {
-    e.stopPropagation();
-    if (notifDropdown) notifDropdown.classList.toggle('hidden');
-    if (desktopDropdown) desktopDropdown.classList.add('hidden');
-  });
+  if (bell && notifDropdown && window.initPortalDropdown) {
+    notifDropdown.style.display = 'none';
+    notifDropdown.classList.add('hidden');
+    window.initPortalDropdown(bell, notifDropdown);
+  } else if (bell) {
+    bell.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (notifDropdown) notifDropdown.classList.toggle('hidden');
+      if (desktopDropdown) desktopDropdown.classList.add('hidden');
+    });
+  }
 
-  if (desktopBtn) desktopBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    if (desktopDropdown) desktopDropdown.classList.toggle('hidden');
-    if (notifDropdown) notifDropdown.classList.add('hidden');
-  });
+  if (desktopBtn && desktopDropdown && window.initPortalDropdown) {
+    desktopDropdown.style.display = 'none';
+    desktopDropdown.classList.add('hidden');
+    window.initPortalDropdown(desktopBtn, desktopDropdown);
+  } else if (desktopBtn) {
+    desktopBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (desktopDropdown) desktopDropdown.classList.toggle('hidden');
+      if (notifDropdown) notifDropdown.classList.add('hidden');
+    });
+  }
 
   window.toggleNotifications = function() {
-    if (desktopDropdown) desktopDropdown.classList.toggle('hidden');
-    if (notifDropdown) notifDropdown.classList.add('hidden');
+    if (desktopDropdown) {
+      if (desktopBtn && desktopBtn._portalDropdown) {
+        desktopBtn._portalDropdown.toggle();
+      } else {
+        desktopDropdown.classList.toggle('hidden');
+      }
+    }
+    if (notifDropdown) {
+      if (bell && bell._portalDropdown) {
+        bell._portalDropdown.close();
+      } else {
+        notifDropdown.classList.add('hidden');
+      }
+    }
   };
 
   document.addEventListener('click', function(e) {
-    if (desktopDropdown && !desktopDropdown.classList.contains('hidden')) {
+    if (desktopDropdown && !desktopDropdown.classList.contains('hidden') && desktopDropdown.style.display !== 'none') {
       if (!desktopBtn || !desktopBtn.contains(e.target)) {
         if (!desktopDropdown.contains(e.target)) {
           desktopDropdown.classList.add('hidden');
+          desktopDropdown.style.display = 'none';
         }
       }
     }
-    if (notifDropdown && !notifDropdown.classList.contains('hidden')) {
+    if (notifDropdown && !notifDropdown.classList.contains('hidden') && notifDropdown.style.display !== 'none') {
       if (!bell || !bell.contains(e.target)) {
         if (!notifDropdown.contains(e.target)) {
           notifDropdown.classList.add('hidden');
+          notifDropdown.style.display = 'none';
         }
       }
     }

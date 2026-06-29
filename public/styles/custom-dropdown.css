@@ -80,7 +80,7 @@ html.dark .cs-trigger svg {
   overscroll-behavior: contain;
   border-radius: 12px;
   border: 1px solid var(--theme-border, #e5e5e5);
-  background: var(--theme-bg-card, #fff);
+  background: #ffffff;
   padding: 4px;
   opacity: 0;
   transform: translateY(-4px);
@@ -88,8 +88,8 @@ html.dark .cs-trigger svg {
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 html.dark .cs-dropdown {
-  background: var(--theme-bg-card, #1c1c1c);
-  border-color: var(--theme-border-subtle, rgba(255,255,255,0.1));
+  background: #262626;
+  border-color: rgba(255,255,255,0.1);
 }
 .cs-dropdown[style*="display: block"] {
   opacity: 1;
@@ -116,19 +116,19 @@ html.dark .cs-option {
   color: var(--theme-text, #e5e5e5);
 }
 .cs-option:hover {
-  background: var(--theme-bg-hover, #f5f5f5);
+  background: #f5f5f5;
 }
 html.dark .cs-option:hover {
   background: rgba(255,255,255,0.06);
 }
 .cs-option.cs-selected {
-  background: var(--theme-accent-bg, rgba(59,130,246,0.1));
-  color: var(--theme-accent, #3b82f6);
+  background: #f5f5f5;
+  color: #171717;
   font-weight: 500;
 }
 html.dark .cs-option.cs-selected {
-  background: color-mix(in srgb, var(--theme-accent, #3b82f6) 15%, transparent);
-  color: var(--theme-accent, #60a5fa);
+  background: rgba(255,255,255,0.1);
+  color: #ffffff;
 }
 .cs-option.cs-disabled {
   opacity: 0.4;

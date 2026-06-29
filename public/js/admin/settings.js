@@ -33,7 +33,7 @@ function initSettingsFormHandlers() {
 
   function post(url, body, btn) {
     const orig = btn ? btn.textContent : '';
-    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
     return fetch(url, {
       method:  'POST',
       headers: body instanceof FormData ? undefined : { 'Content-Type': 'application/json' },
@@ -48,6 +48,23 @@ function initSettingsFormHandlers() {
       .finally(() => { if (btn) { btn.disabled = false; btn.textContent = orig; } });
   }
 
+  function getCheckboxValue(name) {
+    const el = document.getElementById(name) || document.querySelector(`input[type="checkbox"][name="${name}"]`);
+    return el ? el.checked : false;
+  }
+
+  window.deleteCustomTheme = function(themeId, themeName) {
+    if (!confirm('Delete theme "' + themeName + '"? This cannot be undone.')) return;
+    fetch('/admin/settings/theme/' + themeId, { method: 'DELETE' })
+      .then(r => r.json())
+      .then(d => {
+        if (!d.success) throw new Error(d.error || 'Failed');
+        showToast('Theme deleted.', 'success');
+        setTimeout(() => location.reload(), 500);
+      })
+      .catch(err => showToast(err.message || 'Failed to delete theme', 'error'));
+  };
+
   document.getElementById('form-appearance').addEventListener('submit', function (e) {
     e.preventDefault();
     const btn = this.querySelector('button[type="submit"]');
@@ -59,8 +76,8 @@ function initSettingsFormHandlers() {
 
   document.getElementById('saveServerPolicy').addEventListener('click', function () {
     post('/admin/settings/server-policy', {
-      allowUserCreateServer: document.getElementById('allowUserCreateServer').checked,
-      allowUserDeleteServer: document.getElementById('allowUserDeleteServer').checked,
+      allowUserCreateServer: getCheckboxValue('allowUserCreateServer'),
+      allowUserDeleteServer: getCheckboxValue('allowUserDeleteServer'),
       defaultServerLimit:    parseInt(document.getElementById('defaultServerLimit').value, 10),
       defaultMaxMemory:      parseInt(document.getElementById('defaultMaxMemory').value,   10),
       defaultMaxCpu:         parseInt(document.getElementById('defaultMaxCpu').value,      10),
@@ -71,26 +88,26 @@ function initSettingsFormHandlers() {
 
   document.getElementById('saveVtKey').addEventListener('click', function () {
     post('/admin/settings/security', {
-      rateLimitEnabled:    document.getElementById('rateLimitEnabled').checked,
+      rateLimitEnabled:    getCheckboxValue('rateLimitEnabled'),
       rateLimitRpm:        parseInt(document.getElementById('rateLimitRpm').value, 10),
       loginMaxAttempts:    parseInt(document.getElementById('loginMaxAttempts').value, 10),
       loginLockoutMinutes: parseInt(document.getElementById('loginLockoutMinutes').value, 10),
-      enforceDaemonHttps:  document.getElementById('enforceDaemonHttps').checked,
-      behindReverseProxy:  document.getElementById('behindReverseProxy').checked,
-      hashApiKeys:         document.getElementById('hashApiKeys').checked,
+      enforceDaemonHttps:  getCheckboxValue('enforceDaemonHttps'),
+      behindReverseProxy:  getCheckboxValue('behindReverseProxy'),
+      hashApiKeys:         getCheckboxValue('hashApiKeys'),
       virusTotalApiKey:    document.getElementById('vtKeyInput').value.trim() || null,
     }, this);
   });
 
   document.getElementById('saveRateLimit').addEventListener('click', function () {
     post('/admin/settings/security', {
-      rateLimitEnabled:    document.getElementById('rateLimitEnabled').checked,
+      rateLimitEnabled:    getCheckboxValue('rateLimitEnabled'),
       rateLimitRpm:        parseInt(document.getElementById('rateLimitRpm').value, 10),
       loginMaxAttempts:    parseInt(document.getElementById('loginMaxAttempts').value, 10),
       loginLockoutMinutes: parseInt(document.getElementById('loginLockoutMinutes').value, 10),
-      enforceDaemonHttps:  document.getElementById('enforceDaemonHttps').checked,
-      behindReverseProxy:  document.getElementById('behindReverseProxy').checked,
-      hashApiKeys:         document.getElementById('hashApiKeys').checked,
+      enforceDaemonHttps:  getCheckboxValue('enforceDaemonHttps'),
+      behindReverseProxy:  getCheckboxValue('behindReverseProxy'),
+      hashApiKeys:         getCheckboxValue('hashApiKeys'),
       virusTotalApiKey:    document.getElementById('vtKeyInput').value.trim() || null,
     }, this);
   });
