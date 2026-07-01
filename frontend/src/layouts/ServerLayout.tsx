@@ -53,7 +53,7 @@ export function ServerLayout() {
         Back to Dashboard
       </Link>
 
-      {/* Server header */}
+      {/* DesktopTower header */}
       <div className="al-surface p-5">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex-1 min-w-0">
@@ -62,7 +62,7 @@ export function ServerLayout() {
                 <div className="h-6 w-40 bg-neutral-200 dark:bg-neutral-800 rounded animate-pulse" />
               ) : (
                 <h1 className="text-xl font-bold font-display text-neutral-900 dark:text-white truncate">
-                  {server?.name ?? "Server"}
+                  {server?.name ?? "DesktopTower"}
                 </h1>
               )}
               {status && (

@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Envelope, Lock, ArrowRight, Loader2 } from "@phosphor-icons/react";
+import { Envelope, Lock, ArrowRight, Spinner } from "@phosphor-icons/react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 
@@ -60,7 +60,7 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 bg-neutral-900 dark:bg-black relative overflow-hidden items-center justify-center">
+      <div className="hidden lg:flex lg:w-1/2 bg-neutral-950 dark:bg-black relative overflow-hidden items-center justify-center">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.05),transparent_50%)]" />
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
@@ -124,7 +124,7 @@ export function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className="flex h-10 w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 pl-10 pr-4 py-3 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 transition-colors"
+                  className="flex h-10 w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-white/5 pl-10 pr-4 py-3 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 transition-colors"
                 />
               </div>
             </div>
@@ -141,7 +141,7 @@ export function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="flex h-10 w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 pl-10 pr-4 py-3 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 transition-colors"
+                  className="flex h-10 w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-white/5 pl-10 pr-4 py-3 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 transition-colors"
                 />
               </div>
             </div>
@@ -152,7 +152,7 @@ export function LoginPage() {
                   type="checkbox"
                   checked={remember}
                   onChange={(e) => setRemember(e.target.checked)}
-                  className="size-4 rounded border-neutral-300 dark:border-white/20 bg-white dark:bg-white/5 text-neutral-900 dark:text-white focus:ring-neutral-400 dark:focus:ring-neutral-500"
+                  className="size-4 rounded border-neutral-300 dark:border-white/20 bg-white dark:bg-white/5 text-neutral-900 dark:text-white focus:ring-indigo-500/40"
                 />
                 <span className="text-sm text-neutral-600 dark:text-neutral-400">Remember me</span>
               </label>
@@ -164,7 +164,7 @@ export function LoginPage() {
               className="w-full h-10 inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 disabled:pointer-events-none disabled:opacity-50 text-sm gap-2"
             >
               {loading ? (
-                <Loader2 className="size-4 animate-spin" />
+                <Spinner className="size-4 animate-spin" />
               ) : (
                 <>
                   Sign in

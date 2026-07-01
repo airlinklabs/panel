@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, HardDrives, Server } from "@phosphor-icons/react";
+import { ArrowLeft, HardDrives, DesktopTower } from "@phosphor-icons/react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -242,7 +242,7 @@ export function AdminNodeStatsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <Server className="size-4 text-neutral-400" />
+            <DesktopTower className="size-4 text-neutral-400" />
             Servers on this Node ({stats.servers.length})
           </CardTitle>
         </CardHeader>

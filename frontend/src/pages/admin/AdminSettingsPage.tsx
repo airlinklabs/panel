@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   Palette,
-  Server,
+  DesktopTower,
   ShieldCheck,
   FloppyDisk,
   Upload,
@@ -43,7 +43,7 @@ const fadeUp = {
 
 const tabs = [
   { id: "appearance", label: "Appearance", icon: Palette },
-  { id: "server-policy", label: "Server Policy", icon: Server },
+  { id: "server-policy", label: "DesktopTower Policy", icon: DesktopTower },
   { id: "security", label: "Security", icon: ShieldCheck },
 ] as const;
 
@@ -114,7 +114,7 @@ export function AdminSettingsPage() {
     setSaving(true);
     try {
       await api.post("/admin/settings/server-policy", policy);
-      toast("Server policy saved");
+      toast("DesktopTower policy saved");
     } catch (err) {
       toast(err instanceof Error ? err.message : "Failed to save", "error");
     } finally {
@@ -254,7 +254,7 @@ export function AdminSettingsPage() {
       {activeTab === "server-policy" && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Server Policy</CardTitle>
+            <CardTitle className="text-base">DesktopTower Policy</CardTitle>
             <CardDescription>Control server creation and resource limits</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -281,7 +281,7 @@ export function AdminSettingsPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label>Server Limit per User</Label>
+                <Label>DesktopTower Limit per User</Label>
                 <Input
                   type="number"
                   min={0}

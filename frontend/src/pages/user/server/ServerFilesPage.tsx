@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Folder,
@@ -8,17 +8,14 @@ import {
   Plus,
   Trash,
   PencilSimple,
-  ArrowRight,
-  ArrowLeft,
   FileCode,
   FileText,
-  FileJson,
   FileZip,
-  X,
-  FunnelSimple,
-  DotsThreeVertical,
   Download,
-  CheckSquare,
+  MagnifyingGlass,
+  X,
+  Copy,
+  ArrowLeft,
 } from "@phosphor-icons/react";
 import { cn, formatBytes } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
@@ -27,6 +24,7 @@ interface FileItem {
   name: string;
   type: "file" | "directory";
   size?: number;
+  category?: string;
 }
 
 export function ServerFilesPage() {
@@ -35,10 +33,8 @@ export function ServerFilesPage() {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPath, setCurrentPath] = useState("/");
-  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
   const [showUpload, setShowUpload] = useState(false);
-  const [showNewFolder, setShowNewFolder] = useState(false);
-  const [newFolderName, setNewFolderName] = useState("");
   const [contextMenu, setContextMenu] = useState<{ file: FileItem; x: number; y: number } | null>(null);
   const [renamingFile, setRenamingFile] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
@@ -120,56 +116,25 @@ export function ServerFilesPage() {
     setRenamingFile(null);
   };
 
-  const handleCreateFolder = async () => {
-    if (!id || !newFolderName.trim()) return;
-    const path = currentPath === "/" ? newFolderName : `${currentPath}/${newFolderName}`;
-    try {
-      const res = await fetch(`/server/${id}/files/rm/${path}`, {
-        method: "DELETE",
-        credentials: "same-origin",
-      });
-      // Create folder by attempting to create a .airlink_keep file
-      setShowNewFolder(false);
-      setNewFolderName("");
-      fetchFiles();
-    } catch {
-      toast("Failed to create folder", "error");
-    }
-  };
-
-  const handleZip = async (path: string) => {
-    if (!id) return;
-    try {
-      const res = await fetch(`/server/${id}/zip`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ relativePath: path, zipname: path.split("/").pop() + ".zip" }),
-        credentials: "same-origin",
-      });
-      if (!res.ok) throw new Error("Zip failed");
-      toast("Zipped successfully", "success");
-      fetchFiles();
-    } catch {
-      toast("Failed to zip", "error");
-    }
+  const handleDownload = (filePath: string) => {
+    window.location.href = `/server/${id}/files/download/${filePath}`;
     setContextMenu(null);
   };
 
-  const handleUnzip = async (path: string) => {
+  const handleExtractZip = async (name: string, filePath: string) => {
     if (!id) return;
-    const dir = path.replace(/\.zip$/, "");
     try {
       const res = await fetch(`/server/${id}/unzip`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ relativePath: currentPath, zipname: path.split("/").pop() }),
+        body: JSON.stringify({ relativePath: currentPath, zipname: name }),
         credentials: "same-origin",
       });
       if (!res.ok) throw new Error("Unzip failed");
-      toast("Unzipped successfully", "success");
+      toast("Extracted successfully", "success");
       fetchFiles();
     } catch {
-      toast("Failed to unzip", "error");
+      toast("Failed to extract", "error");
     }
     setContextMenu(null);
   };
@@ -187,173 +152,185 @@ export function ServerFilesPage() {
   const pathParts = currentPath.split("/").filter(Boolean);
 
   const getFileIcon = (file: FileItem) => {
-    if (file.type === "directory") return <Folder className="size-4 text-amber-500" />;
+    if (file.type === "directory") return <Folder className="size-6 text-neutral-400 dark:text-neutral-500 shrink-0 al-file-icon" />;
     const ext = file.name.split(".").pop()?.toLowerCase() || "";
-    if (["js", "ts", "tsx", "jsx", "py", "java", "go", "rs"].includes(ext))
-      return <FileCode className="size-4 text-blue-500" />;
-    if (["json"].includes(ext)) return <FileJson className="size-4 text-emerald-500" />;
+    if (["js", "ts", "tsx", "jsx", "py", "java", "go", "rs", "json", "yml", "yaml", "toml", "cfg", "conf", "properties"].includes(ext))
+      return <FileCode className="size-6 text-neutral-400 dark:text-neutral-500 shrink-0 al-file-icon" />;
+    if (["txt", "md", "log"].includes(ext))
+      return <FileText className="size-6 text-neutral-400 dark:text-neutral-500 shrink-0 al-file-icon" />;
     if (["zip", "tar", "gz", "7z"].includes(ext))
-      return <FileZip className="size-4 text-purple-500" />;
-    if (["txt", "md", "yml", "yaml", "toml", "cfg", "conf", "properties"].includes(ext))
-      return <FileText className="size-4 text-neutral-500" />;
-    return <File className="size-4 text-neutral-400" />;
+      return <FileZip className="size-6 text-neutral-400 dark:text-neutral-500 shrink-0 al-file-icon" />;
+    return <File className="size-6 text-neutral-400 dark:text-neutral-500 shrink-0 al-file-icon" />;
   };
 
+  const filteredFiles = searchQuery
+    ? files.filter((f) => f.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : files;
+
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="font-display text-xl font-semibold text-neutral-900 dark:text-white tracking-tight">
-            Files
-          </h1>
-          <div className="flex items-center gap-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={(e) => e.target.files && handleUpload(e.target.files)}
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="h-9 inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 text-sm gap-1.5 px-3"
-            >
-              <Upload className="size-4" />
-              Upload
-            </button>
-            <button
-              onClick={() => setShowNewFolder(true)}
-              className="h-9 inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 border border-neutral-200 dark:border-white/10 bg-transparent text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-sm gap-1.5 px-3"
-            >
-              <Plus className="size-4" />
-              Folder
-            </button>
+    <div className="p-6 overflow-y-auto pt-16">
+      <div className="sm:flex sm:items-center px-8 pt-4">
+        <div className="flex-1">
+          <div className="flex items-center">
+            <h1 className="text-base font-medium leading-6 text-neutral-800 dark:text-white truncate max-w-[300px]">
+              Files
+            </h1>
           </div>
         </div>
-
-        <div className="flex items-center gap-1 mb-4 text-sm overflow-x-auto pb-1">
+        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-2">
           <button
-            onClick={() => setCurrentPath("/")}
-            className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 whitespace-nowrap px-1"
+            onClick={() => fileInputRef.current?.click()}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-3 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition"
           >
-            /
+            <Upload className="w-4 h-4 shrink-0" />
+            Upload File
           </button>
-          {pathParts.map((part, i) => (
-            <span key={i} className="flex items-center gap-1">
-              <span className="text-neutral-300 dark:text-neutral-600">/</span>
-              <button
-                onClick={() => setCurrentPath("/" + pathParts.slice(0, i + 1).join("/"))}
-                className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 whitespace-nowrap px-1"
-              >
-                {part}
-              </button>
-            </span>
-          ))}
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={(e) => e.target.files && handleUpload(e.target.files)}
+          />
         </div>
+      </div>
 
-        {showNewFolder && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            className="mb-4 flex items-center gap-2"
-          >
-            <input
-              type="text"
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              placeholder="Folder name"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleCreateFolder();
-                if (e.key === "Escape") setShowNewFolder(false);
-              }}
-              className="flex h-9 flex-1 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 transition-colors"
-            />
-            <button
-              onClick={handleCreateFolder}
-              disabled={!newFolderName.trim()}
-              className="h-9 inline-flex items-center justify-center font-medium rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 text-sm px-3"
-            >
-              Create
-            </button>
-          </motion.div>
-        )}
-
-        <div className="bg-white dark:bg-white/[0.03] border border-neutral-200/30 dark:border-white/[0.07] rounded-xl overflow-hidden">
-          {loading ? (
-            <div className="p-6 space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-3 animate-pulse">
-                  <div className="size-4 bg-neutral-200 dark:bg-white/10 rounded" />
-                  <div className="h-3 bg-neutral-200 dark:bg-white/10 rounded w-1/3" />
-                  <div className="ml-auto h-3 bg-neutral-200 dark:bg-white/10 rounded w-16" />
-                </div>
-              ))}
-            </div>
-          ) : files.length === 0 ? (
-            <div className="p-8 text-center">
-              <Folder className="size-10 text-neutral-300 dark:text-neutral-600 mx-auto mb-3" />
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                This folder is empty
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-neutral-100 dark:divide-white/[0.05]">
-              {files.map((file) => (
-                <div
-                  key={file.name}
-                  className="flex items-center gap-3 px-4 py-2.5 hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition-colors group relative"
-                  onClick={() => navigateTo(file)}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    setContextMenu({ file, x: e.clientX, y: e.clientY });
-                  }}
-                >
-                  {getFileIcon(file)}
-                  <span className="text-sm text-neutral-900 dark:text-white truncate flex-1">
-                    {renamingFile === file.name ? (
-                      <input
-                        type="text"
-                        value={renameValue}
-                        onChange={(e) => setRenameValue(e.target.value)}
-                        onBlur={() => {
-                          if (renameValue.trim()) handleRename(file.name, renameValue);
-                          setRenamingFile(null);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && renameValue.trim()) handleRename(file.name, renameValue);
-                          if (e.key === "Escape") setRenamingFile(null);
-                        }}
-                        autoFocus
-                        onClick={(e) => e.stopPropagation()}
-                        className="bg-transparent border-b border-neutral-400 dark:border-neutral-500 focus:outline-none w-full"
-                      />
+      <div className="px-8 mt-8">
+        <div className="overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700/40">
+          <div className="px-3 py-2.5 flex items-center overflow-hidden">
+            <nav className="flex items-center gap-0 text-xs min-w-0 overflow-hidden">
+              <a
+                className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 transition shrink-0 text-sm"
+                href="#"
+                onClick={(e) => { e.preventDefault(); setCurrentPath("/"); }}
+              >
+                /home/container/
+              </a>
+              {pathParts.map((part, i) => {
+                const isLast = i === pathParts.length - 1;
+                const partPath = pathParts.slice(0, i + 1).join("/");
+                return (
+                  <span key={i} className="flex items-center">
+                    {!isLast ? (
+                      <>
+                        <a
+                          href="#"
+                          onClick={(e) => { e.preventDefault(); setCurrentPath(`/${partPath}`); }}
+                          className="text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition"
+                        >
+                          {part}
+                        </a>
+                        <span className="text-neutral-300 dark:text-neutral-600 mx-0.5">/</span>
+                      </>
                     ) : (
-                      file.name
+                      <span className="text-neutral-700 dark:text-neutral-200 font-medium">{part}</span>
                     )}
                   </span>
-                  <span className="text-xs text-neutral-400 dark:text-neutral-500 tabular-nums">
-                    {file.type === "directory" ? "—" : formatBytes(file.size || 0)}
-                  </span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setContextMenu({ file, x: e.clientX, y: e.clientY });
-                    }}
-                    className="opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-all"
-                  >
-                    <DotsThreeVertical className="size-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+                );
+              })}
+            </nav>
+          </div>
+
+          <div className="px-4 py-2 border-b border-neutral-100 dark:border-neutral-700/30 flex items-center gap-2">
+            <MagnifyingGlass size={14} className="text-neutral-400 shrink-0" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Filter files…"
+              className="flex-1 bg-transparent text-sm text-neutral-700 dark:text-neutral-300 placeholder:text-neutral-400 focus:outline-none"
+              autoComplete="off"
+              spellCheck={false}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-0.5 rounded transition"
+              >
+                <X size={12} />
+              </button>
+            )}
+          </div>
+
+          <table className="min-w-full bg-white dark:bg-neutral-900/60">
+            <thead className="border-b border-neutral-200 dark:border-neutral-700/40">
+              <tr>
+                <th className="px-4 py-2.5 text-left w-10" />
+                <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-500">Name</th>
+                <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-500 w-24">Size</th>
+                <th className="px-4 py-2.5 text-left text-xs font-medium text-neutral-500 dark:text-neutral-500 w-32 hidden md:table-cell">Modified</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="border-b border-neutral-100 dark:border-neutral-700/30">
+                    <td className="px-4 py-3 w-10" />
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2.5 animate-pulse">
+                        <div className="size-6 bg-neutral-200 dark:bg-white/10 rounded" />
+                        <div className="h-3 bg-neutral-200 dark:bg-white/10 rounded w-1/3" />
+                      </div>
+                    </td>
+                    <td className="px-4 py-3"><div className="h-3 bg-neutral-200 dark:bg-white/10 rounded w-12 animate-pulse" /></td>
+                    <td className="px-4 py-3 hidden md:table-cell"><div className="h-3 bg-neutral-200 dark:bg-white/10 rounded w-16 animate-pulse" /></td>
+                  </tr>
+                ))
+              ) : filteredFiles.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-4 py-12 text-center">
+                    <Folder className="size-10 text-neutral-300 dark:text-neutral-600 mx-auto mb-3" />
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                      {searchQuery ? "No files match your search" : "This folder is empty"}
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                filteredFiles.map((file, index) => {
+                  const filePath = currentPath === "/" ? file.name : `${currentPath}/${file.name}`;
+                  const fileSize = (() => {
+                    const sizes = ["Bytes", "KB", "MB", "GB"];
+                    let size = file.size || 0;
+                    let unitIndex = 0;
+                    while (size >= 1024 && unitIndex < sizes.length - 1) {
+                      size /= 1024;
+                      unitIndex++;
+                    }
+                    return `${size.toFixed(2)} ${sizes[unitIndex]}`;
+                  })();
+
+                  return (
+                    <tr
+                      key={file.name}
+                      className="al-file-row hover:bg-neutral-100 dark:hover:bg-white/5 border-b border-neutral-100 dark:border-neutral-700/30 last:border-0 cursor-pointer transition-colors duration-150"
+                      style={{ animationDelay: `${Math.min(index, 10) * 18}ms` }}
+                      onClick={() => navigateTo(file)}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        setContextMenu({ file, x: e.clientX, y: e.clientY });
+                      }}
+                    >
+                      <td className="px-4 py-3 w-10" />
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2.5 text-sm font-medium text-neutral-800 dark:text-neutral-200 transition-colors">
+                          {getFileIcon(file)}
+                          <span className="truncate">{file.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap">
+                        {file.type === "directory" ? "—" : fileSize}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap hidden md:table-cell">
+                        <span className="text-neutral-300 dark:text-neutral-600">—</span>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
-      </motion.div>
+      </div>
 
       <AnimatePresence>
         {contextMenu && (
@@ -364,79 +341,119 @@ export function ServerFilesPage() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="fixed z-50 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl shadow-lg py-1 min-w-[160px]"
+              className="fixed z-50 w-44 rounded-xl overflow-hidden bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 shadow-lg"
               style={{ top: contextMenu.y, left: contextMenu.x }}
             >
-              {contextMenu.file.type === "file" && (
-                <>
+              <div className="py-1">
+                <button
+                  onClick={() => {
+                    setRenamingFile(contextMenu.file.name);
+                    setRenameValue(contextMenu.file.name);
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
+                >
+                  <PencilSimple size={14} className="shrink-0" />
+                  Rename
+                </button>
+                <button
+                  onClick={() => {
+                    const fp = currentPath === "/" ? contextMenu.file.name : `${currentPath}/${contextMenu.file.name}`;
+                    navigator.clipboard.writeText(fp);
+                    setContextMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
+                >
+                  <Copy size={14} className="shrink-0" />
+                  Copy Path
+                </button>
+                {contextMenu.file.type !== "directory" && (
                   <button
                     onClick={() => {
-                      const filePath = currentPath === "/" ? contextMenu.file.name : `${currentPath}/${contextMenu.file.name}`;
-                      window.location.href = `/server/${id}/files/edit/${filePath}`;
+                      const fp = currentPath === "/" ? contextMenu.file.name : `${currentPath}/${contextMenu.file.name}`;
+                      handleDownload(fp);
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
                   >
-                    <PencilSimple className="size-4" />
-                    Edit
+                    <Download size={14} className="shrink-0" />
+                    Download
                   </button>
-                  {contextMenu.file.name.endsWith(".zip") ? (
-                    <button
-                      onClick={() => handleUnzip(contextMenu.file.name)}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
-                    >
-                      <FileZip className="size-4" />
-                      Unzip
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleZip(contextMenu.file.name)}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
-                    >
-                      <FileZip className="size-4" />
-                      Zip
-                    </button>
-                  )}
-                </>
-              )}
-              <button
-                onClick={() => {
-                  setRenamingFile(contextMenu.file.name);
-                  setRenameValue(contextMenu.file.name);
-                  setContextMenu(null);
-                }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
-              >
-                <PencilSimple className="size-4" />
-                Rename
-              </button>
-              <button
-                onClick={() => {
-                  const filePath = currentPath === "/" ? contextMenu.file.name : `${currentPath}/${contextMenu.file.name}`;
-                  const a = document.createElement("a");
-                  a.href = `/server/${id}/files/download/${filePath}`;
-                  a.click();
-                  setContextMenu(null);
-                }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5"
-              >
-                <Download className="size-4" />
-                Download
-              </button>
-              <div className="h-px bg-neutral-100 dark:bg-white/5 my-1" />
-              <button
-                onClick={() => {
-                  const filePath = currentPath === "/" ? contextMenu.file.name : `${currentPath}/${contextMenu.file.name}`;
-                  handleDelete(filePath);
-                }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
-              >
-                <Trash className="size-4" />
-                Delete
-              </button>
+                )}
+                {contextMenu.file.name.toLowerCase().endsWith(".zip") && (
+                  <button
+                    onClick={() => {
+                      const fp = currentPath === "/" ? contextMenu.file.name : `${currentPath}/${contextMenu.file.name}`;
+                      handleExtractZip(contextMenu.file.name, fp);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
+                  >
+                    <FileZip size={14} className="shrink-0" />
+                    Extract Here
+                  </button>
+                )}
+                <div className="mx-2 my-1 border-t border-neutral-100 dark:border-neutral-700/60" />
+                <button
+                  onClick={() => {
+                    const fp = currentPath === "/" ? contextMenu.file.name : `${currentPath}/${contextMenu.file.name}`;
+                    handleDelete(fp);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-left"
+                >
+                  <Trash size={14} className="shrink-0" />
+                  Delete
+                </button>
+              </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
+
+      {renamingFile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-neutral-800 rounded-2xl w-full max-w-md border border-neutral-200 dark:border-neutral-700/40 shadow-xl"
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
+              <div>
+                <h2 className="text-sm font-semibold text-neutral-800 dark:text-white">Rename</h2>
+                <p className="text-xs text-neutral-500 mt-0.5">Use / to move the file into a different folder.</p>
+              </div>
+              <button onClick={() => setRenamingFile(null)} className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 p-1 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-700 transition">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="px-5 py-4">
+              <input
+                type="text"
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && renameValue.trim()) handleRename(renamingFile, renameValue);
+                  if (e.key === "Escape") setRenamingFile(null);
+                }}
+                autoFocus
+                className="w-full px-3 py-2.5 rounded-xl text-sm bg-white dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 font-mono transition"
+                placeholder="new-name.txt or subfolder/new-name.txt"
+              />
+            </div>
+            <div className="flex gap-2 px-5 pb-5 justify-end">
+              <button onClick={() => setRenamingFile(null)} className="px-4 py-2 text-xs font-medium rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition active:scale-95">
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (renameValue.trim()) handleRename(renamingFile, renameValue);
+                }}
+                className="px-4 py-2 text-xs font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition active:scale-95"
+              >
+                Rename
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

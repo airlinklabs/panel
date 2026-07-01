@@ -57,9 +57,9 @@ interface ConsumerApiKey {
 const permissionOptions = [
   { value: "servers.read", label: "Read Servers" },
   { value: "servers.manage", label: "Manage Servers" },
-  { value: "servers.console", label: "Server Console" },
-  { value: "servers.files", label: "Server Files" },
-  { value: "servers.backups", label: "Server Backups" },
+  { value: "servers.console", label: "DesktopTower Console" },
+  { value: "servers.files", label: "DesktopTower Files" },
+  { value: "servers.backups", label: "DesktopTower Backups" },
 ];
 
 export function ConsumerApiKeysPage() {

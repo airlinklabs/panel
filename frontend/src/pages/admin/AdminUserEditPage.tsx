@@ -175,7 +175,7 @@ export function AdminUserEditPage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="serverLimit">Server Limit</Label>
+                <Label htmlFor="serverLimit">DesktopTower Limit</Label>
                 <Input
                   id="serverLimit"
                   type="number"

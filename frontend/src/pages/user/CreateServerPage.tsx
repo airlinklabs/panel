@@ -1,7 +1,7 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Loader2, Server, Cpu, MemoryStick, HardDrive } from "@phosphor-icons/react";
+import { ArrowLeft, Spinner, DesktopTower, Cpu, Memory, HardDrive } from "@phosphor-icons/react";
 import { useToast } from "@/context/ToastContext";
 
 interface Node {
@@ -94,7 +94,7 @@ export function CreateServerPage() {
         throw new Error(data.error || "Failed to create server");
       }
 
-      toast("Server created successfully", "success");
+      toast("DesktopTower created successfully", "success");
       navigate("/");
     } catch (err) {
       toast(err instanceof Error ? err.message : "Failed to create server", "error");
@@ -137,7 +137,7 @@ export function CreateServerPage() {
         </button>
 
         <h1 className="font-display text-xl font-semibold text-neutral-900 dark:text-white tracking-tight mb-6">
-          Create Server
+          Create DesktopTower
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -148,13 +148,13 @@ export function CreateServerPage() {
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-neutral-900 dark:text-white mb-1.5 block">
-                  Server name
+                  DesktopTower name
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="My Server"
+                  placeholder="My DesktopTower"
                   required
                   className="flex h-10 w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-3 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 transition-colors"
                 />
@@ -252,7 +252,7 @@ export function CreateServerPage() {
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-sm font-medium text-neutral-900 dark:text-white flex items-center gap-2">
-                    <MemoryStick className="size-4 text-neutral-400" />
+                    <Memory className="size-4 text-neutral-400" />
                     Memory
                   </label>
                   <span className="text-sm text-neutral-500 dark:text-neutral-400 tabular-nums">
@@ -340,10 +340,10 @@ export function CreateServerPage() {
               className="h-10 inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 disabled:pointer-events-none disabled:opacity-50 text-sm gap-2 px-4"
             >
               {loading ? (
-                <Loader2 className="size-4 animate-spin" />
+                <Spinner className="size-4 animate-spin" />
               ) : (
                 <>
-                  <Server className="size-4" />
+                  <DesktopTower className="size-4" />
                   Create server
                 </>
               )}

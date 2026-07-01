@@ -129,7 +129,7 @@ export function AdminServerCreatePage() {
     setSubmitting(true);
     try {
       await api.post("/admin/servers/create", form);
-      toast("Server created successfully");
+      toast("DesktopTower created successfully");
       navigate("/admin/servers");
     } catch (err) {
       toast(err instanceof Error ? err.message : "Failed to create server", "error");
@@ -153,7 +153,7 @@ export function AdminServerCreatePage() {
           <ArrowLeft className="size-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Create Server</h1>
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Create DesktopTower</h1>
           <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">Deploy a new game server</p>
         </div>
       </div>
@@ -168,12 +168,12 @@ export function AdminServerCreatePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Server Name</Label>
+              <Label htmlFor="name">DesktopTower Name</Label>
               <Input
                 id="name"
                 value={form.name}
                 onChange={(e) => update("name", e.target.value)}
-                placeholder="My Server"
+                placeholder="My DesktopTower"
               />
             </div>
 
@@ -374,7 +374,7 @@ export function AdminServerCreatePage() {
           </Button>
           <Button type="submit" loading={submitting} disabled={!form.name || !form.nodeId || !form.eggId || !form.ownerId}>
             <Plus className="size-4" />
-            Create Server
+            Create DesktopTower
           </Button>
         </div>
       </form>

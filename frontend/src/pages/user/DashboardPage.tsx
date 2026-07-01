@@ -1,22 +1,18 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
   GridFour,
   List,
   MagnifyingGlass,
   Folder,
-  Server,
-  Cpu,
-  MemoryStick,
-  HardDrive,
-  ArrowRight,
-  FolderSimple,
+  FolderPlus,
   Funnel,
+  ArrowUpDown,
   X,
+  Server,
 } from "@phosphor-icons/react";
-import { cn, formatBytes } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 
@@ -31,7 +27,7 @@ interface ServerData {
   nodeId: number;
   ownerId: number;
   node: { id: number; name: string; address: string };
-  owner: { id: number; username: string };
+  owner: { id: number; username: string; avatar: string | null };
   status: string;
   ramUsage: string;
   cpuUsage: string;
@@ -43,122 +39,143 @@ interface FolderData {
   id: number;
   name: string;
   ownerId: number;
-  members: { id: number; serverId: number }[];
+  members: { id: number; serverId: number; serverUUID: string }[];
 }
 
-const statusColors: Record<string, string> = {
-  running: "bg-emerald-500",
-  stopped: "bg-red-500",
-  starting: "bg-amber-500",
-  unknown: "bg-neutral-400 dark:bg-neutral-600",
-};
-
-const statusLabels: Record<string, string> = {
-  running: "Online",
-  stopped: "Offline",
-  starting: "Starting",
-  unknown: "Unknown",
-};
+function StatusBadge({ status }: { status: string }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-md shrink-0 border",
+        status === "running"
+          ? "bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30"
+          : status === "starting"
+            ? "bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/30"
+            : "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/20"
+      )}
+    >
+      <span className="relative flex h-1.5 w-1.5">
+        {status === "running" && (
+          <>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+          </>
+        )}
+        {status === "starting" && (
+          <>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500" />
+          </>
+        )}
+        {status !== "running" && status !== "starting" && (
+          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
+        )}
+      </span>
+      {status === "running" ? "Running" : status === "starting" ? "Starting" : "Stopped"}
+    </span>
+  );
+}
 
 function SkeletonCard() {
   return (
-    <div className="bg-white dark:bg-white/[0.03] border border-neutral-200/30 dark:border-white/[0.07] rounded-xl p-5 animate-pulse">
-      <div className="flex items-start justify-between mb-4">
+    <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm p-4 animate-pulse">
+      <div className="flex items-start justify-between mb-3">
         <div className="space-y-2 flex-1">
           <div className="h-4 bg-neutral-200 dark:bg-white/10 rounded-lg w-1/3" />
           <div className="h-3 bg-neutral-200 dark:bg-white/10 rounded-lg w-1/2" />
         </div>
         <div className="h-5 w-16 bg-neutral-200 dark:bg-white/10 rounded-full" />
       </div>
-      <div className="space-y-3">
-        <div className="h-3 bg-neutral-200 dark:bg-white/10 rounded-lg w-full" />
-        <div className="h-3 bg-neutral-200 dark:bg-white/10 rounded-lg w-2/3" />
-        <div className="h-3 bg-neutral-200 dark:bg-white/10 rounded-lg w-1/2" />
+      <div className="flex gap-3 mb-3">
+        <div className="flex-1 h-12 bg-neutral-200 dark:bg-white/10 rounded-xl" />
+        <div className="flex-1 h-12 bg-neutral-200 dark:bg-white/10 rounded-xl" />
+        <div className="flex-1 h-12 bg-neutral-200 dark:bg-white/10 rounded-xl" />
       </div>
     </div>
   );
 }
 
 function ServerCard({ server }: { server: ServerData }) {
+  const avatarUrl = server.owner?.avatar
+    || `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(server.owner?.username || "unknown")}`;
+
   return (
     <Link to={`/server/${server.UUID}`}>
-      <motion.div
-        whileHover={{ y: -2 }}
-        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-        className="bg-white dark:bg-white/[0.03] border border-neutral-200/30 dark:border-white/[0.07] rounded-xl p-5 hover:border-neutral-300 dark:hover:border-white/[0.12] transition-colors cursor-pointer h-full"
-      >
-        <div className="flex items-start justify-between mb-4">
-          <div className="min-w-0 flex-1">
-            <h3 className="font-medium text-sm text-neutral-900 dark:text-white truncate">
+      <div className="group relative block bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm p-4 cursor-grab hover:border-neutral-300 dark:hover:border-white/10 hover:shadow-md dark:hover:shadow-none transition-[box-shadow,transform,border-color] duration-150 active:cursor-grabbing">
+        <div className="flex items-start justify-between mb-3">
+          <div className="min-w-0 flex-1 mr-3">
+            <h3 className="text-sm font-medium text-neutral-900 dark:text-white truncate">
               {server.name}
             </h3>
-            {server.description && (
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate mt-0.5">
+            {server.description ? (
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 truncate">
                 {server.description}
+              </p>
+            ) : (
+              <p className="text-xs text-neutral-400 mt-0.5 truncate italic">
+                No description
               </p>
             )}
           </div>
-          <div className="flex items-center gap-1.5 ml-3 shrink-0">
-            <span className={cn("size-2 rounded-full", statusColors[server.status] || statusColors.unknown)}>
-              {(server.status === "running" || server.status === "starting") && (
-                <span className={cn("size-2 rounded-full animate-ping absolute", statusColors[server.status])} />
-              )}
-            </span>
-            <span className="text-xs text-neutral-500 dark:text-neutral-400">
-              {statusLabels[server.status] || "Unknown"}
-            </span>
+          <StatusBadge status={server.status} />
+        </div>
+
+        <div className="flex gap-3 mb-3">
+          <div className="flex-1 bg-neutral-100 dark:bg-neutral-700 rounded-xl px-3 py-2">
+            <p className="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">RAM</p>
+            <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              {Math.round(parseFloat(server.ramUsage || "0"))}%
+            </p>
+          </div>
+          <div className="flex-1 bg-neutral-100 dark:bg-neutral-700 rounded-xl px-3 py-2">
+            <p className="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">CPU</p>
+            <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              {Math.round(parseFloat(server.cpuUsage || "0"))}%
+            </p>
+          </div>
+          <div className="flex-1 bg-neutral-100 dark:bg-neutral-700 rounded-xl px-3 py-2">
+            <p className="text-[10px] text-neutral-500 dark:text-neutral-400 mb-0.5">Used</p>
+            <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              {server.ramUsed || "0MB"}
+            </p>
           </div>
         </div>
 
-        <div className="space-y-2.5">
-          <div className="flex items-center gap-2">
-            <MemoryStick className="size-3.5 text-neutral-400 dark:text-neutral-500 shrink-0" />
-            <div className="flex-1 h-1.5 bg-neutral-100 dark:bg-white/5 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-neutral-400 dark:bg-neutral-500 rounded-full transition-all"
-                style={{ width: `${Math.min(100, parseFloat(server.ramUsage || "0"))}%` }}
-              />
-            </div>
-            <span className="text-xs text-neutral-500 dark:text-neutral-400 tabular-nums shrink-0">
-              {server.ramUsed || "0MB"} / {server.Memory}MB
+        <div className="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-white/5">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <img
+              className="h-4 w-4 rounded-md shrink-0"
+              src={avatarUrl}
+              alt={`${server.owner?.username || "Unknown"} avatar`}
+            />
+            <span className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
+              {server.owner?.username || "Unknown"}
             </span>
           </div>
-
-          <div className="flex items-center gap-2">
-            <Cpu className="size-3.5 text-neutral-400 dark:text-neutral-500 shrink-0" />
-            <div className="flex-1 h-1.5 bg-neutral-100 dark:bg-white/5 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-neutral-400 dark:bg-neutral-500 rounded-full transition-all"
-                style={{ width: `${Math.min(100, parseFloat(server.cpuUsage || "0"))}%` }}
-              />
-            </div>
-            <span className="text-xs text-neutral-500 dark:text-neutral-400 tabular-nums shrink-0">
-              {parseFloat(server.cpuUsage || "0").toFixed(1)}%
+          {server.node && (
+            <span className="text-xs text-neutral-400 dark:text-neutral-500 shrink-0 ml-2 truncate max-w-[6rem]">
+              {server.node.name || server.node.address}
             </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <HardDrive className="size-3.5 text-neutral-400 dark:text-neutral-500 shrink-0" />
-            <div className="flex-1 h-1.5 bg-neutral-100 dark:bg-white/5 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-neutral-400 dark:bg-neutral-500 rounded-full transition-all"
-                style={{ width: `${Math.min(100, (0 / server.Storage) * 100)}%` }}
-              />
-            </div>
-            <span className="text-xs text-neutral-500 dark:text-neutral-400 tabular-nums shrink-0">
-              {formatBytes(server.Storage * 1024 * 1024)}
-            </span>
-          </div>
+          )}
         </div>
-
-        <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-white/[0.05] flex items-center justify-between">
-          <span className="text-xs text-neutral-400 dark:text-neutral-500">
-            {server.node?.name || "Unknown node"}
-          </span>
-          <ArrowRight className="size-3.5 text-neutral-300 dark:text-neutral-600" />
-        </div>
-      </motion.div>
+      </div>
     </Link>
+  );
+}
+
+function FolderCard({ folder }: { folder: FolderData }) {
+  return (
+    <div className="flex items-center gap-3 bg-white dark:bg-white/[0.03] border border-neutral-200 dark:border-white/[0.07] rounded-xl px-3.5 py-3 cursor-pointer relative transition-[background,border-color,box-shadow] select-none hover:bg-neutral-100 dark:hover:bg-white/[0.06] hover:border-neutral-300 dark:hover:border-white/[0.12] hover:shadow-sm group">
+      <Folder className="h-5 w-5 text-amber-500 shrink-0" weight="fill" />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-neutral-800 dark:text-white truncate">
+          {folder.name}
+        </p>
+        <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5">
+          {folder.members.length} server{folder.members.length !== 1 ? "s" : ""}
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -172,7 +189,8 @@ export function DashboardPage() {
     return (localStorage.getItem("dashboard-view") as "grid" | "list") || "grid";
   });
   const [search, setSearch] = useState("");
-  const [selectedFolder, setSelectedFolder] = useState<number | null>(null);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [sort, setSort] = useState("");
 
   useEffect(() => {
     localStorage.setItem("dashboard-view", view);
@@ -197,248 +215,283 @@ export function DashboardPage() {
   }, [fetchData]);
 
   const filteredServers = useMemo(() => {
-    return servers.filter((s) => {
+    let result = servers.filter((s) => {
       const matchesSearch =
         !search ||
         s.name.toLowerCase().includes(search.toLowerCase()) ||
         s.description?.toLowerCase().includes(search.toLowerCase());
-      return matchesSearch;
+      const matchesStatus =
+        !statusFilter ||
+        (statusFilter === "running" && s.status === "running") ||
+        (statusFilter === "stopped" && s.status === "stopped");
+      return matchesSearch && matchesStatus;
     });
-  }, [servers, search]);
+
+    if (sort) {
+      result = [...result].sort((a, b) => {
+        switch (sort) {
+          case "name-asc":
+            return a.name.localeCompare(b.name);
+          case "name-desc":
+            return b.name.localeCompare(a.name);
+          case "status-asc":
+            const statusOrder: Record<string, number> = { running: 0, starting: 1, stopped: 2 };
+            return (statusOrder[a.status] ?? 3) - (statusOrder[b.status] ?? 3);
+          case "ramUsage-desc":
+            return parseFloat(b.ramUsage || "0") - parseFloat(a.ramUsage || "0");
+          case "cpuUsage-desc":
+            return parseFloat(b.cpuUsage || "0") - parseFloat(a.cpuUsage || "0");
+          default:
+            return 0;
+        }
+      });
+    }
+
+    return result;
+  }, [servers, search, statusFilter, sort]);
+
+  const foldersInUse = useMemo(() => {
+    const serverIds = new Set(folders.flatMap((f) => f.members.map((m) => m.serverUUID)));
+    return serverIds;
+  }, [folders]);
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div>
-            <h1 className="font-display text-xl font-semibold text-neutral-900 dark:text-white tracking-tight">
-              Servers
-            </h1>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
-              {servers.length} server{servers.length !== 1 ? "s" : ""} total
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link
-              to="/create-server"
-              className="h-9 inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 text-sm gap-1.5 px-3"
-            >
-              <Plus className="size-4" />
-              Create server
-            </Link>
-          </div>
+    <div className="px-12 pt-6 pb-8">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-base font-medium text-neutral-800 dark:text-white">
+            Servers
+          </h1>
+          <p className="text-sm text-neutral-500 mt-0.5">
+            Manage and monitor your servers
+          </p>
         </div>
-
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <div className="relative flex-1">
-            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400 dark:text-neutral-500" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search servers..."
-              className="flex h-9 w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 pl-9 pr-4 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 transition-colors"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
-              >
-                <X className="size-3.5" />
-              </button>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center bg-neutral-100 dark:bg-white/5 rounded-xl p-0.5">
+        <div className="flex items-center gap-2">
+          <Link
+            to="/create-server"
+            className="flex min-h-10 items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm font-medium hover:bg-neutral-700 dark:hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 dark:focus-visible:ring-white focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950 transition"
+          >
+            <Plus className="h-4 w-4" />
+            New server
+          </Link>
+          <button className="flex min-h-10 items-center gap-1.5 px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 text-sm font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950 transition">
+            <FolderPlus className="h-4 w-4" weight="light" />
+            New folder
+          </button>
+          {servers.length > 0 && (
+            <div className="flex items-center gap-1 bg-neutral-100 dark:bg-neutral-800/60 p-1 rounded-xl border border-neutral-200 dark:border-white/5">
               <button
                 onClick={() => setView("grid")}
                 className={cn(
-                  "h-8 inline-flex items-center justify-center rounded-lg transition-all text-sm px-2.5",
+                  "min-h-9 px-3 py-1.5 text-sm font-medium rounded-xl flex items-center gap-1.5 transition-colors",
                   view === "grid"
-                    ? "bg-white dark:bg-white/10 text-neutral-900 dark:text-white shadow-sm"
-                    : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300"
+                    ? "bg-white dark:bg-white/[0.08] text-neutral-900 dark:text-white shadow-sm"
+                    : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-900 dark:hover:text-white"
                 )}
               >
-                <GridFour className="size-4" />
+                <GridFour className="h-4 w-4" />
+                Grid
               </button>
               <button
                 onClick={() => setView("list")}
                 className={cn(
-                  "h-8 inline-flex items-center justify-center rounded-lg transition-all text-sm px-2.5",
+                  "min-h-9 px-3 py-1.5 text-sm font-medium rounded-xl flex items-center gap-1.5 transition-colors",
                   view === "list"
-                    ? "bg-white dark:bg-white/10 text-neutral-900 dark:text-white shadow-sm"
-                    : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300"
+                    ? "bg-white dark:bg-white/[0.08] text-neutral-900 dark:text-white shadow-sm"
+                    : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-900 dark:hover:text-white"
                 )}
               >
-                <List className="size-4" />
+                <List className="h-4 w-4" />
+                List
               </button>
             </div>
-          </div>
+          )}
         </div>
+      </div>
 
-        {folders.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3">
-              Folders
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setSelectedFolder(null)}
-                className={cn(
-                  "h-8 inline-flex items-center justify-center rounded-xl transition-all text-sm px-3 gap-1.5 border",
-                  selectedFolder === null
-                    ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 border-transparent"
-                    : "bg-white dark:bg-white/[0.03] text-neutral-600 dark:text-neutral-400 border-neutral-200/30 dark:border-white/[0.07] hover:bg-neutral-50 dark:hover:bg-white/5"
-                )}
-              >
-                <FolderSimple className="size-3.5" />
-                All
-              </button>
-              {folders.map((folder) => (
-                <button
-                  key={folder.id}
-                  onClick={() => setSelectedFolder(folder.id)}
-                  className={cn(
-                    "h-8 inline-flex items-center justify-center rounded-xl transition-all text-sm px-3 gap-1.5 border",
-                    selectedFolder === folder.id
-                      ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 border-transparent"
-                      : "bg-white dark:bg-white/[0.03] text-neutral-600 dark:text-neutral-400 border-neutral-200/30 dark:border-white/[0.07] hover:bg-neutral-50 dark:hover:bg-white/5"
-                  )}
-                >
-                  <Folder className="size-3.5" />
-                  {folder.name}
-                </button>
-              ))}
+      <div id="filterBar" className="flex items-center gap-2 mb-5 flex-wrap">
+        <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800">
+          <Funnel className="h-3.5 w-3.5 text-neutral-400" />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-transparent text-sm text-neutral-800 dark:text-white focus:outline-none appearance-none pr-2"
+          >
+            <option value="">Status</option>
+            <option value="running">Running</option>
+            <option value="stopped">Stopped</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800">
+          <ArrowUpDown className="h-3.5 w-3.5 text-neutral-400" />
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            className="bg-transparent text-sm text-neutral-800 dark:text-white focus:outline-none appearance-none pr-2"
+          >
+            <option value="">Sort</option>
+            <option value="name-asc">Name (A-Z)</option>
+            <option value="name-desc">Name (Z-A)</option>
+            <option value="status-asc">Status (Running first)</option>
+            <option value="ramUsage-desc">RAM (Highest)</option>
+            <option value="cpuUsage-desc">CPU (Highest)</option>
+          </select>
+        </div>
+        <div className="relative flex-1 max-w-xs">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search servers..."
+            className="w-full pl-3 pr-8 py-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 transition"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      ) : servers.length === 0 && folders.length === 0 ? (
+        <section className="mx-auto mt-28 max-w-2xl overflow-hidden rounded-2xl border border-neutral-200/80 bg-white/80 p-7 text-left shadow-sm dark:border-white/10 dark:bg-white/[0.045]">
+          <div className="mb-5 flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-neutral-100 dark:bg-white/10 text-neutral-400 dark:text-neutral-500">
+              <Server className="h-7 w-7" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-neutral-400 dark:text-neutral-500">
+                No servers assigned
+              </p>
+              <h2 className="mt-1 text-2xl font-semibold text-neutral-900 dark:text-white">
+                Your server list is empty
+              </h2>
             </div>
           </div>
-        )}
-
-        {loading ? (
-          <div className={cn(view === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-2")}>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <SkeletonCard key={i} />
-            ))}
-          </div>
-        ) : filteredServers.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-16"
+          <p className="max-w-xl text-sm leading-6 text-neutral-600 dark:text-neutral-400">
+            Create your first server and it will appear here with live RAM, CPU, and node details.
+          </p>
+          <Link
+            to="/create-server"
+            className="mt-6 inline-flex items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-neutral-800 active:translate-y-0 dark:bg-white dark:text-neutral-900"
           >
-            <Server className="size-12 text-neutral-300 dark:text-neutral-600 mx-auto mb-4" />
-            <h3 className="text-sm font-medium text-neutral-900 dark:text-white mb-1">
-              {search ? "No servers found" : "No servers yet"}
-            </h3>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
-              {search
-                ? "Try adjusting your search"
-                : "Create your first server to get started"}
-            </p>
-            {!search && (
-              <Link
-                to="/create-server"
-                className="h-9 inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 text-sm gap-1.5 px-3"
-              >
-                <Plus className="size-4" />
-                Create server
-              </Link>
-            )}
-          </motion.div>
-        ) : view === "grid" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <AnimatePresence mode="popLayout">
-              {filteredServers.map((server, i) => (
-                <motion.div
-                  key={server.UUID}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.25, delay: i * 0.03 }}
-                >
-                  <ServerCard server={server} />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        ) : (
-          <div className="bg-white dark:bg-white/[0.03] border border-neutral-200/30 dark:border-white/[0.07] rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-neutral-100 dark:border-white/[0.05]">
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+            Create server
+          </Link>
+        </section>
+      ) : (
+        <>
+          {folders.length > 0 && (
+            <div className="mb-8">
+              <p className="text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider mb-3">
+                Folders
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+                {folders.map((folder) => (
+                  <FolderCard key={folder.id} folder={folder} />
+                ))}
+              </div>
+              <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-2">
+                Drag a server card onto a folder to add it
+              </p>
+            </div>
+          )}
+
+          <p className="text-xs font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider mb-3">
+            Servers
+          </p>
+
+          {view === "grid" ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
+              {filteredServers
+                .filter((s) => !foldersInUse.has(s.UUID))
+                .map((server) => (
+                  <ServerCard key={server.UUID} server={server} />
+                ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden shadow-sm mb-6">
+              <table className="min-w-full divide-y divide-neutral-200 dark:divide-white/5">
+                <thead className="bg-neutral-50 dark:bg-neutral-800">
+                  <tr>
+                    <th className="py-3 pl-6 pr-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">
                       Server
                     </th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider hidden sm:table-cell">
+                    <th className="px-3 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">
                       Status
                     </th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider hidden md:table-cell">
+                    <th className="px-3 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">
+                      Owner
+                    </th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">
+                      RAM
+                    </th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400">
                       CPU
                     </th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider hidden md:table-cell">
-                      Memory
-                    </th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider hidden lg:table-cell">
-                      Node
-                    </th>
-                    <th className="px-4 py-3" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-100 dark:divide-white/[0.05]">
-                  {filteredServers.map((server) => (
-                    <tr
-                      key={server.UUID}
-                      className="hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition-colors"
-                    >
-                      <td className="px-4 py-3">
-                        <Link to={`/server/${server.UUID}`} className="block">
-                          <div className="font-medium text-neutral-900 dark:text-white">
+                <tbody className="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-transparent">
+                  {filteredServers
+                    .filter((s) => !foldersInUse.has(s.UUID))
+                    .map((server) => (
+                      <tr
+                        key={server.UUID}
+                        className="hover:bg-neutral-50 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                        onClick={() => {
+                          window.location.href = `/server/${server.UUID}`;
+                        }}
+                      >
+                        <td className="py-3.5 pl-6 pr-3">
+                          <p className="text-sm font-medium text-neutral-900 dark:text-white truncate">
                             {server.name}
-                          </div>
+                          </p>
                           {server.description && (
-                            <div className="text-xs text-neutral-500 dark:text-neutral-400 truncate max-w-xs">
+                            <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate max-w-xs">
                               {server.description}
-                            </div>
+                            </p>
                           )}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3 hidden sm:table-cell">
-                        <div className="flex items-center gap-1.5">
-                          <span className={cn("size-2 rounded-full", statusColors[server.status] || statusColors.unknown)} />
-                          <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                            {statusLabels[server.status] || "Unknown"}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-neutral-500 dark:text-neutral-400 tabular-nums hidden md:table-cell">
-                        {parseFloat(server.cpuUsage || "0").toFixed(1)}%
-                      </td>
-                      <td className="px-4 py-3 text-xs text-neutral-500 dark:text-neutral-400 tabular-nums hidden md:table-cell">
-                        {server.ramUsed || "0MB"}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-neutral-500 dark:text-neutral-400 hidden lg:table-cell">
-                        {server.node?.name || "Unknown"}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <Link
-                          to={`/server/${server.UUID}`}
-                          className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
-                        >
-                          <ArrowRight className="size-4" />
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-3 py-3.5">
+                          <StatusBadge status={server.status} />
+                        </td>
+                        <td className="px-3 py-3.5 text-sm text-neutral-600 dark:text-neutral-300">
+                          {server.owner?.username || "Unknown"}
+                        </td>
+                        <td className="px-3 py-3.5 text-sm text-neutral-600 dark:text-neutral-300">
+                          {Math.round(parseFloat(server.ramUsage || "0"))}%
+                        </td>
+                        <td className="px-3 py-3.5 text-sm text-neutral-600 dark:text-neutral-300">
+                          {Math.round(parseFloat(server.cpuUsage || "0"))}%
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
-      </motion.div>
+          )}
+
+          {filteredServers.filter((s) => !foldersInUse.has(s.UUID)).length === 0 && (search || statusFilter) && (
+            <div className="flex flex-col items-center justify-center mt-16 text-center">
+              <MagnifyingGlass className="h-12 w-12 text-neutral-300 dark:text-neutral-600 mb-3" />
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                No servers match your filters
+              </p>
+              <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1">
+                Try adjusting your search or filter criteria
+              </p>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

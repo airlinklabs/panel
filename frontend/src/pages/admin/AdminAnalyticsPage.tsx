@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   ChartBar,
-  Server,
+  DesktopTower,
   Users,
   ArrowRight,
   Clock,
@@ -138,7 +138,7 @@ export function AdminAnalyticsPage() {
         {
           label: "Total Servers",
           value: data.servers.total,
-          icon: Server,
+          icon: DesktopTower,
           color: "text-blue-500",
         },
         {
@@ -230,7 +230,7 @@ export function AdminAnalyticsPage() {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList>
               <TabsTrigger value="servers">
-                <Server className="size-4 mr-2" />
+                <DesktopTower className="size-4 mr-2" />
                 Servers
               </TabsTrigger>
               <TabsTrigger value="nodes">

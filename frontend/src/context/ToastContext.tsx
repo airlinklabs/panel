@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, CheckCircle, XCircle, AlertTriangle, Info } from "@phosphor-icons/react";
+import { X, CheckCircle, XCircle, Warning, Info } from "@phosphor-icons/react";
 
 type ToastType = "success" | "error" | "warning" | "info";
 
@@ -25,7 +25,7 @@ let nextId = 0;
 const icons = {
   success: CheckCircle,
   error: XCircle,
-  warning: AlertTriangle,
+  warning: Warning,
   info: Info,
 };
 

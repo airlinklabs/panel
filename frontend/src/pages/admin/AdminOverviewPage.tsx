@@ -1,27 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { motion } from "framer-motion";
 import {
-  ChartLineUp,
-  CircleDashed,
-  Folder,
-  HardDrives,
-  Server,
-  Users,
-  ArrowClockwise,
-  Wifi,
-  Warning,
+  ArrowRight,
+  BookOpen,
+  DiscordLogo,
+  GithubLogo,
+  CreditCard,
 } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
-import { cn, formatNumber } from "@/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 interface SystemStats {
   servers: number;
   nodes: number;
   users: number;
-  onlineServers?: number;
+  images: number;
 }
 
 interface NodeInfo {
@@ -34,102 +25,26 @@ interface NodeInfo {
 }
 
 interface UpdateInfo {
-  updateAvailable: boolean;
-  currentVersion: string;
+  hasUpdate: boolean;
   latestVersion: string;
-}
-
-interface SystemStatus {
-  user: { id: number; username: string; isAdmin: boolean };
-  servers: number;
-  nodes: number;
-  settings: Record<string, unknown>;
-  stats: SystemStats;
-}
-
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.06 } },
-};
-const fadeUp = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } },
-};
-
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  color,
-  index,
-}: {
-  label: string;
-  value: number | string;
-  icon: React.ElementType;
-  color: string;
-  index: number;
-}) {
-  return (
-    <motion.div variants={fadeUp}>
-      <Card className="relative overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">{label}</p>
-              <p className="text-3xl font-bold tabular-nums mt-1 text-neutral-900 dark:text-white">
-                {typeof value === "number" ? formatNumber(value) : value}
-              </p>
-            </div>
-            <div className={cn("p-3 rounded-xl", color)}>
-              <Icon className="size-6" weight="light" />
-            </div>
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 h-12 opacity-[0.03] pointer-events-none">
-            <svg viewBox="0 0 200 40" className="w-full h-full">
-              <path
-                d={`M0,${30 + index * 3} Q25,${20 - index * 2} 50,${25 + index} T100,${20 + index * 2} T150,${28 - index} T200,${22 + index}`}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                className="text-neutral-900 dark:text-white"
-              />
-            </svg>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
+  currentVersion: string;
 }
 
 export function AdminOverviewPage() {
-  const [stats, setStats] = useState<SystemStats | null>(null);
-  const [nodes, setNodes] = useState<NodeInfo[]>([]);
+  const [stats, setStats] = useState<SystemStats>({ servers: 0, nodes: 0, users: 0, images: 0 });
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
-  const [loading, setLoading] = useState(true);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [latency, setLatency] = useState<number | null>(null);
-  const [latencyHistory, setLatencyHistory] = useState<number[]>([]);
+  const [branch, setBranch] = useState<"stable" | "dev">("stable");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
-      const [statusRes, nodesRes] = await Promise.all([
-        api.get<{ data: SystemStatus }>("/api/system/status"),
-        api.get<{ data: NodeInfo[] }>("/admin/nodes/list").catch(() => ({ data: [] })),
-      ]);
-      const s = statusRes.data;
-      setStats({
-        servers: s.stats?.servers ?? s.servers ?? 0,
-        nodes: s.stats?.nodes ?? s.nodes ?? 0,
-        users: s.stats?.users ?? 0,
-        onlineServers: s.stats?.onlineServers ?? 0,
-      });
-      setNodes(nodesRes.data || []);
+      const res = await api.get<{ data: SystemStats }>("/admin/stats");
+      setStats(res.data || { servers: 0, nodes: 0, users: 0, images: 0 });
     } catch {
       // silent
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -162,12 +77,10 @@ export function AdminOverviewPage() {
 
   useEffect(() => {
     const ping = async () => {
-      const start = Date.now();
+      const start = performance.now();
       try {
-        await fetch("/api/system/status", { credentials: "same-origin" });
-        const ms = Date.now() - start;
-        setLatency(ms);
-        setLatencyHistory((prev) => [...prev.slice(-29), ms]);
+        await fetch("/api/v1/ping", { credentials: "same-origin" });
+        setLatency(Math.round(performance.now() - start));
       } catch {
         setLatency(null);
       }
@@ -179,188 +92,159 @@ export function AdminOverviewPage() {
     };
   }, []);
 
+  const latencyPct = latency !== null ? Math.min((latency / 500) * 100, 100) : 0;
+  const latencyColor = latency !== null ? (latency < 100 ? "bg-emerald-500" : latency < 300 ? "bg-amber-500" : "bg-red-500") : "bg-neutral-400";
+
   return (
-    <motion.div
-      variants={stagger}
-      initial="hidden"
-      animate="show"
-      className="space-y-8"
-    >
-      <motion.div variants={fadeUp} className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Admin Overview</h1>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
-            System status and monitoring
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {updateInfo?.updateAvailable && (
-            <Button variant="danger" size="sm" onClick={performUpdate} loading={updating}>
-              Update to {updateInfo.latestVersion}
-            </Button>
-          )}
-          <Button variant="secondary" size="sm" onClick={checkUpdate} loading={checkingUpdate}>
-            <ArrowClockwise className="size-4" />
-            Check Update
-          </Button>
-        </div>
-      </motion.div>
+    <div className="flex min-h-screen">
+      <div className="flex-1 overflow-y-auto pt-16">
+        <div className="px-12 pt-6 pb-8">
+          <div className="mb-6">
+            <h1 className="text-base font-medium text-neutral-800 dark:text-white">About</h1>
+            <p className="text-sm text-neutral-500 mt-0.5">Panel information and credits.</p>
+          </div>
 
-      {updateInfo && (
-        <motion.div variants={fadeUp}>
-          <Card
-            className={cn(
-              updateInfo.updateAvailable
-                ? "border-amber-300 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/5"
-                : "border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/5"
-            )}
-          >
-            <CardContent className="p-4 flex items-center gap-3">
-              {updateInfo.updateAvailable ? (
-                <Warning className="size-5 text-amber-600 dark:text-amber-400 shrink-0" />
-              ) : (
-                <CircleDashed className="size-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              )}
-              <p className="text-sm text-neutral-700 dark:text-neutral-300">
-                {updateInfo.updateAvailable
-                  ? `Version ${updateInfo.latestVersion} is available (current: ${updateInfo.currentVersion})`
-                  : `Running latest version ${updateInfo.currentVersion}`}
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <a href="/admin/users" className="group relative overflow-hidden rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 dark:via-white/10 to-transparent" />
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[10px] text-neutral-500 uppercase tracking-wider">Users</p>
+                <ArrowRight size={14} className="text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-colors" />
+              </div>
+              <p className="text-3xl font-bold text-neutral-800 dark:text-white tabular-nums">{stats.users}</p>
+              <p className="text-xs text-neutral-500 mt-1.5">Registered</p>
+            </a>
+            <a href="/admin/servers" className="group relative overflow-hidden rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 dark:via-white/10 to-transparent" />
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[10px] text-neutral-500 uppercase tracking-wider">Servers</p>
+                <ArrowRight size={14} className="text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-colors" />
+              </div>
+              <p className="text-3xl font-bold text-neutral-800 dark:text-white tabular-nums">{stats.servers}</p>
+              <p className="text-xs text-neutral-500 mt-1.5">Active instances</p>
+            </a>
+            <a href="/admin/nodes" className="group relative overflow-hidden rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 dark:via-white/10 to-transparent" />
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[10px] text-neutral-500 uppercase tracking-wider">Nodes</p>
+                <ArrowRight size={14} className="text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-colors" />
+              </div>
+              <p className="text-3xl font-bold text-neutral-800 dark:text-white tabular-nums">{stats.nodes}</p>
+              <p className="text-xs text-neutral-500 mt-1.5">Connected nodes</p>
+            </a>
+            <a href="/admin/images" className="group relative overflow-hidden rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 px-4 py-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 dark:via-white/10 to-transparent" />
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[10px] text-neutral-500 uppercase tracking-wider">Images</p>
+                <ArrowRight size={14} className="text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-colors" />
+              </div>
+              <p className="text-3xl font-bold text-neutral-800 dark:text-white tabular-nums">{stats.images}</p>
+              <p className="text-xs text-neutral-500 mt-1.5">Available images</p>
+            </a>
+          </div>
 
-      <motion.div
-        variants={stagger}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-      >
-        <StatCard
-          label="Total Servers"
-          value={stats?.servers ?? 0}
-          icon={Server}
-          color="bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400"
-          index={0}
-        />
-        <StatCard
-          label="Online Servers"
-          value={stats?.onlineServers ?? 0}
-          icon={Wifi}
-          color="bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-          index={1}
-        />
-        <StatCard
-          label="Total Nodes"
-          value={stats?.nodes ?? 0}
-          icon={HardDrives}
-          color="bg-violet-100 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400"
-          index={2}
-        />
-        <StatCard
-          label="Total Users"
-          value={stats?.users ?? 0}
-          icon={Users}
-          color="bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400"
-          index={3}
-        />
-      </motion.div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <motion.div variants={fadeUp} className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <ChartLineUp className="size-5 text-neutral-400" />
-                API Latency
-                {latency !== null && (
-                  <Badge variant={latency < 200 ? "success" : latency < 500 ? "warning" : "danger"}>
-                    {latency}ms
-                  </Badge>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-40 flex items-end gap-px">
-                {latencyHistory.length === 0 ? (
-                  <div className="flex-1 flex items-center justify-center text-sm text-neutral-400">
-                    Collecting data...
+          <div className="relative overflow-hidden rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-5 mb-6">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 dark:via-white/10 to-transparent" />
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <img src="/assets/airlink_logo.png" className="h-10 w-10 rounded-xl shrink-0" alt="Airlink" />
+                <div>
+                  <p className="text-sm font-medium text-neutral-800 dark:text-white">Airlink Panel</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-400">v{updateInfo?.currentVersion || "..."}</span>
+                    <span className="text-[10px] text-neutral-500">production</span>
                   </div>
-                ) : (
-                  latencyHistory.map((ms, i) => {
-                    const max = Math.max(...latencyHistory, 100);
-                    const h = Math.max((ms / max) * 100, 4);
-                    return (
-                      <motion.div
-                        key={i}
-                        initial={{ height: 0 }}
-                        animate={{ height: `${h}%` }}
-                        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                        className={cn(
-                          "flex-1 rounded-t-sm",
-                          ms < 200
-                            ? "bg-emerald-400 dark:bg-emerald-500"
-                            : ms < 500
-                            ? "bg-amber-400 dark:bg-amber-500"
-                            : "bg-red-400 dark:bg-red-500"
-                        )}
-                      />
-                    );
-                  })
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex rounded-xl overflow-hidden border border-neutral-200 dark:border-white/10 text-xs">
+                  <button
+                    onClick={() => setBranch("stable")}
+                    className={`px-3 py-1.5 font-medium transition ${branch === "stable" ? "bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300" : "text-neutral-500 dark:text-neutral-500"}`}
+                  >
+                    Stable
+                  </button>
+                  <button
+                    onClick={() => setBranch("dev")}
+                    className={`px-3 py-1.5 font-medium transition ${branch === "dev" ? "bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300" : "text-neutral-500 dark:text-neutral-500"}`}
+                  >
+                    Dev
+                  </button>
+                </div>
+                <button
+                  onClick={checkUpdate}
+                  disabled={checkingUpdate}
+                  className="rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 text-sm font-medium transition"
+                >
+                  {checkingUpdate ? "Checking..." : "Check Updates"}
+                </button>
+                {updateInfo?.hasUpdate && (
+                  <button
+                    onClick={performUpdate}
+                    disabled={updating}
+                    className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-500 transition"
+                  >
+                    {updating ? "Installing..." : "Update"}
+                  </button>
                 )}
               </div>
-              <p className="text-xs text-neutral-400 mt-2">Last 30 pings (every 30s)</p>
-            </CardContent>
-          </Card>
-        </motion.div>
+            </div>
 
-        <motion.div variants={fadeUp}>
-          <Card className="h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <HardDrives className="size-5 text-neutral-400" />
-                Node Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-10 bg-neutral-100 dark:bg-white/5 rounded-lg animate-pulse" />
-                  ))}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="rounded-xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 p-4">
+                <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-3">API Response Time</p>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-mono text-neutral-700 dark:text-neutral-300">{latency !== null ? `${latency} ms` : "-- ms"}</span>
                 </div>
-              ) : nodes.length === 0 ? (
-                <div className="text-center py-8">
-                  <Folder className="size-8 text-neutral-300 dark:text-neutral-600 mx-auto mb-2" />
-                  <p className="text-sm text-neutral-400">No nodes configured</p>
+                <div className="w-full bg-neutral-200 dark:bg-neutral-700/40 rounded-full h-1.5">
+                  <div className={`h-1.5 rounded-full transition-all duration-300 ${latencyColor}`} style={{ width: `${latencyPct}%` }} />
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  {nodes.slice(0, 8).map((node) => (
-                    <div
-                      key={node.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-neutral-50 dark:bg-white/[0.02] border border-neutral-100 dark:border-white/[0.04]"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className={cn(
-                          "size-2 rounded-full shrink-0",
-                          node.status === "online" ? "bg-emerald-500" : "bg-neutral-300 dark:bg-neutral-600"
-                        )} />
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-neutral-900 dark:text-white truncate">{node.name}</p>
-                          <p className="text-xs text-neutral-400 truncate">{node.address}</p>
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <p className="text-xs text-neutral-500">{node.memory}MB</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
+              </div>
+
+              <div className="rounded-xl bg-neutral-100 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 p-4">
+                <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-2">Update Status</p>
+                <p className="text-xs text-neutral-500 mb-3">
+                  Current version: <span className="text-neutral-700 dark:text-neutral-300 font-medium">{updateInfo?.currentVersion || "..."}</span>
+                </p>
+                {updateInfo?.hasUpdate && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400">Update available: v{updateInfo.latestVersion}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <a href="https://discord.gg/BybfXms7JZ" target="_blank" rel="noopener noreferrer" className="group rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors">
+              <div className="flex items-center gap-2 mb-2">
+                <DiscordLogo size={16} className="text-neutral-500 dark:text-neutral-400 shrink-0" />
+                <p className="text-sm font-medium text-neutral-700 dark:text-neutral-200">Discord</p>
+              </div>
+              <p className="text-xs text-neutral-500">Community support and discussions</p>
+            </a>
+            <a href="https://airlinklabs.xyz/" target="_blank" rel="noopener noreferrer" className="group rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors">
+              <div className="flex items-center gap-2 mb-2">
+                <BookOpen size={16} className="text-neutral-500 dark:text-neutral-400 shrink-0" />
+                <p className="text-sm font-medium text-neutral-700 dark:text-neutral-200">Docs</p>
+              </div>
+              <p className="text-xs text-neutral-500">Usage and configuration guides</p>
+            </a>
+            <a href="https://github.com/airlinklabs" target="_blank" rel="noopener noreferrer" className="group rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors">
+              <div className="flex items-center gap-2 mb-2">
+                <GithubLogo size={16} className="text-neutral-500 dark:text-neutral-400 shrink-0" />
+                <p className="text-sm font-medium text-neutral-700 dark:text-neutral-200">GitHub</p>
+              </div>
+              <p className="text-xs text-neutral-500">Source code and contributions</p>
+            </a>
+            <a href="https://ko-fi.com/airlinklabs" target="_blank" rel="noopener noreferrer" className="group rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-white/5 p-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors">
+              <div className="flex items-center gap-2 mb-2">
+                <CreditCard size={16} className="text-neutral-500 dark:text-neutral-400 shrink-0" />
+                <p className="text-sm font-medium text-neutral-700 dark:text-neutral-200">Support</p>
+              </div>
+              <p className="text-xs text-neutral-500">Fund Airlink development</p>
+            </a>
+          </div>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -79,7 +79,7 @@
 
 @layer base {
   * {
-    @apply border-neutral-200 dark:border-white/10;
+    @apply border-neutral-200 dark:border-white/5;
   }
 
   body {
@@ -103,7 +103,7 @@
   }
 
   .al-glass {
-    @apply bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl;
+    @apply bg-white/80 dark:bg-neutral-950/80 backdrop-blur-xl;
   }
 
   .al-stagger {

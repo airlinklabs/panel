@@ -7,8 +7,8 @@ import {
   Trash,
   PencilSimple,
   ArrowClockwise,
-  Server,
-  Radar,
+  DesktopTower,
+  MagnifyingGlass,
   X,
   Warning,
   CheckSquare,
@@ -164,7 +164,7 @@ export function AdminServersPage() {
         </div>
         <Button onClick={() => navigate("/admin/servers/create")}>
           <Plus className="size-4" />
-          Create Server
+          Create DesktopTower
         </Button>
       </div>
 
@@ -197,8 +197,8 @@ export function AdminServersPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="secondary" size="sm">
-                    <Radar className="size-3" />
-                    Radar Scan
+                    <MagnifyingGlass className="size-3" />
+                    MagnifyingGlass Scan
                   </Button>
                   <Button variant="danger" size="sm" onClick={() => setBulkDeleteTarget(true)}>
                     <Trash className="size-3" />
@@ -221,7 +221,7 @@ export function AdminServersPage() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-16 text-center">
-              <Server className="size-10 text-neutral-300 dark:text-neutral-600 mx-auto mb-3" />
+              <DesktopTower className="size-10 text-neutral-300 dark:text-neutral-600 mx-auto mb-3" />
               <p className="text-sm text-neutral-500">
                 {search ? "No servers match your search" : "No servers found"}
               </p>
@@ -250,9 +250,12 @@ export function AdminServersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200/30 dark:divide-white/[0.07]">
-                  {filtered.map((srv) => (
-                    <tr
+                  {filtered.map((srv, index) => (
+                    <motion.tr
                       key={srv.uuid}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                       className={cn(
                         "hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition-colors",
                         selected.has(srv.uuid) && "bg-neutral-50 dark:bg-white/[0.03]"
@@ -313,7 +316,7 @@ export function AdminServersPage() {
                           </button>
                         </div>
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
                 </tbody>
               </table>
@@ -328,7 +331,7 @@ export function AdminServersPage() {
             <div className="mx-auto mb-3 size-12 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center">
               <Warning className="size-6 text-red-600 dark:text-red-400" />
             </div>
-            <ModalTitle className="text-center">Delete Server</ModalTitle>
+            <ModalTitle className="text-center">Delete DesktopTower</ModalTitle>
             <ModalDescription className="text-center">
               Are you sure you want to delete <strong>{deleteTarget?.name}</strong>? All data will be permanently lost.
             </ModalDescription>
@@ -339,7 +342,7 @@ export function AdminServersPage() {
             </ModalClose>
             <Button variant="danger" onClick={handleDelete} loading={actionLoading}>
               <Trash className="size-4" />
-              Delete Server
+              Delete DesktopTower
             </Button>
           </ModalFooter>
         </ModalContent>

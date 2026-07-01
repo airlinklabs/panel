@@ -6,7 +6,7 @@ const buttonVariants = {
   primary:
     "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100",
   secondary:
-    "border border-neutral-200 dark:border-white/10 bg-transparent text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5",
+    "border border-neutral-200 dark:border-white/5 bg-transparent text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5",
   danger:
     "bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700",
 };
@@ -43,8 +43,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Comp
         className={cn(
-          "inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900",
+          "inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 active:scale-[0.98] transition-transform",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900",
           "disabled:pointer-events-none disabled:opacity-50",
           buttonVariants[variant],
           buttonSizes[size],

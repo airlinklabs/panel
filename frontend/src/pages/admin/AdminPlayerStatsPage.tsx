@@ -324,7 +324,7 @@ export function AdminPlayerStatsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">
-                  Server Breakdown
+                  DesktopTower Breakdown
                 </CardTitle>
               </CardHeader>
               <CardContent>

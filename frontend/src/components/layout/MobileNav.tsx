@@ -1,50 +1,43 @@
 import { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { NavLink } from "react-router-dom";
 import {
-  House,
-  PlusSquare,
-  User,
-  DotsThree,
+  MagnifyingGlass,
+  Bell,
+  X,
+  LayoutDashboard,
+  Menu,
   SignOut,
-  ChartBar,
-  Users,
-  DesktopTower,
-  HardDrives,
-  Gear,
-  TrendUp,
-  Shield,
-  Key,
+  DotsThree,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface NavItem {
   label: string;
   path: string;
-  icon: typeof House;
+  icon: typeof LayoutDashboard;
+  matchPrefix?: string;
 }
 
 const mainNav: NavItem[] = [
-  { label: "Home", path: "/", icon: House },
-  { label: "Create", path: "/create-server", icon: PlusSquare },
-  { label: "Account", path: "/account", icon: User },
+  { label: "Servers", path: "/server", icon: LayoutDashboard, matchPrefix: "/server" },
 ];
 
 const overflowNav: NavItem[] = [
-  { label: "Overview", path: "/admin/overview", icon: ChartBar },
-  { label: "Users", path: "/admin/users", icon: Users },
-  { label: "Servers", path: "/admin/servers", icon: DesktopTower },
-  { label: "Nodes", path: "/admin/nodes", icon: HardDrives },
-  { label: "Settings", path: "/admin/settings", icon: Gear },
-  { label: "Analytics", path: "/admin/analytics", icon: TrendUp },
-  { label: "Security", path: "/admin/security", icon: Shield },
-  { label: "API Keys", path: "/admin/api-keys", icon: Key },
+  { label: "Overview", path: "/admin/overview", icon: LayoutDashboard },
+  { label: "Settings", path: "/admin/settings", icon: LayoutDashboard },
+  { label: "Servers", path: "/admin/servers", icon: LayoutDashboard },
+  { label: "Users", path: "/admin/users", icon: LayoutDashboard },
+  { label: "Nodes", path: "/admin/nodes", icon: LayoutDashboard },
+  { label: "Images", path: "/admin/images", icon: LayoutDashboard },
+  { label: "Addons", path: "/admin/addons", icon: LayoutDashboard },
+  { label: "Airlink Cloud", path: "/admin/airlink-cloud", icon: LayoutDashboard },
+  { label: "API Keys", path: "/admin/apikeys", icon: LayoutDashboard },
 ];
 
 export function MobileNav() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [overflowOpen, setOverflowOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -58,114 +51,183 @@ export function MobileNav() {
     window.location.href = "/login";
   };
 
+  const avatarSrc =
+    user?.avatar ||
+    `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(user?.username || "U")}`;
+
   return (
     <>
-      <nav
-        className={cn(
-          "md:hidden fixed bottom-0 inset-x-0 h-16 z-50 flex items-center justify-around",
-          "al-glass border-t border-neutral-200/30 dark:border-white/[0.07]"
-        )}
+      <div
+        id="mobile-topbar"
+        className="mobile-top-bar al-topbar fixed top-0 left-0 right-0 z-10 h-14 bg-white/90 dark:bg-neutral-900/80 border-b border-neutral-200/60 dark:border-white/5"
       >
-        {mainNav.map((item) => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === "/"}
-              className={({ isActive }) =>
-                cn(
-                  "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors min-w-[56px]",
-                  isActive
-                    ? "text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5"
-                    : "text-neutral-400 dark:text-neutral-500"
-                )
-              }
+        <div className="flex items-center justify-between h-14 px-4">
+          <a href="/" className="flex items-center gap-2 min-w-0 flex-1 mr-3">
+            <img
+              src="/assets/logo.png"
+              alt="Logo"
+              className="logo-bg h-8 w-8 rounded-xl bg-neutral-950/90 dark:bg-transparent p-0.5 shrink-0"
+            />
+            <span className="text-sm font-medium text-neutral-800 dark:text-white truncate">
+              Airlink
+            </span>
+          </a>
+          <div className="flex items-center gap-2.5 shrink-0">
+            <button
+              className="flex h-11 w-11 items-center justify-center rounded-xl text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition"
+              aria-label="Open navigation search"
             >
-              <Icon className="size-5" />
-              <span className="text-[11px] font-medium">{item.label}</span>
-            </NavLink>
-          );
-        })}
-
-        {user?.isAdmin && (
+              <MagnifyingGlass className="h-5 w-5" />
+            </button>
+            <div className="relative" id="notification-bell-container">
+              <button
+                className="flex h-11 w-11 items-center justify-center rounded-xl text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition relative"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5" />
+                <span className="hidden absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center">
+                  0
+                </span>
+              </button>
+            </div>
+            <button
+              role="switch"
+              aria-checked="false"
+              className="al-switch relative inline-flex h-6 w-10 items-center rounded-full transition-colors duration-500 bg-neutral-300 dark:bg-neutral-700/70 border border-neutral-400 dark:border-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-950 shrink-0"
+              aria-label="Switch to dark mode"
+            >
+              <span className="al-switch-dot inline-block h-4 w-4 rounded-full bg-white shadow-md transform transition-transform duration-500 border border-neutral-950/20" />
+            </button>
+            <a href="/account" className="flex items-center justify-center p-1.5 min-w-[44px] min-h-[44px]">
+              <img
+                className="h-8 w-8 rounded-xl border border-neutral-200 dark:border-neutral-700"
+                src={avatarSrc}
+                alt="User avatar"
+              />
+            </a>
+          </div>
+        </div>
+        <div className="hidden items-center h-14 px-3 gap-2">
           <button
-            onClick={() => setOverflowOpen(true)}
-            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-neutral-400 dark:text-neutral-500 min-w-[56px]"
+            className="flex h-11 w-11 items-center justify-center rounded-xl text-neutral-600 dark:text-neutral-300 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500"
+            aria-label="Close navigation search"
           >
-            <DotsThree className="size-5" />
-            <span className="text-[11px] font-medium">More</span>
+            <X className="h-5 w-5" />
           </button>
-        )}
+          <div className="al-mobile-search-shell flex-1 flex items-center bg-neutral-100 dark:bg-neutral-800 rounded-xl px-3 py-2 gap-2">
+            <MagnifyingGlass className="h-4 w-4 text-neutral-400 shrink-0" />
+            <input
+              type="search"
+              autoComplete="off"
+              placeholder="Search navigation..."
+              className="flex-1 bg-transparent text-sm text-neutral-800 dark:text-white placeholder-neutral-400 focus:outline-none"
+            />
+          </div>
+        </div>
+      </div>
 
-        <button
-          onClick={handleLogout}
-          className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-red-400 dark:text-red-500 min-w-[56px]"
-        >
-          <SignOut className="size-5" />
-          <span className="text-[11px] font-medium">Logout</span>
-        </button>
+      <nav
+        id="mobile-bottom-nav"
+        className="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-10 bg-white dark:bg-neutral-900 border-t border-neutral-200/60 dark:border-white/5"
+      >
+        <ul className="relative flex items-center justify-around h-16">
+          {mainNav.map((item) => {
+            const Icon = item.icon;
+            return (
+              <li key={item.path} className="flex-1 relative z-10">
+                <NavLink
+                  to={item.path}
+                  end={item.path === "/"}
+                  className="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400"
+                >
+                  <div className="w-5 h-5 flex items-center justify-center [&>svg]:w-5 [&>svg]:h-5 [&>svg]:shrink-0">
+                    <Icon />
+                  </div>
+                  <span className="text-[11px] font-medium">{item.label}</span>
+                </NavLink>
+              </li>
+            );
+          })}
+
+          {user?.isAdmin && overflowNav.length > 0 && (
+            <li className="flex-1 relative z-10">
+              <button
+                onClick={() => setOverflowOpen(true)}
+                className="flex flex-col items-center justify-center w-full h-16 gap-1 text-neutral-500 dark:text-neutral-400"
+              >
+                <DotsThree className="w-5 h-5" />
+                <span className="text-[11px] font-medium">More</span>
+              </button>
+            </li>
+          )}
+
+          <li className="flex-1 relative z-10">
+            <a
+              href="/menu"
+              className="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400"
+            >
+              <Menu className="shrink-0" style={{ width: 18, height: 18 }} />
+              <span className="text-[11px] font-medium">Menu</span>
+            </a>
+          </li>
+
+          <li className="flex-1 relative z-10">
+            <button
+              onClick={handleLogout}
+              className="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400"
+            >
+              <SignOut className="w-5 h-5" />
+              <span className="text-[11px] font-medium">Logout</span>
+            </button>
+          </li>
+        </ul>
       </nav>
 
-      {/* Bottom sheet */}
-      <AnimatePresence>
-        {overflowOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-neutral-950/50 backdrop-blur-sm md:hidden"
-              onClick={() => setOverflowOpen(false)}
-            />
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className={cn(
-                "fixed bottom-0 inset-x-0 z-50 md:hidden",
-                "bg-white dark:bg-neutral-900 rounded-t-2xl border-t border-neutral-200/30 dark:border-white/[0.07]",
-                "shadow-2xl shadow-neutral-900/20 dark:shadow-black/40"
-              )}
-            >
-              <div className="flex justify-center py-3">
-                <div className="w-10 h-1 rounded-full bg-neutral-300 dark:bg-neutral-600" />
-              </div>
-              <div className="px-4 pb-8 max-h-[60vh] overflow-y-auto">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 px-2 pb-2">
-                  Navigation
-                </p>
-                <div className="grid grid-cols-4 gap-2">
-                  {overflowNav.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <NavLink
-                        key={item.path}
-                        to={item.path}
-                        onClick={() => setOverflowOpen(false)}
-                        className={({ isActive }) =>
-                          cn(
-                            "flex flex-col items-center gap-1.5 p-3 rounded-xl transition-colors",
-                            isActive
-                              ? "bg-neutral-100 dark:bg-white/5 text-neutral-900 dark:text-white"
-                              : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-white/[0.02]"
-                          )
-                        }
-                      >
-                        <Icon className="size-5" />
-                        <span className="text-[11px] font-medium text-center leading-tight">
-                          {item.label}
-                        </span>
-                      </NavLink>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {overflowOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-[20] bg-black/50 transition-opacity duration-200"
+            onClick={() => setOverflowOpen(false)}
+          />
+          <div
+            className={cn(
+              "mobile-more-sheet fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-neutral-800 border-t border-neutral-200/30 dark:border-white/5 rounded-t-2xl transition-transform duration-300 ease-out"
+            )}
+          >
+            <div className="flex items-center justify-between px-4 pt-4 pb-2">
+              <p className="text-sm font-medium text-neutral-800 dark:text-white">
+                More
+              </p>
+              <button
+                onClick={() => setOverflowOpen(false)}
+                className="w-11 h-11 flex items-center justify-center rounded-xl text-neutral-500 hover:text-neutral-700 dark:text-neutral-300 dark:hover:text-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 transition"
+                aria-label="Close more navigation"
+              >
+                <X style={{ width: 16, height: 16 }} className="shrink-0" />
+              </button>
+            </div>
+            <div className="px-4 pb-8 space-y-1">
+              {overflowNav.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <a
+                    key={item.path}
+                    href={item.path}
+                    className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition"
+                  >
+                    <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-800 shrink-0 [&>svg]:w-4 [&>svg]:h-4 [&>svg]:shrink-0">
+                      <Icon />
+                    </div>
+                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">
+                      {item.label}
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

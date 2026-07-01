@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Terminal, ArrowUp, Loader2 } from "@phosphor-icons/react";
+import { Terminal, ArrowUp, Spinner } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
 import { Terminal as XTerminal } from "xterm";

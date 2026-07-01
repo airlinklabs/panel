@@ -1,31 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import {
-  MagnifyingGlass,
   Plus,
-  Trash,
   PencilSimple,
-  User,
-  UsersThree,
-  X,
-  Warning,
+  Trash,
+  CaretRight,
 } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
-import { cn } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalTitle,
-  ModalDescription,
-  ModalFooter,
-  ModalClose,
-} from "@/components/ui/modal";
 
 interface UserData {
   id: number;
@@ -33,21 +14,14 @@ interface UserData {
   email: string;
   isAdmin: boolean;
   serverLimit: number;
-  createdAt: string;
+  avatar?: string;
+  servers?: { id: number }[];
 }
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } },
-};
 
 export function AdminUsersPage() {
   const navigate = useNavigate();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<UserData | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -65,158 +39,101 @@ export function AdminUsersPage() {
     fetchUsers();
   }, [fetchUsers]);
 
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
-    setDeleting(true);
+  const handleDelete = async (userId: number) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
     try {
-      await api.delete(`/admin/users/delete/${deleteTarget.id}`);
-      setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
-      setDeleteTarget(null);
+      await api.delete(`/admin/users/delete/${userId}`);
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
     } catch {
       // silent
-    } finally {
-      setDeleting(false);
     }
   };
 
-  const filtered = users.filter(
-    (u) =>
-      u.username.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="space-y-6"
-    >
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Users</h1>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
-            {users.length} registered {users.length === 1 ? "user" : "users"}
-          </p>
+    <div className="flex-1 p-6 overflow-y-auto pt-16">
+      <div className="sm:flex sm:items-center px-8 pt-4">
+        <div className="sm:flex-auto">
+          <h1 className="text-base font-medium leading-6 text-neutral-800 dark:text-white">Users</h1>
+          <p className="mt-1 tracking-tight text-sm text-neutral-500">Manage your users</p>
         </div>
-        <Button onClick={() => navigate("/admin/users/create")}>
-          <Plus className="size-4" />
-          Create User
-        </Button>
+        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <button onClick={() => navigate("/admin/users/create")} className="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">
+            New User
+          </button>
+        </div>
       </div>
 
-      <div className="relative">
-        <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
-        <Input
-          placeholder="Search users..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10"
-        />
+      <div id="stats" className="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
+        <div className="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white mb-2">Total Users</h2>
+          <p className="text-4xl font-normal text-neutral-800 dark:text-white">{users.length}</p>
+          <p className="text-sm text-neutral-400 mt-2">Registered users</p>
+        </div>
+        <div className="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white mb-2">Admins</h2>
+          <p className="text-4xl font-normal text-neutral-800 dark:text-white">{users.filter((u) => u.isAdmin).length}</p>
+          <p className="text-sm text-neutral-400 mt-2">Administrator accounts</p>
+        </div>
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="divide-y divide-neutral-200/30 dark:divide-white/[0.07]">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-16 animate-pulse bg-neutral-50 dark:bg-white/[0.02]" />
-              ))}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="py-16 text-center">
-              <UsersThree className="size-10 text-neutral-300 dark:text-neutral-600 mx-auto mb-3" />
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                {search ? "No users match your search" : "No users found"}
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-neutral-200/30 dark:border-white/[0.07]">
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider">ID</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider">Username</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider hidden sm:table-cell">Email</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider hidden md:table-cell">Role</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider hidden lg:table-cell">Limit</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider hidden lg:table-cell">Created</th>
-                    <th className="text-right px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-200/30 dark:divide-white/[0.07]">
-                  {filtered.map((user) => (
-                    <tr
-                      key={user.id}
-                      className="hover:bg-neutral-50 dark:hover:bg-white/[0.02] cursor-pointer transition-colors"
-                      onClick={() => navigate(`/admin/users/edit/${user.id}`)}
-                    >
-                      <td className="px-4 py-3 text-neutral-500 tabular-nums">{user.id}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="size-8 rounded-full bg-neutral-100 dark:bg-white/10 flex items-center justify-center shrink-0">
-                            <User className="size-4 text-neutral-400" />
-                          </div>
-                          <span className="font-medium text-neutral-900 dark:text-white">{user.username}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-neutral-500 hidden sm:table-cell">{user.email}</td>
-                      <td className="px-4 py-3 hidden md:table-cell">
-                        <Badge variant={user.isAdmin ? "info" : "default"}>
-                          {user.isAdmin ? "Admin" : "User"}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3 text-neutral-500 tabular-nums hidden lg:table-cell">{user.serverLimit}</td>
-                      <td className="px-4 py-3 text-neutral-400 hidden lg:table-cell">
-                        {new Date(user.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={() => navigate(`/admin/users/edit/${user.id}`)}
-                            className="p-2 rounded-lg text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
-                          >
-                            <PencilSimple className="size-4" />
-                          </button>
-                          <button
-                            onClick={() => setDeleteTarget(user)}
-                            className="p-2 rounded-lg text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
-                          >
-                            <Trash className="size-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Modal open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
-        <ModalContent>
-          <ModalHeader>
-            <div className="mx-auto mb-3 size-12 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center">
-              <Warning className="size-6 text-red-600 dark:text-red-400" />
-            </div>
-            <ModalTitle className="text-center">Delete User</ModalTitle>
-            <ModalDescription className="text-center">
-              Are you sure you want to delete <strong>{deleteTarget?.username}</strong>? This action cannot be undone.
-            </ModalDescription>
-          </ModalHeader>
-          <ModalFooter>
-            <ModalClose asChild>
-              <Button variant="secondary" disabled={deleting}>Cancel</Button>
-            </ModalClose>
-            <Button variant="danger" onClick={handleDelete} loading={deleting}>
-              <Trash className="size-4" />
-              Delete
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </motion.div>
+      <div className="overflow-x-auto shadow-sm rounded-xl mx-8 mt-2 mb-8 border border-neutral-200 dark:border-neutral-800/40">
+        <table className="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
+          <thead className="bg-neutral-50 dark:bg-neutral-800/50">
+            <tr>
+              <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6">Name</th>
+              <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6">Role</th>
+              <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6">Servers</th>
+              <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800">
+            {loading ? (
+              [1, 2, 3, 4, 5].map((i) => (
+                <tr key={i}>
+                  <td colSpan={4} className="px-4 py-4">
+                    <div className="h-5 bg-neutral-100 dark:bg-white/5 rounded animate-pulse" />
+                  </td>
+                </tr>
+              ))
+            ) : users.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-4 py-16 text-center">
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400">No users found</p>
+                </td>
+              </tr>
+            ) : (
+              users.map((user) => (
+                <tr key={user.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer" onClick={() => navigate(`/admin/users/edit/${user.id}`)}>
+                  <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                    <div className="flex items-center gap-3">
+                      <div className="relative shrink-0">
+                        <img src={user.avatar || `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(user.username)}`} alt={user.username} className="h-10 w-10 rounded-xl object-cover" />
+                      </div>
+                      <div className="font-medium text-neutral-800 dark:text-white">{user.username}</div>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400">
+                    {user.isAdmin ? (
+                      <span className="inline-flex items-center rounded-md bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">Admin</span>
+                    ) : (
+                      <span className="inline-flex items-center rounded-md bg-amber-50 dark:bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">User</span>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400">{user.servers?.length || 0}</td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm">
+                    <div className="flex gap-2">
+                      <button onClick={(e) => { e.stopPropagation(); navigate(`/admin/users/edit/${user.id}`); }} className="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1.5 text-xs font-medium hover:opacity-90 transition">Edit</button>
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(user.id); }} className="rounded-xl bg-red-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-red-500 transition">
+                        <Trash size={14} className="text-white" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FloppyDisk, Loader2 } from "@phosphor-icons/react";
+import { FloppyDisk, Spinner } from "@phosphor-icons/react";
 import { useToast } from "@/context/ToastContext";
 
 interface Variable {
@@ -107,7 +107,7 @@ export function ServerStartupPage() {
             disabled={saving}
             className="h-9 inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 disabled:pointer-events-none disabled:opacity-50 text-sm gap-1.5 px-3"
           >
-            {saving ? <Loader2 className="size-4 animate-spin" /> : <FloppyDisk className="size-4" />}
+            {saving ? <Spinner className="size-4 animate-spin" /> : <FloppyDisk className="size-4" />}
             Save
           </button>
         </div>

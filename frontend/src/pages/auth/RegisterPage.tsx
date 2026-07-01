@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Envelope, Lock, ArrowRight, Loader2, CheckCircle, XCircle } from "@phosphor-icons/react";
+import { User, Envelope, Lock, ArrowRight, Spinner, CheckCircle, XCircle } from "@phosphor-icons/react";
 import { useToast } from "@/context/ToastContext";
 
 interface ValidationState {
@@ -245,7 +245,7 @@ export function RegisterPage() {
               className="w-full h-10 inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 disabled:pointer-events-none disabled:opacity-50 text-sm gap-2"
             >
               {loading ? (
-                <Loader2 className="size-4 animate-spin" />
+                <Spinner className="size-4 animate-spin" />
               ) : (
                 <>
                   Create account

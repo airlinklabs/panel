@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Gear, Warning, Loader2, Trash, ArrowRight } from "@phosphor-icons/react";
+import { Gear, Warning, Spinner, Trash, ArrowRight } from "@phosphor-icons/react";
 import { useToast } from "@/context/ToastContext";
 import { useNavigate } from "react-router-dom";
 
@@ -68,7 +68,7 @@ export function ServerSettingsPage() {
         credentials: "same-origin",
       });
       if (!res.ok) throw new Error("Failed to reinstall");
-      toast("Server reinstall started", "success");
+      toast("DesktopTower reinstall started", "success");
     } catch {
       toast("Failed to reinstall server", "error");
     } finally {
@@ -85,7 +85,7 @@ export function ServerSettingsPage() {
         credentials: "same-origin",
       });
       if (!res.ok) throw new Error("Failed to delete");
-      toast("Server deleted", "success");
+      toast("DesktopTower deleted", "success");
       navigate("/");
     } catch {
       toast("Failed to delete server", "error");
@@ -120,7 +120,7 @@ export function ServerSettingsPage() {
         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       >
         <h1 className="font-display text-xl font-semibold text-neutral-900 dark:text-white tracking-tight mb-6">
-          Server Settings
+          DesktopTower Settings
         </h1>
 
         <div className="space-y-6">
@@ -131,7 +131,7 @@ export function ServerSettingsPage() {
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-neutral-900 dark:text-white mb-1.5 block">
-                  Server name
+                  DesktopTower name
                 </label>
                 <input
                   type="text"
@@ -157,7 +157,7 @@ export function ServerSettingsPage() {
                   disabled={saving}
                   className="h-9 inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 disabled:pointer-events-none disabled:opacity-50 text-sm gap-1.5 px-4"
                 >
-                  {saving ? <Loader2 className="size-4 animate-spin" /> : <Gear className="size-4" />}
+                  {saving ? <Spinner className="size-4 animate-spin" /> : <Gear className="size-4" />}
                   Save changes
                 </button>
               </div>
@@ -166,7 +166,7 @@ export function ServerSettingsPage() {
 
           <div className="bg-white dark:bg-white/[0.03] border border-neutral-200/30 dark:border-white/[0.07] rounded-xl p-6">
             <h2 className="font-display text-base font-semibold text-neutral-900 dark:text-white mb-4">
-              Reinstall Server
+              Reinstall DesktopTower
             </h2>
             <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
               Reinstall the server. This will re-run the installation scripts without deleting your files.
@@ -176,7 +176,7 @@ export function ServerSettingsPage() {
               disabled={reinstalling}
               className="h-9 inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 border border-neutral-200 dark:border-white/10 bg-transparent text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 disabled:pointer-events-none disabled:opacity-50 text-sm gap-1.5 px-4"
             >
-              {reinstalling ? <Loader2 className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
+              {reinstalling ? <Spinner className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
               Reinstall
             </button>
           </div>
@@ -208,7 +208,7 @@ export function ServerSettingsPage() {
             className="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl"
           >
             <h3 className="font-display text-lg font-semibold text-neutral-900 dark:text-white mb-2">
-              Delete Server
+              Delete DesktopTower
             </h3>
             <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
               Are you sure you want to delete <strong>{server?.name}</strong>? This will permanently remove all files and data.
@@ -225,7 +225,7 @@ export function ServerSettingsPage() {
                 disabled={deleting}
                 className="h-9 inline-flex items-center justify-center font-medium rounded-xl bg-red-600 text-white hover:bg-red-700 disabled:pointer-events-none disabled:opacity-50 text-sm gap-1.5 px-4"
               >
-                {deleting ? <Loader2 className="size-4 animate-spin" /> : <Trash className="size-4" />}
+                {deleting ? <Spinner className="size-4 animate-spin" /> : <Trash className="size-4" />}
                 Delete
               </button>
             </div>

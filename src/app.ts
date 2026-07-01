@@ -97,6 +97,16 @@ const expressWsInstance = expressWs(app);
 // Load static files
 app.use(express.static(path.join(__dirname, '../public')));
 
+// Serve React frontend build (production)
+const frontendDist = path.join(__dirname, '../frontend/dist');
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist, {
+    index: false, // Don't serve index.html for directory requests
+    maxAge: '1y', // Hashed assets get long cache
+    immutable: true,
+  }));
+}
+
 app.use(
   '/monaco',
   express.static(path.join(__dirname, '../node_modules', 'monaco-editor/min')),
@@ -108,7 +118,7 @@ app.use(
 );
 
 // Load views
-const viewsPath = path.join(__dirname, '../views');
+const viewsPath = path.join(__dirname, '../view-old');
 app.set('views', viewsPath);
 app.set('view engine', 'ejs');
 
@@ -470,82 +480,55 @@ app.use((_req, res, next) => {
   // Animation preference — fetch from DB for authenticated users, then continue
   const sessionUser = (_req.session as unknown as Record<string, unknown>)?.user as { id?: number } | undefined;
   const proceedWithRenderOverride = () => {
-    const originalRenderBase = res.render.bind(res);
+    const indexPath = path.join(frontendDist, 'index.html');
+    const hasReactBuild = fs.existsSync(indexPath);
+
     // @ts-expect-error - custom render wrapper with extended callback signature
     res.render = function (view: string, optionsOrCb?: Record<string, unknown> | ((err: Error | null, html?: string) => void), maybeCb?: (err: Error | null, html?: string) => void): void {
       const isAbsolutePath = path.isAbsolute(view);
       const isAddonView = view.includes('/storage/addons/') || view.includes('\\storage\\addons\\');
+      const hasAddonSlug = typeof optionsOrCb === 'object' && optionsOrCb !== null && typeof (optionsOrCb as Record<string, unknown>).addonSlug === 'string';
 
-      const resolvedCb: ((err: Error | null, html?: string) => void) | undefined = typeof optionsOrCb === 'function' ? optionsOrCb : maybeCb;
-      const opts = typeof optionsOrCb === 'function' ? {} : optionsOrCb || {};
+      // Addon views still render via EJS
+      if ((isAddonView || hasAddonSlug) && hasReactBuild) {
+        const resolvedCb = typeof optionsOrCb === 'function' ? optionsOrCb : maybeCb;
+        const opts = typeof optionsOrCb === 'function' ? {} : optionsOrCb || {};
 
-      if (isAbsolutePath || isAddonView) {
-        const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-        (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(view, data, {}, (err: Error | null, html: string) => {
-          if (err) {
-            if (typeof resolvedCb === 'function') {resolvedCb(err); return;}
-            return res.status(500).send('View render error: ' + err.message);
-          }
-          if (typeof resolvedCb === 'function') {resolvedCb(null, html); return;}
-          res.send(html);
-        });
+        if (isAbsolutePath || isAddonView) {
+          const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
+          (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(view, data, {}, (err: Error | null, html: string) => {
+            if (err) {
+              if (typeof resolvedCb === 'function') { resolvedCb(err); return; }
+              return res.status(500).send('View render error: ' + err.message);
+            }
+            if (typeof resolvedCb === 'function') { resolvedCb(null, html); return; }
+            res.send(html);
+          });
+          return;
+        }
+      }
+
+      // All other views serve React SPA index.html
+      if (hasReactBuild) {
+        return res.sendFile(indexPath);
+      }
+
+      // Fallback: try EJS if React build not present
+      const resolvedCb2 = typeof optionsOrCb === 'function' ? optionsOrCb : maybeCb;
+      const opts2 = typeof optionsOrCb === 'function' ? {} : optionsOrCb || {};
+      const rootViewPath = path.join(viewsPath, view + '.ejs');
+      if (fs.existsSync(rootViewPath)) {
+        const originalRenderBase = res.render.bind(res);
+        originalRenderBase(view, opts2, resolvedCb2);
         return;
       }
 
-      // Views now live at views/ root. isMobileViewport is in res.locals for templates.
-      const rootViewPath = path.join(viewsPath, view + '.ejs');
-      const legacyDesktopPath = path.join(viewsPath, 'desktop/' + view + '.ejs');
-      const legacyMobilePath  = path.join(viewsPath, 'mobile/'  + view + '.ejs');
-
-      let resolvedView = view;
-      if (!fs.existsSync(rootViewPath)) {
-        if (fs.existsSync(legacyDesktopPath)) {
-          resolvedView = 'desktop/' + view;
-        } else if (fs.existsSync(legacyMobilePath)) {
-          resolvedView = 'mobile/' + view;
-        }
-        // If none exist, Express throws "view not found" — correct behaviour.
+      // Nothing to render
+      if (typeof resolvedCb2 === 'function') {
+        resolvedCb2(new Error(`View "${view}" not found`));
+      } else {
+        res.status(404).send('Not found');
       }
-
-      // Addon view fallback (unchanged)
-      if (!fs.existsSync(path.join(viewsPath, resolvedView + '.ejs'))) {
-        const optsRecord = opts;
-        if (optsRecord.addonSlug) {
-          const addonSlug = optsRecord.addonSlug as string;
-          const addonFallbackPath = path.join(addonViewsDir, addonSlug, 'views', view + '.ejs');
-          if (fs.existsSync(addonFallbackPath)) {
-            const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-            (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
-              if (err) {
-                if (typeof resolvedCb === 'function') {resolvedCb(err); return;}
-                return res.status(500).send('View render error: ' + err.message);
-              }
-              if (typeof resolvedCb === 'function') {resolvedCb(null, html); return;}
-              res.send(html);
-            });
-            return;
-          }
-        }
-
-        for (const addonDir of getAddonDirs()) {
-          if (optsRecord.addonSlug && addonDir === optsRecord.addonSlug) {continue;}
-          const addonFallbackPath = path.join(addonViewsDir, addonDir, 'views', view + '.ejs');
-          if (fs.existsSync(addonFallbackPath)) {
-            const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-            (ejs as unknown as { renderFile: typeof ejs.renderFile }).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
-              if (err) {
-                if (typeof resolvedCb === 'function') {resolvedCb(err); return;}
-                return res.status(500).send('View render error: ' + err.message);
-              }
-              if (typeof resolvedCb === 'function') {resolvedCb(null, html); return;}
-              res.send(html);
-            });
-            return;
-          }
-        }
-      }
-
-      originalRenderBase(resolvedView, opts, resolvedCb);
     };
 
     next();
@@ -591,6 +574,26 @@ void (async () => {
     await loadModules(app, airlinkVersion, Number(port), expressWsInstance);
     setAppInstance(app);
     await loadAddons(app);
+
+    // SPA fallback — serve React index.html for all non-API, non-file GET requests
+    // This enables client-side routing via React Router
+    app.get('{*splat}', (req: Request, res: Response, next: NextFunction) => {
+      // Skip API routes, WebSocket routes, and file uploads
+      if (
+        req.path.startsWith('/api/') ||
+        req.path.startsWith('/ws') ||
+        req.path.startsWith('/addon-assets/') ||
+        req.method !== 'GET'
+      ) {
+        return next();
+      }
+
+      const indexPath = path.join(frontendDist, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        return res.sendFile(indexPath);
+      }
+      next();
+    });
 
     app.use(notFoundHandler);
     app.use(errorPageHandler);

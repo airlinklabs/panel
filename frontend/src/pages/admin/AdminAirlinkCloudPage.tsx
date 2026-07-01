@@ -161,7 +161,7 @@ export function AdminAirlinkCloudPage() {
                   <WarningCircle className="size-3.5" />
                 )}
                 {config.backupEnabled
-                  ? "Cloud backups are enabled. Server backups will be synced automatically."
+                  ? "Cloud backups are enabled. DesktopTower backups will be synced automatically."
                   : "Cloud backups are disabled."}
               </div>
             </CardContent>

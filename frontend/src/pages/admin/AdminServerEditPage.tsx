@@ -125,7 +125,7 @@ export function AdminServerEditPage() {
     setSubmitting(true);
     try {
       await api.post(`/admin/servers/update/${id}`, form);
-      toast("Server updated successfully");
+      toast("DesktopTower updated successfully");
       navigate("/admin/servers");
     } catch (err) {
       toast(err instanceof Error ? err.message : "Failed to update server", "error");
@@ -160,7 +160,7 @@ export function AdminServerEditPage() {
           <ArrowLeft className="size-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Edit Server</h1>
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Edit DesktopTower</h1>
           <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">{id}</p>
         </div>
       </div>
@@ -175,7 +175,7 @@ export function AdminServerEditPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Server Name</Label>
+              <Label htmlFor="name">DesktopTower Name</Label>
               <Input id="name" value={form.name} onChange={(e) => update("name", e.target.value)} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

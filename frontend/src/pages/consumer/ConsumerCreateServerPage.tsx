@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Plus, Server, ArrowLeft } from "@phosphor-icons/react";
+import { Plus, DesktopTower, ArrowLeft } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
@@ -61,7 +61,7 @@ export function ConsumerCreateServerPage() {
     setCreating(true);
     try {
       await api.post("/api/consumer/v1/servers", form);
-      toast("Server created successfully", "success");
+      toast("DesktopTower created successfully", "success");
       navigate("/consumer/overview");
     } catch {
       toast("Failed to create server", "error");
@@ -89,7 +89,7 @@ export function ConsumerCreateServerPage() {
         </Button>
         <div>
           <h1 className="text-lg font-semibold text-neutral-900 dark:text-white tracking-tight">
-            Create Server
+            Create DesktopTower
           </h1>
           <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
             Deploy a new game server
@@ -99,14 +99,14 @@ export function ConsumerCreateServerPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Server Details</CardTitle>
+          <CardTitle className="text-base">DesktopTower Details</CardTitle>
           <CardDescription>
             Choose a name, game type, and plan for your server
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="server-name">Server Name</Label>
+            <Label htmlFor="server-name">DesktopTower Name</Label>
             <Input
               id="server-name"
               placeholder="my-minecraft-server"
@@ -205,7 +205,7 @@ export function ConsumerCreateServerPage() {
               disabled={!form.name.trim() || !form.gameType || !form.plan}
             >
               <Plus className="size-4" />
-              Create Server
+              Create DesktopTower
             </Button>
           </div>
         </CardContent>

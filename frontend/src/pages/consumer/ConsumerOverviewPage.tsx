@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Server,
+  DesktopTower,
   Play,
   Stop,
   ArrowClockwise,
   Power,
   HardDrive,
   Cpu,
-  MemoryStick,
+  Memory,
   Plus,
 } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
@@ -63,7 +63,7 @@ export function ConsumerOverviewPage() {
     setPowerAction(`${uuid}-${action}`);
     try {
       await api.post(`/api/consumer/v1/servers/${uuid}/power`, { action });
-      toast(`Server ${action} initiated`, "success");
+      toast(`DesktopTower ${action} initiated`, "success");
       setTimeout(fetchServers, 2000);
     } catch {
       toast(`Failed to ${action} server`, "error");
@@ -106,7 +106,7 @@ export function ConsumerOverviewPage() {
           <a href="/consumer/create-server">
             <Button size="sm">
               <Plus className="size-4" />
-              New Server
+              New DesktopTower
             </Button>
           </a>
         </div>
@@ -154,7 +154,7 @@ export function ConsumerOverviewPage() {
       ) : servers.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">
-            <Server className="size-10 text-neutral-300 dark:text-neutral-600 mx-auto" />
+            <DesktopTower className="size-10 text-neutral-300 dark:text-neutral-600 mx-auto" />
             <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-3">
               You don't have any servers yet
             </p>
@@ -183,7 +183,7 @@ export function ConsumerOverviewPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="size-10 rounded-lg bg-neutral-100 dark:bg-white/5 flex items-center justify-center">
-                          <Server className="size-5 text-neutral-500 dark:text-neutral-400" />
+                          <DesktopTower className="size-5 text-neutral-500 dark:text-neutral-400" />
                         </div>
                         <div>
                           <CardTitle className="text-base">
@@ -219,7 +219,7 @@ export function ConsumerOverviewPage() {
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
-                          <MemoryStick className="size-3" />
+                          <Memory className="size-3" />
                           Memory
                         </div>
                         <div className="h-1.5 bg-neutral-100 dark:bg-white/5 rounded-full overflow-hidden">
