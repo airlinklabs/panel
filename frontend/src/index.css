@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Cabinet Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", monospace;
+
+  --color-neutral-50: oklch(98.5% 0 0);
+  --color-neutral-100: oklch(97% 0 0);
+  --color-neutral-200: oklch(92.2% 0 0);
+  --color-neutral-300: oklch(87% 0 0);
+  --color-neutral-400: oklch(70.8% 0 0);
+  --color-neutral-500: oklch(55.6% 0 0);
+  --color-neutral-600: oklch(43.9% 0 0);
+  --color-neutral-700: oklch(37% 0 0);
+  --color-neutral-800: oklch(26.9% 0 0);
+  --color-neutral-900: oklch(20.5% 0 0);
+  --color-neutral-950: oklch(14.5% 0 0);
+
+  --ease-decelerate: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-in: al-fade-in 350ms var(--ease-decelerate) both;
+  --animate-out: al-fade-out 200ms ease-in both;
+  --animate-slide-in-right: al-slide-in-right 300ms var(--ease-decelerate) both;
+  --animate-slide-in-up: al-slide-in-up 300ms var(--ease-decelerate) both;
+  --animate-scale-in: al-scale-in 250ms var(--ease-decelerate) both;
+}
+
+@keyframes al-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes al-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes al-slide-in-right {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes al-slide-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes al-scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes al-ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes al-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes al-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-neutral-200 dark:border-white/10;
+  }
+
+  body {
+    @apply bg-neutral-50 text-neutral-800 dark:bg-neutral-950 dark:text-white antialiased;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.025em;
+  }
+}
+
+@layer utilities {
+  .al-surface {
+    @apply bg-white dark:bg-white/[0.03] border border-neutral-200/30 dark:border-white/[0.07] rounded-xl;
+  }
+
+  .al-surface-secondary {
+    @apply bg-neutral-100 dark:bg-neutral-900;
+  }
+
+  .al-glass {
+    @apply bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl;
+  }
+
+  .al-stagger {
+    animation-delay: calc(var(--i, 0) * 50ms);
+  }
+}
