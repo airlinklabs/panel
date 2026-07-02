@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Spinner, DesktopTower, Cpu, Memory, HardDrive } from "@phosphor-icons/react";
 import { useToast } from "@/context/ToastContext";
+import { csrfFetch } from "@/lib/csrf";
 
 interface Node {
   id: number;
@@ -73,7 +74,7 @@ export function CreateServerPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/create-server", {
+      const res = await csrfFetch("/create-server", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -86,7 +87,6 @@ export function CreateServerPage() {
           Cpu: cpu,
           Storage: storage,
         }),
-        credentials: "same-origin",
       });
 
       if (!res.ok) {

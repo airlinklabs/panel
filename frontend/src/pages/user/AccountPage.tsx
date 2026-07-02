@@ -3,16 +3,17 @@ import {
   User,
   Lock,
   Shield,
-  Mail,
+  EnvelopeSimple,
   FileText,
   Globe,
   Upload,
   X,
-  CircleAlert,
+  Info,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import { csrfFetch } from "@/lib/csrf";
 
 interface LoginHistory {
   timestamp: string;
@@ -104,7 +105,7 @@ export function AccountPage() {
         return;
       }
       try {
-        const res = await fetch("/validate-password", {
+        const res = await csrfFetch("/validate-password", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ currentPassword }),
@@ -126,10 +127,9 @@ export function AccountPage() {
     const formData = new FormData();
     formData.append("avatar", file);
     try {
-      const res = await fetch("/upload-avatar", {
+      const res = await csrfFetch("/upload-avatar", {
         method: "POST",
         body: formData,
-        credentials: "same-origin",
       });
       if (!res.ok) throw new Error("Failed to upload avatar");
       const data = await res.json();
@@ -142,10 +142,9 @@ export function AccountPage() {
 
   const handleRemoveAvatar = async () => {
     try {
-      const res = await fetch("/remove-avatar", {
+      const res = await csrfFetch("/remove-avatar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
       });
       if (res.ok) {
         if (user) setUser({ ...user, avatar: "" });
@@ -163,7 +162,7 @@ export function AccountPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch("/update-username", {
+      const res = await csrfFetch("/update-username", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ newUsername: username.trim() }),
@@ -186,7 +185,7 @@ export function AccountPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch("/change-email", {
+      const res = await csrfFetch("/change-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),
@@ -208,7 +207,7 @@ export function AccountPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch("/update-description", {
+      const res = await csrfFetch("/update-description", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description: description.trim() }),
@@ -230,7 +229,7 @@ export function AccountPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch("/change-password", {
+      const res = await csrfFetch("/change-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentPassword, newPassword }),
@@ -252,7 +251,7 @@ export function AccountPage() {
   const handleLanguageSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("/set-language", {
+      const res = await csrfFetch("/set-language", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ language }),
@@ -276,7 +275,7 @@ export function AccountPage() {
     } else {
       document.documentElement.classList.remove("animations-disabled");
     }
-    await fetch("/account/animations", {
+    await csrfFetch("/account/animations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ animationsDisabled: String(newState) }),
@@ -291,7 +290,7 @@ export function AccountPage() {
     } else {
       document.documentElement.classList.remove("high-contrast");
     }
-    await fetch("/account/high-contrast", {
+    await csrfFetch("/account/high-contrast", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ highContrast: String(newState) }),
@@ -306,7 +305,7 @@ export function AccountPage() {
     } else {
       document.documentElement.classList.remove("compact-mode");
     }
-    await fetch("/account/compact-mode", {
+    await csrfFetch("/account/compact-mode", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ compactMode: String(newState) }),
@@ -317,7 +316,7 @@ export function AccountPage() {
     setFontSize(size);
     document.documentElement.classList.remove("text-size-small", "text-size-medium", "text-size-large");
     if (size !== "medium") document.documentElement.classList.add(`text-size-${size}`);
-    await fetch("/account/font-size", {
+    await csrfFetch("/account/font-size", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ fontSize: size }),
@@ -380,7 +379,7 @@ export function AccountPage() {
             href="/credits"
             className="flex items-center gap-1.5 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-white/10 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white px-3 py-1.5 text-xs font-medium shadow-sm dark:shadow-none transition shrink-0"
           >
-            <CircleAlert className="w-3.5 h-3.5" />
+            <Info className="w-3.5 h-3.5" />
             Credits
           </a>
         </div>
@@ -418,7 +417,7 @@ export function AccountPage() {
 
             <form id="change-email-form" onSubmit={handleEmailSubmit} className="col-span-1">
               <label className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1">
-                <Mail className="w-3 h-3" />
+                <EnvelopeSimple className="w-3 h-3" />
                 Email
               </label>
               <div className="flex gap-1.5">
@@ -548,13 +547,10 @@ export function AccountPage() {
                   role="switch"
                   aria-checked={animationsDisabled}
                   onClick={toggleAnimations}
-                  className={cn(
-                    "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900",
-                    animationsDisabled ? "bg-neutral-900 dark:bg-white" : "bg-neutral-200 dark:bg-neutral-700"
-                  )}
+                  className="al-switch relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 bg-neutral-200 dark:bg-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900"
                 >
                   <span
-                    className="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200"
+                    className="al-switch-dot inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200"
                     style={{ transform: `translateX(${animationsDisabled ? "24px" : "4px"})` }}
                   />
                 </button>
@@ -611,13 +607,10 @@ export function AccountPage() {
                   role="switch"
                   aria-checked={highContrast}
                   onClick={toggleContrast}
-                  className={cn(
-                    "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900",
-                    highContrast ? "bg-neutral-900 dark:bg-white" : "bg-neutral-200 dark:bg-neutral-700"
-                  )}
+                  className="al-switch relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 bg-neutral-200 dark:bg-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900"
                 >
                   <span
-                    className="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200"
+                    className="al-switch-dot inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200"
                     style={{ transform: `translateX(${highContrast ? "24px" : "4px"})` }}
                   />
                 </button>
@@ -639,13 +632,10 @@ export function AccountPage() {
                   role="switch"
                   aria-checked={compactMode}
                   onClick={toggleCompact}
-                  className={cn(
-                    "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900",
-                    compactMode ? "bg-neutral-900 dark:bg-white" : "bg-neutral-200 dark:bg-neutral-700"
-                  )}
+                  className="al-switch relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 bg-neutral-200 dark:bg-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900"
                 >
                   <span
-                    className="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200"
+                    className="al-switch-dot inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200"
                     style={{ transform: `translateX(${compactMode ? "24px" : "4px"})` }}
                   />
                 </button>

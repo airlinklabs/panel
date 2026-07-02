@@ -1,61 +1,24 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   MagnifyingGlass,
-  Plus,
   Trash,
   PencilSimple,
-  ArrowClockwise,
-  DesktopTower,
-  MagnifyingGlass,
-  X,
-  Warning,
-  CheckSquare,
+  ArrowSquareOut,
   Square,
+  CheckSquare,
 } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
-import { cn } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalTitle,
-  ModalDescription,
-  ModalFooter,
-  ModalClose,
-} from "@/components/ui/modal";
 
 interface ServerData {
+  id: number;
   uuid: string;
   name: string;
-  owner: string;
-  nodeName: string;
+  owner: { id: number; username: string; avatar?: string };
+  node: { id: number; name: string; address: string } | null;
   status: string;
-  memory: number;
-  cpu: number;
-  disk: number;
-  allocatedMemory?: number;
-  allocatedCpu?: number;
-  allocatedDisk?: number;
+  Suspended?: boolean;
 }
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } },
-};
-
-const statusColors: Record<string, string> = {
-  running: "bg-emerald-500",
-  stopped: "bg-neutral-300 dark:bg-neutral-600",
-  starting: "bg-amber-500",
-  stopping: "bg-amber-500",
-  error: "bg-red-500",
-};
 
 export function AdminServersPage() {
   const navigate = useNavigate();
@@ -64,8 +27,6 @@ export function AdminServersPage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleteTarget, setDeleteTarget] = useState<ServerData | null>(null);
-  const [bulkDeleteTarget, setBulkDeleteTarget] = useState(false);
-  const [actionLoading, setActionLoading] = useState(false);
 
   const fetchServers = useCallback(async () => {
     setLoading(true);
@@ -102,7 +63,6 @@ export function AdminServersPage() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    setActionLoading(true);
     try {
       await api.post(`/admin/server/delete/${deleteTarget.uuid}`);
       setServers((prev) => prev.filter((s) => s.uuid !== deleteTarget.uuid));
@@ -110,34 +70,16 @@ export function AdminServersPage() {
       setDeleteTarget(null);
     } catch {
       // silent
-    } finally {
-      setActionLoading(false);
     }
   };
 
   const handleBulkDelete = async () => {
-    setActionLoading(true);
     try {
       await Promise.all([...selected].map((uuid) => api.post(`/admin/server/delete/${uuid}`)));
       setServers((prev) => prev.filter((s) => !selected.has(s.uuid)));
       setSelected(new Set());
-      setBulkDeleteTarget(false);
     } catch {
       // silent
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleReinstall = async (uuid: string) => {
-    setActionLoading(true);
-    try {
-      await api.post(`/admin/server/reinstall/${uuid}`);
-      fetchServers();
-    } catch {
-      // silent
-    } finally {
-      setActionLoading(false);
     }
   };
 
@@ -145,231 +87,215 @@ export function AdminServersPage() {
     (s) =>
       s.name.toLowerCase().includes(search.toLowerCase()) ||
       s.uuid.toLowerCase().includes(search.toLowerCase()) ||
-      s.owner.toLowerCase().includes(search.toLowerCase())
+      s.owner?.username?.toLowerCase().includes(search.toLowerCase()) ||
+      s.node?.name?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <motion.div
-      variants={fadeUp}
-      initial="hidden"
-      animate="show"
-      className="space-y-6"
-    >
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Servers</h1>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
-            {servers.length} {servers.length === 1 ? "server" : "servers"} total
-          </p>
+    <div className="flex-1 overflow-y-auto pt-16">
+      <div className="sm:flex sm:items-center px-8 pt-6 pb-4">
+        <div className="sm:flex-auto">
+          <h1 className="text-base font-medium leading-6 text-neutral-800 dark:text-white">Servers</h1>
+          <p className="mt-1 tracking-tight text-sm text-neutral-500">Manage your servers</p>
         </div>
-        <Button onClick={() => navigate("/admin/servers/create")}>
-          <Plus className="size-4" />
-          Create DesktopTower
-        </Button>
-      </div>
-
-      <div className="relative">
-        <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
-        <Input
-          placeholder="Search servers..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10"
-        />
-      </div>
-
-      <AnimatePresence>
-        {selected.size > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: "auto" }}
-            exit={{ opacity: 0, y: -10, height: 0 }}
-            className="overflow-hidden"
+        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <a
+            href="/admin/servers/create"
+            className="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90"
           >
-            <Card className="bg-neutral-50 dark:bg-white/[0.02]">
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Badge variant="default">{selected.size} selected</Badge>
-                  <Button variant="secondary" size="sm" onClick={() => setSelected(new Set())}>
-                    <X className="size-3" />
-                    Clear
-                  </Button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="secondary" size="sm">
-                    <MagnifyingGlass className="size-3" />
-                    MagnifyingGlass Scan
-                  </Button>
-                  <Button variant="danger" size="sm" onClick={() => setBulkDeleteTarget(true)}>
-                    <Trash className="size-3" />
-                    Delete
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            New Server
+          </a>
+        </div>
+      </div>
 
-      <Card>
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="divide-y divide-neutral-200/30 dark:divide-white/[0.07]">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-16 animate-pulse bg-neutral-50 dark:bg-white/[0.02]" />
-              ))}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="py-16 text-center">
-              <DesktopTower className="size-10 text-neutral-300 dark:text-neutral-600 mx-auto mb-3" />
-              <p className="text-sm text-neutral-500">
-                {search ? "No servers match your search" : "No servers found"}
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-neutral-200/30 dark:border-white/[0.07]">
-                    <th className="w-10 px-4 py-3">
-                      <button onClick={toggleAll} className="text-neutral-400 hover:text-neutral-900 dark:hover:text-white">
-                        {selected.size === filtered.length && filtered.length > 0 ? (
-                          <CheckSquare className="size-4" />
-                        ) : (
-                          <Square className="size-4" />
-                        )}
-                      </button>
-                    </th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider">UUID</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider">Name</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider hidden md:table-cell">Owner</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider hidden lg:table-cell">Node</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider">Status</th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider hidden xl:table-cell">Resources</th>
-                    <th className="text-right px-4 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-200/30 dark:divide-white/[0.07]">
-                  {filtered.map((srv, index) => (
-                    <motion.tr
-                      key={srv.uuid}
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                      className={cn(
-                        "hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition-colors",
-                        selected.has(srv.uuid) && "bg-neutral-50 dark:bg-white/[0.03]"
-                      )}
+      <div className="mx-8 mb-4">
+        <div className="relative">
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
+          <input
+            type="text"
+            placeholder="Search servers..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-xl border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-700 pl-10 pr-4 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 placeholder-neutral-400"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mx-8 mb-6">
+        <div className="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white mb-2">Total Servers</h2>
+          <p className="text-4xl font-normal text-neutral-800 dark:text-white">{servers.length}</p>
+          <p className="text-sm text-neutral-400 mt-2">{servers.filter((s) => s.status === "running").length} currently running</p>
+        </div>
+        <div className="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white mb-2">Users</h2>
+          <p className="text-4xl font-normal text-neutral-800 dark:text-white">{[...new Set(servers.map((s) => s.owner?.id).filter(Boolean))].length}</p>
+          <p className="text-sm text-neutral-400 mt-2">with servers assigned</p>
+        </div>
+      </div>
+
+      {selected.size > 0 && (
+        <div className="mx-8 mb-4">
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700/40">
+            <span className="text-sm font-medium text-neutral-600 dark:text-neutral-300 mr-1">{selected.size} selected</span>
+            <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-700 mx-1" />
+            <button
+              onClick={handleBulkDelete}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-500 border border-red-700/30 px-3 py-1.5 text-xs font-medium text-white transition-colors ml-auto"
+            >
+              <Trash size={14} className="shrink-0" />
+              Delete
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="overflow-x-auto shadow-sm rounded-xl mx-8 mt-2 mb-8 border border-neutral-200 dark:border-neutral-800/40">
+        <table className="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
+          <thead className="bg-neutral-50 dark:bg-neutral-800/50">
+            <tr>
+              <th scope="col" className="py-3.5 pl-4 pr-3 sm:pl-6 w-10">
+                <button onClick={toggleAll} className="text-neutral-400 hover:text-neutral-900 dark:hover:text-white">
+                  {selected.size === filtered.length && filtered.length > 0 ? (
+                    <CheckSquare size={16} />
+                  ) : (
+                    <Square size={16} />
+                  )}
+                </button>
+              </th>
+              <th scope="col" className="py-3.5 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Name</th>
+              <th scope="col" className="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white">Owner</th>
+              <th scope="col" className="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white">Node</th>
+              <th scope="col" className="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white">Status</th>
+              <th scope="col" className="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white"></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800">
+            {loading ? (
+              [1, 2, 3, 4, 5].map((i) => (
+                <tr key={i}>
+                  <td colSpan={6} className="px-4 py-4">
+                    <div className="h-5 bg-neutral-100 dark:bg-white/5 rounded animate-pulse" />
+                  </td>
+                </tr>
+              ))
+            ) : filtered.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-16 text-center">
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400">No servers found</p>
+                </td>
+              </tr>
+            ) : (
+              filtered.map((srv) => (
+                <tr
+                  key={srv.uuid}
+                  className="hover:bg-neutral-50 dark:hover:bg-white/[0.03] transition-colors cursor-pointer"
+                  onClick={() => navigate(`/admin/servers/edit/${srv.id}`)}
+                >
+                  <td className="py-4 pl-4 pr-3 sm:pl-6 w-10">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleSelect(srv.uuid); }}
+                      className="text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
                     >
-                      <td className="px-4 py-3">
-                        <button onClick={() => toggleSelect(srv.uuid)} className="text-neutral-400 hover:text-neutral-900 dark:hover:text-white">
-                          {selected.has(srv.uuid) ? (
-                            <CheckSquare className="size-4" />
-                          ) : (
-                            <Square className="size-4" />
-                          )}
-                        </button>
-                      </td>
-                      <td className="px-4 py-3 text-neutral-400 font-mono text-xs">{srv.uuid.slice(0, 8)}</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className="font-medium text-neutral-900 dark:text-white cursor-pointer hover:underline"
-                          onClick={() => navigate(`/admin/servers/edit/${srv.uuid}`)}
-                        >
-                          {srv.name}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-neutral-500 hidden md:table-cell">{srv.owner}</td>
-                      <td className="px-4 py-3 text-neutral-500 hidden lg:table-cell">{srv.nodeName}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <div className={cn("size-2 rounded-full", statusColors[srv.status] || statusColors.stopped)} />
-                          <span className="text-neutral-600 dark:text-neutral-300 capitalize">{srv.status}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 hidden xl:table-cell">
-                        <div className="text-xs text-neutral-500 space-y-0.5">
-                          <p>{srv.allocatedMemory ?? srv.memory}MB / {srv.memory}MB RAM</p>
-                          <p>{srv.allocatedCpu ?? srv.cpu}% / {srv.cpu}% CPU</p>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={() => navigate(`/admin/servers/edit/${srv.uuid}`)}
-                            className="p-2 rounded-lg text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
-                          >
-                            <PencilSimple className="size-4" />
-                          </button>
-                          <button
-                            onClick={() => handleReinstall(srv.uuid)}
-                            disabled={actionLoading}
-                            className="p-2 rounded-lg text-neutral-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
-                          >
-                            <ArrowClockwise className="size-4" />
-                          </button>
-                          <button
-                            onClick={() => setDeleteTarget(srv)}
-                            className="p-2 rounded-lg text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
-                          >
-                            <Trash className="size-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                      {selected.has(srv.uuid) ? <CheckSquare size={16} /> : <Square size={16} />}
+                    </button>
+                  </td>
+                  <td className="whitespace-nowrap py-4 pr-3 text-sm">
+                    <div className="flex items-center gap-3">
+                      <span className="shrink-0 relative flex h-2 w-2">
+                        {srv.Suspended ? (
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-neutral-400" />
+                        ) : (
+                          <>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                          </>
+                        )}
+                      </span>
+                      <div>
+                        <div className="font-medium text-neutral-800 dark:text-white truncate max-w-[200px]">{srv.name}</div>
+                        <div className="text-xs text-neutral-400 dark:text-neutral-500 font-mono mt-0.5">{srv.uuid}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <img
+                        className="h-6 w-6 rounded-md object-cover shrink-0"
+                        src={srv.owner?.avatar || `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(srv.owner?.username || "")}`}
+                        alt={srv.owner?.username}
+                      />
+                      <span className="font-medium text-neutral-800 dark:text-blue-400 truncate max-w-[120px]">{srv.owner?.username}</span>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm">
+                    <span className="font-medium text-neutral-800 dark:text-blue-400 truncate max-w-[120px]">{srv.node?.name || "Unknown"}</span>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm">
+                    {srv.Suspended ? (
+                      <span className="inline-flex items-center rounded-md bg-amber-50 dark:bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-400">Suspended</span>
+                    ) : (
+                      <span className="inline-flex items-center rounded-md bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">Enabled</span>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm">
+                    <div className="flex items-center gap-1.5">
+                      <a
+                        href={`/server/${srv.uuid}`}
+                        onClick={(e) => e.stopPropagation()}
+                        title="Open console"
+                        className="rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                      >
+                        <ArrowSquareOut size={16} className="shrink-0" />
+                      </a>
+                      <a
+                        href={`/admin/servers/edit/${srv.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        title="Edit"
+                        className="rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/30 p-1.5 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                      >
+                        <PencilSimple size={16} className="shrink-0" />
+                      </a>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setDeleteTarget(srv); }}
+                        className="rounded-xl bg-red-600 p-1.5 text-white hover:bg-red-500 transition"
+                        title="Delete"
+                      >
+                        <Trash size={16} className="shrink-0" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
-      <Modal open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
-        <ModalContent>
-          <ModalHeader>
-            <div className="mx-auto mb-3 size-12 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center">
-              <Warning className="size-6 text-red-600 dark:text-red-400" />
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-2xl w-full max-w-md shadow-xl">
+            <div className="px-6 pt-6 pb-4">
+              <p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Delete Server</p>
+              <p className="text-sm text-neutral-500">Delete "{deleteTarget.name}"? All server data will be permanently removed.</p>
             </div>
-            <ModalTitle className="text-center">Delete DesktopTower</ModalTitle>
-            <ModalDescription className="text-center">
-              Are you sure you want to delete <strong>{deleteTarget?.name}</strong>? All data will be permanently lost.
-            </ModalDescription>
-          </ModalHeader>
-          <ModalFooter>
-            <ModalClose asChild>
-              <Button variant="secondary" disabled={actionLoading}>Cancel</Button>
-            </ModalClose>
-            <Button variant="danger" onClick={handleDelete} loading={actionLoading}>
-              <Trash className="size-4" />
-              Delete DesktopTower
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
-      <Modal open={bulkDeleteTarget} onOpenChange={(open) => !open && setBulkDeleteTarget(false)}>
-        <ModalContent>
-          <ModalHeader>
-            <div className="mx-auto mb-3 size-12 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center">
-              <Warning className="size-6 text-red-600 dark:text-red-400" />
+            <div className="px-6 pb-6 flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500 transition"
+              >
+                Delete
+              </button>
             </div>
-            <ModalTitle className="text-center">Delete {selected.size} Servers</ModalTitle>
-            <ModalDescription className="text-center">
-              This will permanently delete all selected servers and their data.
-            </ModalDescription>
-          </ModalHeader>
-          <ModalFooter>
-            <ModalClose asChild>
-              <Button variant="secondary" disabled={actionLoading}>Cancel</Button>
-            </ModalClose>
-            <Button variant="danger" onClick={handleBulkDelete} loading={actionLoading}>
-              <Trash className="size-4" />
-              Delete All
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </motion.div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

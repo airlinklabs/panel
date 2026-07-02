@@ -19,6 +19,7 @@ import {
 } from "@phosphor-icons/react";
 import { cn, formatBytes } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
+import { csrfFetch } from "@/lib/csrf";
 
 interface FileItem {
   name: string;
@@ -68,10 +69,9 @@ export function ServerFilesPage() {
       formData.append("file", file);
       formData.append("path", currentPath);
       try {
-        const res = await fetch(`/server/${id}/upload`, {
+        const res = await csrfFetch(`/server/${id}/upload`, {
           method: "POST",
           body: formData,
-          credentials: "same-origin",
         });
         if (!res.ok) throw new Error("Upload failed");
       } catch {
@@ -85,9 +85,8 @@ export function ServerFilesPage() {
   const handleDelete = async (path: string) => {
     if (!id) return;
     try {
-      const res = await fetch(`/server/${id}/files/rm/${path}`, {
+      const res = await csrfFetch(`/server/${id}/files/rm/${path}`, {
         method: "DELETE",
-        credentials: "same-origin",
       });
       if (!res.ok) throw new Error("Delete failed");
       toast("Deleted successfully", "success");
@@ -101,11 +100,10 @@ export function ServerFilesPage() {
   const handleRename = async (path: string, newName: string) => {
     if (!id) return;
     try {
-      const res = await fetch(`/server/${id}/rename`, {
+      const res = await csrfFetch(`/server/${id}/rename`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ path, newName }),
-        credentials: "same-origin",
       });
       if (!res.ok) throw new Error("Rename failed");
       toast("Renamed successfully", "success");
@@ -124,11 +122,10 @@ export function ServerFilesPage() {
   const handleExtractZip = async (name: string, filePath: string) => {
     if (!id) return;
     try {
-      const res = await fetch(`/server/${id}/unzip`, {
+      const res = await csrfFetch(`/server/${id}/unzip`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ relativePath: currentPath, zipname: name }),
-        credentials: "same-origin",
       });
       if (!res.ok) throw new Error("Unzip failed");
       toast("Extracted successfully", "success");
@@ -168,15 +165,10 @@ export function ServerFilesPage() {
     : files;
 
   return (
-    <div className="p-6 overflow-y-auto pt-16">
+    <div id="server-page-body">
+      {/* Page Header */}
       <div className="sm:flex sm:items-center px-8 pt-4">
-        <div className="flex-1">
-          <div className="flex items-center">
-            <h1 className="text-base font-medium leading-6 text-neutral-800 dark:text-white truncate max-w-[300px]">
-              Files
-            </h1>
-          </div>
-        </div>
+        <div className="flex-1" />
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-2">
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -195,6 +187,7 @@ export function ServerFilesPage() {
         </div>
       </div>
 
+      {/* File Table */}
       <div className="px-8 mt-8">
         <div className="overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700/40">
           <div className="px-3 py-2.5 flex items-center overflow-hidden">
@@ -312,7 +305,7 @@ export function ServerFilesPage() {
                     >
                       <td className="px-4 py-3 w-10" />
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2.5 text-sm font-medium text-neutral-800 dark:text-neutral-200 transition-colors">
+                        <div className="flex items-center gap-2.5 text-sm font-medium text-neutral-800 dark:text-neutral-200 hover:text-neutral-600 dark:hover:text-white transition-colors">
                           {getFileIcon(file)}
                           <span className="truncate">{file.name}</span>
                         </div>

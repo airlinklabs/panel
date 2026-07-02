@@ -1,15 +1,8 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { User, Envelope, Lock, ArrowRight, Spinner, CheckCircle, XCircle } from "@phosphor-icons/react";
+import { Eye, EyeSlash, Spinner } from "@phosphor-icons/react";
 import { useToast } from "@/context/ToastContext";
-
-interface ValidationState {
-  length: boolean;
-  uppercase: boolean;
-  lowercase: boolean;
-  number: boolean;
-}
+import { csrfFetch } from "@/lib/csrf";
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -18,254 +11,444 @@ export function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [panelVisible, setPanelVisible] = useState(false);
 
-  const validation: ValidationState = {
-    length: password.length >= 8,
-    uppercase: /[A-Z]/.test(password),
-    lowercase: /[a-z]/.test(password),
-    number: /[0-9]/.test(password),
-  };
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setPanelVisible(true));
+    });
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
-  const passwordValid = Object.values(validation).every(Boolean);
-  const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;
+  const pwScore = [
+    password.length >= 8,
+    /[A-Za-z]/.test(password),
+    /[0-9]/.test(password),
+    /[^A-Za-z0-9]/.test(password),
+  ].filter(Boolean).length;
+  const pwColors = ["#ef4444", "#f97316", "#eab308", "#22c55e"];
+  const pwLabels = ["Too short", "Weak", "Fair", "Strong"];
+  const pwWidths = ["25%", "50%", "75%", "100%"];
+
+  const pwIndex = Math.max(0, pwScore - 1);
+  const pwEmpty = password.length === 0;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
-
-    if (!passwordValid) {
-      setError("Password does not meet requirements");
-      return;
-    }
-    if (!passwordsMatch) {
-      setError("Passwords do not match");
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const res = await fetch("/register", {
+      const res = await csrfFetch("/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),
-        credentials: "same-origin",
       });
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || data.message || "Registration failed");
+        throw new Error(
+          data.error || data.message || "Registration failed"
+        );
       }
 
       toast("Account created! Please sign in.", "success");
       navigate("/login");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Registration failed";
+      const message =
+        err instanceof Error ? err.message : "Registration failed";
       setError(message);
     } finally {
       setLoading(false);
     }
   };
 
-  const ValidationIcon = ({ ok }: { ok: boolean }) =>
-    ok ? (
-      <CheckCircle className="size-3.5 text-emerald-500 shrink-0" />
-    ) : (
-      <XCircle className="size-3.5 text-neutral-300 dark:text-neutral-600 shrink-0" />
-    );
-
   return (
-    <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 bg-neutral-900 dark:bg-black relative overflow-hidden items-center justify-center">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.05),transparent_50%)]" />
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-1/3 right-1/4 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/3 left-1/3 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
-        </div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="relative z-10 text-center px-8"
+    <>
+      <style>{`
+        .reg-auth-input:focus {
+          border-color: #a3a3a3;
+          box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+        }
+        .dark .reg-auth-input:focus {
+          border-color: rgba(255,255,255,0.08);
+          box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+        }
+        .reg-submit:hover:not(:disabled) {
+          background: #1d2925;
+          transform: translateY(-1px);
+        }
+        .reg-submit:active:not(:disabled) {
+          transform: translateY(0) scale(0.98);
+        }
+        .reg-pw-toggle:hover {
+          color: #737373;
+        }
+        .dark .reg-pw-toggle:hover {
+          color: #d4d4d4;
+        }
+        .reg-panel {
+          opacity: 0;
+          transform: translateX(-12px);
+          transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1);
+        }
+        .reg-panel.visible {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      `}</style>
+      <div style={{ display: "flex", minHeight: "100vh" }}>
+        {/* Left panel */}
+        <div
+          className={`reg-panel ${panelVisible ? "visible" : ""}`}
+          style={{
+            width: "100%",
+            maxWidth: 460,
+            flexShrink: 0,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            padding: "56px 44px",
+            background: "color-mix(in srgb, white 92%, transparent)",
+            boxShadow: "24px 0 70px rgba(43,55,49,0.12)",
+            backdropFilter: "blur(18px)",
+            boxSizing: "border-box",
+          }}
         >
-          <h1 className="font-display text-4xl font-bold text-white tracking-tight mb-4">
-            Airlink Panel
-          </h1>
-          <p className="text-neutral-400 text-lg max-w-md">
-            Create your account and start managing game servers in minutes.
-          </p>
-        </motion.div>
-      </div>
-
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-8 bg-neutral-50 dark:bg-neutral-950">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-sm"
-        >
-          <div className="lg:hidden mb-8 text-center">
-            <h1 className="font-display text-2xl font-bold text-neutral-900 dark:text-white tracking-tight">
-              Airlink Panel
+          <div style={{ marginBottom: 32 }}>
+            <img
+              src="/assets/logo.png"
+              alt="Logo"
+              style={{
+                height: 40,
+                width: 40,
+                borderRadius: 12,
+                objectFit: "contain",
+                marginBottom: 20,
+                display: "block",
+              }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+            />
+            <h1
+              style={{
+                fontSize: 24,
+                fontWeight: 600,
+                color: "#171717",
+                lineHeight: 1.3,
+                margin: 0,
+              }}
+              className="dark:!text-white"
+            >
+              Create account
             </h1>
+            <p style={{ fontSize: 14, color: "#737373", marginTop: 4 }}>
+              Airlink Panel
+            </p>
           </div>
 
-          <h2 className="font-display text-2xl font-semibold text-neutral-900 dark:text-white tracking-tight mb-1">
-            Create account
-          </h2>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-8">
-            Fill in the details to get started
-          </p>
-
           {error && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              className="mb-6 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20"
+            <div
+              style={{
+                borderRadius: 12,
+                backgroundColor: "#fef2f2",
+                border: "1px solid #fecaca",
+                padding: "12px 16px",
+                marginBottom: 20,
+              }}
+              className="dark:!bg-red-500/10 dark:!border-red-500/20"
             >
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-            </motion.div>
+              <p
+                style={{
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: "#b91c1c",
+                }}
+                className="dark:!text-red-400"
+              >
+                {error}
+              </p>
+            </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-neutral-900 dark:text-white mb-1.5 block">
-                Username
-              </label>
-              <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400 dark:text-neutral-500" />
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Choose a username"
-                  required
-                  minLength={3}
-                  maxLength={32}
-                  className="flex h-10 w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 pl-10 pr-4 py-3 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 transition-colors"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-neutral-900 dark:text-white mb-1.5 block">
-                Email
-              </label>
-              <div className="relative">
-                <Envelope className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400 dark:text-neutral-500" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                  className="flex h-10 w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 pl-10 pr-4 py-3 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 transition-colors"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-neutral-900 dark:text-white mb-1.5 block">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400 dark:text-neutral-500" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Create a password"
-                  required
-                  className="flex h-10 w-full rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 pl-10 pr-4 py-3 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 transition-colors"
-                />
-              </div>
-              {password.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  className="mt-2 space-y-1"
-                >
-                  {(
-                    [
-                      ["length", "At least 8 characters"],
-                      ["uppercase", "One uppercase letter"],
-                      ["lowercase", "One lowercase letter"],
-                      ["number", "One number"],
-                    ] as const
-                  ).map(([key, label]) => (
-                    <div key={key} className="flex items-center gap-1.5">
-                      <ValidationIcon ok={validation[key]} />
-                      <span
-                        className={`text-xs ${
-                          validation[key]
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-neutral-400 dark:text-neutral-500"
-                        }`}
-                      >
-                        {label}
-                      </span>
-                    </div>
-                  ))}
-                </motion.div>
-              )}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-neutral-900 dark:text-white mb-1.5 block">
-                Confirm password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400 dark:text-neutral-500" />
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm your password"
-                  required
-                  className={`flex h-10 w-full rounded-xl border bg-white dark:bg-white/5 pl-10 pr-4 py-3 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 transition-colors ${
-                    confirmPassword.length > 0
-                      ? passwordsMatch
-                        ? "border-emerald-300 dark:border-emerald-500/30 focus:ring-emerald-400 dark:focus:ring-emerald-500"
-                        : "border-red-300 dark:border-red-500/30 focus:ring-red-400 dark:focus:ring-red-500"
-                      : "border-neutral-200 dark:border-white/10 focus:ring-neutral-400 dark:focus:ring-neutral-500"
-                  }`}
-                />
-              </div>
-              {confirmPassword.length > 0 && !passwordsMatch && (
-                <p className="mt-1 text-xs text-red-500">Passwords do not match</p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading || !passwordValid || !passwordsMatch}
-              className="w-full h-10 inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 disabled:pointer-events-none disabled:opacity-50 text-sm gap-2"
+          <form onSubmit={handleSubmit} autoComplete="on" noValidate>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 16,
+              }}
             >
-              {loading ? (
-                <Spinner className="size-4 animate-spin" />
-              ) : (
-                <>
-                  Create account
-                  <ArrowRight className="size-4" />
-                </>
-              )}
-            </button>
+              {/* Username + Email side by side */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 16,
+                }}
+              >
+                <div>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color: "#525252",
+                      marginBottom: 6,
+                    }}
+                    className="dark:!text-neutral-400"
+                  >
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="johndoe"
+                    required
+                    autoComplete="username"
+                    spellCheck={false}
+                    autoCapitalize="none"
+                    maxLength={20}
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px",
+                      borderRadius: 10,
+                      border: "1px solid #e5e5e5",
+                      background:
+                        "color-mix(in srgb, #f9fafb 84%, white)",
+                      fontSize: 14,
+                      color: "#171717",
+                      outline: "none",
+                      boxSizing: "border-box",
+                      fontFamily: "inherit",
+                      transition:
+                        "border-color 0.2s, box-shadow 0.2s, background-color 0.2s",
+                    }}
+                    className="reg-auth-input dark:!bg-[rgba(255,255,255,0.08)] dark:!border-[rgba(255,255,255,0.08)] dark:!text-neutral-200"
+                  />
+                </div>
+                <div>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color: "#525252",
+                      marginBottom: 6,
+                    }}
+                    className="dark:!text-neutral-400"
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                    autoComplete="email"
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px",
+                      borderRadius: 10,
+                      border: "1px solid #e5e5e5",
+                      background:
+                        "color-mix(in srgb, #f9fafb 84%, white)",
+                      fontSize: 14,
+                      color: "#171717",
+                      outline: "none",
+                      boxSizing: "border-box",
+                      fontFamily: "inherit",
+                      transition:
+                        "border-color 0.2s, box-shadow 0.2s, background-color 0.2s",
+                    }}
+                    className="reg-auth-input dark:!bg-[rgba(255,255,255,0.08)] dark:!border-[rgba(255,255,255,0.08)] dark:!text-neutral-200"
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: "#525252",
+                    marginBottom: 6,
+                  }}
+                  className="dark:!text-neutral-400"
+                >
+                  Password
+                </label>
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    autoComplete="new-password"
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px",
+                      borderRadius: 10,
+                      border: "1px solid #e5e5e5",
+                      background:
+                        "color-mix(in srgb, #f9fafb 84%, white)",
+                      fontSize: 14,
+                      color: "#171717",
+                      outline: "none",
+                      boxSizing: "border-box",
+                      fontFamily: "inherit",
+                      transition:
+                        "border-color 0.2s, box-shadow 0.2s, background-color 0.2s",
+                    }}
+                    className="reg-auth-input dark:!bg-[rgba(255,255,255,0.08)] dark:!border-[rgba(255,255,255,0.08)] dark:!text-neutral-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    className="reg-pw-toggle"
+                    style={{
+                      position: "absolute",
+                      right: 12,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: 0,
+                      color: "#a3a3a3",
+                      lineHeight: 0,
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    {showPassword ? (
+                      <EyeSlash size={16} />
+                    ) : (
+                      <Eye size={16} />
+                    )}
+                  </button>
+                </div>
+
+                {/* Password strength bar */}
+                <div
+                  style={{
+                    height: 3,
+                    borderRadius: 2,
+                    background: "#e5e5e5",
+                    marginTop: 8,
+                    overflow: "hidden",
+                  }}
+                  className="dark:!bg-[rgba(255,255,255,0.08)]"
+                >
+                  <div
+                    style={{
+                      height: "100%",
+                      borderRadius: 2,
+                      width: pwEmpty ? "0%" : pwWidths[pwIndex],
+                      background: pwEmpty
+                        ? "transparent"
+                        : pwColors[pwIndex],
+                      transition:
+                        "width 0.28s ease, background 0.28s ease",
+                    }}
+                  />
+                </div>
+                <p
+                  style={{
+                    fontSize: 11,
+                    color: "#a3a3a3",
+                    marginTop: 5,
+                    minHeight: 14,
+                    transition: "color 0.2s",
+                  }}
+                  className="dark:!text-neutral-400"
+                >
+                  {pwEmpty
+                    ? "8+ characters, one letter, one number."
+                    : pwLabels[pwIndex]}
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="reg-submit"
+                style={{
+                  width: "100%",
+                  padding: 11,
+                  borderRadius: 10,
+                  background: "#26342f",
+                  color: "white",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  border: "none",
+                  cursor: loading ? "default" : "pointer",
+                  fontFamily: "inherit",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  boxShadow: "0 14px 32px rgba(38,52,47,0.22)",
+                  transition:
+                    "transform 0.2s, background 0.2s, box-shadow 0.2s",
+                  opacity: loading ? 0.6 : 1,
+                }}
+              >
+                {loading ? (
+                  <Spinner
+                    size={15}
+                    className="animate-spin"
+                    weight="bold"
+                  />
+                ) : (
+                  "Create account"
+                )}
+              </button>
+            </div>
           </form>
 
-          <p className="mt-6 text-center text-sm text-neutral-500 dark:text-neutral-400">
+          <p
+            style={{
+              fontSize: 14,
+              color: "#737373",
+              textAlign: "center",
+              marginTop: 24,
+            }}
+            className="dark:!text-neutral-400"
+          >
             Already have an account?{" "}
             <Link
               to="/login"
-              className="font-medium text-neutral-900 dark:text-white hover:underline"
+              style={{ fontWeight: 500, color: "#171717" }}
+              className="dark:!text-neutral-200"
             >
               Sign in
             </Link>
           </p>
-        </motion.div>
+        </div>
+
+        {/* Right wallpaper */}
+        <div
+          style={{
+            flex: 1,
+            background:
+              "url('/assets/wallpapers/register.jpeg') center/cover no-repeat",
+          }}
+          className="hidden lg:block"
+        />
       </div>
-    </div>
+    </>
   );
 }

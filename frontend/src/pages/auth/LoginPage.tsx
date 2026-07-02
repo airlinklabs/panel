@@ -1,20 +1,29 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Envelope, Lock, ArrowRight, Spinner } from "@phosphor-icons/react";
+import { Eye, EyeSlash, Spinner } from "@phosphor-icons/react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import { csrfFetch } from "@/lib/csrf";
 
 export function LoginPage() {
   const navigate = useNavigate();
   const { setUser } = useAuth();
   const { toast } = useToast();
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [panelVisible, setPanelVisible] = useState(false);
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setPanelVisible(true));
+    });
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -23,14 +32,13 @@ export function LoginPage() {
 
     try {
       const body = new URLSearchParams();
-      body.append("email", email);
+      body.append("email", identifier);
       body.append("password", password);
 
-      const res = await fetch("/login", {
+      const res = await csrfFetch("/login", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString(),
-        credentials: "same-origin",
       });
 
       if (!res.ok) {
@@ -38,9 +46,7 @@ export function LoginPage() {
         throw new Error(data.error || data.message || "Invalid credentials");
       }
 
-      const statusRes = await fetch("/api/system/status", {
-        credentials: "same-origin",
-      });
+      const statusRes = await csrfFetch("/api/system/status");
       if (statusRes.ok) {
         const statusData = await statusRes.json();
         if (statusData.data?.user) {
@@ -59,132 +65,329 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 bg-neutral-950 dark:bg-black relative overflow-hidden items-center justify-center">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.05),transparent_50%)]" />
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
-        </div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="relative z-10 text-center px-8"
+    <>
+      <style>{`
+        .login-auth-input:focus {
+          border-color: #a3a3a3;
+          box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+        }
+        .dark .login-auth-input:focus {
+          border-color: rgba(255,255,255,0.08);
+          box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+        }
+        .login-submit:hover:not(:disabled) {
+          background: #1d2925;
+          transform: translateY(-1px);
+        }
+        .login-submit:active:not(:disabled) {
+          transform: translateY(0) scale(0.98);
+        }
+        .login-pw-toggle:hover {
+          color: #737373;
+        }
+        .dark .login-pw-toggle:hover {
+          color: #d4d4d4;
+        }
+        .login-panel {
+          opacity: 0;
+          transform: translateX(-12px);
+          transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1);
+        }
+        .login-panel.visible {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      `}</style>
+      <div style={{ display: "flex", minHeight: "100vh" }}>
+        {/* Left panel */}
+        <div
+          className={`login-panel ${panelVisible ? "visible" : ""}`}
+          style={{
+            width: "100%",
+            maxWidth: 420,
+            flexShrink: 0,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            padding: "56px 44px",
+            background: "color-mix(in srgb, white 92%, transparent)",
+            boxShadow: "24px 0 70px rgba(43,55,49,0.12)",
+            backdropFilter: "blur(18px)",
+            boxSizing: "border-box",
+          }}
         >
-          <h1 className="font-display text-4xl font-bold text-white tracking-tight mb-4">
-            Airlink Panel
-          </h1>
-          <p className="text-neutral-400 text-lg max-w-md">
-            Manage your game servers with ease. Deploy, monitor, and control everything from one place.
-          </p>
-        </motion.div>
-      </div>
-
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-8 bg-neutral-50 dark:bg-neutral-950">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-sm"
-        >
-          <div className="lg:hidden mb-8 text-center">
-            <h1 className="font-display text-2xl font-bold text-neutral-900 dark:text-white tracking-tight">
-              Airlink Panel
+          <div style={{ marginBottom: 32 }}>
+            <img
+              src="/assets/logo.png"
+              alt="Logo"
+              style={{
+                height: 40,
+                width: 40,
+                borderRadius: 12,
+                objectFit: "contain",
+                marginBottom: 20,
+                display: "block",
+              }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+            />
+            <h1
+              style={{
+                fontSize: 24,
+                fontWeight: 600,
+                color: "#171717",
+                lineHeight: 1.3,
+                margin: 0,
+              }}
+              className="dark:!text-white"
+            >
+              Sign in
             </h1>
+            <p style={{ fontSize: 14, color: "#737373", marginTop: 4 }}>
+              to Airlink Panel
+            </p>
           </div>
 
-          <h2 className="font-display text-2xl font-semibold text-neutral-900 dark:text-white tracking-tight mb-1">
-            Sign in
-          </h2>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-8">
-            Enter your credentials to continue
-          </p>
-
           {error && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              className="mb-6 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20"
+            <div
+              style={{
+                borderRadius: 12,
+                backgroundColor: "#fef2f2",
+                border: "1px solid #fecaca",
+                padding: "12px 16px",
+                marginBottom: 20,
+              }}
+              className="dark:!bg-red-500/10 dark:!border-red-500/20"
             >
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-            </motion.div>
+              <p
+                style={{
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: "#b91c1c",
+                }}
+                className="dark:!text-red-400"
+              >
+                {error}
+              </p>
+            </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-neutral-900 dark:text-white mb-1.5 block">
-                Email
-              </label>
-              <div className="relative">
-                <Envelope className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400 dark:text-neutral-500" />
+          <form onSubmit={handleSubmit} autoComplete="on" noValidate>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 16,
+              }}
+            >
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: "#525252",
+                    marginBottom: 6,
+                  }}
+                  className="dark:!text-neutral-400"
+                >
+                  Username or email
+                </label>
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="text"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className="flex h-10 w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-white/5 pl-10 pr-4 py-3 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 transition-colors"
+                  autoComplete="username"
+                  spellCheck={false}
+                  autoCapitalize="none"
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    borderRadius: 10,
+                    border: "1px solid #e5e5e5",
+                    background: "color-mix(in srgb, #f9fafb 84%, white)",
+                    fontSize: 14,
+                    color: "#171717",
+                    outline: "none",
+                    boxSizing: "border-box",
+                    fontFamily: "inherit",
+                    transition:
+                      "border-color 0.2s, box-shadow 0.2s, background-color 0.2s",
+                  }}
+                  className="login-auth-input dark:!bg-[rgba(255,255,255,0.08)] dark:!border-[rgba(255,255,255,0.08)] dark:!text-neutral-200"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="text-sm font-medium text-neutral-900 dark:text-white mb-1.5 block">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400 dark:text-neutral-500" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
-                  className="flex h-10 w-full rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-white/5 pl-10 pr-4 py-3 text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900 transition-colors"
-                />
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: "#525252",
+                    marginBottom: 6,
+                  }}
+                  className="dark:!text-neutral-400"
+                >
+                  Password
+                </label>
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    autoComplete="current-password"
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px",
+                      borderRadius: 10,
+                      border: "1px solid #e5e5e5",
+                      background: "color-mix(in srgb, #f9fafb 84%, white)",
+                      fontSize: 14,
+                      color: "#171717",
+                      outline: "none",
+                      boxSizing: "border-box",
+                      fontFamily: "inherit",
+                      transition:
+                        "border-color 0.2s, box-shadow 0.2s, background-color 0.2s",
+                    }}
+                    className="login-auth-input dark:!bg-[rgba(255,255,255,0.08)] dark:!border-[rgba(255,255,255,0.08)] dark:!text-neutral-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    className="login-pw-toggle"
+                    style={{
+                      position: "absolute",
+                      right: 12,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: 0,
+                      color: "#a3a3a3",
+                      lineHeight: 0,
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    {showPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 9,
+                  cursor: "pointer",
+                  userSelect: "none",
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={remember}
                   onChange={(e) => setRemember(e.target.checked)}
-                  className="size-4 rounded border-neutral-300 dark:border-white/20 bg-white dark:bg-white/5 text-neutral-900 dark:text-white focus:ring-indigo-500/40"
+                  style={{
+                    appearance: "none",
+                    height: 16,
+                    width: 16,
+                    borderRadius: 4,
+                    flexShrink: 0,
+                    border: "1.5px solid #d4d4d4",
+                    background: "white",
+                    cursor: "pointer",
+                    transition: "background 0.12s, border-color 0.12s",
+                    accentColor: "#171717",
+                  }}
+                  className="dark:!bg-neutral-700 dark:!border-neutral-600"
                 />
-                <span className="text-sm text-neutral-600 dark:text-neutral-400">Remember me</span>
+                <span
+                  style={{ fontSize: 14, color: "#737373" }}
+                  className="dark:!text-neutral-400"
+                >
+                  Remember me
+                </span>
               </label>
-            </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full h-10 inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100 disabled:pointer-events-none disabled:opacity-50 text-sm gap-2"
-            >
-              {loading ? (
-                <Spinner className="size-4 animate-spin" />
-              ) : (
-                <>
-                  Sign in
-                  <ArrowRight className="size-4" />
-                </>
-              )}
-            </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="login-submit"
+                style={{
+                  width: "100%",
+                  padding: 11,
+                  borderRadius: 10,
+                  background: "#26342f",
+                  color: "white",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  border: "none",
+                  cursor: loading ? "default" : "pointer",
+                  fontFamily: "inherit",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  boxShadow: "0 14px 32px rgba(38,52,47,0.22)",
+                  transition:
+                    "transform 0.2s, background 0.2s, box-shadow 0.2s",
+                  opacity: loading ? 0.6 : 1,
+                }}
+              >
+                {loading ? (
+                  <Spinner
+                    size={15}
+                    className="animate-spin"
+                    weight="bold"
+                  />
+                ) : (
+                  "Sign in"
+                )}
+              </button>
+            </div>
           </form>
 
-          <p className="mt-6 text-center text-sm text-neutral-500 dark:text-neutral-400">
+          <p
+            style={{
+              fontSize: 14,
+              color: "#737373",
+              textAlign: "center",
+              marginTop: 24,
+            }}
+            className="dark:!text-neutral-400"
+          >
             Don&apos;t have an account?{" "}
             <Link
               to="/register"
-              className="font-medium text-neutral-900 dark:text-white hover:underline"
+              style={{ fontWeight: 500, color: "#171717" }}
+              className="dark:!text-neutral-200"
             >
               Create one
             </Link>
           </p>
-        </motion.div>
+        </div>
+
+        {/* Right wallpaper */}
+        <div
+          style={{
+            flex: 1,
+            background:
+              "url('/assets/wallpapers/login.jpeg') center/cover no-repeat",
+          }}
+          className="hidden lg:block"
+        />
       </div>
-    </div>
+    </>
   );
 }

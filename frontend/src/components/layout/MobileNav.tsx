@@ -4,8 +4,8 @@ import {
   MagnifyingGlass,
   Bell,
   X,
-  LayoutDashboard,
-  Menu,
+  Layout,
+  Hamburger,
   SignOut,
   DotsThree,
 } from "@phosphor-icons/react";
@@ -16,24 +16,24 @@ import { ThemeToggle } from "./ThemeToggle";
 interface NavItem {
   label: string;
   path: string;
-  icon: typeof LayoutDashboard;
+  icon: typeof Layout;
   matchPrefix?: string;
 }
 
 const mainNav: NavItem[] = [
-  { label: "Servers", path: "/server", icon: LayoutDashboard, matchPrefix: "/server" },
+  { label: "Servers", path: "/server", icon: Layout, matchPrefix: "/server" },
 ];
 
 const overflowNav: NavItem[] = [
-  { label: "Overview", path: "/admin/overview", icon: LayoutDashboard },
-  { label: "Settings", path: "/admin/settings", icon: LayoutDashboard },
-  { label: "Servers", path: "/admin/servers", icon: LayoutDashboard },
-  { label: "Users", path: "/admin/users", icon: LayoutDashboard },
-  { label: "Nodes", path: "/admin/nodes", icon: LayoutDashboard },
-  { label: "Images", path: "/admin/images", icon: LayoutDashboard },
-  { label: "Addons", path: "/admin/addons", icon: LayoutDashboard },
-  { label: "Airlink Cloud", path: "/admin/airlink-cloud", icon: LayoutDashboard },
-  { label: "API Keys", path: "/admin/apikeys", icon: LayoutDashboard },
+  { label: "Overview", path: "/admin/overview", icon: Layout },
+  { label: "Settings", path: "/admin/settings", icon: Layout },
+  { label: "Servers", path: "/admin/servers", icon: Layout },
+  { label: "Users", path: "/admin/users", icon: Layout },
+  { label: "Nodes", path: "/admin/nodes", icon: Layout },
+  { label: "Images", path: "/admin/images", icon: Layout },
+  { label: "Addons", path: "/admin/addons", icon: Layout },
+  { label: "Airlink Cloud", path: "/admin/airlink-cloud", icon: Layout },
+  { label: "API Keys", path: "/admin/apikeys", icon: Layout },
 ];
 
 export function MobileNav() {
@@ -166,7 +166,7 @@ export function MobileNav() {
               href="/menu"
               className="mobile-nav-link flex flex-col items-center justify-center h-16 gap-1 text-neutral-500 dark:text-neutral-400"
             >
-              <Menu className="shrink-0" style={{ width: 18, height: 18 }} />
+              <Hamburger className="shrink-0" style={{ width: 18, height: 18 }} />
               <span className="text-[11px] font-medium">Menu</span>
             </a>
           </li>

@@ -31,7 +31,7 @@ const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
   cookieOptions: {
     sameSite: 'strict',
     secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
+    httpOnly: false, // Must be false so the React client can read the token
   },
   size: 32,
   getCsrfTokenFromRequest: (req: Request) =>

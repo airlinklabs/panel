@@ -1,13 +1,13 @@
 import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  LayoutDashboard,
-  LayoutGrid,
+  Layout,
+  GridFour,
   Gear,
-  Server,
+  Desktop,
   Users,
   Network,
-  Box,
+  Cube,
   PuzzlePiece,
   Cloud,
   Key,
@@ -17,36 +17,35 @@ import {
 import type { IconWeight } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
-import { ThemeToggle } from "./ThemeToggle";
 import { NotificationBell } from "./NotificationBell";
 
 interface NavItem {
   label: string;
   path: string;
-  icon: typeof LayoutDashboard;
+  icon: typeof Layout;
   weight?: IconWeight;
   matchPrefix?: string;
 }
 
 const regularNav: NavItem[] = [
-  { label: "Servers", path: "/server", icon: LayoutDashboard, matchPrefix: "/server" },
+  { label: "Servers", path: "/server", icon: Layout, matchPrefix: "/server" },
 ];
 
 const adminNav: NavItem[] = [
-  { label: "Overview", path: "/admin/overview", icon: LayoutGrid, weight: "light" },
+  { label: "Overview", path: "/admin/overview", icon: GridFour, weight: "light" },
   { label: "Settings", path: "/admin/settings", icon: Gear, weight: "light" },
-  { label: "Servers", path: "/admin/servers", icon: Server, weight: "light" },
+  { label: "Servers", path: "/admin/servers", icon: Desktop, weight: "light" },
   { label: "Users", path: "/admin/users", icon: Users, weight: "light" },
   { label: "Nodes", path: "/admin/nodes", icon: Network, weight: "light" },
-  { label: "Images", path: "/admin/images", icon: Box, weight: "light" },
+  { label: "Images", path: "/admin/images", icon: Cube, weight: "light" },
   { label: "Addons", path: "/admin/addons", icon: PuzzlePiece, weight: "light" },
   { label: "Airlink Cloud", path: "/admin/airlink-cloud", icon: Cloud, weight: "light" },
   { label: "API Keys", path: "/admin/apikeys", icon: Key, weight: "light" },
 ];
 
 const consumerNav: NavItem[] = [
-  { label: "Overview", path: "/consumer/overview", icon: LayoutGrid, weight: "light" },
-  { label: "Create Server", path: "/consumer/create-server", icon: LayoutGrid, weight: "light" },
+  { label: "Overview", path: "/consumer/overview", icon: GridFour, weight: "light" },
+  { label: "Create Server", path: "/consumer/create-server", icon: GridFour, weight: "light" },
   { label: "API Keys", path: "/consumer/api-keys", icon: Key, weight: "light" },
 ];
 

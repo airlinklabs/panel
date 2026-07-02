@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Plus,
-  PencilSimple,
+  MagnifyingGlass,
   Trash,
-  CaretRight,
+  PencilSimple,
+  Eye,
 } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 
@@ -22,6 +22,7 @@ export function AdminUsersPage() {
   const navigate = useNavigate();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -49,21 +50,45 @@ export function AdminUsersPage() {
     }
   };
 
+  const filtered = users.filter(
+    (u) =>
+      u.username.toLowerCase().includes(search.toLowerCase()) ||
+      u.email?.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <div className="flex-1 p-6 overflow-y-auto pt-16">
-      <div className="sm:flex sm:items-center px-8 pt-4">
+    <div className="flex-1 overflow-y-auto pt-16">
+      <div className="sm:flex sm:items-center px-8 pt-6 pb-4">
         <div className="sm:flex-auto">
           <h1 className="text-base font-medium leading-6 text-neutral-800 dark:text-white">Users</h1>
           <p className="mt-1 tracking-tight text-sm text-neutral-500">Manage your users</p>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button onClick={() => navigate("/admin/users/create")} className="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90">
-            New User
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => navigate("/admin/users/create")}
+              className="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90"
+            >
+              New User
+            </button>
+          </div>
         </div>
       </div>
 
-      <div id="stats" className="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
+      <div className="mx-8 mb-4">
+        <div className="relative">
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
+          <input
+            type="text"
+            placeholder="Search users..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-xl border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-700 pl-10 pr-4 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 placeholder-neutral-400"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mx-8 mb-6">
         <div className="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
           <h2 className="text-lg font-medium text-neutral-800 dark:text-white mb-2">Total Users</h2>
           <p className="text-4xl font-normal text-neutral-800 dark:text-white">{users.length}</p>
@@ -95,19 +120,30 @@ export function AdminUsersPage() {
                   </td>
                 </tr>
               ))
-            ) : users.length === 0 ? (
+            ) : filtered.length === 0 ? (
               <tr>
                 <td colSpan={4} className="px-4 py-16 text-center">
                   <p className="text-sm text-neutral-500 dark:text-neutral-400">No users found</p>
                 </td>
               </tr>
             ) : (
-              users.map((user) => (
-                <tr key={user.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer" onClick={() => navigate(`/admin/users/edit/${user.id}`)}>
+              filtered.map((user) => (
+                <tr
+                  key={user.id}
+                  className="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer"
+                  onClick={() => navigate(`/admin/users/edit/${user.id}`)}
+                >
                   <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                     <div className="flex items-center gap-3">
                       <div className="relative shrink-0">
-                        <img src={user.avatar || `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(user.username)}`} alt={user.username} className="h-10 w-10 rounded-xl object-cover" />
+                        <img
+                          src={user.avatar || `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(user.username)}`}
+                          alt={user.username}
+                          className="h-10 w-10 rounded-xl object-cover"
+                        />
+                        <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-neutral-400 border-2 border-white dark:border-neutral-900" />
+                        </span>
                       </div>
                       <div className="font-medium text-neutral-800 dark:text-white">{user.username}</div>
                     </div>
@@ -122,8 +158,17 @@ export function AdminUsersPage() {
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400">{user.servers?.length || 0}</td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm">
                     <div className="flex gap-2">
-                      <button onClick={(e) => { e.stopPropagation(); navigate(`/admin/users/edit/${user.id}`); }} className="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1.5 text-xs font-medium hover:opacity-90 transition">Edit</button>
-                      <button onClick={(e) => { e.stopPropagation(); handleDelete(user.id); }} className="rounded-xl bg-red-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-red-500 transition">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigate(`/admin/users/edit/${user.id}`); }}
+                        className="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1.5 text-xs font-medium hover:opacity-90 transition"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDelete(user.id); }}
+                        className="rounded-xl bg-red-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-red-500 transition"
+                        aria-label="Delete user"
+                      >
                         <Trash size={14} className="text-white" />
                       </button>
                     </div>

@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FloppyDisk, Spinner } from "@phosphor-icons/react";
 import { useToast } from "@/context/ToastContext";
+import { csrfFetch } from "@/lib/csrf";
 
 interface Variable {
   name: string;
@@ -58,11 +59,10 @@ export function ServerStartupPage() {
     if (!id) return;
     setSaving(true);
     try {
-      const res = await fetch(`/server/${id}/startup`, {
+      const res = await csrfFetch(`/server/${id}/startup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ variables, startCommand }),
-        credentials: "same-origin",
       });
       if (!res.ok) throw new Error("Failed to save");
       toast("Startup settings saved", "success");

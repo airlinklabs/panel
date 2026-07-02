@@ -1,16 +1,17 @@
+import { csrfFetch } from "./csrf";
+
 const BASE = "";
 
 async function request<T>(
   url: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const res = await fetch(`${BASE}${url}`, {
-    credentials: "same-origin",
+  const res = await csrfFetch(`${BASE}${url}`, {
+    ...options,
     headers: {
       "Content-Type": "application/json",
       ...(options.headers as Record<string, string>),
     },
-    ...options,
   });
 
   if (res.status === 401) {

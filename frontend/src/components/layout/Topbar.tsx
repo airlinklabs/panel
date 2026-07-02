@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { MagnifyingGlass } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "./ThemeToggle";
+import { useTheme } from "@/context/ThemeContext";
 import { SearchDialog } from "./SearchDialog";
 
 interface TopbarProps {
@@ -9,13 +9,7 @@ interface TopbarProps {
 }
 
 export function Topbar({ onMenuToggle }: TopbarProps) {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 0);
-    window.addEventListener("scroll", handler, { passive: true });
-    return () => window.removeEventListener("scroll", handler);
-  }, []);
+  const { theme, toggle } = useTheme();
 
   return (
     <>
@@ -72,11 +66,17 @@ export function Topbar({ onMenuToggle }: TopbarProps) {
           </div>
           <button
             role="switch"
-            aria-checked="false"
+            aria-checked={theme === "dark"}
+            onClick={toggle}
             className="al-switch relative inline-flex h-8 w-14 items-center rounded-full transition-colors duration-500 bg-neutral-300 dark:bg-neutral-700/70 border border-neutral-400 dark:border-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-offset-neutral-900 shrink-0"
             aria-label="Switch to dark mode"
           >
-            <span className="al-switch-dot inline-block h-6 w-6 rounded-full bg-white shadow-md transform transition-transform duration-500 border border-neutral-950/20" />
+            <span
+              className={cn(
+                "al-switch-dot inline-block h-6 w-6 rounded-full bg-white shadow-md transform transition-transform duration-500 border border-neutral-950/20",
+                theme === "dark" ? "translate-x-7" : "translate-x-1"
+              )}
+            />
           </button>
         </div>
       </div>

@@ -8,9 +8,9 @@ import {
   Folder,
   FolderPlus,
   Funnel,
-  ArrowUpDown,
+  ArrowsDownUp,
   X,
-  Server,
+  ComputerTower,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -323,7 +323,7 @@ export function DashboardPage() {
           </select>
         </div>
         <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-800">
-          <ArrowUpDown className="h-3.5 w-3.5 text-neutral-400" />
+          <ArrowsDownUp className="h-3.5 w-3.5 text-neutral-400" />
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
@@ -366,7 +366,7 @@ export function DashboardPage() {
         <section className="mx-auto mt-28 max-w-2xl overflow-hidden rounded-2xl border border-neutral-200/80 bg-white/80 p-7 text-left shadow-sm dark:border-white/10 dark:bg-white/[0.045]">
           <div className="mb-5 flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-neutral-100 dark:bg-white/10 text-neutral-400 dark:text-neutral-500">
-              <Server className="h-7 w-7" />
+              <ComputerTower className="h-7 w-7" />
             </div>
             <div>
               <p className="text-sm font-medium text-neutral-400 dark:text-neutral-500">

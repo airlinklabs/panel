@@ -1,31 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import {
   MagnifyingGlass,
-  Plus,
   Trash,
   PencilSimple,
-  ChartLineUp,
-  HardDrives,
   Copy,
   GearSix,
 } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
-import { cn } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalTitle,
-  ModalDescription,
-  ModalFooter,
-  ModalClose,
-} from "@/components/ui/modal";
 import { useToast } from "@/context/ToastContext";
 
 interface NodeData {
@@ -36,13 +18,10 @@ interface NodeData {
   memory: number;
   disk: number;
   status?: string;
-  serversCount?: number;
+  versionRelease?: string;
+  error?: string;
+  instances?: { id: number }[];
 }
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } },
-};
 
 export function AdminNodesPage() {
   const navigate = useNavigate();
@@ -52,7 +31,6 @@ export function AdminNodesPage() {
   const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<NodeData | null>(null);
   const [showConfig, setShowConfig] = useState<NodeData | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
   const fetchNodes = useCallback(async () => {
     setLoading(true);
@@ -72,7 +50,6 @@ export function AdminNodesPage() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    setDeleting(true);
     try {
       await api.delete(`/admin/node/${deleteTarget.id}`);
       setNodes((prev) => prev.filter((n) => n.id !== deleteTarget.id));
@@ -80,8 +57,6 @@ export function AdminNodesPage() {
       toast("Node deleted");
     } catch {
       toast("Failed to delete node", "error");
-    } finally {
-      setDeleting(false);
     }
   };
 
@@ -91,176 +66,233 @@ export function AdminNodesPage() {
     toast("Config copied to clipboard");
   };
 
+  const getStatusDot = (status?: string) => {
+    if (status === "Online") {
+      return (
+        <span className="flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+        </span>
+      );
+    } else if (status === "Offline") {
+      return <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />;
+    } else {
+      return (
+        <span className="flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-amber-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+        </span>
+      );
+    }
+  };
+
   const filtered = nodes.filter(
     (n) =>
       n.name.toLowerCase().includes(search.toLowerCase()) ||
       n.address.toLowerCase().includes(search.toLowerCase())
   );
 
+  const onlineCount = nodes.filter((n) => n.status === "Online").length;
+  const pct = nodes.length > 0 ? Math.round((onlineCount / nodes.length) * 100) : 0;
+  const totalServers = nodes.reduce((t, n) => t + (n.instances ? n.instances.length : 0), 0);
+
   return (
-    <motion.div
-      variants={fadeUp}
-      initial="hidden"
-      animate="show"
-      className="space-y-6"
-    >
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Nodes</h1>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
-            {nodes.length} {nodes.length === 1 ? "node" : "nodes"} configured
-          </p>
+    <div className="flex-1 overflow-y-auto pt-16">
+      <div className="sm:flex sm:items-center px-8 pt-6 pb-4">
+        <div className="sm:flex-auto">
+          <h1 className="text-base font-medium leading-6 text-neutral-800 dark:text-white">Nodes</h1>
+          <p className="mt-1 tracking-tight text-sm text-neutral-500">Manage your nodes</p>
         </div>
-        <Button onClick={() => navigate("/admin/nodes/create")}>
-          <Plus className="size-4" />
-          Create Node
-        </Button>
-      </div>
-
-      <div className="relative">
-        <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
-        <Input placeholder="Search nodes..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {loading ? (
-          [1, 2, 3].map((i) => (
-            <div key={i} className="h-48 bg-neutral-100 dark:bg-white/5 rounded-xl animate-pulse" />
-          ))
-        ) : filtered.length === 0 ? (
-          <div className="col-span-full py-16 text-center">
-            <HardDrives className="size-10 text-neutral-300 dark:text-neutral-600 mx-auto mb-3" />
-            <p className="text-sm text-neutral-500">
-              {search ? "No nodes match your search" : "No nodes found"}
-            </p>
-          </div>
-        ) : (
-          filtered.map((node, index) => (
-            <motion.div
-              key={node.id}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="group"
+        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <div className="flex gap-2">
+            <button
+              onClick={() => navigate("/admin/nodes/create")}
+              className="rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 text-sm font-medium transition hover:opacity-90"
             >
-              <Card className="h-full hover:border-neutral-300 dark:hover:border-white/15 transition-colors">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "size-10 rounded-xl flex items-center justify-center",
-                        node.status === "online"
-                          ? "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                          : "bg-neutral-100 dark:bg-white/5 text-neutral-400"
-                      )}>
-                        <HardDrives className="size-5" weight="light" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-neutral-900 dark:text-white">{node.name}</h3>
-                        <p className="text-xs text-neutral-400">{node.address}:{node.port}</p>
-                      </div>
-                    </div>
-                    <Badge variant={node.status === "online" ? "success" : "neutral"}>
-                      {node.status || "unknown"}
-                    </Badge>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="p-3 rounded-lg bg-neutral-50 dark:bg-white/[0.02]">
-                      <p className="text-xs text-neutral-400">Memory</p>
-                      <p className="text-sm font-medium text-neutral-900 dark:text-white tabular-nums">{node.memory} MB</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-neutral-50 dark:bg-white/[0.02]">
-                      <p className="text-xs text-neutral-400">Disk</p>
-                      <p className="text-sm font-medium text-neutral-900 dark:text-white tabular-nums">{node.disk} MB</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1 pt-3 border-t border-neutral-200/30 dark:border-white/[0.07]">
-                    <button
-                      onClick={() => navigate(`/admin/nodes/edit/${node.id}`)}
-                      className="flex-1 p-2 rounded-lg text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors text-xs font-medium"
-                    >
-                      <PencilSimple className="size-4 inline mr-1.5" />
-                      Configure
-                    </button>
-                    <button
-                      onClick={() => navigate(`/admin/nodes/stats/${node.id}`)}
-                      className="flex-1 p-2 rounded-lg text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors text-xs font-medium"
-                    >
-                      <ChartLineUp className="size-4 inline mr-1.5" />
-                      Stats
-                    </button>
-                    <button
-                      onClick={() => copyConfig(node)}
-                      className="p-2 rounded-lg text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
-                      title="Copy config"
-                    >
-                      <Copy className="size-4" />
-                    </button>
-                    <button
-                      onClick={() => setShowConfig(node)}
-                      className="p-2 rounded-lg text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
-                      title="Configure command"
-                    >
-                      <GearSix className="size-4" />
-                    </button>
-                    <button
-                      onClick={() => setDeleteTarget(node)}
-                      className="p-2 rounded-lg text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
-                    >
-                      <Trash className="size-4" />
-                    </button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))
-        )}
+              New Node
+            </button>
+          </div>
+        </div>
       </div>
 
-      <Modal open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
-        <ModalContent>
-          <ModalHeader>
-            <ModalTitle className="text-center">Delete Node</ModalTitle>
-            <ModalDescription className="text-center">
-              Are you sure you want to delete <strong>{deleteTarget?.name}</strong>? All associated servers will be affected.
-            </ModalDescription>
-          </ModalHeader>
-          <ModalFooter>
-            <ModalClose asChild>
-              <Button variant="secondary" disabled={deleting}>Cancel</Button>
-            </ModalClose>
-            <Button variant="danger" onClick={handleDelete} loading={deleting}>
-              <Trash className="size-4" />
-              Delete
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <div className="mx-8 mb-4">
+        <div className="relative">
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
+          <input
+            type="text"
+            placeholder="Search nodes..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-xl border border-neutral-200 dark:border-neutral-600/30 bg-white dark:bg-neutral-700 pl-10 pr-4 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/40 placeholder-neutral-400"
+          />
+        </div>
+      </div>
 
-      <Modal open={!!showConfig} onOpenChange={(open) => !open && setShowConfig(null)}>
-        <ModalContent>
-          <ModalHeader>
-            <ModalTitle>Configure Command</ModalTitle>
-            <ModalDescription>Run this command on your node server to connect it to the panel.</ModalDescription>
-          </ModalHeader>
-          <div className="py-4">
-            <pre className="p-4 rounded-xl bg-neutral-950 text-emerald-400 text-sm font-mono overflow-x-auto whitespace-pre-wrap">
-              {showConfig && `NODE_ID=${showConfig.id}\nNODE_NAME=${showConfig.name}\nFILAMENT_ADDRESS=${showConfig.address}\nFILAMENT_PORT=${showConfig.port}`}
-            </pre>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mx-8 mb-6">
+        <div className="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white mb-2">Total Nodes</h2>
+          <p className="text-4xl font-normal text-neutral-800 dark:text-white">{nodes.length}</p>
+          {nodes.length > 0 ? (
+            <>
+              <p className="text-sm text-neutral-400 mt-2">Online nodes: {onlineCount}</p>
+              <div className="mt-2 h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden">
+                <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-neutral-400 mt-2">No nodes yet</p>
+          )}
+        </div>
+        <div className="bg-neutral-50 dark:bg-neutral-800 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+          <h2 className="text-lg font-medium text-neutral-800 dark:text-white mb-2">Server Count</h2>
+          <p className="text-4xl font-normal text-neutral-800 dark:text-white">{totalServers}</p>
+          <p className="text-sm text-neutral-400 mt-2">across all nodes</p>
+        </div>
+      </div>
+
+      {nodes.some((n) => n.status === "Offline") && (
+        <div className="mx-8 mb-4">
+          <div className="shadow-lg rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3 text-sm text-red-700 dark:text-red-400">
+            One or more nodes are offline. Some information may be unavailable.
           </div>
-          <ModalFooter>
-            <ModalClose asChild>
-              <Button variant="secondary">Close</Button>
-            </ModalClose>
-            <Button onClick={() => showConfig && copyConfig(showConfig)}>
-              <Copy className="size-4" />
-              Copy
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </motion.div>
+        </div>
+      )}
+
+      <div className="overflow-x-auto shadow-sm rounded-xl mx-8 mt-2 mb-8 border border-neutral-200 dark:border-neutral-800/40">
+        <table className="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
+          <thead className="bg-neutral-50 dark:bg-neutral-800/50">
+            <tr>
+              <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6">Name</th>
+              <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6">Connection</th>
+              <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6">Instances</th>
+              <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800">
+            {loading ? (
+              [1, 2, 3].map((i) => (
+                <tr key={i}>
+                  <td colSpan={4} className="px-4 py-4">
+                    <div className="h-5 bg-neutral-100 dark:bg-white/5 rounded animate-pulse" />
+                  </td>
+                </tr>
+              ))
+            ) : filtered.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-4 py-16 text-center">
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400">No nodes found</p>
+                </td>
+              </tr>
+            ) : (
+              filtered.map((node) => (
+                <tr
+                  key={node.id}
+                  className="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer"
+                  onClick={() => navigate(`/admin/node/${node.id}/stats`)}
+                >
+                  <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
+                    <div className="flex items-center">
+                      <div className="mr-5">{getStatusDot(node.status)}</div>
+                      <div className="font-medium text-neutral-800 dark:text-white">{node.name}</div>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400">
+                    {node.address}:{node.port}
+                    {" "}
+                    {node.versionRelease ? (
+                      <span className="inline-flex items-center rounded-md bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">{node.versionRelease}</span>
+                    ) : (
+                      <span className="inline-flex items-center rounded-md bg-red-50 dark:bg-red-500/10 px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400">unknown</span>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400">{node.instances?.length || 0}</td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setShowConfig(node); }}
+                        className="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition"
+                      >
+                        Configure
+                      </button>
+                      <a href={`/admin/node/${node.id}`} onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          className="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-2.5 py-1.5 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition"
+                        >
+                          Edit
+                        </button>
+                      </a>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setDeleteTarget(node); }}
+                        className="rounded-xl bg-red-600 hover:bg-red-500 px-2.5 py-1.5 text-xs font-medium text-white transition"
+                        aria-label="Delete node"
+                      >
+                        <Trash size={14} className="text-white" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-2xl w-full max-w-md shadow-xl">
+            <div className="px-6 pt-6 pb-4">
+              <p className="text-sm font-semibold text-neutral-800 dark:text-white mb-1">Delete Node</p>
+              <p className="text-sm text-neutral-500">Are you sure you want to delete "{deleteTarget.name}"? This will permanently remove the node.</p>
+            </div>
+            <div className="px-6 pb-6 flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/40 px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500 transition"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showConfig && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl">
+            <div className="px-5 pt-5 pb-4">
+              <p className="text-sm font-semibold text-neutral-800 dark:text-white leading-snug mb-1">Node Configuration</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">Run this command to auto-configure your node:</p>
+              <pre className="bg-neutral-100 dark:bg-neutral-800 rounded-xl p-3 text-xs font-mono text-emerald-600 dark:text-emerald-400 overflow-x-auto mt-3 mb-4">
+                NODE_ID={showConfig.id}
+                {"\n"}NODE_NAME={showConfig.name}
+                {"\n"}FILAMENT_ADDRESS={showConfig.address}
+                {"\n"}FILAMENT_PORT={showConfig.port}
+              </pre>
+            </div>
+            <div className="flex gap-2 px-5 pb-6 justify-end">
+              <button
+                onClick={() => copyConfig(showConfig)}
+                className="flex-1 py-2.5 text-sm font-medium rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 transition"
+              >
+                Copy
+              </button>
+              <button
+                onClick={() => setShowConfig(null)}
+                className="flex-1 py-2.5 text-sm font-medium rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, FloppyDisk, Download, Spinner, Warning } from "@phosphor-icons/react";
 import { useToast } from "@/context/ToastContext";
+import { csrfFetch } from "@/lib/csrf";
 
 const EXTENSION_MAP: Record<string, string> = {
   js: "javascript",
@@ -75,11 +76,10 @@ export function ServerFileEditPage() {
     if (!id || !filePath) return;
     setSaving(true);
     try {
-      const res = await fetch(`/server/${id}/files/${filePath}`, {
+      const res = await csrfFetch(`/server/${id}/files/${filePath}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),
-        credentials: "same-origin",
       });
       if (!res.ok) throw new Error("Failed to save");
       setOriginalContent(content);
