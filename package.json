@@ -28,7 +28,7 @@
     "@formkit/auto-animate": "^0.9.0",
     "@prisma/adapter-better-sqlite3": "^7.8.0",
     "@prisma/client": "^7.8.0",
-    "adm-zip": "^0.5.17",
+    "adm-zip": "^0.6.0",
     "axios": "^1.18.0",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.10.1",
