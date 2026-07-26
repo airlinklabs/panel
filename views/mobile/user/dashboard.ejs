@@ -288,6 +288,6 @@
   document.getElementById('dashboard-data').dataset.servers = '<%- JSON.stringify((allServers || []).map(s => ({ UUID: s.UUID, name: s.name, status: s.status }))).replace(/'/g, "\\'") %>';
 </script>
 
-<script nonce="<%- nonce %>" src="/javascript/dashboard-mobile.js"></script>
+<script nonce="<%- nonce %>" src="/javascript/user/dashboard-mobile.js"></script>
 
 <%- include('../components/footer') %>

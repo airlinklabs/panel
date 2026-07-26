@@ -294,6 +294,6 @@
   document.getElementById('dashboard-data').dataset.servers = '<%- JSON.stringify((allServers || []).map(s => ({ UUID: s.UUID, name: s.name, status: s.status, ramUsage: s.ramUsage, cpuUsage: s.cpuUsage }))).replace(/'/g, "\\'") %>';
 </script>
 
-<script nonce="<%- nonce %>" src="/javascript/dashboard.js"></script>
+<script nonce="<%- nonce %>" src="/javascript/user/dashboard.js"></script>
 
 <%- include('../components/footer') %>

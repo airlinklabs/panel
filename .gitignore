@@ -3,6 +3,7 @@ node_modules/
 
 # Build outputs
 dist/
+public/styles.css
 
 # Prisma files
 prisma/*

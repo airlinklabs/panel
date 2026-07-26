@@ -1,12 +1,3 @@
-/**
- * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
- *      AirLink - Open Source Project by AirlinkLabs
- *      Repository: https://github.com/airlinklabs/panel
- *
- *     © 2025 AirlinkLabs. Licensed under the MIT License
- * ╳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╳
- */
-
 import express, { Request, Response, NextFunction } from 'express';
 import prisma from './db';
 import path from 'path';

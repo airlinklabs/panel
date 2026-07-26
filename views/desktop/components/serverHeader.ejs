@@ -81,5 +81,5 @@ function formatUptime(seconds) {
   document.getElementById('server-header-data').dataset.uuid = '<%= server.UUID %>';
   document.getElementById('server-header-data').dataset.daemonOffline = '<%= typeof serverStatus !== "undefined" && serverStatus.daemonOffline ? "true" : "false" %>';
 </script>
-<script nonce="<%- nonce %>" src="/javascript/server-header.js"></script>
+<script nonce="<%- nonce %>" src="/javascript/user/server-header.js"></script>
 <% } %>

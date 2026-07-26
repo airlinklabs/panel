@@ -1,0 +1,199 @@
+import { Router, Request, Response } from 'express';
+import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
+import logger from '../../../handlers/logger';
+import axios from 'axios';
+import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
+import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
+import { getParamAsString } from '../../../utils/typeHelpers';
+import prisma from '../../../db';
+import {
+  type ErrorMessage,
+  loadAuthenticatedServerContext,
+  sendMissingServerContext,
+  getServerDaemonAddress,
+  getServerDaemonAuth,
+  getServerStatusInput,
+  getImageFeatures,
+} from './shared';
+
+export function registerFileDetailRoutes(router: Router): void {
+  /*
+   * File system : Get file content
+   */
+  router.get(
+    '/server/:id/files/edit/{*path}',
+    isAuthenticatedForServer('id'),
+    async (req: Request, res: Response) => {
+      const userId = req.session?.user?.id;
+      const serverId = req.params?.id;
+      const filePath = Array.isArray(req.params?.path) ? req.params.path.join('/') : getParamAsString(req.params?.path);
+      const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+      try {
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        if (!user) {
+          res.status(404).json({ error: 'User not found' });
+          return;
+        }
+
+        const server = await prisma.server.findUnique({
+          where: { UUID: getParamAsString(serverId) },
+          include: { node: true, image: true },
+        });
+
+        if (!server) {
+          res.status(404).json({ error: 'Server not found' });
+          return;
+        }
+
+        const response = await axios({
+          method: 'GET',
+          url: `${getServerDaemonAddress(server, '/fs/file/content')}`,
+          responseType: 'text',
+          params: { id: server.UUID, path: filePath },
+          auth: {
+            username: 'Airlink',
+            password: server.node.key,
+          },
+        });
+
+        const extension = getParamAsString(filePath).split('.').pop()?.toLowerCase() || '';
+
+        const features = getImageFeatures(server.image);
+        const serverStatus = await getServerStatus(getServerStatusInput(server));
+
+        res.render('user/server/file', {
+          errorMessage: {},
+          user,
+          features,
+          installed: await checkForServerInstallation(getParamAsString(serverId)),
+          file: {
+            name: getParamAsString(filePath).split('/').pop(),
+            path: filePath,
+            content: response.data,
+            extension,
+          },
+          server,
+          serverStatus,
+          req,
+          settings,
+        });
+      } catch (error) {
+        logger.error('Error fetching file:', error);
+
+        const server = await prisma.server.findUnique({
+          where: { UUID: getParamAsString(serverId) },
+          include: {
+            node: true,
+            owner: true,
+            image: true,
+          },
+        });
+
+        if (!server) {
+          res.status(404).json({ error: 'Server not found' });
+          return;
+        }
+
+        const features = getImageFeatures(server.image);
+        const serverStatus = await getServerStatus(getServerStatusInput(server));
+
+        let errorMessage = 'Error fetching file data.';
+        if (serverStatus.daemonOffline) {
+          errorMessage =
+            'Unable to access file. The daemon appears to be offline.';
+        }
+
+        res.render('user/server/file', {
+          errorMessage: { message: errorMessage },
+          user: req.session?.user,
+          features,
+          installed: false,
+          file: {
+            name: getParamAsString(filePath).split('/').pop() || 'Unknown',
+            path: filePath,
+            content:
+              '// Unable to load file content\n// The daemon appears to be offline',
+            extension: getParamAsString(filePath).split('.').pop() || 'txt',
+          },
+          server,
+          serverStatus,
+          req,
+          settings,
+        });
+      }
+    },
+  );
+
+  /*
+   * File system : Save
+   */
+  router.post(
+    '/server/:id/files/{*path}',
+    isAuthenticatedForServer('id'),
+    async (req: Request, res: Response) => {
+      let filePath = Array.isArray(req.params?.path) ? req.params.path.join('/') : getParamAsString(req.params?.path);
+      if (filePath.endsWith('/save')) {
+        filePath = filePath.slice(0, -5);
+      }
+      const { content } = req.body;
+
+      try {
+        const context = await loadAuthenticatedServerContext(req);
+        if (sendMissingServerContext(res, context)) {
+          return;
+        }
+        const { server } = context;
+
+        await axios({
+          method: 'POST',
+          url: getServerDaemonAddress(server, '/fs/file/content'),
+          data: {
+            id: server.UUID,
+            path: filePath,
+            content: content,
+          },
+          auth: getServerDaemonAuth(server),
+        });
+
+        res.json({ success: true });
+        return;
+      } catch (error) {
+        logger.error('Error saving file:', error);
+        res.status(500).json({ error: 'Failed to save file' });
+        return;
+      }
+    },
+  );
+
+  router.post(
+    '/server/:id/feature/eula',
+    isAuthenticatedForServer('id'),
+    async (req: Request, res: Response) => {
+      const context = await loadAuthenticatedServerContext(req);
+      if (sendMissingServerContext(res, context)) {
+        return;
+      }
+      const { server } = context;
+
+      try {
+        await axios({
+          method: 'POST',
+          url: getServerDaemonAddress(server, '/fs/file/content'),
+          data: {
+            id: server.UUID,
+            path: 'eula.txt',
+            content: 'eula=true',
+          },
+          auth: getServerDaemonAuth(server),
+        });
+
+        res.status(200).json({ success: true });
+        return;
+      } catch (error) {
+        logger.error('Error accepting EULA:', error);
+        res.status(500).json({ error: 'Failed to accept EULA' });
+        return;
+      }
+    },
+  );
+}
