@@ -83,6 +83,31 @@ app.use(
   express.static(path.join(__dirname, '../node_modules', '@formkit/auto-animate')),
 );
 
+app.use(
+  '/vendor/xterm',
+  express.static(path.join(__dirname, '../node_modules', '@xterm/xterm/css')),
+);
+
+app.use(
+  '/vendor/xterm/lib',
+  express.static(path.join(__dirname, '../node_modules', '@xterm/xterm/lib')),
+);
+
+app.use(
+  '/vendor/xterm-addon-fit',
+  express.static(path.join(__dirname, '../node_modules', '@xterm/addon-fit/lib')),
+);
+
+app.use(
+  '/vendor/xterm-addon-web-links',
+  express.static(path.join(__dirname, '../node_modules', '@xterm/addon-web-links/lib')),
+);
+
+app.use(
+  '/vendor/chartjs',
+  express.static(path.join(__dirname, '../node_modules', 'chart.js/dist')),
+);
+
 // Load views
 const viewsPath = path.join(__dirname, '../views');
 app.set('views', viewsPath);
@@ -177,24 +202,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use((req: Request, res: Response, next: NextFunction) => {
   const nonce = res.locals.nonce as string;
 
-  // External domains actually used by the templates:
-  //   fonts:   api.fontshare.com, cdn.fontshare.com, fonts.googleapis.com
-  //   scripts: cdn.jsdelivr.net, cdnjs.cloudflare.com
-  //   styles:  cdn.jsdelivr.net (xterm.css)
-  const cdnScripts = [
-    'https://cdn.jsdelivr.net',
-    'https://cdnjs.cloudflare.com',
-  ];
-  const cdnStyles = [
-    'https://cdn.jsdelivr.net',
-    'https://cdnjs.cloudflare.com',
-  ];
-  const cdnFonts = [
-    'https://api.fontshare.com',
-    'https://cdn.fontshare.com',
-    'https://fonts.googleapis.com',
-    'https://fonts.gstatic.com',
-  ];
+  // All assets are now served locally — no CDN domains needed in CSP.
+  // This significantly tightens security by only allowing self-hosted resources.
 
   helmet({
     // X-Content-Type-Options: nosniff
@@ -233,14 +242,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
           //                     inline scripts and eval().
           //   'strict-dynamic' — lets nonce-carrying scripts load further
           //                     scripts dynamically (needed by Monaco loader).
-          //                     When strict-dynamic is present, host allowlists
-          //                     are ignored by supporting browsers, so the CDN
-          //                     list here is a fallback for older browsers only.
           scriptSrc: [
             '\'self\'',
             `'nonce-${nonce}'`,
             '\'strict-dynamic\'',
-            ...cdnScripts,
           ],
 
           // Inline event handlers (onclick, onchange, etc.) cannot carry nonces.
@@ -251,10 +256,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
           // Styles — allow inline (Tailwind utility classes are inline by nature)
           // plus the exact external stylesheet CDNs used.
-          styleSrc: ['\'self\'', '\'unsafe-inline\'', ...cdnStyles, ...cdnFonts],
+          styleSrc: ['\'self\'', '\'unsafe-inline\''],
 
-          // Fonts — exact CDN origins only, plus data URIs for embedded icons.
-          fontSrc: ['\'self\'', 'data:', ...cdnFonts],
+          fontSrc: ['\'self\'', 'data:'],
 
           // Images — self + data URIs (avatars/favicons) + https for remote images.
           // http: is intentionally excluded; image URLs served by the daemon

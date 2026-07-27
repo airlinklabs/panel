@@ -123,9 +123,9 @@
 
 <%- include('../../components/toast') %>
 
-<script nonce="<%- nonce %>" src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+<script nonce="<%- nonce %>" src="/monaco/min/vs/loader.min.js"></script>
 <script nonce="<%- nonce %>">
-  require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
+  require.config({ paths: { 'vs': '/monaco/min/vs' }});
   require(['vs/editor/editor.main'], function() {
     const tabPanels = {
       general: document.getElementById('mobileTabGeneral'),

@@ -18,8 +18,7 @@
     <% if (settings.darkTheme && settings.darkTheme !== 'default') { %>
     <link rel="stylesheet" href="<%= settings.darkTheme %>" id="dark-theme-css" data-theme-mode="dark">
     <% } %>
-    <link rel="preconnect" href="https://cdn.fontshare.com">
-    <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,300,600,400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/fonts/general-sans/general-sans.css">
     <script nonce="<%- nonce %>" src="/js/csrf.js"></script>
     <script nonce="<%- nonce %>" src="/javascript/shared/viewport-mode.js"></script>
     <script nonce="<%- nonce %>" src="/javascript/shared/page-loader.js"></script>
