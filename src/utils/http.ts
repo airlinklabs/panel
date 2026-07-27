@@ -17,6 +17,19 @@ function isHttpError(error: unknown): error is HttpError {
   return error instanceof Error && 'status' in error && 'body' in error;
 }
 
+function validateUrl(urlStr: string): URL {
+  let parsed: URL;
+  try {
+    parsed = new URL(urlStr);
+  } catch {
+    throw new Error(`Invalid URL: ${urlStr}`);
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    throw new Error(`Blocked protocol: ${parsed.protocol}`);
+  }
+  return parsed;
+}
+
 function buildUrl(baseUrl: string, path: string, params?: Record<string, string | number | boolean | undefined>): string {
   const url = new URL(path, baseUrl);
   if (params) {
@@ -55,6 +68,8 @@ async function request<T = unknown>(
   } = {},
 ): Promise<HttpResponse<T>> {
   const { body, headers: customHeaders, params, auth, timeout, signal } = options;
+
+  validateUrl(url);
 
   const headers: Record<string, string> = {};
 

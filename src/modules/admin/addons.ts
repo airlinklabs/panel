@@ -13,6 +13,7 @@ import { commandRegistry } from '../../handlers/addonCommands';
 import { registerPermission, Permission } from '../../handlers/permissions';
 import { parseAddonManifest } from '../../handlers/addonManifest';
 import { getParamAsString } from '../../utils/typeHelpers';
+import { containPath } from '../../utils/pathSecurity';
 
 const execFileAsync = promisify(execFile);
 
@@ -423,7 +424,11 @@ const addonsModule: Module = {
           if (!addon) return res.status(404).json({ success: false, message: 'Addon not found' });
 
           const addonsDir = path.join(__dirname, '../../../storage/addons');
-          const packageJsonPath = path.join(addonsDir, slug, 'package.json');
+          const addonDir = path.join(addonsDir, slug);
+          if (!containPath(addonsDir, addonDir)) {
+            return res.status(400).json({ success: false, message: 'Invalid addon slug' });
+          }
+          const packageJsonPath = path.join(addonDir, 'package.json');
           const result = parseAddonManifest(packageJsonPath, slug);
 
           const commands = commandRegistry.getAddonCommands(slug).map(c => ({ name: c.name, description: c.description }));
@@ -491,7 +496,11 @@ const addonsModule: Module = {
           if (!addon) return res.status(404).json({ success: false, message: 'Addon not found' });
 
           const addonsDir = path.join(__dirname, '../../../storage/addons');
-          const packageJsonPath = path.join(addonsDir, slug, 'package.json');
+          const addonDir = path.join(addonsDir, slug);
+          if (!containPath(addonsDir, addonDir)) {
+            return res.status(400).json({ success: false, message: 'Invalid addon slug' });
+          }
+          const packageJsonPath = path.join(addonDir, 'package.json');
           const result = parseAddonManifest(packageJsonPath, slug);
           if (!result.success || !result.manifest.settingsSchema) {
             return res.status(400).json({ success: false, message: 'Addon has no settings schema' });
@@ -588,7 +597,7 @@ const addonsModule: Module = {
           const addonsDir = path.join(__dirname, '../../../storage/addons');
           const targetDir = path.join(addonsDir, slug);
 
-          if (!fs.existsSync(targetDir)) {
+          if (!containPath(addonsDir, targetDir) || !fs.existsSync(targetDir)) {
             return res.status(404).json({ success: false, message: 'Addon not found' });
           }
 

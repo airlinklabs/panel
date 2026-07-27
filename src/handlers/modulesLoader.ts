@@ -80,7 +80,9 @@ export const loadModules = async (
       continue;
     }
 
-    if (mod.info.version !== airlinkVersion) {
+    const modMajor = mod.info.version.split('.')[0];
+    const panelMajor = airlinkVersion.split('.')[0];
+    if (modMajor !== panelMajor) {
       logger.warn(`Skipping incompatible module: ${mod.info.name} (requires v${mod.info.version}, found v${airlinkVersion})`);
       skipped++;
       continue;

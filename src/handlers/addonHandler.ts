@@ -8,6 +8,7 @@ import { commandRegistry, scheduler, RegisteredCommand, ScheduledTask } from './
 import { createConfigStore, AddonConfigStore } from './addonConfigStore';
 import { parseAddonManifest, AddonManifestV2, isVersionInRange } from './addonManifest';
 import { registerAddonPermission, clearAddonPermissions } from './permissions';
+import { containPath } from '../utils/pathSecurity';
 import prisma from '../db';
 import type { PrismaClient } from '../generated/prisma/client';
 import logger from './logger';
@@ -271,17 +272,6 @@ function trackRequireCache(_addonPath: string): () => string[] {
     const after = Object.keys(require.cache);
     return after.filter(key => !before.has(key));
   };
-}
-
-function containPath(baseDir: string, targetPath: string): boolean {
-  const realBase = fs.realpathSync(baseDir);
-  let resolved: string;
-  try {
-    resolved = fs.realpathSync(targetPath);
-  } catch {
-    resolved = path.resolve(baseDir, targetPath);
-  }
-  return resolved.startsWith(realBase + path.sep) || resolved === realBase;
 }
 
 function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifestV2): AddonAPI {
@@ -625,6 +615,10 @@ export async function loadAddons(appExpress: Express | any) {
 
   for (const folder of addonFolders) {
     const addonPath = path.join(addonsDir, folder);
+    if (!containPath(addonsDir, addonPath)) {
+      logger.warn(`Addon ${folder}: path escapes addons directory, skipping`);
+      continue;
+    }
     const packageJsonPath = path.join(addonPath, 'package.json');
 
     const result = parseAddonManifest(packageJsonPath, folder);
@@ -844,8 +838,9 @@ export async function toggleAddonStatus(slug: string, enabled: boolean) {
 
       // When enabling, delete disabled.ph if it exists — DB state takes over from here
       if (enabled) {
-        const disabledPhPath = path.join(__dirname, '../../storage/addons', slug, 'disabled.ph');
-        if (fs.existsSync(disabledPhPath)) {
+        const addonsDir = path.join(__dirname, '../../storage/addons');
+        const disabledPhPath = path.join(addonsDir, slug, 'disabled.ph');
+        if (containPath(addonsDir, path.join(addonsDir, slug)) && fs.existsSync(disabledPhPath)) {
           fs.unlinkSync(disabledPhPath);
           logger.info(`Removed disabled.ph for ${slug}`);
         }

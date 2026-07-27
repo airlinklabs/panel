@@ -290,8 +290,8 @@
 
 <div id="dashboard-data" class="hidden"></div>
 <script nonce="<%- nonce %>">
-  document.getElementById('dashboard-data').dataset.folders = '<%- JSON.stringify(folders || []).replace(/'/g, "\\'") %>';
-  document.getElementById('dashboard-data').dataset.servers = '<%- JSON.stringify((allServers || []).map(s => ({ UUID: s.UUID, name: s.name, status: s.status, ramUsage: s.ramUsage, cpuUsage: s.cpuUsage }))).replace(/'/g, "\\'") %>';
+  document.getElementById('dashboard-data').dataset.folders = '<%- JSON.stringify(folders || []).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\x3c').replace(/>/g, '\\x3e') %>';
+  document.getElementById('dashboard-data').dataset.servers = '<%- JSON.stringify((allServers || []).map(s => ({ UUID: s.UUID, name: s.name, status: s.status, ramUsage: s.ramUsage, cpuUsage: s.cpuUsage }))).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\x3c').replace(/>/g, '\\x3e') %>';
 </script>
 
 <script nonce="<%- nonce %>" src="/javascript/user/dashboard.js"></script>

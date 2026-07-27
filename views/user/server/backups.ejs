@@ -285,7 +285,10 @@ function addBackupRow(backup) {
 
   const nameTd = document.createElement('td');
   nameTd.className = 'px-6 py-4 whitespace-nowrap';
-  nameTd.innerHTML = `<div class="text-sm font-medium text-neutral-900 dark:text-white">${backup.name}</div>`;
+  const nameDiv = document.createElement('div');
+  nameDiv.className = 'text-sm font-medium text-neutral-900 dark:text-white';
+  nameDiv.textContent = backup.name;
+  nameTd.appendChild(nameDiv);
   tr.appendChild(nameTd);
 
   const sizeTd = document.createElement('td');
@@ -301,19 +304,28 @@ function addBackupRow(backup) {
 
   const actionsTd = document.createElement('td');
   actionsTd.className = 'px-6 py-4 whitespace-nowrap text-right text-sm font-medium';
-  actionsTd.innerHTML = `
-    <div class="flex justify-end space-x-2">
-      <button onclick="downloadBackup('${backup.UUID}')" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/20 hover:bg-blue-200 dark:hover:bg-blue-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-        Download
-      </button>
-      <button onclick="restoreBackup('${backup.UUID}', '${backup.name}')" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/20 hover:bg-green-200 dark:hover:bg-green-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-        Restore
-      </button>
-      <button onclick="deleteBackup('${backup.UUID}', '${backup.name}')" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/20 hover:bg-red-200 dark:hover:bg-red-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-        Delete
-      </button>
-    </div>
-  `;
+  const actionsDiv = document.createElement('div');
+  actionsDiv.className = 'flex justify-end space-x-2';
+
+  const downloadBtn = document.createElement('button');
+  downloadBtn.className = 'inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/20 hover:bg-blue-200 dark:hover:bg-blue-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500';
+  downloadBtn.textContent = 'Download';
+  downloadBtn.addEventListener('click', () => downloadBackup(backup.UUID));
+
+  const restoreBtn = document.createElement('button');
+  restoreBtn.className = 'inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/20 hover:bg-green-200 dark:hover:bg-green-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500';
+  restoreBtn.textContent = 'Restore';
+  restoreBtn.addEventListener('click', () => restoreBackup(backup.UUID, backup.name));
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/20 hover:bg-red-200 dark:hover:bg-red-900/40 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500';
+  deleteBtn.textContent = 'Delete';
+  deleteBtn.addEventListener('click', () => deleteBackup(backup.UUID, backup.name));
+
+  actionsDiv.appendChild(downloadBtn);
+  actionsDiv.appendChild(restoreBtn);
+  actionsDiv.appendChild(deleteBtn);
+  actionsTd.appendChild(actionsDiv);
   tr.appendChild(actionsTd);
 
   tbody.prepend(tr);

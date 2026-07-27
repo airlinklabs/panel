@@ -19,18 +19,18 @@ function showToast(message, type = 'success') {
 const apiKeySelect = document.getElementById('apiKeySelect');
 const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
 const testButtons = document.querySelectorAll('.test-endpoint-btn');
-let selectedApiKey = localStorage.getItem('apiTestKey') || '';
+let selectedApiKey = sessionStorage.getItem('apiTestKey') || '';
 let selectedApiKeyPermissions = [];
 
 if (selectedApiKey) {
-  const storedPermissions = localStorage.getItem('apiTestKeyPermissions');
+  const storedPermissions = sessionStorage.getItem('apiTestKeyPermissions');
   if (storedPermissions) {
     try {
       selectedApiKeyPermissions = JSON.parse(storedPermissions);
       enableTestButtons();
     } catch (e) {
       console.error('Error parsing stored permissions:', e);
-      localStorage.removeItem('apiTestKeyPermissions');
+      sessionStorage.removeItem('apiTestKeyPermissions');
     }
   }
 }
@@ -55,18 +55,18 @@ saveApiKeyBtn.addEventListener('click', function () {
 
   if (selectedKey) {
     selectedApiKey = selectedKey;
-    localStorage.setItem('apiTestKey', selectedKey);
+    sessionStorage.setItem('apiTestKey', selectedKey);
 
     const permissionsAttr = selectedOption.getAttribute('data-permissions');
     try {
       selectedApiKeyPermissions = JSON.parse(permissionsAttr || '[]');
-      localStorage.setItem('apiTestKeyPermissions', permissionsAttr || '[]');
+      sessionStorage.setItem('apiTestKeyPermissions', permissionsAttr || '[]');
       enableTestButtons();
       showToast('API key selected for testing');
     } catch (e) {
       console.error('Error parsing permissions:', e);
       selectedApiKeyPermissions = [];
-      localStorage.setItem('apiTestKeyPermissions', '[]');
+      sessionStorage.setItem('apiTestKeyPermissions', '[]');
     }
   }
 });

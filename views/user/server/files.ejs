@@ -33,11 +33,28 @@ function getFileIcon(category) {
   return `<span class="al-file-icon size-6">${icon(name, { class: 'size-6' })}</span>`;
 }
 
-// Function to check if a file is an image based on extension
 function isImageFile(filename) {
   const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'tiff'];
   const extension = filename.split('.').pop().toLowerCase();
   return imageExtensions.includes(extension);
+}
+
+function escAttr(val) {
+  return String(val)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function escJS(val) {
+  return String(val)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"')
+    .replace(/</g, '\\x3c')
+    .replace(/>/g, '\\x3e');
 }
 %>
 
@@ -222,44 +239,44 @@ function isImageFile(filename) {
                     <div id="dropdown-<%= file.name %>" class="al-file-menu fixed w-44 rounded-xl shadow-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/60 z-50 transform opacity-0 scale-95 transition-all duration-150 ease-out pointer-events-none overflow-hidden">
                       <div class="py-1" role="menu">
                         <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
-                          onclick="rename('<%= file.name %>', '<%= currentPath && currentPath !== "/" ? currentPath.replace(/^\/+/, "") + "/" + file.name : file.name %>')">
+                          onclick="rename('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(/^\\/+/, '') + "/" + file.name : file.name) %>')">
                           <%- icon('pencil', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                           Rename
                         </button>
                         <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
-                          onclick="copyFilePath('<%= currentPath && currentPath !== "/" ? currentPath.replace(/^\/+/, "") + "/" + file.name : file.name %>')">
+                          onclick="copyFilePath('<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(/^\\/+/, '') + "/" + file.name : file.name) %>')">
                           <%- icon('copy', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                           Copy Path
                         </button>
                         <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
-                          onclick="openMoveModal('<%= file.name %>', '<%= currentPath && currentPath !== "/" ? currentPath.replace(/^\/+/, "") + "/" + file.name : file.name %>')">
+                          onclick="openMoveModal('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(/^\\/+/, '') + "/" + file.name : file.name) %>')">
                           <%- icon('move', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
-                          Move to…
+                          Move to...
                         </button>
                         <% if (file.type !== 'directory') { %>
                         <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
-                          onclick="duplicateFile('<%= file.name %>', '<%= currentPath && currentPath !== "/" ? currentPath.replace(/^\/+/, "") + "/" + file.name : file.name %>')">
+                          onclick="duplicateFile('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(/^\\/+/, '') + "/" + file.name : file.name) %>')">
                           <%- icon('copy', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                           Duplicate
                         </button>
                         <% } %>
                         <% if (file.type !== "directory") { %>
                           <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
-                            onclick="downloadfile('<%= file.name %>', '<%= currentPath && currentPath !== "/" ? currentPath.replace(/^\/+/, "") + "/" + file.name : file.name %>')">
+                            onclick="downloadfile('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(/^\\/+/, '') + "/" + file.name : file.name) %>')">
                             <%- icon('download', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                             Download
                           </button>
                         <% } %>
                         <% if (file.name.toLowerCase().endsWith(".zip")) { %>
                           <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
-                            onclick="extractZip('<%= file.name %>', '<%= currentPath && currentPath !== "/" ? currentPath.replace(/^\/+/, "") + "/" + file.name : file.name %>')">
+                            onclick="extractZip('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(/^\\/+/, '') + "/" + file.name : file.name) %>')">
                             <%- icon('file-archive', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                             Extract Here
                           </button>
                         <% } %>
                         <div class="mx-2 my-1 border-t border-neutral-100 dark:border-neutral-700/60"></div>
                         <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-left"
-                          onclick="deletefile('<%= file.name %>', '<%= currentPath && currentPath !== "/" ? currentPath.replace(/^\/+/, "") + "/" + file.name : file.name %>')">
+                          onclick="deletefile('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(/^\\/+/, '') + "/" + file.name : file.name) %>')">
                           <%- icon('trash-2', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                           Delete
                         </button>
@@ -1144,9 +1161,19 @@ function openCreateFileModal() {
     if (parts.length < 2) { previewEl.classList.add('hidden'); return; }
     const folders = parts.slice(0, -1).join('/');
     const file = parts[parts.length - 1];
-    previewEl.innerHTML = '<span class="text-neutral-400">Will create: </span>' +
-      '<span class="text-blue-500 dark:text-blue-400">' + folders + '/</span>' +
-      '<span class="text-neutral-700 dark:text-neutral-300">' + (file || '…') + '</span>';
+    previewEl.textContent = '';
+    const span1 = document.createElement('span');
+    span1.className = 'text-neutral-400';
+    span1.textContent = 'Will create: ';
+    const span2 = document.createElement('span');
+    span2.className = 'text-blue-500 dark:text-blue-400';
+    span2.textContent = folders + '/';
+    const span3 = document.createElement('span');
+    span3.className = 'text-neutral-700 dark:text-neutral-300';
+    span3.textContent = file || '...';
+    previewEl.appendChild(span1);
+    previewEl.appendChild(span2);
+    previewEl.appendChild(span3);
     previewEl.classList.remove('hidden');
   }
 

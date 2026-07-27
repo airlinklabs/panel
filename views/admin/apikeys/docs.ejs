@@ -185,7 +185,7 @@
                                       <textarea
                                         class="request-body block w-full rounded-md border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-sm focus:border-neutral-500 focus:ring-neutral-500 text-xs h-24"
                                         placeholder="Enter request body in JSON format"
-                                        data-endpoint-path="<%= endpoint.path %>"><%= endpoint.requestExample ? endpoint.requestExample.replace(/\n/g, '\n').trim() : '' %></textarea>
+                                        data-endpoint-path="<%= endpoint.path %>"><%= endpoint.requestExample ? endpoint.requestExample.trim() : '' %></textarea>
                                     </div>
                                     <% } %>
 

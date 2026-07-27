@@ -278,7 +278,7 @@ export function registerFilesRoutes(router: Router): void {
         const cleanPath = relativePath
           .replace(/\/+/g, '/')
           .replace(/^\/|\/$/g, '');
-        const cleanZipName = zipName.replace(/^\/+|\/+$/g, '');
+        const cleanZipName = zipName.replace(/^\/+/, '').replace(/\/+$/, '');
 
         try {
           const response = await daemonRequest<{ message?: string }>({

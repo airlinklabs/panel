@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 
 /**
  * Sanitizes a file path to prevent path traversal attacks.
@@ -46,4 +47,19 @@ export function isPathSafe(userPath: string): boolean {
  */
 export function normalizePath(userPath: string): string {
   return userPath.replace(/\/+/g, '/').replace(/\/$/, '') || '/';
+}
+
+/**
+ * Checks whether targetPath resolves to a location within baseDir.
+ * Uses realpathSync to resolve symlinks before comparison.
+ */
+export function containPath(baseDir: string, targetPath: string): boolean {
+  const realBase = fs.realpathSync(baseDir);
+  let resolved: string;
+  try {
+    resolved = fs.realpathSync(targetPath);
+  } catch {
+    resolved = path.resolve(baseDir, targetPath);
+  }
+  return resolved.startsWith(realBase + path.sep) || resolved === realBase;
 }
