@@ -244,7 +244,7 @@ const coreModule: Module = {
       validator,
       async (req: Request, res: Response) => {
         try {
-          let { username, email, first_name, last_name, password } = req.body;
+          const { username, email, first_name, last_name, password } = req.body;
 
           if (!username || !email || !first_name || !last_name || !password) {
             res.status(400).json({ error: 'Missing required fields' });

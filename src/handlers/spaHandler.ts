@@ -145,10 +145,11 @@ export function spaMiddleware(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-export function handleSPAPageRequest(originalRender: Function) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return function(this: Response, view: string, options?: any, callback?: Function) {
+ 
+export function handleSPAPageRequest(originalRender: (...args: any[]) => any) {
+   
+   
+  return function(this: Response, view: string, options?: any, callback?: (...args: any[]) => any) {
     if (this.locals.isSPA) {
       const spaHandler = SPAHandler.getInstance();
 

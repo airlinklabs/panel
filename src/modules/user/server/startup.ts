@@ -9,7 +9,6 @@ import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import {
   type ErrorMessage,
   type ServerVariable,
-  loadServerPageContext,
   getServerStatusInput,
   getImageFeatures,
   restartServerContainer,

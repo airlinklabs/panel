@@ -6,7 +6,6 @@ import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import {
   type ErrorMessage,
-  loadServerPageContext,
   getImageFeatures,
 } from './shared';
 

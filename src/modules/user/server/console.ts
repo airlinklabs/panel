@@ -9,15 +9,12 @@ import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import {
   type ErrorMessage,
-  type ServerPageServer,
   loadServerPageContext,
   getServerStatusInput,
   getImageFeatures,
   stopServerContainer,
   startServerContainer,
   restartServerContainer,
-  getServerDaemonAuth,
-  getServerDaemonAddress,
 } from './shared';
 
 export function registerConsoleRoutes(router: Router): void {

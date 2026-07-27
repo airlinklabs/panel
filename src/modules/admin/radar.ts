@@ -4,7 +4,6 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import fs from 'fs/promises';
-import fsSync from 'fs';
 import path from 'path';
 import { getParamAsNumber } from '../../utils/typeHelpers';
 import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
@@ -362,7 +361,7 @@ const radarModule: Module = {
             Buffer.from(
               `--${boundary}\r\n` +
               `Content-Disposition: form-data; name="file"; filename="${fileName}"\r\n` +
-              `Content-Type: application/zip\r\n\r\n`
+              'Content-Type: application/zip\r\n\r\n'
             ),
             fileBuffer,
             Buffer.from(`\r\n--${boundary}--\r\n`),

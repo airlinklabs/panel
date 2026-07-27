@@ -68,7 +68,7 @@ function escapeHtml(str: string): string {
 function escapeJsString(str: string): string {
   return str
     .replace(/\\/g, '\\\\')
-    .replace(/'/g, "\\'")
+    .replace(/'/g, '\\\'')
     .replace(/"/g, '\\"')
     .replace(/\n/g, '\\n')
     .replace(/\r/g, '\\r')
@@ -389,7 +389,9 @@ function buildAddonAPI(slug: string, addonPath: string, _manifest?: AddonManifes
       try {
         const row = await (prisma as any).settings.findUnique({ where: { id: 1 } });
         if (row) panelSettings = row;
-      } catch (_) {}
+      } catch {
+        // settings table may not exist yet
+      }
 
       // Inject all template vars into data so addon views (and their includes) have access
       data.nonce = data.nonce || '';

@@ -86,24 +86,6 @@ function normalizeStatus(status: unknown): number {
   return 500;
 }
 
-function getCookieValue(req: Request, name: string): string | undefined {
-  const parsedCookies = req.cookies;
-  if (parsedCookies?.[name]) return parsedCookies[name];
-
-  const cookieHeader = req.headers.cookie;
-  if (!cookieHeader) return undefined;
-
-  return cookieHeader
-    .split(';')
-    .map((part) => part.trim())
-    .map((part) => {
-      const separatorIndex = part.indexOf('=');
-      if (separatorIndex === -1) return [part, ''];
-      return [part.slice(0, separatorIndex), decodeURIComponent(part.slice(separatorIndex + 1))];
-    })
-    .find(([key]) => key === name)?.[1];
-}
-
 function getErrorView(_req: Request): string {
   return 'errors/error';
 }

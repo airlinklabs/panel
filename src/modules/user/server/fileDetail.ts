@@ -7,11 +7,8 @@ import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import {
-  type ErrorMessage,
   loadAuthenticatedServerContext,
   sendMissingServerContext,
-  getServerDaemonAddress,
-  getServerDaemonAuth,
   getServerStatusInput,
   getImageFeatures,
 } from './shared';

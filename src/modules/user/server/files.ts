@@ -11,12 +11,8 @@ import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { isPathSafe, normalizePath } from '../../../utils/pathSecurity';
 import {
   type ErrorMessage,
-  type ServerPageServer,
-  loadServerPageContext,
   loadAuthenticatedServerContext,
   sendMissingServerContext,
-  getServerDaemonAddress,
-  getServerDaemonAuth,
   getServerStatusInput,
   getImageFeatures,
 } from './shared';
