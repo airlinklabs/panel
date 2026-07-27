@@ -110,7 +110,7 @@
                 <div class="p-8 text-center">
                   <%- icon('database', { class: 'mx-auto h-12 w-12 text-neutral-400' }) %>
                   <h3 class="mt-2 text-sm font-medium text-neutral-900 dark:text-white">No backups</h3>
-                  <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Get started by creating your first backup.</p>
+                  <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">No backups yet. Create one.</p>
                 </div>
               <% } %>
             </div>
@@ -195,7 +195,7 @@ async function confirmCreateBackup() {
   const name = document.getElementById('backupName').value.trim();
 
   if (!name) {
-     showToast('Please enter a backup name.', 'error');
+     showToast('Enter a backup name.', 'error');
     return;
   }
 
@@ -250,7 +250,7 @@ function restoreBackup(backupId, backupName) {
     'Restore Backup',
     `Are you sure you want to restore the backup "${backupName}"? This will replace all current server files and cannot be undone.`,
     async () => {
-      showLoading('Restoring backup...', 'Please wait while we restore your backup. This may take a few minutes.');
+      showLoading('Restoring backup...', 'Restoring backup. This may take a few minutes.');
 
       try {
         const response = await fetch(`/server/${serverUUID}/backups/${backupId}/restore`, {

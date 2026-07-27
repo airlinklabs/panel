@@ -950,7 +950,7 @@ function openCreateFileModal() {
     console.log('confirmFileUpload called, selectedFile:', window.selectedFile);
 
     if (!window.selectedFile) {
-      showToast('Please select a file to upload', 'error');
+      showToast('Select a file to upload', 'error');
       return;
     }
 
@@ -1036,7 +1036,7 @@ function openCreateFileModal() {
         xhr.ontimeout = function() {
           loader.close();
           console.error('XHR timeout during upload');
-          showToast('Upload timed out. Please try again with a smaller file', 'error');
+          showToast('Upload timed out. Try a smaller file.', 'error');
         };
 
         // Set a longer timeout for large files

@@ -378,7 +378,7 @@ function scheduleReconnect() {
         }, backoffTime);
     } else {
 
-        writeConsole('system', 'error', 'Maximum reconnect attempts reached. Please refresh the page.');
+        writeConsole('system', 'error', 'Maximum reconnect attempts reached. Refresh the page.');
     }
 }
 
@@ -631,7 +631,7 @@ connectWebSocket();
     });
     <% } else { %>
     startButton.addEventListener('click', () => {
-        showToast('This server is suspended. Please contact an administrator for assistance.', 'error');
+        showToast('This server is suspended. Contact an administrator.', 'error');
     });
     <% } %>
 
@@ -703,7 +703,7 @@ connectWebSocket();
     });
     <% } else { %>
     restartButton.addEventListener('click', () => {
-        showToast('This server is suspended. Please contact an administrator for assistance.', 'error');
+        showToast('This server is suspended. Contact an administrator.', 'error');
     });
     <% } %>
 
@@ -776,7 +776,7 @@ connectWebSocket();
     });
     <% } else { %>
     stopButton.addEventListener('click', () => {
-        showToast('This server is suspended. Please contact an administrator for assistance.', 'error');
+        showToast('This server is suspended. Contact an administrator.', 'error');
     });
     <% } %>
 
