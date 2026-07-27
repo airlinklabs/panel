@@ -330,7 +330,28 @@ app.use(
 // Setting secure:true on a plain HTTP server causes browsers to silently drop
 // all session cookies, breaking login on local network setups.
 const useSecureCookie = process.env.URL?.startsWith('https://') ?? false;
-const sessionSecret = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+
+let sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret) {
+  sessionSecret = crypto.randomBytes(32).toString('hex');
+  // Persist to .env so it survives restarts
+  const envPath = path.join(process.cwd(), '.env');
+  const envLine = `SESSION_SECRET="${sessionSecret}"\n`;
+  try {
+    if (fs.existsSync(envPath)) {
+      const existing = fs.readFileSync(envPath, 'utf8');
+      if (!existing.includes('SESSION_SECRET=')) {
+        fs.appendFileSync(envPath, envLine);
+      }
+    } else {
+      fs.writeFileSync(envPath, envLine);
+    }
+    process.env.SESSION_SECRET = sessionSecret;
+    logger.info('Generated and saved SESSION_SECRET to .env');
+  } catch {
+    logger.warn('Could not write SESSION_SECRET to .env — sessions will not persist across restarts');
+  }
+}
 
 app.use(
   session({
