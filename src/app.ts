@@ -332,19 +332,26 @@ app.use(
 const useSecureCookie = process.env.URL?.startsWith('https://') ?? false;
 
 let sessionSecret = process.env.SESSION_SECRET;
-if (!sessionSecret) {
+if (!sessionSecret || sessionSecret === 'change_me') {
   sessionSecret = crypto.randomBytes(32).toString('hex');
-  // Persist to .env so it survives restarts
   const envPath = path.join(process.cwd(), '.env');
-  const envLine = `SESSION_SECRET="${sessionSecret}"\n`;
+  const examplePath = path.join(process.cwd(), 'example.env');
   try {
+    // If .env doesn't exist, copy from example.env first
+    if (!fs.existsSync(envPath) && fs.existsSync(examplePath)) {
+      fs.copyFileSync(examplePath, envPath);
+    }
+    // Replace or append SESSION_SECRET in .env
     if (fs.existsSync(envPath)) {
-      const existing = fs.readFileSync(envPath, 'utf8');
-      if (!existing.includes('SESSION_SECRET=')) {
-        fs.appendFileSync(envPath, envLine);
+      let envContent = fs.readFileSync(envPath, 'utf8');
+      if (envContent.includes('SESSION_SECRET=')) {
+        envContent = envContent.replace(/SESSION_SECRET=.*/, `SESSION_SECRET="${sessionSecret}"`);
+      } else {
+        envContent += `\nSESSION_SECRET="${sessionSecret}"\n`;
       }
+      fs.writeFileSync(envPath, envContent);
     } else {
-      fs.writeFileSync(envPath, envLine);
+      fs.writeFileSync(envPath, `SESSION_SECRET="${sessionSecret}"\n`);
     }
     process.env.SESSION_SECRET = sessionSecret;
     logger.info('Generated and saved SESSION_SECRET to .env');

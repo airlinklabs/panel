@@ -13,6 +13,18 @@ const EXAMPLE_ENV_PATH = path.resolve(process.cwd(), 'example.env');
 export function loadEnv() {
   const envPath = path.resolve(process.cwd(), '.env');
 
+  // If .env doesn't exist, copy from example.env
+  if (!fs.existsSync(envPath)) {
+    if (fs.existsSync(EXAMPLE_ENV_PATH)) {
+      try {
+        fs.copyFileSync(EXAMPLE_ENV_PATH, envPath);
+        logger.info('Created .env from example.env');
+      } catch {
+        logger.warn('Could not copy example.env to .env');
+      }
+    }
+  }
+
   try {
     const data = fs.readFileSync(envPath, 'utf8');
 
