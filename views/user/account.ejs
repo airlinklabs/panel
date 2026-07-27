@@ -2,7 +2,7 @@
 
 <main class="h-screen m-auto">
   <div class="flex h-screen">
-    <div class="w-60 h-full">
+    <div class="hidden lg:block w-60 h-full">
       <%- include('../components/template') %>
     </div>
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.createElement('div');
     overlay.className = 'fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center p-4';
     overlay.innerHTML = `
-      <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl border border-neutral-200 dark:border-white/10 w-full max-w-lg overflow-hidden">
+      <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-lg border border-neutral-200 dark:border-white/10 w-full max-w-lg overflow-hidden">
         <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b border-neutral-100 dark:border-white/5">
           <div>
             <p class="text-sm font-semibold text-neutral-800 dark:text-white">Position your photo</p>

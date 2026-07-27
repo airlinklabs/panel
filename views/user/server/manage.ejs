@@ -48,7 +48,7 @@
 <main class="h-screen m-auto text-neutral-800 dark:text-white">
   <div class="flex h-screen">
     <!-- Sidebar -->
-    <div class="w-60 h-full">
+    <div class="hidden lg:block w-60 h-full">
       <%- include('../../components/template') %>
     </div>
 
@@ -971,12 +971,13 @@ connectWebSocket();
     const cpuChart = createBackgroundChart('cpuChart');
     const diskChart = createBackgroundChart('diskChart', 'doughnut');
 
+    const serverRamMB = <%- server.Memory || 0 %>;
+    const serverCpuPct = <%- server.Cpu || 0 %>;
+
     function updateRamUsage(stats) {
     const ramStatsUsage = stats?.data?.memory?.usage || 0;
-    const ramStatsLimit = stats?.data?.memory?.limit || <%- server.Memory %> * 1024 * 1024;
+    const ramStatsLimit = stats?.data?.memory?.limit || (serverRamMB > 0 ? serverRamMB * 1024 * 1024 : 0);
     let ramUsagePercent = Number(stats?.data?.memory?.percentage) || 0;
-    const ramUsageInMB = ramStatsUsage / 1024 / 1024;
-    const ramLimitInMB = ramStatsLimit / 1024 / 1024;
 
     if (isNaN(ramUsagePercent)) {
         ramUsagePercent = 0;
@@ -984,7 +985,8 @@ connectWebSocket();
 
     ramUsagePercent = Math.round(ramUsagePercent);
 
-    const ramUsageText = `${ramUsagePercent}% (${formatRam(ramStatsUsage)} / ${formatRam(ramStatsLimit)})`;
+    const limitText = ramStatsLimit > 0 ? formatRam(ramStatsLimit) : 'Unlimited';
+    const ramUsageText = `${ramUsagePercent}% (${formatRam(ramStatsUsage)} / ${limitText})`;
     document.getElementById('ramUsage').textContent = ramUsageText;
 
     if (ramStatsUsage > 0) {
@@ -999,25 +1001,29 @@ connectWebSocket();
             cpuUsagePercent = 0;
         }
 
-        const cpuAllocPct = <%- server.Cpu %> || 100;
+        const cpuAllocPct = serverCpuPct > 0 ? serverCpuPct : 100;
         const cores = Math.max(1, Math.round(cpuAllocPct / 100));
-        const cpuOfAlloc = cpuAllocPct > 0
+        const cpuOfAlloc = serverCpuPct > 0
             ? Math.round(Math.min(100, (cpuUsagePercent / cpuAllocPct) * 100))
             : 0;
 
-        document.getElementById('cpuUsage').textContent =
-            `${cpuOfAlloc}% of ${cores} core${cores === 1 ? '' : 's'}`;
+        const cpuText = serverCpuPct > 0
+            ? `${cpuOfAlloc}% of ${cores} core${cores === 1 ? '' : 's'}`
+            : `${Math.round(cpuUsagePercent)}% of ${cores} core${cores === 1 ? '' : 's'} (unlimited)`;
+        document.getElementById('cpuUsage').textContent = cpuText;
 
         if (cpuOfAlloc > 0) {
             updateChart(cpuChart, cpuOfAlloc);
         }
     }
 
+    const serverStorageGB = <%- server.Storage || 0 %>;
     function updateDiskUsage(stats) {
         const diskUsageRaw = parseFloat(stats.data.storage.usage) || 0;
-        const diskLimitRaw = 10 * 1024;
-        const diskPct = Math.round(diskUsageRaw / diskLimitRaw * 100);
-        document.getElementById('diskUsage').textContent = `${diskPct}% (${formatBytes(diskUsageRaw * 1024 * 1024)} / ${formatBytes(diskLimitRaw * 1024 * 1024)})`;
+        const diskLimitRaw = serverStorageGB > 0 ? serverStorageGB * 1024 : 0;
+        const diskPct = diskLimitRaw > 0 ? Math.round(diskUsageRaw / diskLimitRaw * 100) : 0;
+        const limitText = diskLimitRaw > 0 ? formatBytes(diskLimitRaw * 1024 * 1024) : 'Unlimited';
+        document.getElementById('diskUsage').textContent = `${diskPct}% (${formatBytes(diskUsageRaw * 1024 * 1024)} / ${limitText})`;
     }
 
     function updateStatus(stats) {
@@ -1153,15 +1159,17 @@ connectWebSocket();
         updateStatusChart('rgba(239, 68, 68, 0.1)', 'rgba(239, 68, 68, 0.2)');
 
         // Update RAM usage
-        document.getElementById('ramUsage').textContent = `${Math.round(0)}% (0 MB / ${formatRam(<%- server.Memory %> * 1024 * 1024)})`;
+        const offlineRamLimit = serverRamMB > 0 ? formatRam(serverRamMB * 1024 * 1024) : 'Unlimited';
+        document.getElementById('ramUsage').textContent = `0% (0 MB / ${offlineRamLimit})`;
 
         // Update CPU usage
-        const cpuAllocPct = <%- server.Cpu %>;
-        const cpuCores = (cpuAllocPct / 100).toFixed(1);
-        document.getElementById('cpuUsage').textContent = `${Math.round(0)}% of ${cpuCores} core${cpuCores === '1.0' ? '' : 's'}`;
+        const cpuCores = serverCpuPct > 0 ? (serverCpuPct / 100).toFixed(1) : '1.0';
+        const cpuText = serverCpuPct > 0 ? `0% of ${cpuCores} core${cpuCores === '1.0' ? '' : 's'}` : `0% of ${cpuCores} cores (unlimited)`;
+        document.getElementById('cpuUsage').textContent = cpuText;
 
         // Update disk usage
-        document.getElementById('diskUsage').textContent = `${Math.round(0)}% (0 Bytes / 10 GB)`;
+        const offlineDiskLimit = serverStorageGB > 0 ? formatBytes(serverStorageGB * 1024 * 1024 * 1024) : 'Unlimited';
+        document.getElementById('diskUsage').textContent = `0% (0 Bytes / ${offlineDiskLimit})`;
 
         // Hide players decoration if it exists
 

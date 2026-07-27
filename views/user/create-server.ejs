@@ -92,7 +92,7 @@
 
 <main class="h-screen m-auto">
   <div class="flex h-screen">
-    <div class="w-60 h-full"><%- include('../components/template') %></div>
+    <div class="hidden lg:block w-60 h-full"><%- include('../components/template') %></div>
 
     <div id="page-content" class="flex-1 overflow-y-auto pt-16">
       <div class="px-8 lg:px-12 pt-6 pb-12 max-w-5xl">
@@ -196,7 +196,7 @@
                     <option value="1024">GB</option>
                   </select>
                 </div>
-                <p class="text-[11px] text-neutral-400 mt-1.5">Max <%= resourceLimits.maxMemory %> MB</p>
+                <p class="text-[11px] text-neutral-400 mt-1.5"><%= resourceLimits.maxMemory > 0 ? 'Max ' + resourceLimits.maxMemory + ' MB' : 'Unlimited' %></p>
               </div>
               <div>
                 <label class="form-label flex items-center gap-1.5">
@@ -208,7 +208,7 @@
                   <input id="Cpu" type="number" value="100" min="50" max="<%= resourceLimits.maxCpu %>" class="stepper-input">
                   <button type="button" class="stepper-btn" data-action="inc" data-target="Cpu" data-step="50" data-max="<%= resourceLimits.maxCpu %>">+</button>
                 </div>
-                <p class="text-[11px] text-neutral-400 mt-1.5">50% = half a core. Max <%= resourceLimits.maxCpu %>%</p>
+                <p class="text-[11px] text-neutral-400 mt-1.5">50% = half a core. <%= resourceLimits.maxCpu > 0 ? 'Max ' + resourceLimits.maxCpu + '%' : 'Unlimited' %></p>
               </div>
               <div>
                 <label class="form-label flex items-center gap-1.5">
@@ -226,7 +226,7 @@
                     <option value="1024" selected>GB</option>
                   </select>
                 </div>
-                <p class="text-[11px] text-neutral-400 mt-1.5">Max <%= resourceLimits.maxStorage %> MB</p>
+                <p class="text-[11px] text-neutral-400 mt-1.5"><%= resourceLimits.maxStorage > 0 ? 'Max ' + resourceLimits.maxStorage + ' MB' : 'Unlimited' %></p>
               </div>
             </div>
           </div>

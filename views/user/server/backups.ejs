@@ -5,7 +5,7 @@
   <div id="message-container" class="fixed top-4 right-4 z-50 max-w-md"></div>
   <div class="flex h-screen">
     <!-- Sidebar -->
-    <aside class="w-60 h-full">
+    <aside class="hidden lg:block w-60 h-full">
       <%- include('../../components/template') %>
     </aside>
 
@@ -128,7 +128,7 @@
 
 <!-- Create Backup Modal -->
 <div id="createBackupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-  <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-2xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-200">
+  <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-lg w-full max-w-sm mx-4 transform scale-95 transition-transform duration-200">
     <div class="px-5 pt-5 pb-4 border-b border-neutral-200 dark:border-neutral-700/60">
       <p class="text-sm font-semibold text-neutral-800 dark:text-white">Create Backup</p>
       <p class="text-xs text-neutral-500 mt-0.5">Choose a name for this backup.</p>

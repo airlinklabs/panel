@@ -3,7 +3,7 @@
 <main class="h-screen m-auto">
   <div class="flex h-screen">
     <!-- Sidebar -->
-    <div class="w-60 h-full">
+    <div class="hidden lg:block w-60 h-full">
       <%- include('../../components/template') %>
     </div>
     <!-- Content -->
@@ -96,7 +96,7 @@
          </dl>
 
          <!-- Player Graph -->
-         <div class="bg-gradient-to-br from-neutral-800/20 to-neutral-900/10 border border-neutral-700/20 rounded-xl mt-8 shadow-md p-6">
+         <div class="bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-700/20 rounded-xl mt-8 shadow-md p-6">
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Player Count History</h2>
               <div class="text-xs text-neutral-400">Data collected every 5 minutes (last 48 hours)</div>

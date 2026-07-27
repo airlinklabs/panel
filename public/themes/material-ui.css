@@ -1,0 +1,348 @@
+/*
+ * Material UI (Dark)
+ * Theme inspired by Material Design 3's visual language
+ * Tonal surfaces, strong shape system, clean elevation
+ */
+
+:root {
+  /* --- Page backgrounds (M3 Surface hierarchy) --- */
+  --theme-bg:               oklch(13% 0.01 260);
+  --theme-bg-secondary:     oklch(16% 0.01 260);
+  --theme-bg-tertiary:      oklch(18% 0.01 260);
+  --theme-bg-card:          oklch(18% 0.01 260);
+  --theme-bg-hover:         oklch(21% 0.01 260);
+  --theme-bg-input:         oklch(21% 0.01 260);
+  --theme-bg-active-nav:    oklch(21% 0.08 260);
+
+  /* --- Borders --- */
+  --theme-border:           oklch(28% 0.01 260);
+  --theme-border-subtle:    oklch(24% 0.01 260);
+  --theme-border-input:     oklch(30% 0.01 260);
+  --theme-border-accent:    oklch(50% 0.12 260);
+
+  /* --- Text --- */
+  --theme-text:             oklch(68% 0.01 260);
+  --theme-text-strong:      oklch(92% 0 0);
+  --theme-text-muted:       oklch(55% 0.01 260);
+  --theme-text-nav:         oklch(60% 0.01 260);
+  --theme-text-nav-active:  oklch(90% 0 0);
+  --theme-text-placeholder: oklch(40% 0.01 260);
+  --theme-text-code:        oklch(75% 0.14 175);
+  --theme-text-link:        oklch(71% 0.19 260);
+
+  /* --- Accent / brand (M3 Primary) --- */
+  --theme-accent:           oklch(71% 0.19 260);
+  --theme-accent-hover:     oklch(78% 0.17 260);
+  --theme-accent-text:      oklch(15% 0 0);
+  --theme-accent-subtle:    oklch(30% 0.08 260);
+
+  /* --- Status colours (M3 tones) --- */
+  --theme-success:          oklch(72% 0.19 155);
+  --theme-success-bg:       oklch(25% 0.06 155);
+  --theme-warning:          oklch(78% 0.16 80);
+  --theme-warning-bg:       oklch(28% 0.06 80);
+  --theme-danger:           oklch(65% 0.22 25);
+  --theme-danger-bg:        oklch(25% 0.08 25);
+  --theme-info:             oklch(71% 0.14 230);
+  --theme-info-bg:          oklch(25% 0.05 230);
+
+  /* --- Nav chrome (sidebar + mobile bars) --- */
+  --theme-nav-bg:           oklch(12% 0.01 260);
+  --theme-nav-border:       oklch(22% 0.01 260);
+  --theme-nav-text:         oklch(58% 0.01 260);
+  --theme-nav-text-active:  oklch(90% 0 0);
+  --theme-nav-icon:         oklch(52% 0.01 260);
+  --theme-nav-icon-active:  oklch(71% 0.19 260);
+
+  /* --- Table --- */
+  --theme-table-header-bg:  oklch(15% 0.01 260);
+  --theme-table-row-hover:  oklch(18% 0.02 260);
+  --theme-table-divide:     oklch(22% 0.01 260);
+
+  /* --- Badges / pills --- */
+  --theme-badge-neutral-bg: oklch(25% 0.01 260);
+  --theme-badge-neutral-text: oklch(60% 0.01 260);
+  --theme-badge-blue-bg:    oklch(25% 0.06 260);
+  --theme-badge-blue-text:  oklch(75% 0.15 260);
+
+  /* --- Buttons --- */
+  --theme-btn-secondary-bg:     oklch(20% 0.01 260);
+  --theme-btn-secondary-border: oklch(28% 0.01 260);
+  --theme-btn-secondary-text:   oklch(70% 0.01 260);
+  --theme-btn-secondary-hover:  oklch(24% 0.01 260);
+
+  /* --- Toggle / switch --- */
+  --theme-toggle-track:     oklch(25% 0.01 260);
+  --theme-toggle-dot:       oklch(60% 0.01 260);
+
+  /* --- Search --- */
+  --theme-search-bg:        oklch(16% 0.01 260);
+  --theme-search-border:    oklch(28% 0.01 260);
+  --theme-search-text:      oklch(70% 0.01 260);
+  --theme-search-results:   oklch(16% 0.01 260);
+
+  /* --- Scrollbar --- */
+  --theme-scrollbar-track:  oklch(13% 0.01 260);
+  --theme-scrollbar-thumb:  oklch(28% 0.01 260);
+
+  /* --- Logo background --- */
+  --theme-logo-bg:          transparent;
+
+  /* --- Code / terminal --- */
+  --theme-code-bg:          oklch(11% 0.01 260);
+  --theme-code-text:        oklch(75% 0.14 175);
+  --theme-code-border:      oklch(22% 0.01 260);
+}
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+
+html.dark body {
+  background-color: var(--theme-bg) !important;
+  color: var(--theme-text) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Backgrounds                                                         */
+/* ------------------------------------------------------------------ */
+
+html.dark .dark\:bg-\[#141414\],
+html.dark [class*="dark:bg-neutral-9"],
+html.dark [class*="dark:bg-neutral-8"] {
+  background-color: var(--theme-bg-secondary) !important;
+}
+
+html.dark [class*="dark:bg-neutral-7"] {
+  background-color: var(--theme-bg-card) !important;
+}
+
+html.dark [class*="dark:bg-neutral-7\/20"],
+html.dark [class*="dark:bg-neutral-7\/10"],
+html.dark [class*="dark:bg-white\/5"] {
+  background-color: var(--theme-bg-input) !important;
+}
+
+html.dark [class*="dark:hover:bg-white\/5"]:hover,
+html.dark [class*="dark:hover:bg-neutral"]:hover {
+  background-color: var(--theme-bg-hover) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Borders                                                             */
+/* ------------------------------------------------------------------ */
+
+html.dark [class*="dark:border-"] {
+  border-color: var(--theme-border) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Text                                                                */
+/* ------------------------------------------------------------------ */
+
+html.dark .dark\:text-white {
+  color: var(--theme-text-strong) !important;
+}
+
+html.dark .dark\:text-neutral-400 {
+  color: var(--theme-text-muted) !important;
+}
+
+html.dark .dark\:text-neutral-300 {
+  color: var(--theme-text) !important;
+}
+
+html.dark .dark\:text-neutral-200 {
+  color: var(--theme-text-strong) !important;
+}
+
+html.dark .dark\:text-blue-400,
+html.dark a[class*="dark:text-blue"] {
+  color: var(--theme-text-link) !important;
+}
+
+html.dark code,
+html.dark pre,
+html.dark .font-mono {
+  background-color: var(--theme-code-bg) !important;
+  color: var(--theme-code-text) !important;
+  border-color: var(--theme-code-border) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Nav chrome — sidebar                                                */
+/* ------------------------------------------------------------------ */
+
+html.dark #pc-sidebar,
+html.dark #pc-sidebar2 {
+  background-color: var(--theme-nav-bg) !important;
+  border-color: var(--theme-nav-border) !important;
+}
+
+html.dark .nav-link {
+  color: var(--theme-nav-text) !important;
+}
+
+html.dark .nav-link.active,
+html.dark .nav-link:hover {
+  color: var(--theme-nav-text-active) !important;
+}
+
+html.dark #active-background {
+  background-color: var(--theme-bg-active-nav) !important;
+  border-color: var(--theme-border-accent) !important;
+}
+
+html.dark .nav-link svg {
+  color: var(--theme-nav-icon) !important;
+}
+
+html.dark .nav-link.active svg,
+html.dark .nav-link:hover svg {
+  color: var(--theme-nav-icon-active) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Nav chrome — mobile                                                 */
+/* ------------------------------------------------------------------ */
+
+html.dark .mobile-top-bar,
+html.dark .mobile-bottom-nav {
+  background-color: var(--theme-nav-bg) !important;
+  border-color: var(--theme-nav-border) !important;
+}
+
+html.dark .mobile-nav-link {
+  color: var(--theme-nav-text) !important;
+}
+
+html.dark .mobile-nav-link.active-mobile {
+  color: var(--theme-nav-text-active) !important;
+}
+
+html.dark .mobile-more-sheet {
+  background-color: var(--theme-bg-secondary) !important;
+  border-color: var(--theme-nav-border) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Tables                                                              */
+/* ------------------------------------------------------------------ */
+
+html.dark thead,
+html.dark [class*="dark:bg-neutral-8\/50"] {
+  background-color: var(--theme-table-header-bg) !important;
+}
+
+html.dark tbody tr:hover {
+  background-color: var(--theme-table-row-hover) !important;
+}
+
+html.dark [class*="dark:divide-white\/10"],
+html.dark [class*="dark:divide-white\/5"] {
+  border-color: var(--theme-table-divide) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Buttons                                                             */
+/* ------------------------------------------------------------------ */
+
+html.dark [class*="dark:bg-blue"],
+html.dark [class*="dark:bg-indigo"] {
+  background-color: var(--theme-accent) !important;
+}
+
+html.dark .dark\:bg-neutral-800 {
+  background-color: var(--theme-btn-secondary-bg) !important;
+}
+
+html.dark .dark\:hover\:bg-neutral-700:hover {
+  background-color: var(--theme-btn-secondary-hover) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Badges / status pills                                               */
+/* ------------------------------------------------------------------ */
+
+html.dark [class*="bg-neutral-400\/10"],
+html.dark [class*="dark:text-neutral-300\/70"] {
+  background-color: var(--theme-badge-neutral-bg) !important;
+  color: var(--theme-badge-neutral-text) !important;
+}
+
+html.dark [class*="bg-emerald-600\/10"] {
+  background-color: var(--theme-success-bg) !important;
+}
+
+html.dark [class*="dark:text-emerald-400"] {
+  color: var(--theme-success) !important;
+}
+
+html.dark [class*="bg-yellow-600\/10"] {
+  background-color: var(--theme-warning-bg) !important;
+}
+
+html.dark [class*="dark:text-yellow-400"] {
+  color: var(--theme-warning) !important;
+}
+
+html.dark [class*="text-red-"],
+html.dark [class*="dark:text-red-"] {
+  color: var(--theme-danger) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Search                                                              */
+/* ------------------------------------------------------------------ */
+
+html.dark #searchResults {
+  background-color: var(--theme-search-results) !important;
+  border-color: var(--theme-border) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Toggle / theme switch                                               */
+/* ------------------------------------------------------------------ */
+
+html.dark #theme-toggle {
+  background-color: var(--theme-toggle-track) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Logo                                                                */
+/* ------------------------------------------------------------------ */
+
+html.dark .logo-bg {
+  background-color: var(--theme-logo-bg) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Modals / sheets                                                     */
+/* ------------------------------------------------------------------ */
+
+html.dark [class*="dark:bg-neutral-8"][class*="rounded"] {
+  background-color: var(--theme-bg-card) !important;
+  border-color: var(--theme-border) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Addon cards                                                         */
+/* ------------------------------------------------------------------ */
+
+html.dark .a-card {
+  background: var(--theme-bg-card) !important;
+  border-color: var(--theme-border) !important;
+}
+
+html.dark .a-card:hover {
+  border-color: var(--theme-border-accent) !important;
+}
+
+html.dark .a-icon {
+  background: var(--theme-accent-subtle) !important;
+  border-color: var(--theme-border-accent) !important;
+}
+
+html.dark .a-icon svg {
+  color: var(--theme-accent) !important;
+}

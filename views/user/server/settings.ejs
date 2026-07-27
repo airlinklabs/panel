@@ -3,7 +3,7 @@
 <main class="h-screen m-auto text-neutral-800 dark:text-white">
   <div class="flex h-screen">
     <!-- Sidebar -->
-    <aside class="w-60 h-full">
+    <aside class="hidden lg:block w-60 h-full">
       <%- include('../../components/template') %>
     </aside>
 
@@ -73,17 +73,17 @@
 
             <div>
               <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.memory || 'Memory' %></h3>
-              <p class="text-neutral-400"><%= server.Memory %> MB</p>
+              <p class="text-neutral-400"><%= server.Memory === 0 ? 'Unlimited' : server.Memory + ' MB' %></p>
             </div>
 
             <div>
               <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.cpu || 'CPU' %></h3>
-              <p class="text-neutral-400"><%= server.Cpu * 100 %>%</p>
+              <p class="text-neutral-400"><%= server.Cpu === 0 ? 'Unlimited' : (server.Cpu * 100) + '%' %></p>
             </div>
 
             <div>
               <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= req.translations.storage || 'Storage' %></h3>
-              <p class="text-neutral-400"><%= server.Storage %> GB</p>
+              <p class="text-neutral-400"><%= server.Storage === 0 ? 'Unlimited' : server.Storage + ' GB' %></p>
             </div>
 
             <div>

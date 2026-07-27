@@ -20,7 +20,6 @@
     <% } %>
     <link rel="stylesheet" href="/fonts/general-sans/general-sans.css">
     <script nonce="<%- nonce %>" src="/js/csrf.js"></script>
-    <script nonce="<%- nonce %>" src="/javascript/shared/viewport-mode.js"></script>
     <script nonce="<%- nonce %>" src="/javascript/shared/page-loader.js"></script>
     <script nonce="<%- nonce %>" src="/javascript/shared/checkbox-anim.js"></script>
     <script nonce="<%- nonce %>" src="/javascript/shared/layout-animations.js"></script>
@@ -131,4 +130,5 @@ function initializeTheme() {
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
   initializeTheme();
   </script>
+<%- include("./bottomNav") %>
 <%- include("./modal") %>

@@ -2,7 +2,7 @@
 
 <main class="h-screen m-auto">
   <div class="flex h-screen">
-    <div class="w-60 h-full">
+    <div class="hidden lg:block w-60 h-full">
       <%- include('../../components/template') %>
     </div>
 
@@ -164,7 +164,7 @@
 <div id="radarScanModal" class="fixed inset-0 z-50 hidden">
   <div class="flex items-center justify-center min-h-screen p-4">
     <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" id="radarScanModalBackdrop"></div>
-    <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden">
+    <div class="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700/60 rounded-2xl shadow-lg max-w-2xl w-full overflow-hidden">
 
       <div class="flex justify-between items-start px-6 py-4 border-b border-neutral-200 dark:border-neutral-700/50">
         <div>
