@@ -5,7 +5,7 @@ import logger from './logger';
 
 // Required env vars that must be set for the panel to function.
 // If any are missing after .env load, the panel exits immediately.
-const REQUIRED_ENV_VARS = ['SESSION_SECRET', 'DATABASE_URL'];
+const REQUIRED_ENV_VARS = ['DATABASE_URL'];
 
 // Optional vars from example.env — warn if not set, don't exit.
 const EXAMPLE_ENV_PATH = path.resolve(process.cwd(), 'example.env');
