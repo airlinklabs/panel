@@ -2,7 +2,7 @@
 set -euo pipefail
 
 DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-TARGET="${DIR}/installer-opentui.mjs"
+TARGET="${DIR}/installer.mjs"
 
 if [[ ! -f "$TARGET" ]]; then
   echo "Missing ${TARGET}" >&2
