@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { httpGet, isHttpError } from '../../../utils/http';
 import { daemonSchemeSync } from '../core/daemonRequest';
 
 interface ServerInfo {
@@ -6,6 +6,11 @@ interface ServerInfo {
   nodePort: number;
   serverUUID: string;
   nodeKey: string;
+}
+
+interface DaemonStatusResponse {
+  running?: boolean;
+  startedAt?: string;
 }
 
 interface ServerStatus {
@@ -20,13 +25,14 @@ interface ServerStatus {
 
 export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerStatus> {
   try {
-    const response = await axios({
-      method: 'GET',
-      url: `${daemonSchemeSync()}://${serverInfo.nodeAddress}:${serverInfo.nodePort}/container/status`,
-      auth: { username: 'Airlink', password: serverInfo.nodeKey },
-      params: { id: serverInfo.serverUUID },
-      timeout: 3000,
-    });
+    const response = await httpGet<DaemonStatusResponse>(
+      `${daemonSchemeSync()}://${serverInfo.nodeAddress}:${serverInfo.nodePort}/container/status`,
+      {
+        auth: { username: 'Airlink', password: serverInfo.nodeKey },
+        params: { id: serverInfo.serverUUID },
+        timeout: 3000,
+      },
+    );
 
     const data = response.data;
     const status: ServerStatus = {
@@ -46,7 +52,7 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
     }
 
     return status;
-  } catch (error: any) {
+  } catch (error: unknown) {
     const errorStatus: ServerStatus = {
       online: false,
       starting: false,
@@ -56,18 +62,21 @@ export async function getServerStatus(serverInfo: ServerInfo): Promise<ServerSta
       daemonOffline: true,
     };
 
-    if (axios.isAxiosError(error)) {
-      if (error.code === 'ECONNREFUSED') {
-        errorStatus.error = 'Connection refused — daemon may be offline';
-      } else if (error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
-        errorStatus.error = 'Connection timed out';
-      } else if (error.code === 'ENOTFOUND') {
-        errorStatus.error = 'Host not found — check node address';
-      } else if (error.response) {
-        errorStatus.error = `Daemon responded with ${error.response.status}`;
-        errorStatus.daemonOffline = false;
+    if (isHttpError(error)) {
+      if (error.status === 0) {
+        const code = (error as unknown as { code?: string }).code;
+        if (code === 'ECONNREFUSED') {
+          errorStatus.error = 'Connection refused — daemon may be offline';
+        } else if (code === 'ETIMEDOUT' || code === 'ECONNABORTED') {
+          errorStatus.error = 'Connection timed out';
+        } else if (code === 'ENOTFOUND') {
+          errorStatus.error = 'Host not found — check node address';
+        } else {
+          errorStatus.error = 'Connection failed';
+        }
       } else {
-        errorStatus.error = 'Connection failed';
+        errorStatus.error = `Daemon responded with ${error.status}`;
+        errorStatus.daemonOffline = false;
       }
     } else {
       errorStatus.error = 'An unexpected error occurred';

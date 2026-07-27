@@ -20,6 +20,7 @@ async function listUsers(res: Response) {
   } catch (error) {
     logger.error('Error fetching users:', error);
     res.status(500).json({ message: 'Error fetching users.' });
+    return;
   }
 }
 

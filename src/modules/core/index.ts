@@ -139,7 +139,7 @@ const coreModule: Module = {
             take: 5,
           });
           users.forEach(u => {
-            results.push({ type: 'user', label: u.username, sub: u.email, url: `/admin/users/view/${u.id}/` });
+            results.push({ type: 'user', label: u.username ?? '', sub: u.email ?? '', url: `/admin/users/view/${u.id}/` });
           });
 
           const nodes = await prisma.node.findMany({
@@ -152,10 +152,11 @@ const coreModule: Module = {
           });
         }
 
-        res.json({ results });
+        return res.json({ results });
       } catch (err) {
         logger.error('Search error:', err);
         res.status(500).json({ results: [] });
+        return;
       }
     });
 

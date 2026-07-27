@@ -43,7 +43,7 @@ class AddonCommandRegistry {
   getAllCommands(): Array<RegisteredCommand & { addonSlug: string; key: string }> {
     const result: Array<RegisteredCommand & { addonSlug: string; key: string }> = [];
     for (const [key, cmd] of this.commands) {
-      const addonSlug = key.split(':')[0];
+      const addonSlug = key.split(':')[0] ?? '';
       result.push({ ...cmd, addonSlug, key });
     }
     return result;

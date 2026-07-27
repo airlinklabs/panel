@@ -1,11 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
-import axios from 'axios';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
-import { daemonSchemeSync } from '../../../handlers/utils/core/daemonRequest';
+import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import { AirlinkCloudClient } from '../../../handlers/utils/core/airlinkCloud';
 
 export function registerBackupRoutes(router: Router): void {
@@ -91,53 +90,57 @@ export function registerBackupRoutes(router: Router): void {
         const settings = await prisma.settings.findUnique({ where: { id: 1 } });
         const isCloudBackupEnabled = settings?.airlinkCloudBackupEnabled && settings?.airlinkCloudApiKey;
 
-        const response = await axios.post(
-          `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
-          {
-            id: serverId,
+        const response = await daemonRequest<{
+          success: boolean;
+          backup?: { filePath: string; uuid: string; size: number };
+        }>({
+          method: 'POST',
+          path: '/container/backup',
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
+          body: {
+            id: getParamAsString(serverId),
             name: name.trim(),
           },
-          {
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
-            timeout: 300000,
-          },
-        );
+          timeout: 300000,
+        });
 
         if (response.data.success) {
           let airlinkCloudId = null;
-          let filePath = response.data.backup.filePath;
+          let filePath = response.data.backup!.filePath;
 
           if (isCloudBackupEnabled) {
             try {
               const cloudClient = new AirlinkCloudClient(settings.airlinkCloudApiKey!);
 
-              const downloadResponse = await axios({
+              const downloadResponse = await daemonRequest<import('stream').Readable>({
                 method: 'GET',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup/download`,
+                path: '/container/backup/download',
+                nodeAddress: server.node.address,
+                nodePort: server.node.port,
+                nodeKey: server.node.key,
                 params: { backupPath: filePath },
-                auth: { username: 'Airlink', password: server.node.key },
                 responseType: 'stream',
               });
 
-              const uniqueCloudFileName = `${getParamAsString(serverId)}_${response.data.backup.uuid}_${Date.now()}.tar.gz`;
+              const uniqueCloudFileName = `${getParamAsString(serverId)}_${response.data.backup!.uuid}_${Date.now()}.tar.gz`;
               const uploadResult = await cloudClient.uploadFile(
                 downloadResponse.data,
                 uniqueCloudFileName
               );
 
-              if (uploadResult && uploadResult.id) {
-                airlinkCloudId = uploadResult.id;
+              if (uploadResult && (uploadResult as Record<string, unknown>).id) {
+                airlinkCloudId = (uploadResult as Record<string, unknown>).id as string;
 
-                await axios.delete(
-                  `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
-                  {
-                    data: { backupPath: filePath },
-                    auth: { username: 'Airlink', password: server.node.key },
-                  }
-                ).catch(e => logger.warn(`Failed to delete temporary local backup: ${e}`));
+                await daemonRequest({
+                  method: 'DELETE',
+                  path: '/container/backup',
+                  nodeAddress: server.node.address,
+                  nodePort: server.node.port,
+                  nodeKey: server.node.key,
+                  body: { backupPath: filePath },
+                }).catch(e => logger.warn(`Failed to delete temporary local backup: ${e}`));
 
                 filePath = 'airlink-cloud';
               }
@@ -148,11 +151,11 @@ export function registerBackupRoutes(router: Router): void {
 
           const backup = await prisma.backup.create({
             data: {
-              UUID: response.data.backup.uuid,
+              UUID: response.data.backup!.uuid,
               name: name.trim(),
               serverId: getParamAsString(serverId),
               filePath: filePath,
-              size: BigInt(response.data.backup.size),
+              size: BigInt(response.data.backup!.size),
               airlinkCloudId: airlinkCloudId,
             },
           });
@@ -163,7 +166,7 @@ export function registerBackupRoutes(router: Router): void {
             backup: {
               ...backup,
               size: backup.size ? backup.size.toString() : '0',
-              UUID: response.data.backup.uuid,
+              UUID: response.data.backup!.uuid,
               name: name.trim(),
               createdAt: backup.createdAt,
             },
@@ -173,15 +176,11 @@ export function registerBackupRoutes(router: Router): void {
             .status(500)
             .json({ error: 'Failed to create backup on daemon' });
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Error creating backup:', error);
-        if (axios.isAxiosError(error)) {
-          res.status(500).json({
-            error: `Failed to create backup: ${error.response?.data?.error || error.message}`,
-          });
-        } else {
-          res.status(500).json({ error: 'Failed to create backup' });
-        }
+        res.status(500).json({
+          error: `Failed to create backup: ${error?.body?.error || error?.message || 'Failed to create backup'}`,
+        });
       }
     },
   );
@@ -233,27 +232,22 @@ export function registerBackupRoutes(router: Router): void {
             const cloudClient = new AirlinkCloudClient(settings.airlinkCloudApiKey);
             const cloudDownloadResponse = await cloudClient.getDownloadStream(backup.airlinkCloudId);
 
-            const uploadResponse = await axios({
+            const uploadResponse = await daemonRequest<{ success: boolean; filePath?: string }>({
               method: 'POST',
-              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup/upload`,
+              path: '/container/backup/upload',
+              nodeAddress: server.node.address,
+              nodePort: server.node.port,
+              nodeKey: server.node.key,
               params: {
-                id: serverId,
+                id: getParamAsString(serverId),
                 backupUuid: backup.UUID
               },
-              auth: {
-                username: 'Airlink',
-                password: server.node.key
-              },
-              data: cloudDownloadResponse.data,
-              headers: {
-                'Content-Type': 'application/octet-stream'
-              },
-              maxContentLength: Infinity,
-              maxBodyLength: Infinity
+              body: cloudDownloadResponse.data,
+              timeout: 300000,
             });
 
             if (uploadResponse.data.success) {
-              backupPath = uploadResponse.data.filePath;
+              backupPath = uploadResponse.data.filePath!;
             } else {
               throw new Error('Failed to upload cloud backup to daemon');
             }
@@ -264,29 +258,28 @@ export function registerBackupRoutes(router: Router): void {
           }
         }
 
-        const response = await axios.post(
-          `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/restore`,
-          {
-            id: serverId,
+        const response = await daemonRequest<{ success: boolean }>({
+          method: 'POST',
+          path: '/container/restore',
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
+          body: {
+            id: getParamAsString(serverId),
             backupPath: backupPath,
           },
-          {
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
-            timeout: 300000,
-          },
-        );
+          timeout: 300000,
+        });
 
         if (backup.airlinkCloudId && backupPath !== 'airlink-cloud') {
-          axios.delete(
-            `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
-            {
-              data: { backupPath: backupPath },
-              auth: { username: 'Airlink', password: server.node.key },
-            }
-          ).catch(e => logger.warn(`Failed to delete temporary restore file: ${e}`));
+          daemonRequest({
+            method: 'DELETE',
+            path: '/container/backup',
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            body: { backupPath: backupPath },
+          }).catch(e => logger.warn(`Failed to delete temporary restore file: ${e}`));
         }
 
         if (response.data.success) {
@@ -299,15 +292,11 @@ export function registerBackupRoutes(router: Router): void {
             .status(500)
             .json({ error: 'Failed to restore backup on daemon' });
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Error restoring backup:', error);
-        if (axios.isAxiosError(error)) {
-          res.status(500).json({
-            error: `Failed to restore backup: ${error.response?.data?.error || error.message}`,
-          });
-        } else {
-          res.status(500).json({ error: 'Failed to restore backup' });
-        }
+        res.status(500).json({
+          error: `Failed to restore backup: ${error?.body?.error || error?.message || 'Failed to restore backup'}`,
+        });
       }
     },
   );
@@ -363,20 +352,18 @@ export function registerBackupRoutes(router: Router): void {
           );
           res.setHeader('Content-Type', 'application/gzip');
 
-          downloadResponse.data.pipe(res);
+          (downloadResponse.data as import('stream').Readable).pipe(res);
           return;
         }
 
-        const downloadUrl = `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup/download`;
-        const response = await axios({
+        const downloadResponse = await daemonRequest<import('stream').Readable>({
           method: 'GET',
-          url: downloadUrl,
+          path: '/container/backup/download',
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
           params: {
             backupPath: backup.filePath,
-          },
-          auth: {
-            username: 'Airlink',
-            password: server.node.key,
           },
           responseType: 'stream',
         });
@@ -388,16 +375,12 @@ export function registerBackupRoutes(router: Router): void {
         );
         res.setHeader('Content-Type', 'application/gzip');
 
-        response.data.pipe(res);
-      } catch (error) {
+        downloadResponse.data.pipe(res);
+      } catch (error: any) {
         logger.error('Error downloading backup:', error);
-        if (axios.isAxiosError(error)) {
-          res.status(500).json({
-            error: `Failed to download backup: ${error.response?.data?.error || error.message}`,
-          });
-        } else {
-          res.status(500).json({ error: 'Failed to download backup' });
-        }
+        res.status(500).json({
+          error: `Failed to download backup: ${error?.body?.error || error?.message || 'Failed to download backup'}`,
+        });
       }
     },
   );
@@ -444,18 +427,16 @@ export function registerBackupRoutes(router: Router): void {
           }
         } else {
           try {
-            await axios.delete(
-              `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/backup`,
-              {
-                data: {
-                  backupPath: backup.filePath,
-                },
-                auth: {
-                  username: 'Airlink',
-                  password: server.node.key,
-                },
+            await daemonRequest({
+              method: 'DELETE',
+              path: '/container/backup',
+              nodeAddress: server.node.address,
+              nodePort: server.node.port,
+              nodeKey: server.node.key,
+              body: {
+                backupPath: backup.filePath,
               },
-            );
+            });
           } catch {
             logger.warn('Failed to delete backup file from daemon');
           }

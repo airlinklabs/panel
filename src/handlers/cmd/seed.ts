@@ -1,5 +1,5 @@
 import { createInterface } from 'readline';
-import axios from 'axios';
+import { httpGet } from '../../utils/http';
 import prisma from '../../db';
 
 /**
@@ -72,8 +72,8 @@ class Seeder {
   private async fetchImageData(url: string): Promise<ImageData | null> {
     try {
       console.info(`Fetching image data from ${url}...`);
-      const { data } = await axios.get(url);
-      return data;
+      const response = await httpGet<ImageData>(url);
+      return response.data;
     } catch (error) {
       console.error(`Failed to fetch image data from ${url}:`, error);
       return null;
@@ -82,7 +82,8 @@ class Seeder {
 
   private async fetchAndProcessImages(): Promise<Record<string, any>[]> {
     console.info(`Fetching image index from ${IMAGES_URL}...`);
-    const { data: imageUrls } = await axios.get<string[]>(IMAGES_URL);
+    const response = await httpGet<string[]>(IMAGES_URL);
+    const imageUrls = response.data;
     console.info(`Found ${imageUrls.length} images in the index.`);
 
     const results = await Promise.allSettled(

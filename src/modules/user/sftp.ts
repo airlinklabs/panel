@@ -3,9 +3,8 @@ import { Module } from '../../handlers/moduleInit';
 import { isAuthenticatedForServer } from '../../handlers/utils/auth/serverAuthUtil';
 import { getParamAsString } from '../../utils/typeHelpers';
 import prisma from '../../db';
-import axios from 'axios';
 import logger from '../../handlers/logger';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 import bcrypt from 'bcryptjs';
 
 
@@ -84,11 +83,13 @@ const sftpModule: Module = {
 
           if (existing) {
             try {
-              await axios({
+              await daemonRequest({
+                nodeAddress: server.node.address,
+                nodePort: server.node.port,
+                nodeKey: server.node.key,
                 method: 'DELETE',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/sftp/credentials`,
-                data: { id: server.UUID },
-                auth: { username: 'Airlink', password: server.node.key },
+                path: '/sftp/credentials',
+                body: { id: server.UUID },
                 timeout: 10000,
               });
             } catch {
@@ -96,15 +97,17 @@ const sftpModule: Module = {
             }
           }
 
-          const response = await axios({
+          const response = await daemonRequest({
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
             method: 'POST',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/sftp/credentials`,
-            data: { id: server.UUID },
-            auth: { username: 'Airlink', password: server.node.key },
+            path: '/sftp/credentials',
+            body: { id: server.UUID },
             timeout: 15000,
           });
 
-          const { username, password, port, expiresAt } = response.data;
+          const { username, password, port, expiresAt } = response.data as any;
           const host = server.node.address;
           const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -116,9 +119,10 @@ const sftpModule: Module = {
 
           res.json({ username, password, host, port, expiresAt });
         } catch (error) {
-          if (axios.isAxiosError(error)) {
-            const status = error.response?.status || 500;
-            const message = error.response?.data?.error || 'Failed to generate SFTP credentials.';
+          if (error instanceof Error && 'status' in error) {
+            const httpErr = error as unknown as { status: number; body?: { error?: string } };
+            const status = httpErr.status || 500;
+            const message = httpErr.body?.error || 'Failed to generate SFTP credentials.';
             res.status(status).json({ error: message });
           } else {
             logger.error('SFTP credential request error:', error);
@@ -150,11 +154,13 @@ const sftpModule: Module = {
             return;
           }
 
-          await axios({
+          await daemonRequest({
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
             method: 'DELETE',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/sftp/credentials`,
-            data: { id: server.UUID },
-            auth: { username: 'Airlink', password: server.node.key },
+            path: '/sftp/credentials',
+            body: { id: server.UUID },
             timeout: 10000,
           });
 
@@ -164,9 +170,10 @@ const sftpModule: Module = {
 
           res.json({ message: 'SFTP credentials revoked.' });
         } catch (error) {
-          if (axios.isAxiosError(error)) {
-            const status = error.response?.status || 500;
-            const message = error.response?.data?.error || 'Failed to revoke SFTP credentials.';
+          if (error instanceof Error && 'status' in error) {
+            const httpErr = error as unknown as { status: number; body?: { error?: string } };
+            const status = httpErr.status || 500;
+            const message = httpErr.body?.error || 'Failed to revoke SFTP credentials.';
             res.status(status).json({ error: message });
           } else {
             logger.error('SFTP revocation error:', error);

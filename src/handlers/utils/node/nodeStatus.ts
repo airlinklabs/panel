@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { httpGet, isHttpError } from '../../../utils/http';
 import { daemonSchemeSync } from '../core/daemonRequest';
 import logger from '../../logger';
 
@@ -13,24 +13,24 @@ interface Node {
   error?: string;
 }
 
+interface DaemonStatusResponse {
+  versionFamily?: string;
+  versionRelease?: string;
+  status?: string;
+  remote?: boolean;
+}
+
 export async function checkNodeStatus(node: Node): Promise<Node> {
   try {
     const url = `${daemonSchemeSync()}://${node.address}:${node.port}`;
 
-    const requestData = {
-      method: 'get',
-      url,
+    const response = await httpGet<DaemonStatusResponse>(url, {
       auth: {
         username: 'Airlink',
         password: node.key,
       },
-      headers: {
-        'Content-Type': 'application/json',
-      },
       timeout: 3000,
-    };
-
-    const response = await axios(requestData);
+    });
 
     const { versionFamily, versionRelease, status, remote } = response.data;
 
@@ -46,15 +46,20 @@ export async function checkNodeStatus(node: Node): Promise<Node> {
   } catch (error) {
     node.status = 'Offline';
 
-    if (axios.isAxiosError(error)) {
-      if (error.code === 'ECONNREFUSED') {
-        node.error = 'Connection refused - daemon may be offline';
-      } else if (error.code === 'ETIMEDOUT') {
-        node.error = 'Connection timed out';
-      } else if (error.code === 'ENOTFOUND') {
-        node.error = 'Host not found - check address';
+    if (isHttpError(error)) {
+      if (error.status === 0) {
+        const code = (error as unknown as { code?: string }).code;
+        if (code === 'ECONNREFUSED') {
+          node.error = 'Connection refused - daemon may be offline';
+        } else if (code === 'ETIMEDOUT') {
+          node.error = 'Connection timed out';
+        } else if (code === 'ENOTFOUND') {
+          node.error = 'Host not found - check address';
+        } else {
+          node.error = ((error as unknown as { body?: { message?: string } }).body?.message) || 'Connection failed';
+        }
       } else {
-        node.error = error.response?.data?.message || 'Connection failed';
+        node.error = ((error as unknown as { body?: { message?: string } }).body?.message) || 'Connection failed';
       }
     } else {
       node.error = 'An unexpected error occurred';

@@ -50,7 +50,8 @@ const authModule: Module = {
         req.session.destroy((err) => {
           if (err) {
             logger.error('Session destruction error', err);
-            return res.status(500).json({ error: 'logout_error' });
+            res.status(500).json({ error: 'logout_error' });
+            return;
           }
           res.clearCookie('connect.sid');
           res.redirect('/');
@@ -58,6 +59,7 @@ const authModule: Module = {
       } else {
         res.redirect('/');
       }
+      return;
     });
 
     return router;

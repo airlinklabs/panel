@@ -4,9 +4,8 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { checkNodeStatus } from '../../handlers/utils/node/nodeStatus';
 import logger from '../../handlers/logger';
-import axios from 'axios';
 import { getParamAsNumber } from '../../utils/typeHelpers';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 
 
 function generateApiKey(length: number): string {
@@ -57,6 +56,7 @@ async function listNodes(res: Response, includeServers = false) {
   } catch (error) {
     logger.error('Error fetching nodes:', error);
     res.status(500).json({ message: 'Error fetching nodes.' });
+    return;
   }
 }
 
@@ -257,14 +257,15 @@ const adminModule: Module = {
               if (node) {
                 await Promise.allSettled(
                   node.servers.map((server) =>
-                    axios.delete(
-                      `${daemonSchemeSync()}://${node.address}:${node.port}/container`,
-                      {
-                        auth: { username: 'Airlink', password: node.key },
-                        data: { id: server.UUID },
-                        timeout: 8000,
-                      },
-                    ),
+                    daemonRequest({
+                      nodeAddress: node.address,
+                      nodePort: node.port,
+                      nodeKey: node.key,
+                      method: 'DELETE',
+                      path: '/container',
+                      body: { id: server.UUID },
+                      timeout: 8000,
+                    }),
                   ),
                 );
               }
@@ -470,20 +471,15 @@ const adminModule: Module = {
         let stats: Record<string, unknown>;
 
         try {
-          const response = await axios.get(
-            `${daemonSchemeSync()}://${node.address}:${node.port}/stats`,
-            {
-              auth: {
-                username: 'Airlink',
-                password: node.key,
-              },
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            }
-          );
+          const response = await daemonRequest({
+            nodeAddress: node.address,
+            nodePort: node.port,
+            nodeKey: node.key,
+            method: 'GET',
+            path: '/stats',
+          });
 
-          stats = response.data;
+          stats = response.data as Record<string, unknown>;
         } catch {
           stats = { error: 'Unable to fetch stats from the node.' };
         }

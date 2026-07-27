@@ -30,7 +30,7 @@ export const apiValidator = (requiredPermission?: string) => {
       // When key hashing is enabled, look up the SHA-256 hash of the submitted
       // key — the raw value is never stored. Fall back to plaintext if not.
       const useHash = await hashingEnabled();
-      const lookupKey = useHash ? sha256(rawKey) : rawKey;
+      const lookupKey = useHash ? sha256(rawKey ?? '') : rawKey ?? '';
 
       const keyData = await prisma.apiKey.findUnique({ where: { key: lookupKey } });
 

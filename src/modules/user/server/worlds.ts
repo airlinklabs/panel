@@ -1,13 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
-import axios from 'axios';
 import { isWorld } from '../../../handlers/features';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
-import { daemonSchemeSync } from '../../../handlers/utils/core/daemonRequest';
+import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import {
   getServerStatusInput,
   getImageFeatures,
@@ -39,20 +38,15 @@ export function registerWorldsRoutes(router: Router): void {
         }
 
         try {
-          const worldsRequest = {
-            method: 'GET',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/list?id=${server.UUID}`,
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          };
-
           const serverStatusInput = getServerStatusInput(server);
-          const response = await axios(worldsRequest);
+          const response = await daemonRequest<any[]>({
+            method: 'GET',
+            path: '/fs/list',
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            params: { id: server.UUID },
+          });
           const Folders = response.data;
 
           const worlds = [];
@@ -80,17 +74,13 @@ export function registerWorldsRoutes(router: Router): void {
             req,
             settings,
           });
-        } catch (fileRequestError) {
-          if (axios.isAxiosError(fileRequestError)) {
-            if (
-              fileRequestError.code !== 'ECONNREFUSED' &&
-              fileRequestError.code !== 'ETIMEDOUT' &&
-              fileRequestError.code !== 'ENOTFOUND' &&
-              fileRequestError.code !== 'ERR_BAD_RESPONSE'
-            ) {
-              logger.error('Error fetching files:', fileRequestError);
-            }
-          } else {
+        } catch (fileRequestError: any) {
+          if (
+            fileRequestError?.code !== 'ECONNREFUSED' &&
+            fileRequestError?.code !== 'ETIMEDOUT' &&
+            fileRequestError?.code !== 'ENOTFOUND' &&
+            fileRequestError?.code !== 'ERR_BAD_RESPONSE'
+          ) {
             logger.error('Error fetching files:', fileRequestError);
           }
 

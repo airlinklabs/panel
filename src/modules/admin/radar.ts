@@ -6,10 +6,9 @@ import logger from '../../handlers/logger';
 import fs from 'fs/promises';
 import fsSync from 'fs';
 import path from 'path';
-import axios from 'axios';
-import FormData from 'form-data';
 import { getParamAsNumber } from '../../utils/typeHelpers';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
+import { httpGet, httpPost } from '../../utils/http';
 
 
 // In-memory rate limiter respecting VT free tier: 4/min, 500/day
@@ -149,13 +148,24 @@ const radarModule: Module = {
         }
 
         try {
-          const vtResponse = await axios.get(
+          const vtResponse = await httpGet<any>(
             `https://www.virustotal.com/api/v3/files/${hash}`,
             {
               headers: { 'x-apikey': apiKey },
               timeout: 15000,
             }
           );
+
+          if (vtResponse.status === 404) {
+            res.json({ success: true, found: false });
+            return;
+          }
+
+          if (vtResponse.status !== 200) {
+            logger.error('VirusTotal API error:', `Status ${vtResponse.status}`);
+            res.status(502).json({ success: false, error: 'VirusTotal request failed', message: `Status ${vtResponse.status}` });
+            return;
+          }
 
           const attrs = vtResponse.data?.data?.attributes;
           if (!attrs) {
@@ -181,13 +191,9 @@ const radarModule: Module = {
               : null,
             vtLink: `https://www.virustotal.com/gui/file/${hash}`,
           });
-        } catch (err: any) {
-          if (err?.response?.status === 404) {
-            res.json({ success: true, found: false });
-          } else {
-            logger.error('VirusTotal API error:', err?.message);
-            res.status(502).json({ success: false, error: 'VirusTotal request failed', message: err?.message });
-          }
+        } catch (err: unknown) {
+          logger.error('VirusTotal API error:', err instanceof Error ? err.message : err);
+          res.status(502).json({ success: false, error: 'VirusTotal request failed', message: err instanceof Error ? err.message : 'Unknown error' });
         }
       }
     );
@@ -228,36 +234,31 @@ const radarModule: Module = {
           const scriptContent = await fs.readFile(scriptPath, 'utf-8');
           const script = JSON.parse(scriptContent);
           
-          const response = await axios.post(
-            `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/radar/scan`,
-            {
+          const response = await daemonRequest({
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            method: 'POST',
+            path: '/radar/scan',
+            body: {
               id: server.UUID,
               script
             },
-            {
-              auth: {
-                username: 'Airlink',
-                password: server.node.key,
-              },
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              timeout: 60000
-            }
-          );
+            timeout: 60000
+          });
 
           const scanData = response.data;
 
           // Attach severity from the script pattern definitions to each result
           // so the frontend can colour-code without having to re-derive it
-          if (scanData && Array.isArray(scanData.results)) {
+          if (scanData && Array.isArray((scanData as any).results)) {
             const patternMap: Record<string, string> = {};
             for (const p of script.patterns) {
               const key = (p.description || '').toLowerCase();
               if (p.severity) patternMap[key] = p.severity;
             }
 
-            scanData.results = scanData.results.map((result: any) => {
+            (scanData as any).results = (scanData as any).results.map((result: any) => {
               const key = (result.pattern?.description || '').toLowerCase();
               return {
                 ...result,
@@ -326,26 +327,21 @@ const radarModule: Module = {
           // Ask the node to zip the scannable folders and stream back the archive.
           // Folders included: plugins, mods, config, addons, datapacks
           // Folders excluded: world, world_nether, world_the_end, logs, cache, crash-reports
-          const zipResponse = await axios.post(
-            `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/radar/zip`,
-            {
+          const zipResponse = await daemonRequest<Buffer>({
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            method: 'POST',
+            path: '/radar/zip',
+            body: {
               id: server.UUID,
               include: ['plugins', 'mods', 'config', 'addons', 'datapacks'],
               exclude: ['world', 'world_nether', 'world_the_end', 'logs', 'cache', 'crash-reports'],
               maxFileSizeMb: 32,
             },
-            {
-              auth: {
-                username: 'Airlink',
-                password: server.node.key,
-              },
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              responseType: 'arraybuffer',
-              timeout: 120000,
-            }
-          );
+            responseType: 'arraybuffer',
+            timeout: 120000,
+          });
 
           await fs.writeFile(tmpPath, zipResponse.data);
 
@@ -358,27 +354,40 @@ const radarModule: Module = {
           }
 
           // Upload the zip to VT
-          const form = new FormData();
-          form.append('file', fsSync.createReadStream(tmpPath), {
-            filename: `${server.name}-scan.zip`,
-            contentType: 'application/zip',
-          });
+          const fileBuffer = await fs.readFile(tmpPath);
+          const boundary = `----FormBoundary${Math.random().toString(36).slice(2)}`;
+          const fileName = `${server.name}-scan.zip`;
 
-          const uploadResponse = await axios.post(
+          const formBody = Buffer.concat([
+            Buffer.from(
+              `--${boundary}\r\n` +
+              `Content-Disposition: form-data; name="file"; filename="${fileName}"\r\n` +
+              `Content-Type: application/zip\r\n\r\n`
+            ),
+            fileBuffer,
+            Buffer.from(`\r\n--${boundary}--\r\n`),
+          ]);
+
+          const uploadResponse = await httpPost<Record<string, unknown>>(
             'https://www.virustotal.com/api/v3/files',
-            form,
+            formBody,
             {
-              headers: { ...form.getHeaders(), 'x-apikey': apiKey },
+              headers: {
+                'Content-Type': `multipart/form-data; boundary=${boundary}`,
+                'x-apikey': apiKey,
+              },
               timeout: 90000,
-              maxContentLength: Infinity,
-              maxBodyLength: Infinity,
-              // Accept 409 — VT returns "Conflict" when the file was already uploaded
-              // recently. The response body still contains the analysis ID we need.
-              validateStatus: (s) => s === 200 || s === 409,
             }
           );
 
-          const analysisId = uploadResponse.data?.data?.id;
+          // Accept 200 (success) or 409 (file already uploaded recently)
+          if (uploadResponse.status !== 200 && uploadResponse.status !== 409) {
+            res.status(502).json({ success: false, error: `VT returned status ${uploadResponse.status}` });
+            return;
+          }
+
+          const vtUploadData = uploadResponse.data as { data?: { id?: string } };
+          const analysisId = vtUploadData?.data?.id;
           if (!analysisId) {
             res.status(502).json({ success: false, error: 'VT did not return an analysis ID' });
             return;
@@ -390,7 +399,7 @@ const radarModule: Module = {
           for (let attempt = 0; attempt < 8; attempt++) {
             await new Promise(r => setTimeout(r, 20000));
 
-            const pollResponse = await axios.get(
+            const pollResponse = await httpGet<any>(
               `https://www.virustotal.com/api/v3/analyses/${analysisId}`,
               { headers: { 'x-apikey': apiKey }, timeout: 15000 }
             );
@@ -432,9 +441,9 @@ const radarModule: Module = {
             totalEngines: Object.keys(results).length,
             vtLink,
           });
-        } catch (err: any) {
-          logger.error('VT file scan error:', err?.message);
-          res.status(502).json({ success: false, error: err?.message || 'VT file scan failed' });
+        } catch (err: unknown) {
+          logger.error('VT file scan error:', err instanceof Error ? err.message : err);
+          res.status(502).json({ success: false, error: err instanceof Error ? err.message : 'VT file scan failed' });
         } finally {
           fs.unlink(tmpPath).catch(() => {});
         }

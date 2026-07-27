@@ -259,10 +259,11 @@ const adminModule: Module = {
           }
 
           if (Object.keys(data).length > 0) await saveSettings(data);
-          res.json({ success: true });
+          return res.json({ success: true });
         } catch (error) {
           logger.error('Error saving appearance settings:', error);
           res.status(500).json({ success: false, error: 'Failed to save settings.' });
+          return;
         }
       },
     );
@@ -329,10 +330,11 @@ const adminModule: Module = {
           }
           await saveSettings(securityData);
           await refreshSecurityCache();
-          res.json({ success: true });
+          return res.json({ success: true });
         } catch (error) {
           logger.error('Error saving security settings:', error);
           res.status(500).json({ success: false, error: 'Failed to save settings.' });
+          return;
         }
       },
     );
@@ -371,10 +373,11 @@ const adminModule: Module = {
             serverPolicyData.uploadLimit = parseInt(req.body.uploadLimit, 10) || 100;
           }
           await saveSettings(serverPolicyData);
-          res.json({ success: true });
+          return res.json({ success: true });
         } catch (error) {
           logger.error('Error saving server policy:', error);
           res.status(500).json({ success: false, error: 'Failed to save server policy.' });
+          return;
         }
       },
     );
@@ -395,10 +398,11 @@ const adminModule: Module = {
             banned.push(ip);
             await saveSettings({ bannedIps: JSON.stringify(banned) });
           }
-          res.json({ success: true, banned });
+          return res.json({ success: true, banned });
         } catch (error) {
           logger.error('Error banning IP:', error);
           res.status(500).json({ success: false, error: 'Failed to ban IP.' });
+          return;
         }
       },
     );
@@ -416,10 +420,11 @@ const adminModule: Module = {
           let banned: string[] = [];
           try { banned = JSON.parse(settings?.bannedIps || '[]'); } catch { banned = []; }
           await saveSettings({ bannedIps: JSON.stringify(banned.filter(b => b !== ip)) });
-          res.json({ success: true, banned: banned.filter(b => b !== ip) });
+          return res.json({ success: true, banned: banned.filter(b => b !== ip) });
         } catch (error) {
           logger.error('Error unbanning IP:', error);
           res.status(500).json({ success: false, error: 'Failed to unban IP.' });
+          return;
         }
       },
     );

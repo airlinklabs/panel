@@ -4,8 +4,7 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
 import { queueer } from '../../handlers/queueer';
-import axios from 'axios';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 import {
   getUsedExternalPorts,
   parseImagePortRequirements,
@@ -229,7 +228,7 @@ const userCreateServerModule: Module = {
                 const parsedPorts = JSON.parse(server.Ports);
                 const primary = parsedPorts.find((p: any) => p.primary);
                 if (primary?.Port) {
-                  serverPort = parseInt(String(primary.Port).split(':')[0]);
+                  serverPort = parseInt(String(primary.Port).split(':')[0] ?? '');
                 }
               } catch { /* keep fallback */ }
               serverEnv.push({ env: 'SERVER_PORT', value: serverPort });
@@ -245,8 +244,6 @@ const userCreateServerModule: Module = {
               acc[curr.env] = curr.value;
               return acc;
             }, {});
-
-            const daemonUrl = `${daemonSchemeSync()}://${server.node.address}:${server.node.port}`;
 
             if (!server.image?.scripts) {
               await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
@@ -265,15 +262,15 @@ const userCreateServerModule: Module = {
             try {
               if (scripts.installation && typeof scripts.installation === 'object') {
                 const inst = scripts.installation as { script: string; container: string; entrypoint: string };
-                await axios.post(
-                  `${daemonUrl}/container/installer`,
-                  { id: server.UUID, script: inst.script, container: inst.container, entrypoint: inst.entrypoint || 'bash', env },
-                  {
-                    auth: { username: 'Airlink', password: server.node.key },
-                    headers: { 'Content-Type': 'application/json' },
-                    timeout: 600000,
-                  },
-                );
+                await daemonRequest({
+                  nodeAddress: server.node.address,
+                  nodePort: server.node.port,
+                  nodeKey: server.node.key,
+                  method: 'POST',
+                  path: '/container/installer',
+                  body: { id: server.UUID, script: inst.script, container: inst.container, entrypoint: inst.entrypoint || 'bash', env },
+                  timeout: 600000,
+                });
               } else if (Array.isArray(scripts.install)) {
                 // Pass the docker image so the daemon can pull it during install
                 // rather than waiting until the first Start click.
@@ -283,9 +280,13 @@ const userCreateServerModule: Module = {
                   dockerImageValue = Object.values(parsed)[0] as string | undefined;
                 } catch { /* leave undefined */ }
 
-                await axios.post(
-                  `${daemonUrl}/container/install`,
-                  {
+                await daemonRequest({
+                  nodeAddress: server.node.address,
+                  nodePort: server.node.port,
+                  nodeKey: server.node.key,
+                  method: 'POST',
+                  path: '/container/install',
+                  body: {
                     id: server.UUID,
                     image: dockerImageValue,
                     env,
@@ -296,12 +297,8 @@ const userCreateServerModule: Module = {
                       fileName: s.fileName,
                     })),
                   },
-                  {
-                    auth: { username: 'Airlink', password: server.node.key },
-                    headers: { 'Content-Type': 'application/json' },
-                    timeout: 600000,
-                  },
-                );
+                  timeout: 600000,
+                });
               }
               await prisma.server.update({ where: { id: server.id }, data: { Queued: false } });
             } catch (err) {
@@ -310,10 +307,11 @@ const userCreateServerModule: Module = {
           }
         });
 
-        res.status(200).json({ success: true, serverUUID: createdServer.UUID });
+        return res.status(200).json({ success: true, serverUUID: createdServer.UUID });
       } catch (error) {
         logger.error('Error creating user server:', error);
         res.status(500).json({ error: 'Failed to create server.' });
+        return;
       }
     });
 
@@ -340,15 +338,18 @@ const userCreateServerModule: Module = {
 
         if (!force) {
           try {
-            await axios.delete(`${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container`, {
-              auth: { username: 'Airlink', password: server.node.key },
-              headers: { 'Content-Type': 'application/json' },
-              data: { id: server.UUID },
+            await daemonRequest({
+              nodeAddress: server.node.address,
+              nodePort: server.node.port,
+              nodeKey: server.node.key,
+              method: 'DELETE',
+              path: '/container',
+              body: { id: server.UUID },
             });
           } catch (err: any) {
             const isGone =
-              err.response?.status === 404 ||
-              err.response?.data?.error?.includes('not exist');
+              err.status === 404 ||
+              (err.body as any)?.error?.includes('not exist');
 
             if (!isGone) {
               logger.error('Error deleting container from daemon:', err);
@@ -360,10 +361,11 @@ const userCreateServerModule: Module = {
         }
 
         await prisma.server.delete({ where: { UUID: server.UUID } });
-        res.json({ success: true });
+        return res.json({ success: true });
       } catch (error) {
         logger.error('Error deleting user server:', error);
         res.status(500).json({ error: 'Failed to delete server.' });
+        return;
       }
     });
 

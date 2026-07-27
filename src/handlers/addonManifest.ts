@@ -171,30 +171,32 @@ export function isVersionInRange(version: string, range: string): boolean {
   while (parts.length < 3) parts.push(0);
   while (rangeParts.length < 3) rangeParts.push(null);
 
+  const cleanRangeParts = rangeParts.filter((x): x is number => x !== null);
+
   if (range.startsWith('>=')) {
-    return compareVersions(parts, rangeParts.slice(1)) >= 0;
+    return compareVersions(parts, cleanRangeParts.slice(1)) >= 0;
   }
   if (range.startsWith('>')) {
-    return compareVersions(parts, rangeParts.slice(1)) > 0;
+    return compareVersions(parts, cleanRangeParts.slice(1)) > 0;
   }
   if (range.startsWith('<=')) {
-    return compareVersions(parts, rangeParts.slice(1)) <= 0;
+    return compareVersions(parts, cleanRangeParts.slice(1)) <= 0;
   }
   if (range.startsWith('<')) {
-    return compareVersions(parts, rangeParts.slice(1)) < 0;
+    return compareVersions(parts, cleanRangeParts.slice(1)) < 0;
   }
   if (range.startsWith('=')) {
-    return compareVersions(parts, rangeParts.slice(1)) === 0;
+    return compareVersions(parts, cleanRangeParts.slice(1)) === 0;
   }
   if (range.includes(' - ')) {
     const [min, max] = range.split(' - ');
-    return compareVersions(parts, parseVersion(min)) >= 0 && compareVersions(parts, parseVersion(max)) <= 0;
+    return compareVersions(parts, parseVersion(min ?? '')) >= 0 && compareVersions(parts, parseVersion(max ?? '')) <= 0;
   }
   if (range.includes('||')) {
     return range.split('||').some(r => isVersionInRange(version, r.trim()));
   }
 
-  return compareVersions(parts, rangeParts) === 0;
+  return compareVersions(parts, cleanRangeParts) === 0;
 }
 
 function parseVersion(v: string): number[] {

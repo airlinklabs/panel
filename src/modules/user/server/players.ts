@@ -1,12 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
-import axios from 'axios';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
-import { daemonSchemeSync } from '../../../handlers/utils/core/daemonRequest';
+import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import {
   getServerStatusInput,
   getImageFeatures,
@@ -73,17 +72,22 @@ export function registerPlayersRoutes(router: Router): void {
             `Fetching players for server ${serverId} on port ${primaryPort}`,
           );
 
-          const playersResponse = await axios({
+          const playersResponse = await daemonRequest<{
+            online?: boolean;
+            version?: string;
+            players?: Array<{ name: string; uuid: string }>;
+            maxPlayers?: number;
+            onlinePlayers?: number;
+          }>({
             method: 'GET',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/minecraft/players`,
+            path: '/minecraft/players',
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
             params: {
               id: server.UUID,
               host: server.node.address,
               port: parseInt(primaryPort, 10),
-            },
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
             },
             timeout: 8000,
           });
@@ -115,19 +119,12 @@ export function registerPlayersRoutes(router: Router): void {
             logger.warn(`No valid data returned for server ${serverId}`);
             hadFetchError = true;
           }
-        } catch (error) {
-          if (axios.isAxiosError(error)) {
-            if (
-              error.code !== 'ECONNREFUSED' &&
-              error.code !== 'ETIMEDOUT' &&
-              error.code !== 'ENOTFOUND'
-            ) {
-              logger.error(
-                `Error fetching players from daemon for server ${serverId}:`,
-                error,
-              );
-            }
-          } else {
+        } catch (error: any) {
+          if (
+            error?.code !== 'ECONNREFUSED' &&
+            error?.code !== 'ETIMEDOUT' &&
+            error?.code !== 'ENOTFOUND'
+          ) {
             logger.error(
               `Error fetching players from daemon for server ${serverId}:`,
               error,

@@ -1,6 +1,6 @@
 
 import prisma from '../db';
-import axios from 'axios';
+import { httpGet } from '../utils/http';
 import logger from './logger';
 import { daemonSchemeSync } from './utils/core/daemonRequest';
 
@@ -41,20 +41,21 @@ export async function collectPlayerStats(): Promise<void> {
           }
 
           // Fetch player data from the daemon
-          const response = await axios({
-            method: 'GET',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/minecraft/players`,
-            params: {
-              id: server.UUID,
-              host: server.node.address,
-              port: primaryPort
+          const response = await httpGet<{ onlinePlayers?: number; maxPlayers?: number; online?: boolean }>(
+            `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/minecraft/players`,
+            {
+              params: {
+                id: server.UUID,
+                host: server.node.address,
+                port: primaryPort
+              },
+              auth: {
+                username: 'Airlink',
+                password: server.node.key,
+              },
+              timeout: 5000
             },
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
-            timeout: 5000
-          });
+          );
 
           return {
             serverId: server.UUID,
@@ -98,7 +99,7 @@ export async function collectPlayerStats(): Promise<void> {
     });
 
     if (oldestToKeep.length === MAX_DATA_POINTS) {
-      const oldestTimestamp = oldestToKeep[MAX_DATA_POINTS - 1].timestamp;
+      const oldestTimestamp = oldestToKeep[MAX_DATA_POINTS - 1]!.timestamp;
 
       await prisma.playerStats.deleteMany({
         where: {

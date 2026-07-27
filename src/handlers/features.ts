@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { httpGet, isHttpError } from '../utils/http';
 import prisma from '../db';
 import { checkNodeStatus } from './utils/node/nodeStatus';
 import logger from './logger';
@@ -32,17 +32,18 @@ export async function checkEulaStatus(serverId: string): Promise<CheckEulaResult
       return { accepted: true };
     }
 
-    const eulaResponse = await axios({
-      method: 'GET',
-      url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/file/content`,
-      responseType: 'text',
-      params: { id: server.UUID, path: 'eula.txt' },
-      auth: { username: 'Airlink', password: server.node.key },
-    });
+    const eulaResponse = await httpGet(
+      `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/file/content`,
+      {
+        responseType: 'text',
+        params: { id: server.UUID, path: 'eula.txt' },
+        auth: { username: 'Airlink', password: server.node.key },
+      },
+    );
 
     return { accepted: (eulaResponse.data as string).includes('eula=true') };
   } catch (error: any) {
-    if (error.response?.status === 404) {
+    if (isHttpError(error) && error.status === 404) {
       return { accepted: false };
     }
     return { accepted: false, error: 'An error occurred while checking the EULA status.' };
@@ -72,15 +73,16 @@ export const isWorld = async (folderName: string, serverInfo: ServerInfo): Promi
   }
 
   try {
-    const response = await axios({
-      method: 'GET',
-      url: `${daemonSchemeSync()}://${serverInfo.nodeAddress}:${serverInfo.nodePort}/fs/list`,
-      params: { id: serverInfo.serverUUID, path: folderName },
-      auth: { username: 'Airlink', password: serverInfo.nodeKey },
-      timeout: 5000,
-    });
+    const response = await httpGet<Array<{ name: string }>>(
+      `${daemonSchemeSync()}://${serverInfo.nodeAddress}:${serverInfo.nodePort}/fs/list`,
+      {
+        params: { id: serverInfo.serverUUID, path: folderName },
+        auth: { username: 'Airlink', password: serverInfo.nodeKey },
+        timeout: 5000,
+      },
+    );
 
-    const content: Array<{ name: string }> = response.data;
+    const content = response.data;
     const names = new Set(content.map((item) => item.name));
 
     const hasRequiredFiles = REQUIRED_WORLD_FILES.some((f) => names.has(f));
@@ -88,9 +90,9 @@ export const isWorld = async (folderName: string, serverInfo: ServerInfo): Promi
 
     return hasRequiredFiles && (content.length > 1 || hasCommonFiles);
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      const ignoredCodes = new Set(['ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND']);
-      if (!ignoredCodes.has(error.code || '')) {
+    if (isHttpError(error)) {
+      const ignoredCodes = new Set([0]);
+      if (!ignoredCodes.has(error.status)) {
         logger.error(`Error checking world folder content for ${folderName}:`, error);
       }
     } else {

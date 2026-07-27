@@ -86,7 +86,7 @@ export const loadModules = async (
       continue;
     }
 
-    const router = mod.router(wsInstance ? (r) => wsInstance.applyTo(r) : undefined);
+    const router = mod.router(wsInstance ? (r: any) => wsInstance.applyTo(r) : undefined);
     app.use(router);
     loaded++;
   }

@@ -50,6 +50,6 @@ export function translationMiddleware(
   next: () => void,
 ) {
   req.lang = req.cookies?.lang || 'en';
-  req.translations = loadTranslations(req.lang);
+  req.translations = loadTranslations(req.lang ?? 'en');
   next();
 }

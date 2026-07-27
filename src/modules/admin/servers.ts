@@ -3,10 +3,9 @@ import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
-import axios from 'axios';
 import { queueer } from '../../handlers/queueer';
 import { getParamAsNumber } from '../../utils/typeHelpers';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 import {
   getUsedExternalPorts,
   normalizeServerPorts,
@@ -214,23 +213,18 @@ const adminModule: Module = {
             try {
               logger.info(`Stopping server ${server.UUID} due to suspension`);
 
-              const stopRequestData = {
+              await daemonRequest({
+                nodeAddress: server.node.address,
+                nodePort: server.node.port,
+                nodeKey: server.node.key,
                 method: 'POST',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
-                auth: {
-                  username: 'Airlink',
-                  password: server.node.key,
-                },
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                data: {
+                path: '/container/stop',
+                body: {
                   id: String(server.UUID),
                   stopCmd: server.image?.stop || 'stop',
                 },
-              };
+              });
 
-              await axios(stopRequestData);
               logger.info(`Server ${server.UUID} stopped successfully due to suspension`);
             } catch (stopError) {
               logger.error(`Error stopping server ${server.UUID} during suspension:`, stopError);
@@ -484,7 +478,7 @@ const adminModule: Module = {
                   const parsedPorts = JSON.parse(server.Ports);
                   const primary = parsedPorts.find((p: any) => p.primary);
                   if (primary?.Port) {
-                    serverPort = String(primary.Port).split(':')[0];
+                    serverPort = String(primary.Port).split(':')[0] ?? '';
                   }
                 } catch { /* keep fallback */ }
                 ServerEnv.push({
@@ -528,8 +522,6 @@ const adminModule: Module = {
                 {},
               );
 
-              const daemonUrl = `${daemonSchemeSync()}://${server.node.address}:${server.node.port}`;
-
               if (server.image?.scripts) {
                 let scripts: Record<string, unknown>;
                 try {
@@ -549,21 +541,21 @@ const adminModule: Module = {
                       entrypoint: string;
                     };
 
-                    await axios.post(
-                      `${daemonUrl}/container/installer`,
-                      {
+                    await daemonRequest({
+                      nodeAddress: server.node.address,
+                      nodePort: server.node.port,
+                      nodeKey: server.node.key,
+                      method: 'POST',
+                      path: '/container/installer',
+                      body: {
                         id: server.UUID,
                         script: installation.script,
                         container: installation.container,
                         entrypoint: installation.entrypoint || 'bash',
                         env,
                       },
-                      {
-                        auth: { username: 'Airlink', password: server.node.key },
-                        headers: { 'Content-Type': 'application/json' },
-                        timeout: 600000,
-                      },
-                    );
+                      timeout: 600000,
+                    });
 
                   // Legacy ALC format: scripts.install is an array of file downloads
                   } else if (Array.isArray(scripts.install)) {
@@ -575,9 +567,13 @@ const adminModule: Module = {
                       dockerImageValue = Object.values(parsed)[0] as string | undefined;
                     } catch { /* leave undefined */ }
 
-                    await axios.post(
-                      `${daemonUrl}/container/install`,
-                      {
+                    await daemonRequest({
+                      nodeAddress: server.node.address,
+                      nodePort: server.node.port,
+                      nodeKey: server.node.key,
+                      method: 'POST',
+                      path: '/container/install',
+                      body: {
                         id: server.UUID,
                         image: dockerImageValue,
                         env,
@@ -588,23 +584,19 @@ const adminModule: Module = {
                           fileName: s.fileName,
                         })),
                       },
-                      {
-                        auth: { username: 'Airlink', password: server.node.key },
-                        headers: { 'Content-Type': 'application/json' },
-                      },
-                    );
+                    });
 
                     if (scripts.native && typeof scripts.native === 'object') {
                       const native = scripts.native as { CMD: string; container: string };
-                      await axios.post(
-                        `${daemonUrl}/container/installer`,
-                        { id: server.UUID, env, script: native.CMD, container: native.container, entrypoint: 'bash' },
-                        {
-                          auth: { username: 'Airlink', password: server.node.key },
-                          headers: { 'Content-Type': 'application/json' },
-                          timeout: 600000,
-                        },
-                      );
+                      await daemonRequest({
+                        nodeAddress: server.node.address,
+                        nodePort: server.node.port,
+                        nodeKey: server.node.key,
+                        method: 'POST',
+                        path: '/container/installer',
+                        body: { id: server.UUID, env, script: native.CMD, container: native.container, entrypoint: 'bash' },
+                        timeout: 600000,
+                      });
                     }
                   } else {
                     logger.info(`No install scripts for server ${server.id}, marking as installed`);
@@ -667,43 +659,41 @@ const adminModule: Module = {
               logger.info(`Deleting container ${server.UUID} on node ${server.node.address}:${server.node.port}`);
 
               try {
-                const response = await axios.delete(
-                  `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container`,
-                  {
-                    auth: {
-                      username: 'Airlink',
-                      password: server.node.key,
-                    },
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    data: {
-                      id: server.UUID,
-                    },
+                const response = await daemonRequest({
+                  nodeAddress: server.node.address,
+                  nodePort: server.node.port,
+                  nodeKey: server.node.key,
+                  method: 'DELETE',
+                  path: '/container',
+                  body: {
+                    id: server.UUID,
                   },
-                );
+                });
 
                 if (response.status !== 200) {
-                  throw new Error(`Daemon returned status ${response.status}: ${JSON.stringify(response.data)}`);
-                }
+                  const isNotFound =
+                    response.status === 404 ||
+                    (response.data && typeof response.data === 'object' && 'error' in response.data &&
+                     typeof (response.data as any).error === 'string' &&
+                     (response.data as any).error.includes('not exist'));
 
-                logger.info(`Successfully deleted container ${server.UUID} on daemon`);
+                  if (isNotFound) {
+                    logger.warn(`Container ${server.UUID} not found on daemon, proceeding with database cleanup`);
+                  } else {
+                    throw new Error(`Daemon returned status ${response.status}: ${JSON.stringify(response.data)}`);
+                  }
+                } else {
+                  logger.info(`Successfully deleted container ${server.UUID} on daemon`);
+                }
               } catch (error: unknown) {
                 logger.error('Error deleting container on daemon:', error);
+                const errorMessage = error instanceof Error ? error.message : String(error);
 
-                const daemonError = error as any;
-                const isNotFoundError =
-                  daemonError.response &&
-                  (daemonError.response.status === 404 ||
-                   (daemonError.response.data && daemonError.response.data.error &&
-                    typeof daemonError.response.data.error === 'string' &&
-                    daemonError.response.data.error.includes('not exist')));
-
-                if (!isNotFoundError) {
-                  throw new Error(`Daemon unreachable${daemonError?.message ? `: ${String(daemonError.message)}` : ''}. Use ?force=true to remove from panel only.`, { cause: error });
-                } else {
-                  logger.warn(`Container ${server.UUID} not found on daemon, proceeding with database cleanup`);
+                if (errorMessage.startsWith('Daemon returned status')) {
+                  throw new Error(`Daemon unreachable: ${errorMessage}. Use ?force=true to remove from panel only.`, { cause: error });
                 }
+
+                throw new Error(`Daemon unreachable${errorMessage ? `: ${errorMessage}` : ''}. Use ?force=true to remove from panel only.`, { cause: error });
               }
             }
 

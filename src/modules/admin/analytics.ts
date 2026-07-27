@@ -3,9 +3,8 @@ import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
-import axios from 'axios';
 import { registerPermission } from '../../handlers/permissions';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 
 
 registerPermission('airlink.admin.analytics.view');
@@ -71,7 +70,7 @@ const analyticsModule: Module = {
 
           const imageCounts: Record<string, { name: string | null; count: number }> = {};
           images.forEach(img => { imageCounts[img.id] = { name: img.name, count: 0 }; });
-          servers.forEach(srv => { if (imageCounts[srv.imageId]) imageCounts[srv.imageId].count++; });
+          servers.forEach(srv => { if (imageCounts[srv.imageId]) imageCounts[srv.imageId]!.count++; });
           const topImages = Object.values(imageCounts)
             .sort((a, b) => b.count - a.count)
             .filter(i => i.count > 0)
@@ -98,10 +97,12 @@ const analyticsModule: Module = {
             nodes.map(async node => {
               const serverCount = servers.filter(s => s.nodeId === node.id).length;
               try {
-                const r = await axios({
-                  method: 'get',
-                  url: `${daemonSchemeSync()}://${node.address}:${node.port}`,
-                  auth: { username: 'Airlink', password: node.key },
+                const r = await daemonRequest({
+                  nodeAddress: node.address,
+                  nodePort: node.port,
+                  nodeKey: node.key,
+                  method: 'GET',
+                  path: '/',
                   timeout: TIMEOUT,
                 });
                 return {
@@ -114,8 +115,8 @@ const analyticsModule: Module = {
                   ram:            node.ram,
                   cpu:            node.cpu,
                   disk:           node.disk,
-                  versionFamily:  r.data?.versionFamily ?? null,
-                  versionRelease: r.data?.versionRelease ?? null,
+                  versionFamily:  (r.data as any)?.versionFamily ?? null,
+                  versionRelease: (r.data as any)?.versionRelease ?? null,
                 };
               } catch {
                 return {

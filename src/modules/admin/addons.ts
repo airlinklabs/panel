@@ -45,7 +45,7 @@ function isSafeCommand(cmd: string): boolean {
 
 function parseCommand(cmd: string): { bin: string; args: string[] } {
   const parts = cmd.trim().split(/\s+/);
-  return { bin: parts[0], args: parts.slice(1) };
+  return { bin: parts[0] ?? '', args: parts.slice(1) };
 }
 
 function validateCommandArgs(bin: string, args: string[], workDir: string): { safe: boolean; error?: string } {
@@ -86,7 +86,7 @@ async function* runInstall(
   }
 
   for (const key of keys) {
-    const cmd = commands[key].trim();
+    const cmd = commands[key]?.trim() ?? '';
 
     if (!isSafeCommand(cmd)) {
       yield { type: 'error', message: `Command not permitted: "${cmd}"` };
@@ -256,10 +256,10 @@ const addonsModule: Module = {
             })
           );
 
-          res.json({ success: true, addons: addonData.filter(Boolean) });
+          return res.json({ success: true, addons: addonData.filter(Boolean) });
         } catch (error: any) {
           logger.error('Error fetching addon store list:', error);
-          res.status(500).json({ success: false, message: error.message });
+          return res.status(500).json({ success: false, message: error.message });
         }
       }
     );
@@ -299,9 +299,9 @@ const addonsModule: Module = {
             if (d.title) counts[d.title.toLowerCase()] = d.comments.totalCount;
           }
 
-          res.json({ success: true, counts });
+          return res.json({ success: true, counts });
         } catch {
-          res.json({ success: true, counts: {} });
+          return res.json({ success: true, counts: {} });
         }
       }
     );
@@ -409,7 +409,7 @@ const addonsModule: Module = {
           send({ type: 'error', message: error.message });
         }
 
-        res.end();
+        return res.end();
       }
     );
 
@@ -432,7 +432,7 @@ const addonsModule: Module = {
           const settingsMap: Record<string, string> = {};
           for (const s of allSettings) settingsMap[s.key] = s.value;
 
-          res.json({
+          return res.json({
             success: true,
             addon,
             manifest: result.success ? result.manifest : null,
@@ -440,7 +440,7 @@ const addonsModule: Module = {
             settings: settingsMap,
           });
         } catch (error: any) {
-          res.status(500).json({ success: false, message: error.message });
+          return res.status(500).json({ success: false, message: error.message });
         }
       }
     );
@@ -524,9 +524,9 @@ const addonsModule: Module = {
             });
           }
 
-          res.json({ success: true, message: 'Settings saved' });
+          return res.json({ success: true, message: 'Settings saved' });
         } catch (error: any) {
-          res.status(500).json({ success: false, message: error.message });
+          return res.status(500).json({ success: false, message: error.message });
         }
       }
     );
@@ -567,9 +567,9 @@ const addonsModule: Module = {
             update: { value: enabled ? 'true' : 'false' },
           });
 
-          res.json({ success: true, message: `Capability "${capability}" ${enabled ? 'enabled' : 'disabled'}` });
+          return res.json({ success: true, message: `Capability "${capability}" ${enabled ? 'enabled' : 'disabled'}` });
         } catch (error: any) {
-          res.status(500).json({ success: false, message: error.message });
+          return res.status(500).json({ success: false, message: error.message });
         }
       }
     );
@@ -595,10 +595,10 @@ const addonsModule: Module = {
           await uninstallAddon(slug, req.app);
           await reloadAddons(req.app);
 
-          res.json({ success: true, message: `Addon "${slug}" uninstalled` });
+          return res.json({ success: true, message: `Addon "${slug}" uninstalled` });
         } catch (error: any) {
           logger.error('Error uninstalling addon:', error);
-          res.status(500).json({ success: false, message: error.message });
+          return res.status(500).json({ success: false, message: error.message });
         }
       }
     );

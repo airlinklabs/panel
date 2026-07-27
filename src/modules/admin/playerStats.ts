@@ -3,10 +3,9 @@ import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import logger from '../../handlers/logger';
-import axios from 'axios';
 import { registerPermission } from '../../handlers/permissions';
 import { collectPlayerStats } from '../../handlers/playerStatsCollector';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { daemonRequest } from '../../handlers/utils/core/daemonRequest';
 
 registerPermission('airlink.admin.playerstats.view');
 
@@ -95,17 +94,16 @@ const adminModule: Module = {
                   };
                 }
 
-                const response = await axios({
+                const response = await daemonRequest({
+                  nodeAddress: server.node.address,
+                  nodePort: server.node.port,
+                  nodeKey: server.node.key,
                   method: 'GET',
-                  url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/minecraft/players`,
+                  path: '/minecraft/players',
                   params: {
                     id: server.UUID,
                     host: server.node.address,
                     port: primaryPort
-                  },
-                  auth: {
-                    username: 'Airlink',
-                    password: server.node.key,
                   },
                   timeout: 5000
                 });
@@ -113,10 +111,10 @@ const adminModule: Module = {
                 return {
                   serverId: server.UUID,
                   serverName: server.name,
-                  playerCount: response.data.onlinePlayers || 0,
-                  maxPlayers: response.data.maxPlayers || 0,
-                  online: response.data.online || false,
-                  version: response.data.version || 'Unknown'
+                  playerCount: (response.data as any)?.onlinePlayers || 0,
+                  maxPlayers: (response.data as any)?.maxPlayers || 0,
+                  online: (response.data as any)?.online || false,
+                  version: (response.data as any)?.version || 'Unknown'
                 };
               } catch {
                 return {

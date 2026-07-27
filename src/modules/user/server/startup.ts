@@ -1,12 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
-import axios from 'axios';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
-import { daemonSchemeSync } from '../../../handlers/utils/core/daemonRequest';
+import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import {
   type ErrorMessage,
   type ServerVariable,
@@ -162,17 +161,14 @@ export function registerStartupRoutes(router: Router): void {
           `Startup command updated in database for server ${serverId}`,
         );
         try {
-          const statusRequest = {
+          const statusResponse = await daemonRequest<{ running?: boolean }>({
             method: 'GET',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status`,
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
-            params: { id: serverId },
-          };
-
-          const statusResponse = await axios(statusRequest);
+            path: '/container/status',
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            params: { id: getParamAsString(serverId) },
+          });
           const isRunning = statusResponse.data?.running === true;
 
           if (isRunning) {
@@ -320,17 +316,14 @@ export function registerStartupRoutes(router: Router): void {
         );
 
         try {
-          const statusRequest = {
+          const statusResponse = await daemonRequest<{ running?: boolean }>({
             method: 'GET',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status`,
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
-            params: { id: serverId },
-          };
-
-          const statusResponse = await axios(statusRequest);
+            path: '/container/status',
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            params: { id: getParamAsString(serverId) },
+          });
           const isRunning = statusResponse.data?.running === true;
 
           if (isRunning) {
@@ -478,17 +471,14 @@ export function registerStartupRoutes(router: Router): void {
         logger.info(`Variables updated in database for server ${serverId}`);
 
         try {
-          const statusRequest = {
+          const statusResponse = await daemonRequest<{ running?: boolean }>({
             method: 'GET',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status`,
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
-            params: { id: serverId },
-          };
-
-          const statusResponse = await axios(statusRequest);
+            path: '/container/status',
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            params: { id: getParamAsString(serverId) },
+          });
           const isRunning = statusResponse.data?.running === true;
 
           if (isRunning) {

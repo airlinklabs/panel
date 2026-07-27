@@ -2,11 +2,10 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Module } from '../../../handlers/moduleInit';
 import prisma from '../../../db';
 import logger from '../../../handlers/logger';
-import axios from 'axios';
 import { queueer } from '../../../handlers/queueer';
 import bcrypt from 'bcryptjs';
 import { getParamAsNumber } from '../../../utils/typeHelpers';
-import { daemonSchemeSync } from '../../../handlers/utils/core/daemonRequest';
+import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 
 
 const coreModule: Module = {
@@ -42,7 +41,7 @@ const coreModule: Module = {
         return;
       }
 
-      const apiKey = authHeader.split(' ')[1];
+      const apiKey = authHeader.split(' ')[1] ?? '';
 
       if (validKeys.includes(apiKey)) {
         next();
@@ -482,7 +481,7 @@ const coreModule: Module = {
         );
         const usedPorts = servers.flatMap((server: any) =>
           JSON.parse(server.Ports).map((portInfo: { Port: string }) =>
-            parseInt(portInfo.Port.split(':')[0]),
+            parseInt(portInfo.Port.split(':')[0] ?? ''),
           ),
         );
 
@@ -668,19 +667,14 @@ const coreModule: Module = {
                 };
 
                 try {
-                  await axios.post(
-                    `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/install`,
-                    requestBody,
-                    {
-                      auth: {
-                        username: 'Airlink',
-                        password: server.node.key,
-                      },
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                    },
-                  );
+                  await daemonRequest({
+                    nodeAddress: server.node.address,
+                    nodePort: server.node.port,
+                    nodeKey: server.node.key,
+                    method: 'POST',
+                    path: '/container/install',
+                    body: requestBody,
+                  });
 
                   await prisma.server.update({
                     where: { id: server.id },

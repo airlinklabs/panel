@@ -59,10 +59,10 @@ const folderModule: Module = {
           include: { members: true },
         });
 
-        res.json({ success: true, folder });
+        return res.json({ success: true, folder });
       } catch (error) {
         logger.error('Error creating folder:', error);
-        res.status(500).json({ success: false, error: 'Failed to create folder.' });
+        return res.status(500).json({ success: false, error: 'Failed to create folder.' });
       }
     });
 
@@ -88,10 +88,10 @@ const folderModule: Module = {
           include: { members: true },
         });
 
-        res.json({ success: true, folder: updated });
+        return res.json({ success: true, folder: updated });
       } catch (error) {
         logger.error('Error renaming folder:', error);
-        res.status(500).json({ success: false, error: 'Failed to rename folder.' });
+        return res.status(500).json({ success: false, error: 'Failed to rename folder.' });
       }
     });
 
@@ -108,10 +108,10 @@ const folderModule: Module = {
         if (folder.ownerId !== userId) return res.status(403).json({ success: false, error: 'Not your folder.' });
 
         await prisma.serverFolder.delete({ where: { id: folderId } });
-        res.json({ success: true });
+        return res.json({ success: true });
       } catch (error) {
         logger.error('Error deleting folder:', error);
-        res.status(500).json({ success: false, error: 'Failed to delete folder.' });
+        return res.status(500).json({ success: false, error: 'Failed to delete folder.' });
       }
     });
 
@@ -140,10 +140,10 @@ const folderModule: Module = {
           update: { folderId },
         });
 
-        res.json({ success: true, member });
+        return res.json({ success: true, member });
       } catch (error) {
         logger.error('Error adding server to folder:', error);
-        res.status(500).json({ success: false, error: 'Failed to add server to folder.' });
+        return res.status(500).json({ success: false, error: 'Failed to add server to folder.' });
       }
     });
 
@@ -158,10 +158,10 @@ const folderModule: Module = {
         if (server.ownerId !== userId) return res.status(403).json({ success: false, error: 'Not your server.' });
 
         await prisma.serverFolderMember.deleteMany({ where: { serverUUID } });
-        res.json({ success: true });
+        return res.json({ success: true });
       } catch (error) {
         logger.error('Error removing server from folder:', error);
-        res.status(500).json({ success: false, error: 'Failed to remove server from folder.' });
+        return res.status(500).json({ success: false, error: 'Failed to remove server from folder.' });
       }
     });
 

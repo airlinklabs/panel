@@ -18,7 +18,6 @@ import {
   initializeDefaultUIComponents,
   uiComponentStore,
 } from './handlers/uiComponentHandler';
-import { installDaemonRequestInterceptor } from './handlers/utils/core/daemonRequest';
 import { startPlayerStatsCollection } from './handlers/playerStatsCollector';
 import { initEggCatalogue } from './handlers/eggCatalogueService';
 import crypto from 'crypto';
@@ -304,7 +303,8 @@ setInterval(refreshSecurityCache, 30_000);
 app.use((req, res, next) => {
   const clientIp = req.ip || req.socket.remoteAddress || '';
   if (getSecurityCache().bannedIps.includes(clientIp)) {
-    return renderErrorPage(req, res, 403, 'Your IP address is blocked from this panel.');
+    renderErrorPage(req, res, 403, 'Your IP address is blocked from this panel.');
+    return;
   }
   next();
 });
@@ -433,7 +433,7 @@ app.use((_req, res, next) => {
   res.locals.isMobileViewport = isMobileViewport;
 
   const originalRenderBase = res.render.bind(res);
-  res.render = function (view: string, options?: Record<string, unknown> | ((err: Error | null, html?: string) => void), callback?: (err: Error | null, html?: string) => void) {
+  (res as any).render = function (view: string, options?: Record<string, unknown>, callback?: (err: Error, html: string) => void) {
     const isAbsolutePath = path.isAbsolute(view);
     const isAddonView = view.includes('/storage/addons/') || view.includes('\\storage\\addons\\');
 
@@ -447,10 +447,10 @@ app.use((_req, res, next) => {
       const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
       (ejs as any).renderFile(view, data, {}, (err: Error | null, html: string) => {
         if (err) {
-          if (typeof callback === 'function') return callback(err);
+          if (typeof callback === 'function') return callback(err, '');
           return res.status(500).send('View render error: ' + err.message);
         }
-        if (typeof callback === 'function') return callback(null, html);
+        if (typeof callback === 'function') return callback(null!, html);
         res.send(html);
       });
       return;
@@ -474,10 +474,10 @@ app.use((_req, res, next) => {
           const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
           (ejs as any).renderFile(addonViewPath, data, {}, (err: Error | null, html: string) => {
             if (err) {
-              if (typeof callback === 'function') return callback(err);
+              if (typeof callback === 'function') return callback(err, '');
               return res.status(500).send('View render error: ' + err.message);
             }
-            if (typeof callback === 'function') return callback(null, html);
+            if (typeof callback === 'function') return callback(null!, html);
             res.send(html);
           });
           return;
@@ -494,10 +494,10 @@ app.use((_req, res, next) => {
           const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
           (ejs as any).renderFile(addonViewPath, data, {}, (err: Error | null, html: string) => {
             if (err) {
-              if (typeof callback === 'function') return callback(err);
+              if (typeof callback === 'function') return callback(err, '');
               return res.status(500).send('View render error: ' + err.message);
             }
-            if (typeof callback === 'function') return callback(null, html);
+            if (typeof callback === 'function') return callback(null!, html);
             res.send(html);
           });
           return;
@@ -522,8 +522,6 @@ app.use(errorPageHandler);
   try {
     await databaseLoader();
     await settingsLoader();
-    // Install HMAC signing interceptor for all panel→daemon requests
-    installDaemonRequestInterceptor();
     // Initialize default UI components
     initializeDefaultUIComponents();
     await loadModules(app, airlinkVersion, Number(port), expressWsInstance);

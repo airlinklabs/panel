@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import type { Prisma, Users, settings as PanelSettings } from '../../../generated/prisma/client';
 import prisma from '../../../db';
 import { getParamAsString } from '../../../utils/typeHelpers';
-import { daemonSchemeSync } from '../../../handlers/utils/core/daemonRequest';
+import { daemonRequest, daemonSchemeSync } from '../../../handlers/utils/core/daemonRequest';
 import { getPrimaryExternalPort, portsToDaemonString } from '../../../handlers/utils/server/ports';
 
 declare global {
@@ -220,13 +220,13 @@ export async function stopServerContainer(
   serverId: string,
   stopCommand = server.image?.stop || 'stop',
 ): Promise<void> {
-  const { default: axios } = await import('axios');
-  await axios({
+  await daemonRequest({
     method: 'POST',
-    url: getServerDaemonAddress(server, '/container/stop'),
-    auth: getServerDaemonAuth(server),
-    headers: { 'Content-Type': 'application/json' },
-    data: {
+    path: '/container/stop',
+    nodeAddress: server.node.address,
+    nodePort: server.node.port,
+    nodeKey: server.node.key,
+    body: {
       id: serverId,
       stopCmd: stopCommand,
     },
@@ -242,18 +242,18 @@ export async function startServerContainer(
     variables?: string | null | ServerVariable[];
   } = {},
 ): Promise<void> {
-  const { default: axios } = await import('axios');
   const dockerImage = options.dockerImage ?? getConfiguredDockerImage(server);
   if (!dockerImage) {
     throw new Error('Docker image not found.');
   }
 
-  await axios({
+  await daemonRequest({
     method: 'POST',
-    url: getServerDaemonAddress(server, '/container/start'),
-    auth: getServerDaemonAuth(server),
-    headers: { 'Content-Type': 'application/json' },
-    data: {
+    path: '/container/start',
+    nodeAddress: server.node.address,
+    nodePort: server.node.port,
+    nodeKey: server.node.key,
+    body: {
       id: serverId,
       image: dockerImage,
       ports: portsToDaemonString(server.Ports),

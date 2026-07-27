@@ -1,11 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
-import axios from 'axios';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
+import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import {
   type ErrorMessage,
   loadAuthenticatedServerContext,
@@ -45,15 +45,13 @@ export function registerFileDetailRoutes(router: Router): void {
           return;
         }
 
-        const response = await axios({
+        const response = await daemonRequest<string>({
           method: 'GET',
-          url: `${getServerDaemonAddress(server, '/fs/file/content')}`,
-          responseType: 'text',
+          path: '/fs/file/content',
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
           params: { id: server.UUID, path: filePath },
-          auth: {
-            username: 'Airlink',
-            password: server.node.key,
-          },
         });
 
         const extension = getParamAsString(filePath).split('.').pop()?.toLowerCase() || '';
@@ -144,15 +142,17 @@ export function registerFileDetailRoutes(router: Router): void {
         }
         const { server } = context;
 
-        await axios({
+        await daemonRequest({
           method: 'POST',
-          url: getServerDaemonAddress(server, '/fs/file/content'),
-          data: {
+          path: '/fs/file/content',
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
+          body: {
             id: server.UUID,
             path: filePath,
             content: content,
           },
-          auth: getServerDaemonAuth(server),
         });
 
         res.json({ success: true });
@@ -176,15 +176,17 @@ export function registerFileDetailRoutes(router: Router): void {
       const { server } = context;
 
       try {
-        await axios({
+        await daemonRequest({
           method: 'POST',
-          url: getServerDaemonAddress(server, '/fs/file/content'),
-          data: {
+          path: '/fs/file/content',
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
+          body: {
             id: server.UUID,
             path: 'eula.txt',
             content: 'eula=true',
           },
-          auth: getServerDaemonAuth(server),
         });
 
         res.status(200).json({ success: true });

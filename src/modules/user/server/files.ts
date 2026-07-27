@@ -1,14 +1,13 @@
 import { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
-import axios from 'axios';
 import multer from 'multer';
 import { isWorld } from '../../../handlers/features';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
-import { daemonSchemeSync } from '../../../handlers/utils/core/daemonRequest';
+import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import {
   type ErrorMessage,
   type ServerPageServer,
@@ -61,19 +60,16 @@ export function registerFilesRoutes(router: Router): void {
           return;
         }
 
-        const filesRequest = {
+        const filesResponse = await daemonRequest<any[]>({
           method: 'GET',
-          url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/list?id=${server.UUID}&path=${path}`,
-          auth: {
-            username: 'Airlink',
-            password: server.node.key,
-          },
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        };
+          path: '/fs/list',
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
+          params: { id: server.UUID, path },
+        });
 
-        let files = (await axios(filesRequest)).data as any[];
+        let files = filesResponse.data as any[];
         files = typeof files === 'string' ? JSON.parse(files) : files;
 
         files = files.filter((file: any) => file.name !== 'airlink');
@@ -103,17 +99,13 @@ export function registerFilesRoutes(router: Router): void {
           serverStatus,
           settings,
         });
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          if (
-            error.code !== 'ECONNREFUSED' &&
-            error.code !== 'ETIMEDOUT' &&
-            error.code !== 'ENOTFOUND' &&
-            error.code !== 'ERR_BAD_RESPONSE'
-          ) {
-            logger.error('Error fetching files:', error);
-          }
-        } else {
+      } catch (error: any) {
+        if (
+          error?.code !== 'ECONNREFUSED' &&
+          error?.code !== 'ETIMEDOUT' &&
+          error?.code !== 'ENOTFOUND' &&
+          error?.code !== 'ERR_BAD_RESPONSE'
+        ) {
           logger.error('Error fetching files:', error);
         }
 
@@ -170,11 +162,13 @@ export function registerFilesRoutes(router: Router): void {
         }
         const { server } = context;
 
-        const response = await axios({
+        const response = await daemonRequest<import('stream').Readable>({
           method: 'GET',
-          url: getServerDaemonAddress(server, '/fs/download'),
+          path: '/fs/download',
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
           params: { id: server.UUID, path: filePath },
-          auth: getServerDaemonAuth(server),
           responseType: 'stream',
         });
 
@@ -216,11 +210,13 @@ export function registerFilesRoutes(router: Router): void {
           relativePath = JSON.stringify(relativePath);
         }
 
-        const response: any = await axios({
+        const response = await daemonRequest<{ message?: string }>({
           method: 'POST',
-          url: getServerDaemonAddress(server, '/fs/zip'),
-          auth: getServerDaemonAuth(server),
-          data: {
+          path: '/fs/zip',
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
+          body: {
             id: serverId,
             path: relativePath,
             zipname: zipName,
@@ -230,17 +226,13 @@ export function registerFilesRoutes(router: Router): void {
         if (response.status === 200) {
           res.json({ success: true });
         } else {
-          res.status(response.status).json({ error: response.statusText });
+          res.status(response.status).json({ error: response.data?.message || 'Failed to zip files' });
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Error zipping files:', error);
-        if (axios.isAxiosError(error)) {
-          res
-            .status(500)
-            .json({ error: 'Failed to zip files: ' + error.message });
-        } else {
-          res.status(500).json({ error: 'An unexpected error occurred.' });
-        }
+        res
+          .status(500)
+          .json({ error: 'Failed to zip files: ' + (error?.message || 'An unexpected error occurred.') });
       }
     },
   );
@@ -270,19 +262,19 @@ export function registerFilesRoutes(router: Router): void {
           .replace(/^\/|\/$/g, '');
         const cleanZipName = zipName.replace(/^\/+|\/+$/g, '');
 
-        const requestConfig = {
-          method: 'POST',
-          url: getServerDaemonAddress(server, '/fs/unzip'),
-          auth: getServerDaemonAuth(server),
-          data: {
-            id: serverId,
-            path: cleanPath,
-            zipname: cleanZipName,
-          },
-        };
-
         try {
-          const response = await axios(requestConfig);
+          const response = await daemonRequest<{ message?: string }>({
+            method: 'POST',
+            path: '/fs/unzip',
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            body: {
+              id: serverId,
+              path: cleanPath,
+              zipname: cleanZipName,
+            },
+          });
 
           if (response.status === 200) {
             res.json({ success: true });
@@ -292,28 +284,18 @@ export function registerFilesRoutes(router: Router): void {
               details: response.data,
             });
           }
-        } catch (axiosError) {
-          if (axios.isAxiosError(axiosError)) {
-            logger.error('Axios error:', {
-              error: axiosError,
-              response: axiosError.response?.data,
-              status: axiosError.response?.status,
-            });
-          } else {
-            logger.error('Unexpected error:', {
-              error: axiosError,
-            });
-          }
+        } catch (innerError: any) {
+          logger.error('Error during unzip request:', {
+            error: innerError,
+            response: innerError?.body,
+            status: innerError?.status,
+          });
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Error unzipping files:', error);
-        if (axios.isAxiosError(error)) {
-          res
-            .status(500)
-            .json({ error: 'Failed to unzip files: ' + error.message });
-        } else {
-          res.status(500).json({ error: 'An unexpected error occurred.' });
-        }
+        res
+          .status(500)
+          .json({ error: 'Failed to unzip files: ' + (error?.message || 'An unexpected error occurred.') });
       }
     },
   );
@@ -350,14 +332,16 @@ export function registerFilesRoutes(router: Router): void {
         }
 
         try {
-          await axios({
+          await daemonRequest({
             method: 'DELETE',
-            url: getServerDaemonAddress(server, '/fs/rm'),
-            data: {
+            path: '/fs/rm',
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            body: {
               id: server.UUID,
               path: filePath,
             },
-            auth: getServerDaemonAuth(server),
             timeout: 10000,
           });
 
@@ -366,24 +350,16 @@ export function registerFilesRoutes(router: Router): void {
           );
           res.json({ success: true });
           return;
-        } catch (axiosError) {
-          if (axios.isAxiosError(axiosError)) {
-            const statusCode = axiosError.response?.status || 500;
-            const errorMessage =
-              axiosError.response?.data?.error || 'Failed to delete file';
+        } catch (deleteError: any) {
+          const statusCode = deleteError?.status || 500;
+          const errorMessage =
+            deleteError?.body?.error || deleteError?.message || 'Failed to delete file';
 
-            logger.error(
-              `Error deleting ${filePath}: ${errorMessage}`,
-              axiosError,
-            );
-            res.status(statusCode).json({ error: errorMessage });
-          } else {
-            logger.error(
-              `Unexpected error deleting ${filePath}:`,
-              axiosError,
-            );
-            res.status(500).json({ error: 'An unexpected error occurred' });
-          }
+          logger.error(
+            `Error deleting ${filePath}: ${errorMessage}`,
+            deleteError,
+          );
+          res.status(statusCode).json({ error: errorMessage });
           return;
         }
       } catch (error) {
@@ -429,25 +405,19 @@ export function registerFilesRoutes(router: Router): void {
         try {
           const newPath = newName;
 
-          const renameRequest = {
+          await daemonRequest({
             method: 'POST',
-            url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/rename`,
-            auth: {
-              username: 'Airlink',
-              password: server.node.key,
-            },
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            data: {
+            path: '/fs/rename',
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            body: {
               id: server.UUID,
               path: relativePath,
               newName: newName,
               newPath: newPath,
             },
-          };
-
-          await axios(renameRequest);
+          });
           res.status(200).json({ success: true });
         } catch (error) {
           logger.error('Error renaming file:', error);
@@ -524,53 +494,42 @@ export function registerFilesRoutes(router: Router): void {
             const fileContent = req.file.buffer.toString('base64');
             const fileContentWithMeta = `data:${req.file.mimetype};base64,${fileContent}`;
 
-            const uploadRequest = {
+            const uploadResponse = await daemonRequest<{ fileName?: string; path?: string }>({
               method: 'POST',
-              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/upload`,
-              auth: {
-                username: 'Airlink',
-                password: server.node.key,
-              },
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              data: {
+              path: '/fs/upload',
+              nodeAddress: server.node.address,
+              nodePort: server.node.port,
+              nodeKey: server.node.key,
+              body: {
                 id: server.UUID,
                 path: relativePath,
                 fileName: fileName,
                 fileContent: fileContentWithMeta,
               },
-              maxContentLength: 15 * 1024 * 1024,
-              maxBodyLength: 15 * 1024 * 1024,
               timeout: 60000,
-            };
-
-            const response = await axios(uploadRequest);
+            });
             logger.info(
               `File ${fileName} successfully uploaded to ${relativePath}`,
             );
             res.status(200).json({
               success: true,
-              fileName: response.data.fileName,
-              path: response.data.path,
+              fileName: uploadResponse.data?.fileName,
+              path: uploadResponse.data?.path,
             });
           } else {
-            const createEmptyFileRequest = {
+            await daemonRequest({
               method: 'POST',
-              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/create-empty-file`,
-              auth: {
-                username: 'Airlink',
-                password: server.node.key,
-              },
-              data: {
+              path: '/fs/create-empty-file',
+              nodeAddress: server.node.address,
+              nodePort: server.node.port,
+              nodeKey: server.node.key,
+              body: {
                 id: server.UUID,
                 path: relativePath,
                 fileName: fileName,
               },
               timeout: 10000,
-            };
-
-            await axios(createEmptyFileRequest);
+            });
             logger.info(`Created empty file ${fileName} in ${relativePath}`);
 
             const CHUNK_SIZE = 5 * 1024 * 1024;
@@ -583,14 +542,13 @@ export function registerFilesRoutes(router: Router): void {
               const chunkContent = chunk.toString('base64');
               const chunkContentWithMeta = `data:${req.file.mimetype};base64,${chunkContent}`;
 
-              const uploadChunkRequest = {
+              await daemonRequest({
                 method: 'POST',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/append-file`,
-                auth: {
-                  username: 'Airlink',
-                  password: server.node.key,
-                },
-                data: {
+                path: '/fs/append-file',
+                nodeAddress: server.node.address,
+                nodePort: server.node.port,
+                nodeKey: server.node.key,
+                body: {
                   id: server.UUID,
                   path: relativePath,
                   fileName: fileName,
@@ -599,9 +557,7 @@ export function registerFilesRoutes(router: Router): void {
                   totalChunks: totalChunks,
                 },
                 timeout: 30000,
-              };
-
-              await axios(uploadChunkRequest);
+              });
               logger.info(
                 `Uploaded chunk ${i + 1}/${totalChunks} for file ${fileName}`,
               );
@@ -616,38 +572,33 @@ export function registerFilesRoutes(router: Router): void {
               path: relativePath,
             });
           }
-        } catch (error) {
-          if (axios.isAxiosError(error)) {
-            if (error.response) {
-              logger.error(
-                `Error uploading file - Status: ${error.response.status}, Data:`,
-                error.response.data,
-              );
-              res.status(error.response.status).json({
-                error: error.response.data.error || 'Failed to upload file',
-                details: error.response.data,
-              });
-            } else if (error.request) {
-              logger.error(
-                'Error uploading file - No response received:',
-                error.message,
-              );
-              res.status(500).json({
-                error:
-                  'Connection error during file upload. Please try again with a smaller file.',
-              });
-            } else {
-              logger.error(
-                'Error uploading file - Request setup error:',
-                error.message,
-              );
-              res
-                .status(500)
-                .json({ error: 'Error setting up upload request' });
-            }
+        } catch (error: any) {
+          if (error?.status && error?.body) {
+            logger.error(
+              `Error uploading file - Status: ${error.status}, Data:`,
+              error.body,
+            );
+            res.status(error.status).json({
+              error: error.body?.error || 'Failed to upload file',
+              details: error.body,
+            });
+          } else if (error?.message) {
+            logger.error(
+              'Error uploading file - No response received:',
+              error.message,
+            );
+            res.status(500).json({
+              error:
+                'Connection error during file upload. Please try again with a smaller file.',
+            });
           } else {
-            logger.error('Error uploading file:', error);
-            res.status(500).json({ error: 'Failed to upload file' });
+            logger.error(
+              'Error uploading file - Request setup error:',
+              error?.message || error,
+            );
+            res
+              .status(500)
+              .json({ error: 'Error setting up upload request' });
           }
         }
       } catch (error) {

@@ -65,12 +65,12 @@ export class SPAHandler {
   private extractContentOnly(html: string): string {
     const contentMatch = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
     if (contentMatch) {
-      return contentMatch[1];
+      return contentMatch[1] ?? '';
     }
 
     const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
     if (bodyMatch) {
-      let content = bodyMatch[1];
+      let content = bodyMatch[1] ?? '';
       content = content.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
       content = content.replace(/<link[^>]*>/gi, '');
       content = content.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
@@ -93,7 +93,7 @@ export class SPAHandler {
     let match;
 
     while ((match = scriptRegex.exec(content)) !== null) {
-      scripts.push(match[1]);
+      scripts.push(match[1] ?? '');
     }
 
     return scripts;
@@ -105,7 +105,7 @@ export class SPAHandler {
     let match;
 
     while ((match = linkRegex.exec(content)) !== null) {
-      styles.push(match[1]);
+      styles.push(match[1] ?? '');
     }
 
     return styles;

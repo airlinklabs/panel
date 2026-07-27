@@ -207,7 +207,7 @@ async function updateRepos(): Promise<void> {
 
   results.forEach((r, i) => {
     if (r.status === 'rejected') {
-      logger.warn(`Store: ${REPOS[i].dir} failed: ${r.reason?.message || r.reason}`);
+      logger.warn(`Store: ${REPOS[i]?.dir ?? i} failed: ${r.reason?.message || r.reason}`);
     }
   });
 }

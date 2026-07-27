@@ -4,8 +4,7 @@ import prisma from '../../db';
 import { isAuthenticated } from '../../handlers/utils/auth/authUtil';
 import { getUser } from '../../handlers/utils/user/user';
 import logger from '../../handlers/logger';
-import axios from 'axios';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { daemonRequest, daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 
 interface ErrorMessage {
@@ -64,13 +63,12 @@ const dashboardModule: Module = {
         for (const server of servers) {
           if (!nodeStatuses[server.node.id]) {
             try {
-              await axios({
+              await daemonRequest({
+                nodeAddress: server.node.address,
+                nodePort: server.node.port,
+                nodeKey: server.node.key,
                 method: 'GET',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}`,
-                auth: {
-                  username: 'Airlink',
-                  password: server.node.key,
-                },
+                path: '/',
                 timeout: 2000,
               });
               nodeStatuses[server.node.id] = { online: true };
@@ -119,7 +117,7 @@ const dashboardModule: Module = {
             try {
               if (
                 nodeStatuses[server.node.id] &&
-                !nodeStatuses[server.node.id].online
+                !nodeStatuses[server.node.id]?.online
               ) {
                 return {
                   ...server,
@@ -131,53 +129,52 @@ const dashboardModule: Module = {
                 };
               }
 
-              const statusResponse = await axios({
+              const statusResponse = await daemonRequest({
+                nodeAddress: server.node.address,
+                nodePort: server.node.port,
+                nodeKey: server.node.key,
                 method: 'GET',
-                url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status`,
-                auth: {
-                  username: 'Airlink',
-                  password: server.node.key,
-                },
+                path: '/container/status',
                 params: { id: server.UUID },
                 timeout: 2000,
               });
 
-              const isRunning = statusResponse.data?.running === true;
+              const isRunning = (statusResponse.data as any)?.running === true;
               let ramUsage = '0';
               let cpuUsage = '0';
               let ramUsed = '0MB';
 
               if (isRunning) {
                 try {
-                  const statsResponse = await axios({
+                  const statsResponse = await daemonRequest({
+                    nodeAddress: server.node.address,
+                    nodePort: server.node.port,
+                    nodeKey: server.node.key,
                     method: 'GET',
-                    url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stats`,
-                    auth: {
-                      username: 'Airlink',
-                      password: server.node.key,
-                    },
+                    path: '/container/stats',
                     params: { id: server.UUID },
                     timeout: 2000,
                   });
 
                   if (statsResponse.data) {
-                    const rawRam = Number(statsResponse.data.memory?.percentage) || 0;
-                    const rawCpu = Number(statsResponse.data.cpu?.percentage) || 0;
+                    const rawRam = Number((statsResponse.data as any).memory?.percentage) || 0;
+                    const rawCpu = Number((statsResponse.data as any).cpu?.percentage) || 0;
                     ramUsage = String(Math.round(rawRam * 100) / 100);
                     cpuUsage = String(Math.round(rawCpu * 100) / 100);
 
-                    const memUsageBytes = statsResponse.data.memory?.usage || 0;
+                    const memUsageBytes = (statsResponse.data as any).memory?.usage || 0;
                     const memUsageMB = memUsageBytes / (1024 * 1024);
                     ramUsed = memUsageMB >= 1024
                       ? `${(memUsageMB / 1024).toFixed(1)}GB`
                       : `${memUsageMB.toFixed(0)}MB`;
                   }
                 } catch (statsError) {
-                  if (axios.isAxiosError(statsError)) {
+                  if (statsError instanceof Error && 'status' in statsError) {
+                    const httpErr = statsError as { code?: string };
                     if (
-                      statsError.code !== 'ECONNREFUSED' &&
-                      statsError.code !== 'ETIMEDOUT' &&
-                      statsError.code !== 'ENOTFOUND'
+                      httpErr.code !== 'ECONNREFUSED' &&
+                      httpErr.code !== 'ETIMEDOUT' &&
+                      httpErr.code !== 'ENOTFOUND'
                     ) {
                       logger.error(
                         `Error fetching stats for server ${server.UUID}:`,

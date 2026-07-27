@@ -1,16 +1,9 @@
 import crypto from 'crypto';
-import axios from 'axios';
-import type { InternalAxiosRequestConfig } from 'axios';
 import { URL } from 'url';
 import prisma from '../../../db';
+import { httpGet, httpPost, httpPut, httpPatch, httpDelete, type HttpResponse } from '../../../utils/http';
 
 const SIGNATURE_WINDOW_S = 30;
-
-// ── Protocol helper ──────────────────────────────────────────────────────────
-//
-// Reads enforceDaemonHttps from the DB once, then caches for 60 s so we're
-// not hitting SQLite on every single daemon request. Falls back to http when
-// the setting is off or the DB is unreachable.
 
 let cachedScheme: 'http' | 'https' = 'http';
 let schemeCachedAt = 0;
@@ -26,8 +19,6 @@ async function refreshSchemeCache(): Promise<void> {
   schemeCachedAt = Date.now();
 }
 
-// Returns 'http' or 'https' depending on the enforceDaemonHttps setting.
-// Safe to call on every request — actual DB hit is at most once per minute.
 export async function daemonScheme(): Promise<'http' | 'https'> {
   if (Date.now() - schemeCachedAt > SCHEME_CACHE_TTL_MS) {
     await refreshSchemeCache();
@@ -35,8 +26,6 @@ export async function daemonScheme(): Promise<'http' | 'https'> {
   return cachedScheme;
 }
 
-// Synchronous version — returns the cached value (may be stale up to 60 s).
-// Use this where you cannot await (e.g. inside a sync HMAC interceptor).
 export function daemonSchemeSync(): 'http' | 'https' {
   if (Date.now() - schemeCachedAt > SCHEME_CACHE_TTL_MS) {
     refreshSchemeCache(); // fire-and-forget
@@ -44,17 +33,11 @@ export function daemonSchemeSync(): 'http' | 'https' {
   return cachedScheme;
 }
 
-// Convenience: build the base URL for a node, e.g. "http://1.2.3.4:3001"
 export async function daemonBaseUrl(address: string, port: number | string): Promise<string> {
   const scheme = await daemonScheme();
   return `${scheme}://${address}:${port}`;
 }
 
-// ── HMAC signing ─────────────────────────────────────────────────────────────
-
-// Why this format: timestamp prevents old requests, nonce prevents replay within
-// the window, method+path+body bind the signature to a specific operation.
-// Version tag so future format changes are detectable by both sides.
 export const HMAC_PAYLOAD_VERSION = 1;
 
 function hmacSign(key: string, method: string, path: string, body: string, timestamp: number, nonce: string): string {
@@ -62,21 +45,13 @@ function hmacSign(key: string, method: string, path: string, body: string, times
   return crypto.createHmac('sha256', key).update(payload).digest('hex');
 }
 
-function extractKeyFromAuth(auth: { username?: string; password?: string } | undefined): string | null {
-  if (!auth) return null;
-  return auth.password ?? null;
-}
-
 function serializeRequestBody(data: unknown): string {
   if (data == null) return '';
   if (typeof data === 'string') return data;
   if (Buffer.isBuffer(data)) return '';
-
-  // Streams and socket-backed objects cannot be JSON-stringified safely.
   if (typeof data === 'object' && data !== null && 'pipe' in (data as Record<string, unknown>)) {
     return '';
   }
-
   try {
     return JSON.stringify(data);
   } catch {
@@ -84,43 +59,79 @@ function serializeRequestBody(data: unknown): string {
   }
 }
 
-// Install once at panel startup. After this, every axios request that carries
-// { auth: { username: 'Airlink', password: key } } automatically gets
-// X-Airlink-Timestamp and X-Airlink-Signature headers added.
-export function installDaemonRequestInterceptor(): void {
-  axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-    if (!config.auth || config.auth.username !== 'Airlink') {
-      return config;
-    }
+function signRequest(
+  method: string,
+  url: string,
+  body: unknown,
+  key: string,
+): { timestamp: string; signature: string; nonce: string; payloadVersion: string } {
+  const timestamp = Math.floor(Date.now() / 1000);
+  const nonce = crypto.randomBytes(16).toString('hex');
+  const serializedBody = serializeRequestBody(body);
 
-    const key = extractKeyFromAuth(config.auth);
-    if (!key) return config;
+  let urlPath: string;
+  try {
+    const parsed = new URL(url);
+    urlPath = parsed.pathname;
+  } catch {
+    urlPath = url.split('?')[0] ?? '/';
+  }
 
-    const method = (config.method || 'GET').toUpperCase();
+  const signature = hmacSign(key, method, urlPath, serializedBody, timestamp, nonce);
 
-    let urlPath: string;
-    try {
-      const parsed = new URL(config.url || '', 'http://localhost');
-      urlPath = parsed.pathname;
-    } catch {
-      urlPath = (config.url || '/').split('?')[0];
-    }
+  return {
+    timestamp: String(timestamp),
+    signature,
+    nonce,
+    payloadVersion: String(HMAC_PAYLOAD_VERSION),
+  };
+}
 
-    const body = serializeRequestBody(config.data);
+function buildDaemonHeaders(key: string, method: string, url: string, body: unknown): Record<string, string> {
+  const sig = signRequest(method, url, body, key);
+  return {
+    'X-Airlink-Timestamp': sig.timestamp,
+    'X-Airlink-Signature': sig.signature,
+    'X-Airlink-Nonce': sig.nonce,
+    'X-Airlink-Payload-Version': sig.payloadVersion,
+  };
+}
 
-    const timestamp = Math.floor(Date.now() / 1000);
-    // Cryptographic nonce prevents replay attacks within the 30s signature window.
-    // Each request gets a unique nonce so an attacker cannot resubmit a captured request.
-    const nonce = crypto.randomBytes(16).toString('hex');
-    const signature = hmacSign(key, method, urlPath, body, timestamp, nonce);
+export interface DaemonRequestOptions {
+  nodeAddress: string;
+  nodePort: number;
+  nodeKey: string;
+  method: string;
+  path: string;
+  body?: unknown;
+  params?: Record<string, string | number | boolean | undefined>;
+  timeout?: number;
+  responseType?: 'json' | 'text' | 'arraybuffer' | 'stream';
+}
 
-    config.headers.set('X-Airlink-Timestamp', String(timestamp));
-    config.headers.set('X-Airlink-Signature', signature);
-    config.headers.set('X-Airlink-Nonce', nonce);
-    config.headers.set('X-Airlink-Payload-Version', String(HMAC_PAYLOAD_VERSION));
+export async function daemonRequest<T = unknown>(options: DaemonRequestOptions): Promise<HttpResponse<T>> {
+  const { nodeAddress, nodePort, nodeKey, method, path, body, params, timeout, responseType } = options;
+  const url = `${daemonSchemeSync()}://${nodeAddress}:${nodePort}${path}`;
 
-    return config;
+  const hmacHeaders = buildDaemonHeaders(nodeKey, method, url, body);
+
+  const requestFn = {
+    GET: httpGet,
+    POST: httpPost,
+    PUT: httpPut,
+    PATCH: httpPatch,
+    DELETE: httpDelete,
+  }[method.toUpperCase()] ?? httpGet;
+
+  return requestFn<T>(url, {
+    body,
+    params,
+    timeout,
+    responseType,
+    headers: hmacHeaders,
+    auth: { username: 'Airlink', password: nodeKey },
   });
 }
 
 export { SIGNATURE_WINDOW_S };
+export type { HttpResponse };

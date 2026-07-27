@@ -1,8 +1,16 @@
-import axios from 'axios';
-import FormData from 'form-data';
+import { httpPost, httpDelete, httpGet } from '../../../utils/http';
 import logger from '../../logger';
 
 const AIRLINK_CLOUD_URL = 'https://api.airlinklabs.xyz';
+
+async function streamToBuffer(stream: unknown): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  const readable = stream as AsyncIterable<Buffer>;
+  for await (const chunk of readable) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
+}
 
 export class AirlinkCloudClient {
   private apiKey: string;
@@ -11,18 +19,16 @@ export class AirlinkCloudClient {
     this.apiKey = apiKey;
   }
 
-  async uploadFile(fileStream: any, fileName: string) {
+  async uploadFile(fileStream: unknown, fileName: string) {
+    const buffer = await streamToBuffer(fileStream);
     const form = new FormData();
-    form.append('file', fileStream, fileName);
+    form.append('file', new Blob([new Uint8Array(buffer)]), fileName);
 
     try {
-      const response = await axios.post(`${AIRLINK_CLOUD_URL}/storage/upload`, form, {
+      const response = await httpPost(`${AIRLINK_CLOUD_URL}/storage/upload`, form, {
         headers: {
-          ...form.getHeaders(),
           'X-API-Key': this.apiKey,
         },
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
       });
 
       return response.data;
@@ -34,7 +40,7 @@ export class AirlinkCloudClient {
 
   async deleteFile(fileId: string) {
     try {
-      const response = await axios.delete(`${AIRLINK_CLOUD_URL}/storage/files/${fileId}`, {
+      const response = await httpDelete(`${AIRLINK_CLOUD_URL}/storage/files/${fileId}`, {
         headers: {
           'X-API-Key': this.apiKey,
         },
@@ -49,7 +55,7 @@ export class AirlinkCloudClient {
 
   async getDownloadStream(fileId: string) {
     try {
-      const response = await axios.get(`${AIRLINK_CLOUD_URL}/storage/download/${fileId}`, {
+      const response = await httpGet(`${AIRLINK_CLOUD_URL}/storage/download/${fileId}`, {
         headers: {
           'X-API-Key': this.apiKey,
         },

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { httpGet, isHttpError } from '../utils/http';
 import prisma from '../db';
 import { checkNodeStatus } from './utils/node/nodeStatus';
 import { daemonSchemeSync } from './utils/core/daemonRequest';
@@ -49,15 +49,15 @@ export async function checkForServerInstallation(
       return { installed: false, state: 'offline' };
     }
 
-    const response = await axios.get(
+    const response = await httpGet<{ state?: string }>(
       `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status/${server.UUID}`,
       { auth: { username: 'Airlink', password: server.node.key }, timeout: 4000 },
     );
 
-    const state = response.data.state as string;
+    const state = response.data.state;
     const isInstalled = state === 'installed';
 
-    cache.set(serverId, { data: state, timestamp: now });
+    cache.set(serverId, { data: state ?? '', timestamp: now });
 
     // Keep the DB in sync so next page load hits the fast path above.
     await prisma.server.update({
@@ -67,7 +67,7 @@ export async function checkForServerInstallation(
 
     return { installed: isInstalled, state, failed: state === 'failed' };
   } catch (error: any) {
-    if (error.response?.status === 404) {
+    if (isHttpError(error) && error.status === 404) {
       return { installed: false, state: 'not_found' };
     }
     return { installed: false, error: 'Could not reach daemon.' };

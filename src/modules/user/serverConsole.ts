@@ -8,11 +8,10 @@ import { Router, Request } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import prisma from '../../db';
 import { WebSocket } from 'ws';
-import axios from 'axios';
 import { isAuthenticatedForServerWS } from '../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../handlers/logger';
 import { getParamAsString } from '../../utils/typeHelpers';
-import { daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
+import { daemonRequest, daemonSchemeSync } from '../../handlers/utils/core/daemonRequest';
 
 function wsScheme(): 'ws' | 'wss' {
   return daemonSchemeSync() === 'https' ? 'wss' : 'ws';
@@ -144,14 +143,15 @@ async function proxyConsole(
       const command = extractConsoleCommand(data);
       if (command) {
         try {
-          await axios.post(
-            `${daemonSchemeSync()}://${node.address}:${node.port}/container/command`,
-            { id: serverId, command },
-            {
-              auth: { username: 'Airlink', password: node.key },
-              timeout: 10_000,
-            },
-          );
+          await daemonRequest({
+            nodeAddress: node.address,
+            nodePort: node.port,
+            nodeKey: node.key,
+            method: 'POST',
+            path: '/container/command',
+            body: { id: serverId, command },
+            timeout: 10_000,
+          });
         } catch (error) {
           logger.error(`Failed to send console command to ${serverId}:`, error);
           sendIfOpen(

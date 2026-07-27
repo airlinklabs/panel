@@ -1,13 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { isAuthenticatedForServer } from '../../../handlers/utils/auth/serverAuthUtil';
 import logger from '../../../handlers/logger';
-import axios from 'axios';
 import { checkEulaStatus } from '../../../handlers/features';
 import { checkForServerInstallation } from '../../../handlers/checkForServerInstallation';
 import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
-import { daemonSchemeSync } from '../../../handlers/utils/core/daemonRequest';
+import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 import {
   type ErrorMessage,
   type ServerPageServer,
@@ -110,10 +109,14 @@ export function registerConsoleRoutes(router: Router): void {
             serverUUID: server.UUID,
             nodeKey: node.key,
           }),
-          axios.get(
-            `${daemonSchemeSync()}://${node.address}:${node.port}/container/status/${server.UUID}`,
-            { auth: { username: 'Airlink', password: node.key }, timeout: 4000 }
-          ).then(r => r.data.state as string).catch(() => null),
+          daemonRequest<{ state?: string }>({
+            method: 'GET',
+            path: `/container/status/${server.UUID}`,
+            nodeAddress: node.address,
+            nodePort: node.port,
+            nodeKey: node.key,
+            timeout: 4000,
+          }).then(r => r.data?.state as string).catch(() => null),
         ]);
 
         res.status(200).json({ ...serverStatus, state: installResult });
@@ -200,27 +203,22 @@ export function registerConsoleRoutes(router: Router): void {
               status: stoppingStatus,
             });
 
-            await axios({
+            await daemonRequest({
               method: 'POST',
-              url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/stop`,
-              auth: {
-                username: 'Airlink',
-                password: server.node.key,
-              },
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              data: {
+              path: '/container/stop',
+              nodeAddress: server.node.address,
+              nodePort: server.node.port,
+              nodeKey: server.node.key,
+              body: {
                 id: String(serverId),
                 stopCmd: server.image?.stop || 'stop',
               },
             });
             logger.info('Container stopped successfully: ' + serverId);
             return;
-          } catch (stopError) {
+          } catch (stopError: any) {
             if (
-              axios.isAxiosError(stopError) &&
-              stopError.response?.status === 404
+              stopError?.status === 404
             ) {
               logger.info(
                 'Container already stopped or not found: ' + serverId,
@@ -370,17 +368,13 @@ export function registerConsoleRoutes(router: Router): void {
           },
         });
 
-        await axios({
+        await daemonRequest({
           method: 'DELETE',
-          url: `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container`,
-          auth: {
-            username: 'Airlink',
-            password: server.node.key,
-          },
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          data: {
+          path: '/container',
+          nodeAddress: server.node.address,
+          nodePort: server.node.port,
+          nodeKey: server.node.key,
+          body: {
             id: String(serverId),
           },
         });
@@ -470,17 +464,13 @@ export function registerConsoleRoutes(router: Router): void {
                   reinstallDockerImage = Object.values(parsed)[0] as string | undefined;
                 } catch { /* leave undefined */ }
 
-                const installRequestData = {
+                const installResponse = await daemonRequest<{ status?: number }>({
                   method: 'POST',
-                  url: `${daemonSchemeSync()}://${serverToReinstall.node.address}:${serverToReinstall.node.port}/container/install`,
-                  auth: {
-                    username: 'Airlink',
-                    password: serverToReinstall.node.key,
-                  },
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  data: {
+                  path: '/container/install',
+                  nodeAddress: serverToReinstall.node.address,
+                  nodePort: serverToReinstall.node.port,
+                  nodeKey: serverToReinstall.node.key,
+                  body: {
                     id: serverToReinstall.UUID,
                     image: reinstallDockerImage,
                     env: env,
@@ -498,9 +488,7 @@ export function registerConsoleRoutes(router: Router): void {
                       }),
                     ),
                   },
-                };
-
-                const installResponse = await axios(installRequestData);
+                });
                 logger.info(
                   `Installation scripts sent for server ${serverId}. Response status: ${installResponse.status}`,
                 );
@@ -514,9 +502,9 @@ export function registerConsoleRoutes(router: Router): void {
                   `Error during reinstallation of server ${serverId}:`,
                   error,
                 );
-                if (error.response) {
-                  logger.error(`Response status: ${error.response.status}`);
-                  logger.error('Response data:', error.response.data);
+                if (error?.status) {
+                  logger.error(`Response status: ${error.status}`);
+                  logger.error('Response data:', error?.body);
                 }
                 await prisma.server.update({
                   where: { UUID: getParamAsString(serverId) },
