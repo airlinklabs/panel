@@ -20,11 +20,9 @@ export function createAdminRoutes(deps: AdminDeps): Router {
         settingsStore.get(),
       ]);
 
-      const isMobile = (req as any).cookies?.viewport_mode === 'mobile';
-      const viewport = isMobile ? 'mobile' : 'desktop';
-      const components = getComponents(viewport);
+      const components = getComponents('desktop');
 
-      res.render(path.join(__dirname, `../../../views/${viewport}/admin.ejs`), {
+      res.render(path.join(__dirname, '../../../views/admin.ejs'), {
         title: 'Modrinth Configuration',
         user: req.session?.user,
         req, settings: globalSettings, modrinthSettings,

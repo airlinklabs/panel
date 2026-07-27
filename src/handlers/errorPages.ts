@@ -104,10 +104,8 @@ function getCookieValue(req: Request, name: string): string | undefined {
     .find(([key]) => key === name)?.[1];
 }
 
-function getErrorView(req: Request): string {
-  return getCookieValue(req, 'viewport_mode') === 'mobile'
-    ? 'mobile/errors/error'
-    : 'desktop/errors/error';
+function getErrorView(_req: Request): string {
+  return 'errors/error';
 }
 
 async function getErrorRenderData(req: Request, statusCode: number, detail?: string) {

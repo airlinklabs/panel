@@ -32,11 +32,9 @@ export function createBrowseRoutes(deps: BrowseDeps): Router {
       const rawResults = await modrinthClient.search(query || 'minecraft', type === 'all' ? '' : type || '', page);
       const filteredHits = rawResults?.hits ? await settingsStore.filterProjects(rawResults.hits) : [];
 
-      const isMobile = (req as any).cookies?.viewport_mode === 'mobile';
-      const viewport = isMobile ? 'mobile' : 'desktop';
-      const components = getComponents(viewport);
+      const components = getComponents('desktop');
 
-      res.render(path.join(__dirname, `../../../views/${viewport}/browse.ejs`), {
+      res.render(path.join(__dirname, '../../../views/browse.ejs'), {
         title: 'Modrinth Store',
         user, req, settings: globalSettings, modrinthSettings,
         query, type, page,

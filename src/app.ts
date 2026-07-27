@@ -457,9 +457,7 @@ app.use((_req, res, next) => {
     false,
   );
 
-  const viewportCookie = (_req as any).cookies?.viewport_mode;
-  const isMobileViewport = viewportCookie === 'mobile';
-  res.locals.isMobileViewport = isMobileViewport;
+  res.locals.isMobileViewport = false;
 
   const originalRenderBase = res.render.bind(res);
   (res as any).render = function (view: string, options?: Record<string, unknown>, callback?: (err: Error, html: string) => void) {
@@ -485,23 +483,15 @@ app.use((_req, res, next) => {
       return;
     }
 
-    const prefix = isMobileViewport ? 'mobile/' : 'desktop/';
-    const prefixedView =
-      view.startsWith('desktop/') || view.startsWith('mobile/')
-        ? view
-        : prefix + view;
-
-    const prefixedViewPath = path.join(viewsPath, prefixedView + '.ejs');
-    if (!fs.existsSync(prefixedViewPath) && !view.startsWith('desktop/') && !view.startsWith('mobile/')) {
+    // Check addon views as fallback
+    const viewPath = path.join(viewsPath, view + '.ejs');
+    if (!fs.existsSync(viewPath)) {
       if ((opts as any).addonSlug) {
         const addonSlug = (opts as any).addonSlug as string;
-        const viewportSubdir = isMobileViewport ? 'mobile' : 'desktop';
-        const addonViewportPath = path.join(addonViewsDir, addonSlug, 'views', viewportSubdir, view + '.ejs');
         const addonFallbackPath = path.join(addonViewsDir, addonSlug, 'views', view + '.ejs');
-        const addonViewPath = fs.existsSync(addonViewportPath) ? addonViewportPath : addonFallbackPath;
-        if (fs.existsSync(addonViewPath)) {
+        if (fs.existsSync(addonFallbackPath)) {
           const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-          (ejs as any).renderFile(addonViewPath, data, {}, (err: Error | null, html: string) => {
+          (ejs as any).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
             if (err) {
               if (typeof callback === 'function') return callback(err, '');
               return res.status(500).send('View render error: ' + err.message);
@@ -515,13 +505,10 @@ app.use((_req, res, next) => {
 
       for (const addonDir of getAddonDirs()) {
         if ((opts as any).addonSlug && addonDir === (opts as any).addonSlug) continue;
-        const viewportSubdir = isMobileViewport ? 'mobile' : 'desktop';
-        const addonViewportPath = path.join(addonViewsDir, addonDir, 'views', viewportSubdir, view + '.ejs');
         const addonFallbackPath = path.join(addonViewsDir, addonDir, 'views', view + '.ejs');
-        const addonViewPath = fs.existsSync(addonViewportPath) ? addonViewportPath : addonFallbackPath;
-        if (fs.existsSync(addonViewPath)) {
+        if (fs.existsSync(addonFallbackPath)) {
           const data = { ...res.locals, ...(typeof opts === 'object' ? opts : {}) };
-          (ejs as any).renderFile(addonViewPath, data, {}, (err: Error | null, html: string) => {
+          (ejs as any).renderFile(addonFallbackPath, data, {}, (err: Error | null, html: string) => {
             if (err) {
               if (typeof callback === 'function') return callback(err, '');
               return res.status(500).send('View render error: ' + err.message);
@@ -534,7 +521,7 @@ app.use((_req, res, next) => {
       }
     }
 
-    return originalRenderBase(prefixedView, opts, callback);
+    return originalRenderBase(view, opts, callback);
   };
 
   const renderWithViewport = res.render;

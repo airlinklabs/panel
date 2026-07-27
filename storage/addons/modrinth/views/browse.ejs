@@ -1,0 +1,663 @@
+<%- include(components.header, { title: title, user: user }) %>
+<%- include(components.toast) %>
+<link rel="stylesheet" href="/addons/modrinth/modrinth.css">
+
+<main class="h-screen m-auto modrinth-addon">
+  <div class="flex h-screen">
+    <div class="w-56 h-full flex-shrink-0">
+      <%- include(components.template) %>
+    </div>
+    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
+
+      <!-- Page header -->
+      <div class="sm:flex sm:items-center px-8 pt-4">
+        <div class="sm:flex-auto">
+          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white">Modrinth Store</h1>
+          <p class="mt-1 tracking-tight text-sm text-neutral-500">Browse mods, plugins, modpacks, and more</p>
+        </div>
+      </div>
+
+      <!-- Warning banner -->
+      <% const hasDisabledTypes = modrinthSettings?.disabledProjectTypes?.length > 0;
+         const hasBlockedProjects = modrinthSettings?.blockedProjects?.length > 0;
+         const shouldShowWarning = modrinthSettings?.modrinthInstallationWarning && (hasDisabledTypes || hasBlockedProjects); %>
+      <% if (shouldShowWarning) { %>
+      <div class="mx-8 mt-4 rounded-xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 px-4 py-3 flex items-center gap-3">
+        <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+        <div class="flex-1">
+          <span class="text-amber-700 dark:text-amber-400 font-medium text-sm"><%= modrinthSettings.warningTitle %></span>
+          <span class="ml-2 text-amber-600 dark:text-amber-400/70 text-sm"><%= modrinthSettings.warningMessage %></span>
+        </div>
+        <% if (hasDisabledTypes) { %><span class="text-xs text-amber-600 bg-amber-100 dark:bg-amber-500/20 px-2 py-0.5 rounded-full">Disabled: <%= modrinthSettings.disabledProjectTypes.join(', ') %></span><% } %>
+        <% if (hasBlockedProjects) { %><span class="text-xs text-amber-600 bg-amber-100 dark:bg-amber-500/20 px-2 py-0.5 rounded-full"><%= modrinthSettings.blockedProjects.length %> blocked</span><% } %>
+      </div>
+      <% } %>
+
+      <!-- Filters -->
+      <div class="mx-8 mt-5 flex items-center gap-3 flex-wrap mb-1">
+        <div class="relative flex-1 max-w-md">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          <input type="text" id="searchInput" name="q" value="<%= query %>" placeholder="Search mods, plugins, modpacks..." aria-label="Search projects" class="w-full pl-10 pr-4 py-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
+        </div>
+        <button id="searchBtn" type="button" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-800 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 text-sm font-medium shadow transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          Search
+        </button>
+        <select id="typeFilter" name="type" aria-label="Project type" class="px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-sm text-neutral-800 dark:text-white focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition min-w-[130px]">
+          <option value="all" <%= type === 'all' ? 'selected' : '' %>>All types</option>
+          <% [
+            { value: 'mod', label: 'Mods' }, { value: 'modpack', label: 'Modpacks' },
+            { value: 'resourcepack', label: 'Resource packs' }, { value: 'shader', label: 'Shaders' },
+            { value: 'plugin', label: 'Plugins' }, { value: 'datapack', label: 'Data packs' }
+          ].forEach(function(opt) {
+            const disabled = hasDisabledTypes && modrinthSettings.disabledProjectTypes.includes(opt.value);
+          %>
+          <option value="<%= opt.value %>" <%= type === opt.value ? 'selected' : '' %> <%= disabled ? 'disabled' : '' %>><%= opt.label %><%= disabled ? ' (disabled)' : '' %></option>
+          <% }); %>
+        </select>
+        <select id="sortFilter" aria-label="Sort by" class="px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-sm text-neutral-800 dark:text-white focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition min-w-[120px]">
+          <option value="relevance">Relevance</option>
+          <option value="downloads">Downloads</option>
+          <option value="updated">Updated</option>
+          <option value="newest">Newest</option>
+        </select>
+        <div id="tagFilters" class="flex gap-2 flex-wrap"></div>
+        <span id="statusText" class="text-xs text-neutral-400 dark:text-neutral-500 ml-auto whitespace-nowrap"></span>
+      </div>
+
+      <!-- Recommended section (server-rendered) -->
+      <% const recs = featuredMods || results?.hits || []; %>
+      <% if (!query && recs.length > 0) { %>
+      <div class="mx-8 mt-6 mb-2">
+        <h2 class="text-sm font-medium text-neutral-800 dark:text-white mb-3">Recommended</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="recsGrid">
+          <% recs.slice(0, 6).forEach(function(mod) { %>
+          <div class="rec-card group rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-4 hover:border-neutral-300 dark:hover:border-white/10 transition-colors cursor-pointer" data-id="<%= mod.project_id %>">
+            <div class="flex items-start gap-3">
+              <img src="<%= mod.icon_url || '' %>" alt="" class="w-10 h-10 rounded-lg object-cover shrink-0" onerror="this.style.display='none'">
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-neutral-800 dark:text-white truncate"><%= mod.title %></p>
+                <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5"><%= mod.author || 'Unknown' %></p>
+              </div>
+              <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700 flex-shrink-0"><%= mod.project_type %></span>
+            </div>
+            <% if (mod.description) { %>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-2 line-clamp-2 leading-relaxed"><%= mod.description %></p>
+            <% } %>
+            <div class="flex items-center gap-3 mt-3 text-xs text-neutral-400 dark:text-neutral-500">
+              <span class="flex items-center gap-1"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path></svg><%= (mod.downloads || 0).toLocaleString() %></span>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Loading / Error / Empty states -->
+      <div id="loadingEl" class="m-8 space-y-2"><% for(let i=0;i<8;i++){%><div class="sk h-11 w-full"></div><%}%></div>
+      <div id="errorEl" style="display:none" class="mx-8 mt-6 py-16 text-center"><p id="errorMsg" class="text-sm text-neutral-500"></p><button onclick="loadResults()" class="mt-3 text-xs text-neutral-400 underline cursor-pointer bg-transparent border-none">Retry</button></div>
+      <div id="emptyEl" style="display:none" class="mx-8 mt-6 py-16 text-center"><p class="text-sm text-neutral-500">No projects match your search.</p><button id="clearSearch" class="mt-3 text-xs text-neutral-400 underline cursor-pointer bg-transparent border-none">Clear</button></div>
+
+      <!-- Results table -->
+      <div id="tableWrap" style="display:none" class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40">
+        <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
+          <thead class="bg-neutral-50 dark:bg-neutral-800/50">
+            <tr>
+              <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Name</th>
+              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white col-hide">Type</th>
+              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white col-hide">Downloads</th>
+              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20"></tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+      <div id="paginationWrap" class="flex justify-center items-center gap-1.5 mt-8">
+        <% if (page > 1) { %><a href="/modrinth?<%= query ? 'q=' + encodeURIComponent(query) + '&type=' + type + '&' : '' %>page=<%= page - 1 %>" class="px-3 py-1.5 text-sm bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors">Prev</a><% } %>
+        <% var startPage = Math.max(1, page - 2); var endPage = Math.min(totalPages, page + 2);
+        for (var i = startPage; i <= endPage; i++) { %>
+          <% if (i === page) { %><span class="px-3 py-1.5 text-sm bg-neutral-800 dark:bg-white text-white dark:text-neutral-900 rounded-xl font-medium"><%= i %></span>
+          <% } else { %><a href="/modrinth?<%= query ? 'q=' + encodeURIComponent(query) + '&type=' + type + '&' : '' %>page=<%= i %>" class="px-3 py-1.5 text-sm bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"><%= i %></a><% } %>
+        <% } %>
+        <% if (page < totalPages) { %><a href="/modrinth?<%= query ? 'q=' + encodeURIComponent(query) + '&type=' + type + '&' : '' %>page=<%= page + 1 %>" class="px-3 py-1.5 text-sm bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700 rounded-xl hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors">Next</a><% } %>
+      </div>
+      <% } %>
+
+    </div>
+  </div>
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     WIZARD MODAL — 5 states: details → versions → server → confirm → progress
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="wizardOverlay" role="dialog" aria-modal="true" aria-labelledby="wizTitle">
+  <div class="modal-box">
+
+    <!-- Fixed header -->
+    <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5 flex-shrink-0">
+      <div class="flex items-center gap-2 min-w-0">
+        <img id="wizIcon" src="" alt="" class="w-8 h-8 rounded-lg object-cover shrink-0" onerror="this.style.display='none'">
+        <p id="wizTitle" class="text-sm font-semibold text-neutral-800 dark:text-white truncate"></p>
+        <span id="wizBadge" class="text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap"></span>
+      </div>
+      <div class="flex items-center gap-2 ml-3 shrink-0">
+        <a id="wizSource" href="#" target="_blank" rel="noopener" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-1.5 text-xs font-medium shadow transition flex items-center gap-1.5">
+          <%- icon('external-link', { size: 12, class: 'shrink-0' }) %>
+          Source
+        </a>
+        <button onclick="closeWizard()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition" aria-label="Close">
+          <%- icon('x', { size: 16, class: 'shrink-0' }) %>
+        </button>
+      </div>
+    </div>
+
+    <!-- Two-column body -->
+    <div class="modal-two-col">
+
+      <!-- ─── LEFT PANEL: metadata + action ─── -->
+      <div class="modal-left">
+        <p id="wizMeta" class="text-[11px] text-neutral-400 dark:text-neutral-500"></p>
+        <p id="wizDesc" class="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed"></p>
+        <div id="wizStats" class="flex flex-wrap gap-3 text-xs text-neutral-500 dark:text-neutral-400"></div>
+        <div id="wizCategories" class="flex flex-wrap gap-1"></div>
+        <div class="mt-auto flex flex-col gap-2 pt-2">
+          <!-- Error box (shared) -->
+          <div id="wizErr" style="display:none" class="err-box"><p id="wizErrTxt" class="err-txt"></p></div>
+          <!-- Action button (text changes per step) -->
+          <button id="wizActionBtn" type="button" class="w-full border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 py-2.5 text-sm font-medium shadow-lg transition">
+            Install
+          </button>
+        </div>
+      </div>
+
+      <!-- ─── RIGHT PANEL: wizard steps ─── -->
+      <div class="modal-right">
+
+        <!-- STEP 1: Details -->
+        <div class="wiz-panel active" id="step-details">
+          <p class="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider mb-3">Description</p>
+          <div id="wizLong" class="md-body"></div>
+        </div>
+
+        <!-- STEP 2: Versions -->
+        <div class="wiz-panel" id="step-versions">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Versions</p>
+            <div class="relative">
+              <input type="text" id="verSearch" placeholder="Filter versions..." aria-label="Filter versions" class="w-40 pl-7 pr-2 py-1 text-[11px] rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-800 dark:text-white placeholder-neutral-400 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
+              <svg class="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-neutral-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+          </div>
+          <div id="verList" class="space-y-2 max-h-[400px] overflow-y-auto"></div>
+        </div>
+
+        <!-- STEP 3: Server Picker -->
+        <div class="wiz-panel" id="step-server">
+          <p class="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider mb-3">Select server</p>
+          <div id="srvList" class="space-y-2"></div>
+        </div>
+
+        <!-- STEP 4: Confirmation -->
+        <div class="wiz-panel" id="step-confirm">
+          <p class="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider mb-3">Confirm installation</p>
+          <div class="bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 rounded-lg p-4 mb-4">
+            <div class="confirm-row"><span class="confirm-label">Project</span><span id="cfnProject" class="confirm-value"></span></div>
+            <div class="confirm-row"><span class="confirm-label">Version</span><span id="cfnVersion" class="confirm-value"></span></div>
+            <div class="confirm-row"><span class="confirm-label">Server</span><span id="cfnServer" class="confirm-value"></span></div>
+            <div class="confirm-row" style="border-bottom:none"><span class="confirm-label">Type</span><span id="cfnType" class="confirm-value"></span></div>
+          </div>
+          <p class="text-xs text-neutral-500 dark:text-neutral-400">Click <strong>Install</strong> to begin. The modal will switch to a live progress view.</p>
+        </div>
+
+        <!-- STEP 5: Progress -->
+        <div class="wiz-panel" id="step-progress">
+          <div class="term-box" style="display:block">
+            <div class="flex justify-between items-center">
+              <span id="progLabel" class="text-[11px] font-medium text-neutral-600 dark:text-neutral-300">Starting...</span>
+              <span id="progPct" class="text-[10px] text-neutral-400 font-mono">0%</span>
+            </div>
+            <div class="prog-track"><div id="progFill" class="prog-fill"></div></div>
+            <div id="progLog" class="term-log" aria-live="polite" aria-atomic="false"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script nonce="<%- nonce %>">
+(function() {
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function show(id) { const e=document.getElementById(id); if(e) e.style.display=''; }
+  function hide(id) { const e=document.getElementById(id); if(e) e.style.display='none'; }
+
+  const hasDisabledTypes = <%- hasDisabledTypes %>;
+  const hasBlockedProjects = <%- hasBlockedProjects %>;
+  const disabledProjectTypes = <%- JSON.stringify(modrinthSettings?.disabledProjectTypes || []) %>;
+  const blockedProjects = <%- JSON.stringify(modrinthSettings?.blockedProjects || []) %>;
+
+  let allResults = [], activeTag = null, currentProject = null;
+  let selectedVersion = null, selectedServer = null;
+  let allVersions = [], allServers = [];
+  let currentStep = 'details';
+  let previousFocus = null;
+
+  // ── Focus trap ────────────────────────────────────────────────
+  function trapFocus(modal) {
+    const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    function handler(e) {
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+    modal.addEventListener('keydown', handler);
+    return () => modal.removeEventListener('keydown', handler);
+  }
+  let removeTrap = null;
+
+  // ── Load results ──────────────────────────────────────────────
+  async function loadResults() {
+    show('loadingEl'); hide('tableWrap'); hide('errorEl'); hide('emptyEl'); hide('paginationWrap');
+    document.getElementById('statusText').textContent = '';
+    try {
+      const q = document.getElementById('searchInput').value || '';
+      const type = document.getElementById('typeFilter').value;
+      const sort = document.getElementById('sortFilter').value;
+      const params = new URLSearchParams({ q, type, sort, limit: '20' });
+      const res = await fetch('/modrinth/api/search?' + params.toString());
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Failed');
+      allResults = (data.data && data.data.hits) || data.hits || [];
+      hide('loadingEl');
+      buildTags();
+      renderTable(allResults);
+      document.getElementById('statusText').textContent = allResults.length + ' projects';
+    } catch (err) {
+      hide('loadingEl');
+      document.getElementById('errorMsg').textContent = err.message || 'Failed to load results.';
+      show('errorEl');
+    }
+  }
+
+  // ── Tags ──────────────────────────────────────────────────────
+  function buildTags() {
+    const counts = {};
+    allResults.forEach(a => (a.categories||[]).forEach(t => { counts[t] = (counts[t]||0) + 1; }));
+    const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8).map(e=>e[0]);
+    const el = document.getElementById('tagFilters');
+    el.innerHTML = '';
+    top.forEach(tag => {
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 's-tag'; btn.textContent = tag;
+      btn.addEventListener('click', () => {
+        activeTag = activeTag === tag ? null : tag;
+        el.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.textContent === activeTag));
+        renderTable(filtered());
+      });
+      el.appendChild(btn);
+    });
+  }
+
+  function filtered() {
+    const q = (document.getElementById('searchInput').value||'').toLowerCase().trim();
+    return allResults.filter(a => {
+      const mq = !q || (a.title||'').toLowerCase().includes(q) || (a.description||'').toLowerCase().includes(q);
+      const mt = !activeTag || (a.categories||[]).includes(activeTag);
+      return mq && mt;
+    });
+  }
+
+  // ── Table ─────────────────────────────────────────────────────
+  function renderTable(list) {
+    const tbody = document.getElementById('tableBody');
+    if (!list.length) { hide('tableWrap'); show('emptyEl'); return; }
+    hide('emptyEl'); tbody.innerHTML = '';
+    list.forEach((project, i) => {
+      const isDisabled = (hasDisabledTypes && disabledProjectTypes.includes(project.project_type)) || (hasBlockedProjects && blockedProjects.includes(project.project_id));
+      const tr = document.createElement('tr');
+      tr.style.opacity = '0';
+      tr.className = 'hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer' + (isDisabled ? ' opacity-50' : '');
+      tr.innerHTML =
+        `<td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm"><div class="flex items-center gap-3">` +
+          `<img src="${esc(project.icon_url || '')}" alt="" class="w-8 h-8 rounded-lg object-cover shrink-0" onerror="this.style.display='none'">` +
+          `<div class="min-w-0"><p class="font-medium text-neutral-800 dark:text-white truncate max-w-xs">${esc(project.title)}</p>` +
+          (project.description ? `<p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 max-w-xs truncate">${esc(project.description)}</p>` : '') +
+        `</div></div></td>` +
+        `<td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400 col-hide"><span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${isDisabled ? 'sb-disabled' : 'sb-available'}">${esc(project.project_type)}</span></td>` +
+        `<td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400 col-hide">${(project.downloads || 0).toLocaleString()}</td>` +
+        `<td class="whitespace-nowrap px-3 py-4 text-sm"><button type="button" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Details</button></td>`;
+      tr.addEventListener('click', () => openWizard(project));
+      tr.querySelector('button').addEventListener('click', e => { e.stopPropagation(); openWizard(project); });
+      tbody.appendChild(tr);
+      setTimeout(() => { tr.style.transition = 'opacity 0.15s'; tr.style.opacity = '1'; setTimeout(() => { tr.style.transition = ''; tr.style.opacity = ''; }, 160); }, i * 18);
+    });
+    show('tableWrap');
+  }
+
+  // ── Search handlers ───────────────────────────────────────────
+  document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') { activeTag = null; loadResults(); } });
+  document.getElementById('searchBtn').addEventListener('click', () => { activeTag = null; loadResults(); });
+  document.getElementById('typeFilter').addEventListener('change', () => { activeTag = null; loadResults(); });
+  document.getElementById('sortFilter').addEventListener('change', () => { activeTag = null; loadResults(); });
+  document.getElementById('clearSearch').addEventListener('click', () => {
+    document.getElementById('searchInput').value = ''; activeTag = null;
+    document.querySelectorAll('#tagFilters button').forEach(b => b.classList.remove('on'));
+    loadResults();
+  });
+
+  // ── Recommendation card clicks ─────────────────────────────
+  document.getElementById('recsGrid')?.addEventListener('click', e => {
+    const card = e.target.closest('.rec-card');
+    if (!card) return;
+    const id = card.dataset.id;
+    const project = allResults.find(r => r.project_id === id) || { project_id: id, title: card.querySelector('.text-sm')?.textContent || '' };
+    openWizard(project);
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // WIZARD
+  // ══════════════════════════════════════════════════════════════
+
+  function goStep(step) {
+    currentStep = step;
+    document.querySelectorAll('.wiz-panel').forEach(p => p.classList.remove('active'));
+    const panel = document.getElementById('step-' + step);
+    if (panel) panel.classList.add('active');
+    updateActionBtn();
+  }
+
+  function updateActionBtn() {
+    const btn = document.getElementById('wizActionBtn');
+    btn.disabled = false;
+    switch (currentStep) {
+      case 'details':
+        btn.textContent = 'Install';
+        btn.className = 'w-full border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 py-2.5 text-sm font-medium shadow-lg transition';
+        break;
+      case 'versions':
+        btn.textContent = selectedVersion ? 'Next' : 'Select a version';
+        btn.disabled = !selectedVersion;
+        btn.className = 'w-full rounded-xl py-2.5 text-sm font-medium shadow-lg transition ' +
+          (selectedVersion ? 'bg-neutral-800 hover:bg-neutral-700 text-white dark:bg-neutral-200 dark:hover:bg-neutral-300 dark:text-neutral-900' : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-500 cursor-not-allowed');
+        break;
+      case 'server':
+        btn.textContent = selectedServer ? 'Next' : 'Select a server';
+        btn.disabled = !selectedServer;
+        btn.className = 'w-full rounded-xl py-2.5 text-sm font-medium shadow-lg transition ' +
+          (selectedServer ? 'bg-neutral-800 hover:bg-neutral-700 text-white dark:bg-neutral-200 dark:hover:bg-neutral-300 dark:text-neutral-900' : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-500 cursor-not-allowed');
+        break;
+      case 'confirm':
+        btn.textContent = 'Install now';
+        btn.className = 'w-full rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white dark:bg-neutral-200 dark:hover:bg-neutral-300 dark:text-neutral-900 py-2.5 text-sm font-medium shadow-lg transition';
+        break;
+      case 'progress':
+        btn.textContent = 'Installing...';
+        btn.disabled = true;
+        btn.className = 'w-full rounded-xl bg-neutral-200 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-500 py-2.5 text-sm font-medium shadow-lg transition cursor-not-allowed';
+        break;
+    }
+  }
+
+  // ── Open wizard ───────────────────────────────────────────────
+  async function openWizard(project) {
+    currentProject = project;
+    selectedVersion = null;
+    selectedServer = null;
+    allVersions = [];
+    allServers = [];
+    previousFocus = document.activeElement;
+
+    const isDisabled = (hasDisabledTypes && disabledProjectTypes.includes(project.project_type)) || (hasBlockedProjects && blockedProjects.includes(project.project_id));
+
+    // Header
+    document.getElementById('wizIcon').src = project.icon_url || '';
+    document.getElementById('wizIcon').style.display = project.icon_url ? '' : 'none';
+    document.getElementById('wizTitle').textContent = project.title || '';
+    const badge = document.getElementById('wizBadge');
+    badge.className = 'text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap ' + (isDisabled ? 'sb-disabled' : 'sb-available');
+    badge.textContent = isDisabled ? 'Disabled' : project.project_type;
+    document.getElementById('wizMeta').textContent = 'by ' + (project.author || 'Unknown') + ' · ' + (project.downloads || 0).toLocaleString() + ' downloads';
+    document.getElementById('wizDesc').textContent = project.description || '';
+    document.getElementById('wizSource').href = project.source_url || ('https://modrinth.com/project/' + project.project_id);
+
+    // Stats
+    document.getElementById('wizStats').innerHTML =
+      `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path></svg>${(project.downloads || 0).toLocaleString()}</span>` +
+      `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>${(project.follows || 0).toLocaleString()}</span>`;
+
+    // Categories
+    const catEl = document.getElementById('wizCategories');
+    catEl.innerHTML = '';
+    (project.categories || []).slice(0, 5).forEach(cat => {
+      catEl.innerHTML += `<span class="px-2 py-0.5 text-xs bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700 rounded-full">${esc(cat)}</span>`;
+    });
+
+    // Description (markdown)
+    document.getElementById('wizLong').innerHTML = '<p>' + esc(project.description || 'No description available.') + '</p>';
+
+    // Reset UI
+    hide('wizErr');
+    goStep('details');
+    document.getElementById('wizardOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    // Focus trap
+    const overlay = document.getElementById('wizardOverlay');
+    removeTrap = trapFocus(overlay);
+    document.getElementById('wizActionBtn').focus();
+  }
+
+  function closeWizard() {
+    document.getElementById('wizardOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    if (removeTrap) { removeTrap(); removeTrap = null; }
+    if (previousFocus) { previousFocus.focus(); previousFocus = null; }
+    currentProject = null; selectedVersion = null; selectedServer = null;
+  }
+  window.closeWizard = closeWizard;
+  document.getElementById('wizardOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeWizard(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('wizardOverlay').classList.contains('open')) closeWizard(); });
+
+  // ── Action button handler ─────────────────────────────────────
+  document.getElementById('wizActionBtn').addEventListener('click', async function() {
+    if (this.disabled) return;
+    switch (currentStep) {
+      case 'details': await startVersionPicker(); break;
+      case 'versions': goStep('server'); break;
+      case 'server': showConfirm(); goStep('confirm'); break;
+      case 'confirm': await startInstall(); break;
+    }
+  });
+
+  // ── Step 2: Version picker ────────────────────────────────────
+  async function startVersionPicker() {
+    if (!currentProject) return;
+    const isDisabled = hasDisabledTypes && disabledProjectTypes.includes(currentProject.project_type);
+    if (isDisabled) { showToast('Installation is disabled for this project type', 'error'); return; }
+
+    const verList = document.getElementById('verList');
+    verList.innerHTML = '<div class="sk h-10 w-full"></div><div class="sk h-10 w-full"></div><div class="sk h-10 w-full"></div>';
+    goStep('versions');
+
+    try {
+      const res = await fetch('/modrinth/api/project/' + encodeURIComponent(currentProject.project_id));
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { throw new Error('Non-JSON response (status ' + res.status + '): ' + text.slice(0, 200)); }
+      if (!data.success) throw new Error(data.error || 'API returned success=false');
+      allVersions = (data.data && data.data.versions) || data.versions || [];
+      renderVersions(allVersions);
+    } catch (err) {
+      console.error('[Modrinth] Version load error:', err);
+      verList.innerHTML = '<p class="text-xs text-neutral-400 py-4 text-center">Failed to load versions: ' + esc(err.message || 'Unknown error') + '</p>';
+    }
+  }
+
+  function renderVersions(versions) {
+    const verList = document.getElementById('verList');
+    verList.innerHTML = '';
+    const q = (document.getElementById('verSearch').value || '').toLowerCase();
+    const filtered = versions.filter(v => !q || (v.name||'').toLowerCase().includes(q) || (v.version_number||'').toLowerCase().includes(q));
+    if (!filtered.length) { verList.innerHTML = '<p class="text-xs text-neutral-400 py-4 text-center">No versions match</p>'; return; }
+    filtered.forEach(v => {
+      const div = document.createElement('div');
+      div.className = 'ver-card bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 rounded-lg p-3';
+      div.innerHTML =
+        `<div class="flex items-start justify-between gap-2 mb-1">` +
+          `<div class="flex-1 min-w-0"><div class="text-xs font-medium text-neutral-800 dark:text-white truncate">${esc(v.name || 'Unknown')}</div>` +
+          `<div class="text-neutral-500 text-xs font-mono mt-0.5">${esc(v.version_number || '')}</div></div>` +
+          `<span class="text-[10px] px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 flex-shrink-0 font-medium">${esc(v.version_type || 'release')}</span>` +
+        `</div>` +
+        `<div class="text-[11px] text-neutral-500 mt-1">${(v.game_versions || []).slice(0,3).map(gv => '<span class="font-mono">' + esc(gv) + '</span>').join(', ')}</div>`;
+      div.addEventListener('click', () => {
+        document.querySelectorAll('.ver-card').forEach(c => c.classList.remove('selected'));
+        div.classList.add('selected');
+        selectedVersion = v;
+        updateActionBtn();
+      });
+      verList.appendChild(div);
+    });
+  }
+
+  document.getElementById('verSearch').addEventListener('input', () => { if (allVersions.length) renderVersions(allVersions); });
+
+  // ── Step 3: Server picker ─────────────────────────────────────
+  async function fetchServers() {
+    try {
+      const res = await fetch('/modrinth/api/servers', { credentials: 'include', headers: { 'Accept': 'application/json' } });
+      const data = await res.json();
+      if (!data.success || !data.data || data.data.length === 0) { showToast('No servers available', 'error'); return false; }
+      allServers = data.data;
+      return true;
+    } catch { showToast('Failed to load servers', 'error'); return false; }
+  }
+
+  // ── Step 4: Confirm ──────────────────────────────────────────
+  function showConfirm() {
+    document.getElementById('cfnProject').textContent = currentProject?.title || '';
+    document.getElementById('cfnVersion').textContent = selectedVersion?.name || selectedVersion?.version_number || '';
+    document.getElementById('cfnServer').textContent = allServers.find(s => s.id === selectedServer)?.name || '';
+    document.getElementById('cfnType').textContent = currentProject?.project_type || '';
+  }
+
+  // ── Step 5: Install ──────────────────────────────────────────
+  async function startInstall() {
+    if (!currentProject || !selectedVersion || !selectedServer) return;
+    goStep('progress');
+
+    const log = (text, cls) => {
+      const d = document.createElement('div'); if (cls) d.className = cls;
+      d.textContent = text;
+      const logEl = document.getElementById('progLog');
+      logEl.appendChild(d); logEl.scrollTop = logEl.scrollHeight;
+    };
+
+    try {
+      const res = await fetch('/modrinth/api/install', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ serverId: selectedServer, projectId: currentProject.project_id, versionId: selectedVersion.id })
+      });
+      const ct = res.headers.get('content-type') || '';
+      if (!res.ok || ct.includes('application/json')) {
+        const data = await res.json();
+        log('Error: ' + (data.error || 'Server error'), 'l-err');
+        document.getElementById('progLabel').textContent = 'Failed';
+        showToast(data.error || 'Installation failed', 'error');
+        updateActionBtn();
+        return;
+      }
+
+      // SSE stream
+      const reader = res.body.getReader(), dec = new TextDecoder();
+      let buf = '';
+      outer: while (true) {
+        const { done: end, value } = await reader.read(); if (end) break;
+        buf += dec.decode(value, { stream: true });
+        const parts = buf.split('\n\n'); buf = parts.pop();
+        for (const part of parts) {
+          const raw = part.replace(/^data:\s*/m,'').trim(); if (!raw) continue;
+          let evt; try { evt = JSON.parse(raw); } catch { continue; }
+          if (evt.type === 'progress') {
+            const p = evt.progress || 0;
+            document.getElementById('progFill').style.width = p + '%';
+            document.getElementById('progPct').textContent = p + '%';
+            document.getElementById('progLabel').textContent = evt.stage || 'Installing...';
+            if (evt.message) log(evt.message, 'l-step');
+          } else if (evt.type === 'log') {
+            log(evt.message, evt.level === 'error' ? 'l-err' : evt.level === 'success' ? 'l-ok' : 'l-output');
+          } else if (evt.type === 'complete') {
+            document.getElementById('progFill').style.width = '100%';
+            document.getElementById('progPct').textContent = '100%';
+            document.getElementById('progLabel').textContent = 'Installed';
+            log(evt.message || 'Installation complete!', 'l-ok');
+            showToast(evt.message || 'Installation complete!', 'success');
+            updateActionBtn();
+            break outer;
+          } else if (evt.type === 'error') {
+            log('Error: ' + evt.message, 'l-err');
+            document.getElementById('progLabel').textContent = 'Failed';
+            showToast(evt.message, 'error');
+            updateActionBtn();
+            break outer;
+          }
+        }
+      }
+    } catch (err) {
+      log('Error: ' + err.message, 'l-err');
+      document.getElementById('progLabel').textContent = 'Failed';
+      showToast('Installation failed', 'error');
+      updateActionBtn();
+    }
+  }
+
+  // ── Override goStep to fetch servers when entering server step ──
+  const _origGoStep = goStep;
+  goStep = async function(step) {
+    if (step === 'server' && allServers.length === 0) {
+      const ok = await fetchServers();
+      if (!ok) return;
+      const srvList = document.getElementById('srvList');
+      srvList.innerHTML = '';
+      allServers.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'srv-card bg-neutral-50 dark:bg-neutral-800/40 border border-neutral-200 dark:border-white/5 rounded-lg p-3 flex items-center gap-3';
+        const running = s.status === 'running';
+        card.innerHTML =
+          `<span class="relative flex h-2 w-2 shrink-0">${running ? '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>' : ''}<span class="relative inline-flex rounded-full h-2 w-2 srv-dot-${running ? 'running' : 'stopped'}"></span></span>` +
+          `<div class="min-w-0 flex-1"><p class="text-xs font-medium text-neutral-800 dark:text-white truncate">${esc(s.name || 'Unnamed')}</p>` +
+          `<p class="text-[10px] text-neutral-400">${esc(s.status || 'unknown')}</p></div>`;
+        card.addEventListener('click', () => {
+          document.querySelectorAll('.srv-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          selectedServer = s.id;
+          updateActionBtn();
+        });
+        srvList.appendChild(card);
+      });
+    }
+    _origGoStep(step);
+  };
+
+  // ── Initial load ──────────────────────────────────────────────
+  // Seed allResults with server-rendered data so rec card clicks work immediately
+  <%
+    const initialHits = (results && results.hits) ? results.hits : [];
+  %>
+  allResults = <%- JSON.stringify(initialHits) %>;
+  loadResults();
+})();
+</script>
+
+<%- include(components.footer) %>
