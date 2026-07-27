@@ -1,8 +1,7 @@
 
 import prisma from '../db';
-import { httpGet } from '../utils/http';
 import logger from './logger';
-import { daemonSchemeSync } from './utils/core/daemonRequest';
+import { daemonRequest } from './utils/core/daemonRequest';
 
 
 // Interval in milliseconds (5 minutes)
@@ -41,21 +40,19 @@ export async function collectPlayerStats(): Promise<void> {
           }
 
           // Fetch player data from the daemon
-          const response = await httpGet<{ onlinePlayers?: number; maxPlayers?: number; online?: boolean }>(
-            `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/minecraft/players`,
-            {
-              params: {
-                id: server.UUID,
-                host: server.node.address,
-                port: primaryPort
-              },
-              auth: {
-                username: 'Airlink',
-                password: server.node.key,
-              },
-              timeout: 5000
+          const response = await daemonRequest<{ onlinePlayers?: number; maxPlayers?: number; online?: boolean }>({
+            nodeAddress: server.node.address,
+            nodePort: server.node.port,
+            nodeKey: server.node.key,
+            method: 'GET',
+            path: '/minecraft/players',
+            params: {
+              id: server.UUID,
+              host: server.node.address,
+              port: primaryPort
             },
-          );
+            timeout: 5000
+          });
 
           return {
             serverId: server.UUID,

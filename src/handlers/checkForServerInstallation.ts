@@ -1,7 +1,7 @@
-import { httpGet, isHttpError } from '../utils/http';
+import { isHttpError } from '../utils/http';
 import prisma from '../db';
 import { checkNodeStatus } from './utils/node/nodeStatus';
-import { daemonSchemeSync } from './utils/core/daemonRequest';
+import { daemonRequest } from './utils/core/daemonRequest';
 
 type CheckInstallationResult = {
   installed: boolean;
@@ -49,10 +49,14 @@ export async function checkForServerInstallation(
       return { installed: false, state: 'offline' };
     }
 
-    const response = await httpGet<{ state?: string }>(
-      `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/container/status/${server.UUID}`,
-      { auth: { username: 'Airlink', password: server.node.key }, timeout: 4000 },
-    );
+    const response = await daemonRequest<{ state?: string }>({
+      nodeAddress: server.node.address,
+      nodePort: server.node.port,
+      nodeKey: server.node.key,
+      method: 'GET',
+      path: `/container/status/${server.UUID}`,
+      timeout: 4000,
+    });
 
     const state = response.data.state;
     const isInstalled = state === 'installed';

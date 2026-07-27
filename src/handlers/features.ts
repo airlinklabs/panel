@@ -1,8 +1,8 @@
-import { httpGet, isHttpError } from '../utils/http';
+import { isHttpError } from '../utils/http';
 import prisma from '../db';
 import { checkNodeStatus } from './utils/node/nodeStatus';
 import logger from './logger';
-import { daemonSchemeSync } from './utils/core/daemonRequest';
+import { daemonRequest } from './utils/core/daemonRequest';
 
 interface ServerInfo {
   serverUUID: string;
@@ -32,14 +32,15 @@ export async function checkEulaStatus(serverId: string): Promise<CheckEulaResult
       return { accepted: true };
     }
 
-    const eulaResponse = await httpGet(
-      `${daemonSchemeSync()}://${server.node.address}:${server.node.port}/fs/file/content`,
-      {
-        responseType: 'text',
-        params: { id: server.UUID, path: 'eula.txt' },
-        auth: { username: 'Airlink', password: server.node.key },
-      },
-    );
+    const eulaResponse = await daemonRequest<string>({
+      nodeAddress: server.node.address,
+      nodePort: server.node.port,
+      nodeKey: server.node.key,
+      method: 'GET',
+      path: '/fs/file/content',
+      params: { id: server.UUID, path: 'eula.txt' },
+      responseType: 'text',
+    });
 
     return { accepted: (eulaResponse.data as string).includes('eula=true') };
   } catch (error: any) {
@@ -73,14 +74,15 @@ export const isWorld = async (folderName: string, serverInfo: ServerInfo): Promi
   }
 
   try {
-    const response = await httpGet<Array<{ name: string }>>(
-      `${daemonSchemeSync()}://${serverInfo.nodeAddress}:${serverInfo.nodePort}/fs/list`,
-      {
-        params: { id: serverInfo.serverUUID, path: folderName },
-        auth: { username: 'Airlink', password: serverInfo.nodeKey },
-        timeout: 5000,
-      },
-    );
+    const response = await daemonRequest<Array<{ name: string }>>({
+      nodeAddress: serverInfo.nodeAddress,
+      nodePort: serverInfo.nodePort,
+      nodeKey: serverInfo.nodeKey,
+      method: 'GET',
+      path: '/fs/list',
+      params: { id: serverInfo.serverUUID, path: folderName },
+      timeout: 5000,
+    });
 
     const content = response.data;
     const names = new Set(content.map((item) => item.name));

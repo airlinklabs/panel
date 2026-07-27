@@ -1,5 +1,5 @@
-import { httpGet, isHttpError } from '../../../utils/http';
-import { daemonSchemeSync } from '../core/daemonRequest';
+import { isHttpError } from '../../../utils/http';
+import { daemonRequest } from '../core/daemonRequest';
 import logger from '../../logger';
 
 interface Node {
@@ -22,13 +22,12 @@ interface DaemonStatusResponse {
 
 export async function checkNodeStatus(node: Node): Promise<Node> {
   try {
-    const url = `${daemonSchemeSync()}://${node.address}:${node.port}`;
-
-    const response = await httpGet<DaemonStatusResponse>(url, {
-      auth: {
-        username: 'Airlink',
-        password: node.key,
-      },
+    const response = await daemonRequest<DaemonStatusResponse>({
+      nodeAddress: node.address,
+      nodePort: node.port,
+      nodeKey: node.key,
+      method: 'GET',
+      path: '/',
       timeout: 3000,
     });
 
