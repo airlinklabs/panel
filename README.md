@@ -1,9 +1,9 @@
 > [!NOTE]
-> Airlink 2.5.128 is stable and ready for production. If it breaks, check your `SESSION_SECRET` first -_-
+> Airlink 2.5.128 is stable and ready for production.
 
 # Airlink Panel
 
-**Open-source game server management that works -_-**
+Open-source game server management panel.
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
@@ -14,26 +14,31 @@
 
 ## What is this?
 
-Airlink Panel is a web-based control center for deploying, monitoring, and managing game servers across multiple machines. The panel talks to the daemon so you don't have to -_-
+Airlink Panel is a web-based control center for deploying, monitoring, and managing game servers across multiple machines. The panel communicates with daemons running on each node to manage Docker containers, files, and SFTP.
 
-**What you get:**
-- Full web UI for admins and users (EJS templates, not React)
-- Node-based architecture: one panel, many daemons, infinite game servers
-- Addon system for extending functionality without touching core code
-- REST API (v1 + legacy) for automation and third-party integrations
-- Real-time console, file manager, backups, SFTP, and more
+**Features:**
+- Web UI for admins and users (EJS templates, Tailwind CSS)
+- Node-based architecture: one panel, many daemons
+- Addon system for extending functionality
+- REST API (v1 + legacy) with scoped API keys
+- Real-time console, file manager, backups, SFTP
+- HMAC-signed daemon communication
+- Server creation, power actions, resource management
+- User management with 2FA support
+- Analytics and player stats
+- Multi-language support (i18n)
 
-Full documentation at **[airlinklabs.xyz/docs/quick-start/](https://airlinklabs.xyz/docs/quick-start/)**.
+Documentation: [airlinklabs.xyz/docs/quick-start/](https://airlinklabs.xyz/docs/quick-start/)
 
 ---
 
 ## Project Leads
 
-| Handle | Role | What they do |
-|--------|------|--------------|
-| [thavanish](https://github.com/thavanish) | Maintainer | Keeps the lights on and the semicolons in place |
-| [privt00](https://github.com/privt00) | Project lead | The one who said "let's build a game panel" and meant it |
-| [achul123](https://github.com/achul123) | Core developer | Writes code that works on the first try (sometimes) |
+| Handle | Role |
+|--------|------|
+| [thavanish](https://github.com/thavanish) | Maintainer |
+| [privt00](https://github.com/privt00) | Project lead |
+| [achul123](https://github.com/achul123) | Core developer |
 
 ---
 
@@ -42,19 +47,20 @@ Full documentation at **[airlinklabs.xyz/docs/quick-start/](https://airlinklabs.
 - Node.js v18 or later
 - pnpm v8 or later (`npm install -g pnpm`)
 - Git
+- Docker
 
 ---
 
 ## Installation
 
-### Option 1: Installer script (recommended)
+### Option 1: Installer script
 
 ```bash
 sudo su
 bash <(curl -s https://raw.githubusercontent.com/airlinklabs/panel/refs/heads/main/installer.sh)
 ```
 
-The installer handles everything: Node.js, Docker, database, build, and the systemd service.
+The installer handles Node.js, Docker, database setup, build, and systemd service creation.
 
 Manage with systemd:
 
@@ -72,25 +78,19 @@ cd /var/www/
 git clone https://github.com/AirlinkLabs/panel.git
 cd panel
 
-# Set permissions
 chown -R www-data:www-data /var/www/panel
 chmod -R 755 /var/www/panel
 
-# Install dependencies
 pnpm install
 
-# Set up environment
 cp example.env .env
-# Edit .env - set PORT, URL, SESSION_SECRET, and DATABASE_URL
+# Edit .env: PORT, URL, SESSION_SECRET, DATABASE_URL
 
-# Build everything
 pnpm run setup
-
-# Start the panel
 pnpm run start
 ```
 
-`pnpm run setup` installs deps, generates the Prisma client, pushes the database schema, and builds TypeScript + CSS.
+`pnpm run setup` installs dependencies, generates the Prisma client, pushes the database schema, and builds TypeScript + CSS.
 
 ### Running with pm2
 
@@ -105,7 +105,7 @@ pm2 startup
 
 ## Configuration
 
-Copy `example.env` to `.env` and fill in the required values:
+Copy `example.env` to `.env` and set the required values:
 
 | Variable | Required | Description |
 |----------|----------|-------------|
@@ -114,10 +114,10 @@ Copy `example.env` to `.env` and fill in the required values:
 | `URL` | Yes | Full URL the panel is served from, e.g. `http://192.168.1.10:3000` |
 | `PORT` | Yes | Port to listen on |
 | `DATABASE_URL` | Yes | SQLite path, e.g. `file:./storage/dev.db` |
-| `SESSION_SECRET` | Yes | Random secret for session signing - use `openssl rand -hex 32` |
+| `SESSION_SECRET` | Yes | Random secret for session signing. Generate with `openssl rand -hex 32` |
 
 > [!IMPORTANT]
-> `DATABASE_URL` must be an **absolute path** in production (e.g. `file:/var/www/panel/storage/dev.db`). Relative paths break when started from a different working directory (e.g. via systemd).
+> `DATABASE_URL` must be an **absolute path** in production (e.g. `file:/var/www/panel/storage/dev.db`). Relative paths break when started from a different working directory.
 
 > [!IMPORTANT]
 > `URL` should be the actual IP or hostname the panel is accessible from. Setting it to `http://localhost` will prevent network access and cause CSP issues.
@@ -126,7 +126,7 @@ Copy `example.env` to `.env` and fill in the required values:
 
 ## API Reference
 
-The panel exposes a full REST API. See [`docs/specsheet.md`](docs/specsheet.md) for the complete route catalog with request/response formats, authentication details, and daemon communication.
+The panel exposes a REST API. See [`docs/specsheet.md`](docs/specsheet.md) for the complete route catalog with request/response formats, authentication details, and daemon communication.
 
 138 HTTP routes, 4 WebSocket endpoints, HMAC-signed daemon communication, scoped API keys with granular permissions.
 
@@ -143,33 +143,12 @@ See [`storage/addons/README.md`](storage/addons/README.md) for structure and API
 ## Development
 
 ```bash
-# Install deps
 pnpm install
-
-# Start in dev mode (auto-restart on changes)
-pnpm run dev
-
-# Typecheck
-pnpm run typecheck
-
-# Lint
-pnpm run lint
-
-# Build for production
-pnpm run build
+pnpm run dev        # Start in dev mode (auto-restart on changes)
+pnpm run typecheck  # Typecheck
+pnpm run lint       # Lint
+pnpm run build      # Build for production
 ```
-
----
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=airlinklabs%2Fpanel&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=airlinklabs/panel&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=airlinklabs/panel&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=airlinklabs/panel&type=date&legend=top-left" />
- </picture>
-</a>
 
 ---
 

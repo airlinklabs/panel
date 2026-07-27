@@ -1,4 +1,4 @@
-# Modrinth Store — API Reference
+# Modrinth Store API Reference
 
 ## Base URL
 
@@ -28,7 +28,7 @@ GET /modrinth/api/search?q=string&type=string&index=string&offset=number&limit=n
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
 | `q` | string | required | Search query (max 200 chars) |
-| `type` | string | — | Filter by project type (mod, modpack, plugin, shader, resourcepack, datapack) |
+| `type` | string | - | Filter by project type (mod, modpack, plugin, shader, resourcepack, datapack) |
 | `index` | string | `relevance` | Sort order (relevance, downloads, follows, newest, updated) |
 | `offset` | number | `0` | Pagination offset (>= 0) |
 | `limit` | number | `20` | Results per page (1-50) |
@@ -60,11 +60,11 @@ X-CSRF-Token: <token>
 **Response:** `{ success: true, message: "Installation started" }`
 
 **Errors:**
-- `400` — Invalid input
-- `401` — Not authenticated
-- `403` — Not server owner or project blocked
-- `404` — Server or project not found
-- `409` — Installation already in progress
+- `400` - Invalid input
+- `401` - Not authenticated
+- `403` - Not server owner or project blocked
+- `404` - Server or project not found
+- `409` - Installation already in progress
 
 ### Bulk Install
 
