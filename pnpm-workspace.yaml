@@ -4,3 +4,15 @@ allowBuilds:
   better-sqlite3: true
   esbuild: true
   prisma: true
+minimumReleaseAgeExclude:
+  - '@prisma/adapter-better-sqlite3@7.9.1'
+  - '@prisma/client-runtime-utils@7.9.1'
+  - '@prisma/client@7.9.1'
+  - '@prisma/config@7.9.1'
+  - '@prisma/debug@7.9.1'
+  - '@prisma/dev@0.24.17'
+  - '@prisma/driver-adapter-utils@7.9.1'
+  - '@prisma/engines@7.9.1'
+  - '@prisma/fetch-engine@7.9.1'
+  - '@prisma/get-platform@7.9.1'
+  - prisma@7.9.1
