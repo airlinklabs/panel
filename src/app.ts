@@ -330,11 +330,7 @@ app.use(
 // Setting secure:true on a plain HTTP server causes browsers to silently drop
 // all session cookies, breaking login on local network setups.
 const useSecureCookie = process.env.URL?.startsWith('https://') ?? false;
-const sessionSecret = process.env.SESSION_SECRET;
-
-if (!sessionSecret && process.env.NODE_ENV === 'production') {
-  throw new Error('SESSION_SECRET env var must be set in production.');
-}
+const sessionSecret = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
 
 app.use(
   session({
