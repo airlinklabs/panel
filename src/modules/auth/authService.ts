@@ -4,6 +4,7 @@ import { Router, Request, Response } from 'express';
 import { Module } from '../../handlers/moduleInit';
 import logger from '../../handlers/logger';
 import rateLimit from 'express-rate-limit';
+import { getClientIp } from '../../utils/ip';
 
 declare module 'express-session' {
   interface SessionData {
@@ -25,7 +26,7 @@ const authRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many attempts. Try again in a minute.' },
-  keyGenerator: (req) => req.ip || req.socket?.remoteAddress || 'unknown',
+  keyGenerator: (req) => getClientIp(req),
   validate: false,
 });
 
@@ -119,7 +120,7 @@ const authServiceModule: Module = {
         await prisma.loginHistory.create({
           data: {
             userId:    user.id,
-            ipAddress: req.ip,
+            ipAddress: getClientIp(req),
             userAgent: req.headers['user-agent'] || null,
           },
         });

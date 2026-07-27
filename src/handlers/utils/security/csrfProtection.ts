@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { doubleCsrf } from 'csrf-csrf';
 import crypto from 'crypto';
 import logger from '../../logger';
+import { getClientIp } from '../../../utils/ip';
 
 function ensureCsrfSessionId(req: Request): string {
   const session = req.session as { csrfSessionId?: string } | undefined;
@@ -47,7 +48,7 @@ export const handleCsrfError = (err: unknown, req: Request, res: Response, next:
   if (csrfError.code !== 'EBADCSRFTOKEN') {
     return next(err);
   }
-  logger.warn(`CSRF attack detected: IP=${req.ip}, Path=${req.path}, Method=${req.method}`);
+  logger.warn(`CSRF attack detected: IP=${getClientIp(req)}, Path=${req.path}, Method=${req.method}`);
   if (req.xhr || req.headers.accept?.includes('application/json')) {
     res.status(403).json({ error: 'CSRF token validation failed' });
   } else {

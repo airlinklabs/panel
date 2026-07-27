@@ -3,6 +3,11 @@ import prisma from '../../../db';
 import logger from '../../logger';
 import crypto from 'crypto';
 
+// SHA-256 is used for API key hashing (not bcrypt) because:
+// 1. API keys are random high-entropy strings, not passwords vulnerable to dictionary attacks
+// 2. The lookup is via DB findUnique, not a direct string comparison — no timing leak
+// 3. SHA-256 is fast, which is acceptable for high-entropy random keys
+// 4. The 200ms delay on invalid keys provides additional timing attack protection
 function sha256(value: string): string {
   return crypto.createHash('sha256').update(value).digest('hex');
 }

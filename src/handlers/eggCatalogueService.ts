@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { execSync, exec } from 'child_process';
+import { exec, spawnSync } from 'child_process';
 import { promisify } from 'util';
 import logger from './logger';
 
@@ -37,8 +37,8 @@ let updateTimer: NodeJS.Timeout | null = null;
 
 function isGitAvailable(): boolean {
   try {
-    execSync('git --version', { stdio: 'ignore' });
-    return true;
+    const result = spawnSync('git', ['--version'], { shell: false, stdio: 'ignore', timeout: 5000 });
+    return result.status === 0;
   } catch {
     return false;
   }
@@ -46,8 +46,8 @@ function isGitAvailable(): boolean {
 
 function isGitRepo(dir: string): boolean {
   try {
-    execSync('git rev-parse --git-dir', { cwd: dir, stdio: 'ignore' });
-    return true;
+    const result = spawnSync('git', ['rev-parse', '--git-dir'], { shell: false, cwd: dir, stdio: 'ignore', timeout: 5000 });
+    return result.status === 0;
   } catch {
     return false;
   }

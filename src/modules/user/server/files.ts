@@ -8,6 +8,7 @@ import { getServerStatus } from '../../../handlers/utils/server/serverStatus';
 import { getParamAsString } from '../../../utils/typeHelpers';
 import prisma from '../../../db';
 import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
+import { isPathSafe, normalizePath } from '../../../utils/pathSecurity';
 import {
   type ErrorMessage,
   type ServerPageServer,
@@ -155,6 +156,11 @@ export function registerFilesRoutes(router: Router): void {
     async (req: Request, res: Response) => {
       const filePath = Array.isArray(req.params?.path) ? req.params.path.join('/') : getParamAsString(req.params?.path);
 
+      if (!isPathSafe(filePath)) {
+        res.status(400).json({ error: 'Invalid file path.' });
+        return;
+      }
+
       try {
         const context = await loadAuthenticatedServerContext(req);
         if (sendMissingServerContext(res, context)) {
@@ -193,6 +199,14 @@ export function registerFilesRoutes(router: Router): void {
       const serverId = req.params?.id;
       let relativePath = req.body?.relativePath || '/';
       const zipName = req.body?.zipname;
+
+      if (typeof relativePath === 'string') {
+        relativePath = normalizePath(relativePath);
+        if (!isPathSafe(relativePath) && relativePath !== '/') {
+          res.status(400).json({ error: 'Invalid path.' });
+          return;
+        }
+      }
 
       try {
         if (!serverId) {
@@ -242,8 +256,16 @@ export function registerFilesRoutes(router: Router): void {
     isAuthenticatedForServer('id'),
     async (req: Request, res: Response) => {
       const serverId = req.params?.id;
-      const relativePath = req.body?.relativePath || '/';
+      let relativePath = req.body?.relativePath || '/';
       const zipName = req.body?.zipname;
+
+      if (typeof relativePath === 'string') {
+        relativePath = normalizePath(relativePath);
+        if (!isPathSafe(relativePath) && relativePath !== '/') {
+          res.status(400).json({ error: 'Invalid path.' });
+          return;
+        }
+      }
 
       try {
         if (!serverId) {
@@ -310,6 +332,11 @@ export function registerFilesRoutes(router: Router): void {
     async (req: Request, res: Response) => {
       const serverId = req.params?.id;
       const filePath = Array.isArray(req.params?.path) ? req.params.path.join('/') : getParamAsString(req.params?.path);
+
+      if (!isPathSafe(filePath)) {
+        res.status(400).json({ error: 'Invalid file path.' });
+        return;
+      }
 
       logger.info(
         `Deleting file/directory: ${filePath} from server ${serverId}`,

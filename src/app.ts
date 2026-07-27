@@ -24,6 +24,7 @@ import crypto from 'crypto';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import icon from './utils/icon';
+import { getClientIp } from './utils/ip';
 // hpp removed: Express 5's req.query parsing (qs with arrayLimit: 0) already
 // prevents HTTP Parameter Pollution. No replacement needed.
 import fs from 'fs';
@@ -301,7 +302,7 @@ setInterval(refreshSecurityCache, 30_000);
 
 // IP ban middleware — uses cached list, no per-request DB hit
 app.use((req, res, next) => {
-  const clientIp = req.ip || req.socket.remoteAddress || '';
+  const clientIp = getClientIp(req);
   if (getSecurityCache().bannedIps.includes(clientIp)) {
     renderErrorPage(req, res, 403, 'Your IP address is blocked from this panel.');
     return;
