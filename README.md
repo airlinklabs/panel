@@ -1,9 +1,9 @@
 > [!NOTE]
-> Airlink 2.0.0 is stable and ready for production. If it breaks, you probably forgot to set `SESSION_SECRET` -_-
+> Airlink 2.5.128 is stable and ready for production. If it breaks, check your `SESSION_SECRET` first -_-
 
 # Airlink Panel
 
-**Open-source game server management that actually works -_-**
+**Open-source game server management that works -_-**
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
@@ -14,16 +14,16 @@
 
 ## What is this?
 
-Airlink Panel is the brain of the operation. It's a web-based control center for deploying, monitoring, and managing game servers across multiple machines. Think of it as the thing that yells at the daemon so you don't have to -_-
+Airlink Panel is a web-based control center for deploying, monitoring, and managing game servers across multiple machines. The panel talks to the daemon so you don't have to -_-
 
 **What you get:**
-- Full web UI for admins and users (EJS templates, not React - we like it simple)
-- Node-based architecture - one panel, many daemons, infinite game servers
+- Full web UI for admins and users (EJS templates, not React)
+- Node-based architecture: one panel, many daemons, infinite game servers
 - Addon system for extending functionality without touching core code
 - REST API (v1 + legacy) for automation and third-party integrations
 - Real-time console, file manager, backups, SFTP, and more
 
-For full documentation, visit **[airlinklabs.xyz/docs/quick-start/](https://airlinklabs.xyz/docs/quick-start/)**.
+Full documentation at **[airlinklabs.xyz/docs/quick-start/](https://airlinklabs.xyz/docs/quick-start/)**.
 
 ---
 
@@ -42,20 +42,19 @@ For full documentation, visit **[airlinklabs.xyz/docs/quick-start/](https://airl
 - Node.js v18 or later
 - pnpm v8 or later (`npm install -g pnpm`)
 - Git
-- A sense of humor (optional but recommended)
 
 ---
 
 ## Installation
 
-### Option 1 - Installer script (recommended)
+### Option 1: Installer script (recommended)
 
 ```bash
 sudo su
 bash <(curl -s https://raw.githubusercontent.com/airlinklabs/panel/refs/heads/main/installer.sh)
 ```
 
-This handles everything: Node.js, Docker, database, build, systemd service. Just sit back and watch the progress bar -_-
+The installer handles everything: Node.js, Docker, database, build, and the systemd service.
 
 Manage with systemd:
 
@@ -66,7 +65,7 @@ systemctl restart airlink-panel
 journalctl -u airlink-panel -f
 ```
 
-### Option 2 - Manual
+### Option 2: Manual
 
 ```bash
 cd /var/www/
@@ -84,14 +83,14 @@ pnpm install
 cp example.env .env
 # Edit .env - set PORT, URL, SESSION_SECRET, and DATABASE_URL
 
-# One command to rule them all
+# Build everything
 pnpm run setup
 
 # Start the panel
 pnpm run start
 ```
 
-`pnpm run setup` does the heavy lifting: installs deps, generates Prisma client, pushes database schema, and builds TypeScript + CSS.
+`pnpm run setup` installs deps, generates the Prisma client, pushes the database schema, and builds TypeScript + CSS.
 
 ### Running with pm2
 
@@ -118,18 +117,18 @@ Copy `example.env` to `.env` and fill in the required values:
 | `SESSION_SECRET` | Yes | Random secret for session signing - use `openssl rand -hex 32` |
 
 > [!IMPORTANT]
-> `DATABASE_URL` must be an **absolute path** in production (e.g. `file:/var/www/panel/storage/dev.db`). Relative paths break when started from a different working directory (e.g. via systemd). This is not a suggestion. This is a warning -_-
+> `DATABASE_URL` must be an **absolute path** in production (e.g. `file:/var/www/panel/storage/dev.db`). Relative paths break when started from a different working directory (e.g. via systemd).
 
 > [!IMPORTANT]
-> `URL` should be the actual IP or hostname the panel is accessible from. Setting it to `http://localhost` will prevent network access and cause CSP issues. Your browser will judge you -_-
+> `URL` should be the actual IP or hostname the panel is accessible from. Setting it to `http://localhost` will prevent network access and cause CSP issues.
 
 ---
 
 ## API Reference
 
-The panel exposes a full REST API. See [`docs/specsheet.md`](docs/specsheet.md) for the complete route catalog with request/response formats, authentication details, and how the panel talks to the daemon.
+The panel exposes a full REST API. See [`docs/specsheet.md`](docs/specsheet.md) for the complete route catalog with request/response formats, authentication details, and daemon communication.
 
-**TL;DR:** 138 HTTP routes, 4 WebSocket endpoints, HMAC-signed daemon communication, scoped API keys with granular permissions.
+138 HTTP routes, 4 WebSocket endpoints, HMAC-signed daemon communication, scoped API keys with granular permissions.
 
 ---
 
@@ -181,7 +180,7 @@ pnpm run build
 3. Commit: `git commit -m 'feat: describe your change'`
 4. Push and open a pull request against `main`
 
-Run `pnpm run lint` and `pnpm run typecheck` before submitting. If your PR breaks the build, we will find you -_-
+Run `pnpm run lint` and `pnpm run typecheck` before submitting.
 
 ---
 
@@ -194,4 +193,4 @@ Run `pnpm run lint` and `pnpm run typecheck` before submitting. If your PR break
 
 ## License
 
-MIT - see [`LICENSE`](LICENSE) for details.
+MIT. See [`LICENSE`](LICENSE) for details.

@@ -115,22 +115,27 @@ export async function daemonRequest<T = unknown>(options: DaemonRequestOptions):
 
   const hmacHeaders = buildDaemonHeaders(nodeKey, method, url, body);
 
-  const requestFn = {
-    GET: httpGet,
-    POST: httpPost,
-    PUT: httpPut,
-    PATCH: httpPatch,
-    DELETE: httpDelete,
-  }[method.toUpperCase()] ?? httpGet;
-
-  return requestFn<T>(url, {
-    body,
+  const methodUpper = method.toUpperCase();
+  const httpOpts = {
     params,
     timeout,
     responseType,
     headers: hmacHeaders,
     auth: { username: 'Airlink', password: nodeKey },
-  });
+  };
+
+  switch (methodUpper) {
+  case 'POST':
+    return httpPost<T>(url, body, httpOpts);
+  case 'PUT':
+    return httpPut<T>(url, body, httpOpts);
+  case 'PATCH':
+    return httpPatch<T>(url, body, httpOpts);
+  case 'DELETE':
+    return httpDelete<T>(url, httpOpts);
+  default:
+    return httpGet<T>(url, httpOpts);
+  }
 }
 
 export { SIGNATURE_WINDOW_S };

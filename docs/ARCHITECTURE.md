@@ -1,8 +1,8 @@
-# Modrinth Store — Architecture
+# Modrinth Store Architecture
 
 ## Overview
 
-The Modrinth Store is a panel addon that integrates the [Modrinth](https://modrinth.com) API into AirLink, allowing users to browse, search, and install mods, modpacks, plugins, shaders, resource packs, and datapacks directly from the panel UI.
+The Modrinth Store is a panel addon that integrates the [Modrinth](https://modrinth.com) API into AirLink. Users can browse, search, and install mods, modpacks, plugins, shaders, resource packs, and datapacks from the panel UI.
 
 ## Directory Structure
 
@@ -11,7 +11,7 @@ storage/addons/modrinth/
 ├── package.json              # Addon manifest (routes, migrations, settings schema)
 ├── tsconfig.json
 ├── src/
-│   ├── index.ts              # Entry point — wires all components
+│   ├── index.ts              # Entry point, wires all components
 │   ├── types/                # TypeScript types and Zod schemas
 │   │   ├── modrinth.ts       # Modrinth API types (search, project, version)
 │   │   ├── panel.ts          # Panel addon API contract types
@@ -83,13 +83,13 @@ User Action → Browser → Express Router
 
 ## Security Model
 
-1. **Auth on all routes** — Every route requires session authentication via `security.requireAuth()`.
-2. **CSRF on mutations** — All POST/DELETE/PUT routes use `security.requireCsrf()`.
-3. **Path sanitization** — All file paths pass through `security.sanitizePath()` to prevent directory traversal.
-4. **URL validation** — All external URLs validated against allowed domains (api.modrinth.com, cdn.modrinth.com).
-5. **Input validation** — All user input sanitized before use (search queries, IDs, offsets, limits).
-6. **Zod validation** — All Modrinth API responses validated against Zod schemas before use.
-7. **No raw SQL** — Database operations use parameterized queries via `$executeRaw` tagged templates.
+1. **Auth on all routes.** Every route requires session authentication via `security.requireAuth()`.
+2. **CSRF on mutations.** All POST/DELETE/PUT routes use `security.requireCsrf()`.
+3. **Path sanitization.** All file paths pass through `security.sanitizePath()` to prevent directory traversal.
+4. **URL validation.** All external URLs validated against allowed domains (api.modrinth.com, cdn.modrinth.com).
+5. **Input validation.** All user input sanitized before use (search queries, IDs, offsets, limits).
+6. **Zod validation.** All Modrinth API responses validated against Zod schemas before use.
+7. **No raw SQL.** Database operations use parameterized queries via `$executeRaw` tagged templates.
 
 ## Database Tables
 
@@ -104,11 +104,11 @@ Both created via addon migrations declared in `package.json`.
 
 The addon receives an `AddonApi` object from the panel providing:
 
-- **`prisma`** — Typed Prisma client for DB operations
-- **`security`** — Path sanitization, URL validation, auth/CSRF middleware factories
-- **`config`** — Per-addon key-value config store
-- **`ui`** — Sidebar item registration
-- **`renderView`** — EJS view rendering with panel layout wrapper
-- **`logger`** — Structured logging
-- **`schedule`** — Background task registration
-- **`assetsUrl`** — URL prefix for addon static assets
+- **`prisma`** - Typed Prisma client for DB operations
+- **`security`** - Path sanitization, URL validation, auth/CSRF middleware factories
+- **`config`** - Per-addon key-value config store
+- **`ui`** - Sidebar item registration
+- **`renderView`** - EJS view rendering with panel layout wrapper
+- **`logger`** - Structured logging
+- **`schedule`** - Background task registration
+- **`assetsUrl`** - URL prefix for addon static assets

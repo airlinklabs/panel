@@ -1,6 +1,6 @@
 # AirLink Panel Addon System
 
-This document is the primary reference for building addons for AirLink Panel. It covers the v2 manifest format, the full Addon API surface, lifecycle hooks, permissions, settings, slots, commands, scheduled tasks, and the security model.
+This is the reference for building addons for AirLink Panel. It covers the v2 manifest format, the Addon API surface, lifecycle hooks, permissions, settings, slots, commands, scheduled tasks, and the security model.
 
 ## Table of Contents
 
@@ -400,9 +400,9 @@ Mismatches produce a warning by default. Set strict mode in admin settings to ha
 
 ## Managing Addons
 
-- `/admin/addons` — List, enable/disable, uninstall
-- `/admin/addons/store` — Browse and install from community registry
-- `/admin/addons/:slug` — Addon detail: settings, capabilities, commands
+- `/admin/addons` - List, enable/disable, uninstall
+- `/admin/addons/store` - Browse and install from community registry
+- `/admin/addons/:slug` - Addon detail: settings, capabilities, commands
 
 ## Backward Compatibility
 

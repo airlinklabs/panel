@@ -92,7 +92,7 @@ export default function (router: Router, api: any) {
 
 ## Key Concepts
 
-- **Settings**: Use `api.config.get/set/delete` — no custom tables needed for config
+- **Settings**: Use `api.config.get/set/delete` - no custom tables needed for config
 - **Slots**: Use `api.ui.registerSlot()` to inject content into panel pages
 - **Commands**: Use `api.commands.register()` for admin-triggered actions
 - **Scheduler**: Use `api.schedule.register()` for periodic tasks

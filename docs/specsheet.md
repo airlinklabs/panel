@@ -1,6 +1,6 @@
 # Airlink API Specsheet
 
-> The definitive reference for how the panel talks to the daemon, how users talk to the panel, and how everything fits together -_-
+> The reference for panel-daemon communication, user-panel routes, and how everything fits together.
 
 ---
 

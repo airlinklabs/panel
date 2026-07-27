@@ -1,6 +1,6 @@
 # Airlink Panel - Feature Guide
 
-This is a reference for everything in the Airlink panel. It covers the admin side, the user side, the addon system, and the API.
+This covers the admin side, the user side, the addon system, and the API.
 
 ---
 
@@ -29,33 +29,33 @@ pnpm run start
 
 ## Admin Panel
 
-All admin pages are under `/admin`. You must be logged in as an admin to access them.
+All admin pages are under `/admin`. You need admin privileges to access them.
 
 ### Overview
 
-The overview page is the first thing you see after logging in as an admin. It shows online nodes, total nodes, total instances, and average instance density across all nodes.
+The overview page shows online nodes, total nodes, total instances, and average instance density across all nodes.
 
-If a newer version of the panel is available, a notice appears here with a link to download it.
+If a newer version of the panel is available, a notice appears here with a download link.
 
 ### Nodes
 
 Nodes are the machines that run game servers. Each node runs the Airlink daemon, which the panel communicates with.
 
-To create a node, go to Admin > Nodes > Create Node. You need to provide a name, the node's IP address, and the daemon port (default: 3002).
+To create a node, go to Admin > Nodes > Create Node. You need a name, the node's IP address, and the daemon port (default: 3002).
 
 After creating a node, use the Configure button to get the daemon configuration details. Install and start the daemon on the node machine using those details.
 
-The node list shows each node's connection status, IP, port, and how many instances it is running.
+The node list shows each node's connection status, IP, port, and instance count.
 
 ### Servers
 
 Servers are game server instances that run on nodes. Each server belongs to a user and runs inside a container on a node.
 
-To create a server, go to Admin > Servers > Create Server. You pick a node, a user to own the server, an image (the server type), and resource limits: RAM, disk, and CPU.
+To create a server, go to Admin > Servers > Create Server. Pick a node, a user to own the server, an image (the server type), and resource limits: RAM, disk, and CPU.
 
 The server list shows every server across all nodes with its owner, node, and status.
 
-Clicking a server in the list takes you to its detail page where you can edit its configuration, change resource limits, or delete it.
+Clicking a server opens its detail page where you can edit its configuration, change resource limits, or delete it.
 
 ### Users
 
@@ -67,11 +67,11 @@ Clicking a user opens their profile where you can edit their username and email,
 
 ### Images
 
-Images define what kind of server can be created. Each image specifies a Docker image, startup command, and the environment variables that the server needs.
+Images define what kind of server can be created. Each image specifies a Docker image, startup command, and the environment variables the server needs.
 
 You can upload an image from a JSON file or create one manually. The image editor lets you define environment variables with default values, labels, and whether they are shown to users.
 
-Images are shared across all nodes. Any server creation form will list all available images.
+Images are shared across all nodes. Any server creation form lists all available images.
 
 ### API Keys
 
@@ -84,13 +84,13 @@ When creating a key, you assign it a name, an optional description, and a set of
 - Nodes: read, create, update, delete
 - Settings: read, update
 
-The key is shown once after creation. Copy it immediately - it cannot be retrieved again.
+The key is shown once after creation. Copy it immediately. It cannot be retrieved again.
 
 ### Addons
 
 The addons page at `/admin/addons` lists all addons in the `storage/addons/` folder. Each entry shows whether the addon is enabled or disabled. Toggling the switch enables or disables the addon (a panel restart is required for the change to take effect).
 
-The marketplace tab lists all community addons from the `airlinklabs/addons` registry. From here you can install addons with one click - the panel clones the repository, runs `pnpm install` and `pnpm run build`, and streams the output back to the browser.
+The marketplace tab lists community addons from the `airlinklabs/addons` registry. You can install addons with one click. The panel clones the repository, runs `pnpm install` and `pnpm run build`, and streams the output back to the browser.
 
 ### Settings
 

@@ -95,7 +95,7 @@ Scale ratio: 1.125-1.2 between steps.
 
 | Token | Value | Usage |
 |---|---|---|
-| `rounded-xl` | `0.75rem` (12px) | **Primary** -- buttons, cards, modals, inputs, nav items |
+| `rounded-xl` | `0.75rem` (12px) | Buttons, cards, modals, inputs, nav items |
 | `rounded-2xl` | `1rem` (16px) | Large cards, modal panels |
 | `rounded-lg` | `0.5rem` (8px) | Small elements |
 | `rounded-full` | pill | Avatars, status dots, badges |
@@ -161,7 +161,7 @@ Every interactive component has: default, hover, focus, active, disabled, loadin
 
 | Curve | Value | Usage |
 |---|---|---|
-| Decelerate | `cubic-bezier(0.16, 1, 0.3, 1)` | **Primary** -- modals, reveals, layout |
+| Decelerate | `cubic-bezier(0.16, 1, 0.3, 1)` | Modals, reveals, layout |
 | Standard | `cubic-bezier(0.4, 0, 0.2, 1)` | Transitions, hover states, FLIP |
 | Spring | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Checkbox overshot |
 

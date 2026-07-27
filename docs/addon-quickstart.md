@@ -73,7 +73,7 @@ export default function (router: Router, api: any) {
     },
   });
 
-  // Register a slot — inject content into the dashboard
+  // Register a slot, inject content into the dashboard
   ui.registerSlot('dashboard.home.afterContent', async () => {
     const message = await config.get('message') || 'Hello from My First Addon!';
     return `<div class="mx-8 mt-4 rounded-xl bg-neutral-900 p-4 border border-neutral-800">
