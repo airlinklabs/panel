@@ -10,9 +10,7 @@
   "license": "MIT",
   "scripts": {
     "setup": "pnpm install && prisma generate && prisma db push && pnpm run build",
-    "start": "prisma generate && node dist/app.js",
-    "prestart": "prisma generate",
-    "start:dev": "pnpm run dev",
+    "start": "node dist/app.js",
     "dev": "prisma migrate deploy && prisma generate && nodemon",
     "build": "tsc && tsc -p tsconfig.prisma.json && tailwindcss -i ./public/tw.css -o ./public/styles.css",
     "build:css": "tailwindcss -i ./public/tw.css -o ./public/styles.css --watch",
