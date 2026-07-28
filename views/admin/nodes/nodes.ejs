@@ -8,6 +8,10 @@
     </div>
     <!-- Content -->
     <div id="page-content" class="flex-1 overflow-y-auto pt-16">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin', href: '/admin' },
+        { label: 'Nodes' }
+      ] }) %>
       <%- include('../../components/ui/page-header', {
         title: req.translations.adminNodesTitle,
         description: req.translations.adminNodesText,
@@ -27,7 +31,7 @@
             <% } %>
           </div>
           <div class="al-card">
-            <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);">Server Count</h2>
+            <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);">Servers</h2>
             <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);">
               <%= nodes.reduce((total, node) => total + (node.instances ? node.instances.length : 0), 0) %>
             </p>

@@ -6,6 +6,10 @@
       <%- include('../../components/template') %>
     </div>
     <div id="page-content" class="flex-1 overflow-y-auto pt-16">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin', href: '/admin' },
+        { label: 'Overview' }
+      ] }) %>
       <div class="al-page-header">
         <h1 class="al-page-title"><%= req.translations.adminOverviewTitle || 'About' %></h1>
         <p class="al-page-desc"><%= req.translations.adminOverviewText || 'Panel information and credits.' %></p>
@@ -15,7 +19,7 @@
         <!-- Stats grid -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <%- include('../../components/ui/stat-card', { label: req.translations.totalRegisteredUsers || 'Registered Users', value: userCount, href: '/admin/users', iconName: 'users' }) %>
-          <%- include('../../components/ui/stat-card', { label: 'Active Instances', value: instanceCount, href: '/admin/servers', iconName: 'server' }) %>
+          <%- include('../../components/ui/stat-card', { label: 'Online Servers', value: instanceCount, href: '/admin/servers', iconName: 'server' }) %>
           <%- include('../../components/ui/stat-card', { label: 'Connected Nodes', value: nodeCount, href: '/admin/nodes', iconName: 'network' }) %>
           <%- include('../../components/ui/stat-card', { label: 'Available Images', value: imageCount, href: '/admin/images', iconName: 'box' }) %>
         </div>

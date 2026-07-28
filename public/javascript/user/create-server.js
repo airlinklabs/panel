@@ -173,6 +173,11 @@
   syncUnit('MemoryDisplay',  'MemoryUnit',  'Memory');
   syncUnit('StorageDisplay', 'StorageUnit', 'Storage');
 
+  // Real-time validation: remove invalid state when user types
+  document.getElementById('serverName').addEventListener('input', function() {
+    this.classList.remove('invalid');
+  });
+
   const overlay      = document.getElementById('confirmOverlay');
   const confirmTitle = document.getElementById('confirmTitle');
   const confirmBody  = document.getElementById('confirmBody');
@@ -209,27 +214,44 @@
     const Cpu         = parseInt(document.getElementById('Cpu').value);
     const Storage     = parseInt(document.getElementById('Storage').value);
 
+    // Clear previous validation states
+    document.querySelectorAll('.form-input').forEach(el => el.classList.remove('invalid'));
+
+    let hasError = false;
+
     if (!name) {
       errText.textContent = 'Server name is required.';
       errBox.classList.remove('hidden');
+      document.getElementById('serverName').classList.add('invalid');
       document.getElementById('serverName').focus();
-      return;
+      hasError = true;
+    } else if (name.length < 3) {
+      errText.textContent = 'Server name must be at least 3 characters.';
+      errBox.classList.remove('hidden');
+      document.getElementById('serverName').classList.add('invalid');
+      document.getElementById('serverName').focus();
+      hasError = true;
     }
+
     if (!nodeId) {
       errText.textContent = 'Select a node.';
       errBox.classList.remove('hidden');
-      return;
+      hasError = true;
     }
+
     if (!imageId) {
       errText.textContent = 'Select an image.';
       errBox.classList.remove('hidden');
-      return;
+      hasError = true;
     }
+
     if (!dockerImage) {
       errText.textContent = 'Select a docker variant.';
       errBox.classList.remove('hidden');
-      return;
+      hasError = true;
     }
+
+    if (hasError) return;
 
     const ok = await showConfirm(
       'Create server?',
@@ -249,7 +271,23 @@
       });
       const d = await r.json();
       if (d.success) {
-        window.location.href = '/server/' + d.serverUUID;
+        // Show success toast before redirect
+        const toastContainer = document.getElementById('toast-container');
+        if (toastContainer) {
+          const toast = document.createElement('div');
+          toast.className = 'al-toast al-toast-success';
+          toast.innerHTML = '<span class="al-toast-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></span><span class="al-toast-text">Server created successfully!</span>';
+          toastContainer.appendChild(toast);
+          setTimeout(() => toast.classList.add('show'), 10);
+          setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+          }, 3000);
+        }
+        // Redirect after brief delay
+        setTimeout(() => {
+          window.location.href = '/server/' + d.serverUUID;
+        }, 1000);
       } else {
         btn.disabled = false;
         btn.textContent = origText;

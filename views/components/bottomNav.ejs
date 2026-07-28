@@ -41,13 +41,11 @@
       <% if (typeof user !== 'undefined' && user.isAdmin === true) { %>
       <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
         <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide" style="color:var(--theme-text-muted);">Admin</p>
+        
+        <!-- Core -->
         <a href="/admin/overview" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-text);">
           <%- icon('layout-grid', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Overview</span>
-        </a>
-        <a href="/admin/settings" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-text);">
-          <%- icon('settings', { class: 'w-5 h-5' }) %>
-          <span class="text-sm">Settings</span>
         </a>
         <a href="/admin/servers" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-text);">
           <%- icon('server', { class: 'w-5 h-5' }) %>
@@ -57,6 +55,9 @@
           <%- icon('users', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Users</span>
         </a>
+
+        <!-- Infrastructure -->
+        <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);">Infrastructure</p>
         <a href="/admin/nodes" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-text);">
           <%- icon('network', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Nodes</span>
@@ -65,6 +66,9 @@
           <%- icon('box', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Images</span>
         </a>
+
+        <!-- Extensions -->
+        <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);">Extensions</p>
         <a href="/admin/addons" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-text);">
           <%- icon('puzzle', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Addons</span>
@@ -72,6 +76,13 @@
         <a href="/admin/apikeys" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-text);">
           <%- icon('key', { class: 'w-5 h-5' }) %>
           <span class="text-sm">API Keys</span>
+        </a>
+
+        <!-- Configuration -->
+        <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);">Configuration</p>
+        <a href="/admin/settings" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors" style="color:var(--theme-text);">
+          <%- icon('settings', { class: 'w-5 h-5' }) %>
+          <span class="text-sm">Settings</span>
         </a>
       </div>
       <% } %>
