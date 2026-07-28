@@ -38,25 +38,22 @@
 
 @layer utilities {
   .shadow-md {
-    --tw-shadow: 0 6px 12px -10px rgb(0 0 0 / 0.32);
-    --tw-shadow-colored: 0 6px 12px -10px var(--tw-shadow-color);
+    box-shadow: var(--theme-shadow-md, 0 6px 12px -10px rgb(0 0 0 / 0.32));
   }
 
   .shadow-lg {
-    --tw-shadow: 0 8px 18px -14px rgb(0 0 0 / 0.34);
-    --tw-shadow-colored: 0 8px 18px -14px var(--tw-shadow-color);
+    box-shadow: var(--theme-shadow-lg, 0 8px 18px -14px rgb(0 0 0 / 0.34));
   }
 
   .shadow-2xl {
-    --tw-shadow: 0 18px 44px -28px rgb(0 0 0 / 0.45);
-    --tw-shadow-colored: 0 18px 44px -28px var(--tw-shadow-color);
+    box-shadow: var(--theme-shadow-xl, 0 18px 44px -28px rgb(0 0 0 / 0.45));
   }
 
   /* ── Airlink component utilities ─────────────────────────────── */
 
   /* Core surfaces */
   .al-surface        { background: var(--theme-bg-card); border: 1px solid var(--theme-border); }
-  .al-surface-raised { background: var(--theme-bg-card); border: 1px solid var(--theme-border); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .al-surface-raised { background: var(--theme-bg-card); border: 1px solid var(--theme-border); box-shadow: var(--theme-shadow, 0 1px 3px rgba(0,0,0,0.06)); }
 
   /* Buttons */
   .al-btn-primary {
@@ -109,6 +106,7 @@
     @apply rounded-xl p-4;
     background: var(--theme-bg-card);
     border: 1px solid var(--theme-border);
+    box-shadow: var(--theme-shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
   }
   .al-card-header {
     @apply px-4 py-3 text-xs font-medium rounded-t-xl border-b;

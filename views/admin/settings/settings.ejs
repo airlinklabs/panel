@@ -1,5 +1,20 @@
 <%- include('../../components/header', { title: 'Settings' }) %>
 
+<style>
+.tab-btn {
+  color: var(--theme-text-muted);
+  border-bottom-color: transparent;
+}
+.tab-btn[aria-selected="true"] {
+  color: var(--theme-text-strong);
+  border-bottom-color: var(--theme-accent, currentColor);
+}
+.tab-btn:hover:not([aria-selected="true"]) {
+  color: var(--theme-text);
+  border-bottom-color: var(--theme-border);
+}
+</style>
+
 <main class="min-h-screen">
   <div class="flex min-h-screen">
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/template') %></div>
@@ -62,7 +77,9 @@
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" name="allowRegistration" class="sr-only peer" aria-label="Allow public registration" <%= settings.allowRegistration ? 'checked' : '' %>>
-                <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <div class="al-toggle-track peer-checked:checked">
+                  <div class="al-toggle-dot"></div>
+                </div>
               </label>
             </div>
           </div>
@@ -195,7 +212,9 @@
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" id="allowUserCreateServer" class="sr-only peer" aria-label="Allow users to create servers" <%= settings.allowUserCreateServer ? 'checked' : '' %>>
-                  <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 peer-focus-visible:ring-2 peer-focus-visible:ring-neutral-400 peer-focus-visible:ring-offset-1 outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div class="al-toggle-track peer-checked:checked">
+                    <div class="al-toggle-dot"></div>
+                  </div>
                 </label>
               </div>
               <div class="flex items-center justify-between">
@@ -205,7 +224,9 @@
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" id="allowUserDeleteServer" class="sr-only peer" aria-label="Allow users to delete servers" <%= settings.allowUserDeleteServer ? 'checked' : '' %>>
-                  <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 peer-focus-visible:ring-2 peer-focus-visible:ring-neutral-400 peer-focus-visible:ring-offset-1 outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div class="al-toggle-track peer-checked:checked">
+                    <div class="al-toggle-dot"></div>
+                  </div>
                 </label>
               </div>
             </div>
@@ -305,7 +326,9 @@
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" id="rateLimitEnabled" class="sr-only peer" aria-label="Enable rate limiting" <%= settings.rateLimitEnabled ? 'checked' : '' %>>
-                  <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div class="al-toggle-track peer-checked:checked">
+                    <div class="al-toggle-dot"></div>
+                  </div>
                 </label>
               </div>
               <div>
@@ -345,7 +368,9 @@
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
                   <input type="checkbox" id="behindReverseProxy" class="sr-only peer" aria-label="Behind a reverse proxy" <%= settings.behindReverseProxy ? 'checked' : '' %>>
-                  <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div class="al-toggle-track peer-checked:checked">
+                    <div class="al-toggle-dot"></div>
+                  </div>
                 </label>
               </div>
               <div class="flex items-center justify-between">
@@ -355,7 +380,9 @@
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
                   <input type="checkbox" id="enforceDaemonHttps" class="sr-only peer" aria-label="Enforce HTTPS for daemon connections" <%= settings.enforceDaemonHttps ? 'checked' : '' %>>
-                  <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div class="al-toggle-track peer-checked:checked">
+                    <div class="al-toggle-dot"></div>
+                  </div>
                 </label>
               </div>
               <div class="flex items-center justify-between">
@@ -365,7 +392,9 @@
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
                   <input type="checkbox" id="hashApiKeys" class="sr-only peer" aria-label="Hash API keys at rest" <%= settings.hashApiKeys ? 'checked' : '' %>>
-                  <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div class="al-toggle-track peer-checked:checked">
+                    <div class="al-toggle-dot"></div>
+                  </div>
                 </label>
               </div>
             </div>

@@ -37,23 +37,6 @@
   .dark .cs-option.selected { background: rgba(255,255,255,0.08); }
   .cs-option.disabled { opacity: 0.35; cursor: default; pointer-events: none; }
 
-  /* ── Form field ──────────────────────────────────────────── */
-  .form-input {
-    width: 100%; padding: 10px 14px; border-radius: 10px;
-    border: 1px solid var(--theme-border, #e5e5e5); background: var(--theme-bg-secondary, #f5f5f5);
-    font-size: 14px; color: var(--theme-text-strong, #171717); outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    box-sizing: border-box; font-family: inherit; min-height: 44px;
-  }
-  .dark .form-input { background: var(--theme-bg-secondary, rgba(255,255,255,0.06)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); color: var(--theme-text, #e5e5e5); }
-  .form-input:focus { border-color: var(--theme-border, #a3a3a3); box-shadow: 0 0 0 3px var(--theme-border-subtle, rgba(0,0,0,0.05)); }
-  .dark .form-input:focus { border-color: var(--theme-border, rgba(255,255,255,0.2)); box-shadow: 0 0 0 3px var(--theme-border-subtle, rgba(255,255,255,0.04)); }
-  .form-input::placeholder { color: var(--theme-text-placeholder, #a3a3a3); }
-  .form-input.invalid { border-color: var(--theme-danger, #f87171); }
-
-  .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--theme-text-muted, #525252); margin-bottom: 6px; }
-  .dark .form-label { color: var(--theme-text, #a3a3a3); }
-
   /* ── Resource stepper ────────────────────────────────────── */
   .stepper { display: flex; align-items: center; gap: 0; border: 1px solid var(--theme-border, #e5e5e5); border-radius: 10px; overflow: hidden; background: var(--theme-bg-secondary, #f5f5f5); }
   .dark .stepper { border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); background: var(--theme-bg-secondary, rgba(255,255,255,0.06)); }
@@ -119,12 +102,12 @@
             <div class="al-card-header">Details</div>
             <div class="p-5 space-y-4">
               <div>
-                <label class="form-label" for="serverName">Name</label>
-                <input id="serverName" type="text" placeholder="My server" maxlength="64" class="form-input">
+                <label class="al-label" for="serverName">Name</label>
+                <input id="serverName" type="text" placeholder="My server" maxlength="64" class="al-input">
               </div>
               <div>
-                <label class="form-label" for="serverDescription">Description <span class="text-neutral-400 font-normal">(optional)</span></label>
-                <input id="serverDescription" type="text" placeholder="What is this for?" maxlength="128" class="form-input">
+                <label class="al-label" for="serverDescription">Description <span class="text-neutral-400 font-normal">(optional)</span></label>
+                <input id="serverDescription" type="text" placeholder="What is this for?" maxlength="128" class="al-input">
               </div>
             </div>
           </div>
@@ -134,7 +117,7 @@
             <div class="al-card-header">Node & image</div>
             <div class="p-5 space-y-4">
               <div>
-                <label class="form-label">Node</label>
+                <label class="al-label">Node</label>
                 <select id="nodeId" class="hidden">
                   <option value="" disabled selected>Select a node</option>
                   <% nodes.forEach(node => { %>
@@ -145,7 +128,7 @@
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="form-label">Image</label>
+                  <label class="al-label">Image</label>
                   <select id="imageId" class="hidden">
                     <option value="" disabled selected>Select an image</option>
                     <% images.forEach(image => { %>
@@ -155,7 +138,7 @@
                   <div class="custom-select" data-for="imageId"></div>
                 </div>
                 <div>
-                  <label class="form-label">Docker variant</label>
+                  <label class="al-label">Docker variant</label>
                   <select id="dockerImage" class="hidden">
                     <option value="" disabled selected>Select an image first</option>
                   </select>
@@ -163,7 +146,7 @@
                 </div>
               </div>
               <div>
-                <label class="form-label">Ports</label>
+                <label class="al-label">Ports</label>
                 <button type="button" id="assignPortsBtn" class="cs-trigger">
                   <span id="assignPortsLabel">Assign ports</span>
                 </button>
@@ -178,7 +161,7 @@
             <div class="al-card-header">Resources</div>
             <div class="p-5 grid grid-cols-3 gap-4">
               <div>
-                <label for="MemoryDisplay" class="form-label flex items-center gap-1.5">
+                <label for="MemoryDisplay" class="al-label flex items-center gap-1.5">
                   <%- icon('server', { width: 14, height: 14 }) %>
                   RAM
                 </label>
@@ -196,7 +179,7 @@
                 <p class="text-[11px] text-neutral-400 mt-1.5"><%= resourceLimits.maxMemory > 0 ? 'Max ' + resourceLimits.maxMemory + ' MB' : 'Unlimited' %></p>
               </div>
               <div>
-                <label for="Cpu" class="form-label flex items-center gap-1.5">
+                <label for="Cpu" class="al-label flex items-center gap-1.5">
                   <%- icon('cpu', { width: 14, height: 14 }) %>
                   CPU <span class="text-neutral-400 font-normal">(%)</span>
                 </label>
@@ -208,7 +191,7 @@
                 <p class="text-[11px] text-neutral-400 mt-1.5">50% = half a core. <%= resourceLimits.maxCpu > 0 ? 'Max ' + resourceLimits.maxCpu + '%' : 'Unlimited' %></p>
               </div>
               <div>
-                <label for="StorageDisplay" class="form-label flex items-center gap-1.5">
+                <label for="StorageDisplay" class="al-label flex items-center gap-1.5">
                   <%- icon('hard-drive', { width: 14, height: 14 }) %>
                   Storage
                 </label>
