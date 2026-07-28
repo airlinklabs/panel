@@ -1,6 +1,7 @@
 (function () {
   const tabBtns   = document.querySelectorAll('.tab-btn');
   const tabPanels = document.querySelectorAll('.tab-panel');
+  const tabList = document.querySelector('[role="tablist"]');
 
   function activate(id) {
     tabBtns.forEach(btn => {
@@ -12,9 +13,40 @@
       btn.classList.toggle('border-transparent', !on);
       btn.classList.toggle('text-neutral-500',   !on);
       btn.classList.toggle('dark:text-neutral-400', !on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      btn.setAttribute('tabindex', on ? '0' : '-1');
     });
     tabPanels.forEach(p => p.classList.toggle('hidden', p.dataset.tabPanel !== id));
     try { localStorage.setItem('settings_tab', id); } catch {}
+  }
+
+  // Arrow key navigation for tabs
+  if (tabList) {
+    tabList.addEventListener('keydown', function(e) {
+      const tabs = Array.from(tabBtns);
+      const currentIndex = tabs.findIndex(t => t === document.activeElement);
+      if (currentIndex === -1) return;
+      
+      let newIndex = currentIndex;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        newIndex = (currentIndex + 1) % tabs.length;
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        newIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        newIndex = 0;
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        newIndex = tabs.length - 1;
+      }
+      
+      if (newIndex !== currentIndex) {
+        tabs[newIndex].focus();
+        activate(tabs[newIndex].dataset.tab);
+      }
+    });
   }
 
   tabBtns.forEach(btn => btn.addEventListener('click', () => activate(btn.dataset.tab)));

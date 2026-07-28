@@ -99,11 +99,11 @@
             </thead>
             <tbody>
               <% let userIdx = 0; users.forEach(function(user) { %>
-                <tr style="--i:<%= userIdx++ %>" class="al-table-tr cursor-pointer" onclick="handleRowClick(event, '/admin/users/view/<%= user.id %>/')">
+                <tr style="--i:<%= userIdx++ %>" class="al-table-tr cursor-pointer" tabindex="0" role="link" onclick="handleRowClick(event, '/admin/users/view/<%= user.id %>/')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();handleRowClick(event, '/admin/users/view/<%= user.id %>/');}">
                   <td class="al-table-td sm:pl-6">
                     <div class="flex items-center gap-3">
                       <div class="relative shrink-0">
-                        <img class="h-8 w-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="">
+                        <img class="h-8 w-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="<%= user.username %>">
                         <% if (onlineUsers.has(user.username)) { %>
                           <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
                             <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-success); border:2px solid var(--theme-bg-card);"></span>
@@ -126,12 +126,8 @@
                   <td class="al-table-td"><%= user.servers ? user.servers.length : 0 %></td>
                   <td class="al-table-td">
                     <div class="flex gap-3">
-                      <a href="/admin/users/view/<%= user.id %>/">
-                        <button type="button" class="al-btn-secondary text-xs">View</button>
-                      </a>
-                      <a href="/admin/users/edit/<%= user.id %>/">
-                        <button type="button" class="al-btn-primary text-xs">Edit</button>
-                      </a>
+                      <a href="/admin/users/view/<%= user.id %>/" class="al-btn-secondary text-xs">View</a>
+                      <a href="/admin/users/edit/<%= user.id %>/" class="al-btn-primary text-xs">Edit</a>
                       <button onclick="deleteUser('<%= user.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete user">
                         <%- icon('trash-2', { size: 16 }) %>
                       </button>

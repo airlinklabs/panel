@@ -175,17 +175,17 @@
             <div class="al-card-header">Resources</div>
             <div class="p-5 grid grid-cols-3 gap-4">
               <div>
-                <label class="form-label flex items-center gap-1.5">
+                <label for="MemoryDisplay" class="form-label flex items-center gap-1.5">
                   <%- icon('server', { width: 14, height: 14 }) %>
                   RAM
                 </label>
                 <!-- hidden field always holds MB -->
                 <input type="hidden" id="Memory" value="512">
                 <div class="flex items-stretch gap-0">
-                  <button type="button" class="stepper-btn rounded-l-xl" data-action="dec" data-target="MemoryDisplay" data-step="128" data-min="1">−</button>
-                  <input id="MemoryDisplay" type="number" value="512" min="1" class="stepper-input flex-1">
-                  <button type="button" class="stepper-btn" data-action="inc" data-target="MemoryDisplay" data-step="128">+</button>
-                  <select id="MemoryUnit" class="rounded-r-xl text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-white border border-l-0 border-neutral-200 dark:border-white/10 cursor-pointer">
+                  <button type="button" class="stepper-btn rounded-l-xl" data-action="dec" data-target="MemoryDisplay" data-step="128" data-min="1" aria-label="Decrease RAM">−</button>
+                  <input id="MemoryDisplay" type="number" value="512" min="1" class="stepper-input flex-1" aria-label="RAM value">
+                  <button type="button" class="stepper-btn" data-action="inc" data-target="MemoryDisplay" data-step="128" aria-label="Increase RAM">+</button>
+                  <select id="MemoryUnit" class="rounded-r-xl text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-white border border-l-0 border-neutral-200 dark:border-white/10 cursor-pointer" aria-label="RAM unit">
                     <option value="1" selected>MB</option>
                     <option value="1024">GB</option>
                   </select>
@@ -193,29 +193,29 @@
                 <p class="text-[11px] text-neutral-400 mt-1.5"><%= resourceLimits.maxMemory > 0 ? 'Max ' + resourceLimits.maxMemory + ' MB' : 'Unlimited' %></p>
               </div>
               <div>
-                <label class="form-label flex items-center gap-1.5">
+                <label for="Cpu" class="form-label flex items-center gap-1.5">
                   <%- icon('cpu', { width: 14, height: 14 }) %>
                   CPU <span class="text-neutral-400 font-normal">(%)</span>
                 </label>
                 <div class="stepper">
-                  <button type="button" class="stepper-btn" data-action="dec" data-target="Cpu" data-step="50" data-min="50">−</button>
-                  <input id="Cpu" type="number" value="100" min="50" max="<%= resourceLimits.maxCpu %>" class="stepper-input">
-                  <button type="button" class="stepper-btn" data-action="inc" data-target="Cpu" data-step="50" data-max="<%= resourceLimits.maxCpu %>">+</button>
+                  <button type="button" class="stepper-btn" data-action="dec" data-target="Cpu" data-step="50" data-min="50" aria-label="Decrease CPU">−</button>
+                  <input id="Cpu" type="number" value="100" min="50" max="<%= resourceLimits.maxCpu %>" class="stepper-input" aria-label="CPU percentage">
+                  <button type="button" class="stepper-btn" data-action="inc" data-target="Cpu" data-step="50" data-max="<%= resourceLimits.maxCpu %>" aria-label="Increase CPU">+</button>
                 </div>
                 <p class="text-[11px] text-neutral-400 mt-1.5">50% = half a core. <%= resourceLimits.maxCpu > 0 ? 'Max ' + resourceLimits.maxCpu + '%' : 'Unlimited' %></p>
               </div>
               <div>
-                <label class="form-label flex items-center gap-1.5">
+                <label for="StorageDisplay" class="form-label flex items-center gap-1.5">
                   <%- icon('hard-drive', { width: 14, height: 14 }) %>
                   Storage
                 </label>
                 <!-- hidden field always holds MB -->
                 <input type="hidden" id="Storage" value="5120">
                 <div class="flex items-stretch gap-0">
-                  <button type="button" class="stepper-btn rounded-l-xl" data-action="dec" data-target="StorageDisplay" data-step="1" data-min="1">−</button>
-                  <input id="StorageDisplay" type="number" value="5" min="1" class="stepper-input flex-1">
-                  <button type="button" class="stepper-btn" data-action="inc" data-target="StorageDisplay" data-step="1">+</button>
-                  <select id="StorageUnit" class="rounded-r-xl text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-white border border-l-0 border-neutral-200 dark:border-white/10 cursor-pointer">
+                  <button type="button" class="stepper-btn rounded-l-xl" data-action="dec" data-target="StorageDisplay" data-step="1" data-min="1" aria-label="Decrease storage">−</button>
+                  <input id="StorageDisplay" type="number" value="5" min="1" class="stepper-input flex-1" aria-label="Storage value">
+                  <button type="button" class="stepper-btn" data-action="inc" data-target="StorageDisplay" data-step="1" aria-label="Increase storage">+</button>
+                  <select id="StorageUnit" class="rounded-r-xl text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-white border border-l-0 border-neutral-200 dark:border-white/10 cursor-pointer" aria-label="Storage unit">
                     <option value="1">MB</option>
                     <option value="1024" selected>GB</option>
                   </select>
@@ -245,9 +245,9 @@
   </div>
 </main>
 
-<div class="confirm-overlay" id="portsOverlay">
+<div class="confirm-overlay" id="portsOverlay" role="dialog" aria-modal="true" aria-labelledby="portsOverlayTitle">
   <div class="confirm-box max-w-lg">
-    <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-3">Assign ports</p>
+    <p id="portsOverlayTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-3">Assign ports</p>
     <div id="requiredPortsList" class="space-y-2"></div>
     <div class="flex justify-end mt-4">
       <button id="portsOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">OK</button>
@@ -256,7 +256,7 @@
 </div>
 
 <!-- Custom confirm dialog -->
-<div class="confirm-overlay" id="confirmOverlay">
+<div class="confirm-overlay" id="confirmOverlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmBody">
   <div class="confirm-box">
     <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-1" id="confirmTitle"></p>
     <p class="text-xs text-neutral-500 mb-4" id="confirmBody"></p>
