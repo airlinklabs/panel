@@ -149,7 +149,7 @@
               </div>
               <div class="flex items-center justify-between pt-2 border-t" style="border-color:var(--theme-border);">
                 <div class="flex items-center gap-1.5 min-w-0">
-                  <img loading="lazy" class="h-4 w-4 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="">
+                  <img loading="lazy" class="h-4 w-4 rounded-full shrink-0" src="<%= server.owner && server.owner.avatar ? server.owner.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(server.owner ? server.owner.username : 'unknown') %>" alt="<%= server.owner ? server.owner.username : 'Unknown' %>">
                   <span class="text-xs truncate" style="color:var(--theme-text-muted);"><%= server.owner ? server.owner.username : 'Unknown' %></span>
                 </div>
                 <% if (server.node) { %>
@@ -160,7 +160,7 @@
             <!-- Right-click context menu -->
             <div class="server-ctx-menu hidden absolute z-40 top-2 right-2 rounded-xl shadow-lg py-1 w-44" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
               <button class="ctx-add-to-folder w-full text-left px-3 py-2 text-sm rounded-t-xl transition" style="color:var(--theme-text);" data-uuid="<%= server.UUID %>">Add to folder</button>
-              <button class="ctx-remove-from-folder w-full text-left px-3 py-2 text-sm rounded-b-xl transition" style="color:var(--theme-text);" data-uuid="<%= server.UUID %>" style="display:<%= (folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID))) ? '' : 'none' %>">Remove from folder</button>
+              <button class="ctx-remove-from-folder w-full text-left px-3 py-2 text-sm rounded-b-xl transition" style="color:var(--theme-text); display:<%= (folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID))) ? '' : 'none' %>" data-uuid="<%= server.UUID %>">Remove from folder</button>
             </div>
           </div>
           <% }); %>
@@ -181,7 +181,7 @@
             <tbody style="border-color:var(--theme-border);">
               <% let listIdx = 0; servers.forEach(server => { %>
               <% const inFolderL = folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID)); if (inFolderL) return; %>
-              <tr style="--i:<%= listIdx++ %>" data-href="../server/<%= server.UUID %>" role="link" tabindex="0" class="al-table-tr cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset" style="border-color:var(--theme-border);">
+              <tr style="--i:<%= listIdx++ %>; border-color:var(--theme-border);" data-href="../server/<%= server.UUID %>" role="link" tabindex="0" class="al-table-tr cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset">
                 <td class="al-table-td pl-6">
                   <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= server.name %></p>
                   <% if (server.description) { %><p class="text-xs truncate max-w-xs" style="color:var(--theme-text-muted);"><%= server.description %></p><% } %>
