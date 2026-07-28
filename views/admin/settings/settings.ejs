@@ -17,14 +17,14 @@
       <div class="al-page-body">
 
         <!-- Tab bar -->
-        <div class="flex gap-0.5 mb-6 border-b border-neutral-200 dark:border-neutral-700/40">
-          <button type="button" data-tab="appearance" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Appearance</button>
-          <button type="button" data-tab="servers"    class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Servers</button>
-          <button type="button" data-tab="security"   class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Security</button>
+        <div role="tablist" class="flex gap-0.5 mb-6 border-b border-neutral-200 dark:border-neutral-700/40">
+          <button type="button" role="tab" aria-selected="true" aria-controls="panel-appearance" id="tab-appearance" data-tab="appearance" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Appearance</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-servers" id="tab-servers" data-tab="servers" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Servers</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="panel-security" id="tab-security" data-tab="security" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Security</button>
         </div>
 
         <!-- ── APPEARANCE ──────────────────────────────────────────────────── -->
-        <form id="form-appearance" data-tab-panel="appearance" class="tab-panel space-y-5 hidden" enctype="multipart/form-data">
+        <form id="form-appearance" role="tabpanel" aria-labelledby="tab-appearance" data-tab-panel="appearance" class="tab-panel space-y-5 hidden" enctype="multipart/form-data">
 
           <!-- Branding -->
           <div class="al-card">
@@ -61,7 +61,7 @@
                 <p class="text-xs text-neutral-500 mt-0.5">When off, only admins can create new accounts.</p>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" name="allowRegistration" class="sr-only peer" <%= settings.allowRegistration ? 'checked' : '' %>>
+                <input type="checkbox" name="allowRegistration" class="sr-only peer" aria-label="Allow public registration" <%= settings.allowRegistration ? 'checked' : '' %>>
                 <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
               </label>
             </div>
@@ -182,7 +182,7 @@
         </form>
 
         <!-- ── SERVERS ─────────────────────────────────────────────────────── -->
-        <div id="panel-servers" data-tab-panel="servers" class="tab-panel hidden space-y-5">
+        <div id="panel-servers" role="tabpanel" aria-labelledby="tab-servers" data-tab-panel="servers" class="tab-panel hidden space-y-5">
 
           <div class="al-card">
             <h2 class="al-card-header">User permissions</h2>
@@ -193,7 +193,7 @@
                   <p class="text-xs text-neutral-500 mt-0.5">Users can create their own servers up to their limit.</p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="allowUserCreateServer" class="sr-only peer" <%= settings.allowUserCreateServer ? 'checked' : '' %>>
+                  <input type="checkbox" id="allowUserCreateServer" class="sr-only peer" aria-label="Allow users to create servers" <%= settings.allowUserCreateServer ? 'checked' : '' %>>
                   <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 peer-focus-visible:ring-2 peer-focus-visible:ring-neutral-400 peer-focus-visible:ring-offset-1 outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
@@ -203,7 +203,7 @@
                   <p class="text-xs text-neutral-500 mt-0.5">Users can delete servers they own.</p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="allowUserDeleteServer" class="sr-only peer" <%= settings.allowUserDeleteServer ? 'checked' : '' %>>
+                  <input type="checkbox" id="allowUserDeleteServer" class="sr-only peer" aria-label="Allow users to delete servers" <%= settings.allowUserDeleteServer ? 'checked' : '' %>>
                   <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 peer-focus-visible:ring-2 peer-focus-visible:ring-neutral-400 peer-focus-visible:ring-offset-1 outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
@@ -272,7 +272,7 @@
         </div>
 
         <!-- ── SECURITY ────────────────────────────────────────────────────── -->
-        <div id="panel-security" data-tab-panel="security" class="tab-panel hidden space-y-5">
+        <div id="panel-security" role="tabpanel" aria-labelledby="tab-security" data-tab-panel="security" class="tab-panel hidden space-y-5">
 
           <!-- VirusTotal -->
           <div class="al-card">
@@ -303,7 +303,7 @@
                   <p class="text-xs text-neutral-500 mt-0.5">Limit requests per minute per IP address.</p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" id="rateLimitEnabled" class="sr-only peer" <%= settings.rateLimitEnabled ? 'checked' : '' %>>
+                  <input type="checkbox" id="rateLimitEnabled" class="sr-only peer" aria-label="Enable rate limiting" <%= settings.rateLimitEnabled ? 'checked' : '' %>>
                   <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
@@ -343,7 +343,7 @@
                   <p class="text-xs text-neutral-500 mt-0.5">Enable if Nginx, Caddy, or another proxy sits in front. Makes <code class="text-xs bg-neutral-200 dark:bg-neutral-700 px-1 rounded">req.ip</code> use the forwarded header so rate limiting and IP bans target the real client.</p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
-                  <input type="checkbox" id="behindReverseProxy" class="sr-only peer" <%= settings.behindReverseProxy ? 'checked' : '' %>>
+                  <input type="checkbox" id="behindReverseProxy" class="sr-only peer" aria-label="Behind a reverse proxy" <%= settings.behindReverseProxy ? 'checked' : '' %>>
                   <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
@@ -353,7 +353,7 @@
                   <p class="text-xs text-neutral-500 mt-0.5">Panel contacts daemons over <code class="text-xs bg-neutral-200 dark:bg-neutral-700 px-1 rounded">https://</code>. Only enable if your daemons have TLS configured.</p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
-                  <input type="checkbox" id="enforceDaemonHttps" class="sr-only peer" <%= settings.enforceDaemonHttps ? 'checked' : '' %>>
+                  <input type="checkbox" id="enforceDaemonHttps" class="sr-only peer" aria-label="Enforce HTTPS for daemon connections" <%= settings.enforceDaemonHttps ? 'checked' : '' %>>
                   <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
@@ -363,7 +363,7 @@
                   <p class="text-xs text-neutral-500 mt-0.5">Store API keys as SHA-256 hashes in the database. <strong class="text-amber-600 dark:text-amber-400">Enable before creating new keys — existing keys shown once.</strong></p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
-                  <input type="checkbox" id="hashApiKeys" class="sr-only peer" <%= settings.hashApiKeys ? 'checked' : '' %>>
+                  <input type="checkbox" id="hashApiKeys" class="sr-only peer" aria-label="Hash API keys at rest" <%= settings.hashApiKeys ? 'checked' : '' %>>
                   <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
@@ -377,11 +377,13 @@
           <div class="al-card">
             <h2 class="al-card-header">IP banning</h2>
             <div class="px-5 py-5">
+              <label for="banIpInput" class="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2 block">IP Address</label>
               <div class="flex gap-3 mb-4">
-                <input type="text" id="banIpInput" placeholder="192.168.1.1"
+                <input type="text" id="banIpInput" placeholder="192.168.1.1" aria-describedby="banIpHint"
                   class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors flex-1 max-w-xs">
                 <button type="button" id="banIpBtn" class="rounded-xl bg-red-600 hover:bg-red-500 text-white px-4 py-2 text-sm font-medium transition">Ban IP</button>
               </div>
+              <p id="banIpHint" class="text-xs text-neutral-400 mb-4">Enter the IP address you want to ban from accessing the panel.</p>
               <div id="bannedIpList" class="space-y-2">
                 <% let banned = []; try { banned = JSON.parse(settings.bannedIps || '[]'); } catch {} %>
                 <% if (banned.length === 0) { %>
