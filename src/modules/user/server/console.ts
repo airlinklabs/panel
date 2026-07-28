@@ -151,6 +151,7 @@ export function registerConsoleRoutes(router: Router): void {
           errorMessage.message = 'Server not found.';
           return res.render('user/server/manage', {
             errorMessage,
+            features: [],
             user,
             req,
           });

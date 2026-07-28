@@ -1,3 +1,26 @@
+<!-- Mobile top bar -->
+<div class="mobile-top-bar fixed top-0 left-0 right-0 z-40 lg:hidden h-14 flex items-center justify-between px-4 border-b" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
+  <a href="/" class="flex items-center gap-2.5 min-w-0">
+    <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 w-8 rounded-lg shrink-0" style="background:var(--theme-logo-bg);">
+    <h1 class="font-medium text-sm truncate" style="color:var(--theme-text-strong);"><%= settings.title || 'Airlink' %></h1>
+  </a>
+  <div class="flex items-center gap-2">
+    <button type="button" id="mobile-theme-toggle" class="p-2 rounded-lg transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center" style="color:var(--theme-text-muted);" aria-label="Toggle theme">
+      <svg class="w-4 h-4 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"></path>
+      </svg>
+      <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 009-9c0-.463-.032-.926-.086-1.376z"></path>
+      </svg>
+    </button>
+    <% if (typeof user !== 'undefined') { %>
+    <a href="/account" class="p-1 rounded-lg transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center" style="color:var(--theme-text-muted);">
+      <img class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
+    </a>
+    <% } %>
+  </div>
+</div>
+
 <!-- Mobile bottom navigation -->
 <nav id="mobile-bottom-nav" class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t" aria-label="Mobile navigation" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
   <div class="flex items-stretch h-[60px] px-2">
@@ -115,6 +138,7 @@
   var sheet = document.getElementById('mobile-more-sheet');
   var close = document.getElementById('mobile-more-close');
   var backdrop = document.getElementById('mobile-more-backdrop');
+  var themeToggle = document.getElementById('mobile-theme-toggle');
 
   function openSheet() {
     sheet.classList.remove('translate-y-full');
@@ -131,6 +155,18 @@
   if (btn) btn.addEventListener('click', openSheet);
   if (close) close.addEventListener('click', closeSheet);
   if (backdrop) backdrop.addEventListener('click', closeSheet);
+
+  // Theme toggle for mobile
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function() {
+      if (typeof toggleTheme === 'function') {
+        toggleTheme();
+      } else {
+        var isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      }
+    });
+  }
 
   // Close sheet on any navigation link click
   document.querySelectorAll('.mobile-more-link').forEach(function(link) {

@@ -159,8 +159,8 @@
             </a>
             <!-- Right-click context menu -->
             <div class="server-ctx-menu hidden absolute z-40 top-2 right-2 rounded-xl shadow-lg py-1 w-44" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-              <button class="ctx-add-to-folder w-full text-left px-3 py-2 text-sm rounded-t-xl transition" style="color:var(--theme-text);" data-uuid="<%= server.UUID %>">Add to folder</button>
-              <button class="ctx-remove-from-folder w-full text-left px-3 py-2 text-sm rounded-b-xl transition" style="color:var(--theme-text); display:<%= (folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID))) ? '' : 'none' %>" data-uuid="<%= server.UUID %>">Remove from folder</button>
+              <button class="ctx-add-to-folder w-full text-left px-3 py-2 text-sm rounded-t-xl transition" style="color:var(--theme-text);" data-uuid="<%= server.UUID %>" aria-label="Add to folder">Add to folder</button>
+              <button class="ctx-remove-from-folder w-full text-left px-3 py-2 text-sm rounded-b-xl transition" style="color:var(--theme-text); display:<%= (folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID))) ? '' : 'none' %>" data-uuid="<%= server.UUID %>" aria-label="Remove from folder">Remove from folder</button>
             </div>
           </div>
           <% }); %>
@@ -223,7 +223,7 @@
 </div>
 
 <!-- Folder popup -->
-<div class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity data-[open]:opacity-100 data-[open]:pointer-events-auto" id="folderPopupOverlay" style="background:rgba(0,0,0,0.45); backdrop-filter:blur(4px);">
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity data-[open]:opacity-100 data-[open]:pointer-events-auto" id="folderPopupOverlay" style="background:rgba(0,0,0,0.45);">
     <div class="border rounded-2xl w-full max-w-[440px] max-h-[80vh] flex flex-col scale-[0.96] opacity-0 transition-[transform,opacity] duration-200 overflow-hidden [[data-open]>&]:scale-100 [[data-open]>&]:opacity-100" role="dialog" aria-modal="true" aria-labelledby="folderPopupTitle" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
     <div class="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style="border-color:var(--theme-border);">
       <h2 class="text-sm font-semibold" style="color:var(--theme-text-strong);" id="folderPopupTitle"></h2>

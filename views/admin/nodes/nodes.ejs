@@ -27,7 +27,7 @@
             <% if (nodes.length > 0) { %>
             <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.onlineNodes %>: <%= nodes.filter(node => node.status === 'Online').length %></p>
             <% } else { %>
-            <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.noNodesAvailable || 'No nodes yet — your servers have nowhere to live.' %></p>
+              <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.noNodesAvailable || 'No nodes available' %></p>
             <% } %>
           </div>
           <div class="al-card">
@@ -67,6 +67,14 @@
 
         <!-- Table of nodes -->
         <div class="overflow-x-auto shadow-sm rounded-xl border" id="nodeTable" style="border-color:var(--theme-border);">
+          <% if (nodes.length === 0) { %>
+            <%- include('../../components/ui/empty-state', {
+              iconName: 'network',
+              title: 'No nodes yet',
+              description: 'Add a node to start hosting servers.',
+              action: '<button id="createButtonEmpty" type="button" class="al-btn-primary">' + req.translations.createNewNode + '</button>'
+            }) %>
+          <% } else { %>
           <table class="al-table">
             <thead class="al-table-head">
               <tr>
@@ -121,6 +129,7 @@
               <% }); %>
             </tbody>
           </table>
+          <% } %>
         </div>
       </div>
     </div>

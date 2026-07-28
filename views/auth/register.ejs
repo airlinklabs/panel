@@ -11,8 +11,12 @@
     width: 100%; max-width: 460px; flex-shrink: 0;
     display: flex; flex-direction: column; justify-content: center;
     padding: 48px 40px;
-    background: var(--theme-bg-card);
-    border-right: 1px solid var(--theme-border);
+    background: var(--theme-bg-card, #fff);
+    border-right: 1px solid var(--theme-border, #e5e5e5);
+  }
+  html.dark .auth-panel {
+    background: var(--theme-bg-card, #141414);
+    border-right-color: var(--theme-border-subtle, rgba(255,255,255,0.08));
   }
   .auth-image {
     flex: 1;
@@ -20,49 +24,60 @@
   }
 
   @media (max-width: 768px) {
-    .auth-split { display: block; min-height: 100dvh; }
-    .auth-panel { max-width: 100%; border-right: none; padding: 40px 24px; min-height: 100dvh; justify-content: center; }
+    .auth-split { display: block; min-height: 100vh; }
+    .auth-panel { max-width: 100%; border-right: none; padding: 40px 24px; min-height: 100vh; justify-content: center; }
     .auth-image { display: none; }
   }
 
   .auth-input {
     width: 100%; padding: 10px 14px; border-radius: 10px;
-    border: 1px solid var(--theme-border-input); background: var(--theme-bg-input);
-    font-size: 14px; color: var(--theme-text-strong); outline: none;
+    border: 1px solid var(--theme-border, #e5e5e5); background: var(--theme-bg-input, #f9fafb);
+    font-size: 14px; color: var(--theme-text-strong, #171717); outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
     box-sizing: border-box; font-family: inherit;
   }
-  .auth-input:focus { border-color: var(--theme-border-accent); box-shadow: 0 0 0 3px var(--theme-accent-subtle); }
-  .auth-input::placeholder { color: var(--theme-text-placeholder); }
-  .auth-input.invalid { border-color: var(--theme-danger) !important; }
+  html.dark .auth-input {
+    background: var(--theme-bg-input, rgba(255,255,255,0.08)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); color: var(--theme-text, #e5e5e5);
+  }
+  .auth-input:focus { border-color: var(--theme-border, #a3a3a3); box-shadow: 0 0 0 3px var(--theme-border-subtle, rgba(0,0,0,0.06)); }
+  html.dark .auth-input:focus { border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); box-shadow: 0 0 0 3px var(--theme-border-subtle, rgba(255,255,255,0.08)); }
+  .auth-input::placeholder { color: var(--theme-text-placeholder, #a3a3a3); }
+  html.dark .auth-input::placeholder { color: var(--theme-text-muted, #525252); }
+  .auth-input.invalid { border-color: var(--theme-danger, #f87171) !important; }
 
-  .auth-label { display: block; font-size: 13px; font-weight: 500; color: var(--theme-text-muted); margin-bottom: 6px; }
+  .auth-label { display: block; font-size: 13px; font-weight: 500; color: var(--theme-text-muted, #525252); margin-bottom: 6px; }
+  html.dark .auth-label { color: var(--theme-text, #a3a3a3); }
 
   .auth-submit {
     width: 100%; padding: 11px; border-radius: 10px;
-    background: var(--theme-btn-primary-bg); color: var(--theme-btn-primary-text); font-size: 14px; font-weight: 500;
+    background: var(--theme-text-strong, #171717); color: var(--theme-accent-text, white); font-size: 14px; font-weight: 500;
     border: none; cursor: pointer; transition: background 0.15s;
     font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px;
   }
-  .auth-submit:hover:not(:disabled) { background: var(--theme-btn-primary-hover); }
+  html.dark .auth-submit { background: var(--theme-bg-input, white); color: var(--theme-bg, #0a0a0a); }
+  .auth-submit:hover:not(:disabled) { background: var(--theme-bg-hover, #404040); }
+  html.dark .auth-submit:hover:not(:disabled) { background: var(--theme-bg-hover, #e5e5e5); }
   .auth-submit:disabled { opacity: 0.6; cursor: default; }
 
   .pw-wrapper { position: relative; }
   .pw-toggle {
     position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-    background: none; border: none; cursor: pointer; padding: 0; color: var(--theme-text-muted); line-height: 0;
+    background: none; border: none; cursor: pointer; padding: 0; color: var(--theme-text-muted, #a3a3a3); line-height: 0;
   }
-  .pw-toggle:hover { color: var(--theme-text-strong); }
+  .pw-toggle:hover { color: var(--theme-text-nav, #737373); }
+  html.dark .pw-toggle:hover { color: var(--theme-text-strong, #d4d4d4); }
 
-  .pw-strength { height: 3px; border-radius: 2px; background: var(--theme-border); margin-top: 8px; overflow: hidden; }
+  .pw-strength { height: 3px; border-radius: 2px; background: var(--theme-border, #e5e5e5); margin-top: 8px; overflow: hidden; }
+  html.dark .pw-strength { background: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
   .pw-bar { height: 100%; border-radius: 2px; width: 0%; transition: width 0.28s ease, background 0.28s ease; }
-  .pw-hint { font-size: 11px; color: var(--theme-text-muted); margin-top: 5px; min-height: 14px; transition: color 0.2s; }
+  .pw-hint { font-size: 11px; color: var(--theme-text-muted, #a3a3a3); margin-top: 5px; min-height: 14px; transition: color 0.2s; }
 
   .spinner {
     width: 15px; height: 15px; flex-shrink: 0;
-    border: 2px solid var(--theme-border); border-top-color: var(--theme-text-strong);
+    border: 2px solid var(--theme-border-subtle, rgba(255,255,255,0.08)); border-top-color: var(--theme-accent-text, white);
     border-radius: 50%; animation: spin 0.65s linear infinite; display: none;
   }
+  html.dark .spinner { border-color: var(--theme-border, rgba(0,0,0,0.25)); border-top-color: var(--theme-bg, #0a0a0a); }
   .auth-submit.loading .spinner { display: block; }
   .auth-submit.loading .btn-label { display: none; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -78,20 +93,19 @@
       <% if (settings.logo) { %>
       <img src="<%= settings.logo %>" alt="" class="h-10 w-10 rounded-xl object-contain mb-5">
       <% } %>
-      <h1 class="text-2xl font-semibold" style="color:var(--theme-text-strong);">Create account</h1>
-      <p class="text-sm mt-1" style="color:var(--theme-text-muted);"><%= settings.title %></p>
+      <h1 class="text-2xl font-semibold text-neutral-900 dark:text-white">Create account</h1>
+      <p class="text-sm text-neutral-500 mt-1"><%= settings.title %></p>
     </div>
 
     <% if (req.query.err) { %>
-    <div class="al-alert-danger mb-5">
-      <%- icon('triangle-alert', { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
-      <div>
+    <div class="rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 px-4 py-3 mb-5">
+      <p class="text-sm font-medium text-red-700 dark:text-red-400">
         <% if (req.query.err === 'missing_credentials') { %>All fields are required.
         <% } else if (req.query.err === 'invalid_username') { %>Username must be 3–20 characters, letters and numbers only.
         <% } else if (req.query.err === 'user_already_exists') { %>That username or email is already taken.
         <% } else if (req.query.err === 'weak_password') { %>Password needs 8+ chars, at least one letter and one number.
         <% } else { %>Something went wrong. Try again.<% } %>
-      </div>
+      </p>
     </div>
     <% } %>
 
@@ -130,9 +144,9 @@
       </div>
     </form>
 
-    <p class="text-sm text-center mt-6" style="color:var(--theme-text-muted);">
+    <p class="text-sm text-neutral-500 dark:text-neutral-400 text-center mt-6">
       Already have an account?
-      <a href="/login" class="font-medium hover:underline" style="color:var(--theme-text-strong);">Sign in</a>
+      <a href="/login" class="font-medium text-neutral-800 dark:text-neutral-200 hover:underline">Sign in</a>
     </p>
 
   </div>
@@ -159,7 +173,7 @@
   pwInput.addEventListener('input', function () {
     var v = pwInput.value;
     var score = [v.length >= 8, /[A-Za-z]/.test(v), /[0-9]/.test(v), /[^A-Za-z0-9]/.test(v)].filter(Boolean).length;
-    var colors = ['var(--theme-danger)','var(--theme-warning)','var(--theme-warning)','var(--theme-success)'];
+    var colors = ['var(--theme-danger,#ef4444)','var(--theme-warning,#f97316)','var(--theme-warning,#eab308)','var(--theme-success,#22c55e)'];
     var labels = ['Too short','Weak','Fair','Strong'];
     var widths = ['25%','50%','75%','100%'];
     var bar  = document.getElementById('pwBar');

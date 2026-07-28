@@ -50,6 +50,7 @@ export function registerFilesRoutes(router: Router): void {
           errorMessage.message = 'Server not found.';
           res.render('user/server/files', {
             errorMessage,
+            features: [],
             user,
             req,
             settings,

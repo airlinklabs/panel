@@ -195,13 +195,13 @@ function escJS(val) {
               <% files.forEach((file, index) => { %>
                 <tr class="al-file-row hover:bg-neutral-50 dark:hover:bg-white/[0.02] border-b border-neutral-100 dark:border-neutral-700/30 last:border-0 cursor-pointer transition-colors duration-150" style="--i:<%= Math.min(index, 10) %>">
                   <td class="px-4 py-3 w-10">
-                    <input type="checkbox" class="form-checkbox h-4 w-4 text-neutral-500 bg-neutral-50 dark:bg-white/5 border border-neutral-300 dark:border-white/10 rounded transition file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(/^\/+/, '') + '/' + file.name : file.name %>">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-neutral-500 bg-neutral-50 dark:bg-white/5 border border-neutral-300 dark:border-white/10 rounded transition file-checkbox" data-filename="<%= currentPath && currentPath !== '/' ? currentPath.replace(new RegExp("^/+", "g"), '') + '/' + file.name : file.name %>">
                   </td>
                   <td class="px-4 py-3">
                     <%
                       const isImage = file.type !== 'directory' && isImageFile(file.name);
                       const filePath = currentPath && currentPath !== '/'
-                        ? currentPath.replace(/^\/+/, '') + '/' + file.name
+                        ? currentPath.replace(new RegExp("^/+", "g"), '') + '/' + file.name
                         : file.name;
                       const fileHref = file.type === 'directory'
                         ? `/server/${server.UUID}/files?path=${encodeURIComponent(filePath)}`
@@ -239,44 +239,44 @@ function escJS(val) {
                     <div id="dropdown-<%= file.name %>" class="al-file-menu fixed w-44 rounded-xl shadow-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700/60 z-50 transform opacity-0 scale-95 transition-all duration-150 ease-out pointer-events-none overflow-hidden">
                       <div class="py-1" role="menu">
                         <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
-                          onclick="rename('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(/^\\/+/, '') + "/" + file.name : file.name) %>')">
+                          onclick="rename('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") + "/" + file.name : file.name) %>')">
                           <%- icon('pencil', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                           Rename
                         </button>
                         <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
-                          onclick="copyFilePath('<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(/^\\/+/, '') + "/" + file.name : file.name) %>')">
+                          onclick="copyFilePath('<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") + "/" + file.name : file.name) %>')">
                           <%- icon('copy', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                           Copy Path
                         </button>
                         <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
-                          onclick="openMoveModal('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(/^\\/+/, '') + "/" + file.name : file.name) %>')">
+                          onclick="openMoveModal('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") + "/" + file.name : file.name) %>')">
                           <%- icon('move', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                           Move to...
                         </button>
                         <% if (file.type !== 'directory') { %>
                         <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
-                          onclick="duplicateFile('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(/^\\/+/, '') + "/" + file.name : file.name) %>')">
+                          onclick="duplicateFile('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") + "/" + file.name : file.name) %>')">
                           <%- icon('copy', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                           Duplicate
                         </button>
                         <% } %>
                         <% if (file.type !== "directory") { %>
                           <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
-                            onclick="downloadfile('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(/^\\/+/, '') + "/" + file.name : file.name) %>')">
+                            onclick="downloadfile('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") + "/" + file.name : file.name) %>')">
                             <%- icon('download', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                             Download
                           </button>
                         <% } %>
                         <% if (file.name.toLowerCase().endsWith(".zip")) { %>
                           <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors text-left"
-                            onclick="extractZip('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(/^\\/+/, '') + "/" + file.name : file.name) %>')">
+                            onclick="extractZip('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") + "/" + file.name : file.name) %>')">
                             <%- icon('file-archive', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                             Extract Here
                           </button>
                         <% } %>
                         <div class="mx-2 my-1 border-t border-neutral-100 dark:border-neutral-700/60"></div>
                         <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-left"
-                          onclick="deletefile('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(/^\\/+/, '') + "/" + file.name : file.name) %>')">
+                          onclick="deletefile('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") + "/" + file.name : file.name) %>')">
                           <%- icon('trash-2', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
                           Delete
                         </button>
@@ -295,7 +295,7 @@ function escJS(val) {
 
    <!-- Floating Action Bar (only show when daemon is online) -->
    <% if (!(typeof serverStatus !== 'undefined' && serverStatus.daemonOffline && errorMessage && errorMessage.message)) { %>
-   <div id="floatingActionBar" class="fixed bottom-0 right-0 bg-white dark:bg-[#1a1a1a] border-t border-neutral-200 dark:border-white/5 z-40 backdrop-blur-sm text-neutral-800 dark:text-white py-3.5 px-6 flex items-center justify-between gap-4 translate-y-full transition-transform duration-300 ease-out shadow-lg" style="left: 240px;">
+   <div id="floatingActionBar" class="fixed bottom-0 right-0 bg-white dark:bg-[#1a1a1a] border-t border-neutral-200 dark:border-white/5 z-40 text-neutral-800 dark:text-white py-3.5 px-6 flex items-center justify-between gap-4 translate-y-full transition-transform duration-300 ease-out shadow-lg" style="left: 240px;">
      <div class="flex items-center gap-2.5">
        <%- icon('check-square', { size: 15, class: 'text-neutral-400 shrink-0' }) %>
        <span id="selectedFilesCount" class="text-sm font-medium text-neutral-700 dark:text-neutral-300">0 files selected</span>
@@ -325,7 +325,7 @@ function escJS(val) {
    </div>
    <% } %>
   <!-- Move file modal -->
-  <div id="moveModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
+  <div id="moveModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 ">
     <div class="bg-white dark:bg-[#1c1c1c] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-white/5 shadow-xl scale-95 transition-transform duration-200 sm:mx-4">
       <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5">
         <div>
@@ -350,7 +350,7 @@ function escJS(val) {
   </div>
 
   <!-- Mass Delete Confirmation Modal -->
- <div id="massDeleteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
+ <div id="massDeleteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 ">
     <div class="bg-white dark:bg-[#1c1c1c] border border-neutral-200 dark:border-white/5 rounded-2xl shadow-xl w-full max-w-sm mx-4 transform scale-95 transition-transform duration-200">
       <div class="px-5 pt-5 pb-4">
         <p class="text-sm font-semibold text-neutral-800 dark:text-white">Confirm Mass Deletion</p>
@@ -363,7 +363,7 @@ function escJS(val) {
     </div>
  </div>
     <!-- Create file / folder modal -->
-  <div id="createFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
+  <div id="createFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 ">
     <div class="bg-white dark:bg-[#1c1c1c] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-white/5 shadow-xl transform scale-95 transition-transform duration-200 sm:mx-4">
       <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
         <div>
@@ -389,7 +389,7 @@ function escJS(val) {
   </div>
 
   <!-- Upload file -->
-  <div id="uploadFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 backdrop-blur-sm">
+  <div id="uploadFileModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 ">
     <div class="bg-white dark:bg-[#1c1c1c] rounded-2xl p-8 max-w-md w-full transform scale-95 transition-transform duration-300 border border-neutral-200 dark:border-white/5 shadow-xl">
         <h2 class="text-2xl font-medium mb-1 text-neutral-800">Upload File</h2>
         <p class="mb-6 text-neutral-600">Select a file to upload to the current directory.</p>
@@ -435,7 +435,7 @@ function escJS(val) {
 <%- include('../../components/imageViewer')%>
 
 <!-- Rename Modal -->
-<div id="renameModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 backdrop-blur-sm">
+<div id="renameModal" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 ">
   <div class="bg-white dark:bg-[#1c1c1c] rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md border border-neutral-200 dark:border-white/5 shadow-xl transform scale-95 transition-transform duration-200 sm:mx-4">
     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-neutral-700/60">
       <div>
@@ -1191,7 +1191,7 @@ function openCreateFileModal() {
     const mode = document.getElementById('FileName').getAttribute('data-mode');
     if (!raw) { closeCreateFileModal(); return; }
 
-    const base = '<%= currentPath ? currentPath.replace(/^\/+/, "") : "" %>';
+    const base = '<%= currentPath ? currentPath.replace(new RegExp("^/+", "g"), "") : "" %>';
     let finalPath;
 
     if (raw.startsWith('/')) {
