@@ -7,10 +7,10 @@
   .custom-select { position: relative; user-select: none; }
   .cs-trigger {
     display: flex; align-items: center; justify-content: space-between;
-    width: 100%; padding: 9px 14px; border-radius: 10px; cursor: pointer;
+    width: 100%; padding: 10px 14px; border-radius: 10px; cursor: pointer;
     font-size: 14px; border: 1px solid var(--theme-border, #e5e5e5);
     background: var(--theme-bg-secondary, #f5f5f5); color: var(--theme-text-strong, #171717);
-    transition: background 0.15s, border-color 0.15s;
+    transition: background 0.15s, border-color 0.15s; min-height: 44px;
   }
   .dark .cs-trigger { background: var(--theme-bg-secondary, rgba(255,255,255,0.06)); color: var(--theme-text, #e5e5e5); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
   .cs-trigger:hover { background: var(--theme-bg-hover, #ebebeb); border-color: var(--theme-border, #d4d4d4); }
@@ -29,7 +29,7 @@
   }
   .dark .cs-dropdown { background: var(--theme-bg-card, #1e1e1e); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
   @keyframes cs-open { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
-  .cs-option { padding: 9px 14px; font-size: 13px; cursor: pointer; color: var(--theme-text-strong, #171717); transition: background 0.1s; }
+  .cs-option { padding: 10px 14px; font-size: 13px; cursor: pointer; color: var(--theme-text-strong, #171717); transition: background 0.1s; min-height: 44px; display: flex; align-items: center; }
   .dark .cs-option { color: var(--theme-text, #e5e5e5); }
   .cs-option:hover { background: rgba(0,0,0,0.05); }
   .dark .cs-option:hover { background: rgba(255,255,255,0.06); }
@@ -39,11 +39,11 @@
 
   /* ── Form field ──────────────────────────────────────────── */
   .form-input {
-    width: 100%; padding: 9px 14px; border-radius: 10px;
+    width: 100%; padding: 10px 14px; border-radius: 10px;
     border: 1px solid var(--theme-border, #e5e5e5); background: var(--theme-bg-secondary, #f5f5f5);
     font-size: 14px; color: var(--theme-text-strong, #171717); outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
-    box-sizing: border-box; font-family: inherit;
+    box-sizing: border-box; font-family: inherit; min-height: 44px;
   }
   .dark .form-input { background: var(--theme-bg-secondary, rgba(255,255,255,0.06)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); color: var(--theme-text, #e5e5e5); }
   .form-input:focus { border-color: var(--theme-border, #a3a3a3); box-shadow: 0 0 0 3px var(--theme-border-subtle, rgba(0,0,0,0.05)); }
@@ -58,13 +58,16 @@
   .stepper { display: flex; align-items: center; gap: 0; border: 1px solid var(--theme-border, #e5e5e5); border-radius: 10px; overflow: hidden; background: var(--theme-bg-secondary, #f5f5f5); }
   .dark .stepper { border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); background: var(--theme-bg-secondary, rgba(255,255,255,0.06)); }
   .stepper-btn {
-    padding: 9px 13px; background: none; border: none; cursor: pointer;
+    padding: 10px 14px; background: none; border: none; cursor: pointer;
     font-size: 16px; color: var(--theme-text-muted, #525252); transition: background 0.1s;
-    flex-shrink: 0; line-height: 1;
+    flex-shrink: 0; line-height: 1; min-width: 44px; min-height: 44px;
+    display: flex; align-items: center; justify-content: center;
   }
   .dark .stepper-btn { color: var(--theme-text, #a3a3a3); }
   .stepper-btn:hover { background: var(--theme-bg-hover, rgba(0,0,0,0.06)); }
   .dark .stepper-btn:hover { background: var(--theme-bg-hover, rgba(255,255,255,0.07)); }
+  .stepper-btn:active { background: var(--theme-bg-hover, rgba(0,0,0,0.1)); }
+  .dark .stepper-btn:active { background: var(--theme-bg-hover, rgba(255,255,255,0.1)); }
   .stepper-input {
     flex: 1; text-align: center; border: none; background: none; outline: none;
     font-size: 14px; font-weight: 500; color: var(--theme-text-strong, #171717); padding: 9px 4px;

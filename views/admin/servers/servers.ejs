@@ -128,15 +128,15 @@
                 <td class="al-table-td">
                   <div class="flex items-center gap-1.5">
                     <a href="/server/<%= server.UUID %>" onclick="event.stopPropagation()" title="Open console"
-                      class="al-btn-ghost p-1.5">
+                      class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
                       <%- icon('external-link', { size: 16, class: 'shrink-0' }) %>
                     </a>
                     <a href="/admin/servers/edit/<%= server.id %>" onclick="event.stopPropagation()" title="Edit"
-                      class="al-btn-ghost p-1.5">
+                      class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
                       <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
                     </a>
                     <button type="button" onclick="event.stopPropagation(); deleteServer('<%= server.id %>', '<%= server.name %>')" title="Delete"
-                      class="al-btn-ghost p-1.5" style="color:var(--theme-danger);">
+                      class="al-btn-ghost p-2 min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-danger);">
                       <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
                     </button>
                   </div>
