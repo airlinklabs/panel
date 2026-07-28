@@ -14,11 +14,14 @@
         top: 0;
         width: 100% !important;
         height: 100% !important;
+        pointer-events: none;
     }
 
     #terminal {
         height: 420px;
-        background: var(--theme-bg-card, #141414);
+        background: #141414;
+        overscroll-behavior: contain;
+        touch-action: none;
     }
 
     #terminal .xterm {
@@ -27,12 +30,12 @@
     }
 
     #terminal .xterm-viewport {
-        background: var(--theme-bg-card, #141414) !important;
+        background: #141414 !important;
         border-radius: 0;
     }
 
     #terminal .xterm-screen {
-        background: var(--theme-bg-card, #141414);
+        background: #141414;
     }
 
     .console-wrap {
@@ -43,8 +46,37 @@
         from { opacity: 0; transform: translateY(6px); }
         to   { opacity: 1; transform: translateY(0); }
     }
+
+    /* Mobile terminal */
+    #mobile-terminal {
+        height: 300px;
+        background: #141414;
+        overscroll-behavior: contain;
+        touch-action: none;
+    }
+
+    #mobile-terminal .xterm {
+        padding: 6px;
+        height: 100%;
+    }
+
+    #mobile-terminal .xterm-viewport {
+        background: #141414 !important;
+    }
+
+    #mobile-terminal .xterm-screen {
+        background: #141414;
+    }
+
+    #mobile-terminal-container {
+        overscroll-behavior: contain;
+        animation: console-appear 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
 </style>
 
+<!-- ═══════════════════════════════════════════════════════════════
+     DESKTOP LAYOUT (lg+)
+     ═══════════════════════════════════════════════════════════════ -->
 <main class="h-screen m-auto text-neutral-800 dark:text-white">
   <div class="flex h-full">
     <!-- Sidebar -->
@@ -63,17 +95,17 @@
             <div class="flex items-center gap-3 mt-1.5 flex-wrap">
               <div class="flex items-center gap-1.5">
                 <%- icon('box', { class: 'h-3 w-3 shrink-0' }) %>
-                <span class="text-[11px] truncate max-w-[140px]" style="color:var(--theme-text-muted)"><%= server.image.name %></span>
+                <span class="text-[11px] text-neutral-500 dark:text-neutral-400 truncate max-w-[140px]"><%= server.image.name %></span>
               </div>
-              <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
+              <span class="text-[11px] text-neutral-500 dark:text-neutral-400">·</span>
               <div class="flex items-center gap-1.5">
                 <%- icon('server', { class: 'h-3 w-3 shrink-0' }) %>
-                <span class="text-[11px] truncate max-w-[100px]" style="color:var(--theme-text-muted)"><%= server.node.name %></span>
+                <span class="text-[11px] text-neutral-500 dark:text-neutral-400 truncate max-w-[100px]"><%= server.node.name %></span>
               </div>
-              <span class="text-[11px]" style="color:var(--theme-text-muted)">·</span>
+              <span class="text-[11px] text-neutral-500 dark:text-neutral-400">·</span>
               <div class="flex items-center gap-1.5">
                 <%- icon('hash', { class: 'h-3 w-3 shrink-0' }) %>
-                <span class="text-[11px] font-mono" style="color:var(--theme-text-muted)"><%= server.UUID.split('-')[0] %></span>
+                <span class="text-[11px] text-neutral-500 dark:text-neutral-400 font-mono"><%= server.UUID.split('-')[0] %></span>
               </div>
             </div>
           </div>
@@ -112,7 +144,7 @@
         </div>
         <% } %>
 
-        <!-- Daemon Offline Warning — hidden by default, shown by JS when daemon unreachable -->
+        <!-- Daemon Offline Warning -->
         <div id="daemonOfflineWarningRow" class="<% if (typeof serverStatus === 'undefined' || !serverStatus.daemonOffline) { %>hidden<% } %> mt-3">
           <div id="daemonOfflineWarning" class="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-3">
             <%- icon('triangle-alert', { class: 'h-5 w-5 shrink-0 text-red-500' }) %>
@@ -126,32 +158,28 @@
         </div>
       </div>
 
-
-
       <%- include('../../components/serverTemplate') %>
-
       <%- include('../../components/installHeader') %>
 
       <div id="server-page-body" class="flex flex-col lg:flex-row px-8 mt-4">
 
 <!-- Left side: Console -->
 <div class="w-full lg:w-2/3 lg:pr-5 flex flex-col min-w-0">
-    <div class="flex flex-col rounded-xl overflow-hidden shadow-lg flex-1 console-wrap" style="border:1px solid var(--theme-border);">
-        <!-- Console chrome bar -->
-        <div class="flex items-center gap-2 px-3 py-2 shrink-0" style="background:var(--theme-bg-secondary); border-bottom:1px solid var(--theme-border);">
-            <span class="text-[11px] font-medium text-neutral-600 select-none tracking-wide">console</span>
+    <div class="flex flex-col rounded-xl overflow-hidden shadow-lg flex-1 console-wrap border border-neutral-200 dark:border-neutral-700/50">
+        <div class="flex items-center gap-2 px-3 py-2 shrink-0 bg-neutral-100 dark:bg-neutral-800/50 border-b border-neutral-200 dark:border-neutral-700/50">
+            <span class="text-[11px] text-neutral-400 font-medium select-none tracking-wide">console</span>
         </div>
-        <div class="bg-[#141414] flex-1 relative">
+        <div class="flex-1 relative bg-white dark:bg-neutral-900">
             <div id="terminal"></div>
         </div>
     </div>
     <div class="relative">
         <div class="relative">
             <input id="input" type="text" autocomplete="off" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
-                class="w-full px-4 py-3 bg-neutral-200 dark:bg-neutral-600/20 text-neutral-800 dark:text-white rounded-b-xl text-sm border-t border-neutral-600/20 focus:ring-1 focus:ring-neutral-500/50 dark:focus:ring-neutral-100/20 focus:border-transparent placeholder:font-medium placeholder:text-neutral-600 dark:placeholder:text-neutral-500"
-                style="background: transparent; position: relative; z-index: 1;">
-            <div id="ghost-text-bg" class="absolute inset-0 px-4 py-3 text-sm pointer-events-none rounded-b-xl overflow-hidden bg-neutral-200 dark:bg-neutral-600/20 border-t border-neutral-600/20" style="z-index: 0;">
-                <span id="ghost-typed" class="invisible"></span><span id="ghost-suggestion" class="text-neutral-400 dark:text-neutral-500"></span>
+                class="w-full px-4 py-3 text-sm rounded-b-xl border-t border-neutral-200 dark:border-neutral-700/50 focus:ring-1 focus:border-transparent placeholder:font-medium bg-transparent text-neutral-800 dark:text-white relative z-[1]"
+                style="">
+            <div id="ghost-text-bg" class="absolute inset-0 px-4 py-3 text-sm pointer-events-none rounded-b-xl overflow-hidden border-t border-neutral-200 dark:border-neutral-700/50 z-0 bg-neutral-100 dark:bg-neutral-800/50">
+                <span id="ghost-typed" class="invisible"></span><span id="ghost-suggestion" class="text-neutral-400"></span>
             </div>
         </div>
     </div>
@@ -161,59 +189,210 @@
         <div class="w-full lg:w-1/3 mt-4 lg:mt-0 space-y-4 flex flex-col">
 
             <!-- IP Address Card -->
-            <div class="al-card relative overflow-hidden flex-1 group hover:border-[var(--theme-border-accent)] transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="--i:0">
+            <div class="relative flex-1 overflow-hidden rounded-xl bg-white border border-neutral-200 p-4 shadow-sm group hover:border-neutral-300 transition-[border-color,box-shadow] duration-150 hover:shadow-md dark:bg-white/5 dark:border-neutral-700/50 dark:hover:border-neutral-600" style="--i:0">
                 <div class="relative z-10 flex items-start justify-between gap-2">
                     <div class="min-w-0">
-                        <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.addressIP %>:</h2>
-                        <p id="server-ip-text" class="mt-1 text-sm font-medium font-mono tracking-tight break-all" style="color:var(--theme-text-strong)"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></p>
+                        <h2 class="text-sm text-neutral-500 dark:text-neutral-400 font-medium"><%= req.translations.addressIP %>:</h2>
+                        <p id="server-ip-text" class="mt-1 text-sm text-neutral-800 dark:text-white font-medium font-mono tracking-tight break-all"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></p>
                     </div>
-                    <button id="copy-ip-btn" onclick="copyServerIP()" title="Copy" class="shrink-0 mt-1 rounded-lg p-1.5 transition-colors" style="background:var(--theme-bg-secondary);">
-                        <span id="copy-icon"><%- icon('copy', { class: 'h-3.5 w-3.5' }) %></span>
+                    <button id="copy-ip-btn" onclick="copyServerIP()" title="Copy" class="shrink-0 mt-1 rounded-lg p-1.5 transition-colors bg-neutral-100 dark:bg-white/10 hover:bg-neutral-200 dark:hover:bg-white/15">
+                        <span id="copy-icon"><%- icon('copy', { class: 'h-3.5 w-3.5 text-neutral-600 dark:text-neutral-300' }) %></span>
                         <span id="check-icon" class="hidden"><%- icon('check', { class: 'h-3.5 w-3.5 text-emerald-500', strokeWidth: 2.5 }) %></span>
                     </button>
                 </div>
             </div>
 
             <!-- Status Card -->
-            <div class="al-card relative overflow-hidden flex-1 group hover:border-[var(--theme-border-accent)] transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="--i:1">
+            <div class="relative flex-1 overflow-hidden rounded-xl bg-white border border-neutral-200 p-4 shadow-sm group hover:border-neutral-300 transition-[border-color,box-shadow] duration-150 hover:shadow-md dark:bg-white/5 dark:border-neutral-700/50 dark:hover:border-neutral-600" style="--i:1">
                 <canvas id="statusChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
-                  <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.Status %>:</h2>
-                  <p id="status" class="mt-1 text-lg font-medium tracking-tight leading-snug" style="color:var(--theme-text-strong)">-</p>
-                  <p id="status-msg" class="text-xs font-medium mt-0.5 leading-snug transition-all duration-300 opacity-0 translate-y-1 pointer-events-none"></p>
+                  <h2 class="text-sm text-neutral-500 dark:text-neutral-400 font-medium"><%= req.translations.Status %>:</h2>
+                  <p id="status" class="mt-1 text-lg text-neutral-800 dark:text-white font-medium tracking-tight leading-snug">-</p>
+                  <p id="status-msg" class="text-xs text-neutral-500 dark:text-neutral-400 font-medium mt-0.5 leading-snug transition-all duration-300 opacity-0 translate-y-1 pointer-events-none"></p>
                 </div>
               </div>
 
             <!-- RAM Usage Card -->
-            <div class="al-card relative overflow-hidden flex-1 group hover:border-[var(--theme-border-accent)] transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="--i:2">
+            <div class="relative flex-1 overflow-hidden rounded-xl bg-white border border-neutral-200 p-4 shadow-sm group hover:border-neutral-300 transition-[border-color,box-shadow] duration-150 hover:shadow-md dark:bg-white/5 dark:border-neutral-700/50 dark:hover:border-neutral-600" style="--i:2">
                 <canvas id="ramChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
-                    <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.ramUsage %>:</h2>
-                    <p id="ramUsage" class="mt-1 text-lg font-medium tracking-tight" style="color:var(--theme-text-strong)">0% (0 MB / 0 MB)</p>
+                    <h2 class="text-sm text-neutral-500 dark:text-neutral-400 font-medium"><%= req.translations.ramUsage %>:</h2>
+                    <p id="ramUsage" class="mt-1 text-lg text-neutral-800 dark:text-white font-medium tracking-tight">0% (0 MB / 0 MB)</p>
                 </div>
             </div>
 
             <!-- CPU Usage Card -->
-            <div class="al-card relative overflow-hidden flex-1 group hover:border-[var(--theme-border-accent)] transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="--i:3">
+            <div class="relative flex-1 overflow-hidden rounded-xl bg-white border border-neutral-200 p-4 shadow-sm group hover:border-neutral-300 transition-[border-color,box-shadow] duration-150 hover:shadow-md dark:bg-white/5 dark:border-neutral-700/50 dark:hover:border-neutral-600" style="--i:3">
                 <canvas id="cpuChart" class="absolute inset-0 w-full h-full"></canvas>
                 <div class="relative z-10">
-                    <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.cpuUsage %>:</h2>
-                    <p id="cpuUsage" class="mt-1 text-lg font-medium tracking-tight" style="color:var(--theme-text-strong)">0%</p>
+                    <h2 class="text-sm text-neutral-500 dark:text-neutral-400 font-medium"><%= req.translations.cpuUsage %>:</h2>
+                    <p id="cpuUsage" class="mt-1 text-lg text-neutral-800 dark:text-white font-medium tracking-tight">0%</p>
                 </div>
             </div>
 
             <!-- Disk Usage Card -->
-            <div class="al-card relative overflow-hidden flex-1 group hover:border-[var(--theme-border-accent)] transition-[border-color,box-shadow] duration-150 hover:shadow-md" style="--i:4">
+            <div class="relative flex-1 overflow-hidden rounded-xl bg-white border border-neutral-200 p-4 shadow-sm group hover:border-neutral-300 transition-[border-color,box-shadow] duration-150 hover:shadow-md dark:bg-white/5 dark:border-neutral-700/50 dark:hover:border-neutral-600" style="--i:4">
                 <canvas id="diskChart" class="absolute inset-0 w-full h-full hidden"></canvas>
                 <div class="relative z-10">
-                    <h2 class="text-sm font-medium" style="color:var(--theme-text-muted)"><%= req.translations.diskUsage %>:</h2>
-                    <p id="diskUsage" class="mt-1 text-lg font-medium tracking-tight" style="color:var(--theme-text-strong)">-</p>
+                    <h2 class="text-sm text-neutral-500 dark:text-neutral-400 font-medium"><%= req.translations.diskUsage %>:</h2>
+                    <p id="diskUsage" class="mt-1 text-lg text-neutral-800 dark:text-white font-medium tracking-tight">-</p>
                 </div>
             </div>
         </div>
 
       </div>
+    </div>
+  </div>
+</main>
 
+<!-- ═══════════════════════════════════════════════════════════════
+     MOBILE LAYOUT (< lg) — compact chrome + 2x2 grid + terminal
+     ═══════════════════════════════════════════════════════════════ -->
+<main id="mobile-manage" class="lg:hidden min-h-screen text-neutral-800 dark:text-white">
+  <%- include('../../components/template') %>
+
+  <div class="px-4 pt-5">
+    <!-- Server Header + Meta -->
+    <div class="mb-4">
+      <div class="flex items-start justify-between gap-3">
+        <%- include('../../components/serverHeader') %>
+        <div class="shrink-0 text-right mt-0.5 space-y-0.5">
+          <div class="flex items-center justify-end gap-1.5">
+            <span class="text-[10px] text-neutral-500 dark:text-neutral-400 truncate max-w-[110px]"><%= server.image.name %></span>
+            <%- icon('box', { class: 'h-2.5 w-2.5 shrink-0 text-neutral-500 dark:text-neutral-400' }) %>
+          </div>
+          <div class="flex items-center justify-end gap-1.5">
+            <span class="text-[10px] text-neutral-500 dark:text-neutral-400 truncate max-w-[110px]"><%= server.node.name %></span>
+            <%- icon('server', { class: 'h-2.5 w-2.5 shrink-0 text-neutral-500 dark:text-neutral-400' }) %>
+          </div>
+          <div class="flex items-center justify-end gap-1.5">
+            <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono"><%= server.UUID.split('-')[0] %></span>
+            <%- icon('hash', { class: 'h-2.5 w-2.5 shrink-0 text-neutral-500 dark:text-neutral-400' }) %>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-0 mt-1">
+        <%- include('../../components/loadingPopup') %>
+      </div>
+
+      <% if (server.Suspended) { %>
+      <div class="mt-3 flex items-center gap-2.5 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5">
+        <%- icon('triangle-alert', { size: 16, class: 'text-red-500 shrink-0' }) %>
+        <div class="min-w-0">
+          <p class="text-xs font-medium text-red-500">Server suspended</p>
+          <p class="text-[11px] text-red-400 truncate">Contact an administrator for assistance.</p>
+        </div>
+      </div>
+      <% } %>
+
+      <div id="mobileDaemonOfflineWarning" class="mt-3 flex items-center gap-2.5 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5<% if (typeof serverStatus === 'undefined' || !serverStatus.daemonOffline) { %> hidden<% } %>">
+        <%- icon('triangle-alert', { size: 16, class: 'text-red-500 shrink-0' }) %>
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-medium text-red-500">Connection Error</p>
+          <p class="text-[11px] text-red-400 truncate"><%= (typeof serverStatus !== 'undefined' && serverStatus.error) ? serverStatus.error : 'The daemon appears to be offline.' %></p>
+        </div>
+        <button onclick="window.location.reload()" class="shrink-0 px-2.5 py-1 bg-red-600 hover:bg-red-500 text-white text-[11px] font-medium rounded-lg transition">
+          Retry
+        </button>
+      </div>
+
+      <!-- Mobile Control Buttons -->
+      <div class="flex gap-2 mt-3">
+        <button id="mobileStartButton" type="button"
+          <%= server.Suspended ? 'disabled' : '' %>
+          class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
+          <%- icon('play', { class: 'w-3.5 h-3.5' }) %>
+          <%= req.translations.start %>
+        </button>
+        <button id="mobileRestartButton" type="button"
+          <%= server.Suspended ? 'disabled' : '' %>
+          class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
+          <%- icon('refresh-cw', { class: 'w-3.5 h-3.5' }) %>
+          <%= req.translations.restart %>
+        </button>
+        <button id="mobileStopButton" type="button"
+          <%= server.Suspended ? 'disabled' : '' %>
+          class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white px-3 py-2 text-xs font-medium transition <%= server.Suspended ? 'opacity-50 cursor-not-allowed' : '' %>">
+          <%- icon('square', { class: 'w-3.5 h-3.5' }) %>
+          <%= req.translations.stop %>
+        </button>
+      </div>
+    </div>
+
+    <%- include('../../components/serverTemplate') %>
+  </div>
+
+  <%- include('../../components/installHeader') %>
+
+  <div class="px-4 pb-5">
+    <!-- IP Address -->
+    <div class="mt-3 mb-3">
+      <div class="rounded-xl bg-white border border-neutral-200 px-3 py-2.5 flex items-center gap-2 shadow-sm dark:bg-white/5 dark:border-neutral-700/50">
+        <%- icon('globe', { class: 'h-4 w-4 shrink-0 text-neutral-500 dark:text-neutral-400' }) %>
+        <span class="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 shrink-0"><%= req.translations.addressIP %>:</span>
+        <span class="text-xs font-medium font-mono text-neutral-800 dark:text-white truncate flex-1" id="mobile-server-ip-text"><%= server.node.address %>:<%= server.Ports ? JSON.parse(server.Ports).filter(Port => Port.primary).map(Port => Port.externalPort || String(Port.Port || '').split(':')[0]).pop() : '' %></span>
+        <button id="mobile-copy-ip-btn" onclick="copyMobileServerIP()" class="shrink-0 rounded-md p-1 transition-colors bg-neutral-100 dark:bg-white/10 hover:bg-neutral-200 dark:hover:bg-white/15">
+          <svg id="mobile-copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 text-neutral-600 dark:text-neutral-300">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <svg id="mobile-check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-3.5 w-3.5 text-emerald-500 hidden">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Terminal -->
+    <div class="rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-700/50">
+      <div class="flex items-center px-3 py-2 shrink-0 bg-neutral-100 dark:bg-neutral-800/50 border-b border-neutral-200 dark:border-neutral-700/50">
+        <span class="text-[11px] text-neutral-400 font-medium select-none tracking-wide">console</span>
+      </div>
+      <div id="mobile-terminal-container" class="w-full relative">
+        <div id="mobile-terminal"></div>
+      </div>
+      <div class="relative border-t border-neutral-200 dark:border-neutral-700/50">
+        <input id="mobile-input" type="text" autocomplete="off" placeholder="<%= req.translations.typeACommand || 'Type a command...' %>"
+          class="w-full px-4 py-3 text-sm outline-none placeholder:font-medium bg-white dark:bg-neutral-900 text-neutral-800 dark:text-white">
+      </div>
+    </div>
+
+    <!-- Mobile Stats Grid (2x2) -->
+    <div class="grid grid-cols-2 gap-3 mt-3">
+      <!-- Status -->
+      <div class="relative overflow-hidden rounded-xl bg-white border border-neutral-200 px-3 py-3 min-h-[5rem] shadow-sm dark:bg-white/5 dark:border-neutral-700/50" style="--i:0">
+        <canvas id="mobileStatusChart"></canvas>
+        <div class="relative z-10">
+          <p class="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium"><%= req.translations.Status %></p>
+          <p id="mobile-status" class="mt-0.5 text-base font-semibold text-neutral-800 dark:text-white leading-tight">--</p>
+          <p id="mobile-status-log-text" class="text-[10px] text-neutral-500 dark:text-neutral-400 truncate hidden"></p>
+        </div>
+      </div>
+      <!-- RAM -->
+      <div class="relative overflow-hidden rounded-xl bg-white border border-neutral-200 px-3 py-3 min-h-[5rem] shadow-sm dark:bg-white/5 dark:border-neutral-700/50" style="--i:1">
+        <canvas id="mobileRamChart"></canvas>
+        <div class="relative z-10">
+          <p class="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium"><%= req.translations.ramUsage %></p>
+          <p id="mobile-ramUsage" class="mt-0.5 text-xs text-neutral-800 dark:text-white font-medium leading-tight break-all">0%</p>
+        </div>
+      </div>
+      <!-- CPU -->
+      <div class="relative overflow-hidden rounded-xl bg-white border border-neutral-200 px-3 py-3 min-h-[5rem] shadow-sm dark:bg-white/5 dark:border-neutral-700/50" style="--i:2">
+        <canvas id="mobileCpuChart"></canvas>
+        <div class="relative z-10">
+          <p class="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium"><%= req.translations.cpuUsage %></p>
+          <p id="mobile-cpuUsage" class="mt-0.5 text-base font-semibold text-neutral-800 dark:text-white leading-tight">0%</p>
+        </div>
+      </div>
+      <!-- Disk -->
+      <div class="relative overflow-hidden rounded-xl bg-white border border-neutral-200 px-3 py-3 min-h-[5rem] shadow-sm dark:bg-white/5 dark:border-neutral-700/50" style="--i:3">
+        <canvas id="mobileDiskChart" class="hidden"></canvas>
+        <div class="relative z-10">
+          <p class="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium"><%= req.translations.diskUsage %></p>
+          <p id="mobile-diskUsage" class="mt-0.5 text-xs text-neutral-800 dark:text-white font-medium leading-tight break-all">--</p>
+        </div>
+      </div>
     </div>
   </div>
 </main>
@@ -1228,6 +1407,151 @@ connectWebSocket();
             if (type === 'stopped' || type === 'killed') { setStatusLog(null); }
             if (type === 'error') { unlockInput(); setStatusLog(null); }
         };
+    })();
+
+    // ═══════════════════════════════════════════════════════════════
+    // MOBILE LAYOUT — separate terminal, charts, buttons
+    // ═══════════════════════════════════════════════════════════════
+    (function () {
+        var mobileEl = document.getElementById('mobile-manage');
+        if (!mobileEl) return;
+
+        // Only init mobile terminal if the element exists and is visible
+        var mobileTermEl = document.getElementById('mobile-terminal');
+        if (!mobileTermEl) return;
+
+        var mobileTerm = new Terminal({
+            disableStdin: true,
+            lineHeight: 1.3,
+            fontFamily: 'Menlo, Monaco, Consolas, monospace',
+            fontSize: 11,
+            theme: termTheme,
+            scrollback: 1000,
+            convertEol: true
+        });
+
+        var mobileFitAddon = new FitAddon.FitAddon();
+        mobileTerm.loadAddon(mobileFitAddon);
+        var mobileWebLinksAddon = new WebLinksAddon.WebLinksAddon();
+        mobileTerm.loadAddon(mobileWebLinksAddon);
+        mobileTerm.open(mobileTermEl);
+
+        function fitMobileTerminal() { mobileFitAddon.fit(); }
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(function () { requestAnimationFrame(fitMobileTerminal); });
+        } else {
+            setTimeout(fitMobileTerminal, 100);
+        }
+        window.addEventListener('resize', function () { requestAnimationFrame(fitMobileTerminal); });
+
+        // Touch scroll for mobile terminal
+        (function () {
+            var touchStartY = 0;
+            mobileTermEl.addEventListener('touchstart', function (e) { touchStartY = e.touches[0].clientY; }, { passive: true });
+            mobileTermEl.addEventListener('touchmove', function (e) {
+                var dy = touchStartY - e.touches[0].clientY;
+                touchStartY = e.touches[0].clientY;
+                e.preventDefault();
+                e.stopPropagation();
+                mobileTerm.scrollLines(Math.round(dy / 16));
+            }, { passive: false });
+        })();
+
+        // Mobile charts
+        var mobileStatusChart = createBackgroundChart('mobileStatusChart');
+        var mobileRamChart = createBackgroundChart('mobileRamChart');
+        var mobileCpuChart = createBackgroundChart('mobileCpuChart');
+        var mobileDiskChart = createBackgroundChart('mobileDiskChart', 'doughnut');
+
+        // Share the same WebSocket for stats — update mobile elements too
+        var origUpdateRam = updateRamUsage;
+        var origUpdateCpu = updateCpuUsage;
+        var origUpdateDisk = updateDiskUsage;
+        var origUpdateStatus = updateStatus;
+
+        // Patch update functions to also update mobile elements
+        var origSetStatusText = setStatusText;
+        function patchedSetStatusText(text, colorClass) {
+            origSetStatusText(text, colorClass);
+            var el = document.getElementById('mobile-status');
+            if (el) { el.textContent = text; el.className = 'mt-0.5 text-base font-semibold leading-tight ' + colorClass; }
+        }
+
+        var origSetStatusLog = setStatusLog;
+        function patchedSetStatusLog(msg, eventType) {
+            origSetStatusLog(msg, eventType);
+            var logEl = document.getElementById('mobile-status-log-text');
+            if (!logEl) return;
+            if (msg === null) { logEl.textContent = ''; logEl.classList.add('hidden'); return; }
+            var label = (statusCardLabels[eventType] || msg);
+            var color = (statusColors[eventType] || {}).cls || 'text-neutral-400';
+            logEl.textContent = label;
+            logEl.className = 'text-[10px] font-medium truncate ' + color;
+            logEl.classList.remove('hidden');
+        }
+
+        // Override to also write to mobile terminal
+        var origWriteConsole = writeConsole;
+        function mobileWriteConsole(prefix, type, message) {
+            origWriteConsole(prefix, type, message);
+            var ansi = { system: '\x1b[33m', error: '\x1b[31m', info: '\x1b[34m', success: '\x1b[32m', normal: '\x1b[0m' };
+            var color = ansi[type.toLowerCase()] || '\x1b[0m';
+            var prefixText = (prefix && type !== 'normal') ? '[' + prefix + '] ' : '';
+            mobileTerm.write(color + prefixText + '\x1b[37m' + message + '\x1b[0m\r\n');
+        }
+
+        // Mobile input handling
+        var mobileInput = document.getElementById('mobile-input');
+        if (mobileInput) {
+            mobileInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    var cmd = mobileInput.value.trim();
+                    if (cmd && socket) {
+                        mobileTerm.write('\u001b[1m\u001b[33m~ \u001b[0m' + cmd + '\r\n');
+                        socket.send(JSON.stringify({ event: 'CMD', command: cmd }));
+                        if (commandHistory.length === maxCommands) commandHistory.shift();
+                        commandHistory.push(cmd);
+                        currentCommandIndex = commandHistory.length;
+                    }
+                    mobileInput.value = '';
+                }
+            });
+            mobileInput.addEventListener('keydown', handleKeyUp);
+        }
+
+        // Mobile copy IP
+        window.copyMobileServerIP = function () {
+            var ipText = document.getElementById('mobile-server-ip-text').textContent.trim();
+            navigator.clipboard.writeText(ipText).then(function () {
+                document.getElementById('mobile-copy-icon').classList.add('hidden');
+                document.getElementById('mobile-check-icon').classList.remove('hidden');
+                setTimeout(function () {
+                    document.getElementById('mobile-copy-icon').classList.remove('hidden');
+                    document.getElementById('mobile-check-icon').classList.add('hidden');
+                }, 2000);
+            });
+        };
+
+        // Mobile button handlers
+        var mobileStartBtn = document.getElementById('mobileStartButton');
+        var mobileRestartBtn = document.getElementById('mobileRestartButton');
+        var mobileStopBtn = document.getElementById('mobileStopButton');
+
+        if (mobileStartBtn) {
+            <% if (!server.Suspended) { %>
+            mobileStartBtn.addEventListener('click', function () { startButton.click(); });
+            <% } %>
+        }
+        if (mobileRestartBtn) {
+            <% if (!server.Suspended) { %>
+            mobileRestartBtn.addEventListener('click', function () { restartButton.click(); });
+            <% } %>
+        }
+        if (mobileStopBtn) {
+            <% if (!server.Suspended) { %>
+            mobileStopBtn.addEventListener('click', function () { stopButton.click(); });
+            <% } %>
+        }
     })();
 
 </script>
