@@ -88,7 +88,7 @@
         
         <div class="flex items-center gap-3 py-2">
           <span class="text-xs font-medium text-neutral-500 w-16 shrink-0">Password</span>
-          <span id="sftpValPass" class="text-xs text-neutral-200 flex-1 truncate font-mono blur-sm hover:blur-none transition-all duration-200 cursor-default select-all" title="Hover to reveal"></span>
+          <span id="sftpValPass" class="text-xs text-neutral-200 flex-1 truncate font-mono blur-sm transition-all duration-200 cursor-default select-all sftp-password" title="Hover or tap to reveal"></span>
           <button onclick="sftpCopy('sftpValPass')" aria-label="Copy password" class="shrink-0 flex items-center justify-center w-6 h-6 rounded-md bg-neutral-100 dark:bg-white/5 hover:bg-neutral-200 dark:hover:bg-white/10 text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none">
             <%- icon('copy', { class: 'size-3', strokeWidth: 2 }) %>
           </button>
@@ -111,6 +111,11 @@
 @keyframes al-sftp-out { from { opacity:1; transform:scale(1) translateY(0); } to { opacity:0; transform:scale(0.96) translateY(8px); } }
 #sftpModal .al-sftp-panel { animation: al-sftp-in 0.2s cubic-bezier(0.16,1,0.3,1) both; }
 #sftpModal .al-sftp-panel.al-closing { animation: al-sftp-out 0.15s cubic-bezier(0.4,0,1,1) both; }
+
+/* Desktop: hover to reveal. Touch: tap to toggle via JS */
+@media (hover: hover) {
+  .sftp-password:hover { filter: blur(0); }
+}
 </style>
 
 <script nonce="<%- nonce %>">
@@ -230,5 +235,13 @@
       showToast('Copy failed — try selecting and copying manually.', 'error');
     });
   };
+
+  // Touch device support: tap to toggle password reveal
+  document.querySelectorAll('.sftp-password').forEach(function(el) {
+    el.addEventListener('click', function() {
+      this.classList.toggle('blur-sm');
+      this.classList.toggle('blur-none');
+    });
+  });
 })();
 </script>

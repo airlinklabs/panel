@@ -8,6 +8,10 @@
     </div>
     <!-- Content -->
     <div id="page-content" class="flex-1 overflow-y-auto pt-16">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin', href: '/admin' },
+        { label: 'Users' }
+      ] }) %>
       <%- include('../../components/ui/page-header', {
         title: req.translations.adminUsersTitle,
         description: req.translations.adminUsersText,
@@ -41,6 +45,15 @@
         <% if (req.query.err == "none") { %>
           <%- include('../../components/ui/alert', { type: 'success', message: req.translations.success + '!', detail: req.translations.actionCompleted }) %>
         <% } %>
+
+        <% if (users.length === 0) { %>
+          <%- include('../../components/ui/empty-state', {
+            iconName: 'users',
+            title: req.translations.noUsersYet || 'No users yet',
+            description: 'Create your first user to get started.',
+            action: '<button id="createButtonEmpty" type="button" class="al-btn-primary"><span class="inline-flex items-center gap-1.5">' + icon('plus', { class: 'w-4 h-4' }) + ' Create user</span></button>'
+          }) %>
+        <% } else { %>
 
         <!-- Mobile card view -->
         <div class="lg:hidden space-y-2 mb-6">
@@ -80,7 +93,7 @@
               <tr>
                 <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.name %></th>
                 <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.role %></th>
-                <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.instances %></th>
+                <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.servers || 'Servers' %></th>
                 <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.actions %></th>
               </tr>
             </thead>
@@ -129,6 +142,7 @@
             </tbody>
           </table>
         </div>
+        <% } %>
       </div>
     </div>
   </div>
@@ -141,6 +155,16 @@
   data-delete-user-body="<%= req.translations.areYouSureDeleteUser || 'Are you sure you want to delete this user?' %>"
 ></div>
 
+<script nonce="<%- nonce %>">
+  document.addEventListener('DOMContentLoaded', function() {
+    var emptyBtn = document.getElementById('createButtonEmpty');
+    if (emptyBtn) {
+      emptyBtn.addEventListener('click', function() {
+        window.location.href = '/admin/users/create';
+      });
+    }
+  });
+</script>
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-users-users.js"></script>
 
 <%- include('../../components/footer') %>

@@ -35,6 +35,10 @@
     </div>
 
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin', href: '/admin' },
+        { label: 'API Keys' }
+      ] }) %>
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
           <h1 class="al-page-title"><%= req.translations.apiKeysManagement || 'API Keys Management' %></h1>
