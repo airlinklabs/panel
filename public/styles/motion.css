@@ -50,6 +50,11 @@
 
 [data-animate] {
   opacity: 0;
+  will-change: opacity, transform;
+}
+
+/* Only add filter to will-change for blur animations */
+[data-animate="blur"] {
   will-change: opacity, transform, filter;
 }
 

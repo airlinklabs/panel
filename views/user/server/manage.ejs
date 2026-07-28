@@ -5,7 +5,7 @@
 <script nonce="<%- nonce %>" src="/vendor/xterm/lib/xterm.js"></script>
 <script nonce="<%- nonce %>" src="/vendor/xterm-addon-fit/lib/addon-fit.js"></script>
 <script nonce="<%- nonce %>" src="/vendor/xterm-addon-web-links/lib/addon-web-links.js"></script>
-<script nonce="<%- nonce %>" src="/vendor/chartjs/chart.umd.js"></script>
+<script nonce="<%- nonce %>" defer src="/vendor/chartjs/chart.umd.js"></script>
 
 <style>
     canvas {
@@ -306,7 +306,12 @@ term.loadAddon(webLinksAddon);
 term.open(document.getElementById('terminal'));
 fitAddon.fit();
 
-window.addEventListener('resize', () => fitAddon.fit());
+// Debounced resize handler to prevent excessive reflows
+let resizeTimeout;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => fitAddon.fit(), 100);
+});
 
 // Intercept wheel events on the terminal so scrolling the console scrolls
 // the terminal buffer rather than the page behind it.
@@ -1003,7 +1008,7 @@ connectWebSocket();
                         x: { display: false },
                         y: { display: false }
                     },
-                    animation: true
+                    animation: false
                 }
             });
         }
@@ -1171,8 +1176,10 @@ connectWebSocket();
             statusMsgFadeTimer = setTimeout(() => {
                 msgEl.textContent = label;
                 msgEl.className = `text-xs font-medium mt-0.5 leading-snug transition-all duration-300 ${color}`;
-                void msgEl.offsetHeight;
-                msgEl.classList.remove('opacity-0', 'translate-y-1');
+                // Use requestAnimationFrame to avoid layout thrashing
+                requestAnimationFrame(() => {
+                    msgEl.classList.remove('opacity-0', 'translate-y-1');
+                });
                 statusMsgFadeTimer = null;
             }, 150);
         }
