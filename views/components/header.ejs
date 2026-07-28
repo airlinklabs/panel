@@ -2,7 +2,7 @@
 <html class="h-full js-loading" lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <% if (typeof csrfToken !== 'undefined') { %>
     <meta name="csrf-token" content="<%= csrfToken %>">
     <% } %>
@@ -31,6 +31,12 @@
       html, body, * { scrollbar-width: none; -ms-overflow-style: none; }
       ::-webkit-scrollbar { display: none; }
       html, body { transition: background-color 0.25s ease-in, color 0.25s ease-in; background: var(--theme-bg); color: var(--theme-text); }
+      /* Safe area handling for notched devices */
+      body { 
+        padding-top: env(safe-area-inset-top);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+      }
       /* Pre-hide animatable content before JS runs so there's no flash-then-hide jitter */
       .js-loading #page-content > *:not(.mobile-top-bar):not(.mobile-bottom-nav):not(.mobile-more-sheet):not([style*="position: fixed"]),
       .js-loading #server-page-body > * {
