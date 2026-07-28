@@ -29,23 +29,23 @@
           <!-- Branding -->
           <div class="al-card">
             <h2 class="al-card-header">Branding</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 px-5 py-5">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 p-4">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Site title</label>
                 <input type="text" name="title" value="<%= settings.title %>"
                   class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
               </div>
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Logo</label>
-                <input type="file" name="logo" accept="image/*"
+                <label for="logo-input" class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Logo</label>
+                <input type="file" id="logo-input" name="logo" accept="image/*"
                   class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <% if (settings.logo) { %>
                 <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 mt-2 object-contain">
                 <% } %>
               </div>
               <div>
-                <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Favicon</label>
-                <input type="file" name="favicon" accept=".ico,.png,.jpg,.jpeg"
+                <label for="favicon-input" class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Favicon</label>
+                <input type="file" id="favicon-input" name="favicon" accept=".ico,.png,.jpg,.jpeg"
                   class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <p class="text-xs text-neutral-400 mt-1">PNG or JPG auto-converted to .ico</p>
               </div>
@@ -55,7 +55,7 @@
           <!-- Registration -->
           <div class="al-card">
             <h2 class="al-card-header">Registration</h2>
-            <div class="px-5 py-5 flex items-center justify-between">
+            <div class="p-4 flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow public registration</p>
                 <p class="text-xs text-neutral-500 mt-0.5">When off, only admins can create new accounts.</p>
@@ -70,7 +70,7 @@
           <!-- Themes -->
           <div class="al-card">
             <h2 class="al-card-header">Themes</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-5 py-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white mb-1">Light mode</p>
                 <p class="text-xs text-neutral-500 mb-3">Applied when the panel is in light mode.</p>
@@ -136,7 +136,8 @@
                 <a href="/admin/settings/example-theme" class="text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Download example</a>
               </div>
               <p class="text-xs text-neutral-500 mb-3">A .zip containing info.json, light.css, dark.css.</p>
-              <input type="file" name="themeFile" accept=".zip"
+              <label for="theme-file-input" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload theme file</label>
+              <input type="file" id="theme-file-input" name="themeFile" accept=".zip"
                 class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
             </div>
           </div>
@@ -145,17 +146,17 @@
           <div class="al-card">
             <h2 class="al-card-header">Auth page wallpapers</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3 pb-1">Background image on the login and register pages. Upload a file or paste a URL. Leave both blank to use the default.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-5 py-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white mb-3">Login page</p>
                 <% if (settings.loginWallpaper) { %>
                 <img src="<%= settings.loginWallpaper %>" alt="" class="h-20 w-full object-cover rounded-xl border border-neutral-200 dark:border-white/5 mb-3">
                 <% } %>
-                <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
-                <input type="file" name="loginWallpaperFile" accept="image/*"
+                <label for="login-wallpaper-file" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
+                <input type="file" id="login-wallpaper-file" name="loginWallpaperFile" accept="image/*"
                   class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
-                <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
-                <input type="text" name="loginWallpaperUrl" placeholder="https://…"
+                <label for="login-wallpaper-url" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
+                <input type="text" id="login-wallpaper-url" name="loginWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.loginWallpaper && settings.loginWallpaper.startsWith('http')) ? settings.loginWallpaper : '' %>"
                   class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
               </div>
@@ -164,11 +165,11 @@
                 <% if (settings.registerWallpaper) { %>
                 <img src="<%= settings.registerWallpaper %>" alt="" class="h-20 w-full object-cover rounded-xl border border-neutral-200 dark:border-white/5 mb-3">
                 <% } %>
-                <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
-                <input type="file" name="registerWallpaperFile" accept="image/*"
+                <label for="register-wallpaper-file" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
+                <input type="file" id="register-wallpaper-file" name="registerWallpaperFile" accept="image/*"
                   class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
-                <label class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
-                <input type="text" name="registerWallpaperUrl" placeholder="https://…"
+                <label for="register-wallpaper-url" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
+                <input type="text" id="register-wallpaper-url" name="registerWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.registerWallpaper && settings.registerWallpaper.startsWith('http')) ? settings.registerWallpaper : '' %>"
                   class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
               </div>
@@ -186,7 +187,7 @@
 
           <div class="al-card">
             <h2 class="al-card-header">User permissions</h2>
-            <div class="px-5 py-5 space-y-5">
+            <div class="p-4 space-y-5">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow users to create servers</p>
@@ -212,7 +213,7 @@
 
           <div class="al-card">
             <h2 class="al-card-header">File uploads</h2>
-            <div class="px-5 py-5">
+            <div class="p-4">
               <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Upload limit <span class="text-neutral-400 font-normal">(MB)</span></label>
               <div class="relative max-w-xs">
                 <input type="number" id="uploadLimitInput" value="<%= settings.uploadLimit %>" min="1" max="10000"
@@ -226,7 +227,7 @@
           <div class="al-card">
             <h2 class="al-card-header">Default limits</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3">Applied to new users unless overridden per-user.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 px-5 py-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 p-4">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Server limit</label>
                 <input type="number" id="defaultServerLimit" value="<%= settings.defaultServerLimit %>" min="0" max="100"
@@ -277,7 +278,7 @@
           <!-- VirusTotal -->
           <div class="al-card">
             <h2 class="al-card-header">VirusTotal</h2>
-            <div class="px-5 py-5">
+            <div class="p-4">
               <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">API key</label>
               <div class="relative max-w-sm">
                 <input type="password" id="vtKeyInput" value="<%= settings.virusTotalApiKey || '' %>" placeholder="Paste your key" autocomplete="off"
@@ -296,7 +297,7 @@
           <!-- Rate limiting -->
           <div class="al-card">
             <h2 class="al-card-header">Rate limiting</h2>
-            <div class="px-5 py-5 space-y-4">
+            <div class="p-4 space-y-4">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-neutral-700 dark:text-white">Enable rate limiting</p>
@@ -319,7 +320,7 @@
           <div class="al-card">
             <h2 class="al-card-header">Login protection</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3">After N failed attempts from a single account, that account is locked for the configured duration. Errors always say "invalid credentials" — the username is never revealed.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 px-5 py-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 p-4">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max failed attempts before lockout</label>
                 <input type="number" id="loginMaxAttempts" value="<%= settings.loginMaxAttempts ?? 5 %>" min="1" max="100"
@@ -336,7 +337,7 @@
           <!-- Network -->
           <div class="al-card">
             <h2 class="al-card-header">Network</h2>
-            <div class="px-5 py-5 space-y-5">
+            <div class="p-4 space-y-5">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm font-medium text-neutral-700 dark:text-white">Behind a reverse proxy</p>
@@ -376,7 +377,7 @@
           <!-- IP banning -->
           <div class="al-card">
             <h2 class="al-card-header">IP banning</h2>
-            <div class="px-5 py-5">
+            <div class="p-4">
               <label for="banIpInput" class="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2 block">IP Address</label>
               <div class="flex gap-3 mb-4">
                 <input type="text" id="banIpInput" placeholder="192.168.1.1" aria-describedby="banIpHint"
