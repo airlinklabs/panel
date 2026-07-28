@@ -38,27 +38,27 @@
       <div class="mx-8 mt-5 mb-1">
         <input id="addonSearchInput" type="text" placeholder="Filter addons…" class="w-56 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
       </div>
-      <div class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40">
-        <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
-          <thead class="bg-neutral-50 dark:bg-neutral-800/50">
+      <div class="overflow-x-auto shadow-sm rounded-xl m-8 border" style="border-color:var(--theme-border)">
+        <table class="al-table min-w-full">
+          <thead class="al-table-head">
             <tr>
-              <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Name</th>
-              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white col-hide">Version</th>
-              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white col-hide">Status</th>
-              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white">Actions</th>
+              <th class="al-table-th py-3.5 pl-6 pr-3">Name</th>
+              <th class="al-table-th px-3 py-3.5 col-hide">Version</th>
+              <th class="al-table-th px-3 py-3.5 col-hide">Status</th>
+              <th class="al-table-th px-3 py-3.5">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
+          <tbody class="divide-y" style="border-color:var(--theme-border)">
             <% let addonIdx = 0; addons.forEach(function(addon) { %>
-            <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors addon-row"
+            <tr class="al-table-tr transition-colors addon-row"
                 style="--i:<%= addonIdx++ %>"
                 data-slug="<%= addon.slug %>"
                 data-search="<%= (addon.name + ' ' + (addon.description||'') + ' ' + (addon.author||'')).toLowerCase() %>">
-              <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm">
-                <p class="font-medium text-neutral-800 dark:text-white"><%= addon.name %></p>
-                <% if (addon.description) { %><p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 max-w-xs truncate"><%= addon.description %></p><% } %>
+              <td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3">
+                <p class="font-medium" style="color:var(--theme-text-strong)"><%= addon.name %></p>
+                <% if (addon.description) { %><p class="text-xs mt-0.5 max-w-xs truncate" style="color:var(--theme-text-muted)"><%= addon.description %></p><% } %>
               </td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400 col-hide">v<%= addon.version %><% if (addon.author) { %> · <%= addon.author %><% } %></td>
+              <td class="al-table-td whitespace-nowrap px-3 py-4 col-hide">v<%= addon.version %><% if (addon.author) { %> · <%= addon.author %><% } %></td>
               <td class="whitespace-nowrap px-3 py-4 text-sm col-hide">
                 <% if (addon.hasDisabledPh) { %>
                 <span class="status-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 ring-amber-600/20 dark:ring-amber-400/20">Not enabled</span>
@@ -71,7 +71,7 @@
               <td class="whitespace-nowrap px-3 py-4 text-sm">
                 <div class="flex gap-2">
                   <button onclick="toggleAddon('<%= addon.slug %>', <%= !addon.enabled %>)" type="button"
-                    class="toggle-btn rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">
+                    class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition">
                     <%= addon.enabled ? 'Disable' : 'Enable' %>
                   </button>
                   <button onclick="confirmUninstall('<%= addon.slug %>', '<%= addon.name %>')" type="button"

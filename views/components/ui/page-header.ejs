@@ -1,0 +1,12 @@
+<% /* page-header: { title, description, actions } */ %>
+<div class="al-page-header flex items-start justify-between gap-4">
+  <div class="min-w-0">
+    <h1 class="al-page-title"><%= locals.title || '' %></h1>
+    <% if (locals.description) { %>
+    <p class="al-page-desc"><%= locals.description %></p>
+    <% } %>
+  </div>
+  <% if (locals.actions) { %>
+  <div class="flex items-center gap-2 shrink-0"><%- locals.actions %></div>
+  <% } %>
+</div>

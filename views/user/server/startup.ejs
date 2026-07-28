@@ -1,6 +1,6 @@
 <%- include('../../components/header', { title: 'Startup' }) %>
 
-<main class="h-screen m-auto text-neutral-800 dark:text-white">
+<main class="h-screen m-auto" style="color:var(--theme-text-strong)">
   <!-- Success/Error Messages -->
   <div id="message-container" class="fixed top-4 right-4 z-50 max-w-md"></div>
   <div class="flex h-screen">
@@ -25,8 +25,8 @@
 
       <!-- Startup Configuration -->
       <div class="px-8 mt-8">
-        <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-300 dark:border-neutral-800/20">
-          <div class="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 overflow-hidden mb-6">
+        <div class="al-card p-6 shadow-lg">
+          <div class="al-card overflow-hidden mb-6">
             <div class="p-5 border-b border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
               <div>
                 <h2 class="text-lg font-semibold text-neutral-800 dark:text-white"><%= req.translations.startupCommand || 'Startup Command' %></h2>
@@ -82,8 +82,8 @@
           </div>
 
           <!-- Docker Image Selection -->
-          <div class="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 overflow-hidden">
-            <div class="p-5 border-b border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
+          <div class="al-card overflow-hidden">
+            <div class="p-5 border-b flex justify-between items-center" style="border-color:var(--theme-border)">
               <div>
                 <h3 class="text-lg font-semibold text-neutral-800 dark:text-white"><%= req.translations.dockerImageLabel || 'Docker Image' %></h3>
                 <p class="text-sm text-neutral-600 dark:text-neutral-400"><%= req.translations.dockerImageDesc || 'Change the Docker image used by your server.' %></p>
@@ -155,7 +155,7 @@
         </div>
 
         <!-- Server Variables -->
-        <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-300 dark:border-neutral-800/20 mt-8">
+        <div class="al-card p-6 shadow-lg mt-8">
           <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white"><%= req.translations.serverVariables || 'Server Variables' %></h2>
           <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4"><%= req.translations.serverVariablesDesc || 'Configure environment variables for your server.' %></p>
 
@@ -196,7 +196,7 @@
             </div>
 
             <div class="mt-6">
-              <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-lg hover:bg-blue-700 hover:scale-105 transition-all duration-200"><%= req.translations.saveVariables || 'Save Variables' %></button>
+              <button type="submit" class="al-btn-primary rounded-xl px-6 py-2.5 text-center text-sm font-semibold shadow-lg transition-all duration-200"><%= req.translations.saveVariables || 'Save Variables' %></button>
             </div>
           </form>
         </div>

@@ -7,116 +7,128 @@
       <%- include('../../components/template') %>
     </div>
     <!-- Content -->
-    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
-      <div class="sm:flex sm:items-center px-8 pt-4">
-        <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminUsersTitle %></h1>
-          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminUsersText %></p>
-        </div>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <div class="flex gap-2">
-            <button id="createButton" type="button" class="inline-flex items-center gap-1.5 border border-neutral-200 dark:border-neutral-700/40 rounded-xl bg-neutral-900 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-100 px-3 py-2 text-sm font-medium transition">
-              <%= req.translations.createNewUser %>
-            </button>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16">
+      <%- include('../../components/ui/page-header', {
+        title: req.translations.adminUsersTitle,
+        description: req.translations.adminUsersText,
+        actions: '<button id="createButton" type="button" class="al-btn-primary">' + req.translations.createNewUser + '</button>'
+      }) %>
+
+      <div class="al-page-body">
+
+        <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div class="al-card">
+            <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);"><%= req.translations.totalUsers %></h2>
+            <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);"><%= users.length %></p>
+            <% if (onlineUsers.size > 0) { %>
+              <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.onlineUsers || 'Online Users' %>: <%= onlineUsers.size %></p>
+            <% } else { %>
+              <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
+            <% } %>
+          </div>
+          <div class="al-card">
+            <h2 class="text-sm font-medium mb-2" style="color:var(--theme-text-muted);"><%= req.translations.admins || 'Admins' %></h2>
+              <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong);"><%= users.filter(user => user.isAdmin).length %></p>
+              <% if (onlineUsers.size > 0) { %>
+                <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.onlineUsers || 'Online Admins' %>: <%= Array.from(onlineUsers).filter(username => users.some(user => user.username === username && user.isAdmin)).length %></p>
+              <% } else { %>
+                <p class="text-xs mt-2" style="color:var(--theme-text-muted);"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
+              <% } %>
           </div>
         </div>
-      </div>
 
-      <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-6 m-8">
+        <!-- notifications -->
+        <% if (req.query.err == "none") { %>
+          <%- include('../../components/ui/alert', { type: 'success', message: req.translations.success + '!', detail: req.translations.actionCompleted }) %>
+        <% } %>
 
-        <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
-          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.totalUsers %></h2>
-          <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= users.length %></p>
-          <% if (onlineUsers.size > 0) { %>
-            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.onlineUsers || 'Online Users' %>: <%= onlineUsers.size %></p>
-          <% } else { %>
-            <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
-          <% } %>
-        </div>
-        <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
-          <h2 class="text-lg font-medium text-neutral-800 dark:text-white mb-2"><%= req.translations.admins || 'Admins' %></h2>
-            <p class="text-4xl font-normal text-neutral-800 dark:text-white"><%= users.filter(user => user.isAdmin).length %></p>
-            <% if (onlineUsers.size > 0) { %>
-              <p class="text-sm text-neutral-400 mt-2"><%= req.translations.onlineUsers || 'Online Admins' %>: <%= Array.from(onlineUsers).filter(username => users.some(user => user.username === username && user.isAdmin)).length %></p>
-            <% } else { %>
-              <p class="text-sm text-neutral-400 mt-2"><%= req.translations.noUsersOnline || 'No Users Online' %></p>
-            <% } %>
-        </div>
-      </div>
-
-      <!-- notifications -->
-      <% if (req.query.err == "none") { %>
-        <div class="mt-6 ml-8 mr-8">
-          <div class="rounded-xl bg-emerald-600/20 dark:bg-emerald-800/10 px-4 py-6 shadow-lg border border-neutral-800/20">
-            <div class="flex">
-              <div class="flex-shrink-0 ml-1.5">
-                <%- icon('check', { size: 20, class: 'mt-2 text-emerald-400' }) %>
-              </div>
-              <div class="ml-5">
-                <h3 class="text-sm font-medium text-emerald-400"><%= req.translations.success %>!</h3>
-                <p class="text-sm text-emerald-400/50"><%= req.translations.actionCompleted %></p>
-              </div>
+        <!-- Mobile card view -->
+        <div class="lg:hidden space-y-2 mb-6">
+          <% users.forEach(function(user) { %>
+          <div class="al-card flex items-center gap-3">
+            <div class="relative shrink-0">
+              <img class="w-8 h-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="">
+              <% if (onlineUsers.has(user.username)) { %>
+                <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-success); border:2px solid var(--theme-bg-card);"></span>
+                </span>
+              <% } else { %>
+                <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-text-placeholder); border:2px solid var(--theme-bg-card);"></span>
+                </span>
+              <% } %>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= user.username %></p>
+              <p class="text-xs truncate" style="color:var(--theme-text-muted);"><span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset <%= user.isAdmin ? 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' : 'bg-amber-600/10 text-amber-600 dark:text-amber-400 ring-amber-600/20' %>"><%= user.isAdmin ? 'Admin' : 'User' %></span></p>
+            </div>
+            <div class="flex items-center gap-2">
+              <a href="/admin/users/view/<%= user.id %>/" class="al-btn-ghost" aria-label="View user"><%- icon('external-link', { size: 16 }) %></a>
+              <a href="/admin/users/edit/<%= user.id %>/" class="al-btn-ghost" aria-label="Edit user"><%- icon('pencil', { size: 16 }) %></a>
+              <button onclick="deleteUser('<%= user.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete user">
+                <%- icon('trash-2', { size: 16 }) %>
+              </button>
             </div>
           </div>
+          <% }); %>
         </div>
-      <% } %>
 
-      <!-- Table of users -->
-      <div class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40" id="userTable">
-        <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
-          <thead class="bg-neutral-50 dark:bg-neutral-800/50">
-            <tr>
-              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.name %></th>
-              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.role %></th>
-              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.instances %></th>
-              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.actions %></th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20">
-            <% let userIdx = 0; users.forEach(function(user) { %>
-              <tr style="--i:<%= userIdx++ %>" class="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors clickable-row cursor-pointer" onclick="handleRowClick(event, '/admin/users/view/<%= user.id %>/')">
-                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
-                  <div class="flex items-center gap-3">
-                    <div class="relative shrink-0">
-                      <img class="h-8 w-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="">
-                      <% if (onlineUsers.has(user.username)) { %>
-                        <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 border-2 border-white dark:border-neutral-900"></span>
-                        </span>
-                      <% } else { %>
-                        <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-                          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-neutral-400 border-2 border-white dark:border-neutral-900"></span>
-                        </span>
-                      <% } %>
-                    </div>
-                    <div class="font-medium text-neutral-800 dark:text-white"><%= user.username %></div>
-                  </div>
-                </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400">
-                  <div class="mt-1 ml-2 inline-flex items-center rounded-md
-                  <%= user.isAdmin ? 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' : 'bg-amber-600/10 text-amber-600 dark:text-amber-400 ring-amber-600/20' %>
-                  px-2 py-1 text-xs font-medium ring-1 ring-inset">
-                    <%= user.isAdmin ? 'Admin' : 'User' %>
-                  </div></td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400"><%= user.servers ? user.servers.length : 0 %></td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm">
-                  <div class="flex gap-3">
-                    <a href="/admin/users/view/<%= user.id %>/">
-                      <button type="button" class="rounded-xl bg-white border border-neutral-800/20 hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition">View</button>
-                    </a>
-                    <a href="/admin/users/edit/<%= user.id %>/">
-                      <button type="button" class="rounded-xl bg-blue-600 px-3 py-2 text-center text-sm font-medium text-white shadow-lg hover:bg-blue-500 transition">Edit</button>
-                    </a>
-                    <button onclick="deleteUser('<%= user.id %>')" type="button" class="rounded-xl bg-red-600 hover:bg-red-500 px-3 py-2 text-center text-sm font-medium text-white shadow-sm transition" aria-label="Delete user">
-                      <%- icon('trash-2', { size: 20, class: 'text-white' }) %>
-                    </button>
-                  </div>
-                </td>
+        <!-- Desktop table -->
+        <div class="hidden lg:block overflow-x-auto shadow-sm rounded-xl border" id="userTable" style="border-color:var(--theme-border);">
+          <table class="al-table">
+            <thead class="al-table-head">
+              <tr>
+                <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.name %></th>
+                <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.role %></th>
+                <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.instances %></th>
+                <th scope="col" class="al-table-th sm:pl-6"><%= req.translations.actions %></th>
               </tr>
-            <% }); %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <% let userIdx = 0; users.forEach(function(user) { %>
+                <tr style="--i:<%= userIdx++ %>" class="al-table-tr cursor-pointer" onclick="handleRowClick(event, '/admin/users/view/<%= user.id %>/')">
+                  <td class="al-table-td sm:pl-6">
+                    <div class="flex items-center gap-3">
+                      <div class="relative shrink-0">
+                        <img class="h-8 w-8 rounded-lg object-cover" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="">
+                        <% if (onlineUsers.has(user.username)) { %>
+                          <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-success); border:2px solid var(--theme-bg-card);"></span>
+                          </span>
+                        <% } else { %>
+                          <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5" style="background:var(--theme-text-placeholder); border:2px solid var(--theme-bg-card);"></span>
+                          </span>
+                        <% } %>
+                      </div>
+                      <div class="font-medium" style="color:var(--theme-text-strong);"><%= user.username %></div>
+                    </div>
+                  </td>
+                  <td class="al-table-td">
+                    <div class="mt-1 ml-2 inline-flex items-center rounded-md
+                    <%= user.isAdmin ? 'bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 ring-emerald-600/20' : 'bg-amber-600/10 text-amber-600 dark:text-amber-400 ring-amber-600/20' %>
+                    px-2 py-1 text-xs font-medium ring-1 ring-inset">
+                      <%= user.isAdmin ? 'Admin' : 'User' %>
+                    </div></td>
+                  <td class="al-table-td"><%= user.servers ? user.servers.length : 0 %></td>
+                  <td class="al-table-td">
+                    <div class="flex gap-3">
+                      <a href="/admin/users/view/<%= user.id %>/">
+                        <button type="button" class="al-btn-secondary text-xs">View</button>
+                      </a>
+                      <a href="/admin/users/edit/<%= user.id %>/">
+                        <button type="button" class="al-btn-primary text-xs">Edit</button>
+                      </a>
+                      <button onclick="deleteUser('<%= user.id %>')" type="button" class="al-btn-ghost" style="color:var(--theme-danger);" aria-label="Delete user">
+                        <%- icon('trash-2', { size: 16 }) %>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

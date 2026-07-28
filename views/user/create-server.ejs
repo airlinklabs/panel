@@ -112,10 +112,8 @@
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
           <!-- Details -->
-          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5">
-            <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
-              <p class="text-sm font-medium text-neutral-800 dark:text-white">Details</p>
-            </div>
+          <div class="al-card">
+            <div class="al-card-header">Details</div>
             <div class="p-5 space-y-4">
               <div>
                 <label class="form-label" for="serverName">Name</label>
@@ -129,10 +127,8 @@
           </div>
 
           <!-- Node & Image -->
-          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5">
-            <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
-              <p class="text-sm font-medium text-neutral-800 dark:text-white">Node & image</p>
-            </div>
+          <div class="al-card">
+            <div class="al-card-header">Node & image</div>
             <div class="p-5 space-y-4">
               <div>
                 <label class="form-label">Node</label>
@@ -175,10 +171,8 @@
           </div><!-- /top grid -->
 
           <!-- Resources -->
-          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
-            <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
-              <p class="text-sm font-medium text-neutral-800 dark:text-white">Resources</p>
-            </div>
+          <div class="al-card overflow-hidden">
+            <div class="al-card-header">Resources</div>
             <div class="p-5 grid grid-cols-3 gap-4">
               <div>
                 <label class="form-label flex items-center gap-1.5">
@@ -239,7 +233,7 @@
           <!-- Submit -->
           <div class="flex justify-end pt-1">
             <button type="button" id="createBtn"
-              class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-6 py-2.5 text-sm font-medium shadow-sm transition flex items-center gap-2">
+              class="al-btn-primary rounded-xl px-6 py-2.5 text-sm font-medium shadow-sm transition flex items-center gap-2">
               <span id="createBtnText">Create server</span>
               <span id="createBtnSpinner" class="hidden w-4 h-4 border-2 border-white/30 dark:border-neutral-900/30 border-t-white dark:border-t-neutral-900 rounded-full animate-spin"></span>
             </button>

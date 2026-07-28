@@ -37,26 +37,26 @@
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
       <div class="sm:flex sm:items-center px-8 pt-4">
         <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.apiKeysManagement || 'API Keys Management' %></h1>
-          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.apiKeysDesc || 'Create and manage API keys with specific permissions' %></p>
+          <h1 class="al-page-title"><%= req.translations.apiKeysManagement || 'API Keys Management' %></h1>
+          <p class="al-page-desc mt-1 tracking-tight"><%= req.translations.apiKeysDesc || 'Create and manage API keys with specific permissions' %></p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <div class="flex gap-2">
-            <button id="createApiKeyBtn" type="button" class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+            <button id="createApiKeyBtn" type="button" class="al-btn-primary w-full md:w-auto rounded-xl px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
               Create API Key
             </button>
-            <a href="/admin/api/docs" class="w-full md:w-auto rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 px-3 py-2 text-sm font-medium shadow-sm transition focus:outline focus:outline-2 focus:outline-offset-2">
+            <a href="/admin/api/docs" class="al-btn-secondary w-full md:w-auto rounded-xl px-3 py-2 text-sm font-medium shadow-sm transition focus:outline focus:outline-2 focus:outline-offset-2">
               API Documentation
             </a>
           </div>
         </div>
       </div>
       <div class="px-8 mt-5">
-        <div class="rounded-xl bg-neutral-700/10 dark:bg-neutral-900 p-6">
+        <div class="al-card p-6">
           <div class="sm:flex sm:items-center">
             <div class="sm:flex-auto">
-              <h1 class="text-base font-semibold leading-6 text-neutral-800 dark:text-white"><%= req.translations.navApiKeys || 'API Keys' %></h1>
-              <p class="mt-2 text-sm text-neutral-500"><%= req.translations.apiKeysList || 'A list of all API keys in your panel.' %></p>
+              <h1 class="text-base font-semibold leading-6" style="color:var(--theme-text-strong)"><%= req.translations.navApiKeys || 'API Keys' %></h1>
+              <p class="mt-2 text-sm" style="color:var(--theme-text-muted)"><%= req.translations.apiKeysList || 'A list of all API keys in your panel.' %></p>
             </div>
           </div>
           <div class="mt-8 flow-root">

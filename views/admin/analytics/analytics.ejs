@@ -5,24 +5,24 @@
     <div class="hidden lg:block w-60 h-full"><%- include('../../components/template') %></div>
 
     <div id="page-content" class="flex-1 overflow-y-auto pt-16">
-      <div class="px-8 pt-5 pb-8">
-
-        <div class="flex items-center justify-between mb-6">
+      <div class="al-page-header">
+        <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-base font-medium text-neutral-800 dark:text-white">Analytics</h1>
-            <p class="text-sm text-neutral-500 mt-0.5">Live data from the database and connected daemons.</p>
+            <h1 class="al-page-title">Analytics</h1>
+            <p class="al-page-desc">Live data from the database and connected daemons.</p>
           </div>
           <button id="refreshBtn"
-            class="flex items-center gap-1.5 rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 hover:bg-neutral-100 dark:hover:bg-white/5 text-neutral-700 dark:text-neutral-300 px-3 py-2 text-sm font-medium transition">
+            class="al-btn-secondary flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition">
             <svg id="refreshIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
             </svg>
             Refresh
           </button>
         </div>
+      </div>
 
         <!-- Tab bar -->
-        <div class="flex gap-0.5 border-b border-neutral-200 dark:border-neutral-700/40 mb-6">
+        <div class="flex gap-0.5 border-b mb-6" style="border-color:var(--theme-border)">
           <button type="button" data-tab="servers"  class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Servers</button>
           <button type="button" data-tab="nodes"    class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Nodes</button>
           <button type="button" data-tab="activity" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Activity</button>
@@ -41,41 +41,39 @@
         <div data-tab-panel="servers" class="tab-panel hidden space-y-6">
 
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-              <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Total servers</p>
-              <p class="text-2xl font-semibold text-neutral-800 dark:text-white" id="sv-total">—</p>
-              <p class="text-xs text-neutral-500 mt-1" id="sv-suspended-label"></p>
+            <div class="al-card px-4 py-4">
+              <p class="al-section-label">Total servers</p>
+              <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="sv-total">—</p>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)" id="sv-suspended-label"></p>
             </div>
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-              <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Allocated RAM</p>
-              <p class="text-2xl font-semibold text-neutral-800 dark:text-white" id="sv-ram">—</p>
-              <p class="text-xs text-neutral-500 mt-1">across all servers</p>
+            <div class="al-card px-4 py-4">
+              <p class="al-section-label">Allocated RAM</p>
+              <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="sv-ram">—</p>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)">across all servers</p>
             </div>
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-              <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Allocated CPU</p>
-              <p class="text-2xl font-semibold text-neutral-800 dark:text-white" id="sv-cpu">—</p>
-              <p class="text-xs text-neutral-500 mt-1">total allocation</p>
+            <div class="al-card px-4 py-4">
+              <p class="al-section-label">Allocated CPU</p>
+              <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="sv-cpu">—</p>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)">total allocation</p>
             </div>
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-              <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Allocated disk</p>
-              <p class="text-2xl font-semibold text-neutral-800 dark:text-white" id="sv-storage">—</p>
-              <p class="text-xs text-neutral-500 mt-1">total allocation</p>
+            <div class="al-card px-4 py-4">
+              <p class="al-section-label">Allocated disk</p>
+              <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="sv-storage">—</p>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)">total allocation</p>
             </div>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
             <!-- Top images -->
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">
-              <p class="text-sm font-medium text-neutral-800 dark:text-white mb-4">Images in use</p>
+            <div class="al-card p-5">
+              <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)">Images in use</p>
               <div id="sv-images" class="space-y-3"></div>
             </div>
 
             <!-- Heaviest servers -->
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
-              <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
-                <p class="text-sm font-medium text-neutral-800 dark:text-white">Highest allocated servers</p>
-              </div>
+            <div class="al-card overflow-hidden">
+              <div class="al-card-header">Highest allocated servers</div>
               <div class="divide-y divide-neutral-100 dark:divide-white/5" id="sv-heavy"></div>
             </div>
 
@@ -86,17 +84,17 @@
         <div data-tab-panel="nodes" class="tab-panel hidden space-y-4">
 
           <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-              <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Nodes</p>
-              <p class="text-2xl font-semibold text-neutral-800 dark:text-white" id="nd-total">—</p>
+            <div class="al-card px-4 py-4">
+              <p class="al-section-label">Nodes</p>
+              <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="nd-total">—</p>
             </div>
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-              <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Online</p>
-              <p class="text-2xl font-semibold text-emerald-600 dark:text-emerald-400" id="nd-online">—</p>
+            <div class="al-card px-4 py-4">
+              <p class="al-section-label">Online</p>
+              <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-success)" id="nd-online">—</p>
             </div>
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-              <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Offline</p>
-              <p class="text-2xl font-semibold text-red-500 dark:text-red-400" id="nd-offline">—</p>
+            <div class="al-card px-4 py-4">
+              <p class="al-section-label">Offline</p>
+              <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-danger)" id="nd-offline">—</p>
             </div>
           </div>
 
@@ -107,41 +105,39 @@
         <div data-tab-panel="activity" class="tab-panel hidden space-y-6">
 
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-              <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Users</p>
-              <p class="text-2xl font-semibold text-neutral-800 dark:text-white" id="ac-users">—</p>
-              <p class="text-xs text-neutral-500 mt-1" id="ac-admins-label"></p>
+            <div class="al-card px-4 py-4">
+              <p class="al-section-label">Users</p>
+              <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="ac-users">—</p>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)" id="ac-admins-label"></p>
             </div>
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-              <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Images installed</p>
-              <p class="text-2xl font-semibold text-neutral-800 dark:text-white" id="ac-images">—</p>
-              <p class="text-xs text-neutral-500 mt-1">in library</p>
+            <div class="al-card px-4 py-4">
+              <p class="al-section-label">Images installed</p>
+              <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="ac-images">—</p>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)">in library</p>
             </div>
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-              <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Logins (30d)</p>
-              <p class="text-2xl font-semibold text-neutral-800 dark:text-white" id="ac-logins">—</p>
-              <p class="text-xs text-neutral-500 mt-1">panel sessions</p>
+            <div class="al-card px-4 py-4">
+              <p class="al-section-label">Logins (30d)</p>
+              <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="ac-logins">—</p>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)">panel sessions</p>
             </div>
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
-              <p class="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Avg/day</p>
-              <p class="text-2xl font-semibold text-neutral-800 dark:text-white" id="ac-avg">—</p>
-              <p class="text-xs text-neutral-500 mt-1">logins per day</p>
+            <div class="al-card px-4 py-4">
+              <p class="al-section-label">Avg/day</p>
+              <p class="text-2xl font-semibold tabular-nums" style="color:var(--theme-text-strong)" id="ac-avg">—</p>
+              <p class="text-xs mt-1" style="color:var(--theme-text-muted)">logins per day</p>
             </div>
           </div>
 
           <!-- Login chart -->
-          <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 p-5">
-            <p class="text-sm font-medium text-neutral-800 dark:text-white mb-4">Login activity — last 30 days</p>
+          <div class="al-card p-5">
+            <p class="text-sm font-medium mb-4" style="color:var(--theme-text-strong)">Login activity — last 30 days</p>
             <div class="relative h-44">
               <canvas id="loginChart"></canvas>
             </div>
           </div>
 
           <!-- Recent logins -->
-          <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 overflow-hidden">
-            <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
-              <p class="text-sm font-medium text-neutral-800 dark:text-white">Recent logins</p>
-            </div>
+          <div class="al-card overflow-hidden">
+            <div class="al-card-header">Recent logins</div>
             <div class="overflow-x-auto">
               <table class="min-w-full text-sm divide-y divide-neutral-100 dark:divide-white/5">
                 <thead class="bg-neutral-100/60 dark:bg-white/[0.02]">
