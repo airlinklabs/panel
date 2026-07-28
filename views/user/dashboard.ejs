@@ -51,10 +51,10 @@
 
         <!-- Alerts -->
         <% if (req.query.err === 'NOTACTIVEYET') { %>
-        <%- include('../components/ui/alert', { type: 'warning', message: req.translations.awaitingInstallation || "This server's still getting its act together. Check back in a moment.", detail: req.translations.awaitingInstallationDesc || "The server isn't installed yet or is in a failed state." }) %>
+        <%- include('../components/ui/alert', { type: 'warning', message: req.translations.awaitingInstallation || "Server is installing", detail: req.translations.awaitingInstallationDesc || "This server is not ready yet. It will be available once installation completes." }) %>
         <% } %>
         <% if (req.query.err === 'SERVER_LIMIT_REACHED') { %>
-        <%- include('../components/ui/alert', { type: 'warning', message: "You've hit your server limit — talk to your admin if you need more room.", detail: 'You have reached the maximum number of servers allowed.' }) %>
+        <%- include('../components/ui/alert', { type: 'warning', message: "Server limit reached", detail: 'You have reached the maximum number of servers allowed. Contact your admin to increase your limit.' }) %>
         <% } %>
         <% if (typeof daemonOffline !== 'undefined' && daemonOffline) { %>
         <div class="al-alert-danger mb-5">
@@ -143,7 +143,7 @@
                   <p class="text-sm font-medium" style="color:var(--theme-text);"><%= Math.round(server.cpuUsage) %>%</p>
                 </div>
                 <div class="flex-1 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary);">
-                  <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);">Used</p>
+                  <p class="text-[10px] mb-0.5" style="color:var(--theme-text-muted);">Storage</p>
                   <p class="text-sm font-medium" style="color:var(--theme-text);"><%= server.ramUsed || '0MB' %></p>
                 </div>
               </div>
@@ -201,7 +201,7 @@
         <% if (totalPages > 1) { %>
         <div class="flex items-center justify-center gap-3 mt-2">
           <% if (currentPage > 1) { %>
-          <a href="/?page=<%= currentPage - 1 %>" class="al-btn-secondary"><%= req.translations.prev || 'Prev' %></a>
+          <a href="/?page=<%= currentPage - 1 %>" class="al-btn-secondary"><%= req.translations.prev || 'Previous' %></a>
           <% } %>
           <span class="text-sm" style="color:var(--theme-text-muted);"><%= currentPage %> / <%= totalPages %></span>
           <% if (currentPage < totalPages) { %>
