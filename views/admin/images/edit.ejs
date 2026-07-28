@@ -9,16 +9,16 @@
 
       <div class="px-8 pt-5 flex items-start justify-between">
         <div>
-          <h1 class="text-base font-medium text-neutral-800 dark:text-white"><%= image.name || 'Edit Image' %></h1>
-          <p class="mt-0.5 text-sm text-neutral-500">Edit egg configuration, variables, Docker images, and install scripts.</p>
+          <h1 class="al-page-title"><%= image.name || 'Edit Image' %></h1>
+          <p class="al-page-desc mt-0.5">Edit egg configuration, variables, Docker images, and install scripts.</p>
         </div>
         <div class="flex gap-2 shrink-0 ml-4">
           <a href="/admin/images/export/<%= image.id %>"
-            class="px-3 py-2 text-sm font-medium rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition">
+            class="al-btn-secondary">
             Export
           </a>
           <a href="/admin/images"
-            class="px-3 py-2 text-sm font-medium rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 transition">
+            class="al-btn-secondary">
             Back
           </a>
         </div>

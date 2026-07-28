@@ -1,17 +1,17 @@
 :root {
   /* Page */
-  --theme-bg:                  #ffffff;
-  --theme-bg-secondary:        #fafafa;
+  --theme-bg:                  #f8f8f8;
+  --theme-bg-secondary:        #f3f3f3;
   --theme-bg-card:             #ffffff;
-  --theme-bg-hover:            #f5f5f5;
+  --theme-bg-hover:            #f0f0f0;
   --theme-bg-input:            #ffffff;
-  --theme-bg-active-nav:       #f0f0f0;
+  --theme-bg-active-nav:       #ececec;
 
   /* Borders */
-  --theme-border:              #e5e5e5;
-  --theme-border-subtle:       #efefef;
+  --theme-border:              #e0e0e0;
+  --theme-border-subtle:       #ebebeb;
   --theme-border-input:        #d4d4d4;
-  --theme-border-accent:       #000000;
+  --theme-border-accent:       #171717;
 
   /* Text */
   --theme-text:                #404040;
@@ -31,7 +31,7 @@
 
   /* Nav chrome */
   --theme-nav-bg:              #ffffff;
-  --theme-nav-border:          #e5e5e5;
+  --theme-nav-border:          #e0e0e0;
   --theme-nav-text:            #525252;
   --theme-nav-text-active:     #0a0a0a;
   --theme-nav-icon:            #737373;
@@ -48,7 +48,7 @@
   --theme-info-bg:             #eff6ff;
 
   /* Table */
-  --theme-table-header-bg:     #fafafa;
+  --theme-table-header-bg:     #f5f5f5;
   --theme-table-row-hover:     #f5f5f5;
   --theme-table-divide:        #e5e5e5;
 
@@ -57,7 +57,7 @@
   --theme-btn-primary-text:    #ffffff;
   --theme-btn-primary-hover:   #262626;
   --theme-btn-secondary-bg:    #ffffff;
-  --theme-btn-secondary-border:#e5e5e5;
+  --theme-btn-secondary-border:#e0e0e0;
   --theme-btn-secondary-text:  #0a0a0a;
   --theme-btn-secondary-hover: #f5f5f5;
   --theme-btn-danger-bg:       #dc2626;
@@ -69,10 +69,17 @@
   --theme-skeleton-shine:      #e5e5e5;
 
   /* Code/Terminal */
-  --theme-code-bg:             #fafafa;
+  --theme-code-bg:             #f5f5f5;
   --theme-code-text:           #0a0a0a;
   --theme-code-border:         #e5e5e5;
 
   /* Logo bg */
   --theme-logo-bg:             #0a0a0a;
+
+  /* Shadows */
+  --theme-shadow-sm:           0 1px 2px rgba(0,0,0,0.05);
+  --theme-shadow:              0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --theme-shadow-md:           0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.04);
+  --theme-shadow-lg:           0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --theme-shadow-xl:           0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
 }

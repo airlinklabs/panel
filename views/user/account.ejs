@@ -61,7 +61,7 @@
                   Save
                 </button>
               </div>
-              <span id="username-feedback" class="mt-1 text-[11px] text-neutral-400 inline-block"><%= req.translations.checking || 'Checking...' %></span>
+              <span id="username-feedback" class="mt-1 text-[11px] text-neutral-400 inline-block hidden"></span>
             </form>
 
             <!-- Email -->
@@ -84,12 +84,12 @@
               <label class="flex items-center gap-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-1"><%- icon('lock', { class: 'w-3 h-3' }) %> <%= req.translations.changePassword || 'Change password' %></label>
               <div class="grid grid-cols-2 gap-1.5">
                 <div>
-                  <span id="current-password-feedback" class="text-[11px] text-neutral-400 block mb-1"><%= req.translations.checking || 'Checking...' %></span>
+                  <span id="current-password-feedback" class="text-[11px] text-neutral-400 block mb-1 hidden"></span>
                   <input id="currentPassword" type="password" name="currentPassword" placeholder="<%= req.translations.currentPassword || 'Current password' %>"
                     class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700/20 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
                 </div>
                 <div>
-                  <span class="text-[11px] text-transparent block mb-1">.</span>
+                  <div class="h-[18px] mb-1" aria-hidden="true"></div>
                   <input id="newPassword" type="password" name="newPassword" placeholder="<%= req.translations.newPassword || 'New password' %>" disabled
                     class="rounded-lg border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/50 focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/30 focus:outline-none text-xs w-full bg-white dark:bg-neutral-700/20 px-3 py-1.5 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors disabled:opacity-50">
                 </div>

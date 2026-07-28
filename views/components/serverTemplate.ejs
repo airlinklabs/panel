@@ -1,5 +1,58 @@
 <div class="mt-6 ml-8 mb-8">
     <div>
+       <!-- Mobile server nav — shows on small screens, hides on sm+ -->
+       <div class="block sm:hidden overflow-x-auto mt-3 ml-4 mr-4">
+         <div class="flex gap-1 min-w-max pb-2">
+           <%
+           const rawMenuItemsMobile = global.uiComponentStore ? global.uiComponentStore.getServerMenuItems() : [];
+           const isAdminMobile = (typeof user !== 'undefined' && user && user.isAdmin === true);
+           const menuItemsMobile = rawMenuItemsMobile.filter(item => {
+             if (item.isAdminItem && !isAdminMobile) return false;
+             return true;
+           });
+           if (!menuItemsMobile || menuItemsMobile.length === 0) {
+           %>
+           <a href="/server/<%= server.UUID %>" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
+             <%- icon('terminal', { class: 'size-4' }) %>
+             Console
+           </a>
+           <a href="/server/<%= server.UUID %>/files" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
+             <%- icon('folder', { class: 'size-4' }) %>
+             Files
+           </a>
+           <% if (features.includes('players')) { %>
+           <a href="/server/<%= server.UUID %>/players" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
+             <%- icon('users', { class: 'size-4' }) %>
+             Players
+           </a>
+           <% } %>
+           <% if (features.includes('worlds')) { %>
+           <a href="/server/<%= server.UUID %>/worlds" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
+             <%- icon('globe', { class: 'size-4' }) %>
+             Worlds
+           </a>
+           <% } %>
+           <a href="/server/<%= server.UUID %>/startup" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
+             <%- icon('play', { class: 'size-4' }) %>
+             Startup
+           </a>
+           <a href="/server/<%= server.UUID %>/settings" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
+             <%- icon('settings', { class: 'size-4' }) %>
+             Settings
+           </a>
+           <% } else {
+              menuItemsMobile.forEach(item => {
+                if (item.feature && !features.includes(item.feature)) return;
+                const url = (item.url || '#').replace(':uuid', server.UUID).replace(':id', server.id);
+           %>
+           <a href="<%= url %>" class="nav-link2 flex items-center gap-1.5 py-2 px-3 text-sm rounded-xl border border-transparent whitespace-nowrap" style="color:var(--theme-text-muted);">
+             <%- item.icon %>
+             <%= item.label %>
+           </a>
+           <% }); } %>
+         </div>
+       </div>
+
        <div class="hidden relative sm:block">
           <nav class="flex relative">
              <ul role="list" class="flex min-w-full mt-1.5 flex-none gap-x-2 text-sm font-normal leading-6 text-neutral-600 dark:text-neutral-400">
@@ -82,8 +135,8 @@
  %>
  <div class="px-8 mt-8">
     <% sections.forEach(section => { %>
-      <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-300 dark:border-neutral-800/20 mb-6">
-        <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white"><%= section.title %></h2>
+      <div class="al-card p-6 mb-6">
+        <h2 class="text-base font-semibold mb-4 al-page-title"><%= section.title %></h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <%
@@ -106,13 +159,13 @@
               if (value.includes(':disk')) value = value.replace(':disk', `${server.Storage} MB`);
           %>
             <div>
-              <h3 class="text-sm font-medium text-neutral-600 dark:text-neutral-300 mb-2"><%= item.label %></h3>
+              <h3 class="text-sm font-medium mb-2" style="color:var(--theme-text)"><%= item.label %></h3>
               <% if (item.type === 'link') { %>
-                <a href="<%= item.url %>" class="text-neutral-400 hover:text-neutral-300 transition"><%= value %></a>
+                <a href="<%= item.url %>" class="hover:text-neutral-300 transition" style="color:var(--theme-text-muted)"><%= value %></a>
               <% } else if (item.type === 'button') { %>
-                <button onclick="<%= item.onClick %>" class="text-neutral-400 hover:text-neutral-300 transition"><%= value %></button>
+                <button onclick="<%= item.onClick %>" class="hover:text-neutral-300 transition" style="color:var(--theme-text-muted)"><%= value %></button>
               <% } else { %>
-                <p class="text-neutral-400"><%= value %></p>
+                <p style="color:var(--theme-text-muted)"><%= value %></p>
               <% } %>
             </div>
           <% }); %>

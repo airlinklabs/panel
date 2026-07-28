@@ -8,23 +8,26 @@
     </div>
     <!-- Content -->
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
-      <div class="sm:flex sm:items-center px-8 pt-4">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminCreateServerTitle %></h1>
-            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminCreateServerText || 'Spin up something new. Naming it is half the fun.' %></p>
-        </div>
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin', href: '/admin' },
+        { label: 'Servers', href: '/admin/servers' },
+        { label: 'Create' }
+      ] }) %>
+      <div class="al-page-header">
+        <h1 class="al-page-title"><%= req.translations.adminCreateServerTitle %></h1>
+        <p class="al-page-desc"><%= req.translations.adminCreateServerText || 'Spin up something new. Naming it is half the fun.' %></p>
       </div>
 
       <div id="nodeForm" class="mt-6 px-8 w-full">
-        <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+        <div class="al-card p-5">
           <form id="createServerForm" method="POST" action="/admin/servers/create">
             <!-- General Category -->
-            <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">General</h2>
+            <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)">General</h2>
             <div class="grid grid-cols-2 gap-4 mb-6">
               <div>
-                <label for="serverName" class="text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2"><%= req.translations.name %>:</label>
+                <label for="serverName" class="al-label"><%= req.translations.name %>:</label>
                 <div class="flex items-center space-x-2">
-                    <input id="serverName" name="name" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server">
+                    <input id="serverName" name="name" class="al-input" placeholder="<%= user.username %>'s server">
                     <div class="flex-shrink-0 p-2 mb-1 -ml-5" onclick="generateRandomName()">
                         <%- icon('refresh-cw', { size: 16, class: 'text-neutral-500 dark:text-neutral-300' }) %>
                     </div>
@@ -32,14 +35,14 @@
             </div>
 
               <div>
-                <label for="serverDescription" class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                <label for="serverDescription" class="al-label">
                   <%- icon('file-text', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.description %>:</label>
-                <input id="serverDescription" name="description" class="rounded-xl focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm mt-2 mb-4 w-full hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5" placeholder="<%= user.username %>'s server description">
+                <input id="serverDescription" name="description" class="al-input" placeholder="<%= user.username %>'s server description">
               </div>
 
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                <label class="al-label">
                   <%- icon('user', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.user %>:</label>
                 <select id="serverUser" name="ownerId" class="hidden">
@@ -51,7 +54,7 @@
               </div>
 
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                <label class="al-label">
                   <%- icon('server', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Node %>:
                 </label>
@@ -69,10 +72,10 @@
             </div>
 
             <!-- Resources Category -->
-            <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Resources</h2>
+            <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)">Resources</h2>
             <div class="grid grid-cols-3 gap-4">
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                <label class="al-label">
                   <%- icon('cpu', { size: 14, class: 'shrink-0' }) %>
                   CPU:
                 </label>
@@ -89,7 +92,7 @@
               </div>
 
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                <label class="al-label">
                   <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
                   Memory:
                 </label>
@@ -107,7 +110,7 @@
               </div>
 
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                <label class="al-label">
                   <%- icon('database', { size: 14, class: 'shrink-0' }) %>
                   Storage:
                 </label>
@@ -126,10 +129,10 @@
             </div>
 
             <!-- Startup Category -->
-            <h2 class="text-neutral-700 dark:text-neutral-300 text-lg font-semibold mb-4">Startup</h2>
+            <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)">Startup</h2>
             <div class="grid grid-cols-2 gap-4 mb-6">
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                <label class="al-label">
                   <%- icon('box', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Image %>:</label>
                 <select id="serverImage" name="imageId" class="hidden">
@@ -143,7 +146,7 @@
               </div>
 
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                <label class="al-label">
                   <%- icon('box', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.DockerImage %>:</label>
                 <select id="dockerImage" name="dockerImage" class="hidden">
@@ -153,11 +156,11 @@
               </div>
 
               <div>
-                <label class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-400 text-sm tracking-tight mb-2">
+                <label class="al-label">
                   <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
                   <%= req.translations.Ports %>:</label>
                 <input type="hidden" id="serverPorts" name="Ports">
-          <button type="button" id="assignPortsBtn" class="mt-2 mb-4 w-full inline-flex items-center gap-2 rounded-xl bg-neutral-100 dark:bg-neutral-700/30 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-white px-4 py-2.5 text-sm font-medium border border-neutral-200 dark:border-white/5 transition">
+          <button type="button" id="assignPortsBtn" class="al-btn-secondary mt-2 mb-4 w-full">
             <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
             Assign ports
           </button>
@@ -176,15 +179,17 @@
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true">
-                    <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="allowStartupEditLabel">Disabled</span>
+                    <div class="al-toggle-track peer-checked:checked">
+                      <div class="al-toggle-dot"></div>
+                    </div>
+                    <span class="ms-3 al-page-desc text-sm" id="allowStartupEditLabel">Disabled</span>
                   </label>
                 </div>
               </div>
             </div>
 
             <div class="collapsible-row no-anim" id="variablesSectionRow"><div><div id="variablesSection">
-              <h2 class="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-300 text-md font-semibold mb-4">
+              <h2 class="flex items-center gap-1.5 text-md font-semibold mb-4" style="color:var(--theme-text-strong)">
                 <%- icon('settings', { size: 14, class: 'shrink-0' }) %>
                 Variables</h2>
 
@@ -196,7 +201,7 @@
 
             <!-- Submit Button -->
             <div class="col-span-2">
-                <button type="submit" class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+                <button type="submit" class="al-btn-primary">
                     <%= req.translations.create || 'Create server' %>
                   </button>
               </div>
