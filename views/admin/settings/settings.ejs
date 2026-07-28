@@ -5,12 +5,12 @@
     <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/template') %></div>
 
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
-      <div class="px-8 pt-5">
-        <h1 class="text-base font-medium text-neutral-800 dark:text-white">Settings</h1>
-        <p class="mt-0.5 text-sm text-neutral-500">Manage your panel configuration.</p>
+      <div class="al-page-header">
+        <h1 class="al-page-title">Settings</h1>
+        <p class="al-page-desc">Manage your panel configuration.</p>
       </div>
 
-      <div class="px-8 mt-5">
+      <div class="al-page-body">
 
         <!-- Tab bar -->
         <div class="flex gap-0.5 mb-6 border-b border-neutral-200 dark:border-neutral-700/40">
@@ -23,8 +23,8 @@
         <form id="form-appearance" data-tab-panel="appearance" class="tab-panel space-y-5 hidden" enctype="multipart/form-data">
 
           <!-- Branding -->
-          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Branding</h2>
+          <div class="al-card">
+            <h2 class="al-card-header">Branding</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 px-5 py-5">
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Site title</label>
@@ -49,8 +49,8 @@
           </div>
 
           <!-- Registration -->
-          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Registration</h2>
+          <div class="al-card">
+            <h2 class="al-card-header">Registration</h2>
             <div class="px-5 py-5 flex items-center justify-between">
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow public registration</p>
@@ -64,8 +64,8 @@
           </div>
 
           <!-- Themes -->
-          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Themes</h2>
+          <div class="al-card">
+            <h2 class="al-card-header">Themes</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-5 py-5">
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white mb-1">Light mode</p>
@@ -138,8 +138,8 @@
           </div>
 
           <!-- Auth page wallpapers -->
-          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Auth page wallpapers</h2>
+          <div class="al-card">
+            <h2 class="al-card-header">Auth page wallpapers</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3 pb-1">Background image on the login and register pages. Upload a file or paste a URL. Leave both blank to use the default.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-5 py-5">
               <div>
@@ -172,16 +172,16 @@
           </div>
 
           <div class="flex justify-end gap-3">
-            <button type="button" id="resetButton" class="rounded-xl border border-neutral-200 dark:border-neutral-700/40 text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-white px-4 py-2 text-sm font-medium transition">Reset defaults</button>
-            <button type="submit" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-6 py-2 text-sm font-medium shadow-sm transition">Save appearance</button>
+            <button type="button" id="resetButton" class="al-btn-ghost px-4 py-2 text-sm font-medium transition">Reset defaults</button>
+            <button type="submit" class="al-btn-primary px-6 py-2 text-sm font-medium shadow-sm transition">Save appearance</button>
           </div>
         </form>
 
         <!-- ── SERVERS ─────────────────────────────────────────────────────── -->
         <div id="panel-servers" data-tab-panel="servers" class="tab-panel hidden space-y-5">
 
-          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">User permissions</h2>
+          <div class="al-card">
+            <h2 class="al-card-header">User permissions</h2>
             <div class="px-5 py-5 space-y-5">
               <div class="flex items-center justify-between">
                 <div>
@@ -206,8 +206,8 @@
             </div>
           </div>
 
-          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">File uploads</h2>
+          <div class="al-card">
+            <h2 class="al-card-header">File uploads</h2>
             <div class="px-5 py-5">
               <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Upload limit <span class="text-neutral-400 font-normal">(MB)</span></label>
               <div class="relative max-w-xs">
@@ -219,8 +219,8 @@
             </div>
           </div>
 
-          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Default limits</h2>
+          <div class="al-card">
+            <h2 class="al-card-header">Default limits</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3">Applied to new users unless overridden per-user.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 px-5 py-5">
               <div>
@@ -262,7 +262,7 @@
               </div>
             </div>
             <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
-              <button type="button" id="saveServerPolicy" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-5 py-2 text-sm font-medium shadow-sm transition">Save</button>
+              <button type="button" id="saveServerPolicy" class="al-btn-primary px-5 py-2 text-sm font-medium shadow-sm transition">Save</button>
             </div>
           </div>
         </div>
@@ -271,8 +271,8 @@
         <div id="panel-security" data-tab-panel="security" class="tab-panel hidden space-y-5">
 
           <!-- VirusTotal -->
-          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">VirusTotal</h2>
+          <div class="al-card">
+            <h2 class="al-card-header">VirusTotal</h2>
             <div class="px-5 py-5">
               <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">API key</label>
               <div class="relative max-w-sm">
@@ -285,13 +285,13 @@
               <p class="mt-1.5 text-xs text-neutral-500">Used to scan uploaded files. Get a free key at <a href="https://www.virustotal.com" target="_blank" class="underline hover:text-neutral-700 dark:hover:text-neutral-300 transition">virustotal.com</a>.</p>
             </div>
             <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
-              <button type="button" id="saveVtKey" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-5 py-2 text-sm font-medium shadow-sm transition">Save</button>
+              <button type="button" id="saveVtKey" class="al-btn-primary px-5 py-2 text-sm font-medium shadow-sm transition">Save</button>
             </div>
           </div>
 
           <!-- Rate limiting -->
-          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Rate limiting</h2>
+          <div class="al-card">
+            <h2 class="al-card-header">Rate limiting</h2>
             <div class="px-5 py-5 space-y-4">
               <div class="flex items-center justify-between">
                 <div>
@@ -312,8 +312,8 @@
           </div>
 
           <!-- Login protection -->
-          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Login protection</h2>
+          <div class="al-card">
+            <h2 class="al-card-header">Login protection</h2>
             <p class="text-xs text-neutral-500 px-5 pt-3">After N failed attempts from a single account, that account is locked for the configured duration. Errors always say "invalid credentials" — the username is never revealed.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 px-5 py-5">
               <div>
@@ -330,8 +330,8 @@
           </div>
 
           <!-- Network -->
-          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">Network</h2>
+          <div class="al-card">
+            <h2 class="al-card-header">Network</h2>
             <div class="px-5 py-5 space-y-5">
               <div class="flex items-center justify-between">
                 <div>
@@ -365,13 +365,13 @@
               </div>
             </div>
             <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
-              <button type="button" id="saveRateLimit" class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-5 py-2 text-sm font-medium shadow-sm transition">Save security settings</button>
+              <button type="button" id="saveRateLimit" class="al-btn-primary px-5 py-2 text-sm font-medium shadow-sm transition">Save security settings</button>
             </div>
           </div>
 
           <!-- IP banning -->
-          <div class="bg-white dark:bg-white/5 rounded-xl border border-neutral-200 dark:border-white/5 shadow-sm dark:shadow-none">
-            <h2 class="text-[13px] font-medium text-neutral-800 dark:text-white px-5 py-3.5 bg-neutral-50 dark:bg-white/5 rounded-t-xl border-b border-neutral-200 dark:border-white/5">IP banning</h2>
+          <div class="al-card">
+            <h2 class="al-card-header">IP banning</h2>
             <div class="px-5 py-5">
               <div class="flex gap-3 mb-4">
                 <input type="text" id="banIpInput" placeholder="192.168.1.1"

@@ -1,50 +1,28 @@
 <div class="sm:flex-auto">
   <div class="flex items-center">
-    <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white truncate max-w-[300px]">
+    <h1 class="text-base font-medium leading-6 truncate max-w-[300px]" style="color:var(--theme-text-strong);">
       <%= server.name.charAt(0).toUpperCase() + server.name.slice(1) %>
     </h1>
 
     <% if (typeof serverStatus !== 'undefined') { %>
       <div class="ml-3" data-server-status-container>
-        <% if (serverStatus.online) { %>
-          <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
-            <span class="relative flex h-2 w-2 mr-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-              <% if (serverStatus.uptime != null && typeof serverStatus.uptime === 'number') { %>
-                Uptime: <span id="uptime-display"><%= formatUptime(serverStatus.uptime) %></span>
-                <% if (serverStatus.startedAt) { %>
-                  <span id="server-started-at" class="hidden"><%= serverStatus.startedAt %></span>
-                <% } %>
-              <% } else { %>
-                Online
-              <% } %>
-            </span>
-          </div>
-        <% } else { %>
-          <div class="flex items-center px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm">
-            <span class="inline-flex h-2 w-2 rounded-full bg-red-500 mr-2"></span>
-            <span id="server-status-text" class="text-xs font-medium text-neutral-700 dark:text-neutral-300">Offline</span>
-          </div>
-        <% } %>
+        <%- include('../components/ui/status-badge', { status: serverStatus.online ? 'online' : 'offline' }) %>
       </div>
     <% } %>
   </div>
 
   <div class="flex items-center mt-1">
-    <p class="tracking-tight text-sm text-neutral-500 dark:text-neutral-400 truncate max-w-[400px]">
+    <p class="tracking-tight text-sm truncate max-w-[400px]" style="color:var(--theme-text-muted);">
       <%= server.description %>
     </p>
 
     <% if (typeof serverStatus !== 'undefined' && serverStatus.online && typeof serverStatus.startedAt !== 'undefined' && serverStatus.startedAt) { %>
-      <div class="ml-3 text-xs text-neutral-500 dark:text-neutral-500 flex items-center" data-server-started-container>
+      <div class="ml-3 text-xs flex items-center" style="color:var(--theme-text-muted);" data-server-started-container>
         <%- icon('clock', { class: 'h-3 w-3 mr-1' }) %>
         <span data-server-started-time>Started: <%= new Date(serverStatus.startedAt).toLocaleString() %></span>
       </div>
     <% } else { %>
-      <div class="ml-3 text-xs text-neutral-500 dark:text-neutral-500 hidden items-center" data-server-started-container>
+      <div class="ml-3 text-xs hidden items-center" style="color:var(--theme-text-muted);" data-server-started-container>
         <%- icon('clock', { class: 'h-3 w-3 mr-1' }) %>
         <span data-server-started-time><%= req.translations.startedUnknown || 'Started: Unknown' %></span>
       </div>

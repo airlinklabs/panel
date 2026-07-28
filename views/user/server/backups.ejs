@@ -1,6 +1,6 @@
 <%- include('../../components/header', { title: 'Backups' }) %>
 
-<main class="h-screen m-auto text-neutral-800 dark:text-white">
+<main class="h-screen m-auto" style="color:var(--theme-text-strong)">
   <!-- Success/Error Messages -->
   <div id="message-container" class="fixed top-4 right-4 z-50 max-w-md"></div>
   <div class="flex h-screen">
@@ -16,7 +16,7 @@
         <%- include('../../components/serverHeader') %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex gap-2.5">
           <button id="createBackup" onclick="openCreateBackupModal()" type="button"
-              class="border border-neutral-800/20 block rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+              class="al-btn-primary block rounded-xl px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300">
               <%- icon('plus', { class: 'size-4 inline-flex mr-1 text-neutral-800 mb-0.5', strokeWidth: 1.5 }) %>
               Create Backup
           </button>
@@ -33,33 +33,25 @@
       <!-- Backups Management -->
       <div class="px-6">
         <!-- Backups List -->
-          <div class="bg-neutral-50 dark:bg-white/5 rounded-xl shadow-sm overflow-hidden">
-            <div class="p-5 border-b border-neutral-200 dark:border-neutral-700">
+          <div class="al-card shadow-sm overflow-hidden">
+            <div class="p-5 border-b" style="border-color:var(--theme-border)">
               <div>
-                <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Server Backups</h2>
-                <p class="text-sm text-neutral-600 dark:text-neutral-400">Manage your server backups.</p>
+                <h2 class="text-lg font-semibold" style="color:var(--theme-text-strong)">Server Backups</h2>
+                <p class="text-sm" style="color:var(--theme-text-muted)">Manage your server backups.</p>
               </div>
             </div>
             <div class="overflow-x-auto">
               <% if (backups && backups.length > 0) { %>
-                <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
-                  <thead class="bg-neutral-50 dark:bg-neutral-800/50">
+                <table class="al-table min-w-full">
+                  <thead class="al-table-head">
                     <tr>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                        Name
-                      </th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                        Size
-                      </th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                        Created
-                      </th>
-                      <th class="px-6 py-3 text-right text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                        Actions
-                      </th>
+                      <th class="al-table-th px-6 py-3 uppercase">Name</th>
+                      <th class="al-table-th px-6 py-3 uppercase">Size</th>
+                      <th class="al-table-th px-6 py-3 uppercase">Created</th>
+                      <th class="al-table-th px-6 py-3 uppercase text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="backups-table-body" class="bg-white dark:bg-neutral-800 divide-y divide-neutral-200 dark:divide-neutral-700">
+                  <tbody id="backups-table-body" class="divide-y" style="border-color:var(--theme-border)">
                     <% let backupIdx = 0; backups.forEach(backup => { %>
                       <tr style="--i:<%= backupIdx++ %>" data-backup-id="<%= backup.UUID %>">
                         <td class="px-6 py-4 whitespace-nowrap">

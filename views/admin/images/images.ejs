@@ -64,29 +64,29 @@
         <input id="imageFilterInput" type="text" placeholder="Filter images…" class="w-56 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
       </div>
 
-      <div class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40">
-        <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
-          <thead class="bg-neutral-50 dark:bg-neutral-800/50">
+      <div class="overflow-x-auto shadow-sm rounded-xl m-8 border" style="border-color:var(--theme-border)">
+        <table class="al-table min-w-full">
+          <thead class="al-table-head">
             <tr>
-              <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Name</th>
-              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white col-hide">Author</th>
-              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white col-hide">Created</th>
-              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white">Actions</th>
+              <th class="al-table-th py-3.5 pl-6 pr-3">Name</th>
+              <th class="al-table-th px-3 py-3.5 col-hide">Author</th>
+              <th class="al-table-th px-3 py-3.5 col-hide">Created</th>
+              <th class="al-table-th px-3 py-3.5">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20" id="tableBody">
+          <tbody class="divide-y" style="border-color:var(--theme-border)" id="tableBody">
             <% let imgIdx = 0; images.forEach(function(image) { %>
-            <tr class="hover:bg-neutral-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer img-row"
+            <tr class="al-table-tr transition-colors cursor-pointer img-row"
                 style="--i:<%= imgIdx++ %>"
                 data-search="<%= (image.name + ' ' + (image.author||'')).toLowerCase() %>"
                 onclick="handleRowClick(event, '/admin/images/edit/<%= image.id %>')">
-              <td class="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-neutral-800 dark:text-white"><%= image.name %></td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400 col-hide"><%= image.author || '—' %></td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-600 dark:text-neutral-400 col-hide"><%= new Date(image.createdAt).toLocaleDateString() %></td>
+              <td class="al-table-td whitespace-nowrap py-4 pl-6 pr-3 font-medium" style="color:var(--theme-text-strong)"><%= image.name %></td>
+              <td class="al-table-td whitespace-nowrap px-3 py-4 col-hide"><%= image.author || '—' %></td>
+              <td class="al-table-td whitespace-nowrap px-3 py-4 col-hide"><%= new Date(image.createdAt).toLocaleDateString() %></td>
               <td class="whitespace-nowrap px-3 py-4 text-sm">
                 <div class="flex gap-2">
-                  <a href="/admin/images/edit/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Edit</button></a>
-                  <a href="/admin/images/export/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Export</button></a>
+                  <a href="/admin/images/edit/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition">Edit</button></a>
+                  <a href="/admin/images/export/<%= image.id %>"><button onclick="event.stopPropagation()" type="button" class="al-btn-secondary px-3 py-2 text-sm font-medium shadow-lg transition">Export</button></a>
                   <button onclick="event.stopPropagation(); openDelete('<%= image.id %>', '<%= image.name %>')" type="button" class="rounded-xl bg-red-600 hover:bg-red-500 px-3 py-2 text-sm font-medium shadow-sm transition">
                     <%- icon('trash-2', { size: 16, class: 'text-white shrink-0' }) %>
                   </button>

@@ -1,0 +1,78 @@
+:root {
+  /* Page */
+  --theme-bg:                  #ffffff;
+  --theme-bg-secondary:        #fafafa;
+  --theme-bg-card:             #ffffff;
+  --theme-bg-hover:            #f5f5f5;
+  --theme-bg-input:            #ffffff;
+  --theme-bg-active-nav:       #f0f0f0;
+
+  /* Borders */
+  --theme-border:              #e5e5e5;
+  --theme-border-subtle:       #efefef;
+  --theme-border-input:        #d4d4d4;
+  --theme-border-accent:       #000000;
+
+  /* Text */
+  --theme-text:                #404040;
+  --theme-text-strong:         #0a0a0a;
+  --theme-text-muted:          #737373;
+  --theme-text-nav:            #525252;
+  --theme-text-nav-active:     #0a0a0a;
+  --theme-text-placeholder:    #a3a3a3;
+  --theme-text-code:           #171717;
+  --theme-text-link:           #0a0a0a;
+
+  /* Accent (B&W — no color accent in default light) */
+  --theme-accent:              #0a0a0a;
+  --theme-accent-hover:        #262626;
+  --theme-accent-text:         #ffffff;
+  --theme-accent-subtle:       #f0f0f0;
+
+  /* Nav chrome */
+  --theme-nav-bg:              #ffffff;
+  --theme-nav-border:          #e5e5e5;
+  --theme-nav-text:            #525252;
+  --theme-nav-text-active:     #0a0a0a;
+  --theme-nav-icon:            #737373;
+  --theme-nav-icon-active:     #0a0a0a;
+
+  /* Status (keep semantic color — status can never be color-free) */
+  --theme-success:             #16a34a;
+  --theme-success-bg:          #f0fdf4;
+  --theme-warning:             #d97706;
+  --theme-warning-bg:          #fffbeb;
+  --theme-danger:              #dc2626;
+  --theme-danger-bg:           #fef2f2;
+  --theme-info:                #2563eb;
+  --theme-info-bg:             #eff6ff;
+
+  /* Table */
+  --theme-table-header-bg:     #fafafa;
+  --theme-table-row-hover:     #f5f5f5;
+  --theme-table-divide:        #e5e5e5;
+
+  /* Buttons */
+  --theme-btn-primary-bg:      #0a0a0a;
+  --theme-btn-primary-text:    #ffffff;
+  --theme-btn-primary-hover:   #262626;
+  --theme-btn-secondary-bg:    #ffffff;
+  --theme-btn-secondary-border:#e5e5e5;
+  --theme-btn-secondary-text:  #0a0a0a;
+  --theme-btn-secondary-hover: #f5f5f5;
+  --theme-btn-danger-bg:       #dc2626;
+  --theme-btn-danger-text:     #ffffff;
+  --theme-btn-danger-hover:    #b91c1c;
+
+  /* Skeleton */
+  --theme-skeleton-base:       #f0f0f0;
+  --theme-skeleton-shine:      #e5e5e5;
+
+  /* Code/Terminal */
+  --theme-code-bg:             #fafafa;
+  --theme-code-text:           #0a0a0a;
+  --theme-code-border:         #e5e5e5;
+
+  /* Logo bg */
+  --theme-logo-bg:             #0a0a0a;
+}

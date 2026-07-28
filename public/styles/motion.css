@@ -114,3 +114,21 @@
   animation-fill-mode: both;
   animation-name: motion-slide-up;
 }
+
+/* ── Skeleton shimmer ──────────────────────────────────────────── */
+
+@keyframes al-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+.al-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--theme-skeleton-base)  0%,
+    var(--theme-skeleton-shine) 50%,
+    var(--theme-skeleton-base) 100%
+  );
+  background-size: 200% 100%;
+  animation: al-shimmer 1.4s ease-in-out infinite;
+}

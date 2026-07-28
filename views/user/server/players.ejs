@@ -1,6 +1,6 @@
 <%- include('../../components/header', { title: 'Players' }) %>
 
-<main class="h-screen m-auto text-neutral-800 dark:text-white">
+<main class="h-screen m-auto" style="color:var(--theme-text-strong)">
   <div class="flex h-screen">
     <!-- Sidebar -->
     <aside class="hidden lg:block w-60 h-full">
@@ -38,11 +38,11 @@
       <!-- Players Section -->
       <div class="px-6">
         <!-- Server Info Card -->
-        <div class="bg-neutral-100 dark:bg-neutral-800/50 rounded-xl p-6 mb-6 shadow-lg">
+        <div class="al-card p-6 mb-6 shadow-lg">
           <div class="flex flex-col md:flex-row justify-between items-center mb-4">
             <div>
-              <h2 class="text-xl font-semibold text-neutral-800 dark:text-white mb-1"><%= req.translations.players || 'Players' %></h2>
-              <p class="text-neutral-600 dark:text-neutral-400 text-sm">
+              <h2 class="text-xl font-semibold mb-1" style="color:var(--theme-text-strong)"><%= req.translations.players || 'Players' %></h2>
+              <p class="text-sm" style="color:var(--theme-text-muted)">
                 <% if (typeof serverInfo !== 'undefined') { %>
                   <span class="font-medium"><%= serverInfo.onlinePlayers || 0 %></span> / <span><%= serverInfo.maxPlayers || 0 %></span> players online
                   <% if (serverInfo.version) { %>
@@ -76,20 +76,20 @@
         <% if (players && players.length > 0) { %>
         <div id="PlayersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           <% players.forEach(player => { %>
-            <div class="relative p-4 bg-neutral-100 dark:bg-neutral-800 rounded-xl shadow-lg group hover:bg-neutral-200/60 dark:hover:bg-neutral-700/50 transition-all duration-200">
+            <div class="relative p-4 al-card shadow-lg group transition-all duration-200">
               <div class="flex items-center">
                 <img
                   src="https://crafatar.com/avatars/<%= player.uuid %>?size=64&overlay"
                   alt="<%= player.name %>'s Avatar"
-                  class="rounded-lg border border-neutral-700 mr-4"
+                  class="rounded-lg mr-4"
                   width="64"
                   height="64"
                 />
                 <div>
-                  <p class="text-lg font-bold text-neutral-800 dark:text-white"><%= player.name %></p>
+                  <p class="text-lg font-bold" style="color:var(--theme-text-strong)"><%= player.name %></p>
                   <div class="flex items-center mt-1">
-                    <span class="inline-flex h-2 w-2 rounded-full bg-green-500 mr-2"></span>
-                    <span class="text-xs text-neutral-500 dark:text-neutral-400"><%= req.translations.online || 'Online' %></span>
+                    <span class="al-dot-online mr-2"></span>
+                    <span class="text-xs" style="color:var(--theme-text-muted)"><%= req.translations.online || 'Online' %></span>
                   </div>
                 </div>
               </div>
