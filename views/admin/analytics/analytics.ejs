@@ -1,12 +1,12 @@
 <%- include('../../components/header', { title: 'Analytics' }) %>
 
-<main class="h-screen m-auto">
-  <div class="flex h-screen">
-    <div class="hidden lg:block w-60 h-full"><%- include('../../components/template') %></div>
+<main class="min-h-screen m-auto">
+  <div class="flex min-h-screen">
+    <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/template') %></div>
 
-    <div id="page-content" class="flex-1 overflow-y-auto pt-16">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin', href: '/admin' },
+        { label: 'Admin' },
         { label: 'Analytics' }
       ] }) %>
       <div class="al-page-header">
@@ -25,15 +25,21 @@
         </div>
       </div>
 
+      <div class="al-page-body">
+        <style>
+          .tab-btn { color: var(--theme-text-muted); border-color: transparent; cursor: pointer; }
+          .tab-btn:hover { color: var(--theme-text-strong); }
+          .tab-btn[aria-selected="true"] { color: var(--theme-text-strong); border-color: var(--theme-text-strong); }
+        </style>
         <!-- Tab bar -->
-        <div class="flex gap-0.5 border-b mb-6" style="border-color:var(--theme-border)">
-          <button type="button" data-tab="servers"  class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Servers</button>
-          <button type="button" data-tab="nodes"    class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Nodes</button>
-          <button type="button" data-tab="activity" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Activity</button>
+        <div class="flex gap-0.5 border-b mb-6" style="border-color:var(--theme-border)" role="tablist">
+          <button type="button" data-tab="servers"  class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2" role="tab" aria-selected="true">Servers</button>
+          <button type="button" data-tab="nodes"    class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2" role="tab" aria-selected="false">Nodes</button>
+          <button type="button" data-tab="activity" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2" role="tab" aria-selected="false">Activity</button>
         </div>
 
         <!-- Loading state -->
-        <div id="loading-state" class="flex items-center gap-3 py-12 text-neutral-400">
+        <div id="loading-state" class="flex items-center gap-3 py-12" style="color:var(--theme-text-muted)">
           <svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -156,7 +162,6 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>

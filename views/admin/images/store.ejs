@@ -127,11 +127,11 @@
       <div class="sm:flex sm:items-center px-8 pt-4">
         <%- include('../../components/pageTitle', { title: 'Image Store', description: 'Browse and install images from the Pterodactyl community' }) %>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button id="refreshBtn" onclick="doRefresh()" type="button" class="border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 px-3 py-2 text-sm font-medium shadow-lg transition">Refresh</button>
+          <button id="refreshBtn" onclick="doRefresh()" type="button" class="al-btn-secondary">Refresh</button>
         </div>
       </div>
 
-      <div class="mx-8 mt-6 flex border-b border-neutral-200 dark:border-neutral-800">
+      <div class="mx-8 mt-6 flex" style="border-bottom:1px solid var(--theme-border)">
         <a href="/admin/images" class="px-1 py-2.5 mr-5 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">Installed</a>
         <span class="px-1 py-2.5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px">Store</span>
       </div>
@@ -139,7 +139,7 @@
       <!-- Controls -->
       <div class="mx-8 mt-5 flex items-center justify-between gap-3 flex-wrap mb-1">
         <div class="flex items-center gap-3">
-          <input id="imageFilterInput" type="text" placeholder="Search…" class="w-52 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
+          <input id="imageFilterInput" type="text" placeholder="Search…" class="al-input w-52">
           <span id="statusText" class="text-xs text-neutral-400 dark:text-neutral-500 whitespace-nowrap"></span>
         </div>
         <div class="vtog">
@@ -227,7 +227,7 @@
       </div>
       <div id="eggErr" style="display:none" class="err-box"><p id="eggErrTxt" class="err-txt"></p></div>
       <button id="eggInstallBtn" onclick="confirmInstall()" type="button"
-        class="w-full border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 py-2.5 text-sm font-medium shadow-lg transition mt-auto">
+        class="w-full al-btn-secondary py-2.5 text-sm font-medium mt-auto">
         Install
       </button>
     </div>

@@ -1,5 +1,8 @@
 (function() {
-  const imageData = JSON.parse(document.getElementById('page-data').dataset.image);
+  const pageData = document.getElementById('page-data');
+  if (!pageData) return;
+  const imageData = JSON.parse(pageData.dataset.image);
+  if (!imageData) return;
   const imageId = imageData.id;
 
   let state = {
@@ -19,20 +22,13 @@
 
   function activateTab(name) {
     document.querySelectorAll('.tab-btn').forEach(btn => {
-      const active = btn.dataset.tab === name;
-      btn.classList.toggle('border-neutral-800', active);
-      btn.classList.toggle('dark:border-white', active);
-      btn.classList.toggle('text-neutral-800', active);
-      btn.classList.toggle('dark:text-white', active);
-      btn.classList.toggle('border-transparent', !active);
-      btn.classList.toggle('text-neutral-500', !active);
+      btn.setAttribute('aria-selected', btn.dataset.tab === name ? 'true' : 'false');
     });
     document.querySelectorAll('.tab-form').forEach(form => {
       form.classList.toggle('hidden', form.dataset.tabForm !== name);
     });
     if (name === 'raw') renderRawEditor();
   }
-
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => activateTab(btn.dataset.tab));
   });

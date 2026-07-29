@@ -9,7 +9,7 @@
     <!-- Content -->
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin', href: '/admin' },
+        { label: 'Admin' },
         { label: 'Servers', href: '/admin/servers' },
         { label: 'Create' }
       ] }) %>
@@ -82,8 +82,8 @@
                 <input type="hidden" id="serverCPU" name="Cpu" value="100">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverCPUDisplay" type="number" min="0.5" step="0.5" value="1"
-                    class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-r-0 border-neutral-800/10 dark:border-white/5">
-                  <select id="serverCPUUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-800/10 dark:border-white/5 cursor-pointer">
+                    class="al-input rounded-l-xl flex-1 border-r-0">
+                  <select id="serverCPUUnit" class="al-input rounded-r-xl cursor-pointer" style="flex:0 0 auto;max-width:5rem">
                     <option value="cores" selected>Cores</option>
                     <option value="percent">%</option>
                   </select>
@@ -100,8 +100,8 @@
                 <input type="hidden" id="serverMemory" name="Memory" value="1024">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverMemoryDisplay" type="number" min="1" value="1024"
-                    class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-r-0 border-neutral-800/10 dark:border-white/5">
-                  <select id="serverMemoryUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-800/10 dark:border-white/5 cursor-pointer">
+                    class="al-input rounded-l-xl flex-1 border-r-0">
+                  <select id="serverMemoryUnit" class="al-input rounded-r-xl cursor-pointer" style="flex:0 0 auto;max-width:5rem">
                     <option value="1" selected>MB</option>
                     <option value="1024">GB</option>
                   </select>
@@ -118,8 +118,8 @@
                 <input type="hidden" id="serverStorage" name="Storage" value="20480">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverStorageDisplay" type="number" min="1" value="20"
-                    class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-r-0 border-neutral-800/10 dark:border-white/5">
-                  <select id="serverStorageUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-800/10 dark:border-white/5 cursor-pointer">
+                    class="al-input rounded-l-xl flex-1 border-r-0">
+                  <select id="serverStorageUnit" class="al-input rounded-r-xl cursor-pointer" style="flex:0 0 auto;max-width:5rem">
                     <option value="1">MB</option>
                     <option value="1024" selected>GB</option>
                   </select>
@@ -170,7 +170,7 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between">
                   <div class="flex items-center mb-2 md:mb-0">
                     <div class="flex-shrink-0 mr-3">
-                      <%- icon('pencil', { size: 24, class: 'text-blue-500' }) %>
+                      <%- icon('pencil', { size: 24, style: 'color:var(--theme-accent)' }) %>
                     </div>
                     <div>
                       <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
@@ -179,7 +179,7 @@
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true">
-                    <div class="al-toggle-track peer-checked:checked">
+                    <div class="al-toggle-track">
                       <div class="al-toggle-dot"></div>
                     </div>
                     <span class="ms-3 al-page-desc text-sm" id="allowStartupEditLabel">Disabled</span>

@@ -103,13 +103,13 @@
 
   /* Cards */
   .al-card {
-    @apply rounded-xl p-4;
+    @apply rounded-xl overflow-hidden p-4;
     background: var(--theme-bg-card);
     border: 1px solid var(--theme-border);
     box-shadow: var(--theme-shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
   }
   .al-card-header {
-    @apply px-4 py-3 text-xs font-medium rounded-t-xl border-b;
+    @apply -mx-4 -mt-4 mb-0 px-4 py-3 text-sm font-medium border-b;
     background: var(--theme-bg-secondary);
     border-color: var(--theme-border);
     color: var(--theme-text-muted);
@@ -166,11 +166,16 @@
   /* Section divider label */
   .al-section-label { @apply text-[10px] font-semibold uppercase tracking-widest mb-2; color: var(--theme-text-muted); }
 
-  /* Toggle switch */
-  .al-toggle-track { @apply w-10 h-[22px] rounded-full flex items-center p-0.5 transition-colors cursor-pointer; background: var(--theme-border); }
-  .al-toggle-track.checked { background: var(--theme-accent); }
-  .al-toggle-dot   { @apply w-[18px] h-[18px] rounded-full transition-transform bg-white shadow-sm; }
-  .al-toggle-track.checked .al-toggle-dot { transform: translateX(18px); }
+  /* Radio selection — uses theme accent so themed installs stay unified */
+  .al-radio-active { border-color: var(--theme-accent); background: var(--theme-accent-subtle); }
+  .al-radio-ring-active { border-color: var(--theme-accent); }
+  .al-radio-dot-active { background: var(--theme-accent-text); }
+
+  /* Toggle switch — activated via peer:checked sibling */
+  .al-toggle-track { @apply w-10 h-[22px] rounded-full flex items-center p-0.5 transition-colors cursor-pointer; background: var(--theme-toggle-bg, var(--theme-border)); }
+  .peer:checked ~ .al-toggle-track { background: var(--theme-accent); }
+  .al-toggle-dot   { @apply w-[18px] h-[18px] rounded-full transition-transform shadow-sm; background: var(--theme-accent-text); }
+  .peer:checked ~ .al-toggle-track .al-toggle-dot { transform: translateX(18px); }
 
   /* Legacy aliases — kept for backward compat */
   .al-ui-surface {

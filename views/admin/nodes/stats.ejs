@@ -10,7 +10,7 @@
     <!-- Content -->
     <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin', href: '/admin' },
+        { label: 'Admin' },
         { label: 'Nodes', href: '/admin/nodes' },
         { label: 'Stats' }
       ] }) %>
@@ -31,7 +31,7 @@
             const lastStat = stats.totalStats && stats.totalStats.length ? stats.totalStats.at(-1) : null;
             const isOnline = lastStat && (new Date() - new Date(lastStat.timestamp)) <= 10 * 1000;
             %>
-            <p class="text-4xl font-normal <%= isOnline ? 'text-green-500' : 'text-red-500' %>">
+            <p class="text-4xl font-normal" style="color:<%= isOnline ? 'var(--theme-success)' : 'var(--theme-danger)' %>">
                 <%= isOnline ? 'Online' : 'Offline' %>
             </p>
             <p class="al-page-desc mt-2">

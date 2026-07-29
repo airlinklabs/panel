@@ -6,7 +6,7 @@
 
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin', href: '/admin' },
+        { label: 'Admin' },
         { label: 'Airlink Cloud' }
       ] }) %>
       <div class="al-page-header">
@@ -18,28 +18,28 @@
         
         <!-- API Configuration -->
         <div class="al-card">
-          <h2 class="al-page-title text-sm px-5 py-3.5" style="border-bottom:1px solid var(--theme-border)">API Settings</h2>
-          <div class="px-5 py-5 space-y-4">
+          <h2 class="al-card-header">API Settings</h2>
+          <div class="p-5 space-y-4">
             <div>
               <label class="al-label">Airlink Cloud API Key</label>
               <input type="password" id="airlinkCloudApiKey" value="<%= settings.airlinkCloudApiKey || '' %>" placeholder="YOUR_API_KEY_HERE"
                 class="al-input">
-              <p class="al-page-desc mt-2 text-xs">Get your API key from <a href="https://cloud.airlinklabs.xyz/" target="_blank" class="text-blue-500 hover:underline">Airlink Cloud</a></p>
+                <p class="al-page-desc mt-2 text-xs">Get your API key from <a href="https://cloud.airlinklabs.xyz/" target="_blank" style="color:var(--theme-accent);text-decoration:underline">Airlink Cloud</a></p>
             </div>
           </div>
         </div>
 
         <!-- Feature Configuration -->
         <div class="al-card">
-          <h2 class="al-page-title text-sm px-5 py-3.5" style="border-bottom:1px solid var(--theme-border)">Features</h2>
-          <div class="px-5 py-5 flex items-center justify-between">
+          <h2 class="al-card-header">Features</h2>
+          <div class="p-5 flex items-center justify-between">
             <div>
               <p class="al-page-title text-sm" style="color:var(--theme-text)">Enable Cloud Backups</p>
               <p class="al-page-desc text-xs mt-0.5">When enabled, instance backups will be stored on Airlink Cloud instead of the local daemon.</p>
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" id="airlinkCloudBackupEnabled" class="sr-only peer" <%= settings.airlinkCloudBackupEnabled ? 'checked' : '' %>>
-              <div class="al-toggle-track peer-checked:checked">
+               <div class="al-toggle-track">
                 <div class="al-toggle-dot"></div>
               </div>
             </label>

@@ -1,15 +1,11 @@
-<%- include('../../components/header', { title: 'Dashboard' }) %>
+<%- include('../../components/header', { title: 'Create Node' }) %>
 
-<main class="h-screen m-auto">
-  <div class="flex h-screen">
-    <!-- Sidebar -->
-    <div class="hidden lg:block w-60 h-full">
-      <%- include('../../components/template') %>
-    </div>
-    <!-- Content -->
-    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
+<main class="min-h-screen">
+  <div class="flex min-h-screen">
+    <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/template') %></div>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin', href: '/admin' },
+        { label: 'Admin' },
         { label: 'Nodes', href: '/admin/nodes' },
         { label: 'Create' }
       ] }) %>
@@ -18,58 +14,98 @@
         <p class="al-page-desc"><%= req.translations.adminCreateNodeText || 'One more node and you\'ll have a proper fleet going.' %></p>
       </div>
 
-      <div id="nodeForm" class="mt-6 px-8 w-full">
+      <div id="nodeForm" class="al-page-body">
         <div class="al-card p-5">
           <form>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label for="nodeName" class="al-label">
-                  <%- icon('tag', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.name %>:</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="sm:col-span-2">
+                <label for="nodeName" class="al-label flex items-center gap-1.5">
+                  <%- icon('tag', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  <%= req.translations.name %>
+                </label>
                 <input id="nodeName" class="al-input" placeholder="My node">
               </div>
 
               <div>
-                <label for="nodeRam" class="al-label">
-                  <%- icon('chip', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.adminNodeRamLabel %>:</label>
-                <input id="nodeRam" class="al-input" placeholder="This is only for information purposes.">
+                <label for="nodeRam" class="al-label flex items-center gap-1.5">
+                  <%- icon('memory-stick', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  <%= req.translations.ram %> (GB)
+                </label>
+                <div class="flex gap-2 items-center">
+                  <input id="nodeRam" class="al-input flex-1" placeholder="Informational only">
+                  <label class="flex items-center gap-1.5 text-xs whitespace-nowrap cursor-pointer shrink-0" style="color:var(--theme-text-muted)">
+                    <input type="checkbox" id="nodeRamAll" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-white focus:ring-0"> All
+                  </label>
+                </div>
               </div>
 
               <div>
-                <label for="nodeDisk" class="al-label">
-                  <%- icon('database', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.adminNodeDiskLabel %>:</label>
-                <input id="nodeDisk" class="al-input" placeholder="This is only for information purposes.">
+                <label for="nodeDisk" class="al-label flex items-center gap-1.5">
+                  <%- icon('database', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  <%= req.translations.disk %> (GB)
+                </label>
+                <div class="flex gap-2 items-center">
+                  <input id="nodeDisk" class="al-input flex-1" placeholder="Informational only">
+                  <label class="flex items-center gap-1.5 text-xs whitespace-nowrap cursor-pointer shrink-0" style="color:var(--theme-text-muted)">
+                    <input type="checkbox" id="nodeDiskAll" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-white focus:ring-0"> All
+                  </label>
+                </div>
               </div>
 
               <div>
-                <label for="nodeProcessor" class="al-label">
-                  <%- icon('cpu', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.adminNodeProcessorLabel %>:</label>
-                <input id="nodeProcessor" class="al-input" placeholder="This is only for information purposes.">
+                <label for="nodeProcessor" class="al-label flex items-center gap-1.5">
+                  <%- icon('cpu', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  <%= req.translations.cpu %>
+                </label>
+                <div class="flex gap-2 items-center">
+                  <input id="nodeProcessor" class="al-input flex-1" placeholder="Informational only">
+                  <label class="flex items-center gap-1.5 text-xs whitespace-nowrap cursor-pointer shrink-0" style="color:var(--theme-text-muted)">
+                    <input type="checkbox" id="nodeProcessorAll" class="rounded border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-white focus:ring-0"> All
+                  </label>
+                </div>
               </div>
 
               <div>
-                <label for="nodeAddress" class="al-label">
-                  <%- icon('globe', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.adminNodeAddressLabel %>:</label>
+                <label for="nodeAddress" class="al-label flex items-center gap-1.5">
+                  <%- icon('map-pin', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  <%= req.translations.addressIP %>
+                </label>
                 <input id="nodeAddress" class="al-input" placeholder="localhost">
               </div>
 
               <div>
-                <label for="nodePort" class="al-label">
-                  <%- icon('plug', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.adminNodePortLabel %>:</label>
+                <label for="nodePort" class="al-label flex items-center gap-1.5">
+                  <%- icon('radio-tower', { width: 14, height: 14, class: 'shrink-0' }) %>
+                  <%= req.translations.daemonPort %>
+                </label>
                 <input id="nodePort" class="al-input" placeholder="3002">
               </div>
-            </div>
-            <div class="mt-4 flex justify-end">
-              <button id="createNodeBtn" type="button" class="al-btn-primary">
-                <%= req.translations.create || 'Create' %>
-              </button>
-                    <%= req.translations.create || 'Create node' %>
-                  </button>
+
+              <div class="sm:col-span-2">
+                <label for="daemonKey" class="al-label"><%= req.translations.daemonKey || 'Daemon Key' %></label>
+                <input id="daemonKey" class="al-input" placeholder="Leave blank to auto-generate">
+                <p class="mt-1.5 text-xs" style="color:var(--theme-text-muted)">Optional. If left blank, a secure key will be generated automatically.</p>
+              </div>
+
+              <div class="sm:col-span-2">
+                <label for="allocatedPorts" class="al-label">Allocated Ports</label>
+                <div class="space-y-2">
+                  <div id="allocatedPortsList" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
+                    <!-- Port tags will be inserted here -->
+                  </div>
+                  <div class="flex gap-2">
+                    <input id="newPortInput" type="text" placeholder="25565 or 25565-25570" class="al-input flex-1">
+                    <button id="addPortBtn" type="button" class="al-btn-primary">
+                      Add Port
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sm:col-span-2 pt-4">
+                <button id="createNodeBtn" type="button" class="al-btn-primary">
+                  <%= req.translations.create || 'Create Node' %>
+                </button>
               </div>
             </div>
           </form>

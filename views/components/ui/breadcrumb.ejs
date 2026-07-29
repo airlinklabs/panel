@@ -1,19 +1,21 @@
 <% /* breadcrumb: { items: [{ label, href? }] } */ %>
 <% if (locals.items && items.length > 0) { %>
-<nav aria-label="Breadcrumb" class="mb-4">
-  <ol class="flex items-center gap-1.5 text-sm" style="color:var(--theme-text-muted);">
-    <% items.forEach(function(item, index) { %>
-      <li class="flex items-center gap-1.5">
-        <% if (index > 0) { %>
-          <span style="color:var(--theme-text-placeholder);">/</span>
-        <% } %>
-        <% if (item.href && index < items.length - 1) { %>
-          <a href="<%= item.href %>" class="hover:underline" style="color:var(--theme-text-muted);"><%= item.label %></a>
-        <% } else { %>
-          <span style="color:var(--theme-text-strong);"><%= item.label %></span>
-        <% } %>
-      </li>
-    <% }); %>
-  </ol>
-</nav>
+<div class="px-6 sm:px-8 pt-6 pb-3">
+  <nav aria-label="Breadcrumb">
+    <ol class="flex items-center gap-1.5 text-sm" style="color:var(--theme-text-muted);">
+      <% items.forEach(function(item, index) { %>
+        <li class="flex items-center gap-1.5">
+          <% if (index > 0) { %>
+            <span style="color:var(--theme-text-placeholder);">/</span>
+          <% } %>
+          <% if (item.href && index < items.length - 1) { %>
+            <a href="<%= item.href %>" class="hover:underline" style="color:var(--theme-text-muted);"><%= item.label %></a>
+          <% } else { %>
+            <span style="color:var(--theme-text-strong);"><%= item.label %></span>
+          <% } %>
+        </li>
+      <% }); %>
+    </ol>
+  </nav>
+</div>
 <% } %>

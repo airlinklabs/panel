@@ -7,14 +7,14 @@
       <%- include('../../components/template') %>
     </div>
     <!-- Content -->
-    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin', href: '/admin' },
+        { label: 'Admin' },
         { label: 'Servers', href: '/admin/servers' },
-        { label: serverName }
+        { label: server.name }
       ] }) %>
       <div class="al-page-header">
-        <h1 class="al-page-title"><%= serverName %></h1>
+        <h1 class="al-page-title"><%= server.name %></h1>
         <p class="al-page-desc"><%= req.translations.adminManageServer || 'Rename, reassign, or remove this server.' %></p>
       </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
@@ -22,9 +22,8 @@
             Back to Servers
           </a>
         </div>
-      </div>
 
-      <div id="serverForm" class="mt-6 px-8 w-full">
+      <div id="serverForm" class="al-page-body">
         <div class="al-card p-5">
           <form id="editServerForm">
             <!-- General Category -->
@@ -108,8 +107,8 @@
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverMemoryDisplay" type="number" min="1"
                     value="<%= server.Memory >= 1024 ? Math.round(server.Memory / 1024) : server.Memory %>"
-                    class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-r-0 border-neutral-800/10 dark:border-white/5">
-                  <select id="serverMemoryUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-800/10 dark:border-white/5 cursor-pointer">
+                    class="al-input rounded-l-xl flex-1 border-r-0">
+                  <select id="serverMemoryUnit" class="al-input rounded-r-xl cursor-pointer" style="flex:0 0 auto;max-width:5rem">
                     <option value="1"    <%= server.Memory < 1024  ? 'selected' : '' %>>MB</option>
                     <option value="1024" <%= server.Memory >= 1024 ? 'selected' : '' %>>GB</option>
                   </select>
@@ -126,7 +125,7 @@
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverCPUDisplay" type="number" min="0.5" step="0.5" value="<%= (server.Cpu / 100).toFixed(1) %>"
                     class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-r-0 border-neutral-800/10 dark:border-white/5">
-                  <select id="serverCPUUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-800/10 dark:border-white/5 cursor-pointer">
+                  <select id="serverCPUUnit" class="al-input rounded-r-xl cursor-pointer" style="flex:0 0 auto;max-width:5rem">
                     <option value="cores" selected>Cores</option>
                     <option value="percent">%</option>
                   </select>
@@ -143,8 +142,8 @@
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverStorageDisplay" type="number" min="1"
                     value="<%= server.Storage >= 1024 ? Math.round(server.Storage / 1024) : server.Storage %>"
-                    class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-r-0 border-neutral-800/10 dark:border-white/5">
-                  <select id="serverStorageUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-white border border-neutral-800/10 dark:border-white/5 cursor-pointer">
+                    class="al-input rounded-l-xl flex-1 border-r-0">
+                  <select id="serverStorageUnit" class="al-input rounded-r-xl cursor-pointer" style="flex:0 0 auto;max-width:5rem">
                     <option value="1"    <%= server.Storage < 1024  ? 'selected' : '' %>>MB</option>
                     <option value="1024" <%= server.Storage >= 1024 ? 'selected' : '' %>>GB</option>
                   </select>
@@ -163,11 +162,11 @@
                 <textarea id="startCommand" name="StartCommand" rows="3" class="al-input"><%= server.StartCommand %></textarea>
               </div>
 
-              <div class="bg-neutral-100 dark:bg-neutral-700/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
+              <div class="rounded-lg p-4 mt-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
                 <div class="flex flex-col md:flex-row md:items-center justify-between">
                   <div class="flex items-center mb-2 md:mb-0">
                     <div class="flex-shrink-0 mr-3">
-                      <%- icon('pencil', { size: 24, class: 'text-blue-500' }) %>
+                      <%- icon('pencil', { size: 24, style: 'color:var(--theme-accent)' }) %>
                     </div>
                     <div>
                       <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
@@ -176,7 +175,7 @@
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true" <%= server.allowStartupEdit ? 'checked' : '' %>>
-                    <div class="al-toggle-track peer-checked:checked">
+                    <div class="al-toggle-track">
                       <div class="al-toggle-dot"></div>
                     </div>
                     <span class="ms-3 al-page-desc text-sm" id="allowStartupEditLabel"><%= server.allowStartupEdit ? 'Enabled' : 'Disabled' %></span>
@@ -205,7 +204,7 @@
                   </div>
                 </div>
 
-                <div class="bg-neutral-100 dark:bg-neutral-700/20 rounded-lg p-4 border border-neutral-300 dark:border-white/5 mt-4">
+                <div class="rounded-lg p-4 mt-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
                   <div class="flex flex-col md:flex-row md:items-center justify-between">
                     <div class="flex items-center mb-2 md:mb-0">
                       <div class="flex-shrink-0 mr-3">
@@ -242,11 +241,11 @@
 
             <!-- Submit Button -->
             <div class="flex justify-between items-center">
-              <button type="submit" id="updateServerBtn" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-lg hover:bg-blue-700 hover:scale-105 transition-all duration-200">
+              <button type="submit" id="updateServerBtn" class="al-btn-primary">
                 Save changes
               </button>
 
-              <a href="/admin/servers" class="rounded-xl bg-neutral-200 dark:bg-neutral-800 px-3 py-2 text-center text-sm font-medium text-neutral-700 dark:text-neutral-200 shadow-sm hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-all duration-200">
+              <a href="/admin/servers" class="al-btn-secondary">
                 Cancel
               </a>
             </div>
