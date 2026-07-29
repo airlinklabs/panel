@@ -20,19 +20,28 @@
     portRequirements: imageData.portRequirements,
   };
 
-  function activateTab(name) {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.setAttribute('aria-selected', btn.dataset.tab === name ? 'true' : 'false');
+  let monacoEditor = null;
+
+  function renderRawEditor() {
+    if (monacoEditor) {
+      monacoEditor.setValue(buildExportJson());
+      return;
+    }
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' } });
+    require(['vs/editor/editor.main'], () => {
+      monacoEditor = monaco.editor.create(document.getElementById('json-editor'), {
+        value: buildExportJson(),
+        language: 'json',
+        theme: document.documentElement.classList.contains('dark') ? 'vs-dark' : 'vs',
+        automaticLayout: true,
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        fontSize: 13,
+        tabSize: 2,
+      });
     });
-    document.querySelectorAll('.tab-form').forEach(form => {
-      form.classList.toggle('hidden', form.dataset.tabForm !== name);
-    });
-    if (name === 'raw') renderRawEditor();
   }
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => activateTab(btn.dataset.tab));
-  });
-  activateTab('general');
+  document.getElementById('tab-raw')?.addEventListener('click', renderRawEditor);
 
   document.getElementById('field-name').value = state.name;
   document.getElementById('field-description').value = state.description;
@@ -236,28 +245,6 @@
     state.portRequirements = state.portRequirements.filter(port => port.name && port.internalPort);
     await saveState();
   });
-
-  let monacoEditor = null;
-
-  function renderRawEditor() {
-    if (monacoEditor) {
-      monacoEditor.setValue(buildExportJson());
-      return;
-    }
-    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' } });
-    require(['vs/editor/editor.main'], () => {
-      monacoEditor = monaco.editor.create(document.getElementById('json-editor'), {
-        value: buildExportJson(),
-        language: 'json',
-        theme: document.documentElement.classList.contains('dark') ? 'vs-dark' : 'vs',
-        automaticLayout: true,
-        minimap: { enabled: false },
-        scrollBeyondLastLine: false,
-        fontSize: 13,
-        tabSize: 2,
-      });
-    });
-  }
 
   document.getElementById('save-raw').addEventListener('click', async () => {
     if (!monacoEditor) return;
