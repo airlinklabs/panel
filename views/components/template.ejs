@@ -35,7 +35,7 @@
             if (!sidebarItems || sidebarItems.length === 0) {
             %>
               <li class="nav-item">
-                <a href="/" class="nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);" data-search="container instances servers" data-subterm="jegli:/server/servername" data-match-prefix="/server">
+                <a href="/" class="nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);" data-search="container instances servers" data-match-prefix="/server">
                   <%- icon('layout-dashboard', { class: 'w-5 h-5 mt-0.5' }) %>
                   <span><%= req.translations.navServers || 'Servers' %></span>
                 </a>
@@ -123,15 +123,7 @@
       </ul>
     </nav>
 
-    <!-- Theme toggle -->
-    <div class="shrink-0 px-4 py-3 border-t" style="border-color:var(--theme-nav-border);">
-      <button id="theme-toggle" class="w-full flex items-center gap-3 px-2 py-2 rounded-xl text-sm transition-colors" style="color:var(--theme-nav-text);" aria-label="Toggle theme">
-        <%- icon('sun', { class: 'w-4 h-4 dark:hidden', id: 'theme-icon-light' }) %>
-        <%- icon('moon', { class: 'w-4 h-4 hidden dark:block', id: 'theme-icon-dark' }) %>
-        <span class="dark:hidden">Light mode</span>
-        <span class="hidden dark:block">Dark mode</span>
-      </button>
-    </div>
+
 
     <!-- Static bottom: logout -->
     <div class="shrink-0 border-t" style="border-color:var(--theme-nav-border);">
@@ -145,10 +137,6 @@
 </div>
 
 <script nonce="<%- nonce %>">
-document.getElementById('theme-toggle').addEventListener('click', function() {
-  toggleTheme();
-});
-
 (function () {
   var wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   var ws = new WebSocket(wsProtocol + '//' + window.location.host + '/online-check');
@@ -169,10 +157,19 @@ document.getElementById('theme-toggle').addEventListener('click', function() {
 
   // Mark active nav link
   function markActiveNav(path) {
-    var links = document.querySelectorAll('.nav-link[data-match-prefix]');
+    var links = document.querySelectorAll('.nav-link');
     links.forEach(function(link) {
+      var href = link.getAttribute('href');
       var prefix = link.getAttribute('data-match-prefix');
+      var active = false;
       if (prefix && path.startsWith(prefix)) {
+        active = true;
+      } else if (href && !prefix) {
+        if (path === href || (href !== '/' && path.startsWith(href + '/'))) {
+          active = true;
+        }
+      }
+      if (active) {
         link.classList.add('active');
         link.style.color = 'var(--theme-nav-text-active)';
         link.style.background = 'var(--theme-bg-active-nav)';
@@ -254,9 +251,31 @@ document.getElementById('theme-toggle').addEventListener('click', function() {
         });
       </script>
       <script nonce="<%- nonce %>" src="/javascript/shared/search.js"></script>
+
+      <!-- Theme toggle button -->
+      <div class="flex items-center shrink-0 ml-2">
+        <button id="theme-toggle-topbar"
+          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors"
+          style="color:var(--theme-text-muted); background:var(--theme-bg-secondary); border:1px solid var(--theme-border);"
+          aria-label="Toggle theme">
+          <svg class="w-3.5 h-3.5 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="w-3.5 h-3.5 hidden dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <span class="dark:hidden">Light</span>
+          <span class="hidden dark:inline">Dark</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
+<script nonce="<%- nonce %>">
+(function() {
+  document.getElementById('theme-toggle-topbar').addEventListener('click', toggleTheme);
+})();
+</script>
 <script nonce="<%- nonce %>">
 (function () {
   var ov = document.getElementById('pl-overlay');

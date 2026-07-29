@@ -6,14 +6,7 @@
 
   function activateTab(id) {
     tabBtns.forEach(btn => {
-      const on = btn.dataset.tab === id;
-      btn.classList.toggle('border-neutral-800',      on);
-      btn.classList.toggle('dark:border-white',       on);
-      btn.classList.toggle('text-neutral-800',        on);
-      btn.classList.toggle('dark:text-white',         on);
-      btn.classList.toggle('border-transparent',      !on);
-      btn.classList.toggle('text-neutral-500',        !on);
-      btn.classList.toggle('dark:text-neutral-400',   !on);
+      btn.setAttribute('aria-selected', btn.dataset.tab === id ? 'true' : 'false');
     });
     tabPanels.forEach(p => p.classList.toggle('hidden', p.dataset.tabPanel !== id));
   }
@@ -193,7 +186,7 @@
       data = await res.json();
 
       loading.classList.add('hidden');
-      activateTab(document.querySelector('.tab-btn:not([class*="border-transparent"])')?.dataset.tab || 'servers');
+      activateTab('servers');
 
       renderServers(data);
       renderNodes(data);

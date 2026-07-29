@@ -76,7 +76,7 @@
               </div>
 
               <div class="px-5 py-4 bg-neutral-50 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-neutral-700">
-                <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors duration-200 <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %>><%= req.translations.saveCommand || 'Save Command' %></button>
+                <button type="submit" class="al-btn-primary rounded-xl px-6 py-2.5 text-center text-sm font-semibold shadow-sm <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %>><%= req.translations.saveCommand || 'Save Command' %></button>
               </div>
             </form>
           </div>
@@ -148,7 +148,7 @@
               </div>
 
               <div class="px-5 py-4 bg-neutral-50 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-neutral-700">
-                <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 hover:shadow-lg transition-all duration-200"><%= req.translations.updateDockerImage || 'Update Docker Image' %></button>
+                <button type="submit" class="al-btn-primary rounded-xl px-6 py-2.5 text-center text-sm font-semibold shadow-sm"><%= req.translations.updateDockerImage || 'Update Docker Image' %></button>
               </div>
             </form>
           </div>
@@ -196,7 +196,7 @@
             </div>
 
             <div class="mt-6">
-              <button type="submit" class="al-btn-primary rounded-xl px-6 py-2.5 text-center text-sm font-semibold shadow-lg transition-all duration-200"><%= req.translations.saveVariables || 'Save Variables' %></button>
+              <button type="submit" class="al-btn-primary"><%= req.translations.saveVariables || 'Save Variables' %></button>
             </div>
           </form>
         </div>

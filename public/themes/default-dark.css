@@ -1,22 +1,23 @@
 html.dark {
-  --theme-bg:                  #111111;
-  --theme-bg-secondary:        #181818;
-  --theme-bg-card:             #1a1a1a;
-  --theme-bg-hover:            #242424;
-  --theme-bg-input:            rgba(255,255,255,0.07);
-  --theme-bg-active-nav:       rgba(255,255,255,0.1);
+  --theme-bg:                  #161616;
+  --theme-bg-secondary:        #1e1e1e;
+  --theme-bg-card:             #212121;
+  --theme-bg-hover:            #2a2a2a;
+  --theme-bg-input:            rgba(255,255,255,0.09);
+  --theme-bg-active-nav:       rgba(255,255,255,0.12);
 
-  --theme-border:              rgba(255,255,255,0.1);
-  --theme-border-subtle:       rgba(255,255,255,0.06);
-  --theme-border-input:        rgba(255,255,255,0.12);
-  --theme-border-accent:       rgba(255,255,255,0.25);
+  --theme-border:              rgba(255,255,255,0.13);
+  --theme-toggle-bg:           rgba(255,255,255,0.35);
+  --theme-border-subtle:       rgba(255,255,255,0.08);
+  --theme-border-input:        rgba(255,255,255,0.16);
+  --theme-border-accent:       rgba(255,255,255,0.30);
 
-  --theme-text:                #d4d4d4;
+  --theme-text:                #e0e0e0;
   --theme-text-strong:         #fafafa;
-  --theme-text-muted:          #7a7a7a;
-  --theme-text-nav:            #808080;
+  --theme-text-muted:          #8a8a8a;
+  --theme-text-nav:            #8a8a8a;
   --theme-text-nav-active:     #fafafa;
-  --theme-text-placeholder:    #555555;
+  --theme-text-placeholder:    #666666;
   --theme-text-code:           #a8a8a8;
   --theme-text-link:           #e8e8e8;
 
@@ -56,8 +57,8 @@ html.dark {
   --theme-btn-danger-text:     #ffffff;
   --theme-btn-danger-hover:    #b91c1c;
 
-  --theme-skeleton-base:       rgba(255,255,255,0.06);
-  --theme-skeleton-shine:      rgba(255,255,255,0.1);
+  --theme-skeleton-base:       rgba(255,255,255,0.08);
+  --theme-skeleton-shine:      rgba(255,255,255,0.13);
 
   --theme-code-bg:             #0c0c0c;
   --theme-code-text:           #a8a8a8;

@@ -16,7 +16,7 @@
           <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
             <div class="flex gap-2">
               <a href="/admin/apikeys"
-                class="w-full md:w-auto rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-300 text-neutral-200 dark:text-neutral-800 px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
+                class="al-btn-primary">
                 Manage API Keys
               </a>
             </div>
@@ -101,13 +101,13 @@
                           <div class="bg-neutral-100 dark:bg-neutral-800 px-4 py-3 flex items-center">
                             <span class="inline-flex items-center rounded-md
                             <% if (endpoint.method === 'GET') { %>
-                              bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 ring-green-600/20 dark:ring-green-500/30
+                              style="background:var(--theme-success-bg);color:var(--theme-success);--tw-ring-color:var(--theme-success)"
                             <% } else if (endpoint.method === 'POST') { %>
-                              bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 ring-blue-600/20 dark:ring-blue-500/30
+                              style="background:var(--theme-accent-subtle);color:var(--theme-accent);--tw-ring-color:var(--theme-accent)"
                             <% } else if (endpoint.method === 'PATCH') { %>
-                              bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 ring-yellow-600/20 dark:ring-yellow-500/30
+                              style="background:var(--theme-warning-bg);color:var(--theme-warning);--tw-ring-color:var(--theme-warning)"
                             <% } else if (endpoint.method === 'DELETE') { %>
-                              bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 ring-red-600/20 dark:ring-red-500/30
+                              style="background:var(--theme-danger-bg);color:var(--theme-danger);--tw-ring-color:var(--theme-danger)"
                             <% } %>
                             px-2 py-1 text-xs font-medium ring-1 ring-inset mr-2">
                               <%= endpoint.method %>

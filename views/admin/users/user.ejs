@@ -14,10 +14,10 @@
            <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminUserText %></p>
          </div>
          <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-           <a href="/admin/users/edit/<%= dataUser.id %>" class="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-              <%- icon('pencil', { size: 16, class: 'mr-2' }) %>
-              <%= req.translations.editUser || 'Edit User' %>
-            </a>
+            <a href="/admin/users/edit/<%= dataUser.id %>" class="al-btn-primary">
+               <%- icon('pencil', { size: 16, class: 'mr-2' }) %>
+               <%= req.translations.editUser || 'Edit User' %>
+             </a>
          </div>
        </div>
        <div class="px-8 mt-5">

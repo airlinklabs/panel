@@ -6,13 +6,6 @@
   function activate(id) {
     tabBtns.forEach(btn => {
       const on = btn.dataset.tab === id;
-      btn.classList.toggle('border-neutral-800', on);
-      btn.classList.toggle('dark:border-white',  on);
-      btn.classList.toggle('text-neutral-800',   on);
-      btn.classList.toggle('dark:text-white',    on);
-      btn.classList.toggle('border-transparent', !on);
-      btn.classList.toggle('text-neutral-500',   !on);
-      btn.classList.toggle('dark:text-neutral-400', !on);
       btn.setAttribute('aria-selected', on ? 'true' : 'false');
       btn.setAttribute('tabindex', on ? '0' : '-1');
     });
@@ -170,16 +163,16 @@
         const label = r.closest('label');
         if (!label) return;
         const ring = label.querySelector('.rounded-full.border-2');
-        const dot  = ring?.querySelector('.rounded-full.bg-blue-500');
+        const dot  = ring?.querySelector('.al-radio-dot-active');
         if (r.checked) {
-          label.classList.add('border-blue-400', 'bg-blue-50', 'dark:bg-blue-500/10');
+          label.classList.add('al-radio-active');
           label.classList.remove('border-neutral-200', 'dark:border-neutral-600/30');
-          if (ring) { ring.classList.add('border-blue-500'); ring.classList.remove('border-neutral-300', 'dark:border-neutral-600'); }
-          if (!dot && ring) { const d = document.createElement('span'); d.className = 'w-2.5 h-2.5 rounded-full bg-blue-500'; ring.appendChild(d); }
+          if (ring) { ring.classList.add('al-radio-ring-active'); ring.classList.remove('border-neutral-300', 'dark:border-neutral-600'); }
+          if (!dot && ring) { const d = document.createElement('span'); d.className = 'w-2.5 h-2.5 rounded-full al-radio-dot-active'; ring.appendChild(d); }
         } else {
-          label.classList.remove('border-blue-400', 'bg-blue-50', 'dark:bg-blue-500/10');
+          label.classList.remove('al-radio-active');
           label.classList.add('border-neutral-200', 'dark:border-neutral-600/30');
-          if (ring) { ring.classList.remove('border-blue-500'); ring.classList.add('border-neutral-300', 'dark:border-neutral-600'); }
+          if (ring) { ring.classList.remove('al-radio-ring-active'); ring.classList.add('border-neutral-300', 'dark:border-neutral-600'); }
           dot?.remove();
         }
       });

@@ -4,15 +4,19 @@
 .tab-btn {
   color: var(--theme-text-muted);
   border-bottom-color: transparent;
+  opacity: 0.6;
 }
 .tab-btn[aria-selected="true"] {
   color: var(--theme-text-strong);
   border-bottom-color: var(--theme-accent, currentColor);
+  opacity: 1;
 }
 .tab-btn:hover:not([aria-selected="true"]) {
   color: var(--theme-text);
   border-bottom-color: var(--theme-border);
+  opacity: 0.8;
 }
+.tab-panel { transition: opacity 0.2s ease; }
 </style>
 
 <main class="min-h-screen">
@@ -21,7 +25,7 @@
 
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin', href: '/admin' },
+        { label: 'Admin' },
         { label: 'Settings' }
       ] }) %>
       <div class="al-page-header">
@@ -32,7 +36,7 @@
       <div class="al-page-body">
 
         <!-- Tab bar -->
-        <div role="tablist" class="flex gap-0.5 mb-6 border-b border-neutral-200 dark:border-neutral-700/40">
+        <div role="tablist" class="flex gap-0.5 mb-6" style="border-bottom:1px solid var(--theme-border)">
           <button type="button" role="tab" aria-selected="true" aria-controls="panel-appearance" id="tab-appearance" data-tab="appearance" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Appearance</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="panel-servers" id="tab-servers" data-tab="servers" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Servers</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="panel-security" id="tab-security" data-tab="security" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Security</button>
@@ -48,12 +52,12 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Site title</label>
                 <input type="text" name="title" value="<%= settings.title %>"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="al-input">
               </div>
               <div>
                 <label for="logo-input" class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Logo</label>
                 <input type="file" id="logo-input" name="logo" accept="image/*"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <% if (settings.logo) { %>
                 <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 mt-2 object-contain">
                 <% } %>
@@ -61,7 +65,7 @@
               <div>
                 <label for="favicon-input" class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Favicon</label>
                 <input type="file" id="favicon-input" name="favicon" accept=".ico,.png,.jpg,.jpeg"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                  class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <p class="text-xs text-neutral-400 mt-1">PNG or JPG auto-converted to .ico</p>
               </div>
             </div>
@@ -77,7 +81,7 @@
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" name="allowRegistration" class="sr-only peer" aria-label="Allow public registration" <%= settings.allowRegistration ? 'checked' : '' %>>
-                <div class="al-toggle-track peer-checked:checked">
+                <div class="al-toggle-track">
                   <div class="al-toggle-dot"></div>
                 </div>
               </label>
@@ -93,26 +97,26 @@
                 <p class="text-xs text-neutral-500 mb-3">Applied when the panel is in light mode.</p>
                 <div class="space-y-2">
                   <% const lightVal = settings.lightTheme || 'default'; %>
-                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= lightVal === 'default' ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-600/30 hover:border-neutral-300' %>">
+                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= lightVal === 'default' ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= lightVal !== 'default' ? 'border-color:var(--theme-border)' : '' %>">
                     <input type="radio" name="lightTheme" value="default" class="sr-only" <%= lightVal === 'default' ? 'checked' : '' %>>
-                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === 'default' ? 'border-blue-500' : 'border-neutral-300 dark:border-neutral-600' %>">
-                      <% if (lightVal === 'default') { %><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><% } %>
+                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === 'default' ? 'al-radio-ring-active' : '' %>" style="<%= lightVal !== 'default' ? 'border-color:var(--theme-text-muted)' : '' %>">
+                      <% if (lightVal === 'default') { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
                     </span>
                     <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1">Default</span>
-                    <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full">built-in</span>
+                    <span class="text-xs" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px">built-in</span>
                   </label>
                   <% allThemes.filter(t => t.name !== 'default').forEach(function(theme) { %>
                   <% const ltv = theme.lightPath || theme.path; %>
-                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= lightVal === ltv ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-600/30 hover:border-neutral-300' %>">
+                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= lightVal === ltv ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= lightVal !== ltv ? 'border-color:var(--theme-border)' : '' %>">
                     <input type="radio" name="lightTheme" value="<%= ltv %>" class="sr-only" <%= lightVal === ltv ? 'checked' : '' %>>
-                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === ltv ? 'border-blue-500' : 'border-neutral-300 dark:border-neutral-600' %>">
-                      <% if (lightVal === ltv) { %><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><% } %>
+                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= lightVal === ltv ? 'al-radio-ring-active' : '' %>" style="<%= lightVal !== ltv ? 'border-color:var(--theme-text-muted)' : '' %>">
+                      <% if (lightVal === ltv) { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
                     </span>
                     <div class="flex-1 min-w-0">
                       <span class="text-sm text-neutral-700 dark:text-neutral-300 capitalize block"><%= theme.name.replace(/-/g,' ') %></span>
                       <% if (theme.author) { %><span class="text-xs text-neutral-400">by <%= theme.author %></span><% } %>
                     </div>
-                    <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
+                    <span class="text-xs shrink-0" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px"><%= theme.builtin ? 'built-in' : 'custom' %></span>
                   </label>
                   <% }); %>
                 </div>
@@ -122,32 +126,32 @@
                 <p class="text-xs text-neutral-500 mb-3">Applied when the panel is in dark mode.</p>
                 <div class="space-y-2">
                   <% const darkVal = settings.darkTheme || 'default'; %>
-                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= darkVal === 'default' ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-600/30 hover:border-neutral-300' %>">
+                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= darkVal === 'default' ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= darkVal !== 'default' ? 'border-color:var(--theme-border)' : '' %>">
                     <input type="radio" name="darkTheme" value="default" class="sr-only" <%= darkVal === 'default' ? 'checked' : '' %>>
-                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === 'default' ? 'border-blue-500' : 'border-neutral-300 dark:border-neutral-600' %>">
-                      <% if (darkVal === 'default') { %><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><% } %>
+                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === 'default' ? 'al-radio-ring-active' : '' %>" style="<%= darkVal !== 'default' ? 'border-color:var(--theme-text-muted)' : '' %>">
+                      <% if (darkVal === 'default') { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
                     </span>
                     <span class="text-sm text-neutral-700 dark:text-neutral-300 flex-1">Default</span>
-                    <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full">built-in</span>
+                    <span class="text-xs" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px">built-in</span>
                   </label>
                   <% allThemes.filter(t => t.name !== 'default').forEach(function(theme) { %>
                   <% const dtv = theme.darkPath || theme.path; %>
-                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= darkVal === dtv ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10' : 'border-neutral-200 dark:border-neutral-600/30 hover:border-neutral-300' %>">
+                  <label class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition <%= darkVal === dtv ? 'al-radio-active' : 'hover:border-neutral-300' %>" style="<%= darkVal !== dtv ? 'border-color:var(--theme-border)' : '' %>">
                     <input type="radio" name="darkTheme" value="<%= dtv %>" class="sr-only" <%= darkVal === dtv ? 'checked' : '' %>>
-                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === dtv ? 'border-blue-500' : 'border-neutral-300 dark:border-neutral-600' %>">
-                      <% if (darkVal === dtv) { %><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><% } %>
+                    <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 <%= darkVal === dtv ? 'al-radio-ring-active' : '' %>" style="<%= darkVal !== dtv ? 'border-color:var(--theme-text-muted)' : '' %>">
+                      <% if (darkVal === dtv) { %><span class="w-2.5 h-2.5 rounded-full al-radio-dot-active"></span><% } %>
                     </span>
                     <div class="flex-1 min-w-0">
                       <span class="text-sm text-neutral-700 dark:text-neutral-300 capitalize block"><%= theme.name.replace(/-/g,' ') %></span>
                       <% if (theme.author) { %><span class="text-xs text-neutral-400">by <%= theme.author %></span><% } %>
                     </div>
-                    <span class="text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-700/40 px-2 py-0.5 rounded-full shrink-0"><%= theme.builtin ? 'built-in' : 'custom' %></span>
+                    <span class="text-xs shrink-0" style="color:var(--theme-text-muted);background:var(--theme-bg-secondary);padding:0.125rem 0.5rem;border-radius:9999px"><%= theme.builtin ? 'built-in' : 'custom' %></span>
                   </label>
                   <% }); %>
                 </div>
               </div>
             </div>
-            <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4">
+            <div class="px-5 pb-5 pt-4" style="border-top:1px solid var(--theme-border)">
               <div class="flex items-center justify-between mb-2">
                 <p class="text-sm font-medium text-neutral-700 dark:text-white">Upload custom theme</p>
                 <a href="/admin/settings/example-theme" class="text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Download example</a>
@@ -155,7 +159,7 @@
               <p class="text-xs text-neutral-500 mb-3">A .zip containing info.json, light.css, dark.css.</p>
               <label for="theme-file-input" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload theme file</label>
               <input type="file" id="theme-file-input" name="themeFile" accept=".zip"
-                class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
+                class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
             </div>
           </div>
 
@@ -171,11 +175,11 @@
                 <% } %>
                 <label for="login-wallpaper-file" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
                 <input type="file" id="login-wallpaper-file" name="loginWallpaperFile" accept="image/*"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
+                  class="al-input mb-2 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <label for="login-wallpaper-url" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" id="login-wallpaper-url" name="loginWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.loginWallpaper && settings.loginWallpaper.startsWith('http')) ? settings.loginWallpaper : '' %>"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+                  class="al-input">
               </div>
               <div>
                 <p class="text-sm font-medium text-neutral-700 dark:text-white mb-3">Register page</p>
@@ -184,11 +188,11 @@
                 <% } %>
                 <label for="register-wallpaper-file" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Upload file</label>
                 <input type="file" id="register-wallpaper-file" name="registerWallpaperFile" accept="image/*"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300 mb-2">
+                  class="al-input mb-2 file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <label for="register-wallpaper-url" class="block text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1.5">Or paste a URL</label>
                 <input type="text" id="register-wallpaper-url" name="registerWallpaperUrl" placeholder="https://…"
                   value="<%= (settings.registerWallpaper && settings.registerWallpaper.startsWith('http')) ? settings.registerWallpaper : '' %>"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors">
+                  class="al-input">
               </div>
             </div>
           </div>
@@ -212,7 +216,7 @@
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" id="allowUserCreateServer" class="sr-only peer" aria-label="Allow users to create servers" <%= settings.allowUserCreateServer ? 'checked' : '' %>>
-                  <div class="al-toggle-track peer-checked:checked">
+                  <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
                 </label>
@@ -224,7 +228,7 @@
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" id="allowUserDeleteServer" class="sr-only peer" aria-label="Allow users to delete servers" <%= settings.allowUserDeleteServer ? 'checked' : '' %>>
-                  <div class="al-toggle-track peer-checked:checked">
+                  <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
                 </label>
@@ -238,7 +242,7 @@
               <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Upload limit <span class="text-neutral-400 font-normal">(MB)</span></label>
               <div class="relative max-w-xs">
                 <input type="number" id="uploadLimitInput" value="<%= settings.uploadLimit %>" min="1" max="10000"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 pr-12 text-neutral-800 dark:text-white transition-colors">
+                  class="al-input pr-12">
                 <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-neutral-400 pointer-events-none">MB</span>
               </div>
               <p class="mt-1.5 text-xs text-neutral-500">Maximum file size users can upload via the file manager.</p>
@@ -252,7 +256,7 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Server limit</label>
                 <input type="number" id="defaultServerLimit" value="<%= settings.defaultServerLimit %>" min="0" max="100"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="al-input">
                 <p class="mt-1 text-xs text-neutral-500">0 = cannot create.</p>
               </div>
               <div>
@@ -261,8 +265,8 @@
                 <div class="flex items-stretch gap-0">
                   <input type="number" id="defaultMaxMemoryDisplay" min="1"
                     value="<%= settings.defaultMaxMemory >= 1024 ? Math.round(settings.defaultMaxMemory / 1024) : settings.defaultMaxMemory %>"
-                    class="rounded-l-xl flex-1 border border-r-0 border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
-                  <select id="defaultMaxMemoryUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-600 text-neutral-800 dark:text-white border border-neutral-200 dark:border-neutral-600/30 cursor-pointer">
+                    class="al-input rounded-l-xl flex-1 border-r-0">
+                  <select id="defaultMaxMemoryUnit" class="al-input rounded-r-xl flex-1 cursor-pointer" style="max-width:5rem">
                     <option value="1"    <%= settings.defaultMaxMemory < 1024  ? 'selected' : '' %>>MB</option>
                     <option value="1024" <%= settings.defaultMaxMemory >= 1024 ? 'selected' : '' %>>GB</option>
                   </select>
@@ -271,7 +275,7 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max CPU <span class="text-neutral-400 font-normal">(%)</span></label>
                 <input type="number" id="defaultMaxCpu" value="<%= settings.defaultMaxCpu %>" min="50" max="10000"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="al-input">
               </div>
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max storage</label>
@@ -279,8 +283,8 @@
                 <div class="flex items-stretch gap-0">
                   <input type="number" id="defaultMaxStorageDisplay" min="1"
                     value="<%= settings.defaultMaxStorage >= 1024 ? Math.round(settings.defaultMaxStorage / 1024) : settings.defaultMaxStorage %>"
-                    class="rounded-l-xl flex-1 border border-r-0 border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
-                  <select id="defaultMaxStorageUnit" class="rounded-r-xl text-sm px-2 py-2 bg-neutral-200 dark:bg-neutral-600 text-neutral-800 dark:text-white border border-neutral-200 dark:border-neutral-600/30 cursor-pointer">
+                    class="al-input rounded-l-xl flex-1 border-r-0">
+                  <select id="defaultMaxStorageUnit" class="al-input rounded-r-xl flex-1 cursor-pointer" style="max-width:5rem">
                     <option value="1"    <%= settings.defaultMaxStorage < 1024  ? 'selected' : '' %>>MB</option>
                     <option value="1024" <%= settings.defaultMaxStorage >= 1024 ? 'selected' : '' %>>GB</option>
                   </select>
@@ -303,7 +307,7 @@
               <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">API key</label>
               <div class="relative max-w-sm">
                 <input type="password" id="vtKeyInput" value="<%= settings.virusTotalApiKey || '' %>" placeholder="Paste your key" autocomplete="off"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 pr-16 text-neutral-800 dark:text-white placeholder-neutral-400 font-mono transition-colors">
+                  class="al-input pr-16 font-mono">
                 <button type="button" onclick="const i=this.previousElementSibling;i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'Show':'Hide';"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 transition">Show</button>
               </div>
@@ -326,7 +330,7 @@
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" id="rateLimitEnabled" class="sr-only peer" aria-label="Enable rate limiting" <%= settings.rateLimitEnabled ? 'checked' : '' %>>
-                  <div class="al-toggle-track peer-checked:checked">
+                  <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
                 </label>
@@ -334,7 +338,7 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Requests per minute</label>
                 <input type="number" id="rateLimitRpm" value="<%= settings.rateLimitRpm %>" min="1" max="10000"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-48 bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="al-input w-48">
               </div>
             </div>
           </div>
@@ -347,12 +351,12 @@
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Max failed attempts before lockout</label>
                 <input type="number" id="loginMaxAttempts" value="<%= settings.loginMaxAttempts ?? 5 %>" min="1" max="100"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="al-input">
               </div>
               <div>
                 <label class="block text-sm font-medium text-neutral-700 dark:text-white mb-2">Lockout duration <span class="text-neutral-400 font-normal">(minutes)</span></label>
                 <input type="number" id="loginLockoutMinutes" value="<%= settings.loginLockoutMinutes ?? 15 %>" min="1" max="1440"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus:ring-1 focus:outline-none text-sm w-full bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white transition-colors">
+                  class="al-input">
               </div>
             </div>
           </div>
@@ -368,7 +372,7 @@
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
                   <input type="checkbox" id="behindReverseProxy" class="sr-only peer" aria-label="Behind a reverse proxy" <%= settings.behindReverseProxy ? 'checked' : '' %>>
-                  <div class="al-toggle-track peer-checked:checked">
+                  <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
                 </label>
@@ -380,7 +384,7 @@
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
                   <input type="checkbox" id="enforceDaemonHttps" class="sr-only peer" aria-label="Enforce HTTPS for daemon connections" <%= settings.enforceDaemonHttps ? 'checked' : '' %>>
-                  <div class="al-toggle-track peer-checked:checked">
+                  <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
                 </label>
@@ -392,7 +396,7 @@
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
                   <input type="checkbox" id="hashApiKeys" class="sr-only peer" aria-label="Hash API keys at rest" <%= settings.hashApiKeys ? 'checked' : '' %>>
-                  <div class="al-toggle-track peer-checked:checked">
+                  <div class="al-toggle-track">
                     <div class="al-toggle-dot"></div>
                   </div>
                 </label>
@@ -410,8 +414,8 @@
               <label for="banIpInput" class="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2 block">IP Address</label>
               <div class="flex gap-3 mb-4">
                 <input type="text" id="banIpInput" placeholder="192.168.1.1" aria-describedby="banIpHint"
-                  class="rounded-xl border border-neutral-200 dark:border-neutral-600/30 focus:border-neutral-400 dark:focus:border-white/70 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none text-sm bg-neutral-100 dark:bg-neutral-700/20 px-4 py-2 text-neutral-800 dark:text-white placeholder-neutral-400 transition-colors flex-1 max-w-xs">
-                <button type="button" id="banIpBtn" class="rounded-xl bg-red-600 hover:bg-red-500 text-white px-4 py-2 text-sm font-medium transition">Ban IP</button>
+                  class="al-input flex-1 max-w-xs">
+                <button type="button" id="banIpBtn" class="al-btn-danger">Ban IP</button>
               </div>
               <p id="banIpHint" class="text-xs text-neutral-400 mb-4">Enter the IP address you want to ban from accessing the panel.</p>
               <div id="bannedIpList" class="space-y-2">

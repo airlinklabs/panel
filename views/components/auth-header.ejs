@@ -22,13 +22,14 @@
     <link rel="stylesheet" href="<%= settings.darkTheme %>" id="dark-theme-css" data-theme-mode="dark">
     <% } %>
     <link rel="stylesheet" href="/fonts/general-sans/general-sans.css">
+    <link rel="stylesheet" href="/styles.css">
     <style>
       html, body, * { scrollbar-width: none; -ms-overflow-style: none; }
       ::-webkit-scrollbar { display: none; }
       html, body { transition: background-color 0.25s ease-in, color 0.25s ease-in; margin: 0; padding: 0; }
     </style>
 </head>
-<body style="font-family: 'General Sans'" class="bg-neutral-50 dark:bg-[#141414] h-full text-neutral-800 dark:text-white">
+<body style="font-family: 'General Sans'; background: var(--theme-bg); color: var(--theme-text);" class="h-full">
 
 <script nonce="<%- nonce %>">
 function initializeTheme() {

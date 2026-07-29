@@ -27,136 +27,87 @@
   }
 </style>
 
-<main class="h-screen m-auto">
-  <div class="flex h-screen">
-
-    <div class="hidden lg:block w-60 h-full">
+<main class="min-h-screen m-auto">
+  <div class="flex min-h-screen">
+    <div class="hidden lg:block w-60 shrink-0">
       <%- include('../../components/template') %>
     </div>
-
-    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
-        { label: 'Admin', href: '/admin' },
+        { label: 'Admin' },
         { label: 'API Keys' }
       ] }) %>
-      <div class="sm:flex sm:items-center px-8 pt-4">
-        <div class="sm:flex-auto">
+      <div class="al-page-header flex items-start justify-between gap-4">
+        <div>
           <h1 class="al-page-title"><%= req.translations.apiKeysManagement || 'API Keys Management' %></h1>
-          <p class="al-page-desc mt-1 tracking-tight"><%= req.translations.apiKeysDesc || 'Create and manage API keys with specific permissions' %></p>
+          <p class="al-page-desc"><%= req.translations.apiKeysDesc || 'Create and manage API keys with specific permissions' %></p>
         </div>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <div class="flex gap-2">
-            <button id="createApiKeyBtn" type="button" class="al-btn-primary w-full md:w-auto rounded-xl px-3 py-2 text-sm font-medium shadow-md transition focus:outline focus:outline-2 focus:outline-offset-2">
-              Create API Key
-            </button>
-            <a href="/admin/api/docs" class="al-btn-secondary w-full md:w-auto rounded-xl px-3 py-2 text-sm font-medium shadow-sm transition focus:outline focus:outline-2 focus:outline-offset-2">
-              API Documentation
-            </a>
-          </div>
+        <div class="flex gap-2 shrink-0">
+          <button id="createApiKeyBtn" type="button" class="al-btn-primary"><%= req.translations.createApiKey || 'Create API Key' %></button>
+          <a href="/admin/api/docs" class="al-btn-secondary"><%= req.translations.apiDocs || 'API Documentation' %></a>
         </div>
       </div>
-      <div class="px-8 mt-5">
-        <div class="al-card p-6">
-          <div class="sm:flex sm:items-center">
-            <div class="sm:flex-auto">
-              <h1 class="text-base font-semibold leading-6" style="color:var(--theme-text-strong)"><%= req.translations.navApiKeys || 'API Keys' %></h1>
-              <p class="mt-2 text-sm" style="color:var(--theme-text-muted)"><%= req.translations.apiKeysList || 'A list of all API keys in your panel.' %></p>
-            </div>
+      <div class="al-page-body space-y-3">
+        <% if (apiKeys.length === 0) { %>
+          <div class="flex flex-col items-center justify-center py-24 text-center al-card">
+            <p class="text-sm" style="color:var(--theme-text-muted)"><%= req.translations.noApiKeys || 'No API keys yet. The robots can\'t connect without them.' %></p>
           </div>
-          <div class="mt-8 flow-root">
-            <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-              <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-800">
-                  <thead>
-                    <tr>
-                      <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-neutral-800 dark:text-white sm:pl-0"><%= req.translations.apiKeyName || 'Name' %></th>
-                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white"><%= req.translations.apiKeyKey || 'Key' %></th>
-                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white"><%= req.translations.apiKeyCreatedBy || 'Created By' %></th>
-                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white"><%= req.translations.apiKeyStatus || 'Status' %></th>
-                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-neutral-800 dark:text-white"><%= req.translations.apiKeyCreated || 'Created' %></th>
-                      <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
-                        <span class="sr-only">Actions</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-neutral-100 dark:divide-neutral-800">
-                    <% if (apiKeys.length === 0) { %>
-                      <tr>
-                        <td colspan="6" class="py-4 pl-4 pr-3 text-sm text-center text-neutral-500 sm:pl-0"><%= req.translations.noApiKeys || 'No API keys yet. The robots can\'t connect without them.' %></td>
-                      </tr>
+        <% } else { %>
+          <% apiKeys.forEach(apiKey => { %>
+            <div class="al-card p-5">
+              <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-3 mb-1">
+                    <span class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= apiKey.name %></span>
+                    <% if (apiKey.active) { %>
+                      <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-0.5 text-[11px] font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30"><%= req.translations.apiKeyActive || 'Active' %></span>
                     <% } else { %>
-                      <% let keyIdx = 0; apiKeys.forEach(apiKey => { %>
-                        <tr style="--i:<%= keyIdx++ %>" class="hover:bg-neutral-50 dark:hover:bg-white/[0.03] transition-colors">
-                          <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-neutral-800 dark:text-white sm:pl-0">
-                            <%= apiKey.name %>
-                            <% if (apiKey.description) { %>
-                              <p class="text-xs text-neutral-500"><%= apiKey.description %></p>
-                            <% } %>
-                          </td>
-                          <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-500">
-                            <div class="flex items-center">
-                              <span class="font-mono truncate max-w-[150px]"><%= apiKey.key.substring(0, 8) %>...</span>
-                              <button
-                                class="ml-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
-                                onclick="copyToClipboard('<%= apiKey.key %>')"
-                                title="Copy API key"
-                                aria-label="Copy API key"
-                                type="button"
-                              >
-                                <%- icon('copy', { size: 16, class: 'shrink-0' }) %>
-                              </button>
-                            </div>
-                          </td>
-                          <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-500">
-                            <%= apiKey.user ? apiKey.user.username : 'System' %>
-                          </td>
-                          <td class="whitespace-nowrap px-3 py-4 text-sm">
-                            <% if (apiKey.active) { %>
-                              <span class="inline-flex items-center rounded-md bg-green-50 dark:bg-green-900/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30"><%= req.translations.apiKeyActive || 'Active' %></span>
-                            <% } else { %>
-                              <span class="inline-flex items-center rounded-md bg-red-50 dark:bg-red-900/20 px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-600/20 dark:ring-red-500/30"><%= req.translations.apiKeyInactive || 'Inactive' %></span>
-                            <% } %>
-                          </td>
-                          <td class="whitespace-nowrap px-3 py-4 text-sm text-neutral-500">
-                            <%= new Date(apiKey.createdAt).toLocaleDateString() %>
-                          </td>
-                          <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                            <div class="flex gap-2 justify-end">
-                              <button
-                                onclick="showEditModal('<%= apiKey.id %>', '<%= apiKey.name %>', '<%= apiKey.description || '' %>', <%= apiKey.permissions %>)"
-                                class="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
-                                type="button"
-                                aria-label="Edit API key"
-                              >
-                                <%- icon('pencil', { size: 20, class: 'shrink-0' }) %>
-                              </button>
-                              <form action="/admin/apikeys/toggle/<%= apiKey.id %>" method="POST" class="inline">
-                                <%- include('../../components/csrf') %>
-                                <button type="submit" class="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200" aria-label="<%= apiKey.active ? 'Disable API key' : 'Enable API key' %>">
-                                  <% if (apiKey.active) { %>
-                                    <%- icon('x-circle', { size: 20, class: 'shrink-0' }) %>
-                                  <% } else { %>
-                                    <%- icon('check-circle', { size: 20, class: 'shrink-0' }) %>
-                                  <% } %>
-                                </button>
-                              </form>
-                              <form id="deleteKeyForm_<%= apiKey.id %>" action="/admin/apikeys/delete/<%= apiKey.id %>" method="POST" class="inline">
-                                <%- include('../../components/csrf') %>
-                                <button type="button" onclick="confirmDeleteApiKey('<%= apiKey.id %>')" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" aria-label="Delete API key">
-                                  <%- icon('trash-2', { size: 20, class: 'shrink-0' }) %>
-                                </button>
-                              </form>
-                            </div>
-                          </td>
-                        </tr>
-                      <% }); %>
+                      <span class="inline-flex items-center rounded-md bg-red-50 dark:bg-red-900/20 px-2 py-0.5 text-[11px] font-medium text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-600/20 dark:ring-red-500/30"><%= req.translations.apiKeyInactive || 'Inactive' %></span>
                     <% } %>
-                  </tbody>
-                </table>
+                  </div>
+                  <% if (apiKey.description) { %>
+                    <p class="text-xs" style="color:var(--theme-text-muted)"><%= apiKey.description %></p>
+                  <% } %>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <button onclick="showEditModal('<%= apiKey.id %>', '<%= apiKey.name.replace(/'/g, "\\'") %>', '<%= (apiKey.description || '').replace(/'/g, "\\'") %>', <%= apiKey.permissions %>)"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg transition" style="color:var(--theme-text-muted)" hover:text-neutral-900
+                    type="button" aria-label="Edit API key">
+                    <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
+                  </button>
+                  <form action="/admin/apikeys/toggle/<%= apiKey.id %>" method="POST" class="inline">
+                    <%- include('../../components/csrf') %>
+                    <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg transition" style="color:var(--theme-text-muted)" aria-label="<%= apiKey.active ? 'Disable API key' : 'Enable API key' %>">
+                      <% if (apiKey.active) { %>
+                        <%- icon('x-circle', { size: 16, class: 'shrink-0' }) %>
+                      <% } else { %>
+                        <%- icon('check-circle', { size: 16, class: 'shrink-0' }) %>
+                      <% } %>
+                    </button>
+                  </form>
+                  <form id="deleteKeyForm_<%= apiKey.id %>" action="/admin/apikeys/delete/<%= apiKey.id %>" method="POST" class="inline">
+                    <%- include('../../components/csrf') %>
+                    <button type="button" onclick="confirmDeleteApiKey('<%= apiKey.id %>')" class="w-8 h-8 flex items-center justify-center rounded-lg transition" style="color:var(--theme-danger)" aria-label="Delete API key">
+                      <%- icon('trash-2', { size: 16, class: 'shrink-0' }) %>
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div class="mt-3 flex items-center gap-3 rounded-lg px-3 py-2" style="background:var(--theme-bg-secondary); border:1px solid var(--theme-border)">
+                <code class="flex-1 text-xs font-mono truncate" style="color:var(--theme-text-muted)"><%= apiKey.key.substring(0, 12) %>••••••••••••</code>
+                <button onclick="copyToClipboard('<%= apiKey.key %>')" type="button"
+                  class="text-[11px] font-medium px-2 py-1 rounded-md transition hover:bg-neutral-200 dark:hover:bg-neutral-700" style="color:var(--theme-text-muted); background:var(--theme-bg-card); border:1px solid var(--theme-border)">
+                  Copy
+                </button>
+              </div>
+              <div class="mt-2 flex items-center gap-3 text-xs" style="color:var(--theme-text-muted)">
+                <span><%= req.translations.apiKeyCreatedBy || 'Created by' %> <span class="font-medium" style="color:var(--theme-text-strong)"><%= apiKey.user ? apiKey.user.username : 'System' %></span></span>
+                <span>·</span>
+                <span><%= new Date(apiKey.createdAt).toLocaleDateString() %></span>
               </div>
             </div>
-          </div>
-        </div>
+          <% }); %>
+        <% } %>
       </div>
     </div>
   </div>
@@ -376,7 +327,7 @@
 
   function showToast(message, type = 'success') {
     const toast = document.createElement('div');
-    toast.className = `fixed bottom-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg transition-opacity duration-500 ${type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`;
+    toast.className = `fixed bottom-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg transition-opacity duration-500`; toast.style.background = type === 'success' ? 'var(--theme-success)' : 'var(--theme-danger)'; toast.style.color = '#fff';
     toast.textContent = message;
     document.body.appendChild(toast);
 

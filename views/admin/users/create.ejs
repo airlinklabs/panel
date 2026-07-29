@@ -19,12 +19,12 @@
 
             <div>
               <label for="userEmail" class="block text-neutral-700 dark:text-neutral-400 text-sm font-medium mb-2"><%= req.translations.email %>:</label>
-              <input id="userEmail" type="email" class="rounded-xl text-neutral-800 dark:text-white text-sm w-full px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/20" placeholder="example@domain.com">
+              <input id="userEmail" type="email" class="al-input" placeholder="example@domain.com">
             </div>
 
             <div>
               <label for="userUsername" class="block text-neutral-700 dark:text-neutral-400 text-sm font-medium mb-2"><%= req.translations.username %>:</label>
-              <input id="userUsername" type="text" class="rounded-xl text-neutral-800 dark:text-white text-sm w-full px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/20" placeholder="username">
+              <input id="userUsername" type="text" class="al-input" placeholder="username">
               <div id="username-criteria" class="mt-2 space-y-1">
                 <p id="crit-username-length" class="text-xs text-neutral-400">
                   <span class="crit-icon">—</span> 3–20 characters
@@ -37,7 +37,7 @@
 
             <div class="sm:col-span-2">
               <label for="userPassword" class="block text-neutral-700 dark:text-neutral-400 text-sm font-medium mb-2"><%= req.translations.password %>:</label>
-              <input id="userPassword" type="password" class="rounded-xl text-neutral-800 dark:text-white text-sm w-full px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/20" placeholder="********">
+              <input id="userPassword" type="password" class="al-input" placeholder="********">
               <div id="password-criteria" class="mt-2 space-y-1">
                 <p id="crit-length" class="text-xs text-neutral-400">
                   <span class="crit-icon">—</span> At least 8 characters
@@ -56,7 +56,7 @@
               <div class="flex items-center mt-1">
                 <label class="relative inline-block w-12 h-6">
                   <input type="checkbox" id="userIsAdminSwitch" class="sr-only peer">
-                  <span class="block w-12 h-6 bg-neutral-400 peer-checked:bg-blue-500 rounded-full transition-colors"></span>
+                  <span class="block w-12 h-6 bg-neutral-400 peer-checked:bg-[var(--theme-accent)] rounded-full transition-colors"></span>
                   <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full peer-checked:translate-x-6 transition-transform"></span>
                 </label>
                 <span class="ml-3 text-sm text-neutral-500 dark:text-neutral-400">Admin access</span>
@@ -64,7 +64,7 @@
             </div>
 
             <div class="sm:col-span-2 flex justify-end">
-              <button id="createuserBtn" type="button" class="rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-800 px-5 py-2 text-sm font-medium shadow-md transition disabled:opacity-40 disabled:cursor-not-allowed">
+              <button id="createuserBtn" type="button" class="al-btn-primary">
                 <%= req.translations.create || 'Create user' %>
               </button>
             </div>
