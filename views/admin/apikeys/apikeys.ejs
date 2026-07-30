@@ -66,7 +66,7 @@
                   <% } %>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
-                  <button onclick="showEditModal('<%= apiKey.id %>', '<%= apiKey.name.replace(/'/g, "\\'") %>', '<%= (apiKey.description || '').replace(/'/g, "\\'") %>', <%= apiKey.permissions %>)"
+                  <button onclick="showEditModal(<%- JSON.stringify(apiKey.id) %>, <%- JSON.stringify(apiKey.name) %>, <%- JSON.stringify(apiKey.description || '') %>, <%= apiKey.permissions %>)"
                     class="w-8 h-8 flex items-center justify-center rounded-lg transition" style="color:var(--theme-text-muted)" hover:text-neutral-900
                     type="button" aria-label="Edit API key">
                     <%- icon('pencil', { size: 16, class: 'shrink-0' }) %>
