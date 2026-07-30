@@ -1,7 +1,7 @@
 > [!NOTE]
-> Airlink 2.5.128 is stable and ready for production.
+> Airlink Katharos is in beta 
 
-# Airlink Panel
+# Airlink Panel (Katharos)
 
 Open-source game server management panel.
 
@@ -36,7 +36,7 @@ Documentation: [airlinklabs.xyz/docs/quick-start/](https://airlinklabs.xyz/docs/
 
 | Handle | Role |
 |--------|------|
-| [thavanish](https://github.com/thavanish) | Maintainer |
+| [thavanish](https://github.com/bthavanish) | Maintainer |
 | [privt00](https://github.com/privt00) | Project lead |
 | [achul123](https://github.com/achul123) | Core developer |
 
