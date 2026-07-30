@@ -28,9 +28,15 @@
         { label: 'Admin' },
         { label: 'Settings' }
       ] }) %>
-      <div class="al-page-header">
-        <h1 class="al-page-title">Settings</h1>
-        <p class="al-page-desc">Manage your panel configuration.</p>
+      <div class="al-page-header flex items-start justify-between gap-4">
+        <div>
+          <h1 class="al-page-title">Settings</h1>
+          <p class="al-page-desc">Manage your panel configuration.</p>
+        </div>
+        <div class="flex gap-2 shrink-0 items-center">
+          <button type="button" id="tab-save-btn" class="al-btn-primary">Save</button>
+          <button type="button" id="tab-reset-btn" class="al-btn-secondary">Reset</button>
+        </div>
       </div>
 
       <div class="al-page-body">
@@ -43,7 +49,8 @@
         </div>
 
         <!-- ── APPEARANCE ──────────────────────────────────────────────────── -->
-        <form id="form-appearance" role="tabpanel" aria-labelledby="tab-appearance" data-tab-panel="appearance" class="tab-panel space-y-5 hidden" enctype="multipart/form-data">
+        <div id="panel-appearance" role="tabpanel" aria-labelledby="tab-appearance" data-tab-panel="appearance" class="tab-panel space-y-5 hidden">
+          <form id="form-appearance" enctype="multipart/form-data">
 
           <!-- Branding -->
           <div class="al-card">
@@ -68,23 +75,6 @@
                   class="al-input file:mr-3 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-neutral-200 dark:file:bg-neutral-600 file:text-neutral-700 dark:file:text-neutral-300">
                 <p class="text-xs text-neutral-400 mt-1">PNG or JPG auto-converted to .ico</p>
               </div>
-            </div>
-          </div>
-
-          <!-- Registration -->
-          <div class="al-card">
-            <h2 class="al-card-header">Registration</h2>
-            <div class="p-4 flex items-center justify-between">
-              <div>
-                <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow public registration</p>
-                <p class="text-xs text-neutral-500 mt-0.5">When off, only admins can create new accounts.</p>
-              </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" name="allowRegistration" class="sr-only peer" aria-label="Allow public registration" <%= settings.allowRegistration ? 'checked' : '' %>>
-                <div class="al-toggle-track">
-                  <div class="al-toggle-dot"></div>
-                </div>
-              </label>
             </div>
           </div>
 
@@ -197,11 +187,8 @@
             </div>
           </div>
 
-          <div class="flex justify-end gap-3">
-            <button type="button" id="resetButton" class="al-btn-ghost px-4 py-2 text-sm font-medium transition">Reset defaults</button>
-            <button type="submit" class="al-btn-primary px-6 py-2 text-sm font-medium shadow-sm transition">Save appearance</button>
-          </div>
-        </form>
+          </form>
+        </div>
 
         <!-- ── SERVERS ─────────────────────────────────────────────────────── -->
         <div id="panel-servers" role="tabpanel" aria-labelledby="tab-servers" data-tab-panel="servers" class="tab-panel hidden space-y-5">
@@ -291,14 +278,29 @@
                 </div>
               </div>
             </div>
-            <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
-              <button type="button" id="saveServerPolicy" class="al-btn-primary px-5 py-2 text-sm font-medium shadow-sm transition">Save</button>
-            </div>
           </div>
+
         </div>
 
         <!-- ── SECURITY ────────────────────────────────────────────────────── -->
         <div id="panel-security" role="tabpanel" aria-labelledby="tab-security" data-tab-panel="security" class="tab-panel hidden space-y-5">
+
+          <!-- Registration -->
+          <div class="al-card">
+            <h2 class="al-card-header">Registration</h2>
+            <div class="p-4 flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-neutral-700 dark:text-white">Allow public registration</p>
+                <p class="text-xs text-neutral-500 mt-0.5">When off, only admins can create new accounts.</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="allowRegistration" class="sr-only peer" aria-label="Allow public registration" <%= settings.allowRegistration ? 'checked' : '' %>>
+                <div class="al-toggle-track">
+                  <div class="al-toggle-dot"></div>
+                </div>
+              </label>
+            </div>
+          </div>
 
           <!-- VirusTotal -->
           <div class="al-card">
@@ -313,9 +315,6 @@
               </div>
               <% if (settings.virusTotalApiKey) { %><p class="mt-1.5 text-xs text-emerald-600 dark:text-emerald-400">Key is set.</p><% } %>
               <p class="mt-1.5 text-xs text-neutral-500">Used to scan uploaded files. Get a free key at <a href="https://www.virustotal.com" target="_blank" class="underline hover:text-neutral-700 dark:hover:text-neutral-300 transition">virustotal.com</a>.</p>
-            </div>
-            <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
-              <button type="button" id="saveVtKey" class="al-btn-primary px-5 py-2 text-sm font-medium shadow-sm transition">Save</button>
             </div>
           </div>
 
@@ -402,9 +401,6 @@
                 </label>
               </div>
             </div>
-            <div class="px-5 pb-5 border-t border-neutral-200 dark:border-white/5 pt-4 flex justify-end">
-              <button type="button" id="saveRateLimit" class="al-btn-primary px-5 py-2 text-sm font-medium shadow-sm transition">Save security settings</button>
-            </div>
           </div>
 
           <!-- IP banning -->
@@ -432,7 +428,58 @@
               </div>
             </div>
           </div>
+
         </div>
+
+        <script nonce="<%- nonce %>">
+        (function(){
+          var tabBtns = document.querySelectorAll('.tab-btn');
+          var tabPanels = document.querySelectorAll('.tab-panel');
+          var tabList = document.querySelector('[role="tablist"]');
+          var saveBtn = document.getElementById('tab-save-btn');
+          var resetBtn = document.getElementById('tab-reset-btn');
+          function activate(id) {
+            tabBtns.forEach(function(btn) {
+              var on = btn.dataset.tab === id;
+              btn.setAttribute('aria-selected', on ? 'true' : 'false');
+              btn.setAttribute('tabindex', on ? '0' : '-1');
+            });
+            tabPanels.forEach(function(p) { p.classList.toggle('hidden', p.dataset.tabPanel !== id); });
+            rebind(id);
+            try { localStorage.setItem('settings_tab', id); } catch {}
+          }
+          function rebind(id) {
+            if (window.tabHandlers && saveBtn) {
+              saveBtn.onclick = window.tabHandlers[id] || null;
+              saveBtn.textContent = (window.tabLabels && window.tabLabels[id]) || 'Save';
+            }
+            if (window.tabResetHandlers && resetBtn) {
+              resetBtn.onclick = window.tabResetHandlers[id] || null;
+            }
+          }
+          window._rebindTabHandlers = function() {
+            var active = document.querySelector('.tab-btn[aria-selected="true"]');
+            if (active) rebind(active.dataset.tab);
+          };
+          tabBtns.forEach(function(btn) { btn.addEventListener('click', function() { activate(this.dataset.tab); }); });
+          if (tabList) {
+            tabList.addEventListener('keydown', function(e) {
+              var tabs = Array.from(tabBtns);
+              var currentIndex = tabs.findIndex(function(t) { return t === document.activeElement; });
+              if (currentIndex === -1) return;
+              var newIndex = currentIndex;
+              if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); newIndex = (currentIndex + 1) % tabs.length; }
+              else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); newIndex = (currentIndex - 1 + tabs.length) % tabs.length; }
+              else if (e.key === 'Home') { e.preventDefault(); newIndex = 0; }
+              else if (e.key === 'End') { e.preventDefault(); newIndex = tabs.length - 1; }
+              if (newIndex !== currentIndex) { tabs[newIndex].focus(); activate(tabs[newIndex].dataset.tab); }
+            });
+          }
+          var saved = null;
+          try { saved = localStorage.getItem('settings_tab'); } catch {}
+          activate(saved || 'appearance');
+        })();
+        </script>
 
       </div>
     </div>
@@ -443,26 +490,24 @@
 <%- include('../../components/modal') %>
 
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-settings.js"></script>
+
 <script nonce="<%- nonce %>">
 (function() {
   var hasUnsavedChanges = false;
-  
-  // Track changes on form inputs
+
   document.querySelectorAll('input, select, textarea').forEach(function(el) {
     el.addEventListener('change', function() {
       hasUnsavedChanges = true;
     });
   });
-  
-  // Warn before leaving with unsaved changes
+
   window.addEventListener('beforeunload', function(e) {
     if (hasUnsavedChanges) {
       e.preventDefault();
       e.returnValue = '';
     }
   });
-  
-  // Reset flag when form is submitted successfully
+
   var forms = document.querySelectorAll('form');
   forms.forEach(function(form) {
     form.addEventListener('submit', function() {

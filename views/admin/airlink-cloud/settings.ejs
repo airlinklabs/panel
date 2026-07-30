@@ -9,13 +9,19 @@
         { label: 'Admin' },
         { label: 'Airlink Cloud' }
       ] }) %>
-      <div class="al-page-header">
-        <h1 class="al-page-title">Airlink Cloud</h1>
-        <p class="al-page-desc">Configure your Airlink Cloud integration.</p>
+      <div class="al-page-header flex items-start justify-between gap-4">
+        <div>
+          <h1 class="al-page-title">Airlink Cloud</h1>
+          <p class="al-page-desc">Configure your Airlink Cloud integration.</p>
+        </div>
+        <div class="flex gap-2 shrink-0">
+          <button type="button" id="saveBtn" class="al-btn-primary">Save Settings</button>
+          <button type="button" id="resetBtn" class="al-btn-secondary">Reset</button>
+        </div>
       </div>
 
       <div class="px-8 mt-5 space-y-6">
-        
+
         <!-- API Configuration -->
         <div class="al-card">
           <h2 class="al-card-header">API Settings</h2>
@@ -44,12 +50,6 @@
               </div>
             </label>
           </div>
-        </div>
-
-        <div class="flex justify-end">
-          <button id="saveBtn" class="al-btn-primary px-6">
-            Save Settings
-          </button>
         </div>
 
       </div>

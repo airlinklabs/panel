@@ -52,6 +52,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const name = process.env.NAME || 'AirLink';
 const airlinkVersion = config.meta.version;
+const airlinkCodename = config.meta.codename;
 
 // Trust proxy when the panel is behind a reverse proxy (Nginx, Caddy, etc).
 // Reads from DB at startup — affects req.ip used by rate limiting and IP banning.
@@ -437,6 +438,7 @@ interface GlobalWithCustomProperties extends NodeJS.Global {
   uiComponentStore: typeof import('./handlers/uiComponentHandler').uiComponentStore;
   appName: string;
   airlinkVersion: string;
+  airlinkCodename: string;
   adminMenuItems: SidebarItem[];
   regularMenuItems: SidebarItem[];
 }
@@ -446,10 +448,12 @@ declare const global: GlobalWithCustomProperties;
 app.use((_req, res, next) => {
   res.locals.name = name;
   res.locals.airlinkVersion = airlinkVersion;
+  res.locals.airlinkCodename = airlinkCodename;
   res.locals.icon = icon;
   global.uiComponentStore = uiComponentStore;
   global.appName = name;
   global.airlinkVersion = airlinkVersion;
+  global.airlinkCodename = airlinkCodename;
 
   res.locals.adminMenuItems = uiComponentStore.getSidebarItems(undefined, true);
   res.locals.regularMenuItems = uiComponentStore.getSidebarItems(

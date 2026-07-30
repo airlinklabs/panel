@@ -1,3 +1,7 @@
+document.getElementById('saveSecurityBtn').addEventListener('click', () => {
+  document.getElementById('form-rate-limit').requestSubmit();
+});
+
 document.getElementById('form-rate-limit').addEventListener('submit', async (e) => {
   e.preventDefault();
   const enabled = document.getElementById('rateLimitEnabled').checked;

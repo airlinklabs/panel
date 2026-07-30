@@ -9,14 +9,14 @@
   .al-file-row.is-selected { background: var(--theme-bg-secondary, rgb(245 245 245)); }
   .dark .al-file-row.is-selected { background: var(--theme-bg-hover, rgb(255 255 255 / 0.04)); }
   .al-file-icon { transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms ease; }
-  .al-file-menu { will-change: transform, opacity; }
+
   @keyframes al-file-row-in {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
   }
   @media (prefers-reduced-motion: reduce) {
     .al-file-row { animation: none; }
-    .al-file-icon, .al-file-menu { transition-duration: 0.01ms !important; }
+    .al-file-icon { transition-duration: 0.01ms !important; }
   }
 </style>
 
@@ -237,52 +237,7 @@ function escJS(val) {
                       <span style="color:var(--theme-text-muted)">—</span>
                     <% } %>
                   </td>
-                    <div id="dropdown-<%= file.name %>" class="al-file-menu fixed w-44 rounded-xl shadow-xl z-50 transform opacity-0 scale-95 transition-all duration-150 ease-out pointer-events-none overflow-hidden" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
-                      <div class="py-1" role="menu">
-                        <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors text-left" style="color:var(--theme-text)"
-                          onclick="rename('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") + "/" + file.name : file.name) %>')">
-                          <%- icon('pencil', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
-                          Rename
-                        </button>
-                        <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors text-left" style="color:var(--theme-text)"
-                          onclick="copyFilePath('<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") + "/" + file.name : file.name) %>')">
-                          <%- icon('copy', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
-                          Copy Path
-                        </button>
-                        <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors text-left" style="color:var(--theme-text)"
-                          onclick="openMoveModal('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") + "/" + file.name : file.name) %>')">
-                          <%- icon('move', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
-                          Move to...
-                        </button>
-                        <% if (file.type !== 'directory') { %>
-                        <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors text-left" style="color:var(--theme-text)"
-                          onclick="duplicateFile('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") + "/" + file.name : file.name) %>')">
-                          <%- icon('copy', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
-                          Duplicate
-                        </button>
-                        <% } %>
-                        <% if (file.type !== "directory") { %>
-                          <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors text-left" style="color:var(--theme-text)"
-                            onclick="downloadfile('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") + "/" + file.name : file.name) %>')">
-                            <%- icon('download', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
-                            Download
-                          </button>
-                        <% } %>
-                        <% if (file.name.toLowerCase().endsWith(".zip")) { %>
-                          <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors text-left" style="color:var(--theme-text)"
-                            onclick="extractZip('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") + "/" + file.name : file.name) %>')">
-                            <%- icon('file-archive', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
-                            Extract Here
-                          </button>
-                        <% } %>
-                        <div class="mx-2 my-1 border-t" style="border-color:var(--theme-border);"></div>
-                        <button class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors text-left"
-                          onclick="deletefile('<%= escJS(file.name) %>', '<%= escJS(currentPath && currentPath !== "/" ? currentPath.replace(new RegExp("^/+", "g"), "") + "/" + file.name : file.name) %>')">
-                          <%- icon('trash-2', { class: 'w-3.5 h-3.5 shrink-0', strokeWidth: 1.5 }) %>
-                          Delete
-                        </button>
-                      </div>
-                    </div>
+
                 </tr>
               <% }) %>
             </tbody>
@@ -479,48 +434,8 @@ function escJS(val) {
       window.downloadViewedImage = downloadViewedImage;
     }
 
-    document.addEventListener('contextmenu', (event) => {
-      event.preventDefault();
-      const row = event.target.closest('tr');
-      if (!row) return;
-      const cb = row.querySelector('.file-checkbox[data-filename]');
-      if (!cb) return;
-      const fullPath = cb.dataset.filename;
-      const fileName = fullPath.split('/').pop();
-      const dropdown = document.getElementById('dropdown-' + fileName);
-      if (!dropdown) return;
-      dropdown.style.left = Math.min(event.clientX, window.innerWidth - 185) + 'px';
-      dropdown.style.top = Math.min(event.clientY, window.innerHeight - dropdown.offsetHeight - 8) + 'px';
-      openDropdown(dropdown);
-    });
 
-    document.addEventListener('click', () => {
-      document.querySelectorAll('[id^="dropdown-"]').forEach((el) => closeDropdown(el));
-    });
   });
-
-  function showDropdown(event, fileName) {
-    const dropdown = document.getElementById(`dropdown-${fileName}`);
-
-    const { clientX: mouseX, clientY: mouseY } = event;
-    const dropdownRect = dropdown.getBoundingClientRect();
-    const bodyWidth = document.body.clientWidth;
-
-    dropdown.style.left = `${Math.min(mouseX, bodyWidth - dropdownRect.width)}px`;
-    dropdown.style.top = `${mouseY}px`;
-
-    openDropdown(dropdown);
-  }
-
-  function openDropdown(dropdown) {
-    dropdown.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
-    dropdown.classList.add('opacity-100', 'scale-100');
-  }
-
-  function closeDropdown(dropdown) {
-    dropdown.classList.remove('opacity-100', 'scale-100');
-    dropdown.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
-  }
 
   function deletefile(fileName, filePath) {
     window.modal.confirm({

@@ -1,28 +1,29 @@
 <%- include('../../components/header', { title: req.translations.adminEditUserTitle || 'Edit User' }) %>
 
-<main class="h-screen m-auto">
-  <div class="flex h-screen">
-    <!-- Sidebar -->
-    <div class="w-60 h-full">
+<main class="min-h-screen">
+  <div class="flex min-h-screen">
+    <div class="hidden lg:block w-60 shrink-0">
       <%- include('../../components/template') %>
     </div>
-    <!-- Content -->
-    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
-      <div class="sm:flex sm:items-center px-8 pt-4">
-        <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminEditUserTitle || 'Edit User' %></h1>
-          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminEditUserText || 'Edit user details and permissions.' %></p>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin' },
+        { label: 'Users', href: '/admin/users' },
+        { label: 'Edit' }
+      ] }) %>
+      <div class="al-page-header flex items-start justify-between gap-4">
+        <div>
+          <h1 class="al-page-title"><%= req.translations.adminEditUserTitle || 'Edit User' %></h1>
+          <p class="al-page-desc"><%= req.translations.adminEditUserText || 'Edit user details and permissions.' %></p>
         </div>
-        <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <a href="/admin/users" class="al-btn-secondary">
-            <%- icon('chevron-right', { size: 16, class: 'mr-2 rotate-180' }) %>
-            <%= req.translations.back || 'Back to Users' %>
-          </a>
+        <div class="flex gap-2 shrink-0 items-center">
+          <a href="/admin/users" class="al-btn-secondary">Back to Users</a>
+          <button type="submit" form="editUserForm" class="al-btn-primary"><%= req.translations.saveChanges || 'Save Changes' %></button>
         </div>
       </div>
 
-      <div id="userForm" class="mt-6 px-8 w-full">
-        <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
+      <div class="al-page-body">
+        <div class="al-card p-5">
           <div class="flex items-center gap-4 mb-5 pb-5 border-b border-neutral-200 dark:border-white/5">
             <img class="h-12 w-12 rounded-xl object-cover shrink-0 border border-neutral-200 dark:border-neutral-700/30" src="<%= dataUser.avatar ? dataUser.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(dataUser.username) %>" alt="">
             <div>
@@ -130,10 +131,9 @@
                             <%= req.translations.adminDescription || 'Administrators have full access to manage all aspects of the system.' %>
                           </p>
                         </div>
-                        <label for="isAdmin" class="relative inline-block w-12 h-6">
+                        <label for="isAdmin" class="relative inline-flex items-center cursor-pointer">
                           <input type="checkbox" id="isAdmin" name="isAdmin" class="sr-only peer" <%= dataUser.isAdmin ? 'checked' : '' %>>
-                          <span class="block w-12 h-6 bg-neutral-400 peer-checked:bg-[var(--theme-accent)] rounded-full"></span>
-                          <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full peer-checked:translate-x-6 transition"></span>
+                          <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
                         </label>
                         <span class="ms-3 text-sm font-medium text-neutral-700 dark:text-white" id="adminStatusLabel"><%= dataUser.isAdmin ? req.translations.enabled || 'Enabled' : req.translations.disabled || 'Disabled' %></span>
                       </div>
@@ -180,15 +180,6 @@
               </div>
             </div>
 
-            <!-- Submit Button -->
-            <div class="mt-8 flex justify-end">
-              <button
-                type="submit"
-                class="al-btn-primary"
-              >
-                <%= req.translations.saveChanges || 'Save Changes' %>
-              </button>
-            </div>
           </form>
         </div>
       </div>
