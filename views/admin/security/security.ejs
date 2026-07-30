@@ -6,19 +6,21 @@
       <%- include('../../components/template') %>
     </div>
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
-      <div class="px-8 pt-5">
-        <h1 class="text-base font-medium text-neutral-800 dark:text-white">Security</h1>
-        <p class="mt-0.5 text-sm text-neutral-500">Manage panel security settings, rate limiting, and IP access controls.</p>
+      <div class="al-page-header flex items-start justify-between gap-4">
+        <div>
+          <h1 class="al-page-title">Security</h1>
+          <p class="al-page-desc">Manage panel security settings, rate limiting, and IP access controls.</p>
+        </div>
+        <div class="flex gap-2 shrink-0 items-center">
+          <button type="button" id="saveSecurityBtn" class="al-btn-primary">Save</button>
+        </div>
       </div>
 
-      <div class="px-8 mt-6 space-y-6 max-w-3xl">
+      <div class="al-page-body space-y-6 max-w-3xl">
 
         <!-- Rate Limiting -->
-        <div class="bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
-          <div class="px-5 py-4 border-b border-neutral-200 dark:border-white/5">
-            <h2 class="text-sm font-medium text-neutral-800 dark:text-white">Rate Limiting</h2>
-            <p class="mt-0.5 text-xs text-neutral-500">Limit how many requests a single IP can make per minute to the panel API.</p>
-          </div>
+        <div class="al-card overflow-hidden">
+          <div class="al-card-header">Rate Limiting</div>
           <form id="form-rate-limit" class="px-5 py-5 space-y-4">
             <div class="flex items-center justify-between">
               <div>
@@ -27,34 +29,27 @@
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="rateLimitEnabled" name="rateLimitEnabled" class="sr-only peer" value="true" <%= settings && settings.rateLimitEnabled ? 'checked' : '' %>>
-                <div class="w-10 h-5 bg-neutral-300 dark:bg-neutral-600 peer-focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900 dark:peer-checked:bg-white"></div>
+                <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
               </label>
             </div>
             <div>
               <label for="rateLimitRpm" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">Requests per minute</label>
               <input type="number" id="rateLimitRpm" name="rateLimitRpm" min="1" max="10000" value="<%= settings ? settings.rateLimitRpm : 500 %>"
-                class="w-40 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                class="al-input w-40">
             </div>
-            <div class="pt-1">
-              <button type="submit" class="px-4 py-2 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition">
-                Save
-              </button>
-            </div>
+
           </form>
         </div>
 
         <!-- IP Bans -->
-        <div class="bg-neutral-50 dark:bg-white/[0.03] rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
-          <div class="px-5 py-4 border-b border-neutral-200 dark:border-white/5">
-            <h2 class="text-sm font-medium text-neutral-800 dark:text-white">Banned IPs</h2>
-            <p class="mt-0.5 text-xs text-neutral-500">IPs on this list are blocked from accessing the panel entirely.</p>
-          </div>
+        <div class="al-card overflow-hidden">
+          <div class="al-card-header">Banned IPs</div>
           <div class="px-5 py-5 space-y-4">
             <div class="flex gap-2">
               <input type="text" id="ban-ip-input" placeholder="e.g. 192.168.1.100"
-                class="flex-1 rounded-xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600 transition">
+                class="al-input flex-1">
               <button id="ban-ip-btn" type="button"
-                class="px-4 py-2 text-sm font-medium rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-100 transition whitespace-nowrap">
+                class="al-btn-primary px-4 py-2 text-sm font-medium rounded-xl transition whitespace-nowrap">
                 Ban IP
               </button>
             </div>
@@ -62,9 +57,9 @@
             <% if (bannedIps && bannedIps.length > 0) { %>
               <ul id="banned-list" class="space-y-1.5">
                 <% bannedIps.forEach(ip => { %>
-                  <li class="flex items-center justify-between px-3 py-2 rounded-lg bg-white dark:bg-neutral-800/60 border border-neutral-200 dark:border-white/5 text-sm" data-ip="<%= ip %>">
-                    <span class="font-mono text-neutral-700 dark:text-neutral-300 text-xs"><%= ip %></span>
-                    <button type="button" class="unban-btn text-xs text-red-500 hover:text-red-400 transition">Remove</button>
+                    <li class="flex items-center justify-between px-3 py-2 rounded-lg text-sm" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)" data-ip="<%= ip %>">
+                    <span class="font-mono text-xs" style="color:var(--theme-text-strong)"><%= ip %></span>
+                    <button type="button" class="unban-btn text-xs" style="color:var(--theme-danger)">Remove</button>
                   </li>
                 <% }); %>
               </ul>

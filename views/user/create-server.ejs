@@ -7,10 +7,10 @@
   .custom-select { position: relative; user-select: none; }
   .cs-trigger {
     display: flex; align-items: center; justify-content: space-between;
-    width: 100%; padding: 9px 14px; border-radius: 10px; cursor: pointer;
+    width: 100%; padding: 10px 14px; border-radius: 10px; cursor: pointer;
     font-size: 14px; border: 1px solid var(--theme-border, #e5e5e5);
     background: var(--theme-bg-secondary, #f5f5f5); color: var(--theme-text-strong, #171717);
-    transition: background 0.15s, border-color 0.15s;
+    transition: background 0.15s, border-color 0.15s; min-height: 44px;
   }
   .dark .cs-trigger { background: var(--theme-bg-secondary, rgba(255,255,255,0.06)); color: var(--theme-text, #e5e5e5); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
   .cs-trigger:hover { background: var(--theme-bg-hover, #ebebeb); border-color: var(--theme-border, #d4d4d4); }
@@ -29,7 +29,7 @@
   }
   .dark .cs-dropdown { background: var(--theme-bg-card, #1e1e1e); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
   @keyframes cs-open { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
-  .cs-option { padding: 9px 14px; font-size: 13px; cursor: pointer; color: var(--theme-text-strong, #171717); transition: background 0.1s; }
+  .cs-option { padding: 10px 14px; font-size: 13px; cursor: pointer; color: var(--theme-text-strong, #171717); transition: background 0.1s; min-height: 44px; display: flex; align-items: center; }
   .dark .cs-option { color: var(--theme-text, #e5e5e5); }
   .cs-option:hover { background: rgba(0,0,0,0.05); }
   .dark .cs-option:hover { background: rgba(255,255,255,0.06); }
@@ -37,34 +37,20 @@
   .dark .cs-option.selected { background: rgba(255,255,255,0.08); }
   .cs-option.disabled { opacity: 0.35; cursor: default; pointer-events: none; }
 
-  /* ── Form field ──────────────────────────────────────────── */
-  .form-input {
-    width: 100%; padding: 9px 14px; border-radius: 10px;
-    border: 1px solid var(--theme-border, #e5e5e5); background: var(--theme-bg-secondary, #f5f5f5);
-    font-size: 14px; color: var(--theme-text-strong, #171717); outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    box-sizing: border-box; font-family: inherit;
-  }
-  .dark .form-input { background: var(--theme-bg-secondary, rgba(255,255,255,0.06)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); color: var(--theme-text, #e5e5e5); }
-  .form-input:focus { border-color: var(--theme-border, #a3a3a3); box-shadow: 0 0 0 3px var(--theme-border-subtle, rgba(0,0,0,0.05)); }
-  .dark .form-input:focus { border-color: var(--theme-border, rgba(255,255,255,0.2)); box-shadow: 0 0 0 3px var(--theme-border-subtle, rgba(255,255,255,0.04)); }
-  .form-input::placeholder { color: var(--theme-text-placeholder, #a3a3a3); }
-  .form-input.invalid { border-color: var(--theme-danger, #f87171); }
-
-  .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--theme-text-muted, #525252); margin-bottom: 6px; }
-  .dark .form-label { color: var(--theme-text, #a3a3a3); }
-
   /* ── Resource stepper ────────────────────────────────────── */
   .stepper { display: flex; align-items: center; gap: 0; border: 1px solid var(--theme-border, #e5e5e5); border-radius: 10px; overflow: hidden; background: var(--theme-bg-secondary, #f5f5f5); }
   .dark .stepper { border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); background: var(--theme-bg-secondary, rgba(255,255,255,0.06)); }
   .stepper-btn {
-    padding: 9px 13px; background: none; border: none; cursor: pointer;
+    padding: 10px 14px; background: none; border: none; cursor: pointer;
     font-size: 16px; color: var(--theme-text-muted, #525252); transition: background 0.1s;
-    flex-shrink: 0; line-height: 1;
+    flex-shrink: 0; line-height: 1; min-width: 44px; min-height: 44px;
+    display: flex; align-items: center; justify-content: center;
   }
   .dark .stepper-btn { color: var(--theme-text, #a3a3a3); }
   .stepper-btn:hover { background: var(--theme-bg-hover, rgba(0,0,0,0.06)); }
   .dark .stepper-btn:hover { background: var(--theme-bg-hover, rgba(255,255,255,0.07)); }
+  .stepper-btn:active { background: var(--theme-bg-hover, rgba(0,0,0,0.1)); }
+  .dark .stepper-btn:active { background: var(--theme-bg-hover, rgba(255,255,255,0.1)); }
   .stepper-input {
     flex: 1; text-align: center; border: none; background: none; outline: none;
     font-size: 14px; font-weight: 500; color: var(--theme-text-strong, #171717); padding: 9px 4px;
@@ -75,7 +61,7 @@
   /* ── Confirm dialog ──────────────────────────────────────── */
   .confirm-overlay {
     position: fixed; inset: 0; z-index: 100;
-    background: var(--theme-overlay, rgba(0,0,0,0.45)); backdrop-filter: blur(4px);
+    background: var(--theme-overlay, rgba(0,0,0,0.45));
     display: flex; align-items: center; justify-content: center; padding: 16px;
     opacity: 0; pointer-events: none; transition: opacity 0.2s;
   }
@@ -112,30 +98,26 @@
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
           <!-- Details -->
-          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5">
-            <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
-              <p class="text-sm font-medium text-neutral-800 dark:text-white">Details</p>
-            </div>
+          <div class="al-card">
+            <div class="al-card-header">Details</div>
             <div class="p-5 space-y-4">
               <div>
-                <label class="form-label" for="serverName">Name</label>
-                <input id="serverName" type="text" placeholder="My server" maxlength="64" class="form-input">
+                <label class="al-label" for="serverName">Name</label>
+                <input id="serverName" type="text" placeholder="My server" maxlength="64" class="al-input">
               </div>
               <div>
-                <label class="form-label" for="serverDescription">Description <span class="text-neutral-400 font-normal">(optional)</span></label>
-                <input id="serverDescription" type="text" placeholder="What is this for?" maxlength="128" class="form-input">
+                <label class="al-label" for="serverDescription">Description <span class="text-neutral-400 font-normal">(optional)</span></label>
+                <input id="serverDescription" type="text" placeholder="What is this for?" maxlength="128" class="al-input">
               </div>
             </div>
           </div>
 
           <!-- Node & Image -->
-          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5">
-            <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
-              <p class="text-sm font-medium text-neutral-800 dark:text-white">Node & image</p>
-            </div>
+          <div class="al-card">
+            <div class="al-card-header">Node & image</div>
             <div class="p-5 space-y-4">
               <div>
-                <label class="form-label">Node</label>
+                <label class="al-label">Node</label>
                 <select id="nodeId" class="hidden">
                   <option value="" disabled selected>Select a node</option>
                   <% nodes.forEach(node => { %>
@@ -146,7 +128,7 @@
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="form-label">Image</label>
+                  <label class="al-label">Image</label>
                   <select id="imageId" class="hidden">
                     <option value="" disabled selected>Select an image</option>
                     <% images.forEach(image => { %>
@@ -156,7 +138,7 @@
                   <div class="custom-select" data-for="imageId"></div>
                 </div>
                 <div>
-                  <label class="form-label">Docker variant</label>
+                  <label class="al-label">Docker variant</label>
                   <select id="dockerImage" class="hidden">
                     <option value="" disabled selected>Select an image first</option>
                   </select>
@@ -164,7 +146,7 @@
                 </div>
               </div>
               <div>
-                <label class="form-label">Ports</label>
+                <label class="al-label">Ports</label>
                 <button type="button" id="assignPortsBtn" class="cs-trigger">
                   <span id="assignPortsLabel">Assign ports</span>
                 </button>
@@ -175,23 +157,21 @@
           </div><!-- /top grid -->
 
           <!-- Resources -->
-          <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl border border-neutral-200 dark:border-white/5 overflow-hidden">
-            <div class="px-5 py-3.5 border-b border-neutral-200 dark:border-white/5">
-              <p class="text-sm font-medium text-neutral-800 dark:text-white">Resources</p>
-            </div>
+          <div class="al-card overflow-hidden">
+            <div class="al-card-header">Resources</div>
             <div class="p-5 grid grid-cols-3 gap-4">
               <div>
-                <label class="form-label flex items-center gap-1.5">
+                <label for="MemoryDisplay" class="al-label flex items-center gap-1.5">
                   <%- icon('server', { width: 14, height: 14 }) %>
                   RAM
                 </label>
                 <!-- hidden field always holds MB -->
                 <input type="hidden" id="Memory" value="512">
                 <div class="flex items-stretch gap-0">
-                  <button type="button" class="stepper-btn rounded-l-xl" data-action="dec" data-target="MemoryDisplay" data-step="128" data-min="1">−</button>
-                  <input id="MemoryDisplay" type="number" value="512" min="1" class="stepper-input flex-1">
-                  <button type="button" class="stepper-btn" data-action="inc" data-target="MemoryDisplay" data-step="128">+</button>
-                  <select id="MemoryUnit" class="rounded-r-xl text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-white border border-l-0 border-neutral-200 dark:border-white/10 cursor-pointer">
+                  <button type="button" class="stepper-btn rounded-l-xl" data-action="dec" data-target="MemoryDisplay" data-step="128" data-min="1" aria-label="Decrease RAM">−</button>
+                  <input id="MemoryDisplay" type="number" value="512" min="1" class="stepper-input flex-1" aria-label="RAM value">
+                  <button type="button" class="stepper-btn" data-action="inc" data-target="MemoryDisplay" data-step="128" aria-label="Increase RAM">+</button>
+                  <select id="MemoryUnit" class="rounded-r-xl text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-white border border-l-0 border-neutral-200 dark:border-white/10 cursor-pointer" aria-label="RAM unit">
                     <option value="1" selected>MB</option>
                     <option value="1024">GB</option>
                   </select>
@@ -199,29 +179,29 @@
                 <p class="text-[11px] text-neutral-400 mt-1.5"><%= resourceLimits.maxMemory > 0 ? 'Max ' + resourceLimits.maxMemory + ' MB' : 'Unlimited' %></p>
               </div>
               <div>
-                <label class="form-label flex items-center gap-1.5">
+                <label for="Cpu" class="al-label flex items-center gap-1.5">
                   <%- icon('cpu', { width: 14, height: 14 }) %>
                   CPU <span class="text-neutral-400 font-normal">(%)</span>
                 </label>
                 <div class="stepper">
-                  <button type="button" class="stepper-btn" data-action="dec" data-target="Cpu" data-step="50" data-min="50">−</button>
-                  <input id="Cpu" type="number" value="100" min="50" max="<%= resourceLimits.maxCpu %>" class="stepper-input">
-                  <button type="button" class="stepper-btn" data-action="inc" data-target="Cpu" data-step="50" data-max="<%= resourceLimits.maxCpu %>">+</button>
+                  <button type="button" class="stepper-btn" data-action="dec" data-target="Cpu" data-step="50" data-min="50" aria-label="Decrease CPU">−</button>
+                  <input id="Cpu" type="number" value="100" min="50" max="<%= resourceLimits.maxCpu %>" class="stepper-input" aria-label="CPU percentage">
+                  <button type="button" class="stepper-btn" data-action="inc" data-target="Cpu" data-step="50" data-max="<%= resourceLimits.maxCpu %>" aria-label="Increase CPU">+</button>
                 </div>
                 <p class="text-[11px] text-neutral-400 mt-1.5">50% = half a core. <%= resourceLimits.maxCpu > 0 ? 'Max ' + resourceLimits.maxCpu + '%' : 'Unlimited' %></p>
               </div>
               <div>
-                <label class="form-label flex items-center gap-1.5">
+                <label for="StorageDisplay" class="al-label flex items-center gap-1.5">
                   <%- icon('hard-drive', { width: 14, height: 14 }) %>
                   Storage
                 </label>
                 <!-- hidden field always holds MB -->
                 <input type="hidden" id="Storage" value="5120">
                 <div class="flex items-stretch gap-0">
-                  <button type="button" class="stepper-btn rounded-l-xl" data-action="dec" data-target="StorageDisplay" data-step="1" data-min="1">−</button>
-                  <input id="StorageDisplay" type="number" value="5" min="1" class="stepper-input flex-1">
-                  <button type="button" class="stepper-btn" data-action="inc" data-target="StorageDisplay" data-step="1">+</button>
-                  <select id="StorageUnit" class="rounded-r-xl text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-white border border-l-0 border-neutral-200 dark:border-white/10 cursor-pointer">
+                  <button type="button" class="stepper-btn rounded-l-xl" data-action="dec" data-target="StorageDisplay" data-step="1" data-min="1" aria-label="Decrease storage">−</button>
+                  <input id="StorageDisplay" type="number" value="5" min="1" class="stepper-input flex-1" aria-label="Storage value">
+                  <button type="button" class="stepper-btn" data-action="inc" data-target="StorageDisplay" data-step="1" aria-label="Increase storage">+</button>
+                  <select id="StorageUnit" class="rounded-r-xl text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-white border border-l-0 border-neutral-200 dark:border-white/10 cursor-pointer" aria-label="Storage unit">
                     <option value="1">MB</option>
                     <option value="1024" selected>GB</option>
                   </select>
@@ -239,7 +219,7 @@
           <!-- Submit -->
           <div class="flex justify-end pt-1">
             <button type="button" id="createBtn"
-              class="rounded-xl bg-neutral-900 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-6 py-2.5 text-sm font-medium shadow-sm transition flex items-center gap-2">
+              class="al-btn-primary rounded-xl px-6 py-2.5 text-sm font-medium shadow-sm transition flex items-center gap-2">
               <span id="createBtnText">Create server</span>
               <span id="createBtnSpinner" class="hidden w-4 h-4 border-2 border-white/30 dark:border-neutral-900/30 border-t-white dark:border-t-neutral-900 rounded-full animate-spin"></span>
             </button>
@@ -251,9 +231,9 @@
   </div>
 </main>
 
-<div class="confirm-overlay" id="portsOverlay">
+<div class="confirm-overlay" id="portsOverlay" role="dialog" aria-modal="true" aria-labelledby="portsOverlayTitle">
   <div class="confirm-box max-w-lg">
-    <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-3">Assign ports</p>
+    <p id="portsOverlayTitle" class="text-sm font-semibold text-neutral-800 dark:text-white mb-3">Assign ports</p>
     <div id="requiredPortsList" class="space-y-2"></div>
     <div class="flex justify-end mt-4">
       <button id="portsOk" class="px-4 py-2 rounded-lg text-sm font-medium bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-200 transition">OK</button>
@@ -262,7 +242,7 @@
 </div>
 
 <!-- Custom confirm dialog -->
-<div class="confirm-overlay" id="confirmOverlay">
+<div class="confirm-overlay" id="confirmOverlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmBody">
   <div class="confirm-box">
     <p class="text-sm font-semibold text-neutral-800 dark:text-white mb-1" id="confirmTitle"></p>
     <p class="text-xs text-neutral-500 mb-4" id="confirmBody"></p>

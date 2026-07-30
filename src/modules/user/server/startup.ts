@@ -39,6 +39,7 @@ export function registerStartupRoutes(router: Router): void {
           errorMessage.message = 'Server not found.';
           return res.render('user/server/startup', {
             errorMessage,
+            features: [],
             user,
             req,
             settings,
@@ -77,6 +78,7 @@ export function registerStartupRoutes(router: Router): void {
         errorMessage.message = 'Error fetching server data.';
         return res.render('user/server/startup', {
           errorMessage,
+          features: [],
           user: req.session?.user,
           req,
           settings,

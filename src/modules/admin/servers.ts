@@ -622,7 +622,7 @@ const adminModule: Module = {
       },
     );
 
-    router.get(
+    router.post(
       '/admin/server/delete/:id',
       isAuthenticated(true),
       async (req: Request, res: Response) => {

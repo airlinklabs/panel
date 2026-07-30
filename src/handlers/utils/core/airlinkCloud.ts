@@ -40,7 +40,7 @@ export class AirlinkCloudClient {
 
   async deleteFile(fileId: string) {
     try {
-      const response = await httpDelete(`${AIRLINK_CLOUD_URL}/storage/files/${fileId}`, {
+      const response = await httpDelete(`${AIRLINK_CLOUD_URL}/storage/files/${fileId}`, undefined, {
         headers: {
           'X-API-Key': this.apiKey,
         },

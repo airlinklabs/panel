@@ -1,6 +1,6 @@
 <%- include('../../components/header', { title: 'Startup' }) %>
 
-<main class="h-screen m-auto text-neutral-800 dark:text-white">
+<main class="h-screen m-auto" style="color:var(--theme-text-strong)">
   <!-- Success/Error Messages -->
   <div id="message-container" class="fixed top-4 right-4 z-50 max-w-md"></div>
   <div class="flex h-screen">
@@ -25,8 +25,8 @@
 
       <!-- Startup Configuration -->
       <div class="px-8 mt-8">
-        <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-300 dark:border-neutral-800/20">
-          <div class="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 overflow-hidden mb-6">
+        <div class="al-card p-6 shadow-lg">
+          <div class="al-card overflow-hidden mb-6">
             <div class="p-5 border-b border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
               <div>
                 <h2 class="text-lg font-semibold text-neutral-800 dark:text-white"><%= req.translations.startupCommand || 'Startup Command' %></h2>
@@ -76,14 +76,14 @@
               </div>
 
               <div class="px-5 py-4 bg-neutral-50 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-neutral-700">
-                <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors duration-200 <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %>><%= req.translations.saveCommand || 'Save Command' %></button>
+                <button type="submit" class="al-btn-primary rounded-xl px-6 py-2.5 text-center text-sm font-semibold shadow-sm <%= !isStartupEditAllowed ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !isStartupEditAllowed ? 'disabled' : '' %>><%= req.translations.saveCommand || 'Save Command' %></button>
               </div>
             </form>
           </div>
 
           <!-- Docker Image Selection -->
-          <div class="bg-white dark:bg-neutral-800 rounded-xl shadow-sm border border-neutral-200 dark:border-neutral-700 overflow-hidden">
-            <div class="p-5 border-b border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
+          <div class="al-card overflow-hidden">
+            <div class="p-5 border-b flex justify-between items-center" style="border-color:var(--theme-border)">
               <div>
                 <h3 class="text-lg font-semibold text-neutral-800 dark:text-white"><%= req.translations.dockerImageLabel || 'Docker Image' %></h3>
                 <p class="text-sm text-neutral-600 dark:text-neutral-400"><%= req.translations.dockerImageDesc || 'Change the Docker image used by your server.' %></p>
@@ -148,14 +148,14 @@
               </div>
 
               <div class="px-5 py-4 bg-neutral-50 dark:bg-neutral-800/50 border-t border-neutral-200 dark:border-neutral-700">
-                <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 hover:shadow-lg transition-all duration-200"><%= req.translations.updateDockerImage || 'Update Docker Image' %></button>
+                <button type="submit" class="al-btn-primary rounded-xl px-6 py-2.5 text-center text-sm font-semibold shadow-sm"><%= req.translations.updateDockerImage || 'Update Docker Image' %></button>
               </div>
             </form>
           </div>
         </div>
 
         <!-- Server Variables -->
-        <div class="bg-white dark:bg-white/5 rounded-xl p-6 shadow-lg border border-neutral-300 dark:border-neutral-800/20 mt-8">
+        <div class="al-card p-6 shadow-lg mt-8">
           <h2 class="text-lg font-semibold mb-4 text-neutral-800 dark:text-white"><%= req.translations.serverVariables || 'Server Variables' %></h2>
           <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4"><%= req.translations.serverVariablesDesc || 'Configure environment variables for your server.' %></p>
 
@@ -173,7 +173,7 @@
                       <% if (variable.type === 'boolean') { %>
                         <label class="relative inline-flex items-center cursor-pointer">
                           <input type="checkbox" name="var_<%= variable.env %>" id="toggle_<%= variable.env %>" class="sr-only peer" <%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'checked' : '' %>>
-                          <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                          <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
                           <span class="ms-3 text-sm font-medium text-neutral-600 dark:text-neutral-300" id="label_<%= variable.env %>"><%= variable.value == true || variable.value === '1' || variable.value === 1 ? 'Enabled' : 'Disabled' %></span>
                         </label>
                         <script nonce="<%- nonce %>">
@@ -196,7 +196,7 @@
             </div>
 
             <div class="mt-6">
-              <button type="submit" class="rounded-xl bg-blue-600 px-6 py-2.5 text-center text-sm font-semibold text-white shadow-lg hover:bg-blue-700 hover:scale-105 transition-all duration-200"><%= req.translations.saveVariables || 'Save Variables' %></button>
+              <button type="submit" class="al-btn-primary"><%= req.translations.saveVariables || 'Save Variables' %></button>
             </div>
           </form>
         </div>

@@ -69,7 +69,7 @@
           observer.unobserve(el);
         }
       });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0, rootMargin: '0px' });
 
     document.querySelectorAll('[data-animate]').forEach(function (el) {
       observer.observe(el);
@@ -123,14 +123,17 @@
 
   // ── Init on DOMContentLoaded ──────────────────────────────────────
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
+  function initMotion() {
+    requestAnimationFrame(function () {
       initViewportAnimations();
       initGroupAnimations();
     });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMotion);
   } else {
-    initViewportAnimations();
-    initGroupAnimations();
+    initMotion();
   }
 
   // Re-init on SPA navigation

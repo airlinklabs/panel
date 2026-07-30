@@ -1,41 +1,130 @@
 <%- include('./components/header', { title: 'Authentication' }) %>
 
-<main class="bg-white dark:bg-neutral-900 h-screen w-screen flex items-center justify-center">
-    <div class="container mx-auto px-4 flex flex-col items-center">
-        <!-- Header Text -->
-        <div class="text-center mb-12">
-            <h1 class="text-neutral-900 dark:text-white text-4xl font-semibold mb-2">Welcome Back</h1>
-            <p class="text-neutral-400">Choose your entry point</p>
-        </div>
-        <!-- Cards Container -->
-        <div class="grid md:grid-cols-2 gap-8 w-full max-w-4xl">
-            <!-- Login Card -->
-            <div class="bg-neutral-50 dark:bg-black/20 p-8 border border-neutral-200 dark:border-neutral-200/20 rounded-2xl shadow-lg backdrop-blur-sm transition-transform duration-300 hover:scale-[1.02]">
-                <div class="text-center mb-6">
-                    <%- icon('user', { class: 'w-12 h-12 text-neutral-400 mx-auto mb-4' }) %>
-                    <h2 class="text-neutral-900 dark:text-white text-2xl font-semibold">Sign In</h2>
-                    <p class="text-neutral-400 mt-2">Access your account</p>
-                </div>
-                <a href="/login" class="block w-full p-3 bg-neutral-100 hover:bg-neutral-300 rounded-lg text-neutral-800 font-semibold text-center transition duration-200">
-                    Login
-                </a>
-            </div>
-            <!-- Register Card -->
-            <div class="bg-neutral-50 dark:bg-black/20 p-8 border border-neutral-200 dark:border-neutral-200/20 rounded-2xl shadow-lg backdrop-blur-sm transition-transform duration-300 hover:scale-[1.02]">
-                <div class="text-center mb-6">
-                    <%- icon('user-plus', { class: 'w-12 h-12 text-neutral-400 mx-auto mb-4' }) %>
-                    <h2 class="text-neutral-900 dark:text-white text-2xl font-semibold">Create Account</h2>
-                    <p class="text-neutral-400 mt-2">Start your journey</p>
-                </div>
-                <a href="/register" class="block w-full p-3 bg-neutral-100 hover:bg-neutral-300 rounded-lg text-neutral-800 font-semibold text-center transition duration-200">
-                    Register
-                </a>
-            </div>
-        </div>
-        <!-- Footer Text -->
-        <p class="text-neutral-400 mt-12 text-sm">
-            Need help? <a href="#" class="text-blue-400 hover:underline">Contact Support</a>
-        </p>
+<style>
+  ::-webkit-scrollbar { display: none; }
+  body, html { height: 100%; margin: 0; }
+
+  .auth-split {
+    display: flex; min-height: 100vh;
+  }
+  .auth-panel {
+    width: 100%; max-width: 460px; flex-shrink: 0;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 48px 40px;
+    background: var(--theme-bg-card, #fff);
+    border-right: 1px solid var(--theme-border, #e5e5e5);
+    position: relative; z-index: 1;
+  }
+  html.dark .auth-panel {
+    background: var(--theme-bg-card, #141414);
+    border-right-color: var(--theme-border-subtle, rgba(255,255,255,0.08));
+  }
+  .auth-image {
+    flex: 1;
+    background: url('/assets/wallpapers/login.jpeg') center/cover no-repeat;
+  }
+
+  @media (max-width: 768px) {
+    .auth-split { display: block; min-height: 100vh; }
+    .auth-panel {
+      max-width: 100%; border-right: none; padding: 40px 24px;
+      min-height: 100vh; justify-content: center;
+    }
+    .auth-image { display: none; }
+  }
+
+  .auth-card {
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    padding: 28px 24px; border-radius: 14px;
+    border: 1px solid var(--theme-border, #e5e5e5);
+    background: var(--theme-bg-secondary, #fafafa);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    text-decoration: none; color: inherit;
+  }
+  html.dark .auth-card {
+    background: var(--theme-bg-secondary, rgba(255,255,255,0.04));
+    border-color: var(--theme-border-subtle, rgba(255,255,255,0.06));
+  }
+  .auth-card:hover {
+    border-color: var(--theme-border-accent, #a3a3a3);
+    box-shadow: var(--theme-shadow-md, 0 4px 6px -1px rgba(0,0,0,0.08));
+  }
+  html.dark .auth-card:hover {
+    border-color: var(--theme-border-accent, rgba(255,255,255,0.2));
+  }
+
+  .auth-card-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--theme-bg-active-nav, #f0f0f0);
+    color: var(--theme-text-muted, #737373);
+    margin-bottom: 14px;
+  }
+  html.dark .auth-card-icon {
+    background: var(--theme-accent-subtle, rgba(255,255,255,0.08));
+    color: var(--theme-text, #a3a3a3);
+  }
+
+  .auth-card-title {
+    font-size: 15px; font-weight: 600; margin-bottom: 4px;
+    color: var(--theme-text-strong, #0a0a0a);
+  }
+  html.dark .auth-card-title { color: var(--theme-text-strong, #fafafa); }
+
+  .auth-card-desc {
+    font-size: 13px;
+    color: var(--theme-text-muted, #737373);
+  }
+
+  .auth-panel { opacity: 0; transform: translateX(-12px); transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+  .auth-panel.visible { opacity: 1; transform: translateX(0); }
+</style>
+
+<div class="auth-split">
+  <div class="auth-panel" id="authPanel">
+
+    <div class="mb-8">
+      <% if (settings.logo) { %>
+      <img src="<%= settings.logo %>" alt="" class="h-10 w-10 rounded-xl object-contain mb-5">
+      <% } %>
+      <h1 class="text-2xl font-semibold" style="color:var(--theme-text-strong)">Welcome back</h1>
+      <p class="text-sm mt-1" style="color:var(--theme-text-muted)">Choose your entry point</p>
     </div>
-</main>
+
+    <div class="space-y-3">
+      <a href="/login" class="auth-card">
+        <div class="auth-card-icon">
+          <%- icon('user', { width: 20, height: 20, strokeWidth: 1.5 }) %>
+        </div>
+        <div class="auth-card-title">Sign In</div>
+        <div class="auth-card-desc">Access your account</div>
+      </a>
+
+      <% if (settings.allowRegistration) { %>
+      <a href="/register" class="auth-card">
+        <div class="auth-card-icon">
+          <%- icon('user-plus', { width: 20, height: 20, strokeWidth: 1.5 }) %>
+        </div>
+        <div class="auth-card-title">Create Account</div>
+        <div class="auth-card-desc">Start your journey</div>
+      </a>
+      <% } %>
+    </div>
+
+    <p class="text-xs text-center mt-8" style="color:var(--theme-text-muted)">
+      Need help? <a href="#" class="hover:underline" style="color:var(--theme-text-strong)">Contact Support</a>
+    </p>
+
+  </div>
+  <div class="auth-image"></div>
+</div>
+
+<script nonce="<%- nonce %>">
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      document.getElementById('authPanel').classList.add('visible');
+    });
+  });
+</script>
+
 <%- include('./components/footer') %>

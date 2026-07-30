@@ -1,0 +1,33 @@
+{
+  "history": [
+    { "version": "0.1.0", "codename": "Erebus",    "mode": "alpha" },
+    { "version": "0.2.0", "codename": "Umbra",     "mode": "alpha" },
+    { "version": "0.3.0", "codename": "Skia",      "mode": "alpha" },
+    { "version": "0.4.0", "codename": "Penumbra",  "mode": "alpha" },
+    { "version": "0.5.0", "codename": "Obscura",   "mode": "alpha" },
+    { "version": "0.6.0", "codename": "Nigredo",   "mode": "alpha" },
+    { "version": "0.7.0", "codename": "Kala",      "mode": "alpha" },
+    { "version": "0.8.0", "codename": "Mai",       "mode": "beta" },
+    { "version": "0.9.0", "codename": "Tenebris",  "mode": "beta" },
+    { "version": "1.0.0", "codename": "Leucous",   "mode": "production" },
+    { "version": "1.1.0", "codename": "Albedo",    "mode": "production" },
+    { "version": "1.2.0", "codename": "Candent",   "mode": "production" },
+    { "version": "1.3.0", "codename": "Vellai",    "mode": "production" },
+    { "version": "1.4.0", "codename": "Shukla",    "mode": "production" },
+    { "version": "1.5.0", "codename": "Sciaroscuro", "mode": "production" },
+    { "version": "1.6.0", "codename": "Lucent",    "mode": "production" },
+    { "version": "1.7.0", "codename": "Argyros",   "mode": "production" },
+    { "version": "1.8.0", "codename": "Phaos",     "mode": "production" },
+    { "version": "1.9.0", "codename": "Clarus",    "mode": "production" },
+    { "version": "2.0.0", "codename": "Achromata", "mode": "production" },
+    { "version": "2.1.0", "codename": "Kenosis",   "mode": "production" },
+    { "version": "2.2.0", "codename": "Sunya",     "mode": "production" },
+    { "version": "2.3.0", "codename": "Karumai",   "mode": "production" },
+    { "version": "2.4.0", "codename": "Avarna",    "mode": "production" }
+  ],
+  "meta": {
+    "version": "2.5.128",
+    "codename": "Katharos",
+    "mode": "production"
+  }
+}

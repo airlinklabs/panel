@@ -1,74 +1,145 @@
 <%- include('../../components/header', { title: req.translations.adminCreateUserTitle || 'Create User' }) %>
 
-<main class="h-screen m-auto">
-  <div class="flex h-screen">
-    <div class="hidden lg:block w-60 h-full">
+<main class="min-h-screen">
+  <div class="flex min-h-screen">
+    <div class="hidden lg:block w-60 shrink-0">
       <%- include('../../components/template') %>
     </div>
-    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
-      <div class="sm:flex sm:items-center px-8 pt-4">
-        <div class="sm:flex-auto">
-          <h1 class="text-base font-medium leading-6 text-neutral-800 dark:text-white"><%= req.translations.adminCreateUserTitle %></h1>
-          <p class="mt-1 tracking-tight text-sm text-neutral-500"><%= req.translations.adminCreateUserText || 'Every great panel needs people. Let\'s add one.' %></p>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
+      <div class="al-page-header flex items-start justify-between gap-4">
+        <div>
+          <h1 class="al-page-title"><%= req.translations.adminCreateUserTitle %></h1>
+          <p class="al-page-desc"><%= req.translations.adminCreateUserText || 'Every great panel needs people. Let\'s add one.' %></p>
+        </div>
+        <div class="flex gap-2 shrink-0 items-center">
+          <button id="createuserBtn" type="button" class="al-btn-primary">
+            <%= req.translations.create || 'Create user' %>
+          </button>
         </div>
       </div>
 
-      <div id="userForm" class="mt-6 px-8 w-full">
-        <div class="bg-neutral-50 dark:bg-neutral-800/20 rounded-xl p-5 border border-neutral-200 dark:border-white/5">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div class="al-page-body">
+        <div class="al-card p-5">
+          <form id="createUserForm">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- User Information Section -->
+              <div class="space-y-5">
+                <h2 class="text-lg font-medium text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-white/10 pb-2">
+                  <%= req.translations.userInformation || 'User Information' %>
+                </h2>
 
-            <div>
-              <label for="userEmail" class="block text-neutral-700 dark:text-neutral-400 text-sm font-medium mb-2"><%= req.translations.email %>:</label>
-              <input id="userEmail" type="email" class="rounded-xl text-neutral-800 dark:text-white text-sm w-full px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/20" placeholder="example@domain.com">
-            </div>
+                <div>
+                  <label for="userEmail" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                    <%- icon('mail', { size: 14, class: 'shrink-0' }) %>
+                    <%= req.translations.email %>:
+                  </label>
+                  <input id="userEmail" type="email" class="al-input" placeholder="example@domain.com">
+                </div>
 
-            <div>
-              <label for="userUsername" class="block text-neutral-700 dark:text-neutral-400 text-sm font-medium mb-2"><%= req.translations.username %>:</label>
-              <input id="userUsername" type="text" class="rounded-xl text-neutral-800 dark:text-white text-sm w-full px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/20" placeholder="username">
-              <div id="username-criteria" class="mt-2 space-y-1">
-                <p id="crit-username-length" class="text-xs text-neutral-400">
-                  <span class="crit-icon">—</span> 3–20 characters
-                </p>
-                <p id="crit-username-chars" class="text-xs text-neutral-400">
-                  <span class="crit-icon">—</span> Letters and numbers only
-                </p>
+                <div>
+                  <label for="userUsername" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                    <%- icon('user', { size: 14, class: 'shrink-0' }) %>
+                    <%= req.translations.username %>:
+                  </label>
+                  <input id="userUsername" type="text" class="al-input" placeholder="username">
+                  <div id="username-criteria" class="mt-2 space-y-1">
+                    <p id="crit-username-length" class="text-xs text-neutral-400">
+                      <span class="crit-icon">—</span> 3–20 characters
+                    </p>
+                    <p id="crit-username-chars" class="text-xs text-neutral-400">
+                      <span class="crit-icon">—</span> Letters and numbers only
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <label for="userDescription" class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                    <%= req.translations.description || 'Description' %>
+                  </label>
+                  <textarea id="userDescription" rows="3" class="al-input" placeholder="Optional description"></textarea>
+                </div>
+              </div>
+
+              <!-- Security Section -->
+              <div class="space-y-5">
+                <h2 class="text-lg font-medium text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-white/10 pb-2">
+                  <%= req.translations.security || 'Security' %>
+                </h2>
+
+                <div>
+                  <label for="userPassword" class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                    <%- icon('lock', { size: 14, class: 'shrink-0' }) %>
+                    <%= req.translations.password %>:
+                  </label>
+                  <input id="userPassword" type="password" class="al-input" placeholder="********">
+                  <div id="password-criteria" class="mt-2 space-y-1">
+                    <p id="crit-length" class="text-xs text-neutral-400">
+                      <span class="crit-icon">—</span> At least 8 characters
+                    </p>
+                    <p id="crit-letter" class="text-xs text-neutral-400">
+                      <span class="crit-icon">—</span> At least one letter
+                    </p>
+                    <p id="crit-number" class="text-xs text-neutral-400">
+                      <span class="crit-icon">—</span> At least one number
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <label for="userConfirmPassword" class="block text-neutral-700 dark:text-white text-sm font-medium mb-2">
+                    <%= req.translations.confirmPassword || 'Confirm Password' %>
+                  </label>
+                  <input id="userConfirmPassword" type="password" class="al-input" placeholder="********">
+                </div>
+
+                <div>
+                  <div class="bg-neutral-400/10 dark:bg-neutral-600/20 p-4 rounded-xl border border-neutral-800/10 dark:border-white/5 w-full">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <h3 class="text-sm font-medium text-neutral-800 dark:text-white">
+                          <%= req.translations.adminStatus || 'Administrator Status' %>
+                        </h3>
+                        <p class="text-xs text-neutral-400 mt-1">
+                          <%= req.translations.adminDescription || 'Administrators have full access to manage all aspects of the system.' %>
+                        </p>
+                      </div>
+                      <label for="userIsAdminSwitch" class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="userIsAdminSwitch" class="sr-only peer">
+                        <div class="al-toggle-track"><div class="al-toggle-dot"></div></div>
+                      </label>
+                      <span class="ms-3 text-sm font-medium text-neutral-700 dark:text-white" id="adminStatusLabel">Disabled</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div class="sm:col-span-2">
-              <label for="userPassword" class="block text-neutral-700 dark:text-neutral-400 text-sm font-medium mb-2"><%= req.translations.password %>:</label>
-              <input id="userPassword" type="password" class="rounded-xl text-neutral-800 dark:text-white text-sm w-full px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 placeholder:text-neutral-950/50 dark:placeholder:text-white/20 border border-neutral-800/10 dark:border-white/5 focus:outline-none focus:ring-1 focus:ring-neutral-300 dark:focus:ring-white/20" placeholder="********">
-              <div id="password-criteria" class="mt-2 space-y-1">
-                <p id="crit-length" class="text-xs text-neutral-400">
-                  <span class="crit-icon">—</span> At least 8 characters
-                </p>
-                <p id="crit-letter" class="text-xs text-neutral-400">
-                  <span class="crit-icon">—</span> At least one letter
-                </p>
-                <p id="crit-number" class="text-xs text-neutral-400">
-                  <span class="crit-icon">—</span> At least one number
-                </p>
+            <!-- Server limits -->
+            <div class="mt-6 pt-6 border-t border-neutral-200 dark:border-white/10">
+              <h2 class="text-base font-medium text-neutral-800 dark:text-white mb-1">Server limits</h2>
+              <p class="text-xs text-neutral-500 mb-4">Leave blank to use the global defaults set in Admin &rarr; Settings &rarr; Servers.</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('sliders-horizontal', { size: 14, class: 'shrink-0' }) %> Server limit</label>
+                  <input type="number" id="serverLimit" name="serverLimit" min="0" max="100" placeholder="Use global default" class="al-input">
+                  <p class="mt-1 text-xs text-neutral-500">Max servers this user can create. 0 = cannot create.</p>
+                </div>
+                <div>
+                  <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %> Max memory <span class="text-neutral-400 font-normal text-xs">(MB)</span></label>
+                  <input type="number" id="maxMemory" name="maxMemory" min="128" max="65536" placeholder="Use global default" class="al-input">
+                </div>
+                <div>
+                  <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('cpu', { size: 14, class: 'shrink-0' }) %> Max CPU <span class="text-neutral-400 font-normal text-xs">(%)</span></label>
+                  <input type="number" id="maxCpu" name="maxCpu" min="10" max="10000" placeholder="Use global default" class="al-input">
+                </div>
+                <div>
+                  <label class="flex items-center gap-1.5 text-neutral-700 dark:text-white text-sm font-medium mb-2"><%- icon('database', { size: 14, class: 'shrink-0' }) %> Max storage <span class="text-neutral-400 font-normal text-xs">(MB)</span></label>
+                  <input type="number" id="maxStorage" name="maxStorage" min="1" max="10000" placeholder="Use global default" class="al-input">
+                </div>
               </div>
             </div>
 
-            <div>
-              <label class="block text-neutral-700 dark:text-neutral-400 text-sm font-medium mb-2"><%= req.translations.admin %>:</label>
-              <div class="flex items-center mt-1">
-                <label class="relative inline-block w-12 h-6">
-                  <input type="checkbox" id="userIsAdminSwitch" class="sr-only peer">
-                  <span class="block w-12 h-6 bg-neutral-400 peer-checked:bg-blue-500 rounded-full transition-colors"></span>
-                  <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full peer-checked:translate-x-6 transition-transform"></span>
-                </label>
-                <span class="ml-3 text-sm text-neutral-500 dark:text-neutral-400">Admin access</span>
-              </div>
-            </div>
-
-            <div class="sm:col-span-2 flex justify-end">
-              <button id="createuserBtn" type="button" class="rounded-xl bg-neutral-950 dark:bg-white hover:bg-neutral-700 dark:hover:bg-neutral-200 text-white dark:text-neutral-800 px-5 py-2 text-sm font-medium shadow-md transition disabled:opacity-40 disabled:cursor-not-allowed">
-                <%= req.translations.create || 'Create user' %>
-              </button>
-            </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
