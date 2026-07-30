@@ -3,200 +3,44 @@
 
 <style>
   ::-webkit-scrollbar { display: none; }
-
-  /* Fixed-size detail modal */
-  .modal-overlay {
-    position: fixed; inset: 0; z-index: 50;
-    background: var(--theme-overlay, rgba(0,0,0,0.5));
-    display: flex; align-items: center; justify-content: center; padding: 16px;
-    opacity: 0; pointer-events: none; transition: opacity 0.25s;
-  }
-  .modal-overlay.open { opacity: 1; pointer-events: auto; }
-  .modal-box {
-    background: var(--theme-bg-card, #fff); border: 1px solid var(--theme-border, #e5e5e5); border-radius: 12px;
-    width: 100%; max-width: 680px; height: 520px; max-height: calc(100vh - 40px);
-    display: flex; flex-direction: column;
-    transform: scale(0.96); opacity: 0;
-    transition: transform 0.25s, opacity 0.25s; overflow: hidden;
-  }
-  html.dark .modal-box { background: var(--theme-bg-card, #1c1c1c); border-color: var(--theme-border-subtle, rgba(255,255,255,0.08)); }
-  .modal-overlay.open .modal-box { transform: scale(1); opacity: 1; }
-  .modal-two-col { display: flex; flex: 1; overflow: hidden; min-height: 0; }
-  .modal-left { width: 280px; min-width: 220px; flex-shrink: 0; border-right: 1px solid var(--theme-border, #e5e5e5); overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
-  html.dark .modal-left { border-right-color: var(--theme-border-subtle, rgba(255,255,255,0.06)); }
-  .modal-right { flex: 1; min-width: 0; overflow-y: auto; padding: 18px; }
-
-  /* Status badges */
-  .sb-working { background: var(--theme-success-bg, rgba(34,197,94,0.1)); color: var(--theme-success-text, #15803d); }
-  .sb-beta    { background: var(--theme-warning-bg, rgba(234,179,8,0.1)); color: var(--theme-warning-text, #a16207); }
-  .sb-wip     { background: var(--theme-warning-bg, rgba(249,115,22,0.1)); color: var(--theme-warning-text, #c2410c); }
-  .sb-inst    { background: var(--theme-info-bg, rgba(99,102,241,0.1)); color: var(--theme-info-text, #4338ca); }
-  html.dark .sb-working { background: var(--theme-success-bg, rgba(34,197,94,0.12)); color: var(--theme-success, #4ade80); }
-  html.dark .sb-beta    { background: var(--theme-warning-bg, rgba(234,179,8,0.12)); color: var(--theme-warning, #facc15); }
-  html.dark .sb-wip     { background: var(--theme-warning-bg, rgba(249,115,22,0.12)); color: var(--theme-warning, #fb923c); }
-  html.dark .sb-inst    { background: var(--theme-info-bg, rgba(99,102,241,0.15)); color: var(--theme-info, #a5b4fc); }
-
-  /* Category badges */
-  .cat-game        { background: var(--theme-info-bg, #ede9fe); color: var(--theme-info-text, #6d28d9); }
-  .cat-application { background: var(--theme-info-bg, #e0f2fe); color: var(--theme-info-text, #0369a1); }
-  .cat-generic     { background: var(--theme-success-bg, #dcfce7); color: var(--theme-success-text, #15803d); }
-  html.dark .cat-game        { background: var(--theme-info-bg, rgba(139,92,246,0.15)); color: var(--theme-info, #a78bfa); }
-  html.dark .cat-application { background: var(--theme-info-bg, rgba(14,165,233,0.15)); color: var(--theme-info, #38bdf8); }
-  html.dark .cat-generic     { background: var(--theme-success-bg, rgba(34,197,94,0.15)); color: var(--theme-success, #4ade80); }
-
-  /* Tags */
-  .s-tag { font-size: 11px; color: var(--theme-text-muted, #737373); background: var(--theme-bg-secondary, #f5f5f5); border: 1px solid var(--theme-border, #e5e5e5); border-radius: 99px; padding: 2px 9px; white-space: nowrap; cursor: pointer; transition: all 0.1s; }
-  html.dark .s-tag { color: var(--theme-text-muted, #525252); background: var(--theme-bg-hover, rgba(255,255,255,0.04)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.07)); }
-  .s-tag.on { background: var(--theme-border, #e5e5e5); color: var(--theme-text-strong, #171717); border-color: var(--theme-border-strong, #d4d4d4); }
-  html.dark .s-tag.on { background: var(--theme-bg-hover, rgba(255,255,255,0.1)); color: var(--theme-text-strong, #d4d4d4); border-color: var(--theme-border-subtle, rgba(255,255,255,0.13)); }
-
-  /* Markdown */
-  .md-body { font-size: 12.5px; line-height: 1.75; color: var(--theme-text-muted, #525252); }
-  html.dark .md-body { color: var(--theme-text-muted, #737373); }
-  .md-body h1, .md-body h2 { font-size: 13px; font-weight: 600; color: var(--theme-text-strong, #171717); margin: 0 0 6px; }
-  html.dark .md-body h1, html.dark .md-body h2 { color: var(--theme-text, #e5e5e5); }
-  .md-body h3 { font-size: 12px; font-weight: 600; color: var(--theme-text-muted, #525252); margin: 10px 0 3px; }
-  html.dark .md-body h3 { color: var(--theme-text, #a3a3a3); }
-  .md-body p { margin: 0 0 8px; }
-  .md-body a { color: var(--theme-accent, #7c3aed); text-decoration: none; }
-  .md-body a:hover { text-decoration: underline; }
-  .md-body code { font-family: ui-monospace,monospace; font-size: 11px; background: var(--theme-bg-secondary, #f4f4f5); padding: 1px 5px; border-radius: 4px; color: var(--theme-text-muted, #3f3f46); }
-  html.dark .md-body code { background: var(--theme-bg-hover, rgba(255,255,255,0.07)); color: var(--theme-text-strong, #d4d4d4); }
-  .md-body pre { background: var(--theme-bg-secondary, #f4f4f5); border: 1px solid var(--theme-border, #e5e5e5); border-radius: 8px; padding: 10px 12px; overflow-x: auto; margin: 0 0 8px; }
-  html.dark .md-body pre { background: var(--theme-bg-hover, rgba(255,255,255,0.04)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.07)); }
-  .md-body pre code { background: none; padding: 0; }
-  .md-body ul, .md-body ol { padding-left: 16px; margin: 0 0 8px; }
-  .md-body li { margin-bottom: 2px; }
-  .md-body hr { border: none; border-top: 1px solid var(--theme-border, #e5e5e5); margin: 10px 0; }
-  html.dark .md-body hr { border-top-color: var(--theme-border-subtle, rgba(255,255,255,0.06)); }
-  .md-body strong { color: var(--theme-text-strong, #171717); }
-  html.dark .md-body strong { color: var(--theme-text, #e5e5e5); }
-
-  /* Install terminal inside modal */
-  .term-box { background: var(--theme-bg-input, #f9fafb); border: 1px solid var(--theme-border, #e5e5e5); border-radius: 9px; padding: 12px; display: none; }
-  html.dark .term-box { background: var(--theme-bg-card, rgba(255,255,255,0.03)); border-color: var(--theme-border-subtle, rgba(255,255,255,0.07)); }
-  .term-log { font-family: ui-monospace,monospace; font-size: 11px; color: var(--theme-text-muted, #737373); line-height: 1.6; max-height: 120px; overflow-y: auto; margin-top: 8px; }
-  .term-log .l-step  { color: var(--theme-text, #a3a3a3); }
-  .term-log .l-cmd   { color: var(--theme-text-muted, #737373); font-weight: 500; }
-  .term-log .l-output{ color: var(--theme-text, #a3a3a3); }
-  .term-log .l-ok    { color: var(--theme-success-text, #15803d); }
-  html.dark .term-log .l-ok  { color: var(--theme-success, #4ade80); }
-  .term-log .l-err   { color: var(--theme-danger, #dc2626); }
-  html.dark .term-log .l-err { color: var(--theme-danger, #f87171); }
-  .prog-track { height: 2px; background: var(--theme-border, #e5e5e5); border-radius: 99px; overflow: hidden; margin: 6px 0 2px; }
-  html.dark .prog-track { background: var(--theme-border-subtle, rgba(255,255,255,0.07)); }
-  .prog-fill { height: 100%; background: var(--theme-text, #a3a3a3); border-radius: 99px; transition: width 0.3s ease; width: 0%; }
-
-  /* Pulse skeletons */
-  .sk { border-radius: 8px; animation: sk-pulse 1.4s ease-in-out infinite; }
-  html:not(.dark) .sk { background: var(--theme-bg-secondary, #f0f0f0); }
-  html.dark .sk { background: var(--theme-bg-hover, rgba(255,255,255,0.05)); }
-  @keyframes sk-pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
-
-  /* Error */
-  .err-box { background: var(--theme-danger-bg, rgba(239,68,68,0.08)); border: 1px solid var(--theme-danger-border, rgba(239,68,68,0.2)); border-radius: 9px; padding: 10px 12px; }
-  .err-txt { font-size: 11px; color: var(--theme-danger, #dc2626); }
-  html.dark .err-txt { color: var(--theme-danger, #f87171); }
-
-  @media (max-width: 640px) {
-    .modal-box { height: auto; max-height: calc(100vh - 40px); }
-    .modal-two-col { flex-direction: column; }
-    .modal-left { width: 100%; border-right: none; border-bottom: 1px solid var(--theme-border, #e5e5e5); }
-    html.dark .modal-left { border-bottom-color: var(--theme-border-subtle, rgba(255,255,255,0.06)); }
-    .col-hide { display: none; }
-  }
 </style>
 
-<main class="h-screen m-auto">
-  <div class="flex h-screen">
-    <div class="hidden lg:block w-60 h-full"><%- include('../../components/template') %></div>
-    <div id="page-content" class="flex-1 p-6 overflow-y-auto pt-16">
+<main class="min-h-screen m-auto">
+  <div class="flex min-h-screen">
+    <div class="hidden lg:block w-60 shrink-0"><%- include('../../components/template') %></div>
+    <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
 
-      <div class="sm:flex sm:items-center px-8 pt-4">
-        <%- include('../../components/pageTitle', { title: 'Addons', description: 'Browse and install addons from the community store' }) %>
+      <%- include('../../components/ui/breadcrumb', { items: [
+        { label: 'Admin' },
+        { label: 'Addons', href: '/admin/addons' },
+        { label: 'Store' }
+      ] }) %>
+
+      <div class="al-page-header flex items-start justify-between gap-4">
+        <div>
+          <h1 class="al-page-title">Addon Store</h1>
+          <p class="al-page-desc">Browse and install addons from the community</p>
+        </div>
       </div>
 
-      <div class="mx-8 mt-6 flex border-b border-neutral-200 dark:border-neutral-800">
-        <a href="/admin/addons" class="px-1 py-2.5 mr-5 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">Installed <span class="ml-1 text-xs"><%= addons ? addons.length : 0 %></span></a>
-        <span class="px-1 py-2.5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px">Store</span>
+      <div class="al-page-body">
+        <div class="flex" style="border-bottom:1px solid var(--theme-border)">
+          <a href="/admin/addons" class="px-1 py-2.5 mr-5 text-sm font-medium text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 border-b-2 border-transparent -mb-px transition">Installed <% if (typeof addons !== 'undefined') { %><span class="ml-1 text-xs text-neutral-400"><%= addons.length %></span><% } %></a>
+          <span class="px-1 py-2.5 text-sm font-medium text-neutral-800 dark:text-white border-b-2 border-neutral-800 dark:border-white -mb-px">Store</span>
+        </div>
+
+        <div class="flex flex-col items-center justify-center py-24 text-center">
+          <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border);">
+            <%- icon('package', { class: 'w-6 h-6', style: 'color:var(--theme-text-muted)' }) %>
+          </div>
+          <h3 class="text-sm font-medium" style="color:var(--theme-text-strong)">Coming Soon</h3>
+          <p class="text-sm mt-1 max-w-xs" style="color:var(--theme-text-muted)">The addon store is under development. Check back later for community addons and extensions.</p>
+          <a href="/admin/addons" class="mt-5 al-btn-secondary">Back to Addons</a>
+        </div>
       </div>
 
-      <div class="mx-8 mt-5 flex items-center gap-3 flex-wrap mb-1">
-        <input id="addonStoreFilterInput" type="text" placeholder="Search addons…" class="w-52 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-1 outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition">
-        <div id="tagFilters" class="flex gap-2 flex-wrap"></div>
-        <span id="statusText" class="text-xs text-neutral-400 dark:text-neutral-500 ml-auto whitespace-nowrap"></span>
-      </div>
-
-      <div id="loadingEl" class="m-8 space-y-2"><% for(let i=0;i<8;i++){%><div class="sk h-11 w-full"></div><%}%></div>
-      <div id="errorEl" style="display:none" class="mx-8 mt-6 py-16 text-center"><p id="errorMsg" class="text-sm text-neutral-500"></p><button onclick="loadStore()" class="mt-3 text-xs text-neutral-400 underline cursor-pointer bg-transparent border-none">Retry</button></div>
-      <div id="emptyEl" style="display:none" class="mx-8 mt-6 py-16 text-center"><p class="text-sm text-neutral-500">No addons match your search.</p><button id="clearSearch" class="mt-3 text-xs text-neutral-400 underline cursor-pointer bg-transparent border-none">Clear</button></div>
-
-      <div id="tableWrap" style="display:none" class="overflow-x-auto shadow-sm rounded-xl m-8 border border-neutral-200 dark:border-neutral-800/40">
-        <table class="min-w-full divide-y divide-neutral-200 dark:divide-white/10">
-          <thead class="bg-neutral-50 dark:bg-neutral-800/50">
-            <tr>
-              <th class="py-3.5 pl-6 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white">Name</th>
-              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white col-hide">Author</th>
-              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white col-hide">Status</th>
-              <th class="px-3 py-3.5 text-left text-sm font-medium text-neutral-800 dark:text-white">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody" class="divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-800/20"></tbody>
-        </table>
-      </div>
     </div>
   </div>
 </main>
-
-<!-- Detail modal (fixed 680×520) -->
-<div class="modal-overlay" id="detailOverlay">
-  <div class="modal-box">
-    <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200 dark:border-white/5 flex-shrink-0">
-      <div class="flex items-center gap-2 min-w-0">
-        <p id="dlgName" class="text-sm font-semibold text-neutral-800 dark:text-white truncate"></p>
-        <span id="dlgStatus" class="text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap"></span>
-      </div>
-      <div class="flex items-center gap-2 ml-3 shrink-0">
-        <a id="dlgGh" href="#" target="_blank" rel="noopener" class="rounded-xl border border-neutral-800/20 bg-white hover:bg-neutral-300 text-neutral-800 px-3 py-1.5 text-xs font-medium shadow transition flex items-center gap-1.5">
-          <%- icon('external-link', { size: 12, class: 'shrink-0' }) %>
-          GitHub
-        </a>
-        <button onclick="closeDetail()" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 transition">
-          <%- icon('x', { size: 16, class: 'shrink-0' }) %>
-        </button>
-      </div>
-    </div>
-    <div class="modal-two-col">
-      <div class="modal-left">
-        <p id="dlgMeta" class="text-[11px] text-neutral-400 dark:text-neutral-500"></p>
-        <p id="dlgDesc" class="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed"></p>
-        <div id="dlgFeats" class="flex flex-col gap-1"></div>
-        <div class="mt-auto flex flex-col gap-2 pt-2">
-          <div id="termBox" class="term-box">
-            <div class="flex justify-between items-center">
-              <span id="termLabel" class="text-[11px] font-medium text-neutral-600 dark:text-neutral-300">Starting…</span>
-              <span id="termPct" class="text-[10px] text-neutral-400 font-mono">0%</span>
-            </div>
-            <div class="prog-track"><div id="progFill" class="prog-fill"></div></div>
-            <div id="termLog" class="term-log"></div>
-          </div>
-          <div id="dlgErr" style="display:none" class="err-box"><p id="dlgErrTxt" class="err-txt"></p></div>
-          <button id="actionBtn" type="button"
-            class="w-full border border-neutral-800/20 rounded-xl bg-white hover:bg-neutral-200 dark:hover:bg-neutral-300 text-neutral-800 py-2.5 text-sm font-medium shadow-lg transition">
-            Install
-          </button>
-        </div>
-      </div>
-      <div class="modal-right">
-        <p class="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider mb-3">About</p>
-        <div id="dlgLong" class="md-body"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="page-data" style="display:none" data-installed-slugs="<%- JSON.stringify((addons||[]).map(a=>a.slug)) %>"></div>
-
-<script nonce="<%- nonce %>" src="/javascript/admin/admin-addons-store.js"></script>
 
 <%- include('../../components/footer') %>

@@ -124,7 +124,7 @@
 
 <div id="page-data" style="display:none"
   data-node-id="<%= node.id %>"
-  data-allocated-ports="<%- JSON.stringify(node.allocatedPorts || []) %>"
+  data-allocated-ports="<%- node.allocatedPorts || '[]' %>"
   data-used-ports="<%- JSON.stringify(usedPortsList) %>"
 ></div>
 

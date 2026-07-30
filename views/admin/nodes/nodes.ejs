@@ -86,7 +86,7 @@
             </thead>
             <tbody>
               <% let nodeIdx = 0; nodes.forEach(function(node) { %>
-                <tr style="--i:<%= nodeIdx++ %>" class="al-table-tr cursor-pointer" onclick="handleRowClick(event, '/admin/node/<%= node.id %>/stats')">
+                <tr data-node-id="<%= node.id %>" style="--i:<%= nodeIdx++ %>" class="al-table-tr cursor-pointer" onclick="handleRowClick(event, '/admin/node/<%= node.id %>/stats')">
                   <td class="al-table-td sm:pl-6">
                     <div class="flex items-center">
                       <div class="mr-5">
@@ -138,6 +138,10 @@
 
 <%- include('../../components/toast') %>
 
+<div id="page-data" style="display:none"></div>
+<script nonce="<%- nonce %>">
+  document.getElementById('page-data').dataset.nodes = '<%- JSON.stringify(nodes.map(n => ({ id: n.id, status: n.status }))).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/</g, '\\x3c').replace(/>/g, '\\x3e') %>';
+</script>
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-nodes.js"></script>
 
 <%- include('../../components/footer') %>
