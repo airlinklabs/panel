@@ -195,6 +195,24 @@ const adminModule: Module = {
           return;
         }
 
+        const allocatedPorts = req.body.allocatedPorts || '[]';
+        try {
+          const parsedPorts = JSON.parse(allocatedPorts);
+          if (!Array.isArray(parsedPorts)) {
+            throw new Error('Allocated ports must be an array');
+          }
+          for (const p of parsedPorts) {
+            if (typeof p !== 'number' || p < 1024 || p > 65535) {
+              throw new Error('Each port must be a number between 1024 and 65535');
+            }
+          }
+        } catch (error: any) {
+          res.status(400).json({
+            message: 'Invalid allocated ports format: ' + (error.message || 'Unknown error'),
+          });
+          return;
+        }
+
         try {
           const userId = req.session?.user?.id;
           const user = await prisma.users.findUnique({ where: { id: userId } });
@@ -219,6 +237,7 @@ const adminModule: Module = {
               address,
               port: portValue,
               key,
+              allocatedPorts,
               createdAt: new Date(),
             },
           });
@@ -248,6 +267,17 @@ const adminModule: Module = {
           const deleteInstances = req.query.deleteInstance === 'true';
 
           try {
+            const serverCount = await prisma.server.count({
+              where: { nodeId: nodeId },
+            });
+
+            if (serverCount > 0 && !deleteInstances) {
+              res.status(400).json({
+                message: `Node has ${serverCount} server(s) associated. Set ?deleteInstance=true to delete them as well, or delete the servers first.`,
+              });
+              return;
+            }
+
             if (deleteInstances) {
               const node = await prisma.node.findUnique({
                 where: { id: nodeId },

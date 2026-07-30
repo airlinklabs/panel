@@ -151,7 +151,7 @@
     if (inst) {
       this.disabled = true; this.textContent = 'Removing…';
       try {
-        const res = await fetch('/admin/addons/store/uninstall', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug }) });
+        const res = await fetch('/admin/addons/uninstall/' + encodeURIComponent(slug), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ confirm: true }) });
         const data = await res.json();
         if (data.success) { INSTALLED.delete(slug); showToast(data.message, 'success'); closeDetail(); render(filtered()); }
         else { showToast(data.message||'Failed', 'error'); setActionBtn(true); }

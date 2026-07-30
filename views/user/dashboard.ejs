@@ -181,7 +181,7 @@
             <tbody style="border-color:var(--theme-border);">
               <% let listIdx = 0; servers.forEach(server => { %>
               <% const inFolderL = folders && folders.some(f => f.members.some(m => m.serverUUID === server.UUID)); if (inFolderL) return; %>
-              <tr style="--i:<%= listIdx++ %>; border-color:var(--theme-border);" data-href="../server/<%= server.UUID %>" role="link" tabindex="0" class="al-table-tr cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset">
+              <tr style="--i:<%= listIdx++ %>; border-color:var(--theme-border);" data-server-uuid="<%= server.UUID %>" data-href="../server/<%= server.UUID %>" role="link" tabindex="0" class="al-table-tr cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset">
                 <td class="al-table-td pl-6">
                   <p class="text-sm font-medium truncate" style="color:var(--theme-text-strong);"><%= server.name %></p>
                   <% if (server.description) { %><p class="text-xs truncate max-w-xs" style="color:var(--theme-text-muted);"><%= server.description %></p><% } %>

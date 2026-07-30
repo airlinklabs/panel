@@ -1,12 +1,10 @@
 <%- include('../../components/header', { title: 'Edit Server' }) %>
 
-<main class="h-screen m-auto">
-  <div class="flex h-screen">
-    <!-- Sidebar -->
-    <div class="hidden lg:block w-60 h-full">
+<main class="min-h-screen">
+  <div class="flex min-h-screen">
+    <div class="hidden lg:block w-60 shrink-0">
       <%- include('../../components/template') %>
     </div>
-    <!-- Content -->
     <div id="page-content" class="flex-1 overflow-y-auto pt-16 pb-12">
       <%- include('../../components/ui/breadcrumb', { items: [
         { label: 'Admin' },
@@ -19,24 +17,25 @@
           <p class="al-page-desc"><%= req.translations.adminManageServer || 'Rename, reassign, or remove this server.' %></p>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-          <button type="submit" id="updateServerBtn" class="al-btn-primary">Save changes</button>
+          <button type="submit" form="editServerForm" class="al-btn-primary">Save changes</button>
           <a href="/admin/servers" class="al-btn-secondary">Back to Servers</a>
         </div>
       </div>
 
-      <div id="serverForm" class="al-page-body">
-        <div class="al-card p-5">
-          <form id="editServerForm">
-            <!-- General Category -->
-            <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)">General</h2>
-            <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="al-page-body space-y-5">
+        <form id="editServerForm" class="space-y-5">
+          <div class="al-card">
+            <h2 class="al-card-header">General</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label for="serverName" class="al-label">
-                  <%- icon('tag', { size: 14, class: 'shrink-0' }) %>
-                  <%= req.translations.name %>:</label>
-                <input id="serverName" name="name" value="<%= server.name %>" class="al-input">
+                <label for="serverName" class="al-label"><%= req.translations.name %>:</label>
+                <div class="flex items-center gap-2">
+                  <input id="serverName" name="name" value="<%= server.name %>" class="al-input flex-1">
+                  <button type="button" onclick="generateRandomName()" class="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl transition hover:bg-neutral-200 dark:hover:bg-neutral-600" style="color:var(--theme-text-muted);background:var(--theme-bg-input);border:1px solid var(--theme-border-input)">
+                    <%- icon('dices', { size: 15 }) %>
+                  </button>
+                </div>
               </div>
-
               <div>
                 <label for="serverDescription" class="al-label">
                   <%- icon('file-text', { size: 14, class: 'shrink-0' }) %>
@@ -44,10 +43,11 @@
                 <input id="serverDescription" name="description" value="<%= server.description || '' %>" class="al-input" placeholder="Server description">
               </div>
             </div>
+          </div>
 
-            <!-- Server Configuration -->
-            <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)">Server Configuration</h2>
-            <div class="grid grid-cols-2 gap-4 mb-6">
+          <div class="al-card">
+            <h2 class="al-card-header">Server Configuration</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label for="serverOwner" class="al-label">
                   <%- icon('user', { size: 14, class: 'shrink-0' }) %>
@@ -57,7 +57,7 @@
                     <option value="<%= userOption.id %>" <%= userOption.id === server.ownerId ? 'selected' : '' %>><%= userOption.username %></option>
                   <% }); %>
                 </select>
-                <div class="custom-select mt-2 mb-4" data-for="serverOwner"></div>
+                <div class="custom-select mt-2" data-for="serverOwner"></div>
               </div>
 
               <div>
@@ -69,7 +69,7 @@
                     <option value="<%= node.id %>" <%= node.id === server.nodeId ? 'selected' : '' %>><%= node.name %> (<%= node.address %>)</option>
                   <% }); %>
                 </select>
-                <div class="custom-select mt-2 mb-4" data-for="serverNode"></div>
+                <div class="custom-select mt-2" data-for="serverNode"></div>
               </div>
 
               <div>
@@ -81,7 +81,7 @@
                     <option value="<%= image.id %>" <%= image.id === server.imageId ? 'selected' : '' %> data-port-requirements='<%= image.portRequirements || "[]" %>'><%= image.name %></option>
                   <% }); %>
                 </select>
-                <div class="custom-select mt-2 mb-4" data-for="serverImage"></div>
+                <div class="custom-select mt-2" data-for="serverImage"></div>
               </div>
 
               <div>
@@ -89,16 +89,17 @@
                   <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
                   Ports:</label>
                 <input type="hidden" id="serverPorts" name="Ports">
-          <button type="button" id="assignPortsBtn" class="al-btn-secondary mt-2 mb-4 w-full">
-            <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
-            Assign ports
-          </button>
+                <button type="button" id="assignPortsBtn" class="al-btn-secondary mt-2 w-full">
+                  <%- icon('radio-tower', { size: 14, class: 'shrink-0' }) %>
+                  Assign ports
+                </button>
               </div>
             </div>
+          </div>
 
-            <!-- Resource Allocation -->
-            <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)">Resource Allocation</h2>
-            <div class="grid grid-cols-3 gap-4 mb-6">
+          <div class="al-card">
+            <h2 class="al-card-header">Resource Allocation</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label class="al-label">
                   <%- icon('memory-stick', { size: 14, class: 'shrink-0' }) %>
@@ -114,7 +115,7 @@
                     <option value="1024" <%= server.Memory >= 1024 ? 'selected' : '' %>>GB</option>
                   </select>
                 </div>
-                <p class="text-xs text-neutral-400 mb-3">Min 128 MB</p>
+                <p class="text-xs text-neutral-400">Min 128 MB</p>
               </div>
 
               <div>
@@ -125,13 +126,13 @@
                 <input type="hidden" id="serverCPU" name="Cpu" value="<%= server.Cpu %>">
                 <div class="flex items-stretch mt-2 mb-1 gap-0">
                   <input id="serverCPUDisplay" type="number" min="0.5" step="0.5" value="<%= (server.Cpu / 100).toFixed(1) %>"
-                    class="rounded-l-xl flex-1 focus:ring focus:ring-neutral-800/10 focus:border-neutral-800/20 text-neutral-800 dark:text-white text-sm hover:bg-white/5 px-4 py-2 bg-neutral-400/10 dark:bg-neutral-600/20 border border-r-0 border-neutral-800/10 dark:border-white/5">
+                    class="al-input rounded-l-xl flex-1 border-r-0">
                   <select id="serverCPUUnit" class="al-input rounded-r-xl cursor-pointer" style="flex:0 0 auto;max-width:5rem">
                     <option value="cores" selected>Cores</option>
                     <option value="percent">%</option>
                   </select>
                 </div>
-                <p class="text-xs text-neutral-400 mb-3">1 core = 100%</p>
+                <p class="text-xs text-neutral-400">1 core = 100%</p>
               </div>
 
               <div>
@@ -149,63 +150,64 @@
                     <option value="1024" <%= server.Storage >= 1024 ? 'selected' : '' %>>GB</option>
                   </select>
                 </div>
-                <p class="text-xs text-neutral-400 mb-3">Min 128 MB</p>
+                <p class="text-xs text-neutral-400">Min 128 MB</p>
               </div>
             </div>
+          </div>
 
-            <!-- Startup Configuration -->
-            <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)">Startup Configuration</h2>
-            <div class="mb-6">
+          <div class="al-card">
+            <h2 class="al-card-header">Startup Configuration</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label for="startCommand" class="al-label">
                   <%- icon('terminal', { size: 14, class: 'shrink-0' }) %>
                   Startup Command:</label>
                 <textarea id="startCommand" name="StartCommand" rows="3" class="al-input"><%= server.StartCommand %></textarea>
               </div>
-
-              <div class="rounded-lg p-4 mt-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
-                <div class="flex flex-col md:flex-row md:items-center justify-between">
-                  <div class="flex items-center mb-2 md:mb-0">
-                    <div class="flex-shrink-0 mr-3">
-                      <%- icon('pencil', { size: 24, style: 'color:var(--theme-accent)' }) %>
+              <div>
+                <div class="rounded-lg p-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
+                  <div class="flex flex-col md:flex-row md:items-center justify-between">
+                    <div class="flex items-center mb-2 md:mb-0">
+                      <div class="flex-shrink-0 mr-3">
+                        <%- icon('pencil', { size: 24, style: 'color:var(--theme-accent)' }) %>
+                      </div>
+                      <div>
+                        <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
+                        <p class="text-xs text-neutral-600 dark:text-neutral-400">When enabled, users can modify the startup command for this server.</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 class="text-sm font-medium text-neutral-800 dark:text-white">Startup Command Permissions</h3>
-                      <p class="text-xs text-neutral-600 dark:text-neutral-400">When enabled, users can modify the startup command for this server.</p>
-                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true" <%= server.allowStartupEdit ? 'checked' : '' %>>
+                      <div class="al-toggle-track">
+                        <div class="al-toggle-dot"></div>
+                      </div>
+                      <span class="ms-3 al-page-desc text-sm" id="allowStartupEditLabel"><%= server.allowStartupEdit ? 'Enabled' : 'Disabled' %></span>
+                    </label>
                   </div>
-                  <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="allowStartupEdit" id="allowStartupEdit" class="sr-only peer" value="true" <%= server.allowStartupEdit ? 'checked' : '' %>>
-                    <div class="al-toggle-track">
-                      <div class="al-toggle-dot"></div>
-                    </div>
-                    <span class="ms-3 al-page-desc text-sm" id="allowStartupEditLabel"><%= server.allowStartupEdit ? 'Enabled' : 'Disabled' %></span>
-                  </label>
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Server Status -->
-            <h2 class="text-lg font-semibold mb-4" style="color:var(--theme-text-strong)">Server Status</h2>
-            <div class="grid grid-cols-2 gap-4 mb-6">
+          <div class="al-card">
+            <h2 class="al-card-header">Server Status</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <div class="flex items-center space-x-2 mb-4">
-                  <div class="flex-shrink-0">
-                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full <%= server.Suspended ? 'bg-red-100 text-red-500' : 'bg-green-100 text-green-500' %>">
-                      <% if (server.Suspended) { %>
-                        <%- icon('x-circle', { size: 20, class: 'shrink-0' }) %>
-                      <% } else { %>
-                        <%- icon('check-circle', { size: 20, class: 'shrink-0' }) %>
-                      <% } %>
-                    </span>
-                  </div>
+                <div class="flex items-center gap-3 mb-4">
+                  <span class="inline-flex items-center justify-center h-8 w-8 rounded-full <%= server.Suspended ? 'bg-red-100 text-red-500' : 'bg-green-100 text-green-500' %>">
+                    <% if (server.Suspended) { %>
+                      <%- icon('x-circle', { size: 20, class: 'shrink-0' }) %>
+                    <% } else { %>
+                      <%- icon('check-circle', { size: 20, class: 'shrink-0' }) %>
+                    <% } %>
+                  </span>
                   <div>
                     <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Status: <span class="<%= server.Suspended ? 'text-red-500' : 'text-green-500' %>"><%= server.Suspended ? 'Suspended' : 'Active' %></span></p>
                     <p class="text-xs text-neutral-500">Server ID: <%= server.UUID %></p>
                   </div>
                 </div>
 
-                <div class="rounded-lg p-4 mt-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
+                <div class="rounded-lg p-4" style="background:var(--theme-bg-secondary);border:1px solid var(--theme-border)">
                   <div class="flex flex-col md:flex-row md:items-center justify-between">
                     <div class="flex items-center mb-2 md:mb-0">
                       <div class="flex-shrink-0 mr-3">
@@ -226,12 +228,10 @@
               </div>
 
               <div>
-                <div class="flex items-center space-x-2 mb-4">
-                  <div class="flex-shrink-0">
-                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 text-blue-500">
-                      <%- icon('calendar', { size: 20, class: 'shrink-0' }) %>
-                    </span>
-                  </div>
+                <div class="flex items-center gap-3 mb-4">
+                  <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 text-blue-500">
+                    <%- icon('calendar', { size: 20, class: 'shrink-0' }) %>
+                  </span>
                   <div>
                     <p class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Created</p>
                     <p class="text-xs text-neutral-500"><%= new Date(server.createdAt).toLocaleString() %></p>
@@ -239,16 +239,15 @@
                 </div>
               </div>
             </div>
+          </div>
 
-
-          </form>
-        </div>
+        </form>
       </div>
     </div>
   </div>
 </main>
 
-<div id="portsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50  p-4">
+<div id="portsModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 p-4">
   <div class="al-modal-panel w-full max-w-4xl rounded-2xl border border-neutral-200 dark:border-white/5 bg-white dark:bg-[#1c1c1c] shadow-xl">
     <div class="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-700/60 px-5 py-4">
       <h2 class="text-sm font-semibold text-neutral-800 dark:text-white">Assign ports</h2>
@@ -268,6 +267,36 @@
 
 <%- include('../../components/toast') %>
 <%- include('../../components/loadingPopup') %>
+
+<style>
+#editServerForm .al-card { overflow: visible; }
+#editServerForm .al-card-header { border-radius: 12px 12px 0 0; overflow: hidden; margin-bottom: 16px; }
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+<script nonce="<%- nonce %>">
+const listA = [
+    "Charged", "Fiery", "Mystical", "Dark", "Angry", "Enchanted",
+    "Blazing", "Cursed", "Frozen", "Swift", "Ancient", "Wicked",
+    "Luminous", "Vengeful", "Radiant", "Thunderous", "Shadow",
+    "Frost", "Vibrant", "Spectral", "Nether", "Ender", "Caving",
+    "Toxic", "Haunted", "Radiant", "Ghostly"
+];
+const listB = [
+    "Creeper", "Dragon", "Zombie", "Ghoul", "Enderman", "Skeleton",
+    "Wither", "Magma Cube", "Blaze", "Witch", "Slime", "Spider",
+    "Phantom", "Villager", "Pillager", "Vindicator", "Drowned",
+    "Illager", "Ender Dragon", "Husk", "Stray", "Ravager", "Piglin",
+    "Hoglin", "Shulker", "Warden"
+];
+function generateRandomName() {
+    let randomA, randomB;
+    do { randomA = listA[Math.floor(Math.random() * listA.length)]; randomB = listB[Math.floor(Math.random() * listB.length)]; } while (randomA === randomB);
+    document.getElementById("serverName").value = randomA + " " + randomB;
+}
+</script>
 
 <script nonce="<%- nonce %>">
   document.addEventListener('DOMContentLoaded', function() {
@@ -501,10 +530,6 @@
 </script>
 
 <style>
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 .custom-select { position: relative; user-select: none; }
 .cs-trigger {
     display: flex; align-items: center; justify-content: space-between;

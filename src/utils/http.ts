@@ -206,9 +206,10 @@ export async function httpPatch<T = unknown>(
 
 export async function httpDelete<T = unknown>(
   url: string,
+  body?: unknown,
   options: Omit<Parameters<typeof request>[2], 'body'> = {},
 ): Promise<HttpResponse<T>> {
-  return request<T>('DELETE', url, options);
+  return request<T>('DELETE', url, { ...options, body });
 }
 
 export { isHttpError };

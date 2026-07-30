@@ -46,8 +46,7 @@ function isGitAvailable(): boolean {
 
 function isGitRepo(dir: string): boolean {
   try {
-    const result = spawnSync('git', ['rev-parse', '--git-dir'], { shell: false, cwd: dir, stdio: 'ignore', timeout: 5000 });
-    return result.status === 0;
+    return fs.existsSync(path.join(dir, '.git'));
   } catch {
     return false;
   }
@@ -65,7 +64,7 @@ async function cloneOrPullRepo(repoUrl: string, targetDir: string): Promise<void
       fs.rmSync(targetDir, { recursive: true, force: true });
     }
     logger.info(`Store: cloning ${repoUrl}`);
-    await execAsync(`git clone "${repoUrl}" "${targetDir}"`, { env });
+    await execAsync(`git clone --depth=1 "${repoUrl}" "${targetDir}"`, { env });
     return;
   }
 

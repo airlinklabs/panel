@@ -119,3 +119,53 @@ function closePopup() {
   overlay.classList.add('opacity-0');
   setTimeout(() => document.body.removeChild(overlay), 300);
 }
+
+// ── Live node status polling ──────────────────────────────────
+(function() {
+  var pageData = document.getElementById('page-data');
+  if (!pageData) return;
+  var rawNodes = pageData.dataset.nodes;
+  if (!rawNodes) return;
+
+  var nodeList;
+  try { nodeList = JSON.parse(rawNodes); } catch { return; }
+  if (!nodeList || !nodeList.length) return;
+
+  function getStatusClass(status) {
+    if (status === 'Online') return 'al-dot-online';
+    if (status === 'Offline') return 'al-dot-offline';
+    return 'al-dot-warning';
+  }
+
+  function updateNodeStatus(nodeId, status) {
+    var cell = document.querySelector('#nodeTable [data-node-id="' + nodeId + '"]');
+    if (!cell) return;
+    var dot = cell.querySelector('.al-dot-online, .al-dot-offline, .al-dot-warning');
+    if (!dot) return;
+    var newClass = getStatusClass(status);
+    if (dot.className !== newClass) {
+      dot.className = newClass;
+    }
+  }
+
+  function pollNodeStatus() {
+    fetch('/admin/nodes/list')
+      .then(function(r) { return r.json(); })
+      .then(function(nodes) {
+        if (!nodes || !nodes.length) return;
+        nodes.forEach(function(n) {
+          updateNodeStatus(n.id, n.status);
+        });
+        var anyOffline = nodes.some(function(n) { return n.status === 'Offline'; });
+        var alertEl = document.querySelector('.al-alert-danger');
+        if (anyOffline) {
+          if (!alertEl) window.location.reload();
+        } else {
+          if (alertEl) alertEl.remove();
+        }
+      })
+      .catch(function() {});
+  }
+
+  setInterval(pollNodeStatus, 15000);
+})();

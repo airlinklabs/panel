@@ -7,6 +7,7 @@ import { getParamAsString, getParamAsNumber } from '../../../utils/typeHelpers';
 import bcrypt from 'bcryptjs';
 import validator from 'validator';
 import crypto from 'crypto';
+import { daemonRequest } from '../../../handlers/utils/core/daemonRequest';
 
 function paginate<T>(items: T[], page: number, perPage: number) {
   const total = items.length;
@@ -578,10 +579,33 @@ const coreModule: Module = {
         try {
           const serverId = getParamAsString(req.params.id);
 
-          const existing = await prisma.server.findUnique({ where: { UUID: serverId } });
+          const existing = await prisma.server.findUnique({
+            where: { UUID: serverId },
+            include: { node: true },
+          });
           if (!existing) {
             res.status(404).json({ error: 'Server not found' });
             return;
+          }
+
+          if (existing.node) {
+            try {
+              await daemonRequest({
+                nodeAddress: existing.node.address,
+                nodePort: existing.node.port,
+                nodeKey: existing.node.key,
+                method: 'DELETE',
+                path: '/container',
+                body: { id: existing.UUID },
+              });
+            } catch (err: any) {
+              const isGone =
+                err.status === 404 ||
+                (err.body as any)?.error?.includes('not exist');
+              if (!isGone) {
+                logger.warn(`Could not delete container on daemon: ${err}`);
+              }
+            }
           }
 
           await prisma.server.delete({ where: { UUID: serverId } });
