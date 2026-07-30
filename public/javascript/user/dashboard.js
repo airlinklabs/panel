@@ -154,7 +154,7 @@
     const d = await r.json();
     confirmDeleteFolder.disabled = false;
     delete deleteFolderOverlay.dataset.open;
-    if (d.success) location.reload(); else showToast(d.error || "Couldn't delete the folder.", 'error');
+    if (d.success) location.reload(); else showToast(d.error || 'Couldn\'t delete the folder.', 'error');
   });
 
   // ── Drag-and-drop: server card → folder ───────────────────
@@ -282,4 +282,42 @@
       delete deleteFolderOverlay.dataset.open;
     }
   });
+
+  // ── Live status polling ────────────────────────────────────
+  var serverUUIDs = allServers.map(function(s) { return s.UUID; });
+
+  function updateServerBadge(uuid, online) {
+    var selector = '[data-server-uuid="' + uuid + '"]';
+    var card = document.querySelector(selector);
+    if (!card) return;
+
+    var badge = card.querySelector('.al-badge-online, .al-badge-offline, .al-badge-warning, .al-badge-info');
+    if (!badge) return;
+
+    if (online) {
+      badge.className = 'al-badge-online';
+      badge.innerHTML = '<span class="al-dot-online"></span> Online';
+    } else {
+      badge.className = 'al-badge-offline';
+      badge.innerHTML = '<span class="al-dot-offline"></span> Offline';
+    }
+  }
+
+  function pollAllServers() {
+    Promise.all(serverUUIDs.map(function(uuid) {
+      return fetch('/server/' + uuid + '/status')
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .catch(function() { return null; });
+    })).then(function(results) {
+      results.forEach(function(status, i) {
+        if (status !== null) {
+          updateServerBadge(serverUUIDs[i], status.online);
+        }
+      });
+    });
+  }
+
+  if (serverUUIDs.length > 0) {
+    setInterval(pollAllServers, 15000);
+  }
 })();

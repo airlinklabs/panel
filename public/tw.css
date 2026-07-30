@@ -23,7 +23,7 @@
   }
 
   :where(button, [role="button"], a, input, select, textarea):focus-visible {
-    outline: 2px solid rgb(59 130 246 / 0.75);
+    outline: 2px solid var(--theme-border-accent, #000000);
     outline-offset: 2px;
   }
 
@@ -38,20 +38,146 @@
 
 @layer utilities {
   .shadow-md {
-    --tw-shadow: 0 6px 12px -10px rgb(0 0 0 / 0.32);
-    --tw-shadow-colored: 0 6px 12px -10px var(--tw-shadow-color);
+    box-shadow: var(--theme-shadow-md, 0 6px 12px -10px rgb(0 0 0 / 0.32));
   }
 
   .shadow-lg {
-    --tw-shadow: 0 8px 18px -14px rgb(0 0 0 / 0.34);
-    --tw-shadow-colored: 0 8px 18px -14px var(--tw-shadow-color);
+    box-shadow: var(--theme-shadow-lg, 0 8px 18px -14px rgb(0 0 0 / 0.34));
   }
 
   .shadow-2xl {
-    --tw-shadow: 0 18px 44px -28px rgb(0 0 0 / 0.45);
-    --tw-shadow-colored: 0 18px 44px -28px var(--tw-shadow-color);
+    box-shadow: var(--theme-shadow-xl, 0 18px 44px -28px rgb(0 0 0 / 0.45));
   }
 
+  /* ── Airlink component utilities ─────────────────────────────── */
+
+  /* Core surfaces */
+  .al-surface        { background: var(--theme-bg-card); border: 1px solid var(--theme-border); }
+  .al-surface-raised { background: var(--theme-bg-card); border: 1px solid var(--theme-border); box-shadow: var(--theme-shadow, 0 1px 3px rgba(0,0,0,0.06)); }
+
+  /* Buttons */
+  .al-btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    background: var(--theme-btn-primary-bg);
+    color: var(--theme-btn-primary-text);
+  }
+  .al-btn-primary:hover:not(:disabled) { background: var(--theme-btn-primary-hover); }
+
+  .al-btn-secondary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    background: var(--theme-btn-secondary-bg);
+    border: 1px solid var(--theme-btn-secondary-border);
+    color: var(--theme-btn-secondary-text);
+  }
+  .al-btn-secondary:hover:not(:disabled) { background: var(--theme-btn-secondary-hover); }
+
+  .al-btn-danger {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    background: var(--theme-btn-danger-bg);
+    color: var(--theme-btn-danger-text);
+  }
+  .al-btn-danger:hover:not(:disabled) { background: var(--theme-btn-danger-hover); }
+
+  /* Ghost / icon button */
+  .al-btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg p-2 transition-colors;
+    color: var(--theme-text-muted);
+  }
+  .al-btn-ghost:hover { background: var(--theme-bg-hover); color: var(--theme-text-strong); }
+
+  /* Inputs */
+  .al-input {
+    @apply w-full rounded-xl px-3 py-2 text-sm transition-colors outline-none;
+    background: var(--theme-bg-input);
+    border: 1px solid var(--theme-border-input);
+    color: var(--theme-text-strong);
+  }
+  .al-input::placeholder { color: var(--theme-text-placeholder); }
+  .al-input:focus { border-color: var(--theme-border-accent); box-shadow: 0 0 0 3px var(--theme-accent-subtle); }
+
+  /* Labels */
+  .al-label {
+    @apply block text-xs font-medium mb-1.5;
+    color: var(--theme-text-muted);
+  }
+
+  /* Cards */
+  .al-card {
+    @apply rounded-xl overflow-hidden p-4;
+    background: var(--theme-bg-card);
+    border: 1px solid var(--theme-border);
+    box-shadow: var(--theme-shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
+  }
+  .al-card-header {
+    @apply -mx-4 -mt-4 mb-0 px-4 py-3 text-sm font-medium border-b;
+    background: var(--theme-bg-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-muted);
+  }
+
+  /* Status badge — always shows label alongside color */
+  .al-badge-online  { @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full; background: var(--theme-success-bg); color: var(--theme-success); }
+  .al-badge-offline { @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full; background: var(--theme-danger-bg); color: var(--theme-danger); }
+  .al-badge-warning { @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full; background: var(--theme-warning-bg); color: var(--theme-warning); }
+  .al-badge-info    { @apply inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full; background: var(--theme-info-bg); color: var(--theme-info); }
+
+  /* Status dot (8px, no ping animation — kills the toy look) */
+  .al-dot-online  { @apply inline-block w-2 h-2 rounded-full shrink-0; background: var(--theme-success); }
+  .al-dot-offline { @apply inline-block w-2 h-2 rounded-full shrink-0; background: var(--theme-danger); }
+  .al-dot-warning { @apply inline-block w-2 h-2 rounded-full shrink-0; background: var(--theme-warning); }
+
+  /* Skeleton */
+  .al-skeleton {
+    @apply rounded-lg relative overflow-hidden;
+    background: var(--theme-skeleton-base);
+  }
+  .al-skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, var(--theme-skeleton-shine, rgba(255,255,255,0.08)) 50%, transparent 100%);
+    animation: al-skeleton-shimmer 1.5s ease-in-out infinite;
+  }
+  @keyframes al-skeleton-shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  /* Page layout */
+  .al-page-header { @apply px-6 sm:px-8 pt-6 pb-4; }
+  .al-page-title  { @apply text-base font-medium; color: var(--theme-text-strong); }
+  .al-page-desc   { @apply text-sm mt-0.5; color: var(--theme-text-muted); }
+  .al-page-body   { @apply px-6 sm:px-8 pb-8; }
+
+  /* Table */
+  .al-table       { @apply w-full text-sm; }
+  .al-table-head  { @apply text-left; background: var(--theme-table-header-bg); }
+  .al-table-th    { @apply px-4 py-2.5 text-xs font-medium uppercase tracking-wide; color: var(--theme-text-muted); }
+  .al-table-tr    { @apply border-b transition-colors; border-color: var(--theme-border); }
+  .al-table-tr:hover { background: var(--theme-table-row-hover); }
+  .al-table-td    { @apply px-4 py-3; color: var(--theme-text); }
+
+  /* Alert banners */
+  .al-alert-danger  { @apply rounded-xl px-4 py-3 text-sm flex items-start gap-3; background: var(--theme-danger-bg); color: var(--theme-danger); border: 1px solid color-mix(in oklch, var(--theme-danger) 20%, transparent); }
+  .al-alert-warning { @apply rounded-xl px-4 py-3 text-sm flex items-start gap-3; background: var(--theme-warning-bg); color: var(--theme-warning); border: 1px solid color-mix(in oklch, var(--theme-warning) 20%, transparent); }
+  .al-alert-success { @apply rounded-xl px-4 py-3 text-sm flex items-start gap-3; background: var(--theme-success-bg); color: var(--theme-success); border: 1px solid color-mix(in oklch, var(--theme-success) 20%, transparent); }
+  .al-alert-info    { @apply rounded-xl px-4 py-3 text-sm flex items-start gap-3; background: var(--theme-info-bg); color: var(--theme-info); border: 1px solid color-mix(in oklch, var(--theme-info) 20%, transparent); }
+
+  /* Section divider label */
+  .al-section-label { @apply text-[10px] font-semibold uppercase tracking-widest mb-2; color: var(--theme-text-muted); }
+
+  /* Radio selection — uses theme accent so themed installs stay unified */
+  .al-radio-active { border-color: var(--theme-accent); background: var(--theme-accent-subtle); }
+  .al-radio-ring-active { border-color: var(--theme-accent); }
+  .al-radio-dot-active { background: var(--theme-accent-text); }
+
+  /* Toggle switch — activated via peer:checked sibling */
+  .al-toggle-track { @apply w-10 h-[22px] rounded-full flex items-center p-0.5 transition-colors cursor-pointer; background: var(--theme-toggle-bg, var(--theme-border)); }
+  .peer:checked ~ .al-toggle-track { background: var(--theme-accent); }
+  .al-toggle-dot   { @apply w-[18px] h-[18px] rounded-full transition-transform shadow-sm; background: var(--theme-accent-text); }
+  .peer:checked ~ .al-toggle-track .al-toggle-dot { transform: translateX(18px); }
+
+  /* Legacy aliases — kept for backward compat */
   .al-ui-surface {
     @apply border border-neutral-200 bg-white dark:border-neutral-700/50 dark:bg-neutral-900/60;
   }
@@ -67,6 +193,35 @@
   .al-ui-muted {
     @apply text-neutral-600 dark:text-neutral-400;
   }
+}
+
+/* ── Active mobile nav ──────────────────────────────────────── */
+.active-mobile {
+  color: var(--theme-nav-text-active) !important;
+}
+
+/* ── Refresh spin animation ─────────────────────────────────── */
+.al-refresh-spinning { animation: al-spin 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
+@keyframes al-spin { to { transform: rotate(360deg); } }
+
+/* ── Page loader ────────────────────────────────────────────── */
+.al-page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
+}
+
+/* ── Console responsive ─────────────────────────────────────── */
+#terminal {
+  min-height: 300px;
+  max-height: 60vh;
+}
+@media (max-width: 1023px) {
+  #terminal { max-height: 45vh; }
 }
 
 @media (prefers-reduced-motion: reduce) {

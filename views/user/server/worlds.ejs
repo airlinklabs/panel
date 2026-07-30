@@ -18,25 +18,17 @@
 
             <!-- Error Message -->
       <% if (errorMessage && errorMessage.message) { %>
-          <div class="bg-neutral-100 dark:bg-neutral-500/20 border border-neutral-200 dark:border-transparent p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start space-x-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-6 mt-2 ml-1 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg> 
-      <div>
-        <p class="text-neutral-800 dark:text-white">Error</p>
-        <p class="text-sm text-neutral-600 dark:text-neutral-400"><%= errorMessage.message %></p>
-      </div>
-    </div>
+          <div class="mx-8 mt-4">
+            <%- include('../../components/ui/alert', { type: 'danger', message: 'Error', detail: errorMessage.message }) %>
+          </div>
       <% } %>
 
               <!-- No worlds message -->
-                            <div class="collapsible-row no-anim<% if (worlds.length === 0) { %> open<% } %>" id="noWorldsMessageRow"><div><div id="noWorldsMessage" data-collapsible="true" class="bg-neutral-100 dark:bg-neutral-500/20 border border-neutral-200 dark:border-transparent p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start space-x-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-6 mt-2 ml-1 text-blue-400" viewBox="0 0 24 24" fill="currentColor">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-          </svg> 
+                            <div class="collapsible-row no-anim<% if (worlds.length === 0) { %> open<% } %>" id="noWorldsMessageRow"><div><div id="noWorldsMessage" data-collapsible="true" class="p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start space-x-4" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
+          <%- icon('info', { class: 'size-6 mt-2 ml-1', style:'color:var(--theme-text-muted)' }) %>
       <div>
-        <p class="text-neutral-800 dark:text-white">No worlds found</p>
-        <p class="text-sm text-neutral-600 dark:text-neutral-400">No Minecraft worlds were detected on this server. Worlds will appear here once they are created.</p>
+        <p class="text-sm font-medium" style="color:var(--theme-text-strong)">No worlds found</p>
+        <p class="text-sm" style="color:var(--theme-text-muted)">No Minecraft worlds were detected on this server. Worlds will appear here once they are created.</p>
       </div>
     </div>
 
@@ -48,17 +40,17 @@
       <div class="px-6">
 
         <!-- Table of worlds -->
-        <div class="collapsible-row no-anim<% if (worlds.length > 0) { %> open<% } %>" id="serverTableRow"><div><div class="overflow-hidden shadow rounded-lg border border-neutral-800/20 bg-white dark:bg-neutral-800" id="serverTable">
-          <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
-            <thead class="bg-neutral-50 dark:bg-neutral-800">
+        <div class="collapsible-row no-anim<% if (worlds.length > 0) { %> open<% } %>" id="serverTableRow"><div><div class="overflow-hidden shadow rounded-lg al-card" id="serverTable">
+          <table class="al-table min-w-full">
+            <thead class="al-table-head">
               <tr>
-                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.name %></th>
-                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-medium text-neutral-800 dark:text-white sm:pl-6"><%= req.translations.actions %></th>
+                <th scope="col" class="al-table-th py-3.5 pl-4 pr-3 sm:pl-6"><%= req.translations.name %></th>
+                <th scope="col" class="al-table-th py-3.5 pl-4 pr-3 sm:pl-6"><%= req.translations.actions %></th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-neutral-200 dark:divide-neutral-700 bg-white dark:bg-neutral-800">
+            <tbody class="divide-y" style="border-color:var(--theme-border)">
               <% let worldIdx = 0; worlds.forEach(function(world) { %>
-                <tr style="--i:<%= worldIdx++ %>" class="hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors">
+                <tr style="--i:<%= worldIdx++ %>" class="al-table-tr transition-colors">
                   <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
                     <div class="flex items-center">
                       <div class="mr-5 flex-shrink-0">
@@ -81,8 +73,8 @@
                         <img class="h-10 w-10 rounded-full border border-neutral-200 dark:border-neutral-600" src="<%= iconPath %>" alt="World icon" />
                       </div>
                       <div>
-                        <div class="font-medium text-neutral-800 dark:text-white"><%= world.name %></div>
-                        <div class="text-neutral-500 dark:text-neutral-400 text-xs mt-1">Minecraft World</div>
+                        <div class="font-medium" style="color:var(--theme-text-strong)"><%= world.name %></div>
+                        <div class="text-xs mt-1" style="color:var(--theme-text-muted)">Minecraft World</div>
                       </div>
                     </div>
                   </td>
@@ -90,7 +82,7 @@
                     <div class="flex gap-3">
                       <button
                         type="button"
-                        class="rounded-xl bg-red-600 px-3 py-2 text-center text-sm font-medium text-white shadow-sm hover:bg-red-500 transition-colors"
+                        class="al-btn-danger rounded-xl px-3 py-2 text-center text-sm font-medium shadow-sm"
                         onclick="confirmDeleteWorld('<%= world.name %>')"
                       >
                         <div class="flex items-center">

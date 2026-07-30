@@ -1,20 +1,43 @@
+<!-- Mobile top bar -->
+<div class="mobile-top-bar fixed top-0 left-0 right-0 z-40 lg:hidden h-14 flex items-center justify-between px-4 border-b" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
+  <a href="/" class="flex items-center gap-2.5 min-w-0">
+    <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="h-8 w-8 rounded-lg shrink-0" style="background:var(--theme-logo-bg);">
+    <h1 class="font-medium text-sm truncate" style="color:var(--theme-text-strong);"><%= settings.title || 'Airlink' %></h1>
+  </a>
+  <div class="flex items-center gap-2">
+    <button type="button" id="mobile-theme-toggle" class="p-2 rounded-lg transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center" style="color:var(--theme-text-muted);" aria-label="Toggle theme">
+      <svg class="w-4 h-4 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"></path>
+      </svg>
+      <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 009-9c0-.463-.032-.926-.086-1.376z"></path>
+      </svg>
+    </button>
+    <% if (typeof user !== 'undefined') { %>
+    <a href="/account" class="p-1 rounded-lg transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center" style="color:var(--theme-text-muted);">
+      <img class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
+    </a>
+    <% } %>
+  </div>
+</div>
+
 <!-- Mobile bottom navigation -->
-<nav id="mobile-bottom-nav" class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t border-neutral-200/30 dark:border-white/5 bg-white/8 dark:bg-[#141414]/8 backdrop-blur-xl" aria-label="Mobile navigation">
-  <div class="flex items-center justify-around h-16 px-2">
+<nav id="mobile-bottom-nav" class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t" aria-label="Mobile navigation" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
+  <div class="flex items-stretch h-[60px] px-2">
     <%
     const bottomNavItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
     const navToShow = (bottomNavItems || []).slice(0, 4);
     %>
 
     <% navToShow.forEach(function(item) { %>
-    <a href="<%= item.url %>" class="mobile-nav-link flex flex-col items-center justify-center w-16 h-full text-xs gap-1 transition-colors" data-match-prefix="<%= item.matchPrefix || '' %>">
+    <a href="<%= item.url %>" class="mobile-nav-link min-w-0 flex-1 flex flex-col items-center justify-center gap-1.5 text-xs transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent;" data-match-prefix="<%= item.matchPrefix || '' %>">
       <%- item.icon %>
       <span class="truncate max-w-[4rem]"><%= item.label %></span>
     </a>
     <% }); %>
 
     <!-- More button (for remaining items) -->
-    <button id="mobile-more-btn" class="mobile-nav-link flex flex-col items-center justify-center w-16 h-full text-xs gap-1 transition-colors" aria-label="More navigation options" aria-expanded="false" aria-controls="mobile-more-sheet">
+    <button id="mobile-more-btn" class="mobile-nav-link min-w-0 flex-1 flex flex-col items-center justify-center gap-1.5 text-xs transition-colors active:scale-95" style="color:var(--theme-nav-text); -webkit-tap-highlight-color: transparent;" aria-label="More navigation options" aria-expanded="false" aria-controls="mobile-more-sheet">
       <%- icon('more-horizontal', { class: 'w-5 h-5' }) %>
       <span>More</span>
     </button>
@@ -23,71 +46,82 @@
 
 <!-- More sheet (slides up from bottom) -->
 <div id="mobile-more-sheet" class="mobile-more-sheet fixed inset-x-0 bottom-0 z-50 lg:hidden transform translate-y-full transition-transform duration-300 ease-out" role="dialog" aria-label="Additional navigation" aria-modal="true">
-  <div class="bg-white dark:bg-neutral-900 rounded-t-2xl border-t border-neutral-200 dark:border-neutral-700 shadow-xl max-h-[70vh] overflow-y-auto">
-    <div class="sticky top-0 bg-white dark:bg-neutral-900 px-4 py-3 border-b border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
-      <span class="text-sm font-medium text-neutral-800 dark:text-white">Navigation</span>
-      <button id="mobile-more-close" class="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors" aria-label="Close menu">
-        <%- icon('x', { class: 'w-5 h-5 text-neutral-500' }) %>
+  <div class="rounded-t-2xl border-t shadow-xl max-h-[70vh] overflow-y-auto" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+    <div class="sticky top-0 px-4 py-3 border-b flex items-center justify-between" style="background:var(--theme-bg-card); border-color:var(--theme-border);">
+      <span class="text-sm font-medium" style="color:var(--theme-text-strong);">Navigation</span>
+      <button id="mobile-more-close" class="p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center" style="color:var(--theme-text-muted);" aria-label="Close menu">
+        <%- icon('x', { class: 'w-5 h-5' }) %>
       </button>
     </div>
     <div class="px-2 py-2">
       <% (bottomNavItems || []).slice(4).forEach(function(item) { %>
-      <a href="<%= item.url %>" class="flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors" data-match-prefix="<%= item.matchPrefix || '' %>">
+      <a href="<%= item.url %>" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;" data-match-prefix="<%= item.matchPrefix || '' %>">
         <%- item.icon %>
         <span class="text-sm"><%= item.label %></span>
       </a>
       <% }); %>
 
       <% if (typeof user !== 'undefined' && user.isAdmin === true) { %>
-      <div class="border-t border-neutral-100 dark:border-neutral-800 mt-2 pt-2">
-        <p class="px-4 py-1 text-xs font-medium text-neutral-400 uppercase tracking-wide">Admin</p>
-        <a href="/admin/overview" class="flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+      <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
+        <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide" style="color:var(--theme-text-muted);">Admin</p>
+        
+        <!-- Core -->
+        <a href="/admin/overview" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('layout-grid', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Overview</span>
         </a>
-        <a href="/admin/settings" class="flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
-          <%- icon('settings', { class: 'w-5 h-5' }) %>
-          <span class="text-sm">Settings</span>
-        </a>
-        <a href="/admin/servers" class="flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+        <a href="/admin/servers" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('server', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Servers</span>
         </a>
-        <a href="/admin/users" class="flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+        <a href="/admin/users" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('users', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Users</span>
         </a>
-        <a href="/admin/nodes" class="flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+
+        <!-- Infrastructure -->
+        <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);">Infrastructure</p>
+        <a href="/admin/nodes" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('network', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Nodes</span>
         </a>
-        <a href="/admin/images" class="flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+        <a href="/admin/images" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('box', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Images</span>
         </a>
-        <a href="/admin/addons" class="flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+
+        <!-- Extensions -->
+        <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);">Extensions</p>
+        <a href="/admin/addons" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('puzzle', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Addons</span>
         </a>
-        <a href="/admin/apikeys" class="flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+        <a href="/admin/apikeys" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('key', { class: 'w-5 h-5' }) %>
           <span class="text-sm">API Keys</span>
+        </a>
+
+        <!-- Configuration -->
+        <p class="px-4 py-1 text-xs font-medium uppercase tracking-wide mt-2" style="color:var(--theme-text-muted);">Configuration</p>
+        <a href="/admin/settings" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
+          <%- icon('settings', { class: 'w-5 h-5' }) %>
+          <span class="text-sm">Settings</span>
         </a>
       </div>
       <% } %>
 
-      <div class="border-t border-neutral-100 dark:border-neutral-800 mt-2 pt-2">
+      <div class="border-t mt-2 pt-2" style="border-color:var(--theme-border);">
         <% if (typeof user !== 'undefined') { %>
-        <a href="/account" class="flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+        <a href="/account" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <img class="w-6 h-6 rounded-lg" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="">
           <span class="text-sm">Account</span>
         </a>
-        <a href="/logout" class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+        <a href="/logout" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-danger); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('log-out', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Logout</span>
         </a>
         <% } else { %>
-        <a href="/login" class="flex items-center gap-3 px-4 py-3 rounded-xl text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+        <a href="/login" class="mobile-more-link flex items-center gap-3 px-4 py-3 rounded-xl transition-colors active:bg-black/5 dark:active:bg-white/5" style="color:var(--theme-text); -webkit-tap-highlight-color: transparent; min-height: 44px;">
           <%- icon('log-in', { class: 'w-5 h-5' }) %>
           <span class="text-sm">Login</span>
         </a>
@@ -96,7 +130,7 @@
     </div>
   </div>
 </div>
-<div id="mobile-more-backdrop" class="fixed inset-0 z-40 lg:hidden bg-black/50 hidden" aria-hidden="true"></div>
+<div id="mobile-more-backdrop" class="fixed inset-0 z-40 lg:hidden hidden" style="background:rgba(0,0,0,0.5);" aria-hidden="true"></div>
 
 <script nonce="<%- nonce %>">
 (function () {
@@ -104,6 +138,7 @@
   var sheet = document.getElementById('mobile-more-sheet');
   var close = document.getElementById('mobile-more-close');
   var backdrop = document.getElementById('mobile-more-backdrop');
+  var themeToggle = document.getElementById('mobile-theme-toggle');
 
   function openSheet() {
     sheet.classList.remove('translate-y-full');
@@ -121,6 +156,23 @@
   if (close) close.addEventListener('click', closeSheet);
   if (backdrop) backdrop.addEventListener('click', closeSheet);
 
+  // Theme toggle for mobile
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function() {
+      if (typeof toggleTheme === 'function') {
+        toggleTheme();
+      } else {
+        var isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      }
+    });
+  }
+
+  // Close sheet on any navigation link click
+  document.querySelectorAll('.mobile-more-link').forEach(function(link) {
+    link.addEventListener('click', closeSheet);
+  });
+
   // Highlight active mobile nav link
   function markActiveMobile(path) {
     var links = document.querySelectorAll('.mobile-nav-link[data-match-prefix]');
@@ -128,8 +180,10 @@
       var prefix = link.getAttribute('data-match-prefix');
       if (prefix && path.startsWith(prefix)) {
         link.classList.add('active-mobile');
+        link.style.color = 'var(--theme-nav-text-active)';
       } else {
         link.classList.remove('active-mobile');
+        link.style.color = '';
       }
     });
   }

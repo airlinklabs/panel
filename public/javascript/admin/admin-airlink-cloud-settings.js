@@ -1,12 +1,12 @@
 (function() {
-  const csrfToken = document.getElementById('page-data').dataset.csrfToken;
+  var csrfToken = document.getElementById('page-data').dataset.csrfToken;
 
-  document.getElementById('saveBtn').addEventListener('click', async () => {
-    const apiKey = document.getElementById('airlinkCloudApiKey').value;
-    const backupEnabled = document.getElementById('airlinkCloudBackupEnabled').checked;
+  document.getElementById('saveBtn').addEventListener('click', async function() {
+    var apiKey = document.getElementById('airlinkCloudApiKey').value;
+    var backupEnabled = document.getElementById('airlinkCloudBackupEnabled').checked;
 
     try {
-      const res = await fetch('/admin/airlink-cloud', {
+      var res = await fetch('/admin/airlink-cloud', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -18,7 +18,7 @@
         })
       });
 
-      const data = await res.json();
+      var data = await res.json();
       if (data.success) {
         showToast('Settings saved. Looking good.', 'success');
       } else {
@@ -27,5 +27,9 @@
     } catch (err) {
       showToast('An error occurred while saving settings.', 'error');
     }
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', function() {
+    location.reload();
   });
 })();

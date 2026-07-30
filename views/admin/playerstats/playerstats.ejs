@@ -14,7 +14,7 @@
           description: 'View player statistics across all Minecraft servers'
         }) %>
          <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button id="refreshBtn" class="border border-neutral-200 dark:border-neutral-800/20 block rounded-xl bg-white dark:bg-white/5 hover:bg-neutral-50 dark:hover:bg-white/10 text-neutral-800 dark:text-white px-3 py-2 text-center text-sm font-medium shadow-lg transition duration-300 focus:outline focus:outline-2 focus:outline-offset-2">
+          <button id="refreshBtn" class="al-btn-secondary">
             Refresh Data
           </button>
         </div>
@@ -39,10 +39,10 @@
         <!-- Stats Cards -->
         <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <!-- Total Players Card -->
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
+            <div class="rounded-xl px-4 py-4" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
                <div class="flex items-center justify-between">
                  <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Total Players</dt>
-                  <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                   <div class="rounded-lg p-2" style="background:var(--theme-bg-secondary)">
                     <%- icon('users', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
                   </div>
                </div>
@@ -53,10 +53,10 @@
             </div>
 
             <!-- Max Capacity Card -->
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
+            <div class="rounded-xl px-4 py-4" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
                <div class="flex items-center justify-between">
                  <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Max Capacity</dt>
-                  <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                   <div class="rounded-lg p-2" style="background:var(--theme-bg-secondary)">
                     <%- icon('database', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
                   </div>
                </div>
@@ -67,10 +67,10 @@
             </div>
 
             <!-- Online Servers Card -->
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
+            <div class="rounded-xl px-4 py-4" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
                <div class="flex items-center justify-between">
                  <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Online Servers</dt>
-                  <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                   <div class="rounded-lg p-2" style="background:var(--theme-bg-secondary)">
                     <%- icon('server', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
                   </div>
                </div>
@@ -81,10 +81,10 @@
             </div>
 
             <!-- Utilization Card -->
-            <div class="rounded-xl bg-neutral-50 dark:bg-neutral-800/20 border border-neutral-200 dark:border-white/5 px-4 py-4">
+            <div class="rounded-xl px-4 py-4" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
                <div class="flex items-center justify-between">
                  <dt class="truncate text-sm font-medium text-neutral-500 dark:text-neutral-300">Utilization</dt>
-                  <div class="rounded-lg bg-neutral-100 dark:bg-neutral-700/30 p-2">
+                   <div class="rounded-lg p-2" style="background:var(--theme-bg-secondary)">
                     <%- icon('activity', { size: 20, class: 'text-neutral-400 shrink-0' }) %>
                   </div>
                </div>
@@ -96,7 +96,7 @@
          </dl>
 
          <!-- Player Graph -->
-         <div class="bg-white dark:bg-white/5 border border-neutral-200 dark:border-neutral-700/20 rounded-xl mt-8 shadow-md p-6">
+          <div class="rounded-xl mt-8 p-6" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm)">
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-lg font-semibold text-neutral-800 dark:text-white">Player Count History</h2>
               <div class="text-xs text-neutral-400">Data collected every 5 minutes (last 48 hours)</div>
@@ -110,10 +110,10 @@
          </div>
 
          <!-- Server Table -->
-         <div class="bg-white dark:bg-neutral-800/20 border border-neutral-200 dark:border-neutral-700/20 rounded-xl mt-8 shadow-sm p-6">
+          <div class="rounded-xl mt-8 p-6" style="background:var(--theme-bg-card);border:1px solid var(--theme-border);box-shadow:var(--theme-shadow-sm)">
             <h2 class="text-lg font-semibold text-neutral-800 dark:text-white mb-4">Server Player Counts</h2>
             <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700/20">
+              <table class="min-w-full" style="border-collapse:separate">
                 <thead>
                   <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Server</th>

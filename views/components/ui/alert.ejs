@@ -1,0 +1,12 @@
+<% /* alert: { type: danger|warning|success|info, message, detail } */
+var type = locals.type || 'info';
+var classes = { danger: 'al-alert-danger', warning: 'al-alert-warning', success: 'al-alert-success', info: 'al-alert-info' };
+var icons   = { danger: 'triangle-alert', warning: 'triangle-alert', success: 'circle-check', info: 'info' };
+%>
+<div class="<%= classes[type] || classes.info %>">
+  <%- icon(icons[type] || icons.info, { class: 'w-4 h-4 shrink-0 mt-0.5' }) %>
+  <div>
+    <p class="font-medium"><%= locals.message || '' %></p>
+    <% if (locals.detail) { %><p class="text-xs opacity-70 mt-0.5"><%= locals.detail %></p><% } %>
+  </div>
+</div>

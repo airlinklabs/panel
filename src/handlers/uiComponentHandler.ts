@@ -191,6 +191,14 @@ class UIComponentStore {
     }
     return [];
   }
+
+  public renderComponent(name: string, locals: Record<string, unknown> = {}): string {
+    return `components/ui/${name}`;
+  }
+
+  public getComponentLocals(name: string, data: Record<string, unknown>) {
+    return { __component: name, __componentData: data };
+  }
 }
 
 export const uiComponentStore = new UIComponentStore();

@@ -1,26 +1,26 @@
 <!-- Sidebar -->
-<div id="pc-sidebar" class="sidebar transition hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-56 lg:flex-col left-0">
-  <div id="pc-sidebar2" class="flex flex-col h-full bg-white/8 dark:bg-[#141414]/8 backdrop-blur-xl border-r border-neutral-200/30 dark:border-white/5">
+<div id="pc-sidebar" class="sidebar lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-56 lg:flex-col left-0" style="display:none;">
+  <div id="pc-sidebar2" class="flex flex-col h-full" style="background:var(--theme-nav-bg); border-right:1px solid var(--theme-nav-border);">
 
     <!-- Static top: logo -->
     <div class="pl-6 pt-4 pb-4 flex min-w-0 shrink-0">
       <a href="/" class="flex items-center min-w-0">
-        <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="logo-bg bg-neutral-950/90 p-1 dark:bg-transparent h-10 w-10 rounded-xl mr-3 shrink-0 inline-flex">
-        <h1 class="text-neutral-700 dark:text-white font-medium tracking-tight text-lg truncate min-w-0"><%= settings.title || 'Airlink' %></h1>
+        <img src="<%= settings.logo.startsWith('/') ? settings.logo : '/' + settings.logo %>" alt="Logo" class="logo-bg p-1 h-10 w-10 rounded-xl mr-3 shrink-0 inline-flex" style="background:var(--theme-logo-bg);">
+        <h1 class="font-medium tracking-tight text-lg truncate min-w-0" style="color:var(--theme-text-strong);"><%= settings.title || 'Airlink' %></h1>
       </a>
     </div>
 
     <!-- Static: user info — clicking goes to account page -->
-    <a href="/account" id="sidebar-account-link" class="sidebar-special-link flex items-center space-x-4 py-4 px-4 border-y border-neutral-800/10 dark:border-white/5 shrink-0 hover:bg-neutral-100 dark:hover:bg-white/[0.05] transition-colors group">
-      <img class="h-8 w-8 rounded-xl border border-neutral-700/10 shrink-0" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
+    <a href="/account" id="sidebar-account-link" class="sidebar-special-link flex items-center space-x-4 py-4 px-4 border-y shrink-0 transition-colors group" style="border-color:var(--theme-nav-border);">
+      <img class="h-8 w-8 rounded-xl shrink-0" src="<%= user.avatar ? user.avatar : 'https://api.dicebear.com/9.x/thumbs/svg?seed=' + encodeURIComponent(user.username) %>" alt="User avatar">
       <div class="min-w-0">
-        <p class="text-sm font-medium text-neutral-700 dark:text-white truncate group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">
+        <p class="text-sm font-medium truncate transition-colors" style="color:var(--theme-text-strong);">
           <span id="sidebar-username"><%= user.username %></span>
-          <span class="text-xs text-neutral-500">
+          <span style="color:var(--theme-text-muted);">
             <sup class="mt-1">#<%= String(user.id).padStart(4, '0') %></sup>
           </span>
         </p>
-        <p id="sidebar-description" class="text-xs text-neutral-600 dark:text-neutral-400 truncate"><%= user.description %></p>
+        <p id="sidebar-description" class="text-xs truncate" style="color:var(--theme-text-muted);"><%= user.description %></p>
       </div>
     </a>
 
@@ -29,13 +29,13 @@
       <ul role="list" class="py-2">
         <li>
           <ul role="list" class="-mx-2 space-y-1 relative">
-            <div id="active-background" class="ml-1.5 absolute left-2 w-[calc(97%-1.5rem)] h-9 transition-none duration-0 z-[-1] bg-neutral-200 border border-neutral-300 dark:bg-white/5 dark:border-neutral-300/5 rounded-xl opacity-0"></div>
+            <div id="active-background" class="ml-1.5 absolute left-2 w-[calc(97%-1.5rem)] h-9 transition-none duration-0 z-[-1] rounded-xl opacity-0" style="background:var(--theme-bg-active-nav); border:1px solid var(--theme-border-subtle);"></div>
             <%
             const sidebarItems = regularMenuItems || (global.uiComponentStore ? global.uiComponentStore.getSidebarItems(undefined, false) : []);
             if (!sidebarItems || sidebarItems.length === 0) {
             %>
               <li class="nav-item">
-                <a href="/" class="nav-link mt-1 text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" data-search="container instances servers" data-subterm="jegli:/server/servername" data-match-prefix="/server">
+                <a href="/" class="nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);" data-search="container instances servers" data-match-prefix="/server">
                   <%- icon('layout-dashboard', { class: 'w-5 h-5 mt-0.5' }) %>
                   <span><%= req.translations.navServers || 'Servers' %></span>
                 </a>
@@ -44,7 +44,7 @@
               sidebarItems.forEach(item => {
             %>
               <li class="nav-item">
-                <a href="<%= item.url %>" class="nav-link mt-1 text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200"<% if (item.matchPrefix) { %> data-match-prefix="<%= item.matchPrefix %>"<% } %>>
+                <a href="<%= item.url %>" class="nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal transition-all duration-200" style="color:var(--theme-nav-text);"<% if (item.matchPrefix) { %> data-match-prefix="<%= item.matchPrefix %>"<% } %>>
                   <%- item.icon %>
                   <span><%= item.label %></span>
                 </a>
@@ -52,57 +52,57 @@
             <% }); } %>
 
             <% if (user.isAdmin === true) { %>
-              <p class="pl-8 text-neutral-600 dark:text-neutral-400 text-xs font-medium pt-6 pb-2"><span><%= req.translations.navAdminPanel || 'Admin Panel' %></span></p>
+              <p class="pl-8 text-xs font-medium pt-6 pb-2" style="color:var(--theme-nav-text);"><span><%= req.translations.navAdminPanel || 'Admin Panel' %></span></p>
               <li>
-                <a href="/admin/overview" searchdata="admin overview control" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
+                <a href="/admin/overview" searchdata="admin overview control" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                   <%- icon('layout-grid', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navOverview || 'Overview' %></span>
                 </a>
               </li>
               <li>
-                <a href="/admin/settings" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
+                <a href="/admin/settings" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                   <%- icon('settings', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navSettings || 'Settings' %></span>
                 </a>
               </li>
               <li>
-                <a href="/admin/servers" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
+                <a href="/admin/servers" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                   <%- icon('server', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navServers || 'Servers' %></span>
                 </a>
               </li>
               <li>
-                <a href="/admin/users" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
+                <a href="/admin/users" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                   <%- icon('users', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navUsers || 'Users' %></span>
                 </a>
               </li>
               <li>
-                <a href="/admin/nodes" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
+                <a href="/admin/nodes" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                   <%- icon('network', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navNodes || 'Nodes' %></span>
                 </a>
               </li>
               <li>
-                <a href="/admin/images" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
+                <a href="/admin/images" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                   <%- icon('box', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navImages || 'Images' %></span>
                 </a>
               </li>
               <li>
-                <a href="/admin/addons" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
+                <a href="/admin/addons" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                   <%- icon('puzzle', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navAddons || 'Addons' %></span>
                 </a>
               </li>
               <li>
-                <a href="/admin/airlink-cloud" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
+                <a href="/admin/airlink-cloud" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                   <%- icon('cloud', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navAirlinkCloud || 'Airlink Cloud' %></span>
                 </a>
               </li>
               <li>
-                <a href="/admin/apikeys" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
+                <a href="/admin/apikeys" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                   <%- icon('key', { class: 'w-5 mt-0.5 h-5', strokeWidth: 1.5 }) %>
                   <span><%= req.translations.navApiKeys || 'API Keys' %></span>
                 </a>
@@ -111,7 +111,7 @@
                 adminMenuItems.forEach(item => {
               %>
               <li>
-                <a href="<%= item.url %>" class="transition nav-link mt-1 text-neutral-600 dark:text-neutral-400 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal">
+                <a href="<%= item.url %>" class="transition nav-link mt-1 px-4 mx-4 group flex gap-x-3 py-1.5 rounded-xl text-sm leading-6 font-normal" style="color:var(--theme-nav-text);">
                   <%- item.icon %>
                   <span><%= item.label %></span>
                 </a>
@@ -123,9 +123,11 @@
       </ul>
     </nav>
 
+
+
     <!-- Static bottom: logout -->
-    <div class="shrink-0 border-t border-neutral-800/10 dark:border-white/5">
-      <a href="/logout" id="sidebar-logout-link" class="sidebar-special-link group flex gap-x-3 pl-6 py-4 text-sm font-medium leading-6 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-500 transition-colors duration-200">
+    <div class="shrink-0 border-t" style="border-color:var(--theme-nav-border);">
+      <a href="/logout" id="sidebar-logout-link" class="sidebar-special-link group flex gap-x-3 pl-6 py-4 text-sm font-medium leading-6 transition-colors duration-200" style="color:var(--theme-danger);">
         <%- icon('log-out', { class: 'w-5 h-5 mt-0.5 shrink-0', strokeWidth: 1.5 }) %>
         <span><%= req.translations.navLogout || 'Logout' %></span>
       </a>
@@ -144,88 +146,376 @@
   function markSpecialLinks(path) {
     var account = document.getElementById('sidebar-account-link');
     var logout  = document.getElementById('sidebar-logout-link');
-    var isDark  = document.documentElement.classList.contains('dark');
     if (account) {
       var onAccount = path === '/account' || path.startsWith('/account/');
-      account.style.background = onAccount
-        ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')
-        : '';
+      account.style.background = onAccount ? 'var(--theme-bg-active-nav)' : '';
     }
     if (logout) {
       logout.style.background = '';
     }
   }
 
+  // Mark active nav link
+  function markActiveNav(path) {
+    var links = document.querySelectorAll('.nav-link');
+    links.forEach(function(link) {
+      var href = link.getAttribute('href');
+      var prefix = link.getAttribute('data-match-prefix');
+      var active = false;
+      if (prefix && path.startsWith(prefix)) {
+        active = true;
+      } else if (href && !prefix) {
+        if (path === href || (href !== '/' && path.startsWith(href + '/'))) {
+          active = true;
+        }
+      }
+      if (active) {
+        link.classList.add('active');
+        link.style.color = 'var(--theme-nav-text-active)';
+        link.style.background = 'var(--theme-bg-active-nav)';
+      } else {
+        link.classList.remove('active');
+        link.style.color = '';
+        link.style.background = '';
+      }
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     markSpecialLinks(window.location.pathname);
+    markActiveNav(window.location.pathname);
+    // Show sidebar
+    document.getElementById('pc-sidebar').style.display = '';
   });
   document.addEventListener('al:navigated', function () {
     markSpecialLinks(window.location.pathname);
+    markActiveNav(window.location.pathname);
   });
 })();
 </script>
 
 <div id="colcont" class="lg:pl-56 pb-16 lg:pb-0">
-  <div class="fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-white/8 dark:bg-[#141414]/8 backdrop-blur-xl border-b border-neutral-200/30 dark:border-white/5 px-4 sm:gap-x-6 sm:px-4 lg:px-4">
+  <div class="fixed top-0 left-0 lg:left-56 right-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b px-4 sm:gap-x-6 sm:px-4 lg:px-4" style="background:var(--theme-nav-bg); border-color:var(--theme-nav-border);">
     <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-      <div class="relative flex flex-1 flex-col">
+      <div class="relative flex flex-col">
 
-        <div class="lg:-ml-2 flex items-center w-fit mt-3.5 px-4 py-2 h-10 rounded-xl border border-neutral-300 dark:border-white/5 active:scale-100 duration-200 hover:border-neutral-400 dark:hover:border-neutral-300/10 bg-transparent text-neutral-800 dark:text-white" role="search">
-          <%- icon('search', { class: 'h-5 w-5 text-neutral-400' }) %>
-          <input id="searchInput"
-            class="bg-transparent border-transparent ml-2 focus-visible:ring-transparent border-none ring-transparent sm:text-sm placeholder:text-zinc-500 text-neutral-700 dark:text-neutral-300 focus-visible:outline-none"
-            placeholder="<%= req.translations.navSearch || 'Search' %>"
-            type="search"
-            role="combobox"
-            aria-autocomplete="list"
-            aria-expanded="false"
-            aria-controls="searchResults"
-            aria-activedescendant=""
-            aria-label="<%= req.translations.navSearch || 'Search' %>"
-            name="search"
-            autocomplete="off"
-            onfocus="showSearchResults()">
-          <div aria-hidden="true" class="ml-2 px-1 py-0.5 text-[10px] w-[55px] font-medium text-neutral-700 dark:text-neutral-400 bg-neutral-200 dark:bg-neutral-800 rounded-md border border-neutral-300 dark:border-neutral-700
-            bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.2)_50%,transparent_75%,transparent_100%)]
-            bg-[length:250%_250%,100%_100%] bg-[position:-100%_0,0_0] bg-no-repeat transition-ease-out
-            hover:bg-[position:200%_0,0_0] hover:duration-[2s]">
-            CTRL + K
+        <button id="searchTrigger" type="button"
+          class="lg:-ml-2 flex items-center gap-2 w-fit mt-3.5 pl-3 pr-2.5 py-2 h-10 rounded-xl transition duration-200 bg-transparent"
+          style="border:1px solid var(--theme-border-input); color:var(--theme-text-muted);"
+          onclick="openSearchModal()">
+          <%- icon('search', { class: 'h-4 w-4 shrink-0' }) %>
+          <span class="hidden sm:inline text-sm whitespace-nowrap">Search</span>
+          <div aria-hidden="true" class="ml-2 px-1.5 py-0.5 text-[10px] font-medium rounded-md"
+            style="color:var(--theme-text-muted); background:var(--theme-bg-secondary); border:1px solid var(--theme-border);">
+            CTRL+K
           </div>
-        </div>
+        </button>
 
-        <div id="searchResults" role="listbox" aria-label="Search results" class="absolute bg-neutral-50 dark:bg-neutral-900 w-[19.5rem] rounded-xl shadow-lg shadow-neutral-200/80 dark:shadow-black/40 hidden mt-20 px-2 pb-2 border border-neutral-200 dark:border-neutral-700/60">
-        </div>
+        <div id="searchResults" role="listbox" aria-label="Search results" class="hidden" style="display:none!important"></div>
+      </div>
+
+      <div id="breadcrumb-slot" class="flex items-center flex-1 min-w-0 hidden overflow-hidden" style="flex-direction:row-reverse">
+        <div class="flex items-center gap-1.5 whitespace-nowrap" dir="ltr" id="bc-inner"></div>
       </div>
 
       <script nonce="<%- nonce %>">
-        document.addEventListener('keydown', function(event) {
-          if (event.ctrlKey && event.key === 'k') {
-            event.preventDefault();
-            document.getElementById('searchInput').focus();
-          }
-        });
-
-        function showSearchResults() {
-          document.getElementById('searchResults').classList.remove('hidden');
-          document.getElementById('searchInput').setAttribute('aria-expanded', 'true');
+        function openSearchModal() {
+          var m = document.getElementById('searchModal');
+          var i = document.getElementById('searchModalInput');
+          m.classList.remove('hidden');
+          m.style.opacity = '0';
+          var p = document.getElementById('searchModalPanel');
+          p.style.opacity = '0';
+          p.style.transform = 'scale(0.96) translateY(-8px)';
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+              m.style.transition = 'opacity 0.18s ease';
+              m.style.opacity = '1';
+              p.style.transition = 'opacity 0.18s ease, transform 0.18s cubic-bezier(0.16,1,0.3,1)';
+              p.style.opacity = '1';
+              p.style.transform = 'scale(1) translateY(0)';
+            });
+          });
+          setTimeout(function() { i.focus(); }, 50);
         }
 
-        document.getElementById('searchInput').addEventListener('focus', showSearchResults);
-
-        document.addEventListener('click', function(event) {
-          var searchInput = document.getElementById('searchInput');
-          var searchResults = document.getElementById('searchResults');
-          if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
-            searchResults.classList.add('hidden');
-            searchInput.setAttribute('aria-expanded', 'false');
-            searchInput.setAttribute('aria-activedescendant', '');
-          }
-        });
+        function closeSearchModal() {
+          var m = document.getElementById('searchModal');
+          var p = document.getElementById('searchModalPanel');
+          m.style.transition = 'opacity 0.15s ease';
+          m.style.opacity = '0';
+          p.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+          p.style.opacity = '0';
+          p.style.transform = 'scale(0.96) translateY(-8px)';
+          setTimeout(function() { m.classList.add('hidden'); m.style.opacity = ''; if(p){p.style.opacity='';p.style.transform='';p.style.transition='';} m.style.transition=''; }, 160);
+        }
       </script>
+
+      <script nonce="<%- nonce %>">
+      var searchTimeoutModal = null;
+      var lastQueryModal = '';
+      var activeIndexModal = -1;
+      function doSearchModal(term) {
+        var results = document.getElementById('searchModalResults');
+        activeIndexModal = -1;
+        if (!term) { results.innerHTML = ''; return; }
+        results.innerHTML = '<div class="flex items-center justify-center py-8"><svg class="animate-spin w-5 h-5" style="color:var(--theme-text-muted)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></div>';
+        fetch('/api/search?q=' + encodeURIComponent(term)).then(function(r){return r.json()}).then(function(data){
+          renderModalResults(data.results||[], term);
+        }).catch(function(){
+          renderModalResults([], term);
+        });
+      }
+      function renderModalResults(items, term) {
+        var container = document.getElementById('searchModalResults');
+        container.innerHTML = '';
+        if (!items.length) {
+          container.innerHTML = '<p class="text-sm py-8 text-center" style="color:var(--theme-text-muted)">No results.</p>';
+          return;
+        }
+        var groups = {};
+        items.forEach(function(i){ if(!groups[i.type]) groups[i.type]=[]; groups[i.type].push(i); });
+        var order = ['server','user','node'];
+        var labels = { server:'Servers', user:'Users', node:'Nodes' };
+        order.forEach(function(type){
+          if(!groups[type]) return;
+          var hdr = document.createElement('p');
+          hdr.className = 'text-[10px] font-semibold uppercase tracking-wider px-3 pt-3 pb-1';
+          hdr.style.color = 'var(--theme-text-muted)';
+          hdr.textContent = labels[type];
+          container.appendChild(hdr);
+          groups[type].forEach(function(item){
+            var row = document.createElement('a');
+            row.href = item.url;
+            row.className = 'flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition text-sm';
+            row.style.color = 'var(--theme-text)';
+            row.style.background = 'transparent';
+            row.onmouseenter = function(){ this.style.background = 'var(--theme-bg-hover)'; };
+            row.onmouseleave = function(){ this.style.background = 'transparent'; };
+            row.innerHTML = '<div class="flex-1 min-w-0"><div class="truncate font-medium" style="color:var(--theme-text-strong)">' + escHtml(item.label) + '</div>' +
+              (item.sub ? '<div class="text-xs truncate" style="color:var(--theme-text-muted)">' + escHtml(item.sub) + '</div>' : '') + '</div>';
+            row.addEventListener('click', function(e){
+              e.preventDefault();
+              closeSearchModal();
+              location.href = item.url;
+            });
+            container.appendChild(row);
+          });
+        });
+      }
+      function escHtml(t) {
+        var d = document.createElement('div');
+        d.textContent = t || '';
+        return d.innerHTML;
+      }
+      function onSearchModalInput() {
+        var term = document.getElementById('searchModalInput').value.trim().toLowerCase();
+        if (term === lastQueryModal) return;
+        lastQueryModal = term;
+        clearTimeout(searchTimeoutModal);
+        searchTimeoutModal = setTimeout(function(){ doSearchModal(term); }, 150);
+      }
+      function onSearchModalKeydown(e) {
+        var rows = document.querySelectorAll('#searchModalResults a');
+        if (!rows.length) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); activeIndexModal = Math.min(activeIndexModal + 1, rows.length - 1); updateModalActive(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); activeIndexModal = Math.max(activeIndexModal - 1, 0); updateModalActive(); }
+        else if (e.key === 'Enter') { e.preventDefault(); if (rows[activeIndexModal]) rows[activeIndexModal].click(); }
+      }
+      function updateModalActive() {
+        var rows = document.querySelectorAll('#searchModalResults a');
+        rows.forEach(function(r,i){
+          r.style.background = i === activeIndexModal ? 'var(--theme-bg-hover)' : 'transparent';
+        });
+      }
+
+      document.addEventListener('keydown', function(event) {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+          event.preventDefault();
+          openSearchModal();
+        }
+        if (event.key === 'Escape') {
+          var m = document.getElementById('searchModal');
+          if (!m.classList.contains('hidden')) closeSearchModal();
+        }
+      });
+      </script>
+
       <script nonce="<%- nonce %>" src="/javascript/shared/search.js"></script>
+
+      <script nonce="<%- nonce %>">
+      (function() {
+        function buildBreadcrumb() {
+          var slot = document.getElementById('breadcrumb-slot');
+          if (!slot) return;
+          var inner = document.getElementById('bc-inner');
+          if (!inner) return;
+
+          var path = window.location.pathname;
+          var segs = path.split('/').filter(Boolean);
+          var items = [{ href: '/', label: 'Home' }];
+
+          var labelMap = {
+            'dashboard':'Dashboard', 'account':'Account', 'credits':'Credits',
+            'create-server':'Create Server', 'admin':'Admin', 'overview':'Overview',
+            'servers':'Servers', 'create':'Create', 'edit':'Edit',
+            'nodes':'Nodes', 'users':'Users', 'images':'Images',
+            'store':'Store', 'settings':'Settings', 'security':'Security',
+            'apikeys':'API Keys', 'api':'API', 'docs':'Documentation',
+            'analytics':'Analytics', 'playerstats':'Player Statistics',
+            'addons':'Addons', 'airlink-cloud':'Airlink Cloud',
+            'startup':'Startup', 'files':'Files', 'backups':'Backups',
+            'players':'Players', 'worlds':'Worlds', 'manage':'Manage',
+            'stats':'Statistics', 'sftp':'SFTP',
+          };
+
+          for (var i = 0; i < segs.length; i++) {
+            var seg = segs[i];
+
+            if ((seg === 'server' || seg === 'admin' && segs[i+1] === 'nodes') && i + 1 < segs.length && /^[0-9a-f-]{36}$/i.test(segs[i+1])) {
+              var label = seg === 'server' ? getServerName() : 'Node';
+              items.push({ href: '/' + segs.slice(0, i + 2).join('/'), label: label });
+              i++;
+              continue;
+            }
+            if (seg === 'admin' && segs[i+1] === 'nodes' && i + 2 < segs.length && /^[0-9a-f-]{36}$/i.test(segs[i+2])) {
+              items.push({ href: '/admin/nodes', label: 'Nodes' });
+              var nlabel = 'Node';
+              items.push({ href: '/' + segs.slice(0, i + 3).join('/'), label: nlabel });
+              i += 2;
+              continue;
+            }
+            if (seg === 'admin' && segs[i+1] === 'users' && i + 2 < segs.length && /^[0-9a-f-]{36}$/i.test(segs[i+2])) {
+              items.push({ href: '/admin/users', label: 'Users' });
+              var ulabel = 'User';
+              items.push({ label: ulabel });
+              i += 2;
+              continue;
+            }
+
+            if (/^[0-9a-f-]{36}$/i.test(seg)) continue;
+
+            var label = labelMap[seg] || seg.charAt(0).toUpperCase() + seg.slice(1);
+            var href = '/' + segs.slice(0, i + 1).join('/');
+            items.push(i === segs.length - 1 ? { label: label } : { href: href, label: label });
+          }
+
+          if (items.length <= 1) { slot.classList.add('hidden'); return; }
+
+          var html = '';
+          for (var j = 0; j < items.length; j++) {
+            if (j > 0) html += '<span style="color:var(--theme-text-placeholder);font-size:11px;opacity:0.5">/</span>';
+            if (items[j].href && j < items.length - 1) {
+              html += '<a href="' + items[j].href + '" class="transition" style="color:var(--theme-text-muted);opacity:0.55;text-decoration:none">' + escHtml(items[j].label) + '</a>';
+            } else {
+              html += '<span style="color:var(--theme-text-muted);opacity:0.55">' + escHtml(items[j].label) + '</span>';
+            }
+          }
+          inner.innerHTML = html;
+          slot.classList.remove('hidden');
+        }
+
+        function getServerName() {
+          var el = document.getElementById('server-header-data');
+          if (el) {
+            var h1 = el.closest('#page-content') || el.closest('#server-page-body');
+            var nameEl = h1 ? h1.querySelector('h1') : null;
+            if (nameEl) return nameEl.textContent.trim();
+          }
+          var titles = document.querySelectorAll('h1');
+          for (var t = 0; t < titles.length; t++) {
+            if (titles[t].textContent.trim().length > 0 && titles[t].textContent.trim().length < 100) return titles[t].textContent.trim();
+          }
+          return 'Server';
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', buildBreadcrumb);
+        } else {
+          buildBreadcrumb();
+        }
+      })();
+      </script>
+
+      <!-- Search Modal -->
+      <div id="searchModal" class="hidden" style="position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none">
+        <div onclick="closeSearchModal()" style="position:absolute;inset:0"></div>
+        <div style="position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;padding-top:12vh">
+          <div id="searchModalPanel" style="width:100%;max-width:560px;margin:0 16px;position:relative;opacity:0;transform:scale(0.96) translateY(-8px)">
+            <div style="background:var(--theme-bg-card);border:1px solid var(--theme-border);border-radius:20px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,0.3),0 8px 20px rgba(0,0,0,0.15)">
+              <div style="display:flex;align-items:center;gap:12px;padding:4px 6px 4px 20px;border-bottom:1px solid var(--theme-border)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--theme-text-muted);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input id="searchModalInput" type="search" placeholder="Search" autocomplete="off" spellcheck="false"
+                  oninput="onSearchModalInput()" onkeydown="onSearchModalKeydown(event)"
+                  style="flex:1;min-width:0;background:transparent;border:none;outline:none;font-size:16px;padding:12px 0;color:var(--theme-text-strong)">
+                <button onclick="closeSearchModal()" style="padding:4px 10px;font-size:11px;font-weight:500;border-radius:8px;border:none;cursor:pointer;background:var(--theme-bg-secondary);color:var(--theme-text-muted);border:1px solid var(--theme-border)">ESC</button>
+              </div>
+              <div id="searchModalResults" style="max-height:360px;overflow-y:auto;padding:4px 8px 8px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Theme toggle switch -->
+      <div class="flex items-center shrink-0 ml-2">
+        <div id="theme-toggle-topbar" class="theme-toggle-switch" role="button" tabindex="0" aria-label="Toggle theme">
+          <div class="theme-toggle-knob"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+<style>
+#bc-inner > * {
+  flex-shrink: 0;
+  font-size: 13px;
+}
+#bc-inner a {
+  transition: opacity 0.15s ease;
+}
+#bc-inner a:hover,
+#bc-inner span:hover {
+  opacity: 0.75 !important;
+}
+
+.theme-toggle-switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 70px;
+  height: 30px;
+  padding: 4px 10px;
+  border-radius: 50px;
+  cursor: pointer;
+  background: var(--theme-bg-secondary);
+  border: 1px solid var(--theme-border);
+  flex-shrink: 0;
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+.theme-toggle-knob {
+  position: absolute;
+  z-index: 1;
+  top: 5px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--theme-text-muted);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease;
+}
+html.dark .theme-toggle-knob {
+  transform: translateX(33px);
+}
+</style>
+<script nonce="<%- nonce %>">
+(function() {
+  var btn = document.getElementById('theme-toggle-topbar');
+  btn.addEventListener('click', function() {
+    if (typeof toggleTheme === 'function') toggleTheme();
+  });
+})();
+</script>
 <script nonce="<%- nonce %>">
 (function () {
   var ov = document.getElementById('pl-overlay');

@@ -1,6 +1,6 @@
 <%- include('../../components/header', { title: 'Players' }) %>
 
-<main class="h-screen m-auto text-neutral-800 dark:text-white">
+<main class="h-screen m-auto" style="color:var(--theme-text-strong)">
   <div class="flex h-screen">
     <!-- Sidebar -->
     <aside class="hidden lg:block w-60 h-full">
@@ -17,13 +17,11 @@
       <%- include('../../components/installHeader') %>
             <!-- Error Message -->
       <% if (errorMessage && errorMessage.message) { %>
-          <div class="bg-neutral-100 dark:bg-neutral-500/20 border border-neutral-200 dark:border-transparent p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start space-x-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-6 mt-2 ml-1 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg> 
+          <div class="p-4 ml-8 mr-8 mt-4 rounded-xl flex items-start space-x-4" style="background:var(--theme-danger-bg);border:1px solid var(--theme-danger);">
+          <%- icon('triangle-alert', { class: 'size-6 mt-2 ml-1', style:'color:var(--theme-danger)' }) %>
       <div>
-        <p class="text-neutral-800 dark:text-white"><%= req.translations.connectionError || 'Error' %></p>
-        <p class="text-sm text-neutral-600 dark:text-neutral-400"><%= errorMessage.message %></p>
+        <p class="text-sm font-medium" style="color:var(--theme-text-strong)"><%= req.translations.connectionError || 'Error' %></p>
+        <p class="text-sm" style="color:var(--theme-text-muted)"><%= errorMessage.message %></p>
       </div>
     </div>
       <% } %>
@@ -38,11 +36,11 @@
       <!-- Players Section -->
       <div class="px-6">
         <!-- Server Info Card -->
-        <div class="bg-neutral-100 dark:bg-neutral-800/50 rounded-xl p-6 mb-6 shadow-lg">
+        <div class="al-card p-6 mb-6 shadow-lg">
           <div class="flex flex-col md:flex-row justify-between items-center mb-4">
             <div>
-              <h2 class="text-xl font-semibold text-neutral-800 dark:text-white mb-1"><%= req.translations.players || 'Players' %></h2>
-              <p class="text-neutral-600 dark:text-neutral-400 text-sm">
+              <h2 class="text-xl font-semibold mb-1" style="color:var(--theme-text-strong)"><%= req.translations.players || 'Players' %></h2>
+              <p class="text-sm" style="color:var(--theme-text-muted)">
                 <% if (typeof serverInfo !== 'undefined') { %>
                   <span class="font-medium"><%= serverInfo.onlinePlayers || 0 %></span> / <span><%= serverInfo.maxPlayers || 0 %></span> players online
                   <% if (serverInfo.version) { %>
@@ -62,10 +60,8 @@
             </svg>
             <span>
               Refreshing in <span id="refresh-countdown">30</span> seconds
-              <button onclick="window.location.reload()" class="ml-2 text-blue-400 hover:text-blue-300 transition-colors duration-200 inline-flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
+                <button onclick="window.location.reload()" class="ml-2 transition-colors duration-200 inline-flex items-center" style="color:var(--theme-accent)">
+                  <%- icon('refresh-cw', { class: 'h-3 w-3 mr-1' }) %>
                 Refresh now
               </button>
             </span>
@@ -76,20 +72,20 @@
         <% if (players && players.length > 0) { %>
         <div id="PlayersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           <% players.forEach(player => { %>
-            <div class="relative p-4 bg-neutral-100 dark:bg-neutral-800 rounded-xl shadow-lg group hover:bg-neutral-200/60 dark:hover:bg-neutral-700/50 transition-all duration-200">
+            <div class="relative p-4 al-card shadow-lg group transition-all duration-200">
               <div class="flex items-center">
                 <img
                   src="https://crafatar.com/avatars/<%= player.uuid %>?size=64&overlay"
                   alt="<%= player.name %>'s Avatar"
-                  class="rounded-lg border border-neutral-700 mr-4"
+                  class="rounded-lg mr-4"
                   width="64"
                   height="64"
                 />
                 <div>
-                  <p class="text-lg font-bold text-neutral-800 dark:text-white"><%= player.name %></p>
+                  <p class="text-lg font-bold" style="color:var(--theme-text-strong)"><%= player.name %></p>
                   <div class="flex items-center mt-1">
-                    <span class="inline-flex h-2 w-2 rounded-full bg-green-500 mr-2"></span>
-                    <span class="text-xs text-neutral-500 dark:text-neutral-400"><%= req.translations.online || 'Online' %></span>
+                    <span class="al-dot-online mr-2"></span>
+                    <span class="text-xs" style="color:var(--theme-text-muted)"><%= req.translations.online || 'Online' %></span>
                   </div>
                 </div>
               </div>
@@ -97,7 +93,7 @@
           <% }) %>
         </div>
         <% } else { %>
-          <div id="no-players-message" class="bg-neutral-100 dark:bg-neutral-800/30 rounded-xl p-8 text-center">
+          <div id="no-players-message" class="rounded-xl p-8 text-center" style="background:var(--theme-bg-card);border:1px solid var(--theme-border)">
             <% if (!serverIsOnline && errorMessage && errorMessage.message) { %>
               <!-- Server Offline Message -->
               <div class="flex justify-center mb-6">
@@ -112,10 +108,8 @@
                 The server appears to be offline. Start your server to see online players.
               </p>
               <div class="mt-6">
-                <button onclick="window.location.reload()" class="px-4 py-2 bg-neutral-800 dark:bg-neutral-700 text-white rounded-lg shadow hover:bg-neutral-600 transition-all duration-200 inline-flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
+                <button onclick="window.location.reload()" class="al-btn-primary px-4 py-2 rounded-lg inline-flex items-center">
+                  <%- icon('refresh-cw', { class: 'h-4 w-4 mr-2' }) %>
                   Refresh
                 </button>
               </div>

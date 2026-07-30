@@ -5,6 +5,7 @@ const navLinks      = document.querySelectorAll('.nav-link');
 let activeIndex   = -1;
 let searchTimeout = null;
 let lastQuery     = '';
+let recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
 
 const isAdmin = !!document.querySelector('a[href="/admin/overview"]');
 
@@ -13,6 +14,8 @@ const typeIcon = {
   user:   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0 text-neutral-400"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd"/></svg>',
   node:   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0 text-neutral-400"><path fill-rule="evenodd" d="M2.25 4.125c0-1.036.84-1.875 1.875-1.875h5.25c1.036 0 1.875.84 1.875 1.875V17.25a4.5 4.5 0 1 1-9 0V4.125Zm4.5 14.25a1.125 1.125 0 1 0 0-2.25 1.125 1.125 0 0 0 0 2.25Z" clip-rule="evenodd"/></svg>',
   nav:    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 shrink-0 text-neutral-400"><path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd"/></svg>',
+  clock:  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 shrink-0 text-neutral-400"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+  arrow:  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 shrink-0 text-neutral-400"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>',
 };
 
 function escHtml(t) {
@@ -26,6 +29,14 @@ function highlightMatch(text, term) {
   const safe  = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const regex = new RegExp('(' + safe + ')', 'gi');
   return escHtml(text).replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-600/60 text-yellow-950 dark:text-yellow-50 rounded px-0.5">$1</mark>');
+}
+
+function saveRecentSearch(term) {
+  if (!term || term.length < 2) return;
+  recentSearches = recentSearches.filter(function(s) { return s !== term; });
+  recentSearches.unshift(term);
+  if (recentSearches.length > 5) recentSearches = recentSearches.slice(0, 5);
+  localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
 }
 
 function getNavResults(term) {
@@ -44,6 +55,74 @@ function getNavResults(term) {
     .map(function(link) {
       return { type: 'nav', label: link.textContent.trim(), sub: '', url: link.href };
     });
+}
+
+function showRecommendations() {
+  searchResults.innerHTML = '';
+  activeIndex = -1;
+
+  // Quick links section
+  const quickLinks = [
+    { label: 'Servers', url: '/server', icon: 'server' },
+    { label: 'Account', url: '/account', icon: 'user' },
+  ];
+  if (isAdmin) {
+    quickLinks.push({ label: 'Admin Overview', url: '/admin/overview', icon: 'nav' });
+    quickLinks.push({ label: 'Admin Servers', url: '/admin/servers', icon: 'server' });
+    quickLinks.push({ label: 'Admin Users', url: '/admin/users', icon: 'user' });
+  }
+
+  if (quickLinks.length) {
+    const hdr = document.createElement('p');
+    hdr.className = 'text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-3 pt-3 pb-1';
+    hdr.textContent = 'Quick Links';
+    searchResults.appendChild(hdr);
+
+    quickLinks.forEach(function(item) {
+      const row = document.createElement('a');
+      row.href = item.url;
+      row.className = 'search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer';
+      row.innerHTML = typeIcon[item.icon] || typeIcon.nav +
+        '<span class="flex-1 min-w-0"><span class="block truncate">' + escHtml(item.label) + '</span></span>' +
+        typeIcon.arrow;
+      searchResults.appendChild(row);
+    });
+  }
+
+  // Recent searches
+  if (recentSearches.length) {
+    const hdr = document.createElement('p');
+    hdr.className = 'text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-3 pt-3 pb-1';
+    hdr.textContent = 'Recent';
+    searchResults.appendChild(hdr);
+
+    recentSearches.forEach(function(term) {
+      const row = document.createElement('div');
+      row.className = 'search-result flex items-center gap-2.5 px-3 py-2 rounded-lg text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 transition-colors text-sm cursor-pointer';
+      row.innerHTML = typeIcon.clock +
+        '<span class="flex-1 min-w-0"><span class="block truncate">' + escHtml(term) + '</span></span>' +
+        '<button class="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 p-1" data-remove="' + escHtml(term) + '" aria-label="Remove">' +
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3"><path d="M18 6L6 18M6 6l12 12"/></svg>' +
+        '</button>';
+      
+      row.addEventListener('click', function(e) {
+        if (e.target.closest('[data-remove]')) {
+          e.stopPropagation();
+          recentSearches = recentSearches.filter(function(s) { return s !== term; });
+          localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+          showRecommendations();
+          return;
+        }
+        searchInput.value = term;
+        doSearch(term);
+      });
+      
+      searchResults.appendChild(row);
+    });
+  }
+
+  searchResults.classList.remove('hidden');
+  searchInput.setAttribute('aria-expanded', 'true');
 }
 
 function renderResults(items, term) {
@@ -92,6 +171,7 @@ function renderResults(items, term) {
 
       row.addEventListener('click', function(e) {
         e.preventDefault();
+        saveRecentSearch(term);
         searchResults.classList.add('hidden');
         searchInput.value = '';
         location.href = item.url;
@@ -141,12 +221,16 @@ searchInput.addEventListener('input', function() {
   lastQuery = term;
   clearTimeout(searchTimeout);
   if (!term) {
-    searchResults.classList.add('hidden');
-    searchInput.setAttribute('aria-expanded', 'false');
-    searchInput.setAttribute('aria-activedescendant', '');
+    showRecommendations();
     return;
   }
   searchTimeout = setTimeout(function() { doSearch(term); }, 150);
+});
+
+searchInput.addEventListener('focus', function() {
+  if (!searchInput.value.trim()) {
+    showRecommendations();
+  }
 });
 
 searchInput.addEventListener('keydown', function(e) {

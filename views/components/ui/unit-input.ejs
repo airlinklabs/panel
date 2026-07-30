@@ -1,0 +1,41 @@
+<% /* unit-input: { id, name, label, iconName, value, type, min, step, placeholder, hint, displayValue, wrapperClass } */ %>
+<%
+const inputId = locals.id;
+const displayId = inputId + 'Display';
+const t = locals.type || 'memory';
+const isCpu = t === 'cpu';
+const labelA = isCpu ? 'Cores' : 'GB';
+const labelB = isCpu ? '%' : 'MB';
+const multA = isCpu ? 100 : 1024;
+const multB = 1;
+const raw = parseFloat(locals.value);
+const hasVal = !isNaN(raw) && locals.value !== null && locals.value !== '';
+const dv = !hasVal ? '' : (locals.displayValue !== undefined ? locals.displayValue : (isCpu ? (raw / 100).toFixed(1) : (raw >= 1024 ? Math.round(raw / 1024) : raw)));
+const defUnit = !hasVal ? labelA : (isCpu ? 'Cores' : (raw >= 1024 ? 'GB' : 'MB'));
+const hintText = locals.hint !== undefined ? locals.hint : (isCpu ? '1 core = 100%' : 'Min 128 MB');
+const placeholder = locals.placeholder || '';
+const step = locals.step ?? (isCpu ? 0.5 : 1);
+const min = locals.min ?? 0;
+const hiddenVal = !hasVal ? '' : raw;
+%>
+<div class="<%= locals.wrapperClass || '' %>">
+  <% if (locals.label) { %>
+  <label for="<%= displayId %>" class="al-label">
+    <%- icon(locals.iconName, { size: 14, class: 'shrink-0' }) %>
+    <%= locals.label %>:
+  </label>
+  <% } %>
+  <input type="hidden" id="<%= inputId %>" name="<%= locals.name || inputId %>" value="<%= hiddenVal %>">
+  <div class="flex items-stretch gap-0">
+    <input id="<%= displayId %>" type="number" min="<%= min %>" step="<%= step %>"
+      value="<%= dv %>" placeholder="<%= placeholder %>"
+      class="al-input rounded-l-xl flex-1 border-r-0">
+    <button type="button" class="al-input rounded-r-xl unit-btn"
+      data-hidden="<%= inputId %>" data-a="<%= labelA %>" data-b="<%= labelB %>"
+      data-ma="<%= multA %>" data-mb="<%= multB %>"
+      onclick="unitToggle(this)"
+      style="flex:0 0 auto;max-width:5rem;text-align:center"><%= defUnit %></button>
+  </div>
+  <%- locals.suffix || '' %>
+  <% if (hintText) { %><p class="text-xs text-neutral-400 mt-1"><%= hintText %></p><% } %>
+</div>

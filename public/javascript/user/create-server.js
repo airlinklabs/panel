@@ -173,26 +173,75 @@
   syncUnit('MemoryDisplay',  'MemoryUnit',  'Memory');
   syncUnit('StorageDisplay', 'StorageUnit', 'Storage');
 
+  // Real-time validation: remove invalid state when user types
+  document.getElementById('serverName').addEventListener('input', function() {
+    this.classList.remove('invalid');
+  });
+
   const overlay      = document.getElementById('confirmOverlay');
   const confirmTitle = document.getElementById('confirmTitle');
   const confirmBody  = document.getElementById('confirmBody');
   const confirmOk    = document.getElementById('confirmOk');
   const confirmCancel = document.getElementById('confirmCancel');
   let confirmResolve = null;
+  let lastFocusedBeforeConfirm = null;
+
+  function trapConfirmFocus(e) {
+    if (e.key !== 'Tab') return;
+    const focusable = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
 
   function showConfirm(title, body) {
     return new Promise(resolve => {
+      lastFocusedBeforeConfirm = document.activeElement;
       confirmTitle.textContent = title;
       confirmBody.textContent  = body;
       overlay.classList.add('open');
       confirmResolve = resolve;
+      // Focus the cancel button (safe default)
+      setTimeout(function() { confirmCancel.focus(); }, 0);
+      // Add keyboard handlers
+      overlay._keydownHandler = function(e) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          overlay.classList.remove('open');
+          if (confirmResolve) confirmResolve(false);
+          return;
+        }
+        trapConfirmFocus(e);
+      };
+      document.addEventListener('keydown', overlay._keydownHandler);
     });
   }
 
-  confirmOk.addEventListener('click', () => { overlay.classList.remove('open'); if (confirmResolve) confirmResolve(true); });
-  confirmCancel.addEventListener('click', () => { overlay.classList.remove('open'); if (confirmResolve) confirmResolve(false); });
-  overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.classList.remove('open'); if (confirmResolve) confirmResolve(false); } });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { overlay.classList.remove('open'); if (confirmResolve) confirmResolve(false); } });
+  function closeConfirm(result) {
+    overlay.classList.remove('open');
+    if (overlay._keydownHandler) {
+      document.removeEventListener('keydown', overlay._keydownHandler);
+      overlay._keydownHandler = null;
+    }
+    if (confirmResolve) confirmResolve(result);
+    confirmResolve = null;
+    // Restore focus
+    if (lastFocusedBeforeConfirm && typeof lastFocusedBeforeConfirm.focus === 'function') {
+      lastFocusedBeforeConfirm.focus();
+      lastFocusedBeforeConfirm = null;
+    }
+  }
+
+  confirmOk.addEventListener('click', () => closeConfirm(true));
+  confirmCancel.addEventListener('click', () => closeConfirm(false));
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeConfirm(false); });
 
   document.getElementById('createBtn').addEventListener('click', async function () {
     const btn     = this;
@@ -209,27 +258,44 @@
     const Cpu         = parseInt(document.getElementById('Cpu').value);
     const Storage     = parseInt(document.getElementById('Storage').value);
 
+    // Clear previous validation states
+    document.querySelectorAll('.form-input').forEach(el => el.classList.remove('invalid'));
+
+    let hasError = false;
+
     if (!name) {
       errText.textContent = 'Server name is required.';
       errBox.classList.remove('hidden');
+      document.getElementById('serverName').classList.add('invalid');
       document.getElementById('serverName').focus();
-      return;
+      hasError = true;
+    } else if (name.length < 3) {
+      errText.textContent = 'Server name must be at least 3 characters.';
+      errBox.classList.remove('hidden');
+      document.getElementById('serverName').classList.add('invalid');
+      document.getElementById('serverName').focus();
+      hasError = true;
     }
+
     if (!nodeId) {
       errText.textContent = 'Select a node.';
       errBox.classList.remove('hidden');
-      return;
+      hasError = true;
     }
+
     if (!imageId) {
       errText.textContent = 'Select an image.';
       errBox.classList.remove('hidden');
-      return;
+      hasError = true;
     }
+
     if (!dockerImage) {
       errText.textContent = 'Select a docker variant.';
       errBox.classList.remove('hidden');
-      return;
+      hasError = true;
     }
+
+    if (hasError) return;
 
     const ok = await showConfirm(
       'Create server?',
@@ -249,7 +315,23 @@
       });
       const d = await r.json();
       if (d.success) {
-        window.location.href = '/server/' + d.serverUUID;
+        // Show success toast before redirect
+        const toastContainer = document.getElementById('toast-container');
+        if (toastContainer) {
+          const toast = document.createElement('div');
+          toast.className = 'al-toast al-toast-success';
+          toast.innerHTML = '<span class="al-toast-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></span><span class="al-toast-text">Server created successfully!</span>';
+          toastContainer.appendChild(toast);
+          setTimeout(() => toast.classList.add('show'), 10);
+          setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+          }, 3000);
+        }
+        // Redirect after brief delay
+        setTimeout(() => {
+          window.location.href = '/server/' + d.serverUUID;
+        }, 1000);
       } else {
         btn.disabled = false;
         btn.textContent = origText;

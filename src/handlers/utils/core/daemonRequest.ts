@@ -132,7 +132,7 @@ export async function daemonRequest<T = unknown>(options: DaemonRequestOptions):
   case 'PATCH':
     return httpPatch<T>(url, body, httpOpts);
   case 'DELETE':
-    return httpDelete<T>(url, httpOpts);
+    return httpDelete<T>(url, body, httpOpts);
   default:
     return httpGet<T>(url, httpOpts);
   }
