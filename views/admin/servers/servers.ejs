@@ -247,7 +247,7 @@
       <!-- Footer -->
       <div class="px-4 sm:px-6 py-4 border-t flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3" style="border-color:var(--theme-border);">
         <button type="button" id="radarRescanBtn" class="hidden text-xs hover:underline min-h-[44px] flex items-center justify-center sm:justify-start" style="color:var(--theme-text-muted);" onclick="resetRadarToPickerPhase()">
-          ← Run another scan
+          <%- icon('arrow-left', { class: 'size-3.5 inline mr-1' }) %> Run another scan
         </button>
         <div class="sm:ml-auto">
           <button type="button" onclick="closeRadarScanModal()"

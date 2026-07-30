@@ -11,9 +11,15 @@
         { label: 'Nodes', href: '/admin/nodes' },
         { label: node.name }
       ] }) %>
-      <div class="al-page-header">
-        <h1 class="al-page-title"><%= req.translations.adminEditNodeTitle %></h1>
-        <p class="al-page-desc"><%= req.translations.adminEditNodeText %></p>
+      <div class="al-page-header flex items-start justify-between gap-4">
+        <div>
+          <h1 class="al-page-title"><%= req.translations.adminEditNodeTitle %></h1>
+          <p class="al-page-desc"><%= req.translations.adminEditNodeText %></p>
+        </div>
+        <div class="flex gap-2 shrink-0 items-center">
+          <button id="updateNodeBtn" type="button" class="al-btn-primary"><%= req.translations.update || 'Save changes' %></button>
+          <a href="/admin/nodes" class="al-btn-secondary">Back to Nodes</a>
+        </div>
       </div>
 
       <div id="nodeForm" class="al-page-body">
@@ -88,11 +94,7 @@
                 </div>
               </div>
 
-              <div class="sm:col-span-2 pt-4">
-                <button id="updateNodeBtn" type="button" class="al-btn-primary px-6 py-2.5">
-                  <%= req.translations.update || 'Save changes' %>
-                </button>
-              </div>
+
             </div>
           </form>
         </div>

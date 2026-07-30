@@ -35,7 +35,9 @@
           <h1 class="al-page-title"><%= image.name || 'Edit Image' %></h1>
           <p class="al-page-desc">Edit egg configuration, variables, Docker images, and install scripts.</p>
         </div>
-        <div class="flex gap-2 shrink-0">
+        <div class="flex gap-2 shrink-0 items-center">
+          <button type="button" id="tab-save-btn" class="al-btn-primary">Save</button>
+          <button type="button" id="tab-reset-btn" class="al-btn-secondary">Reset</button>
           <a href="/admin/images/export/<%= image.id %>" class="al-btn-secondary">Export</a>
           <a href="/admin/images" class="al-btn-secondary">Back</a>
         </div>
@@ -59,37 +61,6 @@
           <button type="button" role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" data-tab="settings" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Settings</button>
           <button type="button" role="tab" aria-selected="false" aria-controls="panel-raw" id="tab-raw" data-tab="raw" tabindex="-1" class="tab-btn px-4 py-2.5 text-sm font-medium transition -mb-px border-b-2">Raw JSON</button>
         </div>
-
-        <script nonce="<%- nonce %>">
-        document.addEventListener('DOMContentLoaded', function() {
-          var tabBtns = document.querySelectorAll('.tab-btn');
-          var tabPanels = document.querySelectorAll('.tab-panel');
-          var tabList = document.querySelector('[role="tablist"]');
-          function activate(id) {
-            tabBtns.forEach(function(btn) {
-              var on = btn.dataset.tab === id;
-              btn.setAttribute('aria-selected', on ? 'true' : 'false');
-              btn.setAttribute('tabindex', on ? '0' : '-1');
-            });
-            tabPanels.forEach(function(p) { p.classList.toggle('hidden', p.dataset.tabPanel !== id); });
-          }
-          if (tabList) {
-            tabList.addEventListener('keydown', function(e) {
-              var tabs = Array.from(tabBtns);
-              var currentIndex = tabs.findIndex(function(t) { return t === document.activeElement; });
-              if (currentIndex === -1) return;
-              var newIndex = currentIndex;
-              if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); newIndex = (currentIndex + 1) % tabs.length; }
-              else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); newIndex = (currentIndex - 1 + tabs.length) % tabs.length; }
-              else if (e.key === 'Home') { e.preventDefault(); newIndex = 0; }
-              else if (e.key === 'End') { e.preventDefault(); newIndex = tabs.length - 1; }
-              if (newIndex !== currentIndex) { tabs[newIndex].focus(); activate(tabs[newIndex].dataset.tab); }
-            });
-          }
-          tabBtns.forEach(function(btn) { btn.addEventListener('click', function() { activate(this.dataset.tab); }); });
-          activate('general');
-        });
-        </script>
 
         <!-- General tab -->
         <div id="panel-general" role="tabpanel" aria-labelledby="tab-general" data-tab-panel="general" class="tab-panel space-y-5 hidden">
@@ -137,13 +108,6 @@
               </div>
             </div>
           </div>
-
-          <div class="flex justify-end">
-            <button type="button" id="save-general"
-              class="al-btn-primary">
-              Save Changes
-            </button>
-          </div>
         </div>
 
         <!-- Docker Images tab -->
@@ -163,12 +127,6 @@
               </div>
             </div>
           </div>
-          <div class="flex justify-end">
-            <button type="button" id="save-docker"
-              class="al-btn-primary">
-              Save Changes
-            </button>
-          </div>
         </div>
 
         <!-- Variables tab -->
@@ -187,12 +145,6 @@
                 <!-- populated by JS -->
               </div>
             </div>
-          </div>
-          <div class="flex justify-end">
-            <button type="button" id="save-variables"
-              class="al-btn-primary">
-              Save Changes
-            </button>
           </div>
         </div>
 
@@ -221,12 +173,6 @@
               </div>
             </div>
           </div>
-          <div class="flex justify-end">
-            <button type="button" id="save-install"
-              class="al-btn-primary">
-              Save Changes
-            </button>
-          </div>
         </div>
 
         <!-- Settings tab -->
@@ -244,12 +190,6 @@
               <div id="port-requirements-list" class="space-y-2"></div>
             </div>
           </div>
-          <div class="flex justify-end">
-            <button type="button" id="save-settings"
-              class="al-btn-primary">
-              Save Changes
-            </button>
-          </div>
         </div>
 
         <!-- Raw JSON tab -->
@@ -261,13 +201,54 @@
               <div id="json-editor" class="w-full h-[480px] rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden"></div>
             </div>
           </div>
-          <div class="flex justify-end">
-            <button type="button" id="save-raw"
-              class="al-btn-primary">
-              Save Raw JSON
-            </button>
-          </div>
         </div>
+
+        <script nonce="<%- nonce %>">
+        (function(){
+          var tabBtns = document.querySelectorAll('.tab-btn');
+          var tabPanels = document.querySelectorAll('.tab-panel');
+          var tabList = document.querySelector('[role="tablist"]');
+          var saveBtn = document.getElementById('tab-save-btn');
+          var resetBtn = document.getElementById('tab-reset-btn');
+          function activate(id) {
+            tabBtns.forEach(function(btn) {
+              var on = btn.dataset.tab === id;
+              btn.setAttribute('aria-selected', on ? 'true' : 'false');
+              btn.setAttribute('tabindex', on ? '0' : '-1');
+            });
+            tabPanels.forEach(function(p) { p.classList.toggle('hidden', p.dataset.tabPanel !== id); });
+            rebind(id);
+          }
+          function rebind(id) {
+            if (window.tabHandlers && saveBtn) {
+              saveBtn.onclick = window.tabHandlers[id] || null;
+              saveBtn.textContent = (window.tabLabels && window.tabLabels[id]) || 'Save';
+            }
+            if (window.tabResetHandlers && resetBtn) {
+              resetBtn.onclick = window.tabResetHandlers[id] || null;
+            }
+          }
+          window._rebindTabHandlers = function() {
+            var active = document.querySelector('.tab-btn[aria-selected="true"]');
+            if (active) rebind(active.dataset.tab);
+          };
+          tabBtns.forEach(function(btn) { btn.addEventListener('click', function() { activate(this.dataset.tab); }); });
+          if (tabList) {
+            tabList.addEventListener('keydown', function(e) {
+              var tabs = Array.from(tabBtns);
+              var currentIndex = tabs.findIndex(function(t) { return t === document.activeElement; });
+              if (currentIndex === -1) return;
+              var newIndex = currentIndex;
+              if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); newIndex = (currentIndex + 1) % tabs.length; }
+              else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); newIndex = (currentIndex - 1 + tabs.length) % tabs.length; }
+              else if (e.key === 'Home') { e.preventDefault(); newIndex = 0; }
+              else if (e.key === 'End') { e.preventDefault(); newIndex = tabs.length - 1; }
+              if (newIndex !== currentIndex) { tabs[newIndex].focus(); activate(tabs[newIndex].dataset.tab); }
+            });
+          }
+          activate('general');
+        })();
+        </script>
 
       </div>
     </div>
@@ -276,25 +257,25 @@
 
 <%- include('../../components/toast') %>
 
-<script nonce="<%- nonce %>" src="/monaco/vs/loader.js"></script>
+<script nonce="<%- nonce %>" src="/monaco/min/vs/loader.min.js"></script>
 
-<div id="page-data" style="display:none"
-  data-image="<%- JSON.stringify({
-    id: image.id,
-    name: image.name || '',
-    description: image.description || '',
-    author: image.author || '',
-    startup: image.startup || '',
-    stop: image.stop || 'stop',
-    startup_done: image.startup_done || '',
-    docker_images: image.dockerImages || {},
-    variables: image.variables || [],
-    scripts: image.scripts || {},
-    info: image.info || {},
-    meta: image.meta || {},
-    portRequirements: image.portRequirements || []
-  }) %>"
-></div>
+<script id="page-data" type="application/json" nonce="<%- nonce %>">
+<%- JSON.stringify({
+  id: image.id,
+  name: image.name || '',
+  description: image.description || '',
+  author: image.author || '',
+  startup: image.startup || '',
+  stop: image.stop || 'stop',
+  startup_done: image.startup_done || '',
+  docker_images: image.dockerImages || {},
+  variables: image.variables || [],
+  scripts: image.scripts || {},
+  info: image.info || {},
+  meta: image.meta || {},
+  portRequirements: image.portRequirements || []
+}) %>
+</script>
 
 <script nonce="<%- nonce %>" src="/javascript/admin/admin-image-edit.js"></script>
 

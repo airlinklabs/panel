@@ -4,6 +4,7 @@ declare global {
         uiComponentStore: any;
         name: string;
         airlinkVersion: string;
+        airlinkCodename: string;
         adminMenuItems: any[];
         regularMenuItems: any[];
       }

@@ -9,9 +9,15 @@
         { label: 'Nodes', href: '/admin/nodes' },
         { label: 'Create' }
       ] }) %>
-      <div class="al-page-header">
-        <h1 class="al-page-title"><%= req.translations.adminCreateNodeTitle %></h1>
-        <p class="al-page-desc"><%= req.translations.adminCreateNodeText || 'One more node and you\'ll have a proper fleet going.' %></p>
+      <div class="al-page-header flex items-start justify-between gap-4">
+        <div>
+          <h1 class="al-page-title"><%= req.translations.adminCreateNodeTitle %></h1>
+          <p class="al-page-desc"><%= req.translations.adminCreateNodeText || 'One more node and you\'ll have a proper fleet going.' %></p>
+        </div>
+        <div class="flex gap-2 shrink-0 items-center">
+          <button id="createNodeBtn" type="button" class="al-btn-primary"><%= req.translations.create || 'Create Node' %></button>
+          <a href="/admin/nodes" class="al-btn-secondary">Back to Nodes</a>
+        </div>
       </div>
 
       <div id="nodeForm" class="al-page-body">
@@ -102,11 +108,7 @@
                 </div>
               </div>
 
-              <div class="sm:col-span-2 pt-4">
-                <button id="createNodeBtn" type="button" class="al-btn-primary">
-                  <%= req.translations.create || 'Create Node' %>
-                </button>
-              </div>
+
             </div>
           </form>
         </div>

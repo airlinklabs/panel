@@ -59,6 +59,7 @@ const adminModule: Module = {
             req,
             settings,
             airlinkVersion: res.locals.airlinkVersion,
+            airlinkCodename: res.locals.airlinkCodename,
           });
         } catch (error) {
           logger.error('Error fetching user:', error);

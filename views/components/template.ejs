@@ -221,7 +221,7 @@
           </div>
         </div>
 
-        <div id="searchResults" role="listbox" aria-label="Search results" class="absolute w-[19.5rem] rounded-xl shadow-lg hidden mt-20 px-2 pb-2" style="background:var(--theme-bg-card); border:1px solid var(--theme-border);">
+        <div id="searchResults" role="listbox" aria-label="Search results" class="absolute w-[19.5rem] rounded-xl shadow-lg hidden mt-1 px-2 pb-2 z-50" style="background:var(--theme-bg-card); border:1px solid var(--theme-border); top:100%;">
         </div>
       </div>
 
@@ -252,28 +252,63 @@
       </script>
       <script nonce="<%- nonce %>" src="/javascript/shared/search.js"></script>
 
-      <!-- Theme toggle button -->
+      <!-- Theme toggle switch -->
       <div class="flex items-center shrink-0 ml-2">
-        <button id="theme-toggle-topbar"
-          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          style="color:var(--theme-text-muted); background:var(--theme-bg-secondary); border:1px solid var(--theme-border);"
-          aria-label="Toggle theme">
-          <svg class="w-3.5 h-3.5 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-          </svg>
-          <svg class="w-3.5 h-3.5 hidden dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-          </svg>
-          <span class="dark:hidden">Light</span>
-          <span class="hidden dark:inline">Dark</span>
-        </button>
+        <div id="theme-toggle-topbar" class="theme-toggle-switch" role="button" tabindex="0" aria-label="Toggle theme">
+          <i class="fas fa-sun theme-toggle-icon"></i>
+          <i class="fas fa-moon theme-toggle-icon"></i>
+          <div class="theme-toggle-knob"></div>
+        </div>
       </div>
     </div>
   </div>
 </div>
+<style>
+.theme-toggle-switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 70px;
+  height: 30px;
+  padding: 4px 10px;
+  border-radius: 50px;
+  cursor: pointer;
+  background: var(--theme-bg-secondary);
+  border: 1px solid var(--theme-border);
+  flex-shrink: 0;
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+.theme-toggle-icon {
+  font-size: 12px;
+  position: relative;
+  z-index: 2;
+  transition: color 0.25s ease;
+}
+.theme-toggle-switch i:last-child {
+  transform: translateX(-1.5px);
+}
+.theme-toggle-knob {
+  position: absolute;
+  z-index: 1;
+  top: 5px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--theme-text-muted);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease;
+}
+html.dark .theme-toggle-knob {
+  transform: translateX(33px);
+}
+</style>
 <script nonce="<%- nonce %>">
 (function() {
-  document.getElementById('theme-toggle-topbar').addEventListener('click', toggleTheme);
+  var btn = document.getElementById('theme-toggle-topbar');
+  btn.addEventListener('click', function() {
+    if (typeof toggleTheme === 'function') toggleTheme();
+  });
 })();
 </script>
 <script nonce="<%- nonce %>">

@@ -13,9 +13,15 @@
         { label: 'Servers', href: '/admin/servers' },
         { label: 'Create' }
       ] }) %>
-      <div class="al-page-header">
-        <h1 class="al-page-title"><%= req.translations.adminCreateServerTitle %></h1>
-        <p class="al-page-desc"><%= req.translations.adminCreateServerText || 'Spin up something new. Naming it is half the fun.' %></p>
+      <div class="al-page-header flex items-start justify-between gap-4">
+        <div>
+          <h1 class="al-page-title"><%= req.translations.adminCreateServerTitle %></h1>
+          <p class="al-page-desc"><%= req.translations.adminCreateServerText || 'Spin up something new. Naming it is half the fun.' %></p>
+        </div>
+        <div class="flex gap-2 shrink-0 items-center">
+          <button type="submit" form="createServerForm" class="al-btn-primary"><%= req.translations.create || 'Create server' %></button>
+          <a href="/admin/servers" class="al-btn-secondary">Back to Servers</a>
+        </div>
       </div>
 
       <div id="nodeForm" class="mt-6 px-8 w-full">
@@ -199,12 +205,7 @@
             </div>
             </div></div>
 
-            <!-- Submit Button -->
-            <div class="col-span-2">
-                <button type="submit" class="al-btn-primary">
-                    <%= req.translations.create || 'Create server' %>
-                  </button>
-              </div>
+
           </form>
         </div>
       </div>
